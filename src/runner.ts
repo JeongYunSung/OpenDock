@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { delimiter, dirname, sep } from "node:path";
 import type { LifecyclePhase, LifecycleStep, PackManifest } from "./pack.js";
+import { detectPlatform, type OpenDockPlatform } from "./platform.js";
 
 export interface StepReport {
   id: string;
@@ -19,6 +20,7 @@ interface CommandOptions {
   interactive?: LifecycleStep["interactive"];
   live?: boolean;
   missingAsFailure?: boolean;
+  platform?: OpenDockPlatform;
   timeoutMs?: number;
 }
 
@@ -31,8 +33,11 @@ const defaultDoctorTimeoutMs = 30_000;
 const defaultInteractiveColumns = 100;
 const defaultInteractiveRows = 30;
 
-const allowedCommands = new Set([
-  "brew",
+interface LifecycleOptions {
+  platform?: OpenDockPlatform;
+}
+
+const commonAllowedCommands = new Set([
   "bun",
   "bunx",
   "claude",
@@ -55,7 +60,23 @@ const allowedCommands = new Set([
   "uv",
 ]);
 
-export function getLifecycleSteps(manifest: PackManifest, phase: LifecyclePhase): LifecycleStep[] {
+const platformAllowedCommands: Record<OpenDockPlatform, Set<string>> = {
+  linux: new Set([]),
+  macos: new Set(["brew"]),
+  windows: new Set(["winget"]),
+};
+
+export function getLifecycleSteps(
+  manifest: PackManifest,
+  phase: LifecyclePhase,
+  options: LifecycleOptions = {},
+): LifecycleStep[] {
+  const platform = options.platform ?? detectPlatform();
+  assertManifestSupportsPlatform(manifest, platform);
+  return selectLifecycleSteps(rawLifecycleSteps(manifest, phase), platform);
+}
+
+function rawLifecycleSteps(manifest: PackManifest, phase: LifecyclePhase): LifecycleStep[] {
   const lifecycleSteps = manifest.lifecycle[phase] ?? [];
   if (lifecycleSteps.length > 0) {
     return lifecycleSteps;
@@ -66,26 +87,43 @@ export function getLifecycleSteps(manifest: PackManifest, phase: LifecyclePhase)
   return [];
 }
 
-export function hasLifecycleSteps(manifest: PackManifest, phase: LifecyclePhase): boolean {
-  return getLifecycleSteps(manifest, phase).length > 0;
+export function hasLifecycleSteps(
+  manifest: PackManifest,
+  phase: LifecyclePhase,
+  options: LifecycleOptions = {},
+): boolean {
+  return getLifecycleSteps(manifest, phase, options).length > 0;
 }
 
-export function hasExplicitLifecycleSteps(manifest: PackManifest, phase: LifecyclePhase): boolean {
-  return (manifest.lifecycle[phase] ?? []).length > 0;
+export function hasExplicitLifecycleSteps(
+  manifest: PackManifest,
+  phase: LifecyclePhase,
+  options: LifecycleOptions = {},
+): boolean {
+  const platform = options.platform ?? detectPlatform();
+  assertManifestSupportsPlatform(manifest, platform);
+  return selectLifecycleSteps(manifest.lifecycle[phase] ?? [], platform).length > 0;
 }
 
 export async function runLifecycle(
   manifest: PackManifest,
   phase: LifecyclePhase,
   projectDir: string,
+  options: LifecycleOptions = {},
 ): Promise<StepReport[]> {
+  const platform = options.platform ?? detectPlatform();
+  const steps = getLifecycleSteps(manifest, phase, { platform });
   if (phase === "doctor") {
-    return runDoctorSteps(getLifecycleSteps(manifest, phase), projectDir);
+    return runDoctorSteps(steps, projectDir, platform);
   }
-  return runSetupSteps(getLifecycleSteps(manifest, phase), projectDir);
+  return runSetupSteps(steps, projectDir, platform);
 }
 
-async function runSetupSteps(steps: LifecycleStep[], projectDir: string): Promise<StepReport[]> {
+async function runSetupSteps(
+  steps: LifecycleStep[],
+  projectDir: string,
+  platform: OpenDockPlatform,
+): Promise<StepReport[]> {
   const reports: StepReport[] = [];
   for (const step of steps) {
     if (step.copy) {
@@ -93,7 +131,9 @@ async function runSetupSteps(steps: LifecycleStep[], projectDir: string): Promis
       continue;
     }
 
-    const checkResult = step.check ? await evaluateStepCheck(step, projectDir) : { passed: false };
+    const checkResult = step.check
+      ? await evaluateStepCheck(step, projectDir, platform)
+      : { passed: false };
     if (checkResult.passed) {
       console.log(`✓ ${step.id}: ready`);
       reports.push({ id: step.id, name: stepName(step), status: "Ready" });
@@ -102,7 +142,7 @@ async function runSetupSteps(steps: LifecycleStep[], projectDir: string): Promis
 
     if (step.run) {
       console.log(`→ ${step.id}: ${step.run}`);
-      const runOptions: CommandOptions = { live: true };
+      const runOptions: CommandOptions = { live: true, platform };
       if (step.interactive) {
         runOptions.interactive = step.interactive;
       }
@@ -117,7 +157,7 @@ async function runSetupSteps(steps: LifecycleStep[], projectDir: string): Promis
         throw new Error(`step \`${step.id}\` exited with non-zero status${suffix}`);
       }
       if (step.check) {
-        const postRunCheck = await evaluateStepCheck(step, projectDir);
+        const postRunCheck = await evaluateStepCheck(step, projectDir, platform);
         if (!postRunCheck.passed) {
           const report: StepReport = { id: step.id, name: stepName(step), status: "Failed" };
           if (postRunCheck.message) {
@@ -135,12 +175,17 @@ async function runSetupSteps(steps: LifecycleStep[], projectDir: string): Promis
   return reports;
 }
 
-async function evaluateStepCheck(step: LifecycleStep, projectDir: string): Promise<CheckResult> {
+async function evaluateStepCheck(
+  step: LifecycleStep,
+  projectDir: string,
+  platform: OpenDockPlatform,
+): Promise<CheckResult> {
   if (!step.check) {
     return { passed: false };
   }
   const result = await runCommand(step.check, projectDir, {
     missingAsFailure: true,
+    platform,
     ...(step.timeout_ms === undefined ? {} : { timeoutMs: step.timeout_ms }),
   });
   if (!result.success) {
@@ -159,7 +204,11 @@ async function evaluateStepCheck(step: LifecycleStep, projectDir: string): Promi
   return { passed: true };
 }
 
-async function runDoctorSteps(steps: LifecycleStep[], projectDir: string): Promise<StepReport[]> {
+async function runDoctorSteps(
+  steps: LifecycleStep[],
+  projectDir: string,
+  platform: OpenDockPlatform,
+): Promise<StepReport[]> {
   const reports: StepReport[] = [];
   for (const step of steps) {
     const command = step.run ?? step.check;
@@ -170,6 +219,7 @@ async function runDoctorSteps(steps: LifecycleStep[], projectDir: string): Promi
 
     const result = await runCommand(command, projectDir, {
       missingAsFailure: true,
+      platform,
       timeoutMs: step.timeout_ms ?? defaultDoctorTimeoutMs,
     });
     if (!result.success) {
@@ -213,7 +263,8 @@ export async function runCommand(
   if (!program) {
     throw new Error(`empty command: ${command}`);
   }
-  ensureAllowed(program);
+  const platform = options.platform ?? detectPlatform();
+  ensureAllowed(program, platform);
 
   if (options.interactive === "user") {
     return runUserInteractiveCommand(program, rest, cwd, options);
@@ -450,6 +501,60 @@ function commandEnvironment(program: string): NodeJS.ProcessEnv {
   return env;
 }
 
+function assertManifestSupportsPlatform(manifest: PackManifest, platform: OpenDockPlatform): void {
+  const supported = collectManifestPlatforms(manifest);
+  if (supported.size === 0 || supported.has(platform)) {
+    return;
+  }
+  throw new Error(
+    `pack \`${manifest.id}\` does not support platform \`${platform}\`; available platforms: ${[
+      ...supported,
+    ].join(", ")}`,
+  );
+}
+
+function collectManifestPlatforms(manifest: PackManifest): Set<string> {
+  const platforms = new Set<string>();
+  const phases: LifecyclePhase[] = ["install", "update", "doctor"];
+  for (const phase of phases) {
+    for (const step of manifest.lifecycle[phase] ?? []) {
+      for (const platform of Object.keys(step.platforms)) {
+        platforms.add(platform);
+      }
+    }
+  }
+  for (const step of manifest.setup) {
+    for (const platform of Object.keys(step.platforms)) {
+      platforms.add(platform);
+    }
+  }
+  return platforms;
+}
+
+function selectLifecycleSteps(steps: LifecycleStep[], platform: OpenDockPlatform): LifecycleStep[] {
+  return steps.flatMap((step) => {
+    const platformKeys = Object.keys(step.platforms);
+    if (platformKeys.length === 0) {
+      return [step];
+    }
+
+    const override = step.platforms[platform];
+    if (!override) {
+      return [];
+    }
+
+    return [
+      {
+        ...step,
+        ...override,
+        id: step.id,
+        messages: { ...step.messages, ...override.messages },
+        platforms: {},
+      },
+    ];
+  });
+}
+
 function withoutVoltaNodeImageBin(pathValue: string | undefined): string | undefined {
   if (!pathValue) {
     return pathValue;
@@ -474,9 +579,11 @@ function rejectShellMetacharacters(command: string): void {
   }
 }
 
-function ensureAllowed(program: string): void {
-  if (!allowedCommands.has(program)) {
-    throw new Error(`command \`${program}\` is not allowed in OpenDock setup`);
+function ensureAllowed(program: string, platform: OpenDockPlatform): void {
+  if (!commonAllowedCommands.has(program) && !platformAllowedCommands[platform].has(program)) {
+    throw new Error(
+      `command \`${program}\` is not allowed for OpenDock platform \`${platform}\` setup`,
+    );
   }
 }
 

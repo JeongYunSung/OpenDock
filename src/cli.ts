@@ -10,6 +10,7 @@ import { DockHubClient } from "./dockhub.js";
 import { install } from "./installer.js";
 import { readProjectLogs } from "./logging.js";
 import { PackRef } from "./pack.js";
+import { detectPlatform, type OpenDockPlatform, parsePlatform } from "./platform.js";
 import { hasProjectState, readLock } from "./project.js";
 import { resolvePack } from "./resolver.js";
 import { hasExplicitLifecycleSteps, runLifecycle } from "./runner.js";
@@ -25,32 +26,37 @@ export async function run(argv = process.argv): Promise<void> {
     .command("install")
     .description("Install an approved starterpack into the current directory.")
     .argument("<pack>")
-    .action(async (pack: string) => {
+    .option("--platform <platform>", "Target platform: macos, windows, or linux")
+    .action(async (pack: string, options: { platform?: string }) => {
+      const platform = resolveCliPlatform(options.platform);
       const report = await install({
         packRef: PackRef.parse(pack),
         projectDir: process.cwd(),
         runCommands: true,
         operation: "install",
         phase: "install",
+        platform,
       });
       console.log(
-        `Installed ${report.packId}@${report.version} (${report.filesCreated} files created, ${report.filesUpdated} files updated)`,
+        `Installed ${report.packId}@${report.version} for ${report.platform} (${report.filesCreated} files created, ${report.filesUpdated} files updated)`,
       );
     });
 
   program
     .command("update")
     .description("Update the starterpack installed in the current directory.")
-    .action(async () => {
+    .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
+    .action(async (options: { platform?: string }) => {
       const lock = readLock(process.cwd());
       for (const pack of lock.packs) {
         const packRef = PackRef.parse(pack.id);
+        const platform = resolveCliPlatform(options.platform ?? pack.platform);
         const latest = await resolvePack(packRef);
         if (
           latest.manifest.version === pack.version &&
-          !hasExplicitLifecycleSteps(latest.manifest, "update")
+          !hasExplicitLifecycleSteps(latest.manifest, "update", { platform })
         ) {
-          console.log(`${pack.id} is up to date at ${pack.version}`);
+          console.log(`${pack.id} is up to date at ${pack.version} for ${platform}`);
         } else {
           const report = await install({
             packRef,
@@ -58,11 +64,14 @@ export async function run(argv = process.argv): Promise<void> {
             runCommands: true,
             operation: "update",
             phase: "update",
+            platform,
           });
           if (pack.version === report.version) {
-            console.log(`Updated ${pack.id} at ${report.version}`);
+            console.log(`Updated ${pack.id} at ${report.version} for ${report.platform}`);
           } else {
-            console.log(`Updated ${pack.id}: ${pack.version} -> ${report.version}`);
+            console.log(
+              `Updated ${pack.id}: ${pack.version} -> ${report.version} for ${report.platform}`,
+            );
           }
         }
       }
@@ -71,8 +80,9 @@ export async function run(argv = process.argv): Promise<void> {
   program
     .command("doctor")
     .description("Diagnose the current directory's OpenDock state.")
-    .action(async () => {
-      await printDoctor(process.cwd());
+    .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
+    .action(async (options: { platform?: string }) => {
+      await printDoctor(process.cwd(), options.platform);
     });
 
   program
@@ -136,7 +146,11 @@ export async function run(argv = process.argv): Promise<void> {
   await program.parseAsync(argv);
 }
 
-async function printDoctor(cwd: string): Promise<void> {
+function resolveCliPlatform(value: string | undefined): OpenDockPlatform {
+  return value === undefined ? detectPlatform() : parsePlatform(value);
+}
+
+async function printDoctor(cwd: string, platformOverride?: string): Promise<void> {
   console.log("OpenDock Doctor");
   console.log(`Project: ${cwd}`);
 
@@ -147,8 +161,9 @@ async function printDoctor(cwd: string): Promise<void> {
     console.log("✓ .opendock/dock.lock.yml");
     const lock = readLock(cwd);
     for (const pack of lock.packs) {
-      console.log(`✓ ${pack.id}@${pack.version}`);
-      await printPackDoctorChecks(cwd, PackRef.parse(pack.id));
+      const platform = resolveCliPlatform(platformOverride ?? pack.platform);
+      console.log(`✓ ${pack.id}@${pack.version} [${platform}]`);
+      await printPackDoctorChecks(cwd, PackRef.parse(pack.id), platform);
     }
   } else {
     console.log("Status: Not installed");
@@ -158,10 +173,14 @@ async function printDoctor(cwd: string): Promise<void> {
   }
 }
 
-async function printPackDoctorChecks(cwd: string, packRef: PackRef): Promise<void> {
+async function printPackDoctorChecks(
+  cwd: string,
+  packRef: PackRef,
+  platform: OpenDockPlatform,
+): Promise<void> {
   try {
     const resolved = await resolvePack(packRef);
-    const reports = await runLifecycle(resolved.manifest, "doctor", cwd);
+    const reports = await runLifecycle(resolved.manifest, "doctor", cwd, { platform });
     for (const report of reports) {
       const symbol = report.status === "Failed" ? "!" : "✓";
       const suffix = report.message ? ` (${report.message})` : "";

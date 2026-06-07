@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { dirname, join, relative, sep } from "node:path";
 import { appendRunLog } from "./logging.js";
 import type { FileSpec, LifecyclePhase, PackRef } from "./pack.js";
+import { detectPlatform, type OpenDockPlatform } from "./platform.js";
 import { type ProjectFileRecord, readProjectFile, writeProjectState } from "./project.js";
 import { fileChecksum, isFile, type ResolvedPack, resolvePack, textChecksum } from "./resolver.js";
 import { runLifecycle, type StepReport } from "./runner.js";
@@ -14,6 +15,7 @@ export interface InstallOptions {
   runCommands: boolean;
   operation: string;
   phase?: LifecyclePhase;
+  platform?: OpenDockPlatform;
   resolve?: PackResolver;
 }
 
@@ -22,6 +24,7 @@ export interface InstallReport {
   version: string;
   filesCreated: number;
   filesUpdated: number;
+  platform: OpenDockPlatform;
   steps: StepReport[];
 }
 
@@ -33,6 +36,7 @@ interface TemplateReport {
 
 export async function install(options: InstallOptions): Promise<InstallReport> {
   const resolved = await (options.resolve ?? resolvePack)(options.packRef);
+  const platform = options.platform ?? detectPlatform();
   const priorRecords = readProjectFile(options.projectDir)?.files ?? [];
   const templateReport = applyPackFiles(
     resolved.root,
@@ -46,7 +50,14 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
   let steps: StepReport[] = [];
   if (options.runCommands) {
     try {
-      steps = await runLifecycle(resolved.manifest, options.phase ?? "install", options.projectDir);
+      steps = await runLifecycle(
+        resolved.manifest,
+        options.phase ?? "install",
+        options.projectDir,
+        {
+          platform,
+        },
+      );
     } catch (error) {
       appendRunLog(
         options.projectDir,
@@ -65,6 +76,7 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
     resolved.checksum,
     resolved.signature,
     templateReport.records,
+    platform,
   );
 
   const report: InstallReport = {
@@ -72,6 +84,7 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
     version: resolved.manifest.version,
     filesCreated: templateReport.created,
     filesUpdated: templateReport.updated,
+    platform,
     steps,
   };
 

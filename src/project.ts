@@ -3,6 +3,7 @@ import { join } from "node:path";
 import YAML from "yaml";
 import { LOCK_SCHEMA_VERSION, PROJECT_SCHEMA_VERSION } from "./constants.js";
 import type { PackManifest } from "./pack.js";
+import type { OpenDockPlatform } from "./platform.js";
 
 export interface ProjectFileRecord {
   path: string;
@@ -14,6 +15,7 @@ export interface ProjectFile {
   applied_packs: Array<{
     id: string;
     name: string;
+    platform?: OpenDockPlatform;
     version: string;
   }>;
   files: ProjectFileRecord[];
@@ -25,6 +27,7 @@ export interface LockFile {
     id: string;
     version: string;
     checksum: string;
+    platform?: OpenDockPlatform;
     signature: string;
   }>;
 }
@@ -35,32 +38,39 @@ export function writeProjectState(
   checksum: string,
   signature: string,
   files: ProjectFileRecord[],
+  platform?: OpenDockPlatform,
 ): void {
   const opendockDir = join(projectDir, ".opendock");
   mkdirSync(opendockDir, { recursive: true });
 
+  const appliedPack: ProjectFile["applied_packs"][number] = {
+    id: manifest.id,
+    name: manifest.name ?? manifest.id,
+    version: manifest.version,
+  };
+  if (platform !== undefined) {
+    appliedPack.platform = platform;
+  }
+
   const project: ProjectFile = {
     schema: PROJECT_SCHEMA_VERSION,
-    applied_packs: [
-      {
-        id: manifest.id,
-        name: manifest.name ?? manifest.id,
-        version: manifest.version,
-      },
-    ],
+    applied_packs: [appliedPack],
     files,
   };
 
+  const lockedPack: LockFile["packs"][number] = {
+    id: manifest.id,
+    version: manifest.version,
+    checksum,
+    signature,
+  };
+  if (platform !== undefined) {
+    lockedPack.platform = platform;
+  }
+
   const lock: LockFile = {
     schema: LOCK_SCHEMA_VERSION,
-    packs: [
-      {
-        id: manifest.id,
-        version: manifest.version,
-        checksum,
-        signature,
-      },
-    ],
+    packs: [lockedPack],
   };
 
   writeFileSync(join(opendockDir, "project.yml"), YAML.stringify(project));

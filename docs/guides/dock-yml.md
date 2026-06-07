@@ -76,7 +76,11 @@ lifecycle:
     - id: install-node
       check: node --version
       version: ">=22.0.0 <25.0.0"
-      run: brew install node
+      platforms:
+        macos:
+          run: brew install node
+        windows:
+          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
 
     - id: install-codex-cli
       check: codex --version
@@ -253,6 +257,7 @@ lifecycle:
 | `version` | 선택 | `check` 출력에서 읽은 semver가 만족해야 하는 범위입니다. |
 | `timeout_ms` | 선택 | 명령 timeout입니다. doctor 기본값은 30000ms입니다. |
 | `interactive` | 선택 | TUI나 질문형 명령을 처리하는 방식입니다. |
+| `platforms` | 선택 | 같은 step `id`를 유지하면서 `macos`, `windows`, `linux`별 필드를 override합니다. |
 | `repair` | 선택 | 현재는 파싱만 됩니다. doctor가 자동 실행하지 않습니다. |
 | `copy` | 선택 | 현재는 step을 Ready로만 표시합니다. 파일 복사는 `files`를 사용하세요. |
 | `messages` | 선택 | 현재는 파싱만 됩니다. 출력 문구 커스터마이즈에는 아직 연결되어 있지 않습니다. |
@@ -261,11 +266,13 @@ lifecycle:
 
 `install`과 `update` step은 다음 순서로 처리됩니다.
 
-1. `check`가 있으면 먼저 실행합니다.
-2. `check`가 성공하고 `version`도 만족하면 step은 `Ready`로 표시되고 `run`은 건너뜁니다.
-3. `check`가 실패하면 `run`을 실행합니다.
-4. `run` 이후 `check`가 있으면 다시 실행해서 실제로 상태가 충족됐는지 확인합니다.
-5. `version`이 있으면 `check` 출력에서 첫 번째 `x.y.z` 형태 버전을 읽고 범위를 검사합니다.
+1. 현재 platform에 맞는 `platforms.<platform>` override가 있으면 공통 step 필드와 병합합니다.
+2. `platforms`가 있는데 현재 platform 항목이 없으면 그 step은 건너뜁니다.
+3. `check`가 있으면 먼저 실행합니다.
+4. `check`가 성공하고 `version`도 만족하면 step은 `Ready`로 표시되고 `run`은 건너뜁니다.
+5. `check`가 실패하면 `run`을 실행합니다.
+6. `run` 이후 `check`가 있으면 다시 실행해서 실제로 상태가 충족됐는지 확인합니다.
+7. `version`이 있으면 `check` 출력에서 첫 번째 `x.y.z` 형태 버전을 읽고 범위를 검사합니다.
 
 따라서 설치 step은 가능하면 `check`, `version`, `run`을 함께 쓰는 것이 좋습니다.
 
@@ -275,10 +282,14 @@ lifecycle:
     - id: install-bun
       check: bun --version
       version: ">=1.3.0"
-      run: brew install bun
+      platforms:
+        macos:
+          run: brew install bun
+        windows:
+          run: npm install --global bun
 ```
 
-위 예시는 `bun --version`이 이미 `>=1.3.0`이면 아무것도 하지 않습니다. 없거나 버전이 낮으면 `brew install bun`을 실행하고, 실행 후 다시 `bun --version`으로 검증합니다.
+위 예시는 `bun --version`이 이미 `>=1.3.0`이면 아무것도 하지 않습니다. 없거나 버전이 낮으면 macOS에서는 `brew install bun`, Windows에서는 `npm install --global bun`을 실행하고, 실행 후 다시 `bun --version`으로 검증합니다.
 
 `check` 없이 `run`만 쓰면 매번 실행됩니다.
 
@@ -308,6 +319,39 @@ lifecycle:
 ```
 
 doctor는 실패해도 전체 명령을 즉시 중단하지 않고, 실패한 step을 `!`로 표시합니다. 현재 `repair`는 자동 실행되지 않으므로 doctor에서 발견한 문제를 자동으로 고치고 싶다면 `install` 또는 `update` phase에 해당 `run`을 명시하세요.
+
+### platform별 step override
+
+OpenDock은 top-level `supports.platforms`를 쓰지 않습니다. 지원 플랫폼은 lifecycle step 안의 `platforms` 키에서 자동 추론합니다. `platforms`가 없는 step은 모든 플랫폼에서 실행되는 공통 step입니다.
+
+```yaml
+lifecycle:
+  install:
+    - id: install-node
+      check: node --version
+      version: ">=22.0.0 <25.0.0"
+      platforms:
+        macos:
+          run: brew install node
+        windows:
+          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
+
+    - id: install-codex-cli
+      check: codex --version
+      version: ">=0.0.0"
+      run: npm install --global @openai/codex@latest
+```
+
+이 예시의 실행 순서는 항상 `install-node` 다음 `install-codex-cli`입니다. `install-node` step 안에서만 현재 platform에 맞는 명령이 선택됩니다. 같은 논리적 작업은 `install-node-macos`, `install-node-windows`처럼 id를 나누지 말고 하나의 `id`와 `platforms`로 묶으세요.
+
+선택 platform은 다음 순서로 결정됩니다.
+
+1. `opendock install owner/name --platform windows`처럼 CLI 옵션을 주면 그 값을 사용합니다.
+2. 옵션이 없으면 현재 host OS를 자동 감지합니다. `darwin`은 `macos`, `win32`는 `windows`, `linux`는 `linux`로 매핑됩니다.
+3. 설치 후 `.opendock/dock.lock.yml`에 platform을 기록합니다.
+4. `opendock update`와 `opendock doctor`는 lock에 기록된 platform을 기본값으로 재사용합니다.
+
+지원 platform은 `macos`, `windows`, `linux`입니다. 현재 MVP의 예시는 macOS와 Windows를 중심으로 작성되어 있습니다.
 
 ## version 범위
 
@@ -362,7 +406,10 @@ python
 python3
 test
 uv
+winget
 ```
+
+`brew`는 macOS target step에서만 허용되고, `winget`은 Windows target step에서만 허용됩니다. 공통 step에 `brew install ...`을 쓰면 Windows target 실행 때 거부됩니다.
 
 다음 shell 연산자는 사용할 수 없습니다.
 
@@ -479,7 +526,11 @@ lifecycle:
     - id: install-node
       check: node --version
       version: ">=22.0.0 <25.0.0"
-      run: brew install node
+      platforms:
+        macos:
+          run: brew install node
+        windows:
+          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
 
     - id: install-codex-cli
       check: codex --version
@@ -549,7 +600,9 @@ OpenDock은 프로젝트 설정을 실행하는 도구이므로 pack source를 �
 12. shell operator, pipe, redirect, command substitution을 쓰지 않았는가?
 13. 한 step에 여러 명령을 묶지 않고 단계별로 나눴는가?
 14. 오래 걸리는 명령에는 `timeout_ms`를 넣었는가?
-15. `repair`, `messages`, `copy`, `needs`에 자동 동작을 기대하지 않았는가?
+15. macOS/Windows 명령이 다르면 같은 `id` 아래 `platforms`로 묶었는가?
+16. 공통 step에 `brew`, `winget`처럼 특정 OS 전용 package manager를 넣지 않았는가?
+17. `repair`, `messages`, `copy`, `needs`에 자동 동작을 기대하지 않았는가?
 
 ## 추천 작성 순서
 
@@ -585,10 +638,14 @@ lifecycle:
     - id: install-node
       check: node --version
       version: ">=22.0.0 <25.0.0"
-      run: brew install node
+      platforms:
+        macos:
+          run: brew install node
+        windows:
+          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
 ```
 
-Codex CLI를 npm으로 설치하려면 Node와 npm이 필요합니다. macOS starterpack에서는 Homebrew로 Node를 준비하는 패턴이 가장 단순합니다.
+Codex CLI를 npm으로 설치하려면 Node와 npm이 필요합니다. macOS에서는 Homebrew, Windows에서는 winget으로 Node LTS를 준비하는 패턴이 가장 단순합니다.
 
 Homebrew가 아직 없다면 `opendock install` 전에 다음을 먼저 실행합니다.
 
@@ -657,7 +714,11 @@ lifecycle:
     - id: install-bun
       check: bun --version
       version: ">=1.3.0"
-      run: brew install bun
+      platforms:
+        macos:
+          run: brew install bun
+        windows:
+          run: npm install --global bun
 
     - id: install-oh-my-openagent-codex
       check: bunx oh-my-openagent doctor

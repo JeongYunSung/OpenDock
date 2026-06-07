@@ -46,8 +46,9 @@ cd "$project"
 | 명령어 | 역할 |
 |---|---|
 | `opendock install opendock/oma-codex` | 현재 디렉터리에 스타터팩을 설치합니다. |
-| `opendock update` | 설치된 스타터팩의 새 버전을 확인하고 안전하게 적용합니다. |
-| `opendock doctor` | 프로젝트의 OpenDock 상태를 진단합니다. |
+| `opendock install opendock/oma-codex --platform windows` | 자동 감지 대신 명시한 플랫폼 기준으로 설치합니다. |
+| `opendock update` | 설치된 스타터팩의 새 버전을 확인하고 lock에 기록된 플랫폼 기준으로 적용합니다. |
+| `opendock doctor` | lock에 기록된 플랫폼 기준으로 프로젝트의 OpenDock 상태를 진단합니다. |
 | `opendock log` | 현재 프로젝트의 최근 실행 로그를 보여줍니다. |
 | `opendock version` | CLI, 스키마, 기본 레지스트리 정보를 출력합니다. |
 | `opendock bootstrap mac` | macOS 스타터팩용 Homebrew를 확인하거나 설치합니다. |
@@ -58,6 +59,23 @@ cd "$project"
 
 Codex CLI 설치 기준의 상세 starterpack 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)를 참고하세요. `examples/git`, `examples/codex`, `examples/claude-code`, `examples/oh-my-codex`, `examples/oh-my-openagent`에도 실제 예시가 들어 있습니다.
 
+플랫폼별 명령은 lifecycle 순서를 깨지 않고 step 안의 `platforms`로 작성합니다.
+
+```yaml
+lifecycle:
+  install:
+    - id: install-bun
+      check: bun --version
+      version: ">=1.3.0"
+      platforms:
+        macos:
+          run: brew install bun
+        windows:
+          run: npm install --global bun
+```
+
+`platforms`가 없는 step은 모든 플랫폼 공통으로 실행됩니다. 설치 시 선택된 플랫폼은 `.opendock/dock.lock.yml`에 기록되고 `update`, `doctor`에서 재사용됩니다.
+
 ## 안전 모델
 
 - pack reference는 `owner/name` 형식만 허용합니다.
@@ -66,6 +84,7 @@ Codex CLI 설치 기준의 상세 starterpack 작성법은 [docs/guides/dock-yml
 - 기존 파일은 덮어쓰지 않고 OpenDock 관리 블록으로 append합니다.
 - `.gitignore`는 중복 라인을 만들지 않습니다.
 - setup 명령은 allowlist 기반이며 pipe, redirect, `&&`, `||` 같은 shell 연산자를 차단합니다.
+- `brew`는 macOS step에서만, `winget`은 Windows step에서만 허용합니다.
 - Homebrew 자체 설치는 starterpack이 아니라 `opendock bootstrap mac` first-party 명령에서 사용자 확인 후 처리합니다.
 - `install`과 `update`는 허용된 명령의 출력을 실시간으로 보여주고, 실행 후 check를 다시 돌려 요구 버전이나 상태가 실제로 충족됐는지 확인합니다.
 - `interactive: user`는 실제 터미널 TTY에서 사용자가 직접 진행하고, `interactive: scripted`는 macOS `expect` PTY로 승인된 키 입력을 자동 전달합니다.

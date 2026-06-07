@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { SCHEMA_VERSION } from "./constants.js";
+import { isOpenDockPlatform } from "./platform.js";
 
 const safeSegmentPattern = /^[A-Za-z0-9._-]+$/;
 
@@ -89,8 +90,7 @@ export const interactiveSchema = z.union([
   }),
 ]);
 
-export const lifecycleStepSchema = z.object({
-  id: z.string(),
+const lifecycleStepFieldsSchema = z.object({
   name: z.string().optional(),
   check: z.string().optional(),
   interactive: interactiveSchema.optional(),
@@ -100,6 +100,28 @@ export const lifecycleStepSchema = z.object({
   timeout_ms: z.number().int().positive().optional(),
   copy: copySpecSchema.optional(),
   messages: z.record(z.string(), z.string()).default({}),
+});
+
+const lifecyclePlatformStepSchema = lifecycleStepFieldsSchema;
+
+const lifecyclePlatformsSchema = z
+  .record(z.string(), lifecyclePlatformStepSchema)
+  .default({})
+  .superRefine((platforms, context) => {
+    for (const platform of Object.keys(platforms)) {
+      if (!isOpenDockPlatform(platform)) {
+        context.addIssue({
+          code: "custom",
+          message: `unsupported platform \`${platform}\``,
+          path: [platform],
+        });
+      }
+    }
+  });
+
+export const lifecycleStepSchema = lifecycleStepFieldsSchema.extend({
+  id: z.string(),
+  platforms: lifecyclePlatformsSchema,
 });
 
 export const lifecycleSchema = z.object({

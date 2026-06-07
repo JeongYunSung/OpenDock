@@ -28,7 +28,11 @@ lifecycle:
     - id: install-bun
       check: bun --version
       version: ">=1.3.0"
-      run: brew install bun
+      platforms:
+        macos:
+          run: brew install bun
+        windows:
+          run: npm install --global bun
 
     - id: install-oma-cli
       check: oma --version

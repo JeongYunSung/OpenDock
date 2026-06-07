@@ -9,6 +9,7 @@ import { bootstrapMac, HOMEBREW_INSTALL_COMMAND } from "../src/bootstrap.js";
 import { DockHubClient } from "../src/dockhub.js";
 import { install, type PackResolver } from "../src/installer.js";
 import { PackRef, packManifestSchema } from "../src/pack.js";
+import { readLock } from "../src/project.js";
 import { resolveLocalPack, resolvePack } from "../src/resolver.js";
 import { runLifecycle } from "../src/runner.js";
 
@@ -228,7 +229,7 @@ describe("opendock TypeScript CLI", () => {
     }
   });
 
-  it("runs bundled install/update/doctor examples with a fake toolchain", async () => {
+  it("runs bundled macos and windows examples with a fake toolchain", async () => {
     const examplesRoot = join(repoRoot, "examples");
     const bin = await tempDir();
     writeFakeToolchain(bin);
@@ -241,37 +242,124 @@ describe("opendock TypeScript CLI", () => {
       "opendock/oh-my-openagent",
     ];
 
-    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
-      for (const ref of refs) {
-        const project = await tempDir();
-        const packRef = PackRef.parse(ref);
-        const resolver = localResolver(examplesRoot);
+    for (const platform of ["macos", "windows"] as const) {
+      await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
+        for (const ref of refs) {
+          const project = await tempDir();
+          const packRef = PackRef.parse(ref);
+          const resolver = localResolver(examplesRoot);
 
-        const installReport = await install({
-          packRef,
-          projectDir: project,
-          runCommands: true,
-          operation: "install",
-          phase: "install",
-          resolve: resolver,
-        });
-        expect(installReport.packId).toBe(ref);
+          const installReport = await install({
+            packRef,
+            projectDir: project,
+            runCommands: true,
+            operation: "install",
+            phase: "install",
+            platform,
+            resolve: resolver,
+          });
+          expect(installReport.packId).toBe(ref);
 
-        const updateReport = await install({
-          packRef,
-          projectDir: project,
-          runCommands: true,
-          operation: "update",
-          phase: "update",
-          resolve: resolver,
-        });
-        expect(updateReport.packId).toBe(ref);
+          const updateReport = await install({
+            packRef,
+            projectDir: project,
+            runCommands: true,
+            operation: "update",
+            phase: "update",
+            platform,
+            resolve: resolver,
+          });
+          expect(updateReport.packId).toBe(ref);
 
-        const resolved = resolveLocalPack(examplesRoot, packRef);
-        const doctor = await runLifecycle(resolved.manifest, "doctor", project);
-        expect(doctor.map((report) => report.status)).toEqual(doctor.map(() => "Ready" as const));
-      }
+          const resolved = resolveLocalPack(examplesRoot, packRef);
+          const doctor = await runLifecycle(resolved.manifest, "doctor", project, { platform });
+          expect(doctor.map((report) => report.status)).toEqual(doctor.map(() => "Ready" as const));
+        }
+      });
+    }
+  });
+
+  it("merges platform-specific lifecycle steps in declared order and records platform", async () => {
+    const project = await tempDir();
+    const packs = await tempDir();
+    writePlatformPack(packs);
+
+    const installReport = await install({
+      packRef: PackRef.parse("test/platforms"),
+      projectDir: project,
+      runCommands: true,
+      operation: "install",
+      phase: "install",
+      platform: "windows",
+      resolve: localResolver(packs),
     });
+
+    expect(installReport.platform).toBe("windows");
+    expect(installReport.steps.map((step) => step.id)).toEqual([
+      "common-start",
+      "install-tool",
+      "common-end",
+    ]);
+    expect(existsSync(join(project, ".windows-tool"))).toBe(true);
+    expect(existsSync(join(project, ".mac-tool"))).toBe(false);
+    const lockedPlatform = readLock(project).packs[0]?.platform;
+    if (lockedPlatform === undefined) {
+      throw new Error("expected platform in lock file");
+    }
+    expect(lockedPlatform).toBe("windows");
+
+    const resolved = resolveLocalPack(packs, PackRef.parse("test/platforms"));
+    const doctor = await runLifecycle(resolved.manifest, "doctor", project, {
+      platform: lockedPlatform,
+    });
+    expect(doctor.find((report) => report.id === "tool")?.status).toBe("Ready");
+  });
+
+  it("rejects unsupported platforms and platform-specific package managers", async () => {
+    const project = await tempDir();
+    const macOnly = packManifestSchema.parse({
+      opendock: 1,
+      id: "test/mac-only",
+      lifecycle: {
+        install: [
+          {
+            id: "install-tool",
+            platforms: {
+              macos: {
+                run: "mkdir .mac-tool",
+              },
+            },
+          },
+        ],
+      },
+    });
+    await expect(
+      runLifecycle(macOnly, "install", project, { platform: "windows" }),
+    ).rejects.toThrow("does not support platform `windows`");
+
+    const unsafeWindows = packManifestSchema.parse({
+      opendock: 1,
+      id: "test/unsafe-windows",
+      lifecycle: {
+        install: [
+          {
+            id: "wrong-manager",
+            run: "brew install git",
+          },
+        ],
+      },
+    });
+    await expect(
+      runLifecycle(unsafeWindows, "install", project, { platform: "windows" }),
+    ).rejects.toThrow("not allowed for OpenDock platform `windows`");
+  });
+
+  it("exposes platform options in install update and doctor commands", () => {
+    for (const command of ["install", "update", "doctor"]) {
+      const help = runCli(process.cwd(), {}, [command, "--help"]);
+      expect(help.status).toBe(0);
+      expect(help.stdout).toContain("--platform <platform>");
+    }
   });
 
   it("fails unmet post-run version checks", async () => {
@@ -756,6 +844,42 @@ lifecycle:
   );
 }
 
+function writePlatformPack(root: string): void {
+  const packRoot = join(root, "test", "platforms");
+  mkdirSync(packRoot, { recursive: true });
+  writeFileSync(
+    join(packRoot, "dock.yml"),
+    `opendock: 1
+id: test/platforms
+version: 1.0.0
+lifecycle:
+  install:
+    - id: common-start
+      run: mkdir .common-start
+
+    - id: install-tool
+      platforms:
+        macos:
+          check: test -d .mac-tool
+          run: mkdir .mac-tool
+        windows:
+          check: test -d .windows-tool
+          run: mkdir .windows-tool
+
+    - id: common-end
+      run: mkdir .common-end
+
+  doctor:
+    - id: tool
+      platforms:
+        macos:
+          check: test -d .mac-tool
+        windows:
+          check: test -d .windows-tool
+`,
+  );
+}
+
 function writeTimeoutDoctorPack(root: string): void {
   const packRoot = join(root, "test", "timeout");
   mkdirSync(packRoot, { recursive: true });
@@ -926,6 +1050,12 @@ fi
     join(bin, "omx"),
     `#!/bin/sh
 echo "omx 1.2.3"
+`,
+  );
+  writeExecutable(
+    join(bin, "winget"),
+    `#!/bin/sh
+echo "winget $*"
 `,
   );
 }

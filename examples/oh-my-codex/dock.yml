@@ -7,7 +7,11 @@ lifecycle:
     - id: install-node
       check: node --version
       version: ">=22.0.0 <25.0.0"
-      run: brew install node
+      platforms:
+        macos:
+          run: brew install node
+        windows:
+          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
 
     - id: install-codex-cli
       check: codex --version
@@ -45,4 +49,3 @@ lifecycle:
     - id: oh-my-codex
       check: omx doctor
       timeout_ms: 60000
-

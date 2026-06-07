@@ -12,7 +12,7 @@ small, the setup repeatable, and every generated file auditable.
 ![status](https://img.shields.io/badge/status-MVP-2563eb)
 ![language](https://img.shields.io/badge/language-TypeScript-3178c6)
 ![schema](https://img.shields.io/badge/schema-opendock%201-111827)
-![platform](https://img.shields.io/badge/platform-macOS_first-0f766e)
+![platform](https://img.shields.io/badge/platform-macOS_%2B_Windows-0f766e)
 
 </div>
 
@@ -52,8 +52,8 @@ that into a reviewed starterpack:
 - **Small command surface**: install, update, diagnose, inspect logs, auth, and
   deploy.
 - **Automation-ready**: lifecycle steps can run allowed commands such as `git`,
-  `brew`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, and `omx` without
-  allowing shell pipelines.
+  `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, and `omx`
+  without allowing shell pipelines.
 
 ## Quick Start
 
@@ -94,8 +94,9 @@ README.md
 | Command | Purpose |
 |---|---|
 | `opendock install opendock/oma-codex` | Install an approved starterpack into the current directory. |
-| `opendock update` | Re-resolve installed packs and apply newer versions safely. |
-| `opendock doctor` | Show whether the current directory has valid OpenDock state. |
+| `opendock install opendock/oma-codex --platform windows` | Install using an explicit target platform instead of auto-detecting the host. |
+| `opendock update` | Re-resolve installed packs and apply newer versions safely using the locked platform. |
+| `opendock doctor` | Show whether the current directory has valid OpenDock state using the locked platform. |
 | `opendock log` | Print recent OpenDock runs for the current project. |
 | `opendock version` | Print CLI version, schema version, and default registry. |
 | `opendock bootstrap mac` | Verify or install Homebrew for macOS starterpacks. |
@@ -138,7 +139,11 @@ lifecycle:
     - id: install-node
       check: node --version
       version: ">=22.0.0 <25.0.0"
-      run: brew install node
+      platforms:
+        macos:
+          run: brew install node
+        windows:
+          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
 
     - id: install-codex-cli
       check: codex --version
@@ -175,6 +180,27 @@ lifecycle:
 Template files live under `templates/` and are applied relative to the project
 root.
 
+Platform-specific lifecycle commands stay inside the normal top-to-bottom
+`install`, `update`, and `doctor` order. A step with `platforms` keeps one
+logical `id`, then OpenDock merges the matching platform override:
+
+```yaml
+lifecycle:
+  install:
+    - id: install-bun
+      check: bun --version
+      version: ">=1.3.0"
+      platforms:
+        macos:
+          run: brew install bun
+        windows:
+          run: npm install --global bun
+```
+
+Steps without `platforms` run on every platform. The selected platform is stored
+in `.opendock/dock.lock.yml`, then reused by `opendock update` and
+`opendock doctor`.
+
 Interactive lifecycle steps can either hand control to the user or send a small
 approved key sequence through a macOS `expect` PTY:
 
@@ -206,6 +232,8 @@ the trust boundary explicit:
 - Lifecycle commands reject shell operators such as pipes, redirects, `&&`,
   `||`, and command substitution.
 - Only allowlisted command families can run during lifecycle steps.
+- Platform-specific package managers are target-scoped: `brew` is allowed for
+  macOS steps, and `winget` is allowed for Windows steps.
 - Homebrew bootstrap is first-party only: starterpacks may use `brew`, but
   installing Homebrew itself is handled by `opendock bootstrap mac` with user
   confirmation.
