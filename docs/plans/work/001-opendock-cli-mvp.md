@@ -56,6 +56,7 @@ Base URL: `https://registry.opendock.app`
 | Endpoint | Purpose | Auth |
 |---|---|---|
 | `GET /v1/docks/{owner}/{name}/versions/latest` | Resolve latest approved dock version | No |
+| `GET /v1/docks/{owner}/{name}/versions/{selector}` | Resolve an approved dock by version selector | No |
 | `GET /v1/docks/{owner}/{name}/versions/{version}/download` | Download dock archive | No |
 | `POST /v1/auth/login` | Exchange login token or email token for CLI token | No |
 | `POST /v1/docks/submissions` | Submit dock for review | Yes |
@@ -64,6 +65,7 @@ Local development contract:
 
 - `OPENDOCK_DATA_DIR` may override the local data/cache/log directory.
 - Dock source and registry host are not configurable by runtime environment variables.
+- Install refs support `owner/name@selector`; the CLI stores both requested selector and resolved exact version in lock state.
 
 ## Tasks
 

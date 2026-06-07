@@ -3,16 +3,31 @@ import { SCHEMA_VERSION } from "./constants.js";
 import { isOpenDockPlatform } from "./platform.js";
 
 const safeSegmentPattern = /^[A-Za-z0-9._-]+$/;
+const versionSelectorPattern = /^(latest|v?\d+(?:\.\d+){0,2})$/;
 
 export class DockRef {
   constructor(
     readonly owner: string,
     readonly name: string,
+    readonly selector = "latest",
   ) {}
 
   static parse(value: string): DockRef {
     const trimmed = value.trim();
-    const parts = trimmed.split("/");
+    const [namePart = "", selector = "latest", extraSelector] = trimmed.split("@");
+    if (extraSelector !== undefined) {
+      throw new Error("dock reference may contain only one version selector");
+    }
+    if (selector.trim() === "") {
+      throw new Error("dock version selector cannot be empty");
+    }
+    if (!isSafeVersionSelector(selector)) {
+      throw new Error(
+        "dock version selector must be latest, a major version, a minor version, or an exact version",
+      );
+    }
+
+    const parts = namePart.split("/");
     if (parts.length !== 2) {
       throw new Error("dock reference must be in owner/name form");
     }
@@ -30,15 +45,19 @@ export class DockRef {
       );
     }
 
-    return new DockRef(owner, name);
+    return new DockRef(owner, name, selector);
   }
 
   id(): string {
     return `${this.owner}/${this.name}`;
   }
 
+  requested(): string {
+    return this.selector;
+  }
+
   toString(): string {
-    return this.id();
+    return this.selector === "latest" ? this.id() : `${this.id()}@${this.selector}`;
   }
 }
 
@@ -169,9 +188,43 @@ export function validateManifestFor(manifest: DockManifest, requested: DockRef):
   }
 }
 
+export function assertVersionSatisfiesSelector(version: string, selector: string): void {
+  if (versionSatisfiesSelector(version, selector)) {
+    return;
+  }
+  throw new Error(`resolved version ${version} does not satisfy selector ${selector}`);
+}
+
+export function versionSatisfiesSelector(version: string, selector: string): boolean {
+  if (selector === "latest") {
+    return true;
+  }
+
+  const normalizedVersion = version.startsWith("v") ? version.slice(1) : version;
+  const normalizedSelector = selector.startsWith("v") ? selector.slice(1) : selector;
+  const versionParts = normalizedVersion.split(".");
+  const selectorParts = normalizedSelector.split(".");
+
+  if (versionParts.length < 3 || !versionParts.every(isNumericPart)) {
+    return false;
+  }
+  if (!selectorParts.every(isNumericPart)) {
+    return false;
+  }
+  return selectorParts.every((part, index) => versionParts[index] === part);
+}
+
 function isSafeSegment(value: string): boolean {
   if (value === "." || value === ".." || value.includes("..")) {
     return false;
   }
   return safeSegmentPattern.test(value);
+}
+
+function isSafeVersionSelector(value: string): boolean {
+  return versionSelectorPattern.test(value);
+}
+
+function isNumericPart(value: string): boolean {
+  return /^\d+$/.test(value);
 }

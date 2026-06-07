@@ -23,8 +23,12 @@ export interface SubmissionResponse {
 }
 
 export class OpenDockRegistryClient {
-  async latestDockVersion(owner: string, name: string): Promise<DockVersionResponse> {
-    const url = `${this.apiBase()}/docks/${owner}/${name}/versions/latest`;
+  async resolveDockVersion(
+    owner: string,
+    name: string,
+    selector: string,
+  ): Promise<DockVersionResponse> {
+    const url = `${this.apiBase()}/docks/${owner}/${name}/versions/${encodeURIComponent(selector)}`;
     return this.requestJson<DockVersionResponse>(url);
   }
 

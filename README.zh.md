@@ -40,6 +40,7 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 | Command | Purpose |
 |---|---|
 | `opendock install opendock/oma-codex` | 安装已审核 dock 到当前目录。 |
+| `opendock install opendock/oma-codex@1.5` | 使用版本 selector 安装。 |
 | `opendock install opendock/oma-codex --platform windows` | 使用显式 platform 安装，而不是自动检测当前系统。 |
 | `opendock update` | 使用 lock 中记录的 platform 安全更新已安装的 dock。 |
 | `opendock doctor` | 使用 lock 中记录的 platform 检查项目的 OpenDock 状态。 |

@@ -25,7 +25,7 @@ export async function run(argv = process.argv): Promise<void> {
   program
     .command("install")
     .description("Install an approved dock into the current directory.")
-    .argument("<dock>")
+    .argument("<dock>", "Dock reference: owner/name[@selector]")
     .option("--platform <platform>", "Target platform: macos, windows, or linux")
     .action(async (dock: string, options: { platform?: string }) => {
       const platform = resolveCliPlatform(options.platform);
@@ -49,7 +49,7 @@ export async function run(argv = process.argv): Promise<void> {
     .action(async (options: { platform?: string }) => {
       const lock = readLock(process.cwd());
       for (const dock of lockDocks(lock)) {
-        const dockRef = DockRef.parse(dock.id);
+        const dockRef = DockRef.parse(`${dock.id}@${dock.requested ?? "latest"}`);
         const platform = resolveCliPlatform(options.platform ?? dock.platform);
         const latest = await resolveDock(dockRef);
         if (
@@ -163,7 +163,11 @@ async function printDoctor(cwd: string, platformOverride?: string): Promise<void
     for (const dock of lockDocks(lock)) {
       const platform = resolveCliPlatform(platformOverride ?? dock.platform);
       console.log(`✓ ${dock.id}@${dock.version} [${platform}]`);
-      await printDockDoctorChecks(cwd, DockRef.parse(dock.id), platform);
+      await printDockDoctorChecks(
+        cwd,
+        DockRef.parse(`${dock.id}@${dock.requested ?? "latest"}`),
+        platform,
+      );
     }
   } else {
     console.log("Status: Not installed");

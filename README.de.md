@@ -40,6 +40,7 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 | Command | Purpose |
 |---|---|
 | `opendock install opendock/oma-codex` | Installiert ein geprüftes Dock im aktuellen Verzeichnis. |
+| `opendock install opendock/oma-codex@1.5` | Installiert mit einem Versions-selector. |
 | `opendock install opendock/oma-codex --platform windows` | Installiert mit einer expliziten platform statt automatischer Systemerkennung. |
 | `opendock update` | Aktualisiert installierte Docks sicher mit der im Lock gespeicherten platform. |
 | `opendock doctor` | Prüft den OpenDock-Zustand mit der im Lock gespeicherten platform. |

@@ -136,6 +136,25 @@ describe("opendock TypeScript CLI", () => {
     expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/latest"]);
   });
 
+  it("resolves remote docks using explicit version selectors", async () => {
+    const urls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+      urls.push(String(input));
+      return new Response("{}", { status: 503, statusText: "Unavailable" });
+    }) as typeof fetch;
+
+    try {
+      await expect(resolveDock(DockRef.parse("test/harness@1.5"))).rejects.toThrow(
+        "https://registry.opendock.app/v1/docks/test/harness/versions/1.5",
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/1.5"]);
+  });
+
   it("submits docks only to the fixed OpenDock Registry", async () => {
     const urls: string[] = [];
     const bodies: string[] = [];
@@ -560,6 +579,24 @@ echo "${command} 1.2.3"
     expect(result.stderr).toContain("owner/name");
   });
 
+  it("parses dock version selectors", () => {
+    expect(DockRef.parse("opendock/oma-codex").requested()).toBe("latest");
+    expect(DockRef.parse("opendock/oma-codex@latest").requested()).toBe("latest");
+    expect(DockRef.parse("opendock/oma-codex@1").requested()).toBe("1");
+    expect(DockRef.parse("opendock/oma-codex@v1").requested()).toBe("v1");
+    expect(DockRef.parse("opendock/oma-codex@1.5").requested()).toBe("1.5");
+    expect(DockRef.parse("opendock/oma-codex@1.5.2").requested()).toBe("1.5.2");
+    expect(DockRef.parse("opendock/oma-codex@1.5.2").id()).toBe("opendock/oma-codex");
+    expect(DockRef.parse("opendock/oma-codex@1.5.2").toString()).toBe("opendock/oma-codex@1.5.2");
+    expect(() => DockRef.parse("opendock/oma-codex@")).toThrow("selector cannot be empty");
+    expect(() => DockRef.parse("opendock/oma-codex@beta")).toThrow(
+      "dock version selector must be latest",
+    );
+    expect(() => DockRef.parse("opendock/oma-codex@1@2")).toThrow(
+      "may contain only one version selector",
+    );
+  });
+
   it("stores auth tokens with private permissions", async () => {
     const data = await tempDir();
     const result = runCli(process.cwd(), { OPENDOCK_DATA_DIR: data }, [
@@ -691,6 +728,45 @@ echo "${command} 1.2.3"
     expect(readFileSync(join(project, ".opendock", "dock.lock.yml"), "utf8")).toContain(
       "version: 2.0.0",
     );
+  });
+
+  it("stores requested selectors in project state and lock files", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeTestDock(docks, "test", "demo", "1.5.2", "# Version\n");
+
+    await install({
+      dockRef: DockRef.parse("test/demo@1.5"),
+      projectDir: project,
+      runCommands: true,
+      operation: "install",
+      phase: "install",
+      resolve: localResolver(docks),
+    });
+
+    const projectState = readFileSync(join(project, ".opendock", "project.yml"), "utf8");
+    expect(projectState).toMatch(/requested: "?1\.5"?/);
+    const lockState = readFileSync(join(project, ".opendock", "dock.lock.yml"), "utf8");
+    expect(lockState).toMatch(/requested: "?1\.5"?/);
+    expect(lockState).toContain("version: 1.5.2");
+    expect(lockDocks(readLock(project))[0]?.requested).toBe("1.5");
+  });
+
+  it("rejects resolved versions outside the requested selector", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeTestDock(docks, "test", "demo", "2.0.0", "# Version\n");
+
+    await expect(
+      install({
+        dockRef: DockRef.parse("test/demo@1.5.2"),
+        projectDir: project,
+        runCommands: true,
+        operation: "install",
+        phase: "install",
+        resolve: localResolver(docks),
+      }),
+    ).rejects.toThrow("resolved version 2.0.0 does not satisfy selector 1.5.2");
   });
 
   it("writes failure logs for rejected setup commands", async () => {

@@ -14,11 +14,13 @@ export interface AppliedDock {
   id: string;
   name: string;
   platform?: OpenDockPlatform;
+  requested?: string;
   version: string;
 }
 
 export interface LockedDock {
   id: string;
+  requested?: string;
   version: string;
   checksum: string;
   platform?: OpenDockPlatform;
@@ -41,6 +43,7 @@ export interface LockFile {
 export function writeProjectState(
   projectDir: string,
   manifest: DockManifest,
+  requested: string,
   checksum: string,
   signature: string,
   files: ProjectFileRecord[],
@@ -52,6 +55,7 @@ export function writeProjectState(
   const appliedDock: AppliedDock = {
     id: manifest.id,
     name: manifest.name ?? manifest.id,
+    requested,
     version: manifest.version,
   };
   if (platform !== undefined) {
@@ -66,6 +70,7 @@ export function writeProjectState(
 
   const lockedDock: LockedDock = {
     id: manifest.id,
+    requested,
     version: manifest.version,
     checksum,
     signature,

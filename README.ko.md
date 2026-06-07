@@ -46,6 +46,7 @@ cd "$project"
 | 명령어 | 역할 |
 |---|---|
 | `opendock install opendock/oma-codex` | 현재 디렉터리에 승인된 dock을 설치합니다. |
+| `opendock install opendock/oma-codex@1.5` | 버전 selector를 지정해 설치합니다. |
 | `opendock install opendock/oma-codex --platform windows` | 자동 감지 대신 명시한 플랫폼 기준으로 설치합니다. |
 | `opendock update` | 설치된 dock의 새 버전을 확인하고 lock에 기록된 플랫폼 기준으로 적용합니다. |
 | `opendock doctor` | lock에 기록된 플랫폼 기준으로 프로젝트의 OpenDock 상태를 진단합니다. |
@@ -54,6 +55,8 @@ cd "$project"
 | `opendock bootstrap mac` | macOS dock용 Homebrew를 확인하거나 설치합니다. |
 | `opendock auth login` | OpenDock Registry 토큰을 저장합니다. |
 | `opendock deploy oma-codex` | 로컬 `dock.yml` dock을 OpenDock Registry 검토용으로 제출합니다. |
+
+버전 selector는 `owner/name@selector` 형식입니다. selector가 없으면 `latest`로 해석합니다. `@1`은 최신 `1.x`, `@1.5`는 최신 `1.5.x`, `@1.5.2`는 exact version 요청입니다. OpenDock은 lock에 사용자가 요청한 selector와 실제 설치된 exact version을 함께 저장하고, `update` 때 같은 selector를 재사용합니다.
 
 ## dock.yml 작성 가이드
 

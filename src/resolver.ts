@@ -14,6 +14,7 @@ import { join, relative, resolve, sep } from "node:path";
 import { x as extractTar } from "tar";
 import YAML from "yaml";
 import {
+  assertVersionSatisfiesSelector,
   type DockManifest,
   type DockRef,
   dockManifestSchema,
@@ -53,7 +54,12 @@ export function resolveLocalDock(docksRoot: string, dockRef: DockRef): ResolvedD
 
 async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
   const client = new OpenDockRegistryClient();
-  const metadata = await client.latestDockVersion(dockRef.owner, dockRef.name);
+  const metadata = await client.resolveDockVersion(
+    dockRef.owner,
+    dockRef.name,
+    dockRef.requested(),
+  );
+  assertVersionSatisfiesSelector(metadata.version, dockRef.requested());
 
   if (metadata.id !== dockRef.id()) {
     throw new Error(`registry returned dock id \`${metadata.id}\` for requested \`${dockRef}\``);

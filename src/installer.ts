@@ -1,6 +1,11 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
-import type { DockRef, FileSpec, LifecyclePhase } from "./dock.js";
+import {
+  assertVersionSatisfiesSelector,
+  type DockRef,
+  type FileSpec,
+  type LifecyclePhase,
+} from "./dock.js";
 import { appendRunLog } from "./logging.js";
 import { detectPlatform, type OpenDockPlatform } from "./platform.js";
 import { type ProjectFileRecord, readProjectFile, writeProjectState } from "./project.js";
@@ -36,6 +41,7 @@ interface TemplateReport {
 
 export async function install(options: InstallOptions): Promise<InstallReport> {
   const resolved = await (options.resolve ?? resolveDock)(options.dockRef);
+  assertVersionSatisfiesSelector(resolved.manifest.version, options.dockRef.requested());
   const platform = options.platform ?? detectPlatform();
   assertManifestSupportsPlatform(resolved.manifest, platform);
   const priorRecords = readProjectFile(options.projectDir)?.files ?? [];
@@ -74,6 +80,7 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
   writeProjectState(
     options.projectDir,
     resolved.manifest,
+    options.dockRef.requested(),
     resolved.checksum,
     resolved.signature,
     templateReport.records,

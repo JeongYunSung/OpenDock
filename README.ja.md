@@ -41,6 +41,7 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 | Command | Purpose |
 |---|---|
 | `opendock install opendock/oma-codex` | 現在のディレクトリにスターターパックをインストールします。 |
+| `opendock install opendock/oma-codex@1.5` | version selector を指定してインストールします。 |
 | `opendock install opendock/oma-codex --platform windows` | 自動検出の代わりに明示した platform でインストールします。 |
 | `opendock update` | lock に記録された platform でインストール済みパックを安全に更新します。 |
 | `opendock doctor` | lock に記録された platform で OpenDock の状態を診断します。 |

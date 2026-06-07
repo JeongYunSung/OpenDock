@@ -136,7 +136,7 @@ lifecycle:
 
 ### id 규칙
 
-`id`는 `owner/name` 형식이어야 합니다.
+`id`는 `owner/name` 형식이어야 합니다. 설치 명령에서는 뒤에 `@selector`를 붙여 버전 범위를 고를 수 있지만, `dock.yml`의 `id`에는 selector를 쓰지 않습니다.
 
 ```yaml
 id: opendock/codex
@@ -154,6 +154,30 @@ id: codex
 id: ../codex
 id: opendock/codex/designer
 ```
+
+### 버전 selector
+
+설치할 때는 npm처럼 `@` 뒤에 selector를 붙일 수 있습니다.
+
+```bash
+opendock install opendock/oma-codex
+opendock install opendock/oma-codex@latest
+opendock install opendock/oma-codex@1
+opendock install opendock/oma-codex@1.5
+opendock install opendock/oma-codex@1.5.2
+opendock install opendock/oma-codex@v1
+```
+
+selector가 없으면 `latest`로 해석합니다. `1`은 최신 `1.x`, `1.5`는 최신 `1.5.x`, `1.5.2`는 exact version 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 selector와 registry가 돌려준 exact version을 함께 기록합니다.
+
+```yaml
+docks:
+  - id: opendock/oma-codex
+    requested: 1.5
+    version: 1.5.2
+```
+
+`opendock update`는 lock의 `requested`를 다시 사용합니다. 즉 `@1.5`로 설치한 dock은 `1.5.x` 안에서만 움직이고, `@1.5.2`처럼 exact version으로 설치한 dock은 update에서도 고정됩니다.
 
 ## files 작성법
 
