@@ -37,10 +37,13 @@ lifecycle:
 
     - id: apply-oma-project
       check: test -f .agents/oma-config.yaml
+      interactive: user
       run: oma install
+      timeout_ms: 600000
 
     - id: verify-oma
-      run: test -f .agents/oma-config.yaml
+      run: oma doctor
+      timeout_ms: 60000
 
   update:
     - id: update-oma-cli
@@ -50,7 +53,8 @@ lifecycle:
       run: oma update -y --vendor codex
 
     - id: verify-oma
-      run: test -f .agents/oma-config.yaml
+      run: oma doctor
+      timeout_ms: 60000
 
   doctor:
     - id: git
@@ -76,3 +80,7 @@ lifecycle:
 
     - id: oma-project
       check: test -f .agents/oma-config.yaml
+
+    - id: oma-doctor
+      check: oma doctor
+      timeout_ms: 60000

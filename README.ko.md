@@ -64,6 +64,7 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 - `.gitignore`는 중복 라인을 만들지 않습니다.
 - setup 명령은 allowlist 기반이며 pipe, redirect, `&&`, `||` 같은 shell 연산자를 차단합니다.
 - `install`과 `update`는 허용된 명령의 출력을 실시간으로 보여주고, 실행 후 check를 다시 돌려 요구 버전이나 상태가 실제로 충족됐는지 확인합니다.
+- `interactive: user`는 실제 터미널 TTY에서 사용자가 직접 진행하고, `interactive: scripted`는 macOS `expect` PTY로 승인된 키 입력을 자동 전달합니다.
 - `doctor` lifecycle check에는 기본 timeout이 있으며, step별로 `timeout_ms`를 지정할 수 있습니다.
 - 프로젝트 상태는 `.opendock/`에, 상세 로그는 사용자 데이터 디렉터리에 저장합니다.
 

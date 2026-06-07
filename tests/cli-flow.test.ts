@@ -159,6 +159,31 @@ echo "Downloading oh-my-agent"
     expect(install.stderr).toContain("6.4.0 does not satisfy >=9.0.0");
   });
 
+  it("supports user and scripted interactive lifecycle steps", async () => {
+    const project = await tempDir();
+    const packs = await tempDir();
+    const data = await tempDir();
+    writeInteractivePack(packs);
+    const env = { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data };
+
+    const nonTtyInstall = runCli(project, env, ["install", "test/interactive-user"]);
+    expect(nonTtyInstall.status).not.toBe(0);
+    expect(nonTtyInstall.stderr).toContain("interactive step requires a TTY");
+
+    const userInstall = await runCliInPty(project, env, ["install", "test/interactive-user"], {
+      inputAfter: "USER_TTY",
+      input: "u\r",
+    });
+    expect(userInstall.exitCode).toBe(0);
+    expect(userInstall.output).toContain("USER_TTY");
+    expect(readFileSync(join(project, "user-input.txt"), "utf8")).toBe("750a");
+
+    const scriptedInstall = runCli(project, env, ["install", "test/interactive-scripted"]);
+    expect(scriptedInstall.status).toBe(0);
+    expect(scriptedInstall.stdout).toContain("SCRIPTED_TTY");
+    expect(readFileSync(join(project, "scripted-input.txt"), "utf8")).toBe("090a");
+  });
+
   it("times out hanging doctor checks", async () => {
     const project = await tempDir();
     const packs = await tempDir();
@@ -286,6 +311,42 @@ function runCli(cwd: string, env: NodeJS.ProcessEnv, args: string[]) {
   });
 }
 
+function runCliInPty(
+  cwd: string,
+  env: NodeJS.ProcessEnv,
+  args: string[],
+  options: { input: string; inputAfter: string },
+): { exitCode: number; output: string } {
+  const script = [
+    "set timeout 10",
+    `spawn ${[process.execPath, builtCli, ...args].map(tclWord).join(" ")}`,
+    `expect ${tclWord(options.inputAfter)}`,
+    `send -- [binary format H* ${Buffer.from(options.input, "utf8").toString("hex")}]`,
+    "expect eof",
+    "catch wait result",
+    "if {[llength $result] >= 4} { exit [lindex $result 3] }",
+    "exit 1",
+  ].join("\n");
+  const result = spawnSync("expect", ["-c", script], {
+    cwd,
+    encoding: "utf8",
+    env: { ...process.env, ...env },
+    timeout: 12_000,
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+  return {
+    exitCode: result.status ?? 1,
+    output: `${result.stdout ?? ""}${result.stderr ?? ""}`,
+  };
+}
+
+function tclWord(value: string): string {
+  return `{${value.replace(/\\/g, "\\\\").replace(/}/g, "\\}")}}`;
+}
+
 function writeTestPack(
   root: string,
   owner: string,
@@ -382,6 +443,68 @@ lifecycle:
     - id: slow
       check: node -e "setTimeout(function(){}, 1000)"
       timeout_ms: 50
+`,
+  );
+}
+
+function writeInteractivePack(root: string): void {
+  writeInteractivePackVariant(root, "interactive-user", "user", "");
+  writeInteractivePackVariant(
+    root,
+    "interactive-scripted",
+    `interactive:
+        mode: scripted
+        inputs:
+          - key: tab
+          - key: enter`,
+    "",
+  );
+}
+
+function writeInteractivePackVariant(
+  root: string,
+  name: string,
+  interactive: string,
+  extraRun: string,
+): void {
+  const packRoot = join(root, "test", name);
+  mkdirSync(join(packRoot, "files"), { recursive: true });
+  const scriptName =
+    name === "interactive-user" ? "user-interactive.js" : "scripted-interactive.js";
+  const outputName = name === "interactive-user" ? "user-input.txt" : "scripted-input.txt";
+  const label = name === "interactive-user" ? "USER_TTY" : "SCRIPTED_TTY";
+  const interactiveYaml = interactive.includes("\n") ? interactive : `interactive: ${interactive}`;
+  writeFileSync(
+    join(packRoot, "dock.yml"),
+    `opendock: 1
+id: test/${name}
+version: 1.0.0
+files:
+  - from: files/${scriptName}
+    to: ${scriptName}
+    update: manual_review
+lifecycle:
+  install:
+    - id: interactive
+      run: node ${scriptName}
+      ${interactiveYaml}
+      timeout_ms: 5000
+${extraRun}`,
+  );
+  writeFileSync(
+    join(packRoot, "files", scriptName),
+    `const fs = require("node:fs");
+console.log(process.stdin.isTTY ? "${label}" : "NO_TTY");
+process.stdin.setRawMode(true);
+process.stdin.resume();
+const bytes = [];
+process.stdin.on("data", function(data) {
+  for (const byte of data) bytes.push(byte);
+  if (bytes.length >= 2) {
+    fs.writeFileSync("${outputName}", Buffer.from(bytes.slice(0, 2)).toString("hex"));
+    process.exit(0);
+  }
+});
 `,
   );
 }

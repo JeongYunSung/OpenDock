@@ -152,7 +152,7 @@ async function printDoctor(cwd: string): Promise<void> {
 async function printPackDoctorChecks(cwd: string, packRef: PackRef): Promise<void> {
   try {
     const resolved = await resolvePack(packRef);
-    const reports = runLifecycle(resolved.manifest, "doctor", cwd);
+    const reports = await runLifecycle(resolved.manifest, "doctor", cwd);
     for (const report of reports) {
       const symbol = report.status === "Failed" ? "!" : "✓";
       const suffix = report.message ? ` (${report.message})` : "";

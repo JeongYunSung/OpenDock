@@ -145,10 +145,13 @@ lifecycle:
 
     - id: apply-oma-project
       check: test -f .agents/oma-config.yaml
+      interactive: user
       run: oma install
+      timeout_ms: 600000
 
     - id: verify-oma
-      run: test -f .agents/oma-config.yaml
+      run: oma doctor
+      timeout_ms: 60000
 
   update:
     - id: update-oma-cli
@@ -158,7 +161,8 @@ lifecycle:
       run: oma update -y --vendor codex
 
     - id: verify-oma
-      run: test -f .agents/oma-config.yaml
+      run: oma doctor
+      timeout_ms: 60000
 
   doctor:
     - id: oma
@@ -168,10 +172,33 @@ lifecycle:
     - id: oma-project
       check: test -f .agents/oma-config.yaml
       timeout_ms: 5000
+
+    - id: oma-doctor
+      check: oma doctor
+      timeout_ms: 60000
 ```
 
 Template files live under `templates/` and are applied relative to the project
 root.
+
+Interactive lifecycle steps can either hand control to the user or send a small
+approved key sequence through a macOS `expect` PTY:
+
+```yaml
+lifecycle:
+  install:
+    - id: user-driven-tui
+      run: oma install
+      interactive: user
+
+    - id: scripted-tui
+      run: oma install
+      interactive:
+        mode: scripted
+        inputs:
+          - key: tab
+          - key: enter
+```
 
 ## Safety Model
 
@@ -187,6 +214,8 @@ the trust boundary explicit:
 - Only allowlisted command families can run during lifecycle steps.
 - `install` and `update` stream allowed command output live, then re-run checks
   to confirm the requested version or state was actually reached.
+- `interactive: user` requires a real terminal TTY. `interactive: scripted`
+  uses macOS `expect` and is intended only for approved DockHub packs.
 - `doctor` lifecycle checks have a default timeout, and individual steps may set
   `timeout_ms`.
 - Existing files follow the pack's declared update policy.

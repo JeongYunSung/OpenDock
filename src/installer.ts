@@ -43,7 +43,7 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
   let steps: StepReport[] = [];
   if (options.runCommands) {
     try {
-      steps = runLifecycle(resolved.manifest, options.phase ?? "install", options.projectDir);
+      steps = await runLifecycle(resolved.manifest, options.phase ?? "install", options.projectDir);
     } catch (error) {
       appendRunLog(
         options.projectDir,
