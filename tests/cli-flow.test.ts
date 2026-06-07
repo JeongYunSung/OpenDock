@@ -1,12 +1,14 @@
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { chmodSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { c as createTar } from "tar";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { bootstrapMac, HOMEBREW_INSTALL_COMMAND } from "../src/bootstrap.js";
-import { DockRef, dockManifestSchema } from "../src/dock.js";
+import { DockRef, dockManifestSchema, versionSatisfiesSelector } from "../src/dock.js";
 import { type DockResolver, install } from "../src/installer.js";
 import { lockDocks, readLock } from "../src/project.js";
 import { OpenDockRegistryClient } from "../src/registry.js";
@@ -153,6 +155,69 @@ describe("opendock TypeScript CLI", () => {
     }
 
     expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/1.5"]);
+  });
+
+  it("installs remote docks with selector metadata and stores the requested selector", async () => {
+    const project = await tempDir();
+    const data = await tempDir();
+    const archiveRoot = await tempDir();
+    const archive = await createRemoteDockArchive(archiveRoot, "test", "remote", "1.5.2");
+    const checksum = sha256Bytes(archive);
+    const urls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+      const url = String(input);
+      urls.push(url);
+      if (url === "https://registry.opendock.app/v1/docks/test/remote/versions/1.5") {
+        return new Response(
+          JSON.stringify({
+            approved: true,
+            checksum,
+            id: "test/remote",
+            signature: "registry-signature",
+            version: "1.5.2",
+          }),
+          { headers: { "content-type": "application/json" }, status: 200 },
+        );
+      }
+      if (url === "https://registry.opendock.app/v1/docks/test/remote/versions/1.5.2/download") {
+        return new Response(archive, { status: 200 });
+      }
+      return new Response("{}", { status: 404, statusText: "Not Found" });
+    }) as typeof fetch;
+
+    try {
+      const report = await withEnv({ OPENDOCK_DATA_DIR: data }, () =>
+        install({
+          dockRef: DockRef.parse("test/remote@1.5"),
+          projectDir: project,
+          runCommands: true,
+          operation: "install",
+          phase: "install",
+        }),
+      );
+      expect(report.dockId).toBe("test/remote");
+      expect(report.version).toBe("1.5.2");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(urls).toEqual([
+      "https://registry.opendock.app/v1/docks/test/remote/versions/1.5",
+      "https://registry.opendock.app/v1/docks/test/remote/versions/1.5.2/download",
+    ]);
+    expect(readFileSync(join(project, "README.md"), "utf8")).toBe("# Remote Dock\n");
+    const lockedDock = lockDocks(readLock(project))[0];
+    if (lockedDock === undefined) {
+      throw new Error("expected remote dock in lock file");
+    }
+    expect(lockedDock).toMatchObject({
+      checksum,
+      id: "test/remote",
+      requested: "1.5",
+      signature: "registry-signature",
+      version: "1.5.2",
+    });
   });
 
   it("submits docks only to the fixed OpenDock Registry", async () => {
@@ -585,6 +650,7 @@ echo "${command} 1.2.3"
     expect(DockRef.parse("opendock/oma-codex@1").requested()).toBe("1");
     expect(DockRef.parse("opendock/oma-codex@v1").requested()).toBe("v1");
     expect(DockRef.parse("opendock/oma-codex@1.5").requested()).toBe("1.5");
+    expect(DockRef.parse("opendock/oma-codex@v1.5").requested()).toBe("v1.5");
     expect(DockRef.parse("opendock/oma-codex@1.5.2").requested()).toBe("1.5.2");
     expect(DockRef.parse("opendock/oma-codex@1.5.2").id()).toBe("opendock/oma-codex");
     expect(DockRef.parse("opendock/oma-codex@1.5.2").toString()).toBe("opendock/oma-codex@1.5.2");
@@ -595,6 +661,40 @@ echo "${command} 1.2.3"
     expect(() => DockRef.parse("opendock/oma-codex@1@2")).toThrow(
       "may contain only one version selector",
     );
+    expect(() => DockRef.parse("opendock/oma-codex@v")).toThrow(
+      "dock version selector must be latest",
+    );
+    expect(() => DockRef.parse("opendock/oma-codex@latest.1")).toThrow(
+      "dock version selector must be latest",
+    );
+    expect(() => DockRef.parse("opendock/oma-codex@1.5.2.3")).toThrow(
+      "dock version selector must be latest",
+    );
+  });
+
+  it("matches resolved dock versions against major minor exact and v-prefixed selectors", () => {
+    const accepted: Array<[string, string]> = [
+      ["1.5.2", "latest"],
+      ["1.5.2", "1"],
+      ["1.5.2", "v1"],
+      ["1.5.2", "1.5"],
+      ["v1.5.2", "v1.5"],
+      ["1.5.2", "1.5.2"],
+    ];
+    for (const [version, selector] of accepted) {
+      expect(versionSatisfiesSelector(version, selector)).toBe(true);
+    }
+
+    const rejected: Array<[string, string]> = [
+      ["2.0.0", "1"],
+      ["1.6.0", "1.5"],
+      ["1.5.3", "1.5.2"],
+      ["1.5", "1.5"],
+      ["1.5.x", "1.5"],
+    ];
+    for (const [version, selector] of rejected) {
+      expect(versionSatisfiesSelector(version, selector)).toBe(false);
+    }
   });
 
   it("stores auth tokens with private permissions", async () => {
@@ -769,6 +869,42 @@ echo "${command} 1.2.3"
     ).rejects.toThrow("resolved version 2.0.0 does not satisfy selector 1.5.2");
   });
 
+  it("keeps exact requested selectors pinned during updates", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeTestDock(docks, "test", "pinned", "1.0.0", "# Version One\n");
+
+    await install({
+      dockRef: DockRef.parse("test/pinned@1.0.0"),
+      projectDir: project,
+      runCommands: true,
+      operation: "install",
+      phase: "install",
+      resolve: localResolver(docks),
+    });
+
+    const lockedDock = lockDocks(readLock(project))[0];
+    if (lockedDock === undefined) {
+      throw new Error("expected pinned dock in lock file");
+    }
+    expect(lockedDock.requested).toBe("1.0.0");
+
+    writeTestDock(docks, "test", "pinned", "1.0.1", "# Version Two\n");
+
+    await expect(
+      install({
+        dockRef: DockRef.parse(`${lockedDock.id}@${lockedDock.requested}`),
+        projectDir: project,
+        runCommands: true,
+        operation: "update",
+        phase: "update",
+        resolve: localResolver(docks),
+      }),
+    ).rejects.toThrow("resolved version 1.0.1 does not satisfy selector 1.0.0");
+    expect(readFileSync(join(project, "README.md"), "utf8")).toContain("# Version One");
+    expect(lockDocks(readLock(project))[0]?.version).toBe("1.0.0");
+  });
+
   it("writes failure logs for rejected setup commands", async () => {
     const project = await tempDir();
     const docks = await tempDir();
@@ -817,6 +953,35 @@ async function tempDir(): Promise<string> {
 
 function localResolver(root: string): DockResolver {
   return (dockRef) => resolveLocalDock(root, dockRef);
+}
+
+async function createRemoteDockArchive(
+  root: string,
+  owner: string,
+  name: string,
+  version: string,
+): Promise<Buffer> {
+  const dockRoot = join(root, "remote-dock");
+  mkdirSync(join(dockRoot, "templates"), { recursive: true });
+  writeFileSync(
+    join(dockRoot, "dock.yml"),
+    `opendock: 1
+id: ${owner}/${name}
+version: ${version}
+files:
+  - from: templates/README.md
+    to: README.md
+    update: manual_review
+`,
+  );
+  writeFileSync(join(dockRoot, "templates", "README.md"), "# Remote Dock\n");
+  const archivePath = join(root, "dock.tgz");
+  await createTar({ cwd: dockRoot, file: archivePath, gzip: true }, ["."]);
+  return readFileSync(archivePath);
+}
+
+function sha256Bytes(bytes: Buffer): string {
+  return createHash("sha256").update(bytes).digest("hex");
 }
 
 async function withEnv<T>(env: NodeJS.ProcessEnv, callback: () => Promise<T> | T): Promise<T> {
