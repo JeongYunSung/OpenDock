@@ -61,6 +61,7 @@ export const lifecycleStepSchema = z.object({
   run: z.string().optional(),
   repair: z.string().optional(),
   version: z.string().optional(),
+  timeout_ms: z.number().int().positive().optional(),
   copy: copySpecSchema.optional(),
   messages: z.record(z.string(), z.string()).default({}),
 });

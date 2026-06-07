@@ -32,7 +32,7 @@ lifecycle:
 
     - id: install-oma-cli
       check: oma --version
-      version: ">=9.0.0"
+      version: ">=8.43.0"
       run: bun install --global oh-my-agent@latest
 
     - id: apply-oma-project
@@ -40,7 +40,7 @@ lifecycle:
       run: oma install
 
     - id: verify-oma
-      run: oma doctor
+      run: test -f .agents/oma-config.yaml
 
   update:
     - id: update-oma-cli
@@ -50,7 +50,7 @@ lifecycle:
       run: oma update -y --vendor codex
 
     - id: verify-oma
-      run: oma doctor
+      run: test -f .agents/oma-config.yaml
 
   doctor:
     - id: git
@@ -70,9 +70,9 @@ lifecycle:
       check: bun --version
 
     - id: oma
-      version: ">=9.0.0"
+      version: ">=8.43.0"
       check: oma --version
       repair: bun install --global oh-my-agent@latest
 
     - id: oma-project
-      check: oma doctor
+      check: test -f .agents/oma-config.yaml

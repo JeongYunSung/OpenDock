@@ -124,6 +124,61 @@ describe("opendock TypeScript CLI", () => {
     expect(existsSync(join(project, ".opendock-updated"))).toBe(true);
   });
 
+  it("streams setup command output and fails unmet post-run version checks", async () => {
+    const project = await tempDir();
+    const packs = await tempDir();
+    const data = await tempDir();
+    const bin = await tempDir();
+    writeVersionFailurePack(packs);
+    writeExecutable(
+      join(bin, "oma"),
+      `#!/bin/sh
+echo "oma 6.4.0"
+`,
+    );
+    writeExecutable(
+      join(bin, "bun"),
+      `#!/bin/sh
+echo "Resolving oh-my-agent"
+echo "Downloading oh-my-agent"
+`,
+    );
+
+    const install = runCli(
+      project,
+      {
+        OPENDOCK_PACKS_DIR: packs,
+        OPENDOCK_DATA_DIR: data,
+        PATH: `${bin}:${process.env.PATH ?? ""}`,
+      },
+      ["install", "test/version-fail"],
+    );
+    expect(install.status).not.toBe(0);
+    expect(install.stdout).toContain("→ install-oma-cli: bun install --global oh-my-agent@latest");
+    expect(install.stdout).toContain("Downloading oh-my-agent");
+    expect(install.stderr).toContain("6.4.0 does not satisfy >=9.0.0");
+  });
+
+  it("times out hanging doctor checks", async () => {
+    const project = await tempDir();
+    const packs = await tempDir();
+    const data = await tempDir();
+    writeTimeoutDoctorPack(packs);
+    const env = {
+      OPENDOCK_PACKS_DIR: packs,
+      OPENDOCK_DATA_DIR: data,
+      _VOLTA_TOOL_RECURSION: "1",
+    };
+
+    const install = runCli(project, env, ["install", "test/timeout"]);
+    expect(install.status).toBe(0);
+
+    const doctor = runCli(project, env, ["doctor"]);
+    expect(doctor.status).toBe(0);
+    expect(doctor.stdout).toContain("✓ volta-env");
+    expect(doctor.stdout).toContain("! slow (timed out after 50ms)");
+  });
+
   it("rejects invalid pack references", () => {
     const result = runCli(process.cwd(), {}, ["install", "oma-codex"]);
     expect(result.status).not.toBe(0);
@@ -292,4 +347,46 @@ lifecycle:
   writeFileSync(join(packRoot, "templates", "README.md"), "# Starter README\n");
   writeFileSync(join(packRoot, "templates", ".gitignore"), "node_modules/\n.DS_Store\n");
   writeFileSync(join(packRoot, "templates", "DESIGN.md"), "# Design\n");
+}
+
+function writeVersionFailurePack(root: string): void {
+  const packRoot = join(root, "test", "version-fail");
+  mkdirSync(packRoot, { recursive: true });
+  writeFileSync(
+    join(packRoot, "dock.yml"),
+    `opendock: 1
+id: test/version-fail
+version: 1.0.0
+lifecycle:
+  install:
+    - id: install-oma-cli
+      check: oma --version
+      version: ">=9.0.0"
+      run: bun install --global oh-my-agent@latest
+`,
+  );
+}
+
+function writeTimeoutDoctorPack(root: string): void {
+  const packRoot = join(root, "test", "timeout");
+  mkdirSync(packRoot, { recursive: true });
+  writeFileSync(
+    join(packRoot, "dock.yml"),
+    `opendock: 1
+id: test/timeout
+version: 1.0.0
+lifecycle:
+  doctor:
+    - id: volta-env
+      check: node -e "if (process.env._VOLTA_TOOL_RECURSION) process.exit(7)"
+    - id: slow
+      check: node -e "setTimeout(function(){}, 1000)"
+      timeout_ms: 50
+`,
+  );
+}
+
+function writeExecutable(path: string, content: string): void {
+  writeFileSync(path, content);
+  chmodSync(path, 0o755);
 }

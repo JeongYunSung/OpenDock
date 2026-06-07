@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { delimiter, dirname, sep } from "node:path";
 import type { LifecyclePhase, LifecycleStep, PackManifest } from "./pack.js";
 
 export interface StepReport {
@@ -7,6 +8,25 @@ export interface StepReport {
   status: "Ready" | "Ran" | "Failed";
   message?: string;
 }
+
+interface CommandResult {
+  success: boolean;
+  stdout: string;
+  stderr: string;
+}
+
+interface CommandOptions {
+  live?: boolean;
+  missingAsFailure?: boolean;
+  timeoutMs?: number;
+}
+
+interface CheckResult {
+  passed: boolean;
+  message?: string;
+}
+
+const defaultDoctorTimeoutMs = 30_000;
 
 const allowedCommands = new Set([
   "brew",
@@ -65,37 +85,65 @@ function runSetupSteps(steps: LifecycleStep[], projectDir: string): StepReport[]
       continue;
     }
 
-    const checkPassed = step.check ? stepCheckPassed(step, projectDir) : false;
-    if (checkPassed) {
+    const checkResult = step.check ? evaluateStepCheck(step, projectDir) : { passed: false };
+    if (checkResult.passed) {
+      console.log(`✓ ${step.id}: ready`);
       reports.push({ id: step.id, name: stepName(step), status: "Ready" });
       continue;
     }
 
     if (step.run) {
-      const result = runCommand(step.run, projectDir);
+      console.log(`→ ${step.id}: ${step.run}`);
+      const runOptions: CommandOptions = { live: true };
+      if (step.timeout_ms !== undefined) {
+        runOptions.timeoutMs = step.timeout_ms;
+      }
+      const result = runCommand(step.run, projectDir, runOptions);
       if (!result.success) {
         reports.push({ id: step.id, name: stepName(step), status: "Failed" });
         throw new Error(`step \`${step.id}\` exited with non-zero status`);
       }
+      if (step.check) {
+        const postRunCheck = evaluateStepCheck(step, projectDir);
+        if (!postRunCheck.passed) {
+          const report: StepReport = { id: step.id, name: stepName(step), status: "Failed" };
+          if (postRunCheck.message) {
+            report.message = postRunCheck.message;
+          }
+          reports.push(report);
+          const message = postRunCheck.message ? `: ${postRunCheck.message}` : "";
+          throw new Error(`step \`${step.id}\` did not satisfy its check after run${message}`);
+        }
+      }
+      console.log(`✓ ${step.id}: ran`);
       reports.push({ id: step.id, name: stepName(step), status: "Ran" });
     }
   }
   return reports;
 }
 
-function stepCheckPassed(step: LifecycleStep, projectDir: string): boolean {
+function evaluateStepCheck(step: LifecycleStep, projectDir: string): CheckResult {
   if (!step.check) {
-    return false;
+    return { passed: false };
   }
-  const result = runCommand(step.check, projectDir, { missingAsFailure: true });
+  const result = runCommand(step.check, projectDir, {
+    missingAsFailure: true,
+    ...(step.timeout_ms === undefined ? {} : { timeoutMs: step.timeout_ms }),
+  });
   if (!result.success) {
-    return false;
+    return { passed: false };
   }
   if (!step.version) {
-    return true;
+    return { passed: true };
   }
-  const actual = extractVersion(result.stdout);
-  return actual ? satisfiesVersion(actual, step.version) : false;
+  const actual = extractVersion(combinedOutput(result));
+  if (!actual) {
+    return { passed: false, message: `could not read version from ${step.check}` };
+  }
+  if (!satisfiesVersion(actual, step.version)) {
+    return { passed: false, message: `${actual} does not satisfy ${step.version}` };
+  }
+  return { passed: true };
 }
 
 function runDoctorSteps(steps: LifecycleStep[], projectDir: string): StepReport[] {
@@ -107,14 +155,22 @@ function runDoctorSteps(steps: LifecycleStep[], projectDir: string): StepReport[
       continue;
     }
 
-    const result = runCommand(command, projectDir, { missingAsFailure: true });
+    const result = runCommand(command, projectDir, {
+      missingAsFailure: true,
+      timeoutMs: step.timeout_ms ?? defaultDoctorTimeoutMs,
+    });
     if (!result.success) {
-      reports.push({ id: step.id, name: stepName(step), status: "Failed" });
+      const report: StepReport = { id: step.id, name: stepName(step), status: "Failed" };
+      const message = failureMessage(result);
+      if (message) {
+        report.message = message;
+      }
+      reports.push(report);
       continue;
     }
 
-    if (step.version && result.stdout) {
-      const actual = extractVersion(result.stdout);
+    if (step.version) {
+      const actual = extractVersion(combinedOutput(result));
       if (!actual || !satisfiesVersion(actual, step.version)) {
         reports.push({
           id: step.id,
@@ -136,8 +192,8 @@ function runDoctorSteps(steps: LifecycleStep[], projectDir: string): StepReport[
 export function runCommand(
   command: string,
   cwd: string,
-  options: { missingAsFailure?: boolean } = {},
-): { success: boolean; stdout: string; stderr: string } {
+  options: CommandOptions = {},
+): CommandResult {
   rejectShellMetacharacters(command);
   const args = splitCommand(command);
   const [program, ...rest] = args;
@@ -149,11 +205,22 @@ export function runCommand(
   const output = spawnSync(program, rest, {
     cwd,
     encoding: "utf8",
-    stdio: "pipe",
+    env: commandEnvironment(program),
+    killSignal: "SIGTERM",
+    stdio: options.live ? "inherit" : "pipe",
+    timeout: options.timeoutMs,
   });
 
   if (output.error) {
-    if (options.missingAsFailure && (output.error as NodeJS.ErrnoException).code === "ENOENT") {
+    const code = (output.error as NodeJS.ErrnoException).code;
+    if (code === "ETIMEDOUT") {
+      return {
+        success: false,
+        stdout: output.stdout ?? "",
+        stderr: `timed out after ${options.timeoutMs}ms`,
+      };
+    }
+    if (options.missingAsFailure && code === "ENOENT") {
       return { success: false, stdout: "", stderr: output.error.message };
     }
     throw output.error;
@@ -164,6 +231,45 @@ export function runCommand(
     stdout: output.stdout ?? "",
     stderr: output.stderr ?? "",
   };
+}
+
+function combinedOutput(output: { stdout: string; stderr: string }): string {
+  return `${output.stdout}\n${output.stderr}`;
+}
+
+function failureMessage(output: CommandResult): string | undefined {
+  const text = combinedOutput(output).trim();
+  if (text === "") {
+    return undefined;
+  }
+  return text.length > 240 ? `${text.slice(0, 237)}...` : text;
+}
+
+function commandEnvironment(program: string): NodeJS.ProcessEnv {
+  const env = { ...process.env };
+  delete env._VOLTA_TOOL_RECURSION;
+  if (program === "oma") {
+    env.OMA_SKIP_VERSION_CHECK = env.OMA_SKIP_VERSION_CHECK ?? "1";
+    env.PATH = withoutVoltaNodeImageBin(env.PATH);
+  }
+  return env;
+}
+
+function withoutVoltaNodeImageBin(pathValue: string | undefined): string | undefined {
+  if (!pathValue) {
+    return pathValue;
+  }
+
+  const nodeBin = dirname(process.execPath);
+  const voltaNodeImageMarker = `${sep}.volta${sep}tools${sep}image${sep}node${sep}`;
+  if (!nodeBin.includes(voltaNodeImageMarker)) {
+    return pathValue;
+  }
+
+  return pathValue
+    .split(delimiter)
+    .filter((entry) => entry !== nodeBin)
+    .join(delimiter);
 }
 
 function rejectShellMetacharacters(command: string): void {

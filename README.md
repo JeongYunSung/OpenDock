@@ -140,21 +140,34 @@ lifecycle:
 
     - id: install-oma-cli
       check: oma --version
-      version: ">=9.0.0"
+      version: ">=8.43.0"
       run: bun install --global oh-my-agent@latest
 
     - id: apply-oma-project
       check: test -f .agents/oma-config.yaml
       run: oma install
 
+    - id: verify-oma
+      run: test -f .agents/oma-config.yaml
+
   update:
+    - id: update-oma-cli
+      run: bun install --global oh-my-agent@latest
+
     - id: update-oma-project
       run: oma update -y --vendor codex
 
+    - id: verify-oma
+      run: test -f .agents/oma-config.yaml
+
   doctor:
     - id: oma
-      version: ">=9.0.0"
+      version: ">=8.43.0"
       check: oma --version
+
+    - id: oma-project
+      check: test -f .agents/oma-config.yaml
+      timeout_ms: 5000
 ```
 
 Template files live under `templates/` and are applied relative to the project
@@ -172,6 +185,10 @@ the trust boundary explicit:
 - Lifecycle commands reject shell operators such as pipes, redirects, `&&`,
   `||`, and command substitution.
 - Only allowlisted command families can run during lifecycle steps.
+- `install` and `update` stream allowed command output live, then re-run checks
+  to confirm the requested version or state was actually reached.
+- `doctor` lifecycle checks have a default timeout, and individual steps may set
+  `timeout_ms`.
 - Existing files follow the pack's declared update policy.
 - `.gitignore` receives unique appended lines, not repeated blocks.
 - Detailed logs are stored in the OpenDock data directory, not in project source.
