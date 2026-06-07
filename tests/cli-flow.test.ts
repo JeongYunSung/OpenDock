@@ -6,11 +6,11 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { bootstrapMac, HOMEBREW_INSTALL_COMMAND } from "../src/bootstrap.js";
-import { DockHubClient } from "../src/dockhub.js";
-import { install, type PackResolver } from "../src/installer.js";
-import { PackRef, packManifestSchema } from "../src/pack.js";
-import { readLock } from "../src/project.js";
-import { resolveLocalPack, resolvePack } from "../src/resolver.js";
+import { DockRef, dockManifestSchema } from "../src/dock.js";
+import { type DockResolver, install } from "../src/installer.js";
+import { lockDocks, readLock } from "../src/project.js";
+import { OpenDockRegistryClient } from "../src/registry.js";
+import { resolveDock, resolveLocalDock } from "../src/resolver.js";
 import { runLifecycle } from "../src/runner.js";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -35,32 +35,32 @@ afterAll(async () => {
 describe("opendock TypeScript CLI", () => {
   it("installs idempotently and preserves existing files", async () => {
     const project = await tempDir();
-    const packs = await tempDir();
-    writeTestPack(packs, "test", "harness", "1.0.0", "# Starter README\n");
+    const docks = await tempDir();
+    writeTestDock(docks, "test", "harness", "1.0.0", "# Starter README\n");
     writeFileSync(join(project, "README.md"), "# User README\n");
     writeFileSync(join(project, ".gitignore"), "node_modules/\n");
 
-    const resolver = localResolver(packs);
+    const resolver = localResolver(docks);
     const first = await install({
-      packRef: PackRef.parse("test/harness"),
+      dockRef: DockRef.parse("test/harness"),
       projectDir: project,
       runCommands: true,
       operation: "install",
       phase: "install",
       resolve: resolver,
     });
-    expect(first.packId).toBe("test/harness");
+    expect(first.dockId).toBe("test/harness");
     expect(first.version).toBe("1.0.0");
 
     const second = await install({
-      packRef: PackRef.parse("test/harness"),
+      dockRef: DockRef.parse("test/harness"),
       projectDir: project,
       runCommands: true,
       operation: "install",
       phase: "install",
       resolve: resolver,
     });
-    expect(second.packId).toBe("test/harness");
+    expect(second.dockId).toBe("test/harness");
 
     const readme = readFileSync(join(project, "README.md"), "utf8");
     expect(readme).toContain("# User README");
@@ -72,23 +72,29 @@ describe("opendock TypeScript CLI", () => {
 
     expect(existsSync(join(project, ".opendock", "project.yml"))).toBe(true);
     expect(existsSync(join(project, ".opendock", "dock.lock.yml"))).toBe(true);
+    const projectState = readFileSync(join(project, ".opendock", "project.yml"), "utf8");
+    expect(projectState).toContain("applied_docks:");
+    expect(projectState).not.toContain("applied_packs:");
+    const lockState = readFileSync(join(project, ".opendock", "dock.lock.yml"), "utf8");
+    expect(lockState).toContain("docks:");
+    expect(lockState).not.toContain("packs:");
     expect(existsSync(join(project, "AGENTS.md"))).toBe(true);
     expect(existsSync(join(project, "DESIGN.md"))).toBe(true);
   });
 
   it("reports log output and fixed registry version", async () => {
     const project = await tempDir();
-    const packs = await tempDir();
+    const docks = await tempDir();
     const data = await tempDir();
-    writeTestPack(packs, "test", "harness", "1.0.0", "# Starter README\n");
+    writeTestDock(docks, "test", "harness", "1.0.0", "# Starter README\n");
     await withEnv({ OPENDOCK_DATA_DIR: data }, async () => {
       await install({
-        packRef: PackRef.parse("test/harness"),
+        dockRef: DockRef.parse("test/harness"),
         projectDir: project,
         runCommands: true,
         operation: "install",
         phase: "install",
-        resolve: localResolver(packs),
+        resolve: localResolver(docks),
       });
     });
 
@@ -98,12 +104,12 @@ describe("opendock TypeScript CLI", () => {
 
     const version = runCli(project, {}, ["version"]);
     expect(version.status).toBe(0);
-    expect(version.stdout).toContain("registry https://opencode.app");
+    expect(version.stdout).toContain("registry https://opendock.app");
   });
 
-  it("ignores pack source and registry environment overrides", async () => {
-    const packs = await tempDir();
-    writeTestPack(packs, "test", "harness", "9.9.9", "# Malicious Local Pack\n");
+  it("ignores dock source and registry environment overrides", async () => {
+    const docks = await tempDir();
+    writeTestDock(docks, "test", "harness", "9.9.9", "# Malicious Local Dock\n");
     const urls: string[] = [];
     const originalFetch = globalThis.fetch;
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
@@ -114,12 +120,12 @@ describe("opendock TypeScript CLI", () => {
     try {
       await withEnv(
         {
-          OPENDOCK_PACKS_DIR: packs,
+          OPENDOCK_DOCKS_DIR: docks,
           OPENDOCK_REGISTRY_URL: "http://127.0.0.1:9",
         },
         async () => {
-          await expect(resolvePack(PackRef.parse("test/harness"))).rejects.toThrow(
-            "https://opencode.app/api/v1/packs/test/harness/versions/latest",
+          await expect(resolveDock(DockRef.parse("test/harness"))).rejects.toThrow(
+            "https://opendock.app/api/v1/docks/test/harness/versions/latest",
           );
         },
       );
@@ -127,14 +133,18 @@ describe("opendock TypeScript CLI", () => {
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://opencode.app/api/v1/packs/test/harness/versions/latest"]);
+    expect(urls).toEqual(["https://opendock.app/api/v1/docks/test/harness/versions/latest"]);
   });
 
-  it("submits packs only to the fixed OpenCode registry", async () => {
+  it("submits docks only to the fixed OpenDock Registry", async () => {
     const urls: string[] = [];
+    const bodies: string[] = [];
     const originalFetch = globalThis.fetch;
-    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
       urls.push(String(input));
+      if (init?.body) {
+        bodies.push(String(init.body));
+      }
       return new Response(JSON.stringify({ id: "submission-1", status: "pending" }), {
         headers: { "content-type": "application/json" },
         status: 200,
@@ -143,8 +153,8 @@ describe("opendock TypeScript CLI", () => {
 
     try {
       await withEnv({ OPENDOCK_REGISTRY_URL: "http://127.0.0.1:9" }, async () => {
-        const response = await new DockHubClient().submitPack(
-          { pack_name: "oma-codex", manifest: "opendock: 1" },
+        const response = await new OpenDockRegistryClient().submitDock(
+          { dock_name: "oma-codex", manifest: "opendock: 1" },
           "token",
         );
         expect(response.status).toBe("pending");
@@ -153,27 +163,28 @@ describe("opendock TypeScript CLI", () => {
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://opencode.app/api/v1/packs/submissions"]);
+    expect(urls).toEqual(["https://opendock.app/api/v1/docks/submissions"]);
+    expect(bodies).toEqual([JSON.stringify({ dock_name: "oma-codex", manifest: "opendock: 1" })]);
   });
 
   it("supports opendock v1 files lifecycle and doctor checks", async () => {
     const project = await tempDir();
-    const packs = await tempDir();
-    writeModernPack(packs);
+    const docks = await tempDir();
+    writeModernDock(docks);
     writeFileSync(join(project, "README.md"), "# User README\n");
     writeFileSync(join(project, "DESIGN.md"), "# User Design\n");
     writeFileSync(join(project, ".gitignore"), "node_modules/\n");
-    const resolver = localResolver(packs);
+    const resolver = localResolver(docks);
 
     const installReport = await install({
-      packRef: PackRef.parse("test/modern"),
+      dockRef: DockRef.parse("test/modern"),
       projectDir: project,
       runCommands: true,
       operation: "install",
       phase: "install",
       resolve: resolver,
     });
-    expect(installReport.packId).toBe("test/modern");
+    expect(installReport.dockId).toBe("test/modern");
     expect(existsSync(join(project, ".opendock-fixture"))).toBe(true);
 
     const readme = readFileSync(join(project, "README.md"), "utf8");
@@ -186,25 +197,25 @@ describe("opendock TypeScript CLI", () => {
     expect(gitignore).toContain(".DS_Store");
 
     const reinstall = await install({
-      packRef: PackRef.parse("test/modern"),
+      dockRef: DockRef.parse("test/modern"),
       projectDir: project,
       runCommands: true,
       operation: "install",
       phase: "install",
       resolve: resolver,
     });
-    expect(reinstall.packId).toBe("test/modern");
+    expect(reinstall.dockId).toBe("test/modern");
     const reinstalledDesign = readFileSync(join(project, "DESIGN.md"), "utf8");
     expect(reinstalledDesign).toContain("# User Design");
     expect(reinstalledDesign.match(/OPENDOCK:START test\/modern:DESIGN\.md/g)).toHaveLength(1);
 
-    const resolved = await resolver(PackRef.parse("test/modern"));
+    const resolved = await resolver(DockRef.parse("test/modern"));
     const doctor = await runLifecycle(resolved.manifest, "doctor", project);
     expect(doctor.find((report) => report.id === "node")?.status).toBe("Ready");
     expect(doctor.find((report) => report.id === "fixture")?.status).toBe("Ready");
 
     await install({
-      packRef: PackRef.parse("test/modern"),
+      dockRef: DockRef.parse("test/modern"),
       projectDir: project,
       runCommands: true,
       operation: "update",
@@ -224,7 +235,7 @@ describe("opendock TypeScript CLI", () => {
       "opendock/oh-my-openagent",
     ];
     for (const ref of refs) {
-      const resolved = resolveLocalPack(join(repoRoot, "examples"), PackRef.parse(ref));
+      const resolved = resolveLocalDock(join(repoRoot, "examples"), DockRef.parse(ref));
       expect(resolved.manifest.id).toBe(ref);
     }
   });
@@ -246,11 +257,11 @@ describe("opendock TypeScript CLI", () => {
       await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
         for (const ref of refs) {
           const project = await tempDir();
-          const packRef = PackRef.parse(ref);
+          const dockRef = DockRef.parse(ref);
           const resolver = localResolver(examplesRoot);
 
           const installReport = await install({
-            packRef,
+            dockRef,
             projectDir: project,
             runCommands: true,
             operation: "install",
@@ -258,10 +269,10 @@ describe("opendock TypeScript CLI", () => {
             platform,
             resolve: resolver,
           });
-          expect(installReport.packId).toBe(ref);
+          expect(installReport.dockId).toBe(ref);
 
           const updateReport = await install({
-            packRef,
+            dockRef,
             projectDir: project,
             runCommands: true,
             operation: "update",
@@ -269,9 +280,9 @@ describe("opendock TypeScript CLI", () => {
             platform,
             resolve: resolver,
           });
-          expect(updateReport.packId).toBe(ref);
+          expect(updateReport.dockId).toBe(ref);
 
-          const resolved = resolveLocalPack(examplesRoot, packRef);
+          const resolved = resolveLocalDock(examplesRoot, dockRef);
           const doctor = await runLifecycle(resolved.manifest, "doctor", project, { platform });
           expect(doctor.map((report) => report.status)).toEqual(doctor.map(() => "Ready" as const));
         }
@@ -281,17 +292,17 @@ describe("opendock TypeScript CLI", () => {
 
   it("merges platform-specific lifecycle steps in declared order and records platform", async () => {
     const project = await tempDir();
-    const packs = await tempDir();
-    writePlatformPack(packs);
+    const docks = await tempDir();
+    writePlatformDock(docks);
 
     const installReport = await install({
-      packRef: PackRef.parse("test/platforms"),
+      dockRef: DockRef.parse("test/platforms"),
       projectDir: project,
       runCommands: true,
       operation: "install",
       phase: "install",
       platform: "windows",
-      resolve: localResolver(packs),
+      resolve: localResolver(docks),
     });
 
     expect(installReport.platform).toBe("windows");
@@ -302,13 +313,13 @@ describe("opendock TypeScript CLI", () => {
     ]);
     expect(existsSync(join(project, ".windows-tool"))).toBe(true);
     expect(existsSync(join(project, ".mac-tool"))).toBe(false);
-    const lockedPlatform = readLock(project).packs[0]?.platform;
+    const lockedPlatform = lockDocks(readLock(project))[0]?.platform;
     if (lockedPlatform === undefined) {
       throw new Error("expected platform in lock file");
     }
     expect(lockedPlatform).toBe("windows");
 
-    const resolved = resolveLocalPack(packs, PackRef.parse("test/platforms"));
+    const resolved = resolveLocalDock(docks, DockRef.parse("test/platforms"));
     const doctor = await runLifecycle(resolved.manifest, "doctor", project, {
       platform: lockedPlatform,
     });
@@ -317,12 +328,12 @@ describe("opendock TypeScript CLI", () => {
 
   it("rejects unsupported platforms and platform-specific package managers", async () => {
     const project = await tempDir();
-    const packs = await tempDir();
-    const packRoot = join(packs, "test", "mac-only");
-    mkdirSync(join(packRoot, "templates"), { recursive: true });
-    writeFileSync(join(packRoot, "templates", "README.md"), "# Mac-only pack\n");
+    const docks = await tempDir();
+    const dockRoot = join(docks, "test", "mac-only");
+    mkdirSync(join(dockRoot, "templates"), { recursive: true });
+    writeFileSync(join(dockRoot, "templates", "README.md"), "# Mac-only dock\n");
     writeFileSync(
-      join(packRoot, "dock.yml"),
+      join(dockRoot, "dock.yml"),
       `opendock: 1
 id: test/mac-only
 version: 1.0.0
@@ -341,19 +352,19 @@ lifecycle:
 
     await expect(
       install({
-        packRef: PackRef.parse("test/mac-only"),
+        dockRef: DockRef.parse("test/mac-only"),
         projectDir: project,
         runCommands: true,
         operation: "install",
         phase: "install",
         platform: "windows",
-        resolve: localResolver(packs),
+        resolve: localResolver(docks),
       }),
     ).rejects.toThrow("does not support platform `windows`");
     expect(existsSync(join(project, "README.md"))).toBe(false);
     expect(existsSync(join(project, ".opendock", "dock.lock.yml"))).toBe(false);
 
-    const macOnly = packManifestSchema.parse({
+    const macOnly = dockManifestSchema.parse({
       opendock: 1,
       id: "test/mac-only",
       lifecycle: {
@@ -373,7 +384,7 @@ lifecycle:
       runLifecycle(macOnly, "install", project, { platform: "windows" }),
     ).rejects.toThrow("does not support platform `windows`");
 
-    const unsafeWindows = packManifestSchema.parse({
+    const unsafeWindows = dockManifestSchema.parse({
       opendock: 1,
       id: "test/unsafe-windows",
       lifecycle: {
@@ -400,9 +411,9 @@ lifecycle:
 
   it("fails unmet post-run version checks", async () => {
     const project = await tempDir();
-    const packs = await tempDir();
+    const docks = await tempDir();
     const bin = await tempDir();
-    writeVersionFailurePack(packs);
+    writeVersionFailureDock(docks);
     writeExecutable(
       join(bin, "oma"),
       `#!/bin/sh
@@ -420,12 +431,12 @@ echo "Downloading oh-my-agent"
     await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
       await expect(
         install({
-          packRef: PackRef.parse("test/version-fail"),
+          dockRef: DockRef.parse("test/version-fail"),
           projectDir: project,
           runCommands: true,
           operation: "install",
           phase: "install",
-          resolve: localResolver(packs),
+          resolve: localResolver(docks),
         }),
       ).rejects.toThrow("6.4.0 does not satisfy >=9.0.0");
     });
@@ -433,13 +444,13 @@ echo "Downloading oh-my-agent"
 
   it("supports user and scripted interactive lifecycle steps", async () => {
     const project = await tempDir();
-    const packs = await tempDir();
-    writeInteractivePack(packs);
-    const resolver = localResolver(packs);
+    const docks = await tempDir();
+    writeInteractiveDock(docks);
+    const resolver = localResolver(docks);
 
     await expect(
       install({
-        packRef: PackRef.parse("test/interactive-user"),
+        dockRef: DockRef.parse("test/interactive-user"),
         projectDir: project,
         runCommands: true,
         operation: "install",
@@ -472,32 +483,32 @@ if (!result.success) {
     expect(readFileSync(join(project, "user-input.txt"), "utf8")).toMatch(/^75(?:0a|0d)$/);
 
     const scriptedInstall = await install({
-      packRef: PackRef.parse("test/interactive-scripted"),
+      dockRef: DockRef.parse("test/interactive-scripted"),
       projectDir: project,
       runCommands: true,
       operation: "install",
       phase: "install",
       resolve: resolver,
     });
-    expect(scriptedInstall.packId).toBe("test/interactive-scripted");
+    expect(scriptedInstall.dockId).toBe("test/interactive-scripted");
     expect(readFileSync(join(project, "scripted-input.txt"), "utf8")).toBe("090a");
   });
 
   it("times out hanging doctor checks", async () => {
     const project = await tempDir();
-    const packs = await tempDir();
-    writeTimeoutDoctorPack(packs);
+    const docks = await tempDir();
+    writeTimeoutDoctorDock(docks);
 
     await install({
-      packRef: PackRef.parse("test/timeout"),
+      dockRef: DockRef.parse("test/timeout"),
       projectDir: project,
       runCommands: true,
       operation: "install",
       phase: "install",
-      resolve: localResolver(packs),
+      resolve: localResolver(docks),
     });
 
-    const resolved = resolveLocalPack(packs, PackRef.parse("test/timeout"));
+    const resolved = resolveLocalDock(docks, DockRef.parse("test/timeout"));
     const doctor = await withEnv({ _VOLTA_TOOL_RECURSION: "1" }, () =>
       runLifecycle(resolved.manifest, "doctor", project),
     );
@@ -517,7 +528,7 @@ echo "${command} 1.2.3"
       );
     }
 
-    const manifest = packManifestSchema.parse({
+    const manifest = dockManifestSchema.parse({
       opendock: 1,
       id: "test/ai-tools",
       lifecycle: {
@@ -543,7 +554,7 @@ echo "${command} 1.2.3"
     ]);
   });
 
-  it("rejects invalid pack references", () => {
+  it("rejects invalid dock references", () => {
     const result = runCli(process.cwd(), {}, ["install", "oma-codex"]);
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("owner/name");
@@ -558,7 +569,7 @@ echo "${command} 1.2.3"
       "test-token",
     ]);
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain("Logged in to DockHub.");
+    expect(result.stdout).toContain("Logged in to OpenDock Registry.");
     expect(readFileSync(join(data, "auth-token"), "utf8")).toBe("test-token");
     if (process.platform !== "win32") {
       expect(statSync(join(data, "auth-token")).mode & 0o777).toBe(0o600);
@@ -648,29 +659,29 @@ echo "${command} 1.2.3"
     expect(result.stderr).toContain("not logged in");
   });
 
-  it("reapplies newer pack versions", async () => {
+  it("reapplies newer dock versions", async () => {
     const project = await tempDir();
-    const packs = await tempDir();
-    writeTestPack(packs, "test", "demo", "1.0.0", "# Version One\n");
+    const docks = await tempDir();
+    writeTestDock(docks, "test", "demo", "1.0.0", "# Version One\n");
 
     await install({
-      packRef: PackRef.parse("test/demo"),
+      dockRef: DockRef.parse("test/demo"),
       projectDir: project,
       runCommands: true,
       operation: "install",
       phase: "install",
-      resolve: localResolver(packs),
+      resolve: localResolver(docks),
     });
 
-    writeTestPack(packs, "test", "demo", "2.0.0", "# Version Two\n");
+    writeTestDock(docks, "test", "demo", "2.0.0", "# Version Two\n");
 
     const update = await install({
-      packRef: PackRef.parse("test/demo"),
+      dockRef: DockRef.parse("test/demo"),
       projectDir: project,
       runCommands: true,
       operation: "update",
       phase: "update",
-      resolve: localResolver(packs),
+      resolve: localResolver(docks),
     });
     expect(update.version).toBe("2.0.0");
 
@@ -684,16 +695,16 @@ echo "${command} 1.2.3"
 
   it("writes failure logs for rejected setup commands", async () => {
     const project = await tempDir();
-    const packs = await tempDir();
+    const docks = await tempDir();
     const data = await tempDir();
-    const packRoot = join(packs, "test", "bad");
-    mkdirSync(packRoot, { recursive: true });
+    const dockRoot = join(docks, "test", "bad");
+    mkdirSync(dockRoot, { recursive: true });
     writeFileSync(
-      join(packRoot, "dock.yml"),
+      join(dockRoot, "dock.yml"),
       `schema: opendock/v1
 kind: starterpack
 id: test/bad
-name: Bad Pack
+name: Bad Dock
 version: 1.0.0
 setup:
   - id: dangerous
@@ -705,12 +716,12 @@ setup:
     await withEnv({ OPENDOCK_DATA_DIR: data }, async () => {
       await expect(
         install({
-          packRef: PackRef.parse("test/bad"),
+          dockRef: DockRef.parse("test/bad"),
           projectDir: project,
           runCommands: true,
           operation: "install",
           phase: "install",
-          resolve: localResolver(packs),
+          resolve: localResolver(docks),
         }),
       ).rejects.toThrow("not allowed");
     });
@@ -728,8 +739,8 @@ async function tempDir(): Promise<string> {
   return path;
 }
 
-function localResolver(root: string): PackResolver {
-  return (packRef) => resolveLocalPack(root, packRef);
+function localResolver(root: string): DockResolver {
+  return (dockRef) => resolveLocalDock(root, dockRef);
 }
 
 async function withEnv<T>(env: NodeJS.ProcessEnv, callback: () => Promise<T> | T): Promise<T> {
@@ -799,35 +810,35 @@ function tclWord(value: string): string {
   return `{${value.replace(/\\/g, "\\\\").replace(/}/g, "\\}")}}`;
 }
 
-function writeTestPack(
+function writeTestDock(
   root: string,
   owner: string,
   name: string,
   version: string,
   readme: string,
 ): void {
-  const packRoot = join(root, owner, name);
-  mkdirSync(join(packRoot, "templates"), { recursive: true });
+  const dockRoot = join(root, owner, name);
+  mkdirSync(join(dockRoot, "templates"), { recursive: true });
   writeFileSync(
-    join(packRoot, "dock.yml"),
+    join(dockRoot, "dock.yml"),
     `schema: opendock/v1
 kind: starterpack
 id: ${owner}/${name}
-name: Demo Pack
+name: Demo Dock
 version: ${version}
 `,
   );
-  writeFileSync(join(packRoot, "templates", "README.md"), readme);
-  writeFileSync(join(packRoot, "templates", ".gitignore"), "node_modules/\n.DS_Store\n");
-  writeFileSync(join(packRoot, "templates", "AGENTS.md"), "# Agents\n");
-  writeFileSync(join(packRoot, "templates", "DESIGN.md"), "# Design\n");
+  writeFileSync(join(dockRoot, "templates", "README.md"), readme);
+  writeFileSync(join(dockRoot, "templates", ".gitignore"), "node_modules/\n.DS_Store\n");
+  writeFileSync(join(dockRoot, "templates", "AGENTS.md"), "# Agents\n");
+  writeFileSync(join(dockRoot, "templates", "DESIGN.md"), "# Design\n");
 }
 
-function writeModernPack(root: string): void {
-  const packRoot = join(root, "test", "modern");
-  mkdirSync(join(packRoot, "templates"), { recursive: true });
+function writeModernDock(root: string): void {
+  const dockRoot = join(root, "test", "modern");
+  mkdirSync(join(dockRoot, "templates"), { recursive: true });
   writeFileSync(
-    join(packRoot, "dock.yml"),
+    join(dockRoot, "dock.yml"),
     `opendock: 1
 id: test/modern
 version: 1.0.0
@@ -857,16 +868,16 @@ lifecycle:
       check: test -d .opendock-fixture
 `,
   );
-  writeFileSync(join(packRoot, "templates", "README.md"), "# Starter README\n");
-  writeFileSync(join(packRoot, "templates", ".gitignore"), "node_modules/\n.DS_Store\n");
-  writeFileSync(join(packRoot, "templates", "DESIGN.md"), "# Design\n");
+  writeFileSync(join(dockRoot, "templates", "README.md"), "# Starter README\n");
+  writeFileSync(join(dockRoot, "templates", ".gitignore"), "node_modules/\n.DS_Store\n");
+  writeFileSync(join(dockRoot, "templates", "DESIGN.md"), "# Design\n");
 }
 
-function writeVersionFailurePack(root: string): void {
-  const packRoot = join(root, "test", "version-fail");
-  mkdirSync(packRoot, { recursive: true });
+function writeVersionFailureDock(root: string): void {
+  const dockRoot = join(root, "test", "version-fail");
+  mkdirSync(dockRoot, { recursive: true });
   writeFileSync(
-    join(packRoot, "dock.yml"),
+    join(dockRoot, "dock.yml"),
     `opendock: 1
 id: test/version-fail
 version: 1.0.0
@@ -880,11 +891,11 @@ lifecycle:
   );
 }
 
-function writePlatformPack(root: string): void {
-  const packRoot = join(root, "test", "platforms");
-  mkdirSync(packRoot, { recursive: true });
+function writePlatformDock(root: string): void {
+  const dockRoot = join(root, "test", "platforms");
+  mkdirSync(dockRoot, { recursive: true });
   writeFileSync(
-    join(packRoot, "dock.yml"),
+    join(dockRoot, "dock.yml"),
     `opendock: 1
 id: test/platforms
 version: 1.0.0
@@ -916,11 +927,11 @@ lifecycle:
   );
 }
 
-function writeTimeoutDoctorPack(root: string): void {
-  const packRoot = join(root, "test", "timeout");
-  mkdirSync(packRoot, { recursive: true });
+function writeTimeoutDoctorDock(root: string): void {
+  const dockRoot = join(root, "test", "timeout");
+  mkdirSync(dockRoot, { recursive: true });
   writeFileSync(
-    join(packRoot, "dock.yml"),
+    join(dockRoot, "dock.yml"),
     `opendock: 1
 id: test/timeout
 version: 1.0.0
@@ -935,9 +946,9 @@ lifecycle:
   );
 }
 
-function writeInteractivePack(root: string): void {
-  writeInteractivePackVariant(root, "interactive-user", "user", "");
-  writeInteractivePackVariant(
+function writeInteractiveDock(root: string): void {
+  writeInteractiveDockVariant(root, "interactive-user", "user", "");
+  writeInteractiveDockVariant(
     root,
     "interactive-scripted",
     `interactive:
@@ -949,21 +960,21 @@ function writeInteractivePack(root: string): void {
   );
 }
 
-function writeInteractivePackVariant(
+function writeInteractiveDockVariant(
   root: string,
   name: string,
   interactive: string,
   extraRun: string,
 ): void {
-  const packRoot = join(root, "test", name);
-  mkdirSync(join(packRoot, "files"), { recursive: true });
+  const dockRoot = join(root, "test", name);
+  mkdirSync(join(dockRoot, "files"), { recursive: true });
   const scriptName =
     name === "interactive-user" ? "user-interactive.js" : "scripted-interactive.js";
   const outputName = name === "interactive-user" ? "user-input.txt" : "scripted-input.txt";
   const label = name === "interactive-user" ? "USER_TTY" : "SCRIPTED_TTY";
   const interactiveYaml = interactive.includes("\n") ? interactive : `interactive: ${interactive}`;
   writeFileSync(
-    join(packRoot, "dock.yml"),
+    join(dockRoot, "dock.yml"),
     `opendock: 1
 id: test/${name}
 version: 1.0.0
@@ -980,7 +991,7 @@ lifecycle:
 ${extraRun}`,
   );
   writeFileSync(
-    join(packRoot, "files", scriptName),
+    join(dockRoot, "files", scriptName),
     `const fs = require("node:fs");
 console.log(process.stdin.isTTY ? "${label}" : "NO_TTY");
 process.stdin.setRawMode(true);

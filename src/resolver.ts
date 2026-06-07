@@ -13,72 +13,72 @@ import { tmpdir } from "node:os";
 import { join, relative, resolve, sep } from "node:path";
 import { x as extractTar } from "tar";
 import YAML from "yaml";
-import { DockHubClient } from "./dockhub.js";
 import {
-  type PackManifest,
-  type PackRef,
-  packManifestSchema,
+  type DockManifest,
+  type DockRef,
+  dockManifestSchema,
   validateManifestFor,
-} from "./pack.js";
+} from "./dock.js";
 import { cacheRoot } from "./paths.js";
+import { OpenDockRegistryClient } from "./registry.js";
 
-export interface ResolvedPack {
-  manifest: PackManifest;
+export interface ResolvedDock {
+  manifest: DockManifest;
   root: string;
   checksum: string;
   signature: string;
 }
 
-export async function resolvePack(packRef: PackRef): Promise<ResolvedPack> {
-  return resolveRemotePack(packRef);
+export async function resolveDock(dockRef: DockRef): Promise<ResolvedDock> {
+  return resolveRemoteDock(dockRef);
 }
 
-export function resolveLocalPack(packsRoot: string, packRef: PackRef): ResolvedPack {
-  const packRoot = findLocalPackRoot(packsRoot, packRef);
-  if (!packRoot) {
-    throw new Error(`pack \`${packRef}\` was not found in ${packsRoot}`);
+export function resolveLocalDock(docksRoot: string, dockRef: DockRef): ResolvedDock {
+  const dockRoot = findLocalDockRoot(docksRoot, dockRef);
+  if (!dockRoot) {
+    throw new Error(`dock \`${dockRef}\` was not found in ${docksRoot}`);
   }
 
-  const manifestPath = join(packRoot, "dock.yml");
+  const manifestPath = join(dockRoot, "dock.yml");
   const manifest = parseManifest(manifestPath);
-  validateManifestFor(manifest, packRef);
+  validateManifestFor(manifest, dockRef);
 
   return {
     manifest,
-    root: packRoot,
-    checksum: checksumDir(packRoot),
+    root: dockRoot,
+    checksum: checksumDir(dockRoot),
     signature: "local-dev",
   };
 }
 
-async function resolveRemotePack(packRef: PackRef): Promise<ResolvedPack> {
-  const client = new DockHubClient();
-  const metadata = await client.latestPackVersion(packRef.owner, packRef.name);
+async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
+  const client = new OpenDockRegistryClient();
+  const metadata = await client.latestDockVersion(dockRef.owner, dockRef.name);
 
-  if (metadata.id !== packRef.id()) {
-    throw new Error(`registry returned pack id \`${metadata.id}\` for requested \`${packRef}\``);
+  if (metadata.id !== dockRef.id()) {
+    throw new Error(`registry returned dock id \`${metadata.id}\` for requested \`${dockRef}\``);
   }
   if (!metadata.approved) {
-    throw new Error(`pack \`${packRef}\` is not approved by DockHub`);
+    throw new Error(`dock \`${dockRef}\` is not approved by OpenDock Registry`);
   }
   if (metadata.signature.trim() === "") {
-    throw new Error(`pack \`${packRef}\` is missing a DockHub signature`);
+    throw new Error(`dock \`${dockRef}\` is missing an OpenDock Registry signature`);
   }
 
-  const archive = await client.downloadPack(packRef.owner, packRef.name, metadata.version);
+  const archive = await client.downloadDock(dockRef.owner, dockRef.name, metadata.version);
   const actualChecksum = sha256Bytes(archive);
   if (actualChecksum !== metadata.checksum) {
     throw new Error(
-      `checksum mismatch for \`${packRef}\`: expected ${metadata.checksum}, got ${actualChecksum}`,
+      `checksum mismatch for \`${dockRef}\`: expected ${metadata.checksum}, got ${actualChecksum}`,
     );
   }
 
-  const root = join(cacheRoot(), packRef.owner, packRef.name, metadata.version);
+  const root = join(cacheRoot(), dockRef.owner, dockRef.name, metadata.version);
   rmSync(root, { recursive: true, force: true });
   mkdirSync(root, { recursive: true });
 
   const temp = mkdtempSync(join(tmpdir(), "opendock-"));
-  const archivePath = join(temp, "pack.tgz");
+  const archivePath = join(temp, "dock.tgz");
   writeFileSync(archivePath, archive);
 
   await extractTar({
@@ -88,35 +88,35 @@ async function resolveRemotePack(packRef: PackRef): Promise<ResolvedPack> {
   });
   rmSync(temp, { recursive: true, force: true });
 
-  const packRoot = findManifestRoot(root);
-  if (!packRoot) {
-    throw new Error(`downloaded pack \`${packRef}\` did not contain dock.yml`);
+  const dockRoot = findManifestRoot(root);
+  if (!dockRoot) {
+    throw new Error(`downloaded dock \`${dockRef}\` did not contain dock.yml`);
   }
 
-  const manifest = parseManifest(join(packRoot, "dock.yml"));
-  validateManifestFor(manifest, packRef);
+  const manifest = parseManifest(join(dockRoot, "dock.yml"));
+  validateManifestFor(manifest, dockRef);
 
   return {
     manifest,
-    root: packRoot,
+    root: dockRoot,
     checksum: actualChecksum,
     signature: metadata.signature,
   };
 }
 
-function parseManifest(path: string): PackManifest {
+function parseManifest(path: string): DockManifest {
   try {
-    return packManifestSchema.parse(YAML.parse(readFileSync(path, "utf8")));
+    return dockManifestSchema.parse(YAML.parse(readFileSync(path, "utf8")));
   } catch (error) {
     throw new Error(`failed to parse ${path}: ${(error as Error).message}`);
   }
 }
 
-function findLocalPackRoot(packsRoot: string, packRef: PackRef): string | undefined {
+function findLocalDockRoot(docksRoot: string, dockRef: DockRef): string | undefined {
   const candidates = [
-    join(packsRoot, packRef.owner, packRef.name),
-    join(packsRoot, `${packRef.owner}__${packRef.name}`),
-    join(packsRoot, packRef.name),
+    join(docksRoot, dockRef.owner, dockRef.name),
+    join(docksRoot, `${dockRef.owner}__${dockRef.name}`),
+    join(docksRoot, dockRef.name),
   ];
   return candidates.find((candidate) => existsSync(join(candidate, "dock.yml")));
 }

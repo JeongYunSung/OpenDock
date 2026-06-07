@@ -1,6 +1,6 @@
 # OpenDock CLI MVP
 
-> Build the TypeScript CLI that installs, updates, diagnoses, logs, authenticates, and submits OpenDock starterpacks.
+> Build the TypeScript CLI that installs, updates, diagnoses, logs, authenticates, and submits OpenDock docks.
 
 **Status**: Completed
 **Created**: 2026-06-07
@@ -20,11 +20,11 @@ opendock auth login
 opendock deploy oma-codex
 ```
 
-The MVP applies approved starterpacks to the current directory, preserves user-authored files with declared update policies, writes `.opendock/` project state, exposes diagnostics and logs, stores DockHub auth tokens, and provides deploy submission plumbing.
+The MVP applies approved docks to the current directory, preserves user-authored files with declared update policies, writes `.opendock/` project state, exposes diagnostics and logs, stores OpenDock Registry auth tokens, and provides deploy submission plumbing.
 
 ## Context
 
-The product direction is a CLI-first starterpack runner. The implementation now follows the TypeScript/Bun CLI shape used by adjacent agent-native projects such as Open Design and oh-my-agent.
+The product direction is a CLI-first dock runner. The implementation now follows the TypeScript/Bun CLI shape used by adjacent agent-native projects such as Open Design and oh-my-agent.
 
 Core decisions:
 
@@ -33,7 +33,7 @@ Core decisions:
 - YAML + Zod for `dock.yml` parsing and validation.
 - Vitest for temp-dir CLI integration tests.
 - Biome for lint/format checks.
-- Pack references use `{owner}/{pack}`, e.g. `opendock/oma-codex`.
+- Dock references use `{owner}/{dock}`, e.g. `opendock/oma-codex`.
 - `install` is public and login-free.
 - `deploy` requires login and creates a submission for approval.
 - Existing files are updated through explicit `files[].update` policies.
@@ -43,25 +43,25 @@ Core decisions:
 ## Constraints
 
 - Do not modify parent `.agents/` SSOT files.
-- Registry/auth/deploy code must keep the runtime pack source fixed to the approved registry.
+- Registry/auth/deploy code must keep the runtime dock source fixed to the approved registry.
 - Commands that execute lifecycle steps must use an allowlist and must not execute arbitrary shell pipelines.
 - Generated build output stays out of source control.
 
 ## API Contracts
 
-DockHub API draft:
+OpenDock Registry API draft:
 
 | Endpoint | Purpose | Auth |
 |---|---|---|
-| `GET /api/v1/packs/{owner}/{name}/versions/latest` | Resolve latest approved pack version | No |
-| `GET /api/v1/packs/{owner}/{name}/versions/{version}/download` | Download pack archive | No |
+| `GET /api/v1/docks/{owner}/{name}/versions/latest` | Resolve latest approved dock version | No |
+| `GET /api/v1/docks/{owner}/{name}/versions/{version}/download` | Download dock archive | No |
 | `POST /api/v1/auth/login` | Exchange login token or email token for CLI token | No |
-| `POST /api/v1/packs/submissions` | Submit starterpack for review | Yes |
+| `POST /api/v1/docks/submissions` | Submit dock for review | Yes |
 
 Local development contract:
 
 - `OPENDOCK_DATA_DIR` may override the local data/cache/log directory.
-- Pack source and registry host are not configurable by runtime environment variables.
+- Dock source and registry host are not configurable by runtime environment variables.
 
 ## Tasks
 
@@ -69,13 +69,13 @@ Local development contract:
 |---|------|------|----------|--------|
 | 1 | Create TypeScript package scaffold and baseline CLI | cli | P0 | DONE |
 | 2 | Implement `dock.yml` parser and schema validation | core | P0 | DONE |
-| 3 | Implement pack reference parsing and local/remote resolver | core | P0 | DONE |
+| 3 | Implement dock reference parsing and local/remote resolver | core | P0 | DONE |
 | 4 | Implement template application with update policies | core | P0 | DONE |
 | 5 | Write `.opendock/project.yml` and `.opendock/dock.lock.yml` | core | P0 | DONE |
 | 6 | Implement lifecycle runner with command allowlist | core | P0 | DONE |
 | 7 | Implement `install`, `doctor`, `log`, `version`, and `update` | cli | P0 | DONE |
 | 8 | Add `auth login` token storage and `deploy` submission flow | cli | P1 | DONE |
-| 9 | Keep `examples/oma-codex` starterpack fixture | fixture | P0 | DONE |
+| 9 | Keep `examples/oma-codex` dock fixture | fixture | P0 | DONE |
 | 10 | Add temp-dir CLI integration tests for edge cases | qa | P0 | DONE |
 | 11 | Run typecheck, tests, lint, and final manual smoke checks | qa | P0 | DONE |
 
@@ -85,13 +85,13 @@ Local development contract:
 - [x] `bun run test` passes.
 - [x] `bun run lint` passes.
 - [x] `opendock version` prints CLI, schema, and registry info.
-- [x] `opendock install opendock/oma-codex` can install from a configured local pack fixture.
+- [x] `opendock install opendock/oma-codex` can install from a configured local dock fixture.
 - [x] Existing files are not overwritten.
 - [x] Re-running `install` does not duplicate managed blocks.
 - [x] `.opendock/project.yml` and `.opendock/dock.lock.yml` are created.
 - [x] `opendock doctor` reports project state and missing items.
 - [x] `opendock log` shows recent project runs.
-- [x] `opendock update` reads lock state and applies newer pack versions.
+- [x] `opendock update` reads lock state and applies newer dock versions.
 - [x] `opendock deploy` fails clearly when not logged in.
 - [x] `opendock auth login` stores a token through the configured login flow.
 
@@ -99,16 +99,16 @@ Local development contract:
 
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| 2026-06-07 | Build CLI before app | It proves the core starterpack workflow with the smallest product surface. |
+| 2026-06-07 | Build CLI before app | It proves the core dock workflow with the smallest product surface. |
 | 2026-06-07 | Use TypeScript/Bun | It aligns OpenDock with adjacent open-source agent tooling and keeps the CLI easy to extend. |
-| 2026-06-07 | Use `{owner}/{pack}` refs | Shorter and clearer than URL-based install syntax. |
+| 2026-06-07 | Use `{owner}/{dock}` refs | Shorter and clearer than URL-based install syntax. |
 | 2026-06-07 | Use managed append blocks | Existing project files can be updated without overwriting user-authored content. |
-| 2026-06-07 | Add `opendock: 1` manifest shape | Keeps starterpacks concise while preserving legacy `schema/kind/setup` compatibility. |
+| 2026-06-07 | Add `opendock: 1` manifest shape | Keeps docks concise while preserving legacy `schema/kind/setup` compatibility. |
 
 ## Progress Notes
 
 - [2026-06-07] TypeScript package scaffolded with Commander, YAML, Zod, Vitest, and Biome.
 - [2026-06-07] Local fixture install flow, update flow, project state, logging, auth, deploy no-login failure, and command allowlist were ported to TypeScript.
-- [2026-06-07] Edge cases covered for invalid pack refs, idempotent managed blocks, unique `.gitignore` append, auth token file mode, newer pack updates, and failure logging.
-- [2026-06-07] Added `files` policies, `lifecycle.install/update/doctor`, and the `opendock/oma-codex` example pack.
+- [2026-06-07] Edge cases covered for invalid dock refs, idempotent managed blocks, unique `.gitignore` append, auth token file mode, newer dock updates, and failure logging.
+- [2026-06-07] Added `files` policies, `lifecycle.install/update/doctor`, and the `opendock/oma-codex` example dock.
 - [2026-06-07] Final verification passed: `bun run typecheck`, `bun run test`, `bun run lint`, `bun run check`, and manual smoke for version/install/doctor/log/update/auth/deploy no-login.

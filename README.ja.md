@@ -47,15 +47,15 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 | `opendock log` | 現在のプロジェクトの実行ログを表示します。 |
 | `opendock version` | CLI、schema、registry 情報を表示します。 |
 | `opendock bootstrap mac` | macOS 用スターターパックのために Homebrew を確認またはインストールします。 |
-| `opendock auth login` | DockHub トークンを保存します。 |
-| `opendock deploy oma-codex` | ローカルの `dock.yml` をレビュー用に提出します。 |
+| `opendock auth login` | OpenDock Registry トークンを保存します。 |
+| `opendock deploy oma-codex` | ローカルの `dock.yml` を OpenDock Registry のレビュー用に提出します。 |
 
 Platform 別の lifecycle コマンドは、step 内の `platforms` で定義します。選択された platform は `.opendock/dock.lock.yml` に保存され、`update` と `doctor` で再利用されます。
 
 ## 安全性
 
-OpenDock は `owner/name` 形式の pack reference、固定レジストリ
-`https://opencode.app`、DockHub の承認・署名・checksum 検証、既存ファイルへの
+OpenDock は `owner/name` 形式の dock reference、固定レジストリ
+`https://opendock.app`、OpenDock Registry の承認・署名・checksum 検証、既存ファイルへの
 managed block 追記、allowlist ベースの setup コマンド実行を採用しています。
-pack source と registry host は実行時の環境変数では変更できません。shell pipeline
+dock source と registry host は実行時の環境変数では変更できません。shell pipeline
 や redirect は許可されません。

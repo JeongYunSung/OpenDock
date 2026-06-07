@@ -1,7 +1,7 @@
 {
   "name": "opendock",
   "version": "0.1.0",
-  "description": "Approved starterpacks for AI workspaces.",
+  "description": "Approved docks for AI workspaces.",
   "type": "module",
   "license": "MIT",
   "bin": {

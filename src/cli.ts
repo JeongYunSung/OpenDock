@@ -6,31 +6,31 @@ import { Command } from "commander";
 import { TokenStore } from "./auth.js";
 import { bootstrapMac } from "./bootstrap.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
-import { DockHubClient } from "./dockhub.js";
+import { DockRef } from "./dock.js";
 import { install } from "./installer.js";
 import { readProjectLogs } from "./logging.js";
-import { PackRef } from "./pack.js";
 import { detectPlatform, type OpenDockPlatform, parsePlatform } from "./platform.js";
-import { hasProjectState, readLock } from "./project.js";
-import { resolvePack } from "./resolver.js";
+import { hasProjectState, lockDocks, readLock } from "./project.js";
+import { OpenDockRegistryClient } from "./registry.js";
+import { resolveDock } from "./resolver.js";
 import { hasExplicitLifecycleSteps, runLifecycle } from "./runner.js";
 
 export async function run(argv = process.argv): Promise<void> {
   const program = new Command();
   program
     .name("opendock")
-    .description("Install, update, diagnose, and deploy OpenDock starterpacks.")
+    .description("Install, update, diagnose, and deploy OpenDock docks.")
     .version(VERSION);
 
   program
     .command("install")
-    .description("Install an approved starterpack into the current directory.")
-    .argument("<pack>")
+    .description("Install an approved dock into the current directory.")
+    .argument("<dock>")
     .option("--platform <platform>", "Target platform: macos, windows, or linux")
-    .action(async (pack: string, options: { platform?: string }) => {
+    .action(async (dock: string, options: { platform?: string }) => {
       const platform = resolveCliPlatform(options.platform);
       const report = await install({
-        packRef: PackRef.parse(pack),
+        dockRef: DockRef.parse(dock),
         projectDir: process.cwd(),
         runCommands: true,
         operation: "install",
@@ -38,39 +38,39 @@ export async function run(argv = process.argv): Promise<void> {
         platform,
       });
       console.log(
-        `Installed ${report.packId}@${report.version} for ${report.platform} (${report.filesCreated} files created, ${report.filesUpdated} files updated)`,
+        `Installed ${report.dockId}@${report.version} for ${report.platform} (${report.filesCreated} files created, ${report.filesUpdated} files updated)`,
       );
     });
 
   program
     .command("update")
-    .description("Update the starterpack installed in the current directory.")
+    .description("Update the dock installed in the current directory.")
     .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
     .action(async (options: { platform?: string }) => {
       const lock = readLock(process.cwd());
-      for (const pack of lock.packs) {
-        const packRef = PackRef.parse(pack.id);
-        const platform = resolveCliPlatform(options.platform ?? pack.platform);
-        const latest = await resolvePack(packRef);
+      for (const dock of lockDocks(lock)) {
+        const dockRef = DockRef.parse(dock.id);
+        const platform = resolveCliPlatform(options.platform ?? dock.platform);
+        const latest = await resolveDock(dockRef);
         if (
-          latest.manifest.version === pack.version &&
+          latest.manifest.version === dock.version &&
           !hasExplicitLifecycleSteps(latest.manifest, "update", { platform })
         ) {
-          console.log(`${pack.id} is up to date at ${pack.version} for ${platform}`);
+          console.log(`${dock.id} is up to date at ${dock.version} for ${platform}`);
         } else {
           const report = await install({
-            packRef,
+            dockRef,
             projectDir: process.cwd(),
             runCommands: true,
             operation: "update",
             phase: "update",
             platform,
           });
-          if (pack.version === report.version) {
-            console.log(`Updated ${pack.id} at ${report.version} for ${report.platform}`);
+          if (dock.version === report.version) {
+            console.log(`Updated ${dock.id} at ${report.version} for ${report.platform}`);
           } else {
             console.log(
-              `Updated ${pack.id}: ${pack.version} -> ${report.version} for ${report.platform}`,
+              `Updated ${dock.id}: ${dock.version} -> ${report.version} for ${report.platform}`,
             );
           }
         }
@@ -111,36 +111,36 @@ export async function run(argv = process.argv): Promise<void> {
   const bootstrap = program.command("bootstrap").description("Prepare first-party host tools.");
   bootstrap
     .command("mac")
-    .description("Install or verify Homebrew for macOS starterpacks.")
+    .description("Install or verify Homebrew for macOS docks.")
     .option("-y, --yes", "Run the official Homebrew installer without OpenDock confirmation")
     .action(async (options: { yes?: boolean }) => {
       await bootstrapMac({ assumeYes: options.yes === true });
     });
 
-  const auth = program.command("auth").description("Authenticate with DockHub.");
+  const auth = program.command("auth").description("Authenticate with OpenDock Registry.");
   auth
     .command("login")
-    .description("Log in to DockHub.")
+    .description("Log in to OpenDock Registry.")
     .option("--token <token>", "Token to store")
     .action(async (options: { token?: string }) => {
       const token = options.token ?? process.env.OPENDOCK_AUTH_TOKEN ?? (await promptToken());
       await new TokenStore().saveToken(token);
-      console.log("Logged in to DockHub.");
+      console.log("Logged in to OpenDock Registry.");
     });
 
   program
     .command("deploy")
-    .description("Submit a starterpack to DockHub for review.")
-    .argument("<pack-name>")
-    .action(async (packName: string) => {
+    .description("Submit a dock to OpenDock Registry for review.")
+    .argument("<dock-name>")
+    .action(async (dockName: string) => {
       const token = new TokenStore().loadToken();
       if (!token) {
         throw new Error("not logged in; run `opendock auth login` first");
       }
       const manifest = readFileSync("dock.yml", "utf8");
-      const client = new DockHubClient();
-      const response = await client.submitPack({ pack_name: packName, manifest }, token);
-      console.log(`Submitted ${packName} for review: ${response.id} (${response.status})`);
+      const client = new OpenDockRegistryClient();
+      const response = await client.submitDock({ dock_name: dockName, manifest }, token);
+      console.log(`Submitted ${dockName} for review: ${response.id} (${response.status})`);
     });
 
   await program.parseAsync(argv);
@@ -160,10 +160,10 @@ async function printDoctor(cwd: string, platformOverride?: string): Promise<void
     console.log("✓ .opendock/project.yml");
     console.log("✓ .opendock/dock.lock.yml");
     const lock = readLock(cwd);
-    for (const pack of lock.packs) {
-      const platform = resolveCliPlatform(platformOverride ?? pack.platform);
-      console.log(`✓ ${pack.id}@${pack.version} [${platform}]`);
-      await printPackDoctorChecks(cwd, PackRef.parse(pack.id), platform);
+    for (const dock of lockDocks(lock)) {
+      const platform = resolveCliPlatform(platformOverride ?? dock.platform);
+      console.log(`✓ ${dock.id}@${dock.version} [${platform}]`);
+      await printDockDoctorChecks(cwd, DockRef.parse(dock.id), platform);
     }
   } else {
     console.log("Status: Not installed");
@@ -173,13 +173,13 @@ async function printDoctor(cwd: string, platformOverride?: string): Promise<void
   }
 }
 
-async function printPackDoctorChecks(
+async function printDockDoctorChecks(
   cwd: string,
-  packRef: PackRef,
+  dockRef: DockRef,
   platform: OpenDockPlatform,
 ): Promise<void> {
   try {
-    const resolved = await resolvePack(packRef);
+    const resolved = await resolveDock(dockRef);
     const reports = await runLifecycle(resolved.manifest, "doctor", cwd, { platform });
     for (const report of reports) {
       const symbol = report.status === "Failed" ? "!" : "✓";
@@ -187,14 +187,14 @@ async function printPackDoctorChecks(
       console.log(`${symbol} ${report.id}${suffix}`);
     }
   } catch (error) {
-    console.log(`! ${packRef.id()} doctor checks unavailable: ${(error as Error).message}`);
+    console.log(`! ${dockRef.id()} doctor checks unavailable: ${(error as Error).message}`);
   }
 }
 
 async function promptToken(): Promise<string> {
   const readline = createInterface({ input, output });
   try {
-    const token = (await readline.question("DockHub token: ")).trim();
+    const token = (await readline.question("OpenDock Registry token: ")).trim();
     if (token === "") {
       throw new Error("empty token");
     }

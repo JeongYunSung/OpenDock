@@ -4,33 +4,33 @@ import { isOpenDockPlatform } from "./platform.js";
 
 const safeSegmentPattern = /^[A-Za-z0-9._-]+$/;
 
-export class PackRef {
+export class DockRef {
   constructor(
     readonly owner: string,
     readonly name: string,
   ) {}
 
-  static parse(value: string): PackRef {
+  static parse(value: string): DockRef {
     const trimmed = value.trim();
     const parts = trimmed.split("/");
     if (parts.length !== 2) {
-      throw new Error("pack reference must be in owner/name form");
+      throw new Error("dock reference must be in owner/name form");
     }
 
     const [owner, name] = parts;
     if (!owner || owner.trim() === "") {
-      throw new Error("pack owner cannot be empty");
+      throw new Error("dock owner cannot be empty");
     }
     if (!name || name.trim() === "") {
-      throw new Error("pack name cannot be empty");
+      throw new Error("dock name cannot be empty");
     }
     if (!isSafeSegment(owner) || !isSafeSegment(name)) {
       throw new Error(
-        "pack owner/name may only contain ASCII letters, numbers, dots, underscores, and hyphens",
+        "dock owner/name may only contain ASCII letters, numbers, dots, underscores, and hyphens",
       );
     }
 
-    return new PackRef(owner, name);
+    return new DockRef(owner, name);
   }
 
   id(): string {
@@ -130,7 +130,7 @@ export const lifecycleSchema = z.object({
   doctor: z.array(lifecycleStepSchema).default([]),
 });
 
-export const packManifestSchema = z.object({
+export const dockManifestSchema = z.object({
   opendock: z.number().optional(),
   schema: z.string().optional(),
   kind: z.string().optional(),
@@ -144,12 +144,12 @@ export const packManifestSchema = z.object({
   setup: z.array(lifecycleStepSchema).default([]),
 });
 
-export type PackManifest = z.infer<typeof packManifestSchema>;
+export type DockManifest = z.infer<typeof dockManifestSchema>;
 export type FileSpec = z.infer<typeof fileSpecSchema>;
 export type LifecycleStep = z.infer<typeof lifecycleStepSchema>;
 export type LifecyclePhase = keyof z.infer<typeof lifecycleSchema>;
 
-export function validateManifestFor(manifest: PackManifest, requested: PackRef): void {
+export function validateManifestFor(manifest: DockManifest, requested: DockRef): void {
   if (manifest.opendock === undefined && manifest.schema === undefined) {
     throw new Error("manifest must declare `opendock` or `schema`");
   }
@@ -164,7 +164,7 @@ export function validateManifestFor(manifest: PackManifest, requested: PackRef):
   }
   if (manifest.id !== requested.id()) {
     throw new Error(
-      `manifest id \`${manifest.id}\` does not match requested pack \`${requested}\``,
+      `manifest id \`${manifest.id}\` does not match requested dock \`${requested}\``,
     );
   }
 }

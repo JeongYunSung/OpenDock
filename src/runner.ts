@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { delimiter, dirname, sep } from "node:path";
-import type { LifecyclePhase, LifecycleStep, PackManifest } from "./pack.js";
+import type { DockManifest, LifecyclePhase, LifecycleStep } from "./dock.js";
 import { detectPlatform, type OpenDockPlatform } from "./platform.js";
 
 export interface StepReport {
@@ -67,7 +67,7 @@ const platformAllowedCommands: Record<OpenDockPlatform, Set<string>> = {
 };
 
 export function getLifecycleSteps(
-  manifest: PackManifest,
+  manifest: DockManifest,
   phase: LifecyclePhase,
   options: LifecycleOptions = {},
 ): LifecycleStep[] {
@@ -76,7 +76,7 @@ export function getLifecycleSteps(
   return selectLifecycleSteps(rawLifecycleSteps(manifest, phase), platform);
 }
 
-function rawLifecycleSteps(manifest: PackManifest, phase: LifecyclePhase): LifecycleStep[] {
+function rawLifecycleSteps(manifest: DockManifest, phase: LifecyclePhase): LifecycleStep[] {
   const lifecycleSteps = manifest.lifecycle[phase] ?? [];
   if (lifecycleSteps.length > 0) {
     return lifecycleSteps;
@@ -88,7 +88,7 @@ function rawLifecycleSteps(manifest: PackManifest, phase: LifecyclePhase): Lifec
 }
 
 export function hasLifecycleSteps(
-  manifest: PackManifest,
+  manifest: DockManifest,
   phase: LifecyclePhase,
   options: LifecycleOptions = {},
 ): boolean {
@@ -96,7 +96,7 @@ export function hasLifecycleSteps(
 }
 
 export function hasExplicitLifecycleSteps(
-  manifest: PackManifest,
+  manifest: DockManifest,
   phase: LifecyclePhase,
   options: LifecycleOptions = {},
 ): boolean {
@@ -106,7 +106,7 @@ export function hasExplicitLifecycleSteps(
 }
 
 export async function runLifecycle(
-  manifest: PackManifest,
+  manifest: DockManifest,
   phase: LifecyclePhase,
   projectDir: string,
   options: LifecycleOptions = {},
@@ -502,7 +502,7 @@ function commandEnvironment(program: string): NodeJS.ProcessEnv {
 }
 
 export function assertManifestSupportsPlatform(
-  manifest: PackManifest,
+  manifest: DockManifest,
   platform: OpenDockPlatform,
 ): void {
   const supported = collectManifestPlatforms(manifest);
@@ -510,13 +510,13 @@ export function assertManifestSupportsPlatform(
     return;
   }
   throw new Error(
-    `pack \`${manifest.id}\` does not support platform \`${platform}\`; available platforms: ${[
+    `dock \`${manifest.id}\` does not support platform \`${platform}\`; available platforms: ${[
       ...supported,
     ].join(", ")}`,
   );
 }
 
-function collectManifestPlatforms(manifest: PackManifest): Set<string> {
+function collectManifestPlatforms(manifest: DockManifest): Set<string> {
   const platforms = new Set<string>();
   const phases: LifecyclePhase[] = ["install", "update", "doctor"];
   for (const phase of phases) {

@@ -1,6 +1,6 @@
 import { API_PREFIX, DEFAULT_REGISTRY_URL } from "./constants.js";
 
-export interface PackVersionResponse {
+export interface DockVersionResponse {
   id: string;
   version: string;
   approved: boolean;
@@ -13,7 +13,7 @@ export interface LoginResponse {
 }
 
 export interface SubmissionRequest {
-  pack_name: string;
+  dock_name: string;
   manifest: string;
 }
 
@@ -22,14 +22,14 @@ export interface SubmissionResponse {
   status: string;
 }
 
-export class DockHubClient {
-  async latestPackVersion(owner: string, name: string): Promise<PackVersionResponse> {
-    const url = `${this.apiBase()}/packs/${owner}/${name}/versions/latest`;
-    return this.requestJson<PackVersionResponse>(url);
+export class OpenDockRegistryClient {
+  async latestDockVersion(owner: string, name: string): Promise<DockVersionResponse> {
+    const url = `${this.apiBase()}/docks/${owner}/${name}/versions/latest`;
+    return this.requestJson<DockVersionResponse>(url);
   }
 
-  async downloadPack(owner: string, name: string, version: string): Promise<Buffer> {
-    const url = `${this.apiBase()}/packs/${owner}/${name}/versions/${version}/download`;
+  async downloadDock(owner: string, name: string, version: string): Promise<Buffer> {
+    const url = `${this.apiBase()}/docks/${owner}/${name}/versions/${version}/download`;
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`failed to request ${url}: ${response.status} ${response.statusText}`);
@@ -46,8 +46,8 @@ export class DockHubClient {
     });
   }
 
-  async submitPack(request: SubmissionRequest, token: string): Promise<SubmissionResponse> {
-    const url = `${this.apiBase()}/packs/submissions`;
+  async submitDock(request: SubmissionRequest, token: string): Promise<SubmissionResponse> {
+    const url = `${this.apiBase()}/docks/submissions`;
     return this.requestJson<SubmissionResponse>(url, {
       method: "POST",
       body: JSON.stringify(request),

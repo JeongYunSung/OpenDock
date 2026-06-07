@@ -52,7 +52,7 @@ export async function bootstrapMac(options: BootstrapMacOptions = {}): Promise<B
     return { status: "path-missing", brewPath };
   }
 
-  write("Homebrew is required for starterpacks that install macOS developer tools.");
+  write("Homebrew is required for docks that install macOS developer tools.");
   write(`Official Homebrew installer: ${HOMEBREW_INSTALL_COMMAND}`);
 
   const approved =

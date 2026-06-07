@@ -1,26 +1,26 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
+import type { DockRef, FileSpec, LifecyclePhase } from "./dock.js";
 import { appendRunLog } from "./logging.js";
-import type { FileSpec, LifecyclePhase, PackRef } from "./pack.js";
 import { detectPlatform, type OpenDockPlatform } from "./platform.js";
 import { type ProjectFileRecord, readProjectFile, writeProjectState } from "./project.js";
-import { fileChecksum, isFile, type ResolvedPack, resolvePack, textChecksum } from "./resolver.js";
+import { fileChecksum, isFile, type ResolvedDock, resolveDock, textChecksum } from "./resolver.js";
 import { assertManifestSupportsPlatform, runLifecycle, type StepReport } from "./runner.js";
 
-export type PackResolver = (packRef: PackRef) => Promise<ResolvedPack> | ResolvedPack;
+export type DockResolver = (dockRef: DockRef) => Promise<ResolvedDock> | ResolvedDock;
 
 export interface InstallOptions {
-  packRef: PackRef;
+  dockRef: DockRef;
   projectDir: string;
   runCommands: boolean;
   operation: string;
   phase?: LifecyclePhase;
   platform?: OpenDockPlatform;
-  resolve?: PackResolver;
+  resolve?: DockResolver;
 }
 
 export interface InstallReport {
-  packId: string;
+  dockId: string;
   version: string;
   filesCreated: number;
   filesUpdated: number;
@@ -35,11 +35,11 @@ interface TemplateReport {
 }
 
 export async function install(options: InstallOptions): Promise<InstallReport> {
-  const resolved = await (options.resolve ?? resolvePack)(options.packRef);
+  const resolved = await (options.resolve ?? resolveDock)(options.dockRef);
   const platform = options.platform ?? detectPlatform();
   assertManifestSupportsPlatform(resolved.manifest, platform);
   const priorRecords = readProjectFile(options.projectDir)?.files ?? [];
-  const templateReport = applyPackFiles(
+  const templateReport = applyDockFiles(
     resolved.root,
     join(resolved.root, "templates"),
     options.projectDir,
@@ -81,7 +81,7 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
   );
 
   const report: InstallReport = {
-    packId: resolved.manifest.id,
+    dockId: resolved.manifest.id,
     version: resolved.manifest.version,
     filesCreated: templateReport.created,
     filesUpdated: templateReport.updated,
@@ -92,32 +92,32 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
   appendRunLog(
     options.projectDir,
     options.operation,
-    report.packId,
+    report.dockId,
     "Success",
-    `${report.packId}@${report.version} (${report.filesCreated} created, ${report.filesUpdated} updated)`,
+    `${report.dockId}@${report.version} (${report.filesCreated} created, ${report.filesUpdated} updated)`,
   );
 
   return report;
 }
 
-function applyPackFiles(
-  packRoot: string,
+function applyDockFiles(
+  dockRoot: string,
   templateRoot: string,
   projectDir: string,
-  packId: string,
+  dockId: string,
   files: FileSpec[],
   priorRecords: ProjectFileRecord[],
 ): TemplateReport {
   if (files.length > 0) {
-    return applyExplicitFiles(packRoot, projectDir, packId, files, priorRecords);
+    return applyExplicitFiles(dockRoot, projectDir, dockId, files, priorRecords);
   }
-  return applyLegacyTemplates(templateRoot, projectDir, packId, priorRecords);
+  return applyLegacyTemplates(templateRoot, projectDir, dockId, priorRecords);
 }
 
 function applyExplicitFiles(
-  packRoot: string,
+  dockRoot: string,
   projectDir: string,
-  packId: string,
+  dockId: string,
   files: FileSpec[],
   priorRecords: ProjectFileRecord[],
 ): TemplateReport {
@@ -125,7 +125,7 @@ function applyExplicitFiles(
   const priorRecordMap = new Map(priorRecords.map((record) => [record.path, record.checksum]));
 
   for (const file of files) {
-    const source = join(packRoot, file.from);
+    const source = join(dockRoot, file.from);
     if (!isSafeRelativePath(file.from) || !isSafeRelativePath(file.to)) {
       throw new Error(`unsafe file mapping \`${file.from}\` -> \`${file.to}\``);
     }
@@ -161,7 +161,7 @@ function applyExplicitFiles(
         writeFileSync(target, content);
         report.records.push({ path: file.to, checksum: textChecksum(content) });
       } else {
-        upsertManagedBlock(target, packId, file.to, content);
+        upsertManagedBlock(target, dockId, file.to, content);
       }
       report.updated += 1;
       continue;
@@ -186,7 +186,7 @@ function applyExplicitFiles(
 function applyLegacyTemplates(
   templateRoot: string,
   projectDir: string,
-  packId: string,
+  dockId: string,
   priorRecords: ProjectFileRecord[],
 ): TemplateReport {
   const report: TemplateReport = { created: 0, updated: 0, records: [] };
@@ -223,7 +223,7 @@ function applyLegacyTemplates(
       writeFileSync(target, content);
       report.records.push({ path: rel, checksum: textChecksum(content) });
     } else {
-      upsertManagedBlock(target, packId, rel, content);
+      upsertManagedBlock(target, dockId, rel, content);
     }
     report.updated += 1;
   }
@@ -265,13 +265,13 @@ function appendUniqueLines(path: string, addition: string): void {
 
 export function upsertManagedBlock(
   path: string,
-  packId: string,
+  dockId: string,
   relPath: string,
   content: string,
 ): void {
   const existing = existsSync(path) ? readFileSync(path, "utf8") : "";
-  const start = `<!-- OPENDOCK:START ${packId}:${relPath} -->`;
-  const end = `<!-- OPENDOCK:END ${packId}:${relPath} -->`;
+  const start = `<!-- OPENDOCK:START ${dockId}:${relPath} -->`;
+  const end = `<!-- OPENDOCK:END ${dockId}:${relPath} -->`;
   const block = `${start}\n${content.trimEnd()}\n${end}`;
 
   let next: string;

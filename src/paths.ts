@@ -10,7 +10,7 @@ export function dataRoot(): string {
 
 export function cacheRoot(): string {
   if (process.env.OPENDOCK_DATA_DIR) {
-    return join(process.env.OPENDOCK_DATA_DIR, "packs");
+    return join(process.env.OPENDOCK_DATA_DIR, "docks");
   }
-  return join(homedir(), "Library", "Caches", "OpenDock", "packs");
+  return join(homedir(), "Library", "Caches", "OpenDock", "docks");
 }

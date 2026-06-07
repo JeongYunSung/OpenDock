@@ -9,7 +9,8 @@ export interface RunLog {
   timestamp: string;
   project_path: string;
   command: string;
-  pack_id: string;
+  dock_id?: string;
+  pack_id?: string;
   status: RunStatus;
   message: string;
 }
@@ -17,7 +18,7 @@ export interface RunLog {
 export function appendRunLog(
   projectDir: string,
   command: string,
-  packId: string,
+  dockId: string,
   status: RunStatus,
   message: string,
 ): void {
@@ -28,7 +29,7 @@ export function appendRunLog(
     timestamp: new Date().toISOString(),
     project_path: projectPath,
     command,
-    pack_id: packId,
+    dock_id: dockId,
     status,
     message,
   };
