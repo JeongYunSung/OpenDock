@@ -28,20 +28,28 @@ afterAll(async () => {
 describe("opendock TypeScript CLI", () => {
   it("installs idempotently and preserves existing files", async () => {
     const project = await tempDir();
+    const packs = await tempDir();
     const data = await tempDir();
+    writeTestPack(packs, "test", "harness", "1.0.0", "# Starter README\n");
     writeFileSync(join(project, "README.md"), "# User README\n");
     writeFileSync(join(project, ".gitignore"), "node_modules/\n");
 
-    const first = opendock(project, data, ["install", "opendock/codex-designer"]);
+    const first = runCli(project, { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data }, [
+      "install",
+      "test/harness",
+    ]);
     expect(first.status).toBe(0);
-    expect(first.stdout).toContain("Installed opendock/codex-designer@1.0.0");
+    expect(first.stdout).toContain("Installed test/harness@1.0.0");
 
-    const second = opendock(project, data, ["install", "opendock/codex-designer"]);
+    const second = runCli(project, { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data }, [
+      "install",
+      "test/harness",
+    ]);
     expect(second.status).toBe(0);
 
     const readme = readFileSync(join(project, "README.md"), "utf8");
     expect(readme).toContain("# User README");
-    expect(readme.match(/OPENDOCK:START opendock\/codex-designer:README\.md/g)).toHaveLength(1);
+    expect(readme.match(/OPENDOCK:START test\/harness:README\.md/g)).toHaveLength(1);
 
     const gitignore = readFileSync(join(project, ".gitignore"), "utf8");
     expect(gitignore.match(/node_modules\//g)).toHaveLength(1);
@@ -55,25 +63,69 @@ describe("opendock TypeScript CLI", () => {
 
   it("reports doctor, log, and up-to-date update state", async () => {
     const project = await tempDir();
+    const packs = await tempDir();
     const data = await tempDir();
-    expect(opendock(project, data, ["install", "opendock/codex-designer"]).status).toBe(0);
+    writeTestPack(packs, "test", "harness", "1.0.0", "# Starter README\n");
+    const env = { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data };
+    expect(runCli(project, env, ["install", "test/harness"]).status).toBe(0);
 
-    const doctor = opendock(project, data, ["doctor"]);
+    const doctor = runCli(project, env, ["doctor"]);
     expect(doctor.status).toBe(0);
     expect(doctor.stdout).toContain("Status: Ready");
-    expect(doctor.stdout).toContain("opendock/codex-designer@1.0.0");
+    expect(doctor.stdout).toContain("test/harness@1.0.0");
 
-    const logs = opendock(project, data, ["log"]);
+    const logs = runCli(project, env, ["log"]);
     expect(logs.status).toBe(0);
-    expect(logs.stdout).toContain("install opendock/codex-designer");
+    expect(logs.stdout).toContain("install test/harness");
 
-    const update = opendock(project, data, ["update"]);
+    const update = runCli(project, env, ["update"]);
     expect(update.status).toBe(0);
-    expect(update.stdout).toContain("opendock/codex-designer is up to date at 1.0.0");
+    expect(update.stdout).toContain("test/harness is up to date at 1.0.0");
+  });
+
+  it("supports opendock v1 files lifecycle and doctor checks", async () => {
+    const project = await tempDir();
+    const packs = await tempDir();
+    const data = await tempDir();
+    writeModernPack(packs);
+    writeFileSync(join(project, "README.md"), "# User README\n");
+    writeFileSync(join(project, "DESIGN.md"), "# User Design\n");
+    writeFileSync(join(project, ".gitignore"), "node_modules/\n");
+    const env = { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data };
+
+    const install = runCli(project, env, ["install", "test/modern"]);
+    expect(install.status).toBe(0);
+    expect(install.stdout).toContain("Installed test/modern@1.0.0");
+    expect(existsSync(join(project, ".opendock-fixture"))).toBe(true);
+
+    const readme = readFileSync(join(project, "README.md"), "utf8");
+    expect(readme).toBe("# User README\n");
+    const design = readFileSync(join(project, "DESIGN.md"), "utf8");
+    expect(design).toContain("# User Design");
+    expect(design.match(/OPENDOCK:START test\/modern:DESIGN\.md/g)).toHaveLength(1);
+    const gitignore = readFileSync(join(project, ".gitignore"), "utf8");
+    expect(gitignore.match(/node_modules\//g)).toHaveLength(1);
+    expect(gitignore).toContain(".DS_Store");
+
+    const reinstall = runCli(project, env, ["install", "test/modern"]);
+    expect(reinstall.status).toBe(0);
+    const reinstalledDesign = readFileSync(join(project, "DESIGN.md"), "utf8");
+    expect(reinstalledDesign).toContain("# User Design");
+    expect(reinstalledDesign.match(/OPENDOCK:START test\/modern:DESIGN\.md/g)).toHaveLength(1);
+
+    const doctor = runCli(project, env, ["doctor"]);
+    expect(doctor.status).toBe(0);
+    expect(doctor.stdout).toContain("✓ node");
+    expect(doctor.stdout).toContain("✓ fixture");
+
+    const update = runCli(project, env, ["update"]);
+    expect(update.status).toBe(0);
+    expect(update.stdout).toContain("Updated test/modern at 1.0.0");
+    expect(existsSync(join(project, ".opendock-updated"))).toBe(true);
   });
 
   it("rejects invalid pack references", () => {
-    const result = runCli(process.cwd(), {}, ["install", "codex-designer"]);
+    const result = runCli(process.cwd(), {}, ["install", "oma-codex"]);
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("owner/name");
   });
@@ -97,7 +149,7 @@ describe("opendock TypeScript CLI", () => {
   it("requires login before deploy", async () => {
     const project = await tempDir();
     const data = await tempDir();
-    const result = runCli(project, { OPENDOCK_DATA_DIR: data }, ["deploy", "codex-designer"]);
+    const result = runCli(project, { OPENDOCK_DATA_DIR: data }, ["deploy", "oma-codex"]);
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("not logged in");
   });
@@ -106,7 +158,7 @@ describe("opendock TypeScript CLI", () => {
     const project = await tempDir();
     const packs = await tempDir();
     const data = await tempDir();
-    writeTestPack(packs, "1.0.0", "# Version One\n");
+    writeTestPack(packs, "test", "demo", "1.0.0", "# Version One\n");
 
     expect(
       runCli(project, { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data }, [
@@ -115,7 +167,7 @@ describe("opendock TypeScript CLI", () => {
       ]).status,
     ).toBe(0);
 
-    writeTestPack(packs, "2.0.0", "# Version Two\n");
+    writeTestPack(packs, "test", "demo", "2.0.0", "# Version Two\n");
 
     const update = runCli(project, { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data }, [
       "update",
@@ -171,17 +223,6 @@ async function tempDir(): Promise<string> {
   return path;
 }
 
-function opendock(project: string, data: string, args: string[]) {
-  return runCli(
-    project,
-    {
-      OPENDOCK_PACKS_DIR: join(repoRoot, "examples"),
-      OPENDOCK_DATA_DIR: data,
-    },
-    args,
-  );
-}
-
 function runCli(cwd: string, env: NodeJS.ProcessEnv, args: string[]) {
   return spawnSync(process.execPath, [builtCli, ...args], {
     cwd,
@@ -190,17 +231,65 @@ function runCli(cwd: string, env: NodeJS.ProcessEnv, args: string[]) {
   });
 }
 
-function writeTestPack(root: string, version: string, readme: string): void {
-  const packRoot = join(root, "test", "demo");
+function writeTestPack(
+  root: string,
+  owner: string,
+  name: string,
+  version: string,
+  readme: string,
+): void {
+  const packRoot = join(root, owner, name);
   mkdirSync(join(packRoot, "templates"), { recursive: true });
   writeFileSync(
     join(packRoot, "dock.yml"),
     `schema: opendock/v1
 kind: starterpack
-id: test/demo
+id: ${owner}/${name}
 name: Demo Pack
 version: ${version}
 `,
   );
   writeFileSync(join(packRoot, "templates", "README.md"), readme);
+  writeFileSync(join(packRoot, "templates", ".gitignore"), "node_modules/\n.DS_Store\n");
+  writeFileSync(join(packRoot, "templates", "AGENTS.md"), "# Agents\n");
+  writeFileSync(join(packRoot, "templates", "DESIGN.md"), "# Design\n");
+}
+
+function writeModernPack(root: string): void {
+  const packRoot = join(root, "test", "modern");
+  mkdirSync(join(packRoot, "templates"), { recursive: true });
+  writeFileSync(
+    join(packRoot, "dock.yml"),
+    `opendock: 1
+id: test/modern
+version: 1.0.0
+files:
+  - from: templates/DESIGN.md
+    to: DESIGN.md
+    update: managed_block
+  - from: templates/README.md
+    to: README.md
+    update: manual_review
+  - from: templates/.gitignore
+    to: .gitignore
+    update: append_unique
+lifecycle:
+  install:
+    - id: fixture
+      check: test -d .opendock-fixture
+      run: mkdir .opendock-fixture
+  update:
+    - id: update-fixture
+      run: mkdir .opendock-updated
+  doctor:
+    - id: node
+      version: ">=0.0.0"
+      check: node --version
+    - id: fixture
+      check: test -d .opendock-fixture
+`,
+  );
+  writeFileSync(join(packRoot, "templates", "README.md"), "# Starter README\n");
+  writeFileSync(join(packRoot, "templates", ".gitignore"), "node_modules/\n.DS_Store\n");
+  writeFileSync(join(packRoot, "templates", "DESIGN.md"), "# Design\n");
 }

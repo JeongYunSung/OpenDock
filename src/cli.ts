@@ -11,6 +11,7 @@ import { readProjectLogs } from "./logging.js";
 import { PackRef } from "./pack.js";
 import { hasProjectState, readLock } from "./project.js";
 import { resolvePack } from "./resolver.js";
+import { hasExplicitLifecycleSteps, runLifecycle } from "./runner.js";
 
 export async function run(argv = process.argv): Promise<void> {
   const program = new Command();
@@ -29,6 +30,7 @@ export async function run(argv = process.argv): Promise<void> {
         projectDir: process.cwd(),
         runCommands: true,
         operation: "install",
+        phase: "install",
       });
       console.log(
         `Installed ${report.packId}@${report.version} (${report.filesCreated} files created, ${report.filesUpdated} files updated)`,
@@ -43,7 +45,10 @@ export async function run(argv = process.argv): Promise<void> {
       for (const pack of lock.packs) {
         const packRef = PackRef.parse(pack.id);
         const latest = await resolvePack(packRef);
-        if (latest.manifest.version === pack.version) {
+        if (
+          latest.manifest.version === pack.version &&
+          !hasExplicitLifecycleSteps(latest.manifest, "update")
+        ) {
           console.log(`${pack.id} is up to date at ${pack.version}`);
         } else {
           const report = await install({
@@ -51,8 +56,13 @@ export async function run(argv = process.argv): Promise<void> {
             projectDir: process.cwd(),
             runCommands: true,
             operation: "update",
+            phase: "update",
           });
-          console.log(`Updated ${pack.id}: ${pack.version} -> ${report.version}`);
+          if (pack.version === report.version) {
+            console.log(`Updated ${pack.id} at ${report.version}`);
+          } else {
+            console.log(`Updated ${pack.id}: ${pack.version} -> ${report.version}`);
+          }
         }
       }
     });
@@ -60,8 +70,8 @@ export async function run(argv = process.argv): Promise<void> {
   program
     .command("doctor")
     .description("Diagnose the current directory's OpenDock state.")
-    .action(() => {
-      printDoctor(process.cwd());
+    .action(async () => {
+      await printDoctor(process.cwd());
     });
 
   program
@@ -117,7 +127,7 @@ export async function run(argv = process.argv): Promise<void> {
   await program.parseAsync(argv);
 }
 
-function printDoctor(cwd: string): void {
+async function printDoctor(cwd: string): Promise<void> {
   console.log("OpenDock Doctor");
   console.log(`Project: ${cwd}`);
 
@@ -129,12 +139,27 @@ function printDoctor(cwd: string): void {
     const lock = readLock(cwd);
     for (const pack of lock.packs) {
       console.log(`✓ ${pack.id}@${pack.version}`);
+      await printPackDoctorChecks(cwd, PackRef.parse(pack.id));
     }
   } else {
     console.log("Status: Not installed");
     console.log("Checks:");
     console.log("! .opendock/project.yml missing");
     console.log("! .opendock/dock.lock.yml missing");
+  }
+}
+
+async function printPackDoctorChecks(cwd: string, packRef: PackRef): Promise<void> {
+  try {
+    const resolved = await resolvePack(packRef);
+    const reports = runLifecycle(resolved.manifest, "doctor", cwd);
+    for (const report of reports) {
+      const symbol = report.status === "Failed" ? "!" : "✓";
+      const suffix = report.message ? ` (${report.message})` : "";
+      console.log(`${symbol} ${report.id}${suffix}`);
+    }
+  } catch (error) {
+    console.log(`! ${packRef.id()} doctor checks unavailable: ${(error as Error).message}`);
   }
 }
 

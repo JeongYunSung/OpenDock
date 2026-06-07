@@ -1,16 +1,17 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 import { appendRunLog } from "./logging.js";
-import type { PackRef } from "./pack.js";
+import type { FileSpec, LifecyclePhase, PackRef } from "./pack.js";
 import { type ProjectFileRecord, readProjectFile, writeProjectState } from "./project.js";
 import { fileChecksum, isFile, resolvePack, textChecksum } from "./resolver.js";
-import { runSetup, type StepReport } from "./runner.js";
+import { runLifecycle, type StepReport } from "./runner.js";
 
 export interface InstallOptions {
   packRef: PackRef;
   projectDir: string;
   runCommands: boolean;
   operation: string;
+  phase?: LifecyclePhase;
 }
 
 export interface InstallReport {
@@ -30,17 +31,19 @@ interface TemplateReport {
 export async function install(options: InstallOptions): Promise<InstallReport> {
   const resolved = await resolvePack(options.packRef);
   const priorRecords = readProjectFile(options.projectDir)?.files ?? [];
-  const templateReport = applyTemplates(
+  const templateReport = applyPackFiles(
+    resolved.root,
     join(resolved.root, "templates"),
     options.projectDir,
     resolved.manifest.id,
+    resolved.manifest.files,
     priorRecords,
   );
 
   let steps: StepReport[] = [];
   if (options.runCommands) {
     try {
-      steps = runSetup(resolved.manifest, options.projectDir);
+      steps = runLifecycle(resolved.manifest, options.phase ?? "install", options.projectDir);
     } catch (error) {
       appendRunLog(
         options.projectDir,
@@ -80,7 +83,90 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
   return report;
 }
 
-function applyTemplates(
+function applyPackFiles(
+  packRoot: string,
+  templateRoot: string,
+  projectDir: string,
+  packId: string,
+  files: FileSpec[],
+  priorRecords: ProjectFileRecord[],
+): TemplateReport {
+  if (files.length > 0) {
+    return applyExplicitFiles(packRoot, projectDir, packId, files, priorRecords);
+  }
+  return applyLegacyTemplates(templateRoot, projectDir, packId, priorRecords);
+}
+
+function applyExplicitFiles(
+  packRoot: string,
+  projectDir: string,
+  packId: string,
+  files: FileSpec[],
+  priorRecords: ProjectFileRecord[],
+): TemplateReport {
+  const report: TemplateReport = { created: 0, updated: 0, records: [] };
+  const priorRecordMap = new Map(priorRecords.map((record) => [record.path, record.checksum]));
+
+  for (const file of files) {
+    const source = join(packRoot, file.from);
+    if (!isSafeRelativePath(file.from) || !isSafeRelativePath(file.to)) {
+      throw new Error(`unsafe file mapping \`${file.from}\` -> \`${file.to}\``);
+    }
+    if (!existsSync(source) || statSync(source).isDirectory()) {
+      throw new Error(`file mapping source does not exist: ${file.from}`);
+    }
+
+    const target = join(projectDir, file.to);
+    mkdirSync(dirname(target), { recursive: true });
+    const content = readFileSync(source, "utf8");
+    const existed = existsSync(target);
+
+    if (!existed) {
+      writeFileSync(target, content);
+      report.created += 1;
+      report.records.push({ path: file.to, checksum: textChecksum(content) });
+      continue;
+    }
+
+    if (file.update === "append_unique") {
+      appendUniqueLines(target, content);
+      report.updated += 1;
+      report.records.push({ path: file.to, checksum: fileChecksum(target) });
+      continue;
+    }
+
+    if (file.update === "managed_block") {
+      if (
+        priorRecordMap.has(file.to) &&
+        isFile(target) &&
+        fileChecksum(target) === priorRecordMap.get(file.to)
+      ) {
+        writeFileSync(target, content);
+        report.records.push({ path: file.to, checksum: textChecksum(content) });
+      } else {
+        upsertManagedBlock(target, packId, file.to, content);
+      }
+      report.updated += 1;
+      continue;
+    }
+
+    if (file.update === "manual_review") {
+      if (
+        priorRecordMap.has(file.to) &&
+        isFile(target) &&
+        fileChecksum(target) === priorRecordMap.get(file.to)
+      ) {
+        writeFileSync(target, content);
+        report.updated += 1;
+        report.records.push({ path: file.to, checksum: textChecksum(content) });
+      }
+    }
+  }
+
+  return report;
+}
+
+function applyLegacyTemplates(
   templateRoot: string,
   projectDir: string,
   packId: string,
@@ -201,4 +287,15 @@ function appendBlock(existing: string, block: string): string {
 
 function normalizePath(path: string): string {
   return path.split(sep).join("/");
+}
+
+function isSafeRelativePath(path: string): boolean {
+  const normalized = normalizePath(path);
+  return (
+    normalized !== "" &&
+    normalized !== "." &&
+    !normalized.startsWith("/") &&
+    !normalized.startsWith("../") &&
+    !normalized.includes("/../")
+  );
 }

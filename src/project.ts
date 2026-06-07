@@ -44,7 +44,7 @@ export function writeProjectState(
     applied_packs: [
       {
         id: manifest.id,
-        name: manifest.name,
+        name: manifest.name ?? manifest.id,
         version: manifest.version,
       },
     ],
