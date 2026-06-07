@@ -12,7 +12,7 @@
 
 OpenDock は、承認済みスターターパックを現在のプロジェクトディレクトリへ
 適用する Bun-first TypeScript CLI です。最初のパックは
-`opendock/codex-designer` で、
+`opendock/oma-codex` で、
 Codex を使うデザイナー向けに Git と `README.md`、`DESIGN.md`、
 `AGENTS.md`、`.gitignore` などのハーネスファイルを準備します。
 
@@ -32,7 +32,7 @@ cd "$project"
 export OPENDOCK_PACKS_DIR="$repo/examples"
 export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
-"$repo/bin/opendock.js" install opendock/codex-designer
+"$repo/bin/opendock.js" install opendock/oma-codex
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -41,13 +41,13 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
 | Command | Purpose |
 |---|---|
-| `opendock install opendock/codex-designer` | 現在のディレクトリにスターターパックをインストールします。 |
+| `opendock install opendock/oma-codex` | 現在のディレクトリにスターターパックをインストールします。 |
 | `opendock update` | インストール済みパックを安全に更新します。 |
 | `opendock doctor` | OpenDock の状態を診断します。 |
 | `opendock log` | 現在のプロジェクトの実行ログを表示します。 |
 | `opendock version` | CLI、schema、registry 情報を表示します。 |
 | `opendock auth login` | DockHub トークンを保存します。 |
-| `opendock deploy codex-designer` | ローカルの `dock.yml` をレビュー用に提出します。 |
+| `opendock deploy oma-codex` | ローカルの `dock.yml` をレビュー用に提出します。 |
 
 ## 安全性
 

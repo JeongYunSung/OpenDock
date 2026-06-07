@@ -12,7 +12,7 @@
 
 OpenDock es una CLI Bun-first escrita en TypeScript que instala starterpacks
 aprobados en el directorio actual del proyecto. El primer paquete es
-`opendock/codex-designer`, pensado para preparar Git y archivos de trabajo como
+`opendock/oma-codex`, pensado para preparar Git y archivos de trabajo como
 `README.md`, `DESIGN.md`, `AGENTS.md` y `.gitignore` para proyectos Codex.
 
 ## Inicio rápido
@@ -31,7 +31,7 @@ cd "$project"
 export OPENDOCK_PACKS_DIR="$repo/examples"
 export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
-"$repo/bin/opendock.js" install opendock/codex-designer
+"$repo/bin/opendock.js" install opendock/oma-codex
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -40,13 +40,13 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
 | Command | Purpose |
 |---|---|
-| `opendock install opendock/codex-designer` | Instala un starterpack en el directorio actual. |
+| `opendock install opendock/oma-codex` | Instala un starterpack en el directorio actual. |
 | `opendock update` | Actualiza de forma segura los paquetes instalados. |
 | `opendock doctor` | Diagnostica el estado OpenDock del proyecto. |
 | `opendock log` | Muestra los logs recientes del proyecto. |
 | `opendock version` | Muestra la versión de CLI, schema y registry. |
 | `opendock auth login` | Guarda un token de DockHub. |
-| `opendock deploy codex-designer` | Envía un `dock.yml` local para revisión. |
+| `opendock deploy oma-codex` | Envía un `dock.yml` local para revisión. |
 
 ## Seguridad
 

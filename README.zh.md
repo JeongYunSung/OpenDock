@@ -12,7 +12,7 @@
 
 OpenDock 是一个 Bun-first TypeScript CLI，用来把经过审核的 starterpack
 安装到当前项目目录。
-首个示例包是 `opendock/codex-designer`，用于为设计师准备 Codex 项目：Git、
+首个示例包是 `opendock/oma-codex`，用于为设计师准备 Codex 项目：Git、
 `README.md`、`DESIGN.md`、`AGENTS.md`、`.gitignore` 等项目工作文件。
 
 ## 快速开始
@@ -31,7 +31,7 @@ cd "$project"
 export OPENDOCK_PACKS_DIR="$repo/examples"
 export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
-"$repo/bin/opendock.js" install opendock/codex-designer
+"$repo/bin/opendock.js" install opendock/oma-codex
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -40,13 +40,13 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
 | Command | Purpose |
 |---|---|
-| `opendock install opendock/codex-designer` | 安装 starterpack 到当前目录。 |
+| `opendock install opendock/oma-codex` | 安装 starterpack 到当前目录。 |
 | `opendock update` | 安全更新已安装的 starterpack。 |
 | `opendock doctor` | 检查项目的 OpenDock 状态。 |
 | `opendock log` | 查看当前项目最近的 OpenDock 日志。 |
 | `opendock version` | 输出 CLI、schema 和 registry 信息。 |
 | `opendock auth login` | 保存 DockHub token。 |
-| `opendock deploy codex-designer` | 提交本地 `dock.yml` 进入审核流程。 |
+| `opendock deploy oma-codex` | 提交本地 `dock.yml` 进入审核流程。 |
 
 ## 安全模型
 

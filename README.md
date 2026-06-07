@@ -11,7 +11,7 @@ small, the setup repeatable, and every generated file auditable.
 
 ![status](https://img.shields.io/badge/status-MVP-2563eb)
 ![language](https://img.shields.io/badge/language-TypeScript-3178c6)
-![schema](https://img.shields.io/badge/schema-opendock%2Fv1-111827)
+![schema](https://img.shields.io/badge/schema-opendock%201-111827)
 ![platform](https://img.shields.io/badge/platform-macOS_first-0f766e)
 
 </div>
@@ -21,21 +21,21 @@ small, the setup repeatable, and every generated file auditable.
 OpenDock is a Bun-first TypeScript CLI for installing approved starterpacks into
 the current project directory.
 
-The first pack is `opendock/codex-designer`: a designer-friendly Codex project
-starter that prepares Git and AI workspace harness files such as `README.md`,
+The first pack is `opendock/oma-codex`: a Codex project starter that prepares
+Git, Oh My Agent, and AI workspace harness files such as `README.md`,
 `DESIGN.md`, `AGENTS.md`, and `.gitignore`.
 
 OpenDock is intentionally not a terminal replacement. It is the small binary you
 run when a project needs a known-good AI setup.
 
 ```bash
-opendock install opendock/codex-designer
+opendock install opendock/oma-codex
 opendock update
 opendock doctor
 opendock log
 opendock version
 opendock auth login
-opendock deploy codex-designer
+opendock deploy oma-codex
 ```
 
 ## Why OpenDock
@@ -47,11 +47,11 @@ that into a reviewed starterpack:
 - **Project-scoped**: installs into the current directory and writes local
   `.opendock/` state.
 - **Approved by design**: remote packs must come from DockHub-approved metadata.
-- **Safe with existing files**: existing files are appended with managed blocks
-  instead of being overwritten.
+- **Safe with existing files**: each file declares its own update policy, such
+  as managed blocks, manual review, or unique-line append.
 - **Small command surface**: install, update, diagnose, inspect logs, auth, and
   deploy.
-- **Automation-ready**: setup steps can run allowed commands such as `git`,
+- **Automation-ready**: lifecycle steps can run allowed commands such as `git`,
   `brew`, `npm`, `bun`, `pip`, `uv`, and `oma` without allowing shell pipelines.
 
 ## Quick Start
@@ -64,7 +64,7 @@ bun run build
 bin/opendock.js version
 ```
 
-Try the included `opendock/codex-designer` fixture in a temporary project:
+Try the included `opendock/oma-codex` fixture in a temporary project:
 
 ```bash
 repo=$PWD
@@ -74,7 +74,7 @@ cd "$project"
 export OPENDOCK_PACKS_DIR="$repo/examples"
 export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
-"$repo/bin/opendock.js" install opendock/codex-designer
+"$repo/bin/opendock.js" install opendock/oma-codex
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -95,13 +95,13 @@ README.md
 
 | Command | Purpose |
 |---|---|
-| `opendock install opendock/codex-designer` | Install an approved starterpack into the current directory. |
+| `opendock install opendock/oma-codex` | Install an approved starterpack into the current directory. |
 | `opendock update` | Re-resolve installed packs and apply newer versions safely. |
 | `opendock doctor` | Show whether the current directory has valid OpenDock state. |
 | `opendock log` | Print recent OpenDock runs for the current project. |
 | `opendock version` | Print CLI version, schema version, and default registry. |
 | `opendock auth login` | Store a DockHub token for authenticated commands. |
-| `opendock deploy codex-designer` | Submit a local `dock.yml` starterpack for DockHub review. |
+| `opendock deploy oma-codex` | Submit a local `dock.yml` starterpack for DockHub review. |
 
 `install` is public. `deploy` requires `opendock auth login`.
 
@@ -110,26 +110,51 @@ README.md
 A starterpack is a directory with a `dock.yml` file and optional `templates/`.
 
 ```yaml
-schema: opendock/v1
-kind: starterpack
-id: opendock/codex-designer
-name: Designer Codex Starter Pack
-summary: Set up Codex, Oh My Agent, and project harness files for designers.
-version: 1.0.0
+opendock: 1
+id: opendock/oma-codex
+version: 1.2.0
 
-needs:
-  git: latest
+files:
+  - from: templates/DESIGN.md
+    to: DESIGN.md
+    update: managed_block
 
-setup:
-  - id: git
-    name: Git setup
-    check: git status
-    run: git init -b main
-    messages:
-      checking: Checking Git state.
-      ready: Git is already ready.
-      running: Initializing Git.
-      done: Git is ready.
+  - from: templates/README.md
+    to: README.md
+    update: manual_review
+
+  - from: templates/.gitignore
+    to: .gitignore
+    update: append_unique
+
+lifecycle:
+  install:
+    - id: git-init
+      check: git status
+      run: git init -b main
+
+    - id: install-bun
+      check: bun --version
+      version: ">=1.3.0"
+      run: brew install bun
+
+    - id: install-oma-cli
+      check: oma --version
+      version: ">=9.0.0"
+      run: bun install --global oh-my-agent@latest
+
+    - id: apply-oma-project
+      check: test -f .agents/oma-config.yaml
+      run: oma install
+
+  update:
+    - id: update-oma-project
+      run: oma update -y --vendor codex
+
+  doctor:
+    - id: oma
+      version: ">=9.0.0"
+      check: oma --version
 ```
 
 Template files live under `templates/` and are applied relative to the project
@@ -144,10 +169,10 @@ the trust boundary explicit:
 - Local development packs are loaded only when `OPENDOCK_PACKS_DIR` is set.
 - Remote packs are resolved from `OPENDOCK_REGISTRY_URL` or `https://opendock.io`.
 - Remote metadata must be approved, signed, and checksum-matched before unpack.
-- Setup commands reject shell operators such as pipes, redirects, `&&`, `||`, and
-  command substitution.
-- Only allowlisted command families can run during setup.
-- Existing files are preserved by managed append blocks.
+- Lifecycle commands reject shell operators such as pipes, redirects, `&&`,
+  `||`, and command substitution.
+- Only allowlisted command families can run during lifecycle steps.
+- Existing files follow the pack's declared update policy.
 - `.gitignore` receives unique appended lines, not repeated blocks.
 - Detailed logs are stored in the OpenDock data directory, not in project source.
 
@@ -167,12 +192,12 @@ src/
   cli.ts              # commander CLI entrypoint
   installer.ts        # install/update template application
   resolver.ts         # local and DockHub pack resolution
-  runner.ts           # setup command allowlist runner
+  runner.ts           # lifecycle command allowlist runner
   dockhub.ts          # DockHub API client boundary
 tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
-  codex-designer/     # local starterpack fixture
+  oma-codex/          # local starterpack fixture
 docs/plans/work/      # implementation plan and verification notes
 ```
 
@@ -185,8 +210,8 @@ bun run lint
 bun run check
 ```
 
-The integration tests use temporary directories and the local
-`examples/codex-designer` pack.
+The integration tests use temporary directories and generated local pack
+fixtures. The `examples/oma-codex` pack is a real starterpack example.
 
 ## Current Scope
 

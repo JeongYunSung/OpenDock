@@ -15,7 +15,7 @@
 
 OpenDock은 현재 디렉터리에 승인된 스타터팩을 적용하는 Bun-first TypeScript
 CLI입니다. 첫
-스타터팩은 `opendock/codex-designer`이며, 디자이너가 Codex 프로젝트를 바로
+스타터팩은 `opendock/oma-codex`이며, 디자이너가 Codex 프로젝트를 바로
 시작할 수 있도록 Git과 `README.md`, `DESIGN.md`, `AGENTS.md`, `.gitignore`
 같은 작업 하네스 파일을 준비합니다.
 
@@ -39,7 +39,7 @@ cd "$project"
 export OPENDOCK_PACKS_DIR="$repo/examples"
 export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
-"$repo/bin/opendock.js" install opendock/codex-designer
+"$repo/bin/opendock.js" install opendock/oma-codex
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -48,13 +48,13 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
 | 명령어 | 역할 |
 |---|---|
-| `opendock install opendock/codex-designer` | 현재 디렉터리에 스타터팩을 설치합니다. |
+| `opendock install opendock/oma-codex` | 현재 디렉터리에 스타터팩을 설치합니다. |
 | `opendock update` | 설치된 스타터팩의 새 버전을 확인하고 안전하게 적용합니다. |
 | `opendock doctor` | 프로젝트의 OpenDock 상태를 진단합니다. |
 | `opendock log` | 현재 프로젝트의 최근 실행 로그를 보여줍니다. |
 | `opendock version` | CLI, 스키마, 기본 레지스트리 정보를 출력합니다. |
 | `opendock auth login` | DockHub 토큰을 저장합니다. |
-| `opendock deploy codex-designer` | 로컬 `dock.yml` 스타터팩을 검토용으로 제출합니다. |
+| `opendock deploy oma-codex` | 로컬 `dock.yml` 스타터팩을 검토용으로 제출합니다. |
 
 ## 안전 모델
 
