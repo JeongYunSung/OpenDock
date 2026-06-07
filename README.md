@@ -52,7 +52,8 @@ that into a reviewed starterpack:
 - **Small command surface**: install, update, diagnose, inspect logs, auth, and
   deploy.
 - **Automation-ready**: lifecycle steps can run allowed commands such as `git`,
-  `brew`, `npm`, `bun`, `pip`, `uv`, and `oma` without allowing shell pipelines.
+  `brew`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, and `omx` without
+  allowing shell pipelines.
 
 ## Quick Start
 
@@ -105,11 +106,13 @@ README.md
 ## Pack Format
 
 A starterpack is a directory with a `dock.yml` file and optional `templates/`.
+See [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) for the detailed
+Korean authoring guide.
 
 ```yaml
 opendock: 1
-id: opendock/oma-codex
-version: 1.2.0
+id: opendock/codex
+version: 0.1.0
 
 files:
   - from: templates/DESIGN.md
@@ -130,48 +133,40 @@ lifecycle:
       check: git status
       run: git init -b main
 
-    - id: install-bun
-      check: bun --version
-      version: ">=1.3.0"
-      run: brew install bun
+    - id: install-node
+      check: node --version
+      version: ">=22.0.0 <25.0.0"
+      run: brew install node
 
-    - id: install-oma-cli
-      check: oma --version
-      version: ">=8.43.0"
-      run: bun install --global oh-my-agent@latest
+    - id: install-codex-cli
+      check: codex --version
+      version: ">=0.0.0"
+      run: npm install --global @openai/codex@latest
 
-    - id: apply-oma-project
-      check: test -f .agents/oma-config.yaml
-      interactive: user
-      run: oma install
-      timeout_ms: 600000
-
-    - id: verify-oma
-      run: oma doctor
+    - id: verify-codex-cli
+      run: codex --version
       timeout_ms: 60000
 
   update:
-    - id: update-oma-cli
-      run: bun install --global oh-my-agent@latest
+    - id: update-codex-cli
+      run: npm install --global @openai/codex@latest
 
-    - id: update-oma-project
-      run: oma update -y --vendor codex
-
-    - id: verify-oma
-      run: oma doctor
+    - id: verify-codex-cli
+      run: codex --version
       timeout_ms: 60000
 
   doctor:
-    - id: oma
-      version: ">=8.43.0"
-      check: oma --version
+    - id: node
+      version: ">=22.0.0 <25.0.0"
+      check: node --version
 
-    - id: oma-project
-      check: test -f .agents/oma-config.yaml
-      timeout_ms: 5000
+    - id: npm
+      version: ">=10.0.0"
+      check: npm --version
 
-    - id: oma-doctor
-      check: oma doctor
+    - id: codex
+      version: ">=0.0.0"
+      check: codex --version
       timeout_ms: 60000
 ```
 
@@ -185,11 +180,11 @@ approved key sequence through a macOS `expect` PTY:
 lifecycle:
   install:
     - id: user-driven-tui
-      run: oma install
+      run: codex
       interactive: user
 
     - id: scripted-tui
-      run: oma install
+      run: codex
       interactive:
         mode: scripted
         inputs:
@@ -239,7 +234,14 @@ tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
   oma-codex/          # local starterpack fixture
+  git/                # Git install/init example
+  codex/              # Codex CLI example
+  claude-code/        # Claude Code example
+  oh-my-codex/        # Codex CLI + Oh My Codex example
+  oh-my-openagent/    # Codex CLI + Oh My OpenAgent example
 docs/plans/work/      # implementation plan and verification notes
+docs/guides/
+  dock-yml.md         # detailed Korean dock.yml authoring guide
 ```
 
 ## Development
@@ -252,7 +254,7 @@ bun run check
 ```
 
 The integration tests use temporary directories and generated local pack
-fixtures. The `examples/oma-codex` pack is a real starterpack example.
+fixtures. The `examples/` packs are real starterpack examples.
 
 ## Current Scope
 

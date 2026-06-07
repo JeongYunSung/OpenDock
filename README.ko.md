@@ -53,6 +53,10 @@ cd "$project"
 | `opendock auth login` | DockHub 토큰을 저장합니다. |
 | `opendock deploy oma-codex` | 로컬 `dock.yml` 스타터팩을 검토용으로 제출합니다. |
 
+## dock.yml 작성 가이드
+
+Codex CLI 설치 기준의 상세 starterpack 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)를 참고하세요. `examples/git`, `examples/codex`, `examples/claude-code`, `examples/oh-my-codex`, `examples/oh-my-openagent`에도 실제 예시가 들어 있습니다.
+
 ## 안전 모델
 
 - pack reference는 `owner/name` 형식만 허용합니다.
