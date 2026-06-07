@@ -40,12 +40,16 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 | Command | Purpose |
 |---|---|
 | `opendock install opendock/oma-codex` | 安装 starterpack 到当前目录。 |
-| `opendock update` | 安全更新已安装的 starterpack。 |
-| `opendock doctor` | 检查项目的 OpenDock 状态。 |
+| `opendock install opendock/oma-codex --platform windows` | 使用显式 platform 安装，而不是自动检测当前系统。 |
+| `opendock update` | 使用 lock 中记录的 platform 安全更新已安装的 starterpack。 |
+| `opendock doctor` | 使用 lock 中记录的 platform 检查项目的 OpenDock 状态。 |
 | `opendock log` | 查看当前项目最近的 OpenDock 日志。 |
 | `opendock version` | 输出 CLI、schema 和 registry 信息。 |
+| `opendock bootstrap mac` | 为 macOS starterpack 检查或安装 Homebrew。 |
 | `opendock auth login` | 保存 DockHub token。 |
 | `opendock deploy oma-codex` | 提交本地 `dock.yml` 进入审核流程。 |
+
+Platform 专用 lifecycle 命令写在 step 的 `platforms` 中。安装时选中的 platform 会保存到 `.opendock/dock.lock.yml`，并在 `update` 和 `doctor` 中复用。
 
 ## 安全模型
 

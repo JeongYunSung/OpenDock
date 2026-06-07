@@ -501,7 +501,10 @@ function commandEnvironment(program: string): NodeJS.ProcessEnv {
   return env;
 }
 
-function assertManifestSupportsPlatform(manifest: PackManifest, platform: OpenDockPlatform): void {
+export function assertManifestSupportsPlatform(
+  manifest: PackManifest,
+  platform: OpenDockPlatform,
+): void {
   const supported = collectManifestPlatforms(manifest);
   if (supported.size === 0 || supported.has(platform)) {
     return;

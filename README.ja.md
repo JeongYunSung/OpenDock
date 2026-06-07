@@ -41,12 +41,16 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 | Command | Purpose |
 |---|---|
 | `opendock install opendock/oma-codex` | 現在のディレクトリにスターターパックをインストールします。 |
-| `opendock update` | インストール済みパックを安全に更新します。 |
-| `opendock doctor` | OpenDock の状態を診断します。 |
+| `opendock install opendock/oma-codex --platform windows` | 自動検出の代わりに明示した platform でインストールします。 |
+| `opendock update` | lock に記録された platform でインストール済みパックを安全に更新します。 |
+| `opendock doctor` | lock に記録された platform で OpenDock の状態を診断します。 |
 | `opendock log` | 現在のプロジェクトの実行ログを表示します。 |
 | `opendock version` | CLI、schema、registry 情報を表示します。 |
+| `opendock bootstrap mac` | macOS 用スターターパックのために Homebrew を確認またはインストールします。 |
 | `opendock auth login` | DockHub トークンを保存します。 |
 | `opendock deploy oma-codex` | ローカルの `dock.yml` をレビュー用に提出します。 |
+
+Platform 別の lifecycle コマンドは、step 内の `platforms` で定義します。選択された platform は `.opendock/dock.lock.yml` に保存され、`update` と `doctor` で再利用されます。
 
 ## 安全性
 

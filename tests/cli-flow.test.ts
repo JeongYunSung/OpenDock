@@ -317,6 +317,42 @@ describe("opendock TypeScript CLI", () => {
 
   it("rejects unsupported platforms and platform-specific package managers", async () => {
     const project = await tempDir();
+    const packs = await tempDir();
+    const packRoot = join(packs, "test", "mac-only");
+    mkdirSync(join(packRoot, "templates"), { recursive: true });
+    writeFileSync(join(packRoot, "templates", "README.md"), "# Mac-only pack\n");
+    writeFileSync(
+      join(packRoot, "dock.yml"),
+      `opendock: 1
+id: test/mac-only
+version: 1.0.0
+files:
+  - from: templates/README.md
+    to: README.md
+    update: manual_review
+lifecycle:
+  install:
+    - id: install-tool
+      platforms:
+        macos:
+          run: mkdir .mac-tool
+`,
+    );
+
+    await expect(
+      install({
+        packRef: PackRef.parse("test/mac-only"),
+        projectDir: project,
+        runCommands: true,
+        operation: "install",
+        phase: "install",
+        platform: "windows",
+        resolve: localResolver(packs),
+      }),
+    ).rejects.toThrow("does not support platform `windows`");
+    expect(existsSync(join(project, "README.md"))).toBe(false);
+    expect(existsSync(join(project, ".opendock", "dock.lock.yml"))).toBe(false);
+
     const macOnly = packManifestSchema.parse({
       opendock: 1,
       id: "test/mac-only",

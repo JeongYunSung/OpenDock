@@ -5,7 +5,7 @@ import type { FileSpec, LifecyclePhase, PackRef } from "./pack.js";
 import { detectPlatform, type OpenDockPlatform } from "./platform.js";
 import { type ProjectFileRecord, readProjectFile, writeProjectState } from "./project.js";
 import { fileChecksum, isFile, type ResolvedPack, resolvePack, textChecksum } from "./resolver.js";
-import { runLifecycle, type StepReport } from "./runner.js";
+import { assertManifestSupportsPlatform, runLifecycle, type StepReport } from "./runner.js";
 
 export type PackResolver = (packRef: PackRef) => Promise<ResolvedPack> | ResolvedPack;
 
@@ -37,6 +37,7 @@ interface TemplateReport {
 export async function install(options: InstallOptions): Promise<InstallReport> {
   const resolved = await (options.resolve ?? resolvePack)(options.packRef);
   const platform = options.platform ?? detectPlatform();
+  assertManifestSupportsPlatform(resolved.manifest, platform);
   const priorRecords = readProjectFile(options.projectDir)?.files ?? [];
   const templateReport = applyPackFiles(
     resolved.root,

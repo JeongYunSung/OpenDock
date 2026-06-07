@@ -40,12 +40,16 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 | Command | Purpose |
 |---|---|
 | `opendock install opendock/oma-codex` | Instala un starterpack en el directorio actual. |
-| `opendock update` | Actualiza de forma segura los paquetes instalados. |
-| `opendock doctor` | Diagnostica el estado OpenDock del proyecto. |
+| `opendock install opendock/oma-codex --platform windows` | Instala usando una platform explícita en lugar de detectar el sistema actual. |
+| `opendock update` | Actualiza de forma segura los paquetes instalados usando la platform guardada en el lock. |
+| `opendock doctor` | Diagnostica el estado OpenDock del proyecto usando la platform guardada en el lock. |
 | `opendock log` | Muestra los logs recientes del proyecto. |
 | `opendock version` | Muestra la versión de CLI, schema y registry. |
+| `opendock bootstrap mac` | Verifica o instala Homebrew para starterpacks de macOS. |
 | `opendock auth login` | Guarda un token de DockHub. |
 | `opendock deploy oma-codex` | Envía un `dock.yml` local para revisión. |
+
+Los comandos lifecycle específicos por platform se definen dentro de `platforms` en cada step. La platform elegida se guarda en `.opendock/dock.lock.yml` y se reutiliza en `update` y `doctor`.
 
 ## Seguridad
 
