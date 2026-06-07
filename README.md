@@ -64,15 +64,12 @@ bun run build
 bin/opendock.js version
 ```
 
-Try the included `opendock/oma-codex` fixture in a temporary project:
+Try the approved `opendock/oma-codex` pack in a temporary project:
 
 ```bash
 repo=$PWD
 project=$(mktemp -d)
-
 cd "$project"
-export OPENDOCK_PACKS_DIR="$repo/examples"
-export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
 "$repo/bin/opendock.js" install opendock/oma-codex
 "$repo/bin/opendock.js" doctor
@@ -206,8 +203,8 @@ OpenDock treats starterpacks as powerful project setup recipes, so the MVP keeps
 the trust boundary explicit:
 
 - Pack references must be in `owner/name` form and cannot contain path traversal.
-- Local development packs are loaded only when `OPENDOCK_PACKS_DIR` is set.
-- Remote packs are resolved from `OPENDOCK_REGISTRY_URL` or `https://opendock.io`.
+- Packs are resolved only from the fixed OpenCode registry at `https://opencode.app`.
+- Runtime environment variables cannot change the pack source or registry host.
 - Remote metadata must be approved, signed, and checksum-matched before unpack.
 - Lifecycle commands reject shell operators such as pipes, redirects, `&&`,
   `||`, and command substitution.
@@ -226,9 +223,7 @@ the trust boundary explicit:
 
 | Variable | Use |
 |---|---|
-| `OPENDOCK_PACKS_DIR` | Resolve starterpacks from a local fixture directory. |
 | `OPENDOCK_DATA_DIR` | Override the user data/cache/log directory. |
-| `OPENDOCK_REGISTRY_URL` | Point remote registry calls at another DockHub-compatible API. |
 | `OPENDOCK_AUTH_TOKEN` | Provide a login token non-interactively. |
 
 ## Repository Layout

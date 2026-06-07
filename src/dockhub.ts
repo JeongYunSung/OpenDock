@@ -1,4 +1,4 @@
-import { API_PREFIX } from "./constants.js";
+import { API_PREFIX, DEFAULT_REGISTRY_URL } from "./constants.js";
 
 export interface PackVersionResponse {
   id: string;
@@ -23,12 +23,6 @@ export interface SubmissionResponse {
 }
 
 export class DockHubClient {
-  private readonly baseUrl: string;
-
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl.replace(/\/+$/, "");
-  }
-
   async latestPackVersion(owner: string, name: string): Promise<PackVersionResponse> {
     const url = `${this.apiBase()}/packs/${owner}/${name}/versions/latest`;
     return this.requestJson<PackVersionResponse>(url);
@@ -65,7 +59,7 @@ export class DockHubClient {
   }
 
   private apiBase(): string {
-    return `${this.baseUrl}${API_PREFIX}`;
+    return `${DEFAULT_REGISTRY_URL}${API_PREFIX}`;
   }
 
   private async requestJson<T>(url: string, init?: RequestInit): Promise<T> {

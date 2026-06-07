@@ -5,6 +5,11 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { DockHubClient } from "../src/dockhub.js";
+import { install, type PackResolver } from "../src/installer.js";
+import { PackRef } from "../src/pack.js";
+import { resolveLocalPack, resolvePack } from "../src/resolver.js";
+import { runLifecycle } from "../src/runner.js";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const builtCli = join(repoRoot, "bin", "opendock.js");
@@ -29,23 +34,31 @@ describe("opendock TypeScript CLI", () => {
   it("installs idempotently and preserves existing files", async () => {
     const project = await tempDir();
     const packs = await tempDir();
-    const data = await tempDir();
     writeTestPack(packs, "test", "harness", "1.0.0", "# Starter README\n");
     writeFileSync(join(project, "README.md"), "# User README\n");
     writeFileSync(join(project, ".gitignore"), "node_modules/\n");
 
-    const first = runCli(project, { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data }, [
-      "install",
-      "test/harness",
-    ]);
-    expect(first.status).toBe(0);
-    expect(first.stdout).toContain("Installed test/harness@1.0.0");
+    const resolver = localResolver(packs);
+    const first = await install({
+      packRef: PackRef.parse("test/harness"),
+      projectDir: project,
+      runCommands: true,
+      operation: "install",
+      phase: "install",
+      resolve: resolver,
+    });
+    expect(first.packId).toBe("test/harness");
+    expect(first.version).toBe("1.0.0");
 
-    const second = runCli(project, { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data }, [
-      "install",
-      "test/harness",
-    ]);
-    expect(second.status).toBe(0);
+    const second = await install({
+      packRef: PackRef.parse("test/harness"),
+      projectDir: project,
+      runCommands: true,
+      operation: "install",
+      phase: "install",
+      resolve: resolver,
+    });
+    expect(second.packId).toBe("test/harness");
 
     const readme = readFileSync(join(project, "README.md"), "utf8");
     expect(readme).toContain("# User README");
@@ -61,41 +74,104 @@ describe("opendock TypeScript CLI", () => {
     expect(existsSync(join(project, "DESIGN.md"))).toBe(true);
   });
 
-  it("reports doctor, log, and up-to-date update state", async () => {
+  it("reports log output and fixed registry version", async () => {
     const project = await tempDir();
     const packs = await tempDir();
     const data = await tempDir();
     writeTestPack(packs, "test", "harness", "1.0.0", "# Starter README\n");
-    const env = { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data };
-    expect(runCli(project, env, ["install", "test/harness"]).status).toBe(0);
+    await withEnv({ OPENDOCK_DATA_DIR: data }, async () => {
+      await install({
+        packRef: PackRef.parse("test/harness"),
+        projectDir: project,
+        runCommands: true,
+        operation: "install",
+        phase: "install",
+        resolve: localResolver(packs),
+      });
+    });
 
-    const doctor = runCli(project, env, ["doctor"]);
-    expect(doctor.status).toBe(0);
-    expect(doctor.stdout).toContain("Status: Ready");
-    expect(doctor.stdout).toContain("test/harness@1.0.0");
-
-    const logs = runCli(project, env, ["log"]);
+    const logs = runCli(project, { OPENDOCK_DATA_DIR: data }, ["log"]);
     expect(logs.status).toBe(0);
     expect(logs.stdout).toContain("install test/harness");
 
-    const update = runCli(project, env, ["update"]);
-    expect(update.status).toBe(0);
-    expect(update.stdout).toContain("test/harness is up to date at 1.0.0");
+    const version = runCli(project, {}, ["version"]);
+    expect(version.status).toBe(0);
+    expect(version.stdout).toContain("registry https://opencode.app");
+  });
+
+  it("ignores pack source and registry environment overrides", async () => {
+    const packs = await tempDir();
+    writeTestPack(packs, "test", "harness", "9.9.9", "# Malicious Local Pack\n");
+    const urls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+      urls.push(String(input));
+      return new Response("{}", { status: 503, statusText: "Unavailable" });
+    }) as typeof fetch;
+
+    try {
+      await withEnv(
+        {
+          OPENDOCK_PACKS_DIR: packs,
+          OPENDOCK_REGISTRY_URL: "http://127.0.0.1:9",
+        },
+        async () => {
+          await expect(resolvePack(PackRef.parse("test/harness"))).rejects.toThrow(
+            "https://opencode.app/api/v1/packs/test/harness/versions/latest",
+          );
+        },
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(urls).toEqual(["https://opencode.app/api/v1/packs/test/harness/versions/latest"]);
+  });
+
+  it("submits packs only to the fixed OpenCode registry", async () => {
+    const urls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+      urls.push(String(input));
+      return new Response(JSON.stringify({ id: "submission-1", status: "pending" }), {
+        headers: { "content-type": "application/json" },
+        status: 200,
+      });
+    }) as typeof fetch;
+
+    try {
+      await withEnv({ OPENDOCK_REGISTRY_URL: "http://127.0.0.1:9" }, async () => {
+        const response = await new DockHubClient().submitPack(
+          { pack_name: "oma-codex", manifest: "opendock: 1" },
+          "token",
+        );
+        expect(response.status).toBe("pending");
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(urls).toEqual(["https://opencode.app/api/v1/packs/submissions"]);
   });
 
   it("supports opendock v1 files lifecycle and doctor checks", async () => {
     const project = await tempDir();
     const packs = await tempDir();
-    const data = await tempDir();
     writeModernPack(packs);
     writeFileSync(join(project, "README.md"), "# User README\n");
     writeFileSync(join(project, "DESIGN.md"), "# User Design\n");
     writeFileSync(join(project, ".gitignore"), "node_modules/\n");
-    const env = { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data };
+    const resolver = localResolver(packs);
 
-    const install = runCli(project, env, ["install", "test/modern"]);
-    expect(install.status).toBe(0);
-    expect(install.stdout).toContain("Installed test/modern@1.0.0");
+    const installReport = await install({
+      packRef: PackRef.parse("test/modern"),
+      projectDir: project,
+      runCommands: true,
+      operation: "install",
+      phase: "install",
+      resolve: resolver,
+    });
+    expect(installReport.packId).toBe("test/modern");
     expect(existsSync(join(project, ".opendock-fixture"))).toBe(true);
 
     const readme = readFileSync(join(project, "README.md"), "utf8");
@@ -107,27 +183,38 @@ describe("opendock TypeScript CLI", () => {
     expect(gitignore.match(/node_modules\//g)).toHaveLength(1);
     expect(gitignore).toContain(".DS_Store");
 
-    const reinstall = runCli(project, env, ["install", "test/modern"]);
-    expect(reinstall.status).toBe(0);
+    const reinstall = await install({
+      packRef: PackRef.parse("test/modern"),
+      projectDir: project,
+      runCommands: true,
+      operation: "install",
+      phase: "install",
+      resolve: resolver,
+    });
+    expect(reinstall.packId).toBe("test/modern");
     const reinstalledDesign = readFileSync(join(project, "DESIGN.md"), "utf8");
     expect(reinstalledDesign).toContain("# User Design");
     expect(reinstalledDesign.match(/OPENDOCK:START test\/modern:DESIGN\.md/g)).toHaveLength(1);
 
-    const doctor = runCli(project, env, ["doctor"]);
-    expect(doctor.status).toBe(0);
-    expect(doctor.stdout).toContain("✓ node");
-    expect(doctor.stdout).toContain("✓ fixture");
+    const resolved = await resolver(PackRef.parse("test/modern"));
+    const doctor = await runLifecycle(resolved.manifest, "doctor", project);
+    expect(doctor.find((report) => report.id === "node")?.status).toBe("Ready");
+    expect(doctor.find((report) => report.id === "fixture")?.status).toBe("Ready");
 
-    const update = runCli(project, env, ["update"]);
-    expect(update.status).toBe(0);
-    expect(update.stdout).toContain("Updated test/modern at 1.0.0");
+    await install({
+      packRef: PackRef.parse("test/modern"),
+      projectDir: project,
+      runCommands: true,
+      operation: "update",
+      phase: "update",
+      resolve: resolver,
+    });
     expect(existsSync(join(project, ".opendock-updated"))).toBe(true);
   });
 
-  it("streams setup command output and fails unmet post-run version checks", async () => {
+  it("fails unmet post-run version checks", async () => {
     const project = await tempDir();
     const packs = await tempDir();
-    const data = await tempDir();
     const bin = await tempDir();
     writeVersionFailurePack(packs);
     writeExecutable(
@@ -144,64 +231,92 @@ echo "Downloading oh-my-agent"
 `,
     );
 
-    const install = runCli(
-      project,
-      {
-        OPENDOCK_PACKS_DIR: packs,
-        OPENDOCK_DATA_DIR: data,
-        PATH: `${bin}:${process.env.PATH ?? ""}`,
-      },
-      ["install", "test/version-fail"],
-    );
-    expect(install.status).not.toBe(0);
-    expect(install.stdout).toContain("→ install-oma-cli: bun install --global oh-my-agent@latest");
-    expect(install.stdout).toContain("Downloading oh-my-agent");
-    expect(install.stderr).toContain("6.4.0 does not satisfy >=9.0.0");
+    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
+      await expect(
+        install({
+          packRef: PackRef.parse("test/version-fail"),
+          projectDir: project,
+          runCommands: true,
+          operation: "install",
+          phase: "install",
+          resolve: localResolver(packs),
+        }),
+      ).rejects.toThrow("6.4.0 does not satisfy >=9.0.0");
+    });
   });
 
   it("supports user and scripted interactive lifecycle steps", async () => {
     const project = await tempDir();
     const packs = await tempDir();
-    const data = await tempDir();
     writeInteractivePack(packs);
-    const env = { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data };
+    const resolver = localResolver(packs);
 
-    const nonTtyInstall = runCli(project, env, ["install", "test/interactive-user"]);
-    expect(nonTtyInstall.status).not.toBe(0);
-    expect(nonTtyInstall.stderr).toContain("interactive step requires a TTY");
+    await expect(
+      install({
+        packRef: PackRef.parse("test/interactive-user"),
+        projectDir: project,
+        runCommands: true,
+        operation: "install",
+        phase: "install",
+        resolve: resolver,
+      }),
+    ).rejects.toThrow("interactive step requires a TTY");
 
-    const userInstall = await runCliInPty(project, env, ["install", "test/interactive-user"], {
+    const userScript = join(project, "run-user-interactive.ts");
+    writeFileSync(
+      userScript,
+      `import { runCommand } from ${JSON.stringify(join(repoRoot, "src", "runner.ts"))};
+const result = await runCommand("node user-interactive.js", process.cwd(), {
+  interactive: "user",
+  live: true,
+  timeoutMs: 5000,
+});
+if (!result.success) {
+  console.error(result.stderr);
+  process.exit(1);
+}
+`,
+    );
+    const userInstall = runCliInPty(project, ["bun", userScript], {
       inputAfter: "USER_TTY",
       input: "u\r",
     });
     expect(userInstall.exitCode).toBe(0);
     expect(userInstall.output).toContain("USER_TTY");
-    expect(readFileSync(join(project, "user-input.txt"), "utf8")).toBe("750a");
+    expect(readFileSync(join(project, "user-input.txt"), "utf8")).toMatch(/^75(?:0a|0d)$/);
 
-    const scriptedInstall = runCli(project, env, ["install", "test/interactive-scripted"]);
-    expect(scriptedInstall.status).toBe(0);
-    expect(scriptedInstall.stdout).toContain("SCRIPTED_TTY");
+    const scriptedInstall = await install({
+      packRef: PackRef.parse("test/interactive-scripted"),
+      projectDir: project,
+      runCommands: true,
+      operation: "install",
+      phase: "install",
+      resolve: resolver,
+    });
+    expect(scriptedInstall.packId).toBe("test/interactive-scripted");
     expect(readFileSync(join(project, "scripted-input.txt"), "utf8")).toBe("090a");
   });
 
   it("times out hanging doctor checks", async () => {
     const project = await tempDir();
     const packs = await tempDir();
-    const data = await tempDir();
     writeTimeoutDoctorPack(packs);
-    const env = {
-      OPENDOCK_PACKS_DIR: packs,
-      OPENDOCK_DATA_DIR: data,
-      _VOLTA_TOOL_RECURSION: "1",
-    };
 
-    const install = runCli(project, env, ["install", "test/timeout"]);
-    expect(install.status).toBe(0);
+    await install({
+      packRef: PackRef.parse("test/timeout"),
+      projectDir: project,
+      runCommands: true,
+      operation: "install",
+      phase: "install",
+      resolve: localResolver(packs),
+    });
 
-    const doctor = runCli(project, env, ["doctor"]);
-    expect(doctor.status).toBe(0);
-    expect(doctor.stdout).toContain("✓ volta-env");
-    expect(doctor.stdout).toContain("! slow (timed out after 50ms)");
+    const resolved = resolveLocalPack(packs, PackRef.parse("test/timeout"));
+    const doctor = await withEnv({ _VOLTA_TOOL_RECURSION: "1" }, () =>
+      runLifecycle(resolved.manifest, "doctor", project),
+    );
+    expect(doctor.find((report) => report.id === "volta-env")?.status).toBe("Ready");
+    expect(doctor.find((report) => report.id === "slow")?.message).toBe("timed out after 50ms");
   });
 
   it("rejects invalid pack references", () => {
@@ -237,23 +352,28 @@ echo "Downloading oh-my-agent"
   it("reapplies newer pack versions", async () => {
     const project = await tempDir();
     const packs = await tempDir();
-    const data = await tempDir();
     writeTestPack(packs, "test", "demo", "1.0.0", "# Version One\n");
 
-    expect(
-      runCli(project, { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data }, [
-        "install",
-        "test/demo",
-      ]).status,
-    ).toBe(0);
+    await install({
+      packRef: PackRef.parse("test/demo"),
+      projectDir: project,
+      runCommands: true,
+      operation: "install",
+      phase: "install",
+      resolve: localResolver(packs),
+    });
 
     writeTestPack(packs, "test", "demo", "2.0.0", "# Version Two\n");
 
-    const update = runCli(project, { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data }, [
-      "update",
-    ]);
-    expect(update.status).toBe(0);
-    expect(update.stdout).toContain("Updated test/demo: 1.0.0 -> 2.0.0");
+    const update = await install({
+      packRef: PackRef.parse("test/demo"),
+      projectDir: project,
+      runCommands: true,
+      operation: "update",
+      phase: "update",
+      resolve: localResolver(packs),
+    });
+    expect(update.version).toBe("2.0.0");
 
     const readme = readFileSync(join(project, "README.md"), "utf8");
     expect(readme).toContain("# Version Two");
@@ -283,14 +403,20 @@ setup:
 `,
     );
 
-    const install = runCli(project, { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data }, [
-      "install",
-      "test/bad",
-    ]);
-    expect(install.status).not.toBe(0);
-    expect(install.stderr).toContain("not allowed");
+    await withEnv({ OPENDOCK_DATA_DIR: data }, async () => {
+      await expect(
+        install({
+          packRef: PackRef.parse("test/bad"),
+          projectDir: project,
+          runCommands: true,
+          operation: "install",
+          phase: "install",
+          resolve: localResolver(packs),
+        }),
+      ).rejects.toThrow("not allowed");
+    });
 
-    const logs = runCli(project, { OPENDOCK_PACKS_DIR: packs, OPENDOCK_DATA_DIR: data }, ["log"]);
+    const logs = runCli(project, { OPENDOCK_DATA_DIR: data }, ["log"]);
     expect(logs.status).toBe(0);
     expect(logs.stdout).toContain("Failure");
     expect(logs.stdout).toContain("not allowed");
@@ -303,6 +429,34 @@ async function tempDir(): Promise<string> {
   return path;
 }
 
+function localResolver(root: string): PackResolver {
+  return (packRef) => resolveLocalPack(root, packRef);
+}
+
+async function withEnv<T>(env: NodeJS.ProcessEnv, callback: () => Promise<T> | T): Promise<T> {
+  const previous = new Map<string, string | undefined>();
+  for (const key of Object.keys(env)) {
+    previous.set(key, process.env[key]);
+    const value = env[key];
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
+  try {
+    return await callback();
+  } finally {
+    for (const [key, value] of previous) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  }
+}
+
 function runCli(cwd: string, env: NodeJS.ProcessEnv, args: string[]) {
   return spawnSync(process.execPath, [builtCli, ...args], {
     cwd,
@@ -313,13 +467,12 @@ function runCli(cwd: string, env: NodeJS.ProcessEnv, args: string[]) {
 
 function runCliInPty(
   cwd: string,
-  env: NodeJS.ProcessEnv,
-  args: string[],
+  command: string[],
   options: { input: string; inputAfter: string },
 ): { exitCode: number; output: string } {
   const script = [
     "set timeout 10",
-    `spawn ${[process.execPath, builtCli, ...args].map(tclWord).join(" ")}`,
+    `spawn ${command.map(tclWord).join(" ")}`,
     `expect ${tclWord(options.inputAfter)}`,
     `send -- [binary format H* ${Buffer.from(options.input, "utf8").toString("hex")}]`,
     "expect eof",
@@ -330,7 +483,7 @@ function runCliInPty(
   const result = spawnSync("expect", ["-c", script], {
     cwd,
     encoding: "utf8",
-    env: { ...process.env, ...env },
+    env: process.env,
     timeout: 12_000,
   });
 

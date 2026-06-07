@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { dataRoot } from "./paths.js";
 
@@ -21,11 +21,12 @@ export function appendRunLog(
   status: RunStatus,
   message: string,
 ): void {
-  const path = projectLogPath(projectDir);
+  const projectPath = canonicalProjectPath(projectDir);
+  const path = projectLogPath(projectPath);
   mkdirSync(dirname(path), { recursive: true });
   const log: RunLog = {
     timestamp: new Date().toISOString(),
-    project_path: projectDir,
+    project_path: projectPath,
     command,
     pack_id: packId,
     status,
@@ -36,7 +37,7 @@ export function appendRunLog(
 }
 
 export function readProjectLogs(projectDir: string): RunLog[] {
-  const path = projectLogPath(projectDir);
+  const path = projectLogPath(canonicalProjectPath(projectDir));
   if (!existsSync(path)) {
     return [];
   }
@@ -49,4 +50,12 @@ export function readProjectLogs(projectDir: string): RunLog[] {
 function projectLogPath(projectDir: string): string {
   const hash = createHash("sha256").update(projectDir).digest("hex");
   return join(dataRoot(), "logs", `${hash}.jsonl`);
+}
+
+function canonicalProjectPath(projectDir: string): string {
+  try {
+    return realpathSync(projectDir);
+  } catch {
+    return projectDir;
+  }
 }

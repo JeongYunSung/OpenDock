@@ -13,7 +13,6 @@ import { tmpdir } from "node:os";
 import { join, relative, resolve, sep } from "node:path";
 import { x as extractTar } from "tar";
 import YAML from "yaml";
-import { DEFAULT_REGISTRY_URL } from "./constants.js";
 import { DockHubClient } from "./dockhub.js";
 import {
   type PackManifest,
@@ -31,9 +30,6 @@ export interface ResolvedPack {
 }
 
 export async function resolvePack(packRef: PackRef): Promise<ResolvedPack> {
-  if (process.env.OPENDOCK_PACKS_DIR) {
-    return resolveLocalPack(process.env.OPENDOCK_PACKS_DIR, packRef);
-  }
   return resolveRemotePack(packRef);
 }
 
@@ -56,8 +52,7 @@ export function resolveLocalPack(packsRoot: string, packRef: PackRef): ResolvedP
 }
 
 async function resolveRemotePack(packRef: PackRef): Promise<ResolvedPack> {
-  const baseUrl = process.env.OPENDOCK_REGISTRY_URL ?? DEFAULT_REGISTRY_URL;
-  const client = new DockHubClient(baseUrl);
+  const client = new DockHubClient();
   const metadata = await client.latestPackVersion(packRef.owner, packRef.name);
 
   if (metadata.id !== packRef.id()) {

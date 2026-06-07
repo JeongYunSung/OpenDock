@@ -118,8 +118,7 @@ export async function run(argv = process.argv): Promise<void> {
         throw new Error("not logged in; run `opendock auth login` first");
       }
       const manifest = readFileSync("dock.yml", "utf8");
-      const registry = process.env.OPENDOCK_REGISTRY_URL ?? DEFAULT_REGISTRY_URL;
-      const client = new DockHubClient(registry);
+      const client = new DockHubClient();
       const response = await client.submitPack({ pack_name: packName, manifest }, token);
       console.log(`Submitted ${packName} for review: ${response.id} (${response.status})`);
     });

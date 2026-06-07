@@ -28,7 +28,6 @@ repo=$PWD
 project=$(mktemp -d)
 
 cd "$project"
-export OPENDOCK_PACKS_DIR="$repo/examples"
 export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
 "$repo/bin/opendock.js" install opendock/oma-codex
@@ -51,6 +50,8 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 ## Seguridad
 
 OpenDock conserva los archivos existentes con bloques administrados, exige
-referencias `owner/name`, valida aprobación, firma y checksum en packs remotos,
-y solo ejecuta comandos de setup permitidos. Los pipelines y operadores de shell
-no están permitidos.
+referencias `owner/name`, resuelve packs solo desde el registry fijo
+`https://opencode.app`, valida aprobación, firma y checksum en packs remotos, y
+solo ejecuta comandos de setup permitidos. El pack source y el registry host no
+pueden cambiarse con variables de entorno en runtime. Los pipelines y
+operadores de shell no están permitidos.

@@ -3,8 +3,10 @@ import { dirname, join, relative, sep } from "node:path";
 import { appendRunLog } from "./logging.js";
 import type { FileSpec, LifecyclePhase, PackRef } from "./pack.js";
 import { type ProjectFileRecord, readProjectFile, writeProjectState } from "./project.js";
-import { fileChecksum, isFile, resolvePack, textChecksum } from "./resolver.js";
+import { fileChecksum, isFile, type ResolvedPack, resolvePack, textChecksum } from "./resolver.js";
 import { runLifecycle, type StepReport } from "./runner.js";
+
+export type PackResolver = (packRef: PackRef) => Promise<ResolvedPack> | ResolvedPack;
 
 export interface InstallOptions {
   packRef: PackRef;
@@ -12,6 +14,7 @@ export interface InstallOptions {
   runCommands: boolean;
   operation: string;
   phase?: LifecyclePhase;
+  resolve?: PackResolver;
 }
 
 export interface InstallReport {
@@ -29,7 +32,7 @@ interface TemplateReport {
 }
 
 export async function install(options: InstallOptions): Promise<InstallReport> {
-  const resolved = await resolvePack(options.packRef);
+  const resolved = await (options.resolve ?? resolvePack)(options.packRef);
   const priorRecords = readProjectFile(options.projectDir)?.files ?? [];
   const templateReport = applyPackFiles(
     resolved.root,

@@ -43,7 +43,7 @@ Core decisions:
 ## Constraints
 
 - Do not modify parent `.agents/` SSOT files.
-- No real DockHub service exists yet, so registry/auth/deploy code must be testable with configurable endpoints and local fixtures.
+- Registry/auth/deploy code must keep the runtime pack source fixed to the approved registry.
 - Commands that execute lifecycle steps must use an allowlist and must not execute arbitrary shell pipelines.
 - Generated build output stays out of source control.
 
@@ -60,9 +60,8 @@ DockHub API draft:
 
 Local development contract:
 
-- `OPENDOCK_PACKS_DIR` may point to local pack fixtures.
 - `OPENDOCK_DATA_DIR` may override the local data/cache/log directory.
-- `OPENDOCK_REGISTRY_URL` may override the default registry URL for tests.
+- Pack source and registry host are not configurable by runtime environment variables.
 
 ## Tasks
 

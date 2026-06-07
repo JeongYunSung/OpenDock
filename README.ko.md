@@ -29,15 +29,12 @@ bun run build
 bin/opendock.js version
 ```
 
-포함된 로컬 스타터팩을 임시 프로젝트에서 실행합니다.
+승인된 스타터팩을 임시 프로젝트에서 실행합니다.
 
 ```bash
 repo=$PWD
 project=$(mktemp -d)
-
 cd "$project"
-export OPENDOCK_PACKS_DIR="$repo/examples"
-export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
 "$repo/bin/opendock.js" install opendock/oma-codex
 "$repo/bin/opendock.js" doctor
@@ -59,6 +56,7 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 ## 안전 모델
 
 - pack reference는 `owner/name` 형식만 허용합니다.
+- pack source와 registry host는 런타임 환경변수로 바꿀 수 없으며 `https://opencode.app`에 고정됩니다.
 - 원격 pack은 DockHub 승인, 서명, 체크섬 검증을 통과해야 합니다.
 - 기존 파일은 덮어쓰지 않고 OpenDock 관리 블록으로 append합니다.
 - `.gitignore`는 중복 라인을 만들지 않습니다.

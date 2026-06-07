@@ -28,7 +28,6 @@ repo=$PWD
 project=$(mktemp -d)
 
 cd "$project"
-export OPENDOCK_PACKS_DIR="$repo/examples"
 export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
 "$repo/bin/opendock.js" install opendock/oma-codex
@@ -50,7 +49,8 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
 ## 安全模型
 
-OpenDock 只接受 `owner/name` 形式的 pack reference。远程 pack 需要通过 DockHub
-批准、签名和 checksum 校验。已有文件不会被直接覆盖，而是写入 OpenDock
-managed block。setup 命令使用 allowlist，并拒绝 pipe、redirect、`&&`、`||`
-等 shell 操作符。
+OpenDock 只接受 `owner/name` 形式的 pack reference，并且只从固定 registry
+`https://opencode.app` 解析 pack；pack source 和 registry host 不能通过运行时环境变量
+修改。远程 pack 需要通过 DockHub 批准、签名和 checksum 校验。已有文件不会被直接覆盖，
+而是写入 OpenDock managed block。setup 命令使用 allowlist，并拒绝 pipe、redirect、
+`&&`、`||` 等 shell 操作符。

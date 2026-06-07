@@ -29,7 +29,6 @@ repo=$PWD
 project=$(mktemp -d)
 
 cd "$project"
-export OPENDOCK_PACKS_DIR="$repo/examples"
 export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
 "$repo/bin/opendock.js" install opendock/oma-codex
@@ -51,6 +50,8 @@ export OPENDOCK_DATA_DIR="$project/.opendock-data"
 
 ## 安全性
 
-OpenDock は `owner/name` 形式の pack reference、DockHub の承認・署名・
-checksum 検証、既存ファイルへの managed block 追記、allowlist ベースの setup
-コマンド実行を採用しています。shell pipeline や redirect は許可されません。
+OpenDock は `owner/name` 形式の pack reference、固定レジストリ
+`https://opencode.app`、DockHub の承認・署名・checksum 検証、既存ファイルへの
+managed block 追記、allowlist ベースの setup コマンド実行を採用しています。
+pack source と registry host は実行時の環境変数では変更できません。shell pipeline
+や redirect は許可されません。
