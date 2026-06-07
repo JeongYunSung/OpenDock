@@ -1,0 +1,58 @@
+opendock: 1
+id: opendock/oh-my-openagent
+version: 0.1.0
+
+lifecycle:
+  install:
+    - id: install-node
+      check: node --version
+      version: ">=22.0.0 <25.0.0"
+      run: brew install node
+
+    - id: install-codex-cli
+      check: codex --version
+      version: ">=0.0.0"
+      run: npm install --global @openai/codex@latest
+
+    - id: install-bun
+      check: bun --version
+      version: ">=1.3.0"
+      run: brew install bun
+
+    - id: install-oh-my-openagent-codex
+      check: bunx oh-my-openagent doctor
+      run: bunx oh-my-openagent install --no-tui --platform=codex --codex-autonomous
+      timeout_ms: 600000
+
+  update:
+    - id: update-codex-cli
+      run: npm install --global @openai/codex@latest
+
+    - id: update-oh-my-openagent-codex
+      run: bunx oh-my-openagent install --no-tui --platform=codex --codex-autonomous
+      timeout_ms: 600000
+
+    - id: verify-oh-my-openagent
+      run: bunx oh-my-openagent doctor
+      timeout_ms: 60000
+
+  doctor:
+    - id: node
+      check: node --version
+      version: ">=22.0.0 <25.0.0"
+
+    - id: npm
+      check: npm --version
+      version: ">=10.0.0"
+
+    - id: bun
+      check: bun --version
+      version: ">=1.3.0"
+
+    - id: codex
+      check: codex --version
+      version: ">=0.0.0"
+
+    - id: oh-my-openagent
+      check: bunx oh-my-openagent doctor
+      timeout_ms: 60000

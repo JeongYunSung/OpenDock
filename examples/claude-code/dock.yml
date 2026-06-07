@@ -1,0 +1,36 @@
+opendock: 1
+id: opendock/claude-code
+version: 0.1.0
+
+lifecycle:
+  install:
+    - id: install-node
+      check: node --version
+      version: ">=22.0.0 <25.0.0"
+      run: brew install node
+
+    - id: install-claude-code
+      check: claude --version
+      version: ">=0.0.0"
+      run: npm install --global @anthropic-ai/claude-code@latest
+
+  update:
+    - id: update-claude-code
+      run: npm install --global @anthropic-ai/claude-code@latest
+
+    - id: verify-claude-code
+      run: claude --version
+      timeout_ms: 60000
+
+  doctor:
+    - id: node
+      check: node --version
+      version: ">=22.0.0 <25.0.0"
+
+    - id: npm
+      check: npm --version
+      version: ">=10.0.0"
+
+    - id: claude-code
+      check: claude --version
+      version: ">=0.0.0"

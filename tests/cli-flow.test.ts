@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { DockHubClient } from "../src/dockhub.js";
 import { install, type PackResolver } from "../src/installer.js";
-import { PackRef } from "../src/pack.js";
+import { PackRef, packManifestSchema } from "../src/pack.js";
 import { resolveLocalPack, resolvePack } from "../src/resolver.js";
 import { runLifecycle } from "../src/runner.js";
 
@@ -212,6 +212,67 @@ describe("opendock TypeScript CLI", () => {
     expect(existsSync(join(project, ".opendock-updated"))).toBe(true);
   });
 
+  it("keeps bundled example manifests valid", () => {
+    const refs = [
+      "opendock/oma-codex",
+      "opendock/git",
+      "opendock/codex",
+      "opendock/claude-code",
+      "opendock/oh-my-codex",
+      "opendock/oh-my-openagent",
+    ];
+    for (const ref of refs) {
+      const resolved = resolveLocalPack(join(repoRoot, "examples"), PackRef.parse(ref));
+      expect(resolved.manifest.id).toBe(ref);
+    }
+  });
+
+  it("runs bundled install/update/doctor examples with a fake toolchain", async () => {
+    const examplesRoot = join(repoRoot, "examples");
+    const bin = await tempDir();
+    writeFakeToolchain(bin);
+
+    const refs = [
+      "opendock/git",
+      "opendock/codex",
+      "opendock/claude-code",
+      "opendock/oh-my-codex",
+      "opendock/oh-my-openagent",
+    ];
+
+    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
+      for (const ref of refs) {
+        const project = await tempDir();
+        const packRef = PackRef.parse(ref);
+        const resolver = localResolver(examplesRoot);
+
+        const installReport = await install({
+          packRef,
+          projectDir: project,
+          runCommands: true,
+          operation: "install",
+          phase: "install",
+          resolve: resolver,
+        });
+        expect(installReport.packId).toBe(ref);
+
+        const updateReport = await install({
+          packRef,
+          projectDir: project,
+          runCommands: true,
+          operation: "update",
+          phase: "update",
+          resolve: resolver,
+        });
+        expect(updateReport.packId).toBe(ref);
+
+        const resolved = resolveLocalPack(examplesRoot, packRef);
+        const doctor = await runLifecycle(resolved.manifest, "doctor", project);
+        expect(doctor.map((report) => report.status)).toEqual(doctor.map(() => "Ready" as const));
+      }
+    });
+  });
+
   it("fails unmet post-run version checks", async () => {
     const project = await tempDir();
     const packs = await tempDir();
@@ -317,6 +378,44 @@ if (!result.success) {
     );
     expect(doctor.find((report) => report.id === "volta-env")?.status).toBe("Ready");
     expect(doctor.find((report) => report.id === "slow")?.message).toBe("timed out after 50ms");
+  });
+
+  it("allows documented AI CLI doctor commands", async () => {
+    const project = await tempDir();
+    const bin = await tempDir();
+    for (const command of ["bunx", "claude", "codex", "omo", "omx"]) {
+      writeExecutable(
+        join(bin, command),
+        `#!/bin/sh
+echo "${command} 1.2.3"
+`,
+      );
+    }
+
+    const manifest = packManifestSchema.parse({
+      opendock: 1,
+      id: "test/ai-tools",
+      lifecycle: {
+        doctor: [
+          { id: "claude", check: "claude --version", version: ">=1.0.0" },
+          { id: "codex", check: "codex --version", version: ">=1.0.0" },
+          { id: "bunx", check: "bunx oh-my-openagent doctor" },
+          { id: "omo", check: "omo version", version: ">=1.0.0" },
+          { id: "omx", check: "omx doctor" },
+        ],
+      },
+    });
+
+    const reports = await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      runLifecycle(manifest, "doctor", project),
+    );
+    expect(reports.map((report) => report.status)).toEqual([
+      "Ready",
+      "Ready",
+      "Ready",
+      "Ready",
+      "Ready",
+    ]);
   });
 
   it("rejects invalid pack references", () => {
@@ -665,4 +764,92 @@ process.stdin.on("data", function(data) {
 function writeExecutable(path: string, content: string): void {
   writeFileSync(path, content);
   chmodSync(path, 0o755);
+}
+
+function writeFakeToolchain(bin: string): void {
+  writeExecutable(
+    join(bin, "brew"),
+    `#!/bin/sh
+echo "brew $*"
+`,
+  );
+  writeExecutable(
+    join(bin, "bun"),
+    `#!/bin/sh
+if [ "$1" = "--version" ]; then
+  echo "1.3.11"
+else
+  echo "bun $*"
+fi
+`,
+  );
+  writeExecutable(
+    join(bin, "bunx"),
+    `#!/bin/sh
+echo "bunx 1.2.3"
+`,
+  );
+  writeExecutable(
+    join(bin, "claude"),
+    `#!/bin/sh
+echo "claude 1.2.3"
+`,
+  );
+  writeExecutable(
+    join(bin, "codex"),
+    `#!/bin/sh
+echo "codex 1.2.3"
+`,
+  );
+  writeExecutable(
+    join(bin, "git"),
+    `#!/bin/sh
+case "$1" in
+  --version)
+    echo "git version 2.40.0"
+    ;;
+  status)
+    if [ -d .git ]; then
+      echo "on branch main"
+      exit 0
+    fi
+    echo "not a git repository" >&2
+    exit 1
+    ;;
+  init)
+    mkdir -p .git
+    echo "initialized git repository"
+    ;;
+  *)
+    echo "git $*"
+    ;;
+esac
+`,
+  );
+  writeExecutable(
+    join(bin, "node"),
+    `#!/bin/sh
+if [ "$1" = "--version" ]; then
+  echo "v22.18.0"
+else
+  echo "node $*"
+fi
+`,
+  );
+  writeExecutable(
+    join(bin, "npm"),
+    `#!/bin/sh
+if [ "$1" = "--version" ]; then
+  echo "10.9.0"
+else
+  echo "npm $*"
+fi
+`,
+  );
+  writeExecutable(
+    join(bin, "omx"),
+    `#!/bin/sh
+echo "omx 1.2.3"
+`,
+  );
 }
