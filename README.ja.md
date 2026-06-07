@@ -55,7 +55,7 @@ Platform 別の lifecycle コマンドは、step 内の `platforms` で定義し
 ## 安全性
 
 OpenDock は `owner/name` 形式の dock reference、固定レジストリ
-`https://opendock.app`、OpenDock Registry の承認・署名・checksum 検証、既存ファイルへの
+`https://registry.opendock.app`、OpenDock Registry の承認・署名・checksum 検証、既存ファイルへの
 managed block 追記、allowlist ベースの setup コマンド実行を採用しています。
 dock source と registry host は実行時の環境変数では変更できません。shell pipeline
 や redirect は許可されません。

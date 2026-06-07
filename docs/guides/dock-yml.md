@@ -571,9 +571,9 @@ dock은 사용자가 이미 작성한 파일을 함부로 덮어쓰면 안 됩�
 
 ## 보안과 배포 기준
 
-OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 런타임 환경변수로 바꿀 수 없게 고정합니다. 현재 registry는 `https://opendock.app`입니다.
+OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 런타임 환경변수로 바꿀 수 없게 고정합니다. 현재 registry는 `https://registry.opendock.app`입니다.
 
-사람이 탐색하는 dock catalog는 `https://opendock.app/docks`, CLI가 사용하는 registry API root는 `https://opendock.app/api/v1/docks`입니다.
+사람이 탐색하는 dock catalog는 `https://registry.opendock.app`, CLI가 사용하는 registry API root는 `https://registry.opendock.app/v1/docks`입니다.
 
 배포 흐름은 다음 원칙을 따릅니다.
 

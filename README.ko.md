@@ -79,7 +79,7 @@ lifecycle:
 ## 안전 모델
 
 - dock reference는 `owner/name` 형식만 허용합니다.
-- dock source와 registry host는 런타임 환경변수로 바꿀 수 없으며 `https://opendock.app`에 고정됩니다.
+- dock source와 registry host는 런타임 환경변수로 바꿀 수 없으며 `https://registry.opendock.app`에 고정됩니다.
 - 원격 dock은 OpenDock Registry 승인, 서명, 체크섬 검증을 통과해야 합니다.
 - 기존 파일은 덮어쓰지 않고 OpenDock 관리 블록으로 append합니다.
 - `.gitignore`는 중복 라인을 만들지 않습니다.
@@ -97,5 +97,5 @@ lifecycle:
 저장, deploy 제출 plumbing, update, doctor, log, 테스트가 구현되어 있습니다.
 호스팅 OpenDock Registry 서비스와 패키지 매니저 배포는 다음 단계입니다.
 메인 사이트는 `https://opendock.app`, 사람이 보는 dock 카탈로그는
-`https://opendock.app/docks`, CLI registry API는
-`https://opendock.app/api/v1/docks` 기준으로 설계합니다.
+`https://registry.opendock.app`, CLI registry API는
+`https://registry.opendock.app/v1/docks` 기준으로 설계합니다.

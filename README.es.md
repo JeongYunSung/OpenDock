@@ -55,7 +55,7 @@ Los comandos lifecycle específicos por platform se definen dentro de `platforms
 
 OpenDock conserva los archivos existentes con bloques administrados, exige
 referencias `owner/name`, resuelve docks solo desde el registry fijo
-`https://opendock.app`, valida aprobación, firma y checksum en docks remotos, y
+`https://registry.opendock.app`, valida aprobación, firma y checksum en docks remotos, y
 solo ejecuta comandos de setup permitidos. El dock source y el registry host no
 pueden cambiarse con variables de entorno en runtime. Los pipelines y
 operadores de shell no están permitidos.

@@ -55,7 +55,7 @@ Les commandes lifecycle spécifiques à une platform se définissent dans `platf
 
 OpenDock préserve les fichiers existants avec des blocs gérés, exige des
 références `owner/name`, résout les docks uniquement depuis le registry fixe
-`https://opendock.app`, vérifie l'approbation, la signature et le checksum des
+`https://registry.opendock.app`, vérifie l'approbation, la signature et le checksum des
 docks distants, et limite les commandes de setup à une allowlist. Le dock source
 et le registry host ne peuvent pas être changés par variable d'environnement au
 runtime. Les pipelines et redirections shell sont refusés.

@@ -228,7 +228,7 @@ the trust boundary explicit:
 
 - Dock references must be in `owner/name` form and cannot contain path traversal.
 - Docks are resolved only from the fixed OpenDock Registry at
-  `https://opendock.app`.
+  `https://registry.opendock.app`.
 - Runtime environment variables cannot change the dock source or registry host.
 - Remote metadata must be approved, signed, and checksum-matched before unpack.
 - Lifecycle commands reject shell operators such as pipes, redirects, `&&`,
@@ -297,7 +297,7 @@ OpenDock is an MVP CLI. The following are intentionally not shipped yet:
 
 - hosted OpenDock Registry review service
 - package-manager distribution
-- full dock catalog UX at `https://opendock.app/docks`
+- full dock catalog UX at `https://registry.opendock.app`
 - binary release automation
 
 The CLI already has the local fixture flow, remote registry client boundary,
@@ -305,8 +305,8 @@ approval/checksum/signature checks, project state, logging, auth token storage,
 deploy submission plumbing, and regression tests.
 
 When the hosted service ships, `https://opendock.app` is the product site,
-`https://opendock.app/docks` is the human dock catalog, and
-`https://opendock.app/api/v1/docks` is the CLI registry API root.
+`https://registry.opendock.app` is the human dock catalog, and
+`https://registry.opendock.app/v1/docks` is the CLI registry API root.
 
 ## Ecosystem
 

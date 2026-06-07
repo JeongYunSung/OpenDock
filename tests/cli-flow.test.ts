@@ -104,7 +104,7 @@ describe("opendock TypeScript CLI", () => {
 
     const version = runCli(project, {}, ["version"]);
     expect(version.status).toBe(0);
-    expect(version.stdout).toContain("registry https://opendock.app");
+    expect(version.stdout).toContain("registry https://registry.opendock.app");
   });
 
   it("ignores dock source and registry environment overrides", async () => {
@@ -125,7 +125,7 @@ describe("opendock TypeScript CLI", () => {
         },
         async () => {
           await expect(resolveDock(DockRef.parse("test/harness"))).rejects.toThrow(
-            "https://opendock.app/api/v1/docks/test/harness/versions/latest",
+            "https://registry.opendock.app/v1/docks/test/harness/versions/latest",
           );
         },
       );
@@ -133,7 +133,7 @@ describe("opendock TypeScript CLI", () => {
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://opendock.app/api/v1/docks/test/harness/versions/latest"]);
+    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/latest"]);
   });
 
   it("submits docks only to the fixed OpenDock Registry", async () => {
@@ -163,7 +163,7 @@ describe("opendock TypeScript CLI", () => {
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://opendock.app/api/v1/docks/submissions"]);
+    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/submissions"]);
     expect(bodies).toEqual([JSON.stringify({ dock_name: "oma-codex", manifest: "opendock: 1" })]);
   });
 

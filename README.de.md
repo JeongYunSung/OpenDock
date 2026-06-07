@@ -55,7 +55,7 @@ Platform-spezifische lifecycle-Befehle werden pro step in `platforms` definiert.
 
 OpenDock erhält bestehende Dateien durch verwaltete Blöcke, erlaubt nur
 `owner/name`-Referenzen, löst Docks nur über die feste Registry
-`https://opendock.app` auf, prüft Approval, Signatur und Checksumme für Remote
+`https://registry.opendock.app` auf, prüft Approval, Signatur und Checksumme für Remote
 Docks und führt Setup-Befehle nur über eine Allowlist aus. Dock source und
 Registry host können nicht per Runtime-Umgebungsvariable geändert werden.
 Shell-Pipelines und Redirects werden blockiert.

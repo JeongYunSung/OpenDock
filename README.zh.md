@@ -54,7 +54,7 @@ Platform 专用 lifecycle 命令写在 step 的 `platforms` 中。安装时选�
 ## 安全模型
 
 OpenDock 只接受 `owner/name` 形式的 dock reference，并且只从固定 registry
-`https://opendock.app` 解析 dock；dock source 和 registry host 不能通过运行时环境变量
+`https://registry.opendock.app` 解析 dock；dock source 和 registry host 不能通过运行时环境变量
 修改。远程 dock 需要通过 OpenDock Registry 批准、签名和 checksum 校验。已有文件不会被直接覆盖，
 而是写入 OpenDock managed block。setup 命令使用 allowlist，并拒绝 pipe、redirect、
 `&&`、`||` 等 shell 操作符。

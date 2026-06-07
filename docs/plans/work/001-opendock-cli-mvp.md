@@ -51,12 +51,14 @@ Core decisions:
 
 OpenDock Registry API draft:
 
+Base URL: `https://registry.opendock.app`
+
 | Endpoint | Purpose | Auth |
 |---|---|---|
-| `GET /api/v1/docks/{owner}/{name}/versions/latest` | Resolve latest approved dock version | No |
-| `GET /api/v1/docks/{owner}/{name}/versions/{version}/download` | Download dock archive | No |
-| `POST /api/v1/auth/login` | Exchange login token or email token for CLI token | No |
-| `POST /api/v1/docks/submissions` | Submit dock for review | Yes |
+| `GET /v1/docks/{owner}/{name}/versions/latest` | Resolve latest approved dock version | No |
+| `GET /v1/docks/{owner}/{name}/versions/{version}/download` | Download dock archive | No |
+| `POST /v1/auth/login` | Exchange login token or email token for CLI token | No |
+| `POST /v1/docks/submissions` | Submit dock for review | Yes |
 
 Local development contract:
 
