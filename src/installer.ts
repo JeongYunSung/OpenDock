@@ -1,4 +1,11 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 import {
   assertVersionSatisfiesSelector,
@@ -136,12 +143,11 @@ function applyExplicitFiles(
     if (!isSafeRelativePath(file.from) || !isSafeRelativePath(file.to)) {
       throw new Error(`unsafe file mapping \`${file.from}\` -> \`${file.to}\``);
     }
-    if (!existsSync(source) || statSync(source).isDirectory()) {
-      throw new Error(`file mapping source does not exist: ${file.from}`);
-    }
+    assertSafeSourceFile(source, file.from);
 
     const target = join(projectDir, file.to);
     mkdirSync(dirname(target), { recursive: true });
+    assertSafeTargetFile(target, file.to);
     const content = readFileSync(source, "utf8");
     const existed = existsSync(target);
 
@@ -204,13 +210,10 @@ function applyLegacyTemplates(
   const priorRecordMap = new Map(priorRecords.map((record) => [record.path, record.checksum]));
 
   for (const source of listEntries(templateRoot)) {
-    if (statSync(source).isDirectory()) {
-      continue;
-    }
-
     const rel = normalizePath(relative(templateRoot, source));
     const target = join(projectDir, rel);
     mkdirSync(dirname(target), { recursive: true });
+    assertSafeTargetFile(target, rel);
     const content = readFileSync(source, "utf8");
 
     if (!existsSync(target)) {
@@ -242,10 +245,15 @@ function listEntries(root: string): string[] {
   const result: string[] = [];
   for (const entry of readdirSync(root, { withFileTypes: true })) {
     const path = join(root, entry.name);
+    if (entry.isSymbolicLink()) {
+      throw new Error(`template entry cannot be a symlink: ${entry.name}`);
+    }
     if (entry.isDirectory()) {
       result.push(...listEntries(path));
-    } else {
+    } else if (entry.isFile()) {
       result.push(path);
+    } else {
+      throw new Error(`template entry must be a regular file or directory: ${entry.name}`);
     }
   }
   return result;
@@ -322,4 +330,26 @@ function isSafeRelativePath(path: string): boolean {
     !normalized.startsWith("../") &&
     !normalized.includes("/../")
   );
+}
+
+function assertSafeSourceFile(path: string, relPath: string): void {
+  if (!existsSync(path)) {
+    throw new Error(`file mapping source does not exist: ${relPath}`);
+  }
+  const stat = lstatSync(path);
+  if (stat.isSymbolicLink()) {
+    throw new Error(`file mapping source cannot be a symlink: ${relPath}`);
+  }
+  if (!stat.isFile()) {
+    throw new Error(`file mapping source must be a regular file: ${relPath}`);
+  }
+}
+
+function assertSafeTargetFile(path: string, relPath: string): void {
+  if (!existsSync(path)) {
+    return;
+  }
+  if (lstatSync(path).isSymbolicLink()) {
+    throw new Error(`file mapping target cannot be a symlink: ${relPath}`);
+  }
 }

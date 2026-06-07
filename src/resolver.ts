@@ -23,6 +23,12 @@ import {
 import { cacheRoot } from "./paths.js";
 import { OpenDockRegistryClient } from "./registry.js";
 
+const safeResolvedVersionPattern = /^v?\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
+const allowedArchiveEntryTypes = new Set(["File", "OldFile", "Directory"]);
+const maxExtractedArchiveBytes = 100 * 1024 * 1024;
+const maxExtractedEntryBytes = 25 * 1024 * 1024;
+const maxExtractedFiles = 2_000;
+
 export interface ResolvedDock {
   manifest: DockManifest;
   root: string;
@@ -60,6 +66,7 @@ async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
     dockRef.requested(),
   );
   assertVersionSatisfiesSelector(metadata.version, dockRef.requested());
+  assertSafeResolvedVersion(metadata.version);
 
   if (metadata.id !== dockRef.id()) {
     throw new Error(`registry returned dock id \`${metadata.id}\` for requested \`${dockRef}\``);
@@ -86,13 +93,25 @@ async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
   const temp = mkdtempSync(join(tmpdir(), "opendock-"));
   const archivePath = join(temp, "dock.tgz");
   writeFileSync(archivePath, archive);
+  const extractionLimits: ExtractionLimits = { fileCount: 0, totalBytes: 0 };
+  let blockedArchiveEntry: string | undefined;
 
   await extractTar({
     file: archivePath,
     cwd: root,
-    filter: (entryPath) => isSafeArchivePath(root, entryPath),
+    filter: (entryPath, entry) => {
+      try {
+        return isSafeArchiveEntry(root, entryPath, entry, extractionLimits);
+      } catch (error) {
+        blockedArchiveEntry = (error as Error).message;
+        return false;
+      }
+    },
   });
   rmSync(temp, { recursive: true, force: true });
+  if (blockedArchiveEntry) {
+    throw new Error(blockedArchiveEntry);
+  }
 
   const dockRoot = findManifestRoot(root);
   if (!dockRoot) {
@@ -145,6 +164,9 @@ function listFiles(root: string): string[] {
   const files: string[] = [];
   for (const entry of entries) {
     const path = join(root, entry.name);
+    if (entry.isSymbolicLink()) {
+      throw new Error(`dock cache entry cannot be a symlink: ${path}`);
+    }
     if (entry.isDirectory()) {
       files.push(...listFiles(path));
     } else if (entry.isFile()) {
@@ -177,6 +199,58 @@ function isSafeArchivePath(destination: string, entryPath: string): boolean {
   return (
     resolved === normalizedDestination || resolved.startsWith(`${normalizedDestination}${sep}`)
   );
+}
+
+interface ArchiveEntry {
+  type?: string;
+  size?: number;
+}
+
+interface ExtractionLimits {
+  fileCount: number;
+  totalBytes: number;
+}
+
+function assertSafeResolvedVersion(version: string): void {
+  if (!safeResolvedVersionPattern.test(version)) {
+    throw new Error(`registry returned unsafe dock version \`${version}\``);
+  }
+}
+
+function isSafeArchiveEntry(
+  destination: string,
+  entryPath: string,
+  entry: ArchiveEntry,
+  limits: ExtractionLimits,
+): boolean {
+  if (!isSafeArchivePath(destination, entryPath)) {
+    throw new Error(`archive entry escapes destination: ${entryPath}`);
+  }
+
+  const type = entry.type ?? "";
+  if (!allowedArchiveEntryTypes.has(type)) {
+    throw new Error(`archive entry type \`${type || "unknown"}\` is not allowed: ${entryPath}`);
+  }
+
+  if (type === "Directory") {
+    return true;
+  }
+
+  limits.fileCount += 1;
+  if (limits.fileCount > maxExtractedFiles) {
+    throw new Error(`downloaded dock archive contains more than ${maxExtractedFiles} files`);
+  }
+
+  const size = entry.size ?? 0;
+  if (size > maxExtractedEntryBytes) {
+    throw new Error(`archive entry exceeds ${maxExtractedEntryBytes} bytes: ${entryPath}`);
+  }
+  limits.totalBytes += size;
+  if (limits.totalBytes > maxExtractedArchiveBytes) {
+    throw new Error(`downloaded dock archive expands beyond ${maxExtractedArchiveBytes} bytes`);
+  }
+
+  return true;
 }
 
 function normalizePath(path: string): string {

@@ -32,6 +32,9 @@ interface CheckResult {
 const defaultDoctorTimeoutMs = 30_000;
 const defaultInteractiveColumns = 100;
 const defaultInteractiveRows = 30;
+const safePackagePattern =
+  /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+(?:@[A-Za-z0-9][A-Za-z0-9._+-]*)?$/;
+const safeIdentifierPattern = /^[A-Za-z0-9._:@/=-]+$/;
 
 interface LifecycleOptions {
   platform?: OpenDockPlatform;
@@ -264,7 +267,7 @@ export async function runCommand(
     throw new Error(`empty command: ${command}`);
   }
   const platform = options.platform ?? detectPlatform();
-  ensureAllowed(program, platform);
+  ensureAllowed(program, rest, platform);
 
   if (options.interactive === "user") {
     return runUserInteractiveCommand(program, rest, cwd, options);
@@ -492,11 +495,44 @@ function failureMessage(output: CommandResult): string | undefined {
 }
 
 function commandEnvironment(program: string): NodeJS.ProcessEnv {
-  const env = { ...process.env };
+  const env = minimalEnvironment();
   delete env._VOLTA_TOOL_RECURSION;
   if (program === "oma") {
     env.OMA_SKIP_VERSION_CHECK = env.OMA_SKIP_VERSION_CHECK ?? "1";
     env.PATH = withoutVoltaNodeImageBin(env.PATH);
+  }
+  return env;
+}
+
+function minimalEnvironment(): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {};
+  for (const key of [
+    "PATH",
+    "HOME",
+    "USER",
+    "LOGNAME",
+    "SHELL",
+    "TERM",
+    "TMPDIR",
+    "TMP",
+    "TEMP",
+    "LANG",
+    "LC_ALL",
+    "LC_CTYPE",
+    "SystemRoot",
+    "ComSpec",
+    "PATHEXT",
+    "APPDATA",
+    "LOCALAPPDATA",
+    "ProgramFiles",
+    "ProgramFiles(x86)",
+    "ProgramData",
+    "WINDIR",
+  ]) {
+    const value = process.env[key];
+    if (value !== undefined) {
+      env[key] = value;
+    }
   }
   return env;
 }
@@ -582,12 +618,204 @@ function rejectShellMetacharacters(command: string): void {
   }
 }
 
-function ensureAllowed(program: string, platform: OpenDockPlatform): void {
+function ensureAllowed(program: string, args: string[], platform: OpenDockPlatform): void {
   if (!commonAllowedCommands.has(program) && !platformAllowedCommands[platform].has(program)) {
     throw new Error(
       `command \`${program}\` is not allowed for OpenDock platform \`${platform}\` setup`,
     );
   }
+  if (!isAllowedCommandShape(program, args)) {
+    const rendered = [program, ...args].join(" ");
+    throw new Error(`command \`${rendered}\` is not allowed for OpenDock setup`);
+  }
+}
+
+function isAllowedCommandShape(program: string, args: string[]): boolean {
+  if (program === "node" || program === "python" || program === "python3") {
+    return args.length === 1 && ["--version", "-v", "-V"].includes(args[0] ?? "");
+  }
+  if (program === "git") {
+    return (
+      isExact(args, ["--version"]) ||
+      isExact(args, ["status"]) ||
+      isExact(args, ["init", "-b", "main"])
+    );
+  }
+  if (program === "test") {
+    return args.length === 2 && ["-d", "-f"].includes(args[0] ?? "") && isSafeRelativeArg(args[1]);
+  }
+  if (program === "mkdir") {
+    const paths = args[0] === "-p" ? args.slice(1) : args;
+    return paths.length > 0 && paths.every(isSafeRelativeArg);
+  }
+  if (program === "brew") {
+    return (
+      isExact(args, ["--version"]) ||
+      (["install", "upgrade"].includes(args[0] ?? "") && args.slice(1).every(isSafePackageName))
+    );
+  }
+  if (program === "winget") {
+    return isSafeWingetCommand(args);
+  }
+  if (program === "npm" || program === "pnpm" || program === "bun") {
+    return isSafePackageManagerCommand(program, args);
+  }
+  if (program === "pip" || program === "pip3") {
+    return isSafePipCommand(args);
+  }
+  if (program === "pipx") {
+    return isSafePipxCommand(args);
+  }
+  if (program === "uv") {
+    return isSafeUvCommand(args);
+  }
+  if (program === "npx" || program === "bunx") {
+    return isSafePackageRunnerCommand(args);
+  }
+  if (program === "codex" || program === "claude") {
+    return isExact(args, ["--version"]);
+  }
+  if (program === "oma") {
+    return isSafeOmaCommand(args);
+  }
+  if (program === "omx") {
+    return isExact(args, ["doctor"]) || isExact(args, ["--version"]);
+  }
+  if (program === "omo") {
+    return isExact(args, ["version"]) || isExact(args, ["doctor"]) || isExact(args, ["--version"]);
+  }
+  return false;
+}
+
+function isSafePackageManagerCommand(program: string, args: string[]): boolean {
+  if (isExact(args, ["--version"])) {
+    return true;
+  }
+  if (program === "pnpm" && args[0] === "add") {
+    return hasGlobalFlag(args) && packageArgs(args.slice(1)).every(isSafePackageName);
+  }
+  if ((args[0] === "install" || args[0] === "update") && hasGlobalFlag(args)) {
+    return packageArgs(args.slice(1)).every(isSafePackageName);
+  }
+  return false;
+}
+
+function isSafePipCommand(args: string[]): boolean {
+  if (isExact(args, ["--version"]) || isExact(args, ["-V"])) {
+    return true;
+  }
+  if (args[0] !== "install") {
+    return false;
+  }
+  const allowedFlags = new Set(["--user", "--upgrade", "-U"]);
+  const packages = args.slice(1).filter((arg) => !allowedFlags.has(arg));
+  return packages.length > 0 && packages.every(isSafePackageName);
+}
+
+function isSafePipxCommand(args: string[]): boolean {
+  if (isExact(args, ["--version"])) {
+    return true;
+  }
+  return (
+    ["install", "upgrade"].includes(args[0] ?? "") &&
+    args.length >= 2 &&
+    args.slice(1).every(isSafePackageName)
+  );
+}
+
+function isSafeUvCommand(args: string[]): boolean {
+  if (isExact(args, ["--version"])) {
+    return true;
+  }
+  return (
+    args.length >= 3 &&
+    args[0] === "tool" &&
+    ["install", "upgrade"].includes(args[1] ?? "") &&
+    args.slice(2).every(isSafePackageName)
+  );
+}
+
+function isSafePackageRunnerCommand(args: string[]): boolean {
+  if (args.length === 0 || !isSafePackageName(args[0] ?? "")) {
+    return false;
+  }
+  const blocked = new Set(["--package", "-p", "--eval", "-e", "--call", "-c"]);
+  return args.slice(1).every((arg) => !blocked.has(arg) && isSafeRunnerArg(arg));
+}
+
+function isSafeOmaCommand(args: string[]): boolean {
+  if (isExact(args, ["--version"]) || isExact(args, ["doctor"]) || isExact(args, ["install"])) {
+    return true;
+  }
+  if (args[0] !== "update") {
+    return false;
+  }
+  const allowed = new Set(["update", "-y", "--vendor", "codex", "claude-code"]);
+  return args.length >= 2 && args.every((arg) => allowed.has(arg));
+}
+
+function isSafeWingetCommand(args: string[]): boolean {
+  if (isExact(args, ["--version"])) {
+    return true;
+  }
+  if (!["install", "upgrade"].includes(args[0] ?? "")) {
+    return false;
+  }
+  const idIndex = args.indexOf("--id");
+  if (idIndex < 0 || !isSafePackageName(args[idIndex + 1] ?? "")) {
+    return false;
+  }
+  const allowedFlags = new Set([
+    "--accept-package-agreements",
+    "--accept-source-agreements",
+    "--exact",
+    "--id",
+  ]);
+  return args.slice(1).every((arg, index) => {
+    const originalIndex = index + 1;
+    if (originalIndex === idIndex) {
+      return true;
+    }
+    if (originalIndex === idIndex + 1) {
+      return isSafePackageName(arg);
+    }
+    return allowedFlags.has(arg);
+  });
+}
+
+function hasGlobalFlag(args: string[]): boolean {
+  return args.includes("--global") || args.includes("-g");
+}
+
+function packageArgs(args: string[]): string[] {
+  return args.filter((arg) => arg !== "--global" && arg !== "-g");
+}
+
+function isExact(args: string[], expected: string[]): boolean {
+  return args.length === expected.length && args.every((arg, index) => arg === expected[index]);
+}
+
+function isSafePackageName(value: string): boolean {
+  return safePackagePattern.test(value);
+}
+
+function isSafeRunnerArg(value: string): boolean {
+  return safeIdentifierPattern.test(value);
+}
+
+function isSafeRelativeArg(value: string | undefined): boolean {
+  if (!value) {
+    return false;
+  }
+  const normalized = value.split(sep).join("/");
+  return (
+    normalized !== "" &&
+    normalized !== "." &&
+    !normalized.startsWith("/") &&
+    !normalized.startsWith("../") &&
+    !normalized.includes("/../") &&
+    !normalized.includes("\0")
+  );
 }
 
 function splitCommand(command: string): string[] {

@@ -1,6 +1,14 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { chmodSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  statSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -13,7 +21,7 @@ import { type DockResolver, install } from "../src/installer.js";
 import { lockDocks, readLock } from "../src/project.js";
 import { OpenDockRegistryClient } from "../src/registry.js";
 import { resolveDock, resolveLocalDock } from "../src/resolver.js";
-import { runLifecycle } from "../src/runner.js";
+import { runCommand, runLifecycle } from "../src/runner.js";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const builtCli = join(repoRoot, "bin", "opendock.js");
@@ -218,6 +226,80 @@ describe("opendock TypeScript CLI", () => {
       signature: "registry-signature",
       version: "1.5.2",
     });
+  });
+
+  it("rejects unsafe remote versions oversized archives and symlink archive entries", async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () =>
+      new Response(
+        JSON.stringify({
+          approved: true,
+          checksum: "unused",
+          id: "test/unsafe-version",
+          signature: "registry-signature",
+          version: "../../bad",
+        }),
+        { headers: { "content-type": "application/json" }, status: 200 },
+      )) as typeof fetch;
+
+    try {
+      await expect(resolveDock(DockRef.parse("test/unsafe-version"))).rejects.toThrow(
+        "unsafe dock version",
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    globalThis.fetch = (async () =>
+      new Response("", {
+        headers: { "content-length": String(51 * 1024 * 1024) },
+        status: 200,
+      })) as typeof fetch;
+
+    try {
+      await expect(
+        new OpenDockRegistryClient().downloadDock("test", "large", "1.0.0"),
+      ).rejects.toThrow("exceeds");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    const project = await tempDir();
+    const data = await tempDir();
+    const archiveRoot = await tempDir();
+    const archive = await createSymlinkDockArchive(archiveRoot, "test", "symlink-archive", "1.0.0");
+    const checksum = sha256Bytes(archive);
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+      const url = String(input);
+      if (url === "https://registry.opendock.app/v1/docks/test/symlink-archive/versions/latest") {
+        return new Response(
+          JSON.stringify({
+            approved: true,
+            checksum,
+            id: "test/symlink-archive",
+            signature: "registry-signature",
+            version: "1.0.0",
+          }),
+          { headers: { "content-type": "application/json" }, status: 200 },
+        );
+      }
+      return new Response(archive, { status: 200 });
+    }) as typeof fetch;
+
+    try {
+      await expect(
+        withEnv({ OPENDOCK_DATA_DIR: data }, () =>
+          install({
+            dockRef: DockRef.parse("test/symlink-archive"),
+            projectDir: project,
+            runCommands: false,
+            operation: "install",
+          }),
+        ),
+      ).rejects.toThrow("not allowed");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 
   it("submits docks only to the fixed OpenDock Registry", async () => {
@@ -526,28 +608,122 @@ echo "Downloading oh-my-agent"
     });
   });
 
-  it("supports user and scripted interactive lifecycle steps", async () => {
+  it("rejects inline interpreter commands and scrubs lifecycle environments", async () => {
     const project = await tempDir();
-    const docks = await tempDir();
-    writeInteractiveDock(docks);
-    const resolver = localResolver(docks);
+    const bin = await tempDir();
+
+    await expect(
+      runCommand('node -e "console.log(process.env.OPENDOCK_AUTH_TOKEN)"', project),
+    ).rejects.toThrow("not allowed for OpenDock setup");
+
+    writeExecutable(
+      join(bin, "oma"),
+      `#!/bin/sh
+echo "token=\${OPENDOCK_AUTH_TOKEN:-missing}"
+`,
+    );
+
+    await withEnv(
+      {
+        OPENDOCK_AUTH_TOKEN: "secret-token",
+        PATH: `${bin}:${process.env.PATH ?? ""}`,
+      },
+      async () => {
+        const result = await runCommand("oma --version", project);
+        expect(result.success).toBe(true);
+        expect(result.stdout).toContain("token=missing");
+      },
+    );
+  });
+
+  it("rejects symlinked dock template sources and project targets", async () => {
+    const outside = await tempDir();
+    const sourceProject = await tempDir();
+    const sourceDocks = await tempDir();
+    const sourceDock = join(sourceDocks, "test", "source-symlink");
+    mkdirSync(join(sourceDock, "templates"), { recursive: true });
+    writeFileSync(join(outside, "secret.txt"), "outside secret\n");
+    symlinkSync(join(outside, "secret.txt"), join(sourceDock, "templates", "README.md"));
+    writeFileSync(
+      join(sourceDock, "dock.yml"),
+      `opendock: 1
+id: test/source-symlink
+version: 1.0.0
+files:
+  - from: templates/README.md
+    to: README.md
+    update: manual_review
+`,
+    );
 
     await expect(
       install({
-        dockRef: DockRef.parse("test/interactive-user"),
-        projectDir: project,
-        runCommands: true,
+        dockRef: DockRef.parse("test/source-symlink"),
+        projectDir: sourceProject,
+        runCommands: false,
         operation: "install",
-        phase: "install",
-        resolve: resolver,
+        resolve: () => ({
+          checksum: "local",
+          manifest: dockManifestSchema.parse({
+            files: [
+              {
+                from: "templates/README.md",
+                to: "README.md",
+                update: "manual_review",
+              },
+            ],
+            id: "test/source-symlink",
+            opendock: 1,
+            version: "1.0.0",
+          }),
+          root: sourceDock,
+          signature: "local",
+        }),
       }),
-    ).rejects.toThrow("interactive step requires a TTY");
+    ).rejects.toThrow("source cannot be a symlink");
 
-    const userScript = join(project, "run-user-interactive.ts");
-    writeFileSync(
-      userScript,
-      `import { runCommand } from ${JSON.stringify(join(repoRoot, "src", "runner.ts"))};
-const result = await runCommand("node user-interactive.js", process.cwd(), {
+    const targetProject = await tempDir();
+    const targetDocks = await tempDir();
+    writeTestDock(targetDocks, "test", "target-symlink", "1.0.0", "# Safe README\n");
+    symlinkSync(join(outside, "secret.txt"), join(targetProject, "README.md"));
+
+    await expect(
+      install({
+        dockRef: DockRef.parse("test/target-symlink"),
+        projectDir: targetProject,
+        runCommands: false,
+        operation: "install",
+        resolve: localResolver(targetDocks),
+      }),
+    ).rejects.toThrow("target cannot be a symlink");
+    expect(readFileSync(join(outside, "secret.txt"), "utf8")).toBe("outside secret\n");
+  });
+
+  it("supports user and scripted interactive lifecycle steps", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    const bin = await tempDir();
+    writeInteractiveOma(bin);
+    writeInteractiveDock(docks);
+    const resolver = localResolver(docks);
+
+    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
+      await expect(
+        install({
+          dockRef: DockRef.parse("test/interactive-user"),
+          projectDir: project,
+          runCommands: true,
+          operation: "install",
+          phase: "install",
+          resolve: resolver,
+        }),
+      ).rejects.toThrow("interactive step requires a TTY");
+
+      const userScript = join(project, "run-user-interactive.ts");
+      writeFileSync(
+        userScript,
+        `import { runCommand } from ${JSON.stringify(join(repoRoot, "src", "runner.ts"))};
+const result = await runCommand("oma install", process.cwd(), {
   interactive: "user",
   live: true,
   timeoutMs: 5000,
@@ -557,30 +733,33 @@ if (!result.success) {
   process.exit(1);
 }
 `,
-    );
-    const userInstall = runCliInPty(project, ["bun", userScript], {
-      inputAfter: "USER_TTY",
-      input: "u\r",
-    });
-    expect(userInstall.exitCode).toBe(0);
-    expect(userInstall.output).toContain("USER_TTY");
-    expect(readFileSync(join(project, "user-input.txt"), "utf8")).toMatch(/^75(?:0a|0d)$/);
+      );
+      const userInstall = runCliInPty(project, ["bun", userScript], {
+        inputAfter: "USER_TTY",
+        input: "u\r",
+      });
+      expect(userInstall.exitCode).toBe(0);
+      expect(userInstall.output).toContain("USER_TTY");
+      expect(readFileSync(join(project, "user-input.txt"), "utf8")).toMatch(/^75(?:0a|0d)$/);
 
-    const scriptedInstall = await install({
-      dockRef: DockRef.parse("test/interactive-scripted"),
-      projectDir: project,
-      runCommands: true,
-      operation: "install",
-      phase: "install",
-      resolve: resolver,
+      const scriptedInstall = await install({
+        dockRef: DockRef.parse("test/interactive-scripted"),
+        projectDir: project,
+        runCommands: true,
+        operation: "install",
+        phase: "install",
+        resolve: resolver,
+      });
+      expect(scriptedInstall.dockId).toBe("test/interactive-scripted");
+      expect(readFileSync(join(project, "scripted-input.txt"), "utf8")).toBe("090a");
     });
-    expect(scriptedInstall.dockId).toBe("test/interactive-scripted");
-    expect(readFileSync(join(project, "scripted-input.txt"), "utf8")).toBe("090a");
   });
 
   it("times out hanging doctor checks", async () => {
     const project = await tempDir();
     const docks = await tempDir();
+    const bin = await tempDir();
+    writeTimeoutOma(bin);
     writeTimeoutDoctorDock(docks);
 
     await install({
@@ -593,8 +772,9 @@ if (!result.success) {
     });
 
     const resolved = resolveLocalDock(docks, DockRef.parse("test/timeout"));
-    const doctor = await withEnv({ _VOLTA_TOOL_RECURSION: "1" }, () =>
-      runLifecycle(resolved.manifest, "doctor", project),
+    const doctor = await withEnv(
+      { _VOLTA_TOOL_RECURSION: "1", PATH: `${bin}:${process.env.PATH ?? ""}` },
+      () => runLifecycle(resolved.manifest, "doctor", project),
     );
     expect(doctor.find((report) => report.id === "volta-env")?.status).toBe("Ready");
     expect(doctor.find((report) => report.id === "slow")?.message).toBe("timed out after 50ms");
@@ -980,6 +1160,32 @@ files:
   return readFileSync(archivePath);
 }
 
+async function createSymlinkDockArchive(
+  root: string,
+  owner: string,
+  name: string,
+  version: string,
+): Promise<Buffer> {
+  const dockRoot = join(root, "symlink-dock");
+  mkdirSync(join(dockRoot, "templates"), { recursive: true });
+  writeFileSync(
+    join(dockRoot, "dock.yml"),
+    `opendock: 1
+id: ${owner}/${name}
+version: ${version}
+files:
+  - from: templates/README.md
+    to: README.md
+    update: manual_review
+`,
+  );
+  writeFileSync(join(dockRoot, "target.txt"), "# Symlink Target\n");
+  symlinkSync("../target.txt", join(dockRoot, "templates", "README.md"));
+  const archivePath = join(root, "symlink-dock.tgz");
+  await createTar({ cwd: dockRoot, file: archivePath, gzip: true }, ["."]);
+  return readFileSync(archivePath);
+}
+
 function sha256Bytes(bytes: Buffer): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
@@ -1179,9 +1385,9 @@ version: 1.0.0
 lifecycle:
   doctor:
     - id: volta-env
-      check: node -e "if (process.env._VOLTA_TOOL_RECURSION) process.exit(7)"
+      check: oma doctor
     - id: slow
-      check: node -e "setTimeout(function(){}, 1000)"
+      check: oma update -y --vendor codex
       timeout_ms: 50
 `,
   );
@@ -1226,7 +1432,7 @@ files:
 lifecycle:
   install:
     - id: interactive
-      run: node ${scriptName}
+      run: oma install
       ${interactiveYaml}
       timeout_ms: 5000
 ${extraRun}`,
@@ -1245,6 +1451,45 @@ process.stdin.on("data", function(data) {
     process.exit(0);
   }
 });
+`,
+  );
+}
+
+function writeInteractiveOma(bin: string): void {
+  writeExecutable(
+    join(bin, "oma"),
+    `#!/usr/bin/env node
+const fs = require("node:fs");
+const scripted = fs.existsSync("user-input.txt");
+const label = scripted ? "SCRIPTED_TTY" : "USER_TTY";
+const outputName = scripted ? "scripted-input.txt" : "user-input.txt";
+console.log(process.stdin.isTTY ? label : "NO_TTY");
+process.stdin.setRawMode(true);
+process.stdin.resume();
+const bytes = [];
+process.stdin.on("data", function(data) {
+  for (const byte of data) bytes.push(byte);
+  if (bytes.length >= 2) {
+    fs.writeFileSync(outputName, Buffer.from(bytes.slice(0, 2)).toString("hex"));
+    process.exit(0);
+  }
+});
+`,
+  );
+}
+
+function writeTimeoutOma(bin: string): void {
+  writeExecutable(
+    join(bin, "oma"),
+    `#!/bin/sh
+if [ -n "$_VOLTA_TOOL_RECURSION" ]; then
+  exit 7
+fi
+if [ "$1" = "update" ]; then
+  sleep 1
+else
+  echo "oma 9.0.0"
+fi
 `,
   );
 }
