@@ -331,6 +331,14 @@ codex --version -> codex 0.128.0
 
 OpenDock lifecycle 명령은 shell을 그대로 실행하지 않습니다. 명령 문자열을 안전하게 나눈 뒤 allowlist에 있는 프로그램만 실행합니다.
 
+Homebrew가 없는 macOS에서는 starterpack을 실행하기 전에 first-party bootstrap을 먼저 실행하세요.
+
+```bash
+opendock bootstrap mac
+```
+
+이 명령은 `brew`가 이미 PATH에 있으면 그대로 통과하고, `/opt/homebrew/bin/brew` 또는 `/usr/local/bin/brew`에 설치돼 있지만 PATH에 없으면 shellenv 안내를 출력합니다. Homebrew가 아예 없을 때만 공식 Homebrew installer 명령을 보여주고 사용자 확인 후 실행합니다. `dock.yml` 안에서 Homebrew 설치용 `curl | sh`를 직접 실행하는 방식은 허용하지 않습니다.
+
 Codex 설치 starterpack 예시에서 주로 쓰는 허용 명령은 다음과 같습니다. 전체 runner allowlist는 `src/runner.ts`를 기준으로 확인하세요.
 
 ```text
@@ -581,6 +589,12 @@ lifecycle:
 ```
 
 Codex CLI를 npm으로 설치하려면 Node와 npm이 필요합니다. macOS starterpack에서는 Homebrew로 Node를 준비하는 패턴이 가장 단순합니다.
+
+Homebrew가 아직 없다면 `opendock install` 전에 다음을 먼저 실행합니다.
+
+```bash
+opendock bootstrap mac
+```
 
 ### Codex CLI 설치
 

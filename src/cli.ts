@@ -4,6 +4,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { createInterface } from "node:readline/promises";
 import { Command } from "commander";
 import { TokenStore } from "./auth.js";
+import { bootstrapMac } from "./bootstrap.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
 import { DockHubClient } from "./dockhub.js";
 import { install } from "./installer.js";
@@ -95,6 +96,15 @@ export async function run(argv = process.argv): Promise<void> {
       console.log(`opendock ${VERSION}`);
       console.log(`schema ${SCHEMA_VERSION}`);
       console.log(`registry ${DEFAULT_REGISTRY_URL}`);
+    });
+
+  const bootstrap = program.command("bootstrap").description("Prepare first-party host tools.");
+  bootstrap
+    .command("mac")
+    .description("Install or verify Homebrew for macOS starterpacks.")
+    .option("-y, --yes", "Run the official Homebrew installer without OpenDock confirmation")
+    .action(async (options: { yes?: boolean }) => {
+      await bootstrapMac({ assumeYes: options.yes === true });
     });
 
   const auth = program.command("auth").description("Authenticate with DockHub.");

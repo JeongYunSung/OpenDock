@@ -98,10 +98,12 @@ README.md
 | `opendock doctor` | Show whether the current directory has valid OpenDock state. |
 | `opendock log` | Print recent OpenDock runs for the current project. |
 | `opendock version` | Print CLI version, schema version, and default registry. |
+| `opendock bootstrap mac` | Verify or install Homebrew for macOS starterpacks. |
 | `opendock auth login` | Store a DockHub token for authenticated commands. |
 | `opendock deploy oma-codex` | Submit a local `dock.yml` starterpack for DockHub review. |
 
 `install` is public. `deploy` requires `opendock auth login`.
+Run `opendock bootstrap mac` first when Homebrew is missing.
 
 ## Pack Format
 
@@ -204,6 +206,9 @@ the trust boundary explicit:
 - Lifecycle commands reject shell operators such as pipes, redirects, `&&`,
   `||`, and command substitution.
 - Only allowlisted command families can run during lifecycle steps.
+- Homebrew bootstrap is first-party only: starterpacks may use `brew`, but
+  installing Homebrew itself is handled by `opendock bootstrap mac` with user
+  confirmation.
 - `install` and `update` stream allowed command output live, then re-run checks
   to confirm the requested version or state was actually reached.
 - `interactive: user` requires a real terminal TTY. `interactive: scripted`

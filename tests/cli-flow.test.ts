@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { bootstrapMac, HOMEBREW_INSTALL_COMMAND } from "../src/bootstrap.js";
 import { DockHubClient } from "../src/dockhub.js";
 import { install, type PackResolver } from "../src/installer.js";
 import { PackRef, packManifestSchema } from "../src/pack.js";
@@ -437,6 +438,81 @@ echo "${command} 1.2.3"
     expect(readFileSync(join(data, "auth-token"), "utf8")).toBe("test-token");
     if (process.platform !== "win32") {
       expect(statSync(join(data, "auth-token")).mode & 0o777).toBe(0o600);
+    }
+  });
+
+  it("handles mac bootstrap states without running the installer unexpectedly", async () => {
+    const readyMessages: string[] = [];
+    const ready = await bootstrapMac({
+      commandAvailable: () => true,
+      pathExists: () => false,
+      platform: "darwin",
+      runInstall: () => {
+        throw new Error("should not install");
+      },
+      write: (message) => readyMessages.push(message),
+    });
+    expect(ready.status).toBe("ready");
+    expect(readyMessages.join("\n")).toContain("already installed");
+
+    const pathMessages: string[] = [];
+    const pathMissing = await bootstrapMac({
+      commandAvailable: () => false,
+      pathExists: (path) => path === "/opt/homebrew/bin/brew",
+      platform: "darwin",
+      runInstall: () => {
+        throw new Error("should not install");
+      },
+      write: (message) => pathMessages.push(message),
+    });
+    expect(pathMissing).toEqual({
+      brewPath: "/opt/homebrew/bin/brew",
+      status: "path-missing",
+    });
+    expect(pathMessages.join("\n")).toContain("not available on PATH");
+
+    let skippedInstallRuns = 0;
+    const skippedMessages: string[] = [];
+    const skipped = await bootstrapMac({
+      commandAvailable: () => false,
+      confirm: async () => false,
+      pathExists: () => false,
+      platform: "darwin",
+      runInstall: () => {
+        skippedInstallRuns += 1;
+        return 0;
+      },
+      write: (message) => skippedMessages.push(message),
+    });
+    expect(skipped.status).toBe("skipped");
+    expect(skippedInstallRuns).toBe(0);
+    expect(skippedMessages.join("\n")).toContain(HOMEBREW_INSTALL_COMMAND);
+
+    let installRuns = 0;
+    const installed = await bootstrapMac({
+      assumeYes: true,
+      commandAvailable: () => false,
+      pathExists: () => false,
+      platform: "darwin",
+      runInstall: () => {
+        installRuns += 1;
+        return 0;
+      },
+      write: () => undefined,
+    });
+    expect(installed.status).toBe("installed");
+    expect(installRuns).toBe(1);
+  });
+
+  it("exposes the mac bootstrap CLI command", () => {
+    const help = runCli(process.cwd(), {}, ["bootstrap", "mac", "--help"]);
+    expect(help.status).toBe(0);
+    expect(help.stdout).toContain("Install or verify Homebrew");
+
+    const unsupported = runCli(process.cwd(), {}, ["bootstrap", "mac"]);
+    if (process.platform !== "darwin") {
+      expect(unsupported.status).not.toBe(0);
+      expect(unsupported.stderr).toContain("only supported on macOS");
     }
   });
 
