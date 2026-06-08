@@ -732,14 +732,17 @@ function isSafePackageRunnerCommand(args: string[]): boolean {
 }
 
 function isSafeOmaCommand(args: string[]): boolean {
+  if (args.length === 0) {
+    return true;
+  }
   if (isExact(args, ["--version"]) || isExact(args, ["doctor"]) || isExact(args, ["install"])) {
     return true;
   }
   if (args[0] !== "update") {
     return false;
   }
-  const allowed = new Set(["update", "-y", "--vendor", "codex", "claude-code"]);
-  return args.length >= 2 && args.every((arg) => allowed.has(arg));
+  const allowed = new Set(["update", "-y"]);
+  return args.every((arg) => allowed.has(arg));
 }
 
 function isSafeWingetCommand(args: string[]): boolean {

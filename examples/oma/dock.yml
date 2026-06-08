@@ -1,30 +1,9 @@
 opendock: 1
-id: opendock/oma-codex
-version: 1.2.0
-
-files:
-  - from: templates/DESIGN.md
-    to: DESIGN.md
-    update: managed_block
-
-  - from: templates/AGENTS.md
-    to: AGENTS.md
-    update: managed_block
-
-  - from: templates/README.md
-    to: README.md
-    update: manual_review
-
-  - from: templates/.gitignore
-    to: .gitignore
-    update: append_unique
+id: opendock/oma
+version: 0.1.0
 
 lifecycle:
   install:
-    - id: git-init
-      check: git status
-      run: git init -b main
-
     - id: install-bun
       check: bun --version
       version: ">=1.3.0"
@@ -42,7 +21,7 @@ lifecycle:
     - id: apply-oma-project
       check: test -f .agents/oma-config.yaml
       interactive: user
-      run: oma install
+      run: oma
       timeout_ms: 600000
 
     - id: verify-oma
@@ -54,32 +33,22 @@ lifecycle:
       run: bun install --global oh-my-agent@latest
 
     - id: update-oma-project
-      run: oma update -y --vendor codex
+      interactive: user
+      run: oma
+      timeout_ms: 600000
 
     - id: verify-oma
       run: oma doctor
       timeout_ms: 60000
 
   doctor:
-    - id: git
-      version: ">=2.40.0"
-      check: git --version
-
-    - id: node
-      version: ">=22.0.0 <25.0.0"
-      check: node --version
-
-    - id: npm
-      version: ">=10.0.0"
-      check: npm --version
-
     - id: bun
-      version: ">=1.3.0"
       check: bun --version
+      version: ">=1.3.0"
 
     - id: oma
-      version: ">=8.43.0"
       check: oma --version
+      version: ">=8.43.0"
       repair: bun install --global oh-my-agent@latest
 
     - id: oma-project

@@ -2,6 +2,23 @@ opendock: 1
 id: opendock/codex
 version: 0.1.0
 
+files:
+  - from: files/DESIGN.md
+    to: DESIGN.md
+    update: managed_block
+
+  - from: files/AGENTS.md
+    to: AGENTS.md
+    update: managed_block
+
+  - from: files/README.md
+    to: README.md
+    update: manual_review
+
+  - from: files/.gitignore
+    to: .gitignore
+    update: append_unique
+
 lifecycle:
   install:
     - id: install-node
