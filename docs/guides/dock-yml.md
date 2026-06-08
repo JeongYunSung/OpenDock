@@ -9,7 +9,8 @@
 | 예제 | 용도 |
 |---|---|
 | `examples/git/dock.yml` | Git 설치와 프로젝트 초기화를 담당하는 기본 dock |
-| `examples/codex/dock.yml` | Codex CLI만 설치하는 기본 dock |
+| `examples/codex/dock.yml` | Codex CLI와 기본 프로젝트 파일을 적용하는 dock |
+| `examples/oma/dock.yml` | 파일 payload 없이 Oh My Agent를 적용하는 dock |
 | `examples/claude-code/dock.yml` | Claude Code를 설치하는 dock |
 | `examples/oh-my-codex/dock.yml` | Codex CLI와 Oh My Codex를 설치하는 dock |
 | `examples/oh-my-openagent/dock.yml` | Codex CLI와 Oh My OpenAgent Codex Light를 설치하는 dock |
@@ -21,7 +22,7 @@ dock은 보통 다음 구조를 가집니다.
 ```text
 my-dock/
   dock.yml
-  templates/
+  files/
     README.md
     DESIGN.md
     AGENTS.md
@@ -36,12 +37,14 @@ id: opendock/codex
 version: 0.1.0
 
 files:
-  - from: templates/README.md
+  - from: files/README.md
     to: README.md
     update: managed_block
 ```
 
-권장 형식은 `opendock: 1`입니다. 과거 호환용으로 `schema: opendock/v1`, `kind: starterpack`, `setup`도 파싱되지만 새 dock은 `opendock`, `files`, `lifecycle` 중심으로 작성하는 편이 좋습니다.
+`from` 경로는 dock root 기준입니다. `files/`는 예시에서 쓰는 권장 폴더명일 뿐이고, OpenDock은 특수한 `templates/` 폴더나 암묵적 fallback을 사용하지 않습니다. 프로젝트에 넣을 파일은 항상 `files` 목록에 명시하세요.
+
+현재 형식은 `opendock: 1`입니다. 새 dock은 `opendock`, `files`, `lifecycle` 중심으로 작성하세요.
 
 ## 전체 예제
 
@@ -51,19 +54,19 @@ id: opendock/codex
 version: 0.1.0
 
 files:
-  - from: templates/DESIGN.md
+  - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
 
-  - from: templates/AGENTS.md
+  - from: files/AGENTS.md
     to: AGENTS.md
     update: managed_block
 
-  - from: templates/README.md
+  - from: files/README.md
     to: README.md
     update: manual_review
 
-  - from: templates/.gitignore
+  - from: files/.gitignore
     to: .gitignore
     update: append_unique
 
@@ -122,16 +125,13 @@ lifecycle:
 
 | 필드 | 필수 | 설명 |
 |---|---:|---|
-| `opendock` | 권장 필수 | 현재 지원 버전은 `1`입니다. |
-| `schema` | 선택 | 과거 형식 호환용입니다. 값은 `opendock/v1`만 지원합니다. |
-| `kind` | 선택 | 과거 형식 호환용입니다. 쓰는 경우 `starterpack`만 지원합니다. |
+| `opendock` | 필수 | 현재 지원 버전은 `1`입니다. |
 | `id` | 필수 | dock 식별자입니다. 설치 요청의 `owner/name`과 정확히 같아야 합니다. |
 | `name` | 선택 | 사람이 읽는 이름입니다. 현재 실행 로직에는 영향이 없습니다. |
 | `summary` | 선택 | 설명 문자열입니다. 기본값은 빈 문자열입니다. |
 | `version` | 권장 필수 | dock 버전입니다. 없으면 `0.1.0`으로 해석됩니다. |
-| `files` | 선택 | 프로젝트에 적용할 템플릿 파일 목록입니다. |
+| `files` | 선택 | 프로젝트에 적용할 파일 목록입니다. |
 | `lifecycle` | 선택 | `install`, `update`, `doctor` 단계별 명령 목록입니다. |
-| `setup` | 선택 | 과거 형식 호환용입니다. `lifecycle.install` 또는 `lifecycle.update`가 비어 있을 때 fallback으로 사용됩니다. |
 | `needs` | 선택 | 현재는 파싱만 됩니다. 실제 설치 판단은 `lifecycle`의 `check`, `version`, `run`으로 표현하세요. |
 
 ### id 규칙
@@ -160,19 +160,19 @@ id: opendock/codex/designer
 설치할 때는 npm처럼 `@` 뒤에 selector를 붙일 수 있습니다.
 
 ```bash
-opendock install opendock/oma-codex
-opendock install opendock/oma-codex@latest
-opendock install opendock/oma-codex@1
-opendock install opendock/oma-codex@1.5
-opendock install opendock/oma-codex@1.5.2
-opendock install opendock/oma-codex@v1
+opendock install opendock/codex
+opendock install opendock/codex@latest
+opendock install opendock/codex@1
+opendock install opendock/codex@1.5
+opendock install opendock/codex@1.5.2
+opendock install opendock/codex@v1
 ```
 
 selector가 없으면 `latest`로 해석합니다. `1`은 최신 `1.x`, `1.5`는 최신 `1.5.x`, `1.5.2`는 exact version 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 selector와 registry가 돌려준 exact version을 함께 기록합니다.
 
 ```yaml
 docks:
-  - id: opendock/oma-codex
+  - id: opendock/codex
     requested: 1.5
     version: 1.5.2
 ```
@@ -185,7 +185,7 @@ docks:
 
 ```yaml
 files:
-  - from: templates/DESIGN.md
+  - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
 ```
@@ -206,7 +206,7 @@ files:
 
 ```yaml
 files:
-  - from: templates/AGENTS.md
+  - from: files/AGENTS.md
     to: AGENTS.md
     update: managed_block
 ```
@@ -227,7 +227,7 @@ files:
 
 ```yaml
 files:
-  - from: templates/README.md
+  - from: files/README.md
     to: README.md
     update: manual_review
 ```
@@ -240,16 +240,12 @@ files:
 
 ```yaml
 files:
-  - from: templates/.gitignore
+  - from: files/.gitignore
     to: .gitignore
     update: append_unique
 ```
 
 `.gitignore`처럼 줄 단위 규칙을 누적해야 하는 파일에 적합합니다. 빈 줄은 무시되고, 같은 라인은 반복 추가되지 않습니다.
-
-### legacy templates 동작
-
-`files`를 비워두고 `templates/`만 둔 과거 형식도 동작합니다. 이 경우 `.gitignore`는 `append_unique`, 나머지 파일은 기존 파일이 있으면 managed block 방식에 가깝게 처리됩니다. 하지만 새 dock은 파일별 의도가 분명한 `files`를 쓰는 것이 좋습니다.
 
 ## lifecycle 작성법
 
@@ -601,7 +597,7 @@ OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 �
 
 배포 흐름은 다음 원칙을 따릅니다.
 
-1. dock author가 `dock.yml`과 `templates/`를 작성합니다.
+1. dock author가 `dock.yml`과 `files[].from`에 명시한 source 파일을 작성합니다.
 2. `opendock auth login`으로 로그인합니다.
 3. `opendock deploy <dock-name>`으로 제출합니다.
 4. OpenDock Registry 검토를 통과한 dock만 registry에서 설치될 수 있습니다.
@@ -796,9 +792,9 @@ lifecycle:
 - 검증 없이 `run`만 늘어놓지 마세요. 가능한 step에는 `check`를 붙여 재실행해도 안전하게 만드세요.
 - 사용자 README처럼 문맥이 중요한 파일에 `managed_block`을 무조건 쓰지 마세요. `manual_review`가 더 나을 수 있습니다.
 
-## 빠른 템플릿
+## 빠른 시작 YAML
 
-새 dock을 만들 때 아래 템플릿에서 시작하세요.
+새 dock을 만들 때 아래 예시에서 시작하세요.
 
 ```yaml
 opendock: 1
@@ -806,19 +802,19 @@ id: owner/name
 version: 0.1.0
 
 files:
-  - from: templates/DESIGN.md
+  - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
 
-  - from: templates/AGENTS.md
+  - from: files/AGENTS.md
     to: AGENTS.md
     update: managed_block
 
-  - from: templates/README.md
+  - from: files/README.md
     to: README.md
     update: manual_review
 
-  - from: templates/.gitignore
+  - from: files/.gitignore
     to: .gitignore
     update: append_unique
 

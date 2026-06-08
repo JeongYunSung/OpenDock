@@ -14,10 +14,8 @@
 ---
 
 OpenDock은 현재 디렉터리에 승인된 dock을 적용하는 Bun-first TypeScript
-CLI입니다. 첫
-dock은 `opendock/oma-codex`이며, 디자이너가 Codex 프로젝트를 바로
-시작할 수 있도록 Git과 `README.md`, `DESIGN.md`, `AGENTS.md`, `.gitignore`
-같은 작업 하네스 파일을 준비합니다.
+CLI입니다. 첫 dock은 `opendock/codex`이며, Node와 Codex CLI를 확인하고
+설치한 뒤 검토 가능한 프로젝트 파일과 OpenDock 상태를 함께 남깁니다.
 
 ## 빠른 시작
 
@@ -36,7 +34,7 @@ repo=$PWD
 project=$(mktemp -d)
 cd "$project"
 
-"$repo/bin/opendock.js" install opendock/oma-codex
+"$repo/bin/opendock.js" install opendock/codex
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -45,22 +43,22 @@ cd "$project"
 
 | 명령어 | 역할 |
 |---|---|
-| `opendock install opendock/oma-codex` | 현재 디렉터리에 승인된 dock을 설치합니다. |
-| `opendock install opendock/oma-codex@1.5` | 버전 selector를 지정해 설치합니다. |
-| `opendock install opendock/oma-codex --platform windows` | 자동 감지 대신 명시한 플랫폼 기준으로 설치합니다. |
+| `opendock install opendock/codex` | 현재 디렉터리에 승인된 dock을 설치합니다. |
+| `opendock install opendock/codex@1.5` | 버전 selector를 지정해 설치합니다. |
+| `opendock install opendock/codex --platform windows` | 자동 감지 대신 명시한 플랫폼 기준으로 설치합니다. |
 | `opendock update` | 설치된 dock의 새 버전을 확인하고 lock에 기록된 플랫폼 기준으로 적용합니다. |
 | `opendock doctor` | lock에 기록된 플랫폼 기준으로 프로젝트의 OpenDock 상태를 진단합니다. |
 | `opendock log` | 현재 프로젝트의 최근 실행 로그를 보여줍니다. |
 | `opendock version` | CLI, 스키마, 기본 레지스트리 정보를 출력합니다. |
 | `opendock bootstrap mac` | macOS dock용 Homebrew를 확인하거나 설치합니다. |
 | `opendock auth login` | OpenDock Registry 토큰을 저장합니다. |
-| `opendock deploy oma-codex` | 로컬 `dock.yml` dock을 OpenDock Registry 검토용으로 제출합니다. |
+| `opendock deploy codex` | 로컬 `dock.yml` dock을 OpenDock Registry 검토용으로 제출합니다. |
 
 버전 selector는 `owner/name@selector` 형식입니다. selector가 없으면 `latest`로 해석합니다. `@1`은 최신 `1.x`, `@1.5`는 최신 `1.5.x`, `@1.5.2`는 exact version 요청입니다. OpenDock은 lock에 사용자가 요청한 selector와 실제 설치된 exact version을 함께 저장하고, `update` 때 같은 selector를 재사용합니다.
 
 ## dock.yml 작성 가이드
 
-Codex CLI 설치 기준의 상세 dock 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)를 참고하세요. `examples/git`, `examples/codex`, `examples/claude-code`, `examples/oh-my-codex`, `examples/oh-my-openagent`에도 실제 예시가 들어 있습니다.
+Codex CLI 설치 기준의 상세 dock 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)를 참고하세요. `examples/git`, `examples/codex`, `examples/oma`, `examples/claude-code`, `examples/oh-my-codex`, `examples/oh-my-openagent`에도 실제 예시가 들어 있습니다.
 
 플랫폼별 명령은 lifecycle 순서를 깨지 않고 step 안의 `platforms`로 작성합니다.
 
@@ -86,7 +84,7 @@ lifecycle:
 - 원격 dock은 OpenDock Registry 승인, 서명, 체크섬 검증을 통과해야 합니다.
 - 기존 파일은 덮어쓰지 않고 OpenDock 관리 블록으로 append합니다.
 - `.gitignore`는 중복 라인을 만들지 않습니다.
-- setup 명령은 allowlist 기반이며 pipe, redirect, `&&`, `||` 같은 shell 연산자를 차단합니다.
+- lifecycle 명령은 allowlist 기반이며 pipe, redirect, `&&`, `||` 같은 shell 연산자를 차단합니다.
 - `brew`는 macOS step에서만, `winget`은 Windows step에서만 허용합니다.
 - Homebrew 자체 설치는 dock이 아니라 `opendock bootstrap mac` first-party 명령에서 사용자 확인 후 처리합니다.
 - `install`과 `update`는 허용된 명령의 출력을 실시간으로 보여주고, 실행 후 check를 다시 돌려 요구 버전이나 상태가 실제로 충족됐는지 확인합니다.

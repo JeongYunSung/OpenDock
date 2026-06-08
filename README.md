@@ -21,21 +21,21 @@ small, the setup repeatable, and every generated file auditable.
 OpenDock is a Bun-first TypeScript CLI for installing approved docks into
 the current project directory.
 
-The first dock is `opendock/oma-codex`: a Codex project starter that prepares
-Git, Oh My Agent, and AI workspace harness files such as `README.md`,
-`DESIGN.md`, `AGENTS.md`, and `.gitignore`.
+The first dock is `opendock/codex`: a general Codex starter that verifies Node,
+installs the Codex CLI, applies reviewable project files, and keeps the setup
+tracked through OpenDock state.
 
 OpenDock is intentionally not a terminal replacement. It is the small binary you
 run when a project needs a known-good AI setup.
 
 ```bash
-opendock install opendock/oma-codex
+opendock install opendock/codex
 opendock update
 opendock doctor
 opendock log
 opendock version
 opendock auth login
-opendock deploy oma-codex
+opendock deploy codex
 ```
 
 ## Why OpenDock
@@ -66,14 +66,14 @@ bun run build
 bin/opendock.js version
 ```
 
-Try the approved `opendock/oma-codex` dock in a temporary project:
+Try the approved `opendock/codex` dock in a temporary project:
 
 ```bash
 repo=$PWD
 project=$(mktemp -d)
 cd "$project"
 
-"$repo/bin/opendock.js" install opendock/oma-codex
+"$repo/bin/opendock.js" install opendock/codex
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -94,16 +94,16 @@ README.md
 
 | Command | Purpose |
 |---|---|
-| `opendock install opendock/oma-codex` | Install an approved dock into the current directory. |
-| `opendock install opendock/oma-codex@1.5` | Install using a version selector. |
-| `opendock install opendock/oma-codex --platform windows` | Install using an explicit target platform instead of auto-detecting the host. |
+| `opendock install opendock/codex` | Install an approved dock into the current directory. |
+| `opendock install opendock/codex@1.5` | Install using a version selector. |
+| `opendock install opendock/codex --platform windows` | Install using an explicit target platform instead of auto-detecting the host. |
 | `opendock update` | Re-resolve installed docks and apply newer versions safely using the locked platform. |
 | `opendock doctor` | Show whether the current directory has valid OpenDock state using the locked platform. |
 | `opendock log` | Print recent OpenDock runs for the current project. |
 | `opendock version` | Print CLI version, schema version, and default registry. |
 | `opendock bootstrap mac` | Verify or install Homebrew for macOS docks. |
 | `opendock auth login` | Store an OpenDock Registry token for authenticated commands. |
-| `opendock deploy oma-codex` | Submit a local `dock.yml` dock for OpenDock Registry review. |
+| `opendock deploy codex` | Submit a local `dock.yml` dock for OpenDock Registry review. |
 
 `install` is public. `deploy` requires `opendock auth login`.
 Run `opendock bootstrap mac` first when Homebrew is missing.
@@ -125,7 +125,8 @@ an install pinned to `@1.5.2` stays pinned while `@1.5` can move within `1.5.x`.
 
 ## Dock Format
 
-A dock is a directory with a `dock.yml` file and optional `templates/`.
+A dock is a directory with a `dock.yml` file and any source files referenced by
+`files[].from`.
 See [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) for the detailed
 Korean authoring guide.
 
@@ -135,15 +136,15 @@ id: opendock/codex
 version: 0.1.0
 
 files:
-  - from: templates/DESIGN.md
+  - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
 
-  - from: templates/README.md
+  - from: files/README.md
     to: README.md
     update: manual_review
 
-  - from: templates/.gitignore
+  - from: files/.gitignore
     to: .gitignore
     update: append_unique
 
@@ -194,8 +195,8 @@ lifecycle:
       timeout_ms: 60000
 ```
 
-Template files live under `templates/` and are applied relative to the project
-root.
+`from` paths are relative to the dock root. `files/` is only the recommended
+example folder name; OpenDock does not require a special payload directory.
 
 Platform-specific lifecycle commands stay inside the normal top-to-bottom
 `install`, `update`, and `doctor` order. A step with `platforms` keeps one
@@ -237,35 +238,6 @@ lifecycle:
           - key: enter
 ```
 
-## Safety Model
-
-OpenDock treats docks as powerful project setup recipes, so the MVP keeps
-the trust boundary explicit:
-
-- Dock references must be in `owner/name` form and cannot contain path traversal.
-- Version selectors use `owner/name@selector`; `:` tags are not supported.
-- Docks are resolved only from the fixed OpenDock Registry at
-  `https://registry.opendock.app`.
-- Runtime environment variables cannot change the dock source or registry host.
-- Remote metadata must be approved, signed, and checksum-matched before unpack.
-- Lifecycle commands reject shell operators such as pipes, redirects, `&&`,
-  `||`, and command substitution.
-- Only allowlisted command families can run during lifecycle steps.
-- Platform-specific package managers are target-scoped: `brew` is allowed for
-  macOS steps, and `winget` is allowed for Windows steps.
-- Homebrew bootstrap is first-party only: docks may use `brew`, but
-  installing Homebrew itself is handled by `opendock bootstrap mac` with user
-  confirmation.
-- `install` and `update` stream allowed command output live, then re-run checks
-  to confirm the requested version or state was actually reached.
-- `interactive: user` requires a real terminal TTY. `interactive: scripted`
-  uses macOS `expect` and is intended only for approved OpenDock Registry docks.
-- `doctor` lifecycle checks have a default timeout, and individual steps may set
-  `timeout_ms`.
-- Existing files follow the dock's declared update policy.
-- `.gitignore` receives unique appended lines, not repeated blocks.
-- Detailed logs are stored in the OpenDock data directory, not in project source.
-
 ## Environment Variables
 
 | Variable | Use |
@@ -278,16 +250,16 @@ the trust boundary explicit:
 ```text
 src/
   cli.ts              # commander CLI entrypoint
-  installer.ts        # install/update template application
+  installer.ts        # install/update dock file application
   resolver.ts         # local and OpenDock Registry dock resolution
-  runner.ts           # lifecycle command allowlist runner
+  runner.ts           # lifecycle command runner
   registry.ts         # OpenDock Registry API client boundary
 tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
-  oma-codex/          # local dock fixture
   git/                # Git install/init example
-  codex/              # Codex CLI example
+  codex/              # Codex CLI + project files example
+  oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
   oh-my-codex/        # Codex CLI + Oh My Codex example
   oh-my-openagent/    # Codex CLI + Oh My OpenAgent example
@@ -318,8 +290,8 @@ OpenDock is an MVP CLI. The following are intentionally not shipped yet:
 - binary release automation
 
 The CLI already has the local fixture flow, remote registry client boundary,
-approval/checksum/signature checks, project state, logging, auth token storage,
-deploy submission plumbing, and regression tests.
+project state, logging, auth token storage, deploy submission plumbing, and
+regression tests.
 
 When the hosted service ships, `https://opendock.app` is the product site,
 `https://registry.opendock.app` is the human dock catalog, and

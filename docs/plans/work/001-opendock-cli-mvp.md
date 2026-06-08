@@ -11,13 +11,13 @@
 Create a high-quality Bun-first TypeScript CLI in this repository that supports the agreed OpenDock command surface:
 
 ```bash
-opendock install opendock/oma-codex
+opendock install opendock/codex
 opendock update
 opendock doctor
 opendock log
 opendock version
 opendock auth login
-opendock deploy oma-codex
+opendock deploy codex
 ```
 
 The MVP applies approved docks to the current directory, preserves user-authored files with declared update policies, writes `.opendock/` project state, exposes diagnostics and logs, stores OpenDock Registry auth tokens, and provides deploy submission plumbing.
@@ -33,7 +33,7 @@ Core decisions:
 - YAML + Zod for `dock.yml` parsing and validation.
 - Vitest for temp-dir CLI integration tests.
 - Biome for lint/format checks.
-- Dock references use `{owner}/{dock}`, e.g. `opendock/oma-codex`.
+- Dock references use `{owner}/{dock}`, e.g. `opendock/codex`.
 - `install` is public and login-free.
 - `deploy` requires login and creates a submission for approval.
 - Existing files are updated through explicit `files[].update` policies.
@@ -79,7 +79,7 @@ Local development contract:
 | 6 | Implement lifecycle runner with command allowlist | core | P0 | DONE |
 | 7 | Implement `install`, `doctor`, `log`, `version`, and `update` | cli | P0 | DONE |
 | 8 | Add `auth login` token storage and `deploy` submission flow | cli | P1 | DONE |
-| 9 | Keep `examples/oma-codex` dock fixture | fixture | P0 | DONE |
+| 9 | Keep `examples/codex` dock fixture | fixture | P0 | DONE |
 | 10 | Add temp-dir CLI integration tests for edge cases | qa | P0 | DONE |
 | 11 | Run typecheck, tests, lint, and final manual smoke checks | qa | P0 | DONE |
 
@@ -89,7 +89,7 @@ Local development contract:
 - [x] `bun run test` passes.
 - [x] `bun run lint` passes.
 - [x] `opendock version` prints CLI, schema, and registry info.
-- [x] `opendock install opendock/oma-codex` can install from a configured local dock fixture.
+- [x] `opendock install opendock/codex` can install from a configured local dock fixture.
 - [x] Existing files are not overwritten.
 - [x] Re-running `install` does not duplicate managed blocks.
 - [x] `.opendock/project.yml` and `.opendock/dock.lock.yml` are created.
@@ -107,12 +107,12 @@ Local development contract:
 | 2026-06-07 | Use TypeScript/Bun | It aligns OpenDock with adjacent open-source agent tooling and keeps the CLI easy to extend. |
 | 2026-06-07 | Use `{owner}/{dock}` refs | Shorter and clearer than URL-based install syntax. |
 | 2026-06-07 | Use managed append blocks | Existing project files can be updated without overwriting user-authored content. |
-| 2026-06-07 | Add `opendock: 1` manifest shape | Keeps docks concise while preserving legacy `schema/kind/setup` compatibility. |
+| 2026-06-07 | Add `opendock: 1` manifest shape | Keeps docks concise and makes lifecycle the single command surface. |
 
 ## Progress Notes
 
 - [2026-06-07] TypeScript package scaffolded with Commander, YAML, Zod, Vitest, and Biome.
 - [2026-06-07] Local fixture install flow, update flow, project state, logging, auth, deploy no-login failure, and command allowlist were ported to TypeScript.
 - [2026-06-07] Edge cases covered for invalid dock refs, idempotent managed blocks, unique `.gitignore` append, auth token file mode, newer dock updates, and failure logging.
-- [2026-06-07] Added `files` policies, `lifecycle.install/update/doctor`, and the `opendock/oma-codex` example dock.
+- [2026-06-07] Added `files` policies, `lifecycle.install/update/doctor`, and the `opendock/codex` example dock.
 - [2026-06-07] Final verification passed: `bun run typecheck`, `bun run test`, `bun run lint`, `bun run check`, and manual smoke for version/install/doctor/log/update/auth/deploy no-login.
