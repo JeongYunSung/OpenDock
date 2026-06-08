@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { SCHEMA_VERSION } from "./constants.js";
 import { isOpenDockPlatform } from "./platform.js";
 
 const safeSegmentPattern = /^[A-Za-z0-9._-]+$/;
@@ -149,19 +148,18 @@ export const lifecycleSchema = z.object({
   doctor: z.array(lifecycleStepSchema).default([]),
 });
 
-export const dockManifestSchema = z.object({
-  opendock: z.number().optional(),
-  schema: z.string().optional(),
-  kind: z.string().optional(),
-  id: z.string(),
-  name: z.string().optional(),
-  summary: z.string().default(""),
-  version: z.string().default("0.1.0"),
-  needs: z.record(z.string(), z.string()).default({}),
-  files: z.array(fileSpecSchema).default([]),
-  lifecycle: lifecycleSchema.default({ install: [], update: [], doctor: [] }),
-  setup: z.array(lifecycleStepSchema).default([]),
-});
+export const dockManifestSchema = z
+  .object({
+    opendock: z.number().optional(),
+    id: z.string(),
+    name: z.string().optional(),
+    summary: z.string().default(""),
+    version: z.string().default("0.1.0"),
+    needs: z.record(z.string(), z.string()).default({}),
+    files: z.array(fileSpecSchema).default([]),
+    lifecycle: lifecycleSchema.default({ install: [], update: [], doctor: [] }),
+  })
+  .strict();
 
 export type DockManifest = z.infer<typeof dockManifestSchema>;
 export type FileSpec = z.infer<typeof fileSpecSchema>;
@@ -169,17 +167,11 @@ export type LifecycleStep = z.infer<typeof lifecycleStepSchema>;
 export type LifecyclePhase = keyof z.infer<typeof lifecycleSchema>;
 
 export function validateManifestFor(manifest: DockManifest, requested: DockRef): void {
-  if (manifest.opendock === undefined && manifest.schema === undefined) {
-    throw new Error("manifest must declare `opendock` or `schema`");
+  if (manifest.opendock === undefined) {
+    throw new Error("manifest must declare `opendock: 1`");
   }
   if (manifest.opendock !== undefined && manifest.opendock !== 1) {
     throw new Error(`unsupported opendock manifest version \`${manifest.opendock}\``);
-  }
-  if (manifest.schema !== undefined && manifest.schema !== SCHEMA_VERSION) {
-    throw new Error(`unsupported schema \`${manifest.schema}\``);
-  }
-  if (manifest.kind !== undefined && manifest.kind !== "starterpack") {
-    throw new Error(`unsupported kind \`${manifest.kind}\``);
   }
   if (manifest.id !== requested.id()) {
     throw new Error(

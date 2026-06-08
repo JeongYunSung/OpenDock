@@ -1,12 +1,5 @@
-import {
-  existsSync,
-  lstatSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
-import { dirname, join, relative, sep } from "node:path";
+import { existsSync, lstatSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join, sep } from "node:path";
 import {
   assertVersionSatisfiesSelector,
   type DockRef,
@@ -40,7 +33,7 @@ export interface InstallReport {
   steps: StepReport[];
 }
 
-interface TemplateReport {
+interface FileApplyReport {
   created: number;
   updated: number;
   records: ProjectFileRecord[];
@@ -52,9 +45,8 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
   const platform = options.platform ?? detectPlatform();
   assertManifestSupportsPlatform(resolved.manifest, platform);
   const priorRecords = readProjectFile(options.projectDir)?.files ?? [];
-  const templateReport = applyDockFiles(
+  const fileReport = applyDockFiles(
     resolved.root,
-    join(resolved.root, "templates"),
     options.projectDir,
     resolved.manifest.id,
     resolved.manifest.files,
@@ -90,15 +82,15 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
     options.dockRef.requested(),
     resolved.checksum,
     resolved.signature,
-    templateReport.records,
+    fileReport.records,
     platform,
   );
 
   const report: InstallReport = {
     dockId: resolved.manifest.id,
     version: resolved.manifest.version,
-    filesCreated: templateReport.created,
-    filesUpdated: templateReport.updated,
+    filesCreated: fileReport.created,
+    filesUpdated: fileReport.updated,
     platform,
     steps,
   };
@@ -116,26 +108,12 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
 
 function applyDockFiles(
   dockRoot: string,
-  templateRoot: string,
   projectDir: string,
   dockId: string,
   files: FileSpec[],
   priorRecords: ProjectFileRecord[],
-): TemplateReport {
-  if (files.length > 0) {
-    return applyExplicitFiles(dockRoot, projectDir, dockId, files, priorRecords);
-  }
-  return applyLegacyTemplates(templateRoot, projectDir, dockId, priorRecords);
-}
-
-function applyExplicitFiles(
-  dockRoot: string,
-  projectDir: string,
-  dockId: string,
-  files: FileSpec[],
-  priorRecords: ProjectFileRecord[],
-): TemplateReport {
-  const report: TemplateReport = { created: 0, updated: 0, records: [] };
+): FileApplyReport {
+  const report: FileApplyReport = { created: 0, updated: 0, records: [] };
   const priorRecordMap = new Map(priorRecords.map((record) => [record.path, record.checksum]));
 
   for (const file of files) {
@@ -194,69 +172,6 @@ function applyExplicitFiles(
   }
 
   return report;
-}
-
-function applyLegacyTemplates(
-  templateRoot: string,
-  projectDir: string,
-  dockId: string,
-  priorRecords: ProjectFileRecord[],
-): TemplateReport {
-  const report: TemplateReport = { created: 0, updated: 0, records: [] };
-  if (!existsSync(templateRoot)) {
-    return report;
-  }
-
-  const priorRecordMap = new Map(priorRecords.map((record) => [record.path, record.checksum]));
-
-  for (const source of listEntries(templateRoot)) {
-    const rel = normalizePath(relative(templateRoot, source));
-    const target = join(projectDir, rel);
-    mkdirSync(dirname(target), { recursive: true });
-    assertSafeTargetFile(target, rel);
-    const content = readFileSync(source, "utf8");
-
-    if (!existsSync(target)) {
-      writeFileSync(target, content);
-      report.records.push({ path: rel, checksum: textChecksum(content) });
-      report.created += 1;
-      continue;
-    }
-
-    if (rel === ".gitignore") {
-      appendUniqueLines(target, content);
-    } else if (
-      priorRecordMap.has(rel) &&
-      isFile(target) &&
-      fileChecksum(target) === priorRecordMap.get(rel)
-    ) {
-      writeFileSync(target, content);
-      report.records.push({ path: rel, checksum: textChecksum(content) });
-    } else {
-      upsertManagedBlock(target, dockId, rel, content);
-    }
-    report.updated += 1;
-  }
-
-  return report;
-}
-
-function listEntries(root: string): string[] {
-  const result: string[] = [];
-  for (const entry of readdirSync(root, { withFileTypes: true })) {
-    const path = join(root, entry.name);
-    if (entry.isSymbolicLink()) {
-      throw new Error(`template entry cannot be a symlink: ${entry.name}`);
-    }
-    if (entry.isDirectory()) {
-      result.push(...listEntries(path));
-    } else if (entry.isFile()) {
-      result.push(path);
-    } else {
-      throw new Error(`template entry must be a regular file or directory: ${entry.name}`);
-    }
-  }
-  return result;
 }
 
 function appendUniqueLines(path: string, addition: string): void {

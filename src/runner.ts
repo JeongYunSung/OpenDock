@@ -80,14 +80,7 @@ export function getLifecycleSteps(
 }
 
 function rawLifecycleSteps(manifest: DockManifest, phase: LifecyclePhase): LifecycleStep[] {
-  const lifecycleSteps = manifest.lifecycle[phase] ?? [];
-  if (lifecycleSteps.length > 0) {
-    return lifecycleSteps;
-  }
-  if (phase === "install" || phase === "update") {
-    return manifest.setup;
-  }
-  return [];
+  return manifest.lifecycle[phase] ?? [];
 }
 
 export function hasLifecycleSteps(
@@ -562,11 +555,6 @@ function collectManifestPlatforms(manifest: DockManifest): Set<string> {
       }
     }
   }
-  for (const step of manifest.setup) {
-    for (const platform of Object.keys(step.platforms)) {
-      platforms.add(platform);
-    }
-  }
   return platforms;
 }
 
@@ -621,12 +609,12 @@ function rejectShellMetacharacters(command: string): void {
 function ensureAllowed(program: string, args: string[], platform: OpenDockPlatform): void {
   if (!commonAllowedCommands.has(program) && !platformAllowedCommands[platform].has(program)) {
     throw new Error(
-      `command \`${program}\` is not allowed for OpenDock platform \`${platform}\` setup`,
+      `command \`${program}\` is not allowed for OpenDock platform \`${platform}\` lifecycle`,
     );
   }
   if (!isAllowedCommandShape(program, args)) {
     const rendered = [program, ...args].join(" ");
-    throw new Error(`command \`${rendered}\` is not allowed for OpenDock setup`);
+    throw new Error(`command \`${rendered}\` is not allowed for OpenDock lifecycle`);
   }
 }
 
