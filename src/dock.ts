@@ -65,7 +65,12 @@ export const copySpecSchema = z.object({
   to: z.string(),
 });
 
-export const fileUpdatePolicySchema = z.enum(["append_unique", "managed_block", "manual_review"]);
+export const fileUpdatePolicySchema = z.enum([
+  "append_unique",
+  "managed_block",
+  "managed_file",
+  "manual_review",
+]);
 
 export const fileSpecSchema = z.object({
   from: z.string(),
@@ -163,6 +168,7 @@ export const dockManifestSchema = z
 
 export type DockManifest = z.infer<typeof dockManifestSchema>;
 export type FileSpec = z.infer<typeof fileSpecSchema>;
+export type FileUpdatePolicy = z.infer<typeof fileUpdatePolicySchema>;
 export type LifecycleStep = z.infer<typeof lifecycleStepSchema>;
 export type LifecyclePhase = keyof z.infer<typeof lifecycleSchema>;
 

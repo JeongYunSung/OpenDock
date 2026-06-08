@@ -2,12 +2,13 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import YAML from "yaml";
 import { LOCK_SCHEMA_VERSION, PROJECT_SCHEMA_VERSION } from "./constants.js";
-import type { DockManifest } from "./dock.js";
+import type { DockManifest, FileUpdatePolicy } from "./dock.js";
 import type { OpenDockPlatform } from "./platform.js";
 
 export interface ProjectFileRecord {
   path: string;
   checksum: string;
+  update?: FileUpdatePolicy;
 }
 
 export interface AppliedDock {
