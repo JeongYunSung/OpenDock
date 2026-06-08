@@ -99,11 +99,11 @@ export async function run(argv = process.argv): Promise<void> {
 
   program
     .command("version")
-    .description("Show CLI, schema, and Hub information.")
+    .description("Show CLI, schema, and registry information.")
     .action(() => {
       console.log(`opendock ${VERSION}`);
       console.log(`schema ${SCHEMA_VERSION}`);
-      console.log(`hub ${DEFAULT_REGISTRY_URL}`);
+      console.log(`registry ${DEFAULT_REGISTRY_URL}`);
     });
 
   const bootstrap = program.command("bootstrap").description("Prepare first-party host tools.");
@@ -115,20 +115,20 @@ export async function run(argv = process.argv): Promise<void> {
       await bootstrapMac({ assumeYes: options.yes === true });
     });
 
-  const auth = program.command("auth").description("Authenticate with OpenDock Hub.");
+  const auth = program.command("auth").description("Authenticate with OpenDock Registry.");
   auth
     .command("login")
-    .description("Log in to OpenDock Hub.")
+    .description("Log in to OpenDock Registry.")
     .option("--token <token>", "Token to store")
     .action(async (options: { token?: string }) => {
       const token = options.token ?? (await promptToken());
       await new TokenStore().saveToken(token);
-      console.log("Logged in to OpenDock Hub.");
+      console.log("Logged in to OpenDock Registry.");
     });
 
   program
     .command("deploy")
-    .description("Submit a dock to OpenDock Hub for review.")
+    .description("Submit a dock to OpenDock Registry for review.")
     .argument("<dock-name>")
     .action(async (dockName: string) => {
       const token = new TokenStore().loadToken();
@@ -200,7 +200,7 @@ async function printDockDoctorChecks(
 async function promptToken(): Promise<string> {
   const readline = createInterface({ input, output });
   try {
-    const token = (await readline.question("OpenDock Hub token: ")).trim();
+    const token = (await readline.question("OpenDock Registry token: ")).trim();
     if (token === "") {
       throw new Error("empty token");
     }

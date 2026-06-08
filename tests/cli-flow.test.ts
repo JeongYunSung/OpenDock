@@ -93,7 +93,7 @@ describe("opendock TypeScript CLI", () => {
     expect(existsSync(join(project, "DESIGN.md"))).toBe(true);
   });
 
-  it("reports log output and fixed hub version", async () => {
+  it("reports log output and fixed registry version", async () => {
     const project = await tempDir();
     const docks = await tempDir();
     writeTestDock(docks, "test", "harness", "1.0.0", "# Starter README\n");
@@ -112,7 +112,7 @@ describe("opendock TypeScript CLI", () => {
 
     const version = runCli(project, {}, ["version"]);
     expect(version.status).toBe(0);
-    expect(version.stdout).toContain("hub https://hub.opendock.app");
+    expect(version.stdout).toContain("registry https://registry.opendock.app");
   });
 
   it("expands directory file mappings and records managed file policies", async () => {
@@ -427,7 +427,7 @@ files:
     ).rejects.toThrow("duplicate file mapping target");
   });
 
-  it("uses the fixed OpenDock Hub endpoint for remote resolution", async () => {
+  it("uses the fixed OpenDock Registry endpoint for remote resolution", async () => {
     const urls: string[] = [];
     const originalFetch = globalThis.fetch;
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
@@ -437,13 +437,13 @@ files:
 
     try {
       await expect(resolveDock(DockRef.parse("test/harness"))).rejects.toThrow(
-        "https://hub.opendock.app/v1/docks/test/harness/versions/latest",
+        "https://registry.opendock.app/v1/docks/test/harness/versions/latest",
       );
     } finally {
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://hub.opendock.app/v1/docks/test/harness/versions/latest"]);
+    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/latest"]);
   });
 
   it("resolves remote docks using explicit version selectors", async () => {
@@ -456,13 +456,13 @@ files:
 
     try {
       await expect(resolveDock(DockRef.parse("test/harness@1.5"))).rejects.toThrow(
-        "https://hub.opendock.app/v1/docks/test/harness/versions/1.5",
+        "https://registry.opendock.app/v1/docks/test/harness/versions/1.5",
       );
     } finally {
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://hub.opendock.app/v1/docks/test/harness/versions/1.5"]);
+    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/1.5"]);
   });
 
   it("installs remote docks with selector metadata and stores the requested selector", async () => {
@@ -476,19 +476,19 @@ files:
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
       const url = String(input);
       urls.push(url);
-      if (url === "https://hub.opendock.app/v1/docks/test/remote/versions/1.5") {
+      if (url === "https://registry.opendock.app/v1/docks/test/remote/versions/1.5") {
         return new Response(
           JSON.stringify({
             approved: true,
             checksum,
             id: "test/remote",
-            signature: "hub-signature",
+            signature: "registry-signature",
             version: "1.5.2",
           }),
           { headers: { "content-type": "application/json" }, status: 200 },
         );
       }
-      if (url === "https://hub.opendock.app/v1/docks/test/remote/versions/1.5.2/download") {
+      if (url === "https://registry.opendock.app/v1/docks/test/remote/versions/1.5.2/download") {
         return new Response(archive, { status: 200 });
       }
       return new Response("{}", { status: 404, statusText: "Not Found" });
@@ -511,8 +511,8 @@ files:
     }
 
     expect(urls).toEqual([
-      "https://hub.opendock.app/v1/docks/test/remote/versions/1.5",
-      "https://hub.opendock.app/v1/docks/test/remote/versions/1.5.2/download",
+      "https://registry.opendock.app/v1/docks/test/remote/versions/1.5",
+      "https://registry.opendock.app/v1/docks/test/remote/versions/1.5.2/download",
     ]);
     expect(readFileSync(join(project, "README.md"), "utf8")).toBe("# Remote Dock\n");
     const lockedDock = lockDocks(readLock(project))[0];
@@ -523,7 +523,7 @@ files:
       checksum,
       id: "test/remote",
       requested: "1.5",
-      signature: "hub-signature",
+      signature: "registry-signature",
       version: "1.5.2",
     });
   });
@@ -536,7 +536,7 @@ files:
           approved: true,
           checksum: "unused",
           id: "test/unsafe-version",
-          signature: "hub-signature",
+          signature: "registry-signature",
           version: "../../bad",
         }),
         { headers: { "content-type": "application/json" }, status: 200 },
@@ -571,13 +571,13 @@ files:
     const checksum = sha256Bytes(archive);
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
       const url = String(input);
-      if (url === "https://hub.opendock.app/v1/docks/test/symlink-archive/versions/latest") {
+      if (url === "https://registry.opendock.app/v1/docks/test/symlink-archive/versions/latest") {
         return new Response(
           JSON.stringify({
             approved: true,
             checksum,
             id: "test/symlink-archive",
-            signature: "hub-signature",
+            signature: "registry-signature",
             version: "1.0.0",
           }),
           { headers: { "content-type": "application/json" }, status: 200 },
@@ -602,7 +602,7 @@ files:
     }
   });
 
-  it("submits docks only to the fixed OpenDock Hub", async () => {
+  it("submits docks only to the fixed OpenDock Registry", async () => {
     const urls: string[] = [];
     const bodies: string[] = [];
     const originalFetch = globalThis.fetch;
@@ -627,7 +627,7 @@ files:
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://hub.opendock.app/v1/docks/submissions"]);
+    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/submissions"]);
     expect(bodies).toEqual([JSON.stringify({ dock_name: "codex", manifest: "opendock: 1" })]);
   });
 
@@ -1383,7 +1383,7 @@ lifecycle:
       "test-token",
     ]);
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain("Logged in to OpenDock Hub.");
+    expect(result.stdout).toContain("Logged in to OpenDock Registry.");
     expect(readFileSync(authPath, "utf8")).toBe("test-token");
     if (process.platform !== "win32") {
       expect(statSync(authPath).mode & 0o777).toBe(0o600);

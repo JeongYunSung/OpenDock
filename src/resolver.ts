@@ -69,13 +69,13 @@ async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
   assertSafeResolvedVersion(metadata.version);
 
   if (metadata.id !== dockRef.id()) {
-    throw new Error(`hub returned dock id \`${metadata.id}\` for requested \`${dockRef}\``);
+    throw new Error(`registry returned dock id \`${metadata.id}\` for requested \`${dockRef}\``);
   }
   if (!metadata.approved) {
-    throw new Error(`dock \`${dockRef}\` is not approved by OpenDock Hub`);
+    throw new Error(`dock \`${dockRef}\` is not approved by OpenDock Registry`);
   }
   if (metadata.signature.trim() === "") {
-    throw new Error(`dock \`${dockRef}\` is missing an OpenDock Hub signature`);
+    throw new Error(`dock \`${dockRef}\` is missing an OpenDock Registry signature`);
   }
 
   const archive = await client.downloadDock(dockRef.owner, dockRef.name, metadata.version);
@@ -213,7 +213,7 @@ interface ExtractionLimits {
 
 function assertSafeResolvedVersion(version: string): void {
   if (!safeResolvedVersionPattern.test(version)) {
-    throw new Error(`hub returned unsafe dock version \`${version}\``);
+    throw new Error(`registry returned unsafe dock version \`${version}\``);
   }
 }
 
