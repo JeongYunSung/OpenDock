@@ -7,13 +7,13 @@ import { TokenStore } from "./auth.js";
 import { bootstrapMac } from "./bootstrap.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
 import { DockRef } from "./dock.js";
-import { install } from "./installer.js";
+import { type InstallReport, install } from "./installer.js";
 import { readProjectLogs } from "./logging.js";
 import { detectPlatform, type OpenDockPlatform, parsePlatform } from "./platform.js";
 import { hasProjectState, lockDocks, readLock } from "./project.js";
 import { OpenDockRegistryClient } from "./registry.js";
 import { resolveDock } from "./resolver.js";
-import { hasExplicitLifecycleSteps, runLifecycle } from "./runner.js";
+import { runLifecycle } from "./runner.js";
 
 export async function run(argv = process.argv): Promise<void> {
   const program = new Command();
@@ -26,11 +26,13 @@ export async function run(argv = process.argv): Promise<void> {
     .command("install")
     .description("Install an approved dock into the current directory.")
     .argument("<dock>", "Dock reference: owner/name[@selector]")
+    .option("--force", "Overwrite user-edited managed files")
     .option("--platform <platform>", "Target platform: macos, windows, or linux")
-    .action(async (dock: string, options: { platform?: string }) => {
+    .action(async (dock: string, options: { force?: boolean; platform?: string }) => {
       const platform = resolveCliPlatform(options.platform);
       const report = await install({
         dockRef: DockRef.parse(dock),
+        force: options.force === true,
         projectDir: process.cwd(),
         runCommands: true,
         operation: "install",
@@ -38,41 +40,37 @@ export async function run(argv = process.argv): Promise<void> {
         platform,
       });
       console.log(
-        `Installed ${report.dockId}@${report.version} for ${report.platform} (${report.filesCreated} files created, ${report.filesUpdated} files updated)`,
+        `Installed ${report.dockId}@${report.version} for ${report.platform} (${formatFileSummary(report)})`,
       );
     });
 
   program
     .command("update")
     .description("Update the dock installed in the current directory.")
+    .option("--force", "Overwrite user-edited managed files")
     .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
-    .action(async (options: { platform?: string }) => {
+    .action(async (options: { force?: boolean; platform?: string }) => {
       const lock = readLock(process.cwd());
       for (const dock of lockDocks(lock)) {
         const dockRef = DockRef.parse(`${dock.id}@${dock.requested ?? "latest"}`);
         const platform = resolveCliPlatform(options.platform ?? dock.platform);
-        const latest = await resolveDock(dockRef);
-        if (
-          latest.manifest.version === dock.version &&
-          !hasExplicitLifecycleSteps(latest.manifest, "update", { platform })
-        ) {
-          console.log(`${dock.id} is up to date at ${dock.version} for ${platform}`);
+        const report = await install({
+          dockRef,
+          force: options.force === true,
+          projectDir: process.cwd(),
+          runCommands: true,
+          operation: "update",
+          phase: "update",
+          platform,
+        });
+        if (dock.version === report.version) {
+          console.log(
+            `Updated ${dock.id} at ${report.version} for ${report.platform} (${formatFileSummary(report)})`,
+          );
         } else {
-          const report = await install({
-            dockRef,
-            projectDir: process.cwd(),
-            runCommands: true,
-            operation: "update",
-            phase: "update",
-            platform,
-          });
-          if (dock.version === report.version) {
-            console.log(`Updated ${dock.id} at ${report.version} for ${report.platform}`);
-          } else {
-            console.log(
-              `Updated ${dock.id}: ${dock.version} -> ${report.version} for ${report.platform}`,
-            );
-          }
+          console.log(
+            `Updated ${dock.id}: ${dock.version} -> ${report.version} for ${report.platform} (${formatFileSummary(report)})`,
+          );
         }
       }
     });
@@ -148,6 +146,10 @@ export async function run(argv = process.argv): Promise<void> {
 
 function resolveCliPlatform(value: string | undefined): OpenDockPlatform {
   return value === undefined ? detectPlatform() : parsePlatform(value);
+}
+
+function formatFileSummary(report: InstallReport): string {
+  return `${report.filesCreated} files created, ${report.filesUpdated} files updated, ${report.filesDeleted} files deleted, ${report.filesReviewRequired} review required`;
 }
 
 async function printDoctor(cwd: string, platformOverride?: string): Promise<void> {

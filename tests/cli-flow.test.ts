@@ -5,6 +5,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  rmSync,
   statSync,
   symlinkSync,
   writeFileSync,
@@ -18,7 +19,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { bootstrapMac, HOMEBREW_INSTALL_COMMAND } from "../src/bootstrap.js";
 import { DockRef, dockManifestSchema, versionSatisfiesSelector } from "../src/dock.js";
 import { type DockResolver, install } from "../src/installer.js";
-import { lockDocks, readLock } from "../src/project.js";
+import { lockDocks, readLock, readProjectFile } from "../src/project.js";
 import { OpenDockRegistryClient } from "../src/registry.js";
 import { resolveDock, resolveLocalDock } from "../src/resolver.js";
 import { runCommand, runLifecycle } from "../src/runner.js";
@@ -95,26 +96,335 @@ describe("opendock TypeScript CLI", () => {
   it("reports log output and fixed hub version", async () => {
     const project = await tempDir();
     const docks = await tempDir();
-    const home = await tempDir();
     writeTestDock(docks, "test", "harness", "1.0.0", "# Starter README\n");
-    await withEnv({ HOME: home }, async () => {
-      await install({
-        dockRef: DockRef.parse("test/harness"),
-        projectDir: project,
-        runCommands: true,
-        operation: "install",
-        phase: "install",
-        resolve: localResolver(docks),
-      });
+    await install({
+      dockRef: DockRef.parse("test/harness"),
+      projectDir: project,
+      runCommands: true,
+      operation: "install",
+      phase: "install",
+      resolve: localResolver(docks),
     });
 
-    const logs = runCli(project, { HOME: home }, ["log"]);
+    const logs = runCli(project, {}, ["log"]);
     expect(logs.status).toBe(0);
     expect(logs.stdout).toContain("install test/harness");
 
     const version = runCli(project, {}, ["version"]);
     expect(version.status).toBe(0);
     expect(version.stdout).toContain("hub https://hub.opendock.app");
+  });
+
+  it("expands directory file mappings and records managed file policies", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeDirectoryManagedDock(docks, "1.0.0", {
+      "rules/frontend.md": "# Frontend\n",
+      "skills/design/SKILL.md": "# Design Skill\n",
+    });
+
+    const report = await install({
+      dockRef: DockRef.parse("test/directory-managed"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: localResolver(docks),
+    });
+
+    expect(report.filesCreated).toBe(2);
+    expect(readFileSync(join(project, "project", "rules", "frontend.md"), "utf8")).toBe(
+      "# Frontend\n",
+    );
+    expect(readFileSync(join(project, "project", "skills", "design", "SKILL.md"), "utf8")).toBe(
+      "# Design Skill\n",
+    );
+    expect(readProjectFile(project)?.files).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: "project/rules/frontend.md",
+          update: "managed_file",
+        }),
+        expect.objectContaining({
+          path: "project/skills/design/SKILL.md",
+          update: "managed_file",
+        }),
+      ]),
+    );
+  });
+
+  it("stops install before replacing existing untracked managed files unless forced", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeDirectoryManagedDock(docks, "1.0.0", {
+      "config.yml": "tool: dock\n",
+    });
+    mkdirSync(join(project, "project"), { recursive: true });
+    writeFileSync(join(project, "project", "config.yml"), "tool: user\n");
+
+    await expect(
+      install({
+        dockRef: DockRef.parse("test/directory-managed"),
+        projectDir: project,
+        runCommands: false,
+        operation: "install",
+        resolve: localResolver(docks),
+      }),
+    ).rejects.toThrow("require review");
+    expect(readFileSync(join(project, "project", "config.yml"), "utf8")).toBe("tool: user\n");
+    expect(existsSync(join(project, ".opendock", "project.yml"))).toBe(false);
+
+    const report = await install({
+      dockRef: DockRef.parse("test/directory-managed"),
+      force: true,
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: localResolver(docks),
+    });
+
+    expect(report.filesUpdated).toBe(1);
+    expect(report.filesReviewRequired).toBe(0);
+    expect(readFileSync(join(project, "project", "config.yml"), "utf8")).toBe("tool: dock\n");
+    expect(existsSync(join(project, ".opendock", "project.yml"))).toBe(true);
+  });
+
+  it("reconciles skipped dock versions without git-style conflict resolution", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeDirectoryManagedDock(docks, "0.1.0", {
+      "test.md": "version 0.1\n",
+    });
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/directory-managed"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+
+    writeDirectoryManagedDock(docks, "0.3.0", {
+      "machine.md": "version 0.3\n",
+    });
+    const report = await install({
+      dockRef: DockRef.parse("test/directory-managed"),
+      projectDir: project,
+      runCommands: false,
+      operation: "update",
+      phase: "update",
+      resolve: resolver,
+    });
+
+    expect(report.filesCreated).toBe(1);
+    expect(report.filesDeleted).toBe(1);
+    expect(report.filesReviewRequired).toBe(0);
+    expect(existsSync(join(project, "project", "test.md"))).toBe(false);
+    expect(readFileSync(join(project, "project", "machine.md"), "utf8")).toBe("version 0.3\n");
+    expect(readProjectFile(project)?.files.map((file) => file.path)).toEqual([
+      "project/machine.md",
+    ]);
+  });
+
+  it("stops before applying updates when removed managed files were user-edited", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeDirectoryManagedDock(docks, "0.1.0", {
+      "test.md": "version 0.1\n",
+    });
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/directory-managed"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+    writeFileSync(join(project, "project", "test.md"), "user change\n");
+
+    writeDirectoryManagedDock(
+      docks,
+      "0.3.0",
+      {
+        "machine.md": "version 0.3\n",
+      },
+      { updateMarker: true },
+    );
+
+    await expect(
+      install({
+        dockRef: DockRef.parse("test/directory-managed"),
+        projectDir: project,
+        runCommands: true,
+        operation: "update",
+        phase: "update",
+        resolve: resolver,
+      }),
+    ).rejects.toThrow("require review");
+
+    expect(readFileSync(join(project, "project", "test.md"), "utf8")).toBe("user change\n");
+    expect(existsSync(join(project, "project", "machine.md"))).toBe(false);
+    expect(existsSync(join(project, ".updated"))).toBe(false);
+    expect(
+      readProjectFile(project)
+        ?.files.map((file) => file.path)
+        .sort(),
+    ).toEqual(["project/test.md"]);
+  });
+
+  it("force-updates user-edited removed managed files", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeDirectoryManagedDock(docks, "0.1.0", {
+      "test.md": "version 0.1\n",
+    });
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/directory-managed"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+    writeFileSync(join(project, "project", "test.md"), "user change\n");
+
+    writeDirectoryManagedDock(docks, "0.3.0", {
+      "machine.md": "version 0.3\n",
+    });
+    const report = await install({
+      dockRef: DockRef.parse("test/directory-managed"),
+      force: true,
+      projectDir: project,
+      runCommands: false,
+      operation: "update",
+      phase: "update",
+      resolve: resolver,
+    });
+
+    expect(report.filesCreated).toBe(1);
+    expect(report.filesDeleted).toBe(1);
+    expect(report.filesReviewRequired).toBe(0);
+    expect(existsSync(join(project, "project", "test.md"))).toBe(false);
+    expect(readFileSync(join(project, "project", "machine.md"), "utf8")).toBe("version 0.3\n");
+    expect(readProjectFile(project)?.files.map((file) => file.path)).toEqual([
+      "project/machine.md",
+    ]);
+  });
+
+  it("stops before replacing user-edited managed files", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeDirectoryManagedDock(docks, "1.0.0", {
+      "config.yml": "tool: old\n",
+    });
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/directory-managed"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+    writeFileSync(join(project, "project", "config.yml"), "tool: user\n");
+
+    writeDirectoryManagedDock(docks, "1.1.0", {
+      "config.yml": "tool: new\n",
+    });
+    await expect(
+      install({
+        dockRef: DockRef.parse("test/directory-managed"),
+        projectDir: project,
+        runCommands: false,
+        operation: "update",
+        phase: "update",
+        resolve: resolver,
+      }),
+    ).rejects.toThrow("require review");
+
+    expect(readFileSync(join(project, "project", "config.yml"), "utf8")).toBe("tool: user\n");
+    expect(readProjectFile(project)?.files).toEqual([
+      expect.objectContaining({
+        path: "project/config.yml",
+        update: "managed_file",
+      }),
+    ]);
+  });
+
+  it("force-replaces user-edited managed files", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeDirectoryManagedDock(docks, "1.0.0", {
+      "config.yml": "tool: old\n",
+    });
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/directory-managed"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+    writeFileSync(join(project, "project", "config.yml"), "tool: user\n");
+
+    writeDirectoryManagedDock(docks, "1.1.0", {
+      "config.yml": "tool: new\n",
+    });
+    const report = await install({
+      dockRef: DockRef.parse("test/directory-managed"),
+      force: true,
+      projectDir: project,
+      runCommands: false,
+      operation: "update",
+      phase: "update",
+      resolve: resolver,
+    });
+
+    expect(report.filesUpdated).toBe(1);
+    expect(report.filesReviewRequired).toBe(0);
+    expect(readFileSync(join(project, "project", "config.yml"), "utf8")).toBe("tool: new\n");
+    expect(readProjectFile(project)?.files).toEqual([
+      expect.objectContaining({
+        path: "project/config.yml",
+        update: "managed_file",
+      }),
+    ]);
+  });
+
+  it("rejects duplicate file mapping targets", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    const dockRoot = join(docks, "test", "duplicate-target");
+    mkdirSync(join(dockRoot, "files"), { recursive: true });
+    writeFileSync(join(dockRoot, "files", "first.md"), "first\n");
+    writeFileSync(join(dockRoot, "files", "second.md"), "second\n");
+    writeFileSync(
+      join(dockRoot, "dock.yml"),
+      `opendock: 1
+id: test/duplicate-target
+version: 1.0.0
+files:
+  - from: files/first.md
+    to: README.md
+    update: managed_file
+  - from: files/second.md
+    to: README.md
+    update: managed_file
+`,
+    );
+
+    await expect(
+      install({
+        dockRef: DockRef.parse("test/duplicate-target"),
+        projectDir: project,
+        runCommands: false,
+        operation: "install",
+        resolve: localResolver(docks),
+      }),
+    ).rejects.toThrow("duplicate file mapping target");
   });
 
   it("uses the fixed OpenDock Hub endpoint for remote resolution", async () => {
@@ -624,6 +934,11 @@ lifecycle:
       expect(help.status).toBe(0);
       expect(help.stdout).toContain("--platform <platform>");
     }
+    for (const command of ["install", "update"]) {
+      const help = runCli(process.cwd(), {}, [command, "--help"]);
+      expect(help.status).toBe(0);
+      expect(help.stdout).toContain("--force");
+    }
   });
 
   it("fails unmet post-run version checks", async () => {
@@ -731,7 +1046,7 @@ files:
           signature: "local",
         }),
       }),
-    ).rejects.toThrow("source cannot be a symlink");
+    ).rejects.toThrow("cannot be a symlink");
 
     const targetProject = await tempDir();
     const targetDocks = await tempDir();
@@ -748,6 +1063,107 @@ files:
       }),
     ).rejects.toThrow("target cannot be a symlink");
     expect(readFileSync(join(outside, "secret.txt"), "utf8")).toBe("outside secret\n");
+  });
+
+  it("rejects symlinked project target parent directories", async () => {
+    const outside = await tempDir();
+    const project = await tempDir();
+    const docks = await tempDir();
+    const dockRoot = join(docks, "test", "target-parent-symlink");
+    mkdirSync(join(dockRoot, "files"), { recursive: true });
+    writeFileSync(join(dockRoot, "files", "safe.md"), "safe\n");
+    writeFileSync(
+      join(dockRoot, "dock.yml"),
+      `opendock: 1
+id: test/target-parent-symlink
+version: 1.0.0
+files:
+  - from: files/safe.md
+    to: project/safe.md
+    update: managed_file
+`,
+    );
+    symlinkSync(outside, join(project, "project"));
+
+    await expect(
+      install({
+        dockRef: DockRef.parse("test/target-parent-symlink"),
+        projectDir: project,
+        runCommands: false,
+        operation: "install",
+        resolve: localResolver(docks),
+      }),
+    ).rejects.toThrow("target parent cannot be a symlink");
+    expect(existsSync(join(outside, "safe.md"))).toBe(false);
+  });
+
+  it("does not delete through symlinked project target parent directories", async () => {
+    const outside = await tempDir();
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeDirectoryManagedDock(docks, "1.0.0", {
+      "safe.md": "safe\n",
+    });
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/directory-managed"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+
+    rmSync(join(project, "project"), { force: true, recursive: true });
+    writeFileSync(join(outside, "safe.md"), "safe\n");
+    symlinkSync(outside, join(project, "project"));
+    const dockRoot = join(docks, "test", "directory-managed");
+    rmSync(join(dockRoot, "files"), { force: true, recursive: true });
+    writeFileSync(
+      join(dockRoot, "dock.yml"),
+      `opendock: 1
+id: test/directory-managed
+version: 1.1.0
+files: []
+`,
+    );
+
+    await expect(
+      install({
+        dockRef: DockRef.parse("test/directory-managed"),
+        projectDir: project,
+        runCommands: false,
+        operation: "update",
+        phase: "update",
+        resolve: resolver,
+      }),
+    ).rejects.toThrow("target parent cannot be a symlink");
+    expect(readFileSync(join(outside, "safe.md"), "utf8")).toBe("safe\n");
+  });
+
+  it("rejects symlinks inside directory file mappings", async () => {
+    const outside = await tempDir();
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeFileSync(join(outside, "secret.txt"), "outside secret\n");
+    writeDirectoryManagedDock(docks, "1.0.0", {
+      "safe.md": "safe\n",
+    });
+    symlinkSync(
+      join(outside, "secret.txt"),
+      join(docks, "test", "directory-managed", "files", "project", "secret.md"),
+    );
+
+    await expect(
+      install({
+        dockRef: DockRef.parse("test/directory-managed"),
+        projectDir: project,
+        runCommands: false,
+        operation: "install",
+        resolve: localResolver(docks),
+      }),
+    ).rejects.toThrow("cannot be a symlink");
+    expect(existsSync(join(project, "project", "safe.md"))).toBe(false);
   });
 
   it("supports user and scripted interactive lifecycle steps", async () => {
@@ -1169,7 +1585,6 @@ lifecycle:
   it("writes failure logs for rejected lifecycle commands", async () => {
     const project = await tempDir();
     const docks = await tempDir();
-    const home = await tempDir();
     const dockRoot = join(docks, "test", "bad");
     mkdirSync(dockRoot, { recursive: true });
     writeFileSync(
@@ -1186,20 +1601,18 @@ lifecycle:
 `,
     );
 
-    await withEnv({ HOME: home }, async () => {
-      await expect(
-        install({
-          dockRef: DockRef.parse("test/bad"),
-          projectDir: project,
-          runCommands: true,
-          operation: "install",
-          phase: "install",
-          resolve: localResolver(docks),
-        }),
-      ).rejects.toThrow("not allowed");
-    });
+    await expect(
+      install({
+        dockRef: DockRef.parse("test/bad"),
+        projectDir: project,
+        runCommands: true,
+        operation: "install",
+        phase: "install",
+        resolve: localResolver(docks),
+      }),
+    ).rejects.toThrow("not allowed");
 
-    const logs = runCli(project, { HOME: home }, ["log"]);
+    const logs = runCli(project, {}, ["log"]);
     expect(logs.status).toBe(0);
     expect(logs.stdout).toContain("Failure");
     expect(logs.stdout).toContain("not allowed");
@@ -1372,6 +1785,36 @@ files:
   writeFileSync(join(dockRoot, "files", ".gitignore"), "node_modules/\n.DS_Store\n");
   writeFileSync(join(dockRoot, "files", "AGENTS.md"), "# Agents\n");
   writeFileSync(join(dockRoot, "files", "DESIGN.md"), "# Design\n");
+}
+
+function writeDirectoryManagedDock(
+  root: string,
+  version: string,
+  files: Record<string, string>,
+  options: { updateMarker?: boolean } = {},
+): void {
+  const dockRoot = join(root, "test", "directory-managed");
+  const sourceRoot = join(dockRoot, "files", "project");
+  rmSync(dockRoot, { force: true, recursive: true });
+  mkdirSync(sourceRoot, { recursive: true });
+  writeFileSync(
+    join(dockRoot, "dock.yml"),
+    `opendock: 1
+id: test/directory-managed
+name: Directory Managed Dock
+version: ${version}
+files:
+  - from: files/project
+    to: project
+    update: managed_file
+${options.updateMarker === true ? "lifecycle:\n  update:\n    - id: update-marker\n      run: mkdir .updated\n" : ""}
+`,
+  );
+  for (const [path, content] of Object.entries(files)) {
+    const target = join(sourceRoot, path);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, content);
+  }
 }
 
 function writeModernDock(root: string): void {
