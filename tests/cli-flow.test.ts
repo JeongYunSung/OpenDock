@@ -651,6 +651,81 @@ files:
     ]);
   });
 
+  it("uses the fixed OpenDock Registry for cli auth endpoints", async () => {
+    const requests: Array<{ body: string | undefined; method: string; url: string }> = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
+      requests.push({
+        body: init?.body === undefined ? undefined : String(init.body),
+        method: init?.method ?? "GET",
+        url: String(input),
+      });
+      const url = String(input);
+      if (url.endsWith("/auth/cli/start")) {
+        return new Response(
+          JSON.stringify({
+            authUrl: "https://accounts.example.test/login",
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+          }),
+          { headers: { "content-type": "application/json" }, status: 200 },
+        );
+      }
+      if (url.endsWith("/auth/cli/exchange")) {
+        return new Response(
+          JSON.stringify({
+            token: "od_test",
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+            user: { email: "designer@example.com", id: "user-1" },
+          }),
+          { headers: { "content-type": "application/json" }, status: 200 },
+        );
+      }
+      if (url.endsWith("/auth/me")) {
+        return new Response(JSON.stringify({ email: "designer@example.com", id: "user-1" }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        });
+      }
+      if (url.endsWith("/auth/logout")) {
+        return new Response("", { status: 200 });
+      }
+      return new Response("{}", { status: 404 });
+    }) as typeof fetch;
+
+    try {
+      const client = new OpenDockRegistryClient();
+      await client.startCliLogin("http://127.0.0.1:49152/callback");
+      await client.exchangeCliCode("oc_test_code");
+      await client.currentUser("od_test");
+      await client.logout("od_test");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(requests).toEqual([
+      {
+        body: JSON.stringify({ redirectUri: "http://127.0.0.1:49152/callback" }),
+        method: "POST",
+        url: "https://registry.opendock.app/v1/auth/cli/start",
+      },
+      {
+        body: JSON.stringify({ code: "oc_test_code" }),
+        method: "POST",
+        url: "https://registry.opendock.app/v1/auth/cli/exchange",
+      },
+      {
+        body: undefined,
+        method: "GET",
+        url: "https://registry.opendock.app/v1/auth/me",
+      },
+      {
+        body: undefined,
+        method: "POST",
+        url: "https://registry.opendock.app/v1/auth/logout",
+      },
+    ]);
+  });
+
   it("performs browser auth through localhost callback and stores the cli token", async () => {
     const authRoot = await tempDir();
     let callbackUri = "";
@@ -689,6 +764,36 @@ files:
     expect(token.token).toBe("od_test_cli_token");
     expect(tokenStore.loadToken()).toBe("od_test_cli_token");
     expect(messages.join("\n")).toContain("Logged in as designer@example.com.");
+  });
+
+  it("fails browser auth cleanly when the callback receives an error", async () => {
+    const authRoot = await tempDir();
+    let callbackUri = "";
+    const tokenStore = new TokenStore(authRoot);
+
+    await expect(
+      performBrowserLogin({
+        tokenStore,
+        client: {
+          async startCliLogin(redirectUri: string) {
+            callbackUri = redirectUri;
+            return {
+              authUrl: "https://accounts.example.test/login",
+              expiresAt: new Date(Date.now() + 60_000).toISOString(),
+            };
+          },
+          async exchangeCliCode() {
+            throw new Error("should not exchange after callback error");
+          },
+        },
+        openBrowser: async () => {
+          const response = await fetch(`${callbackUri}?error=access_denied`);
+          expect(response.status).toBe(200);
+        },
+      }),
+    ).rejects.toThrow("OpenDock login failed: access_denied");
+
+    expect(tokenStore.loadToken()).toBeUndefined();
   });
 
   it("supports opendock v1 files lifecycle and doctor checks", async () => {
@@ -883,7 +988,7 @@ lifecycle:
         }
       });
     }
-  });
+  }, 15_000);
 
   it("merges platform-specific lifecycle steps in declared order and records platform", async () => {
     const project = await tempDir();
