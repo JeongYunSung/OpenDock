@@ -54,6 +54,10 @@ id: opendock/codex
 version: 0.1.0
 
 files:
+  - from: files/.agents
+    to: .agents
+    update: managed_file
+
   - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
@@ -181,10 +185,14 @@ docks:
 
 ## files 작성법
 
-`files`는 dock 안의 파일을 프로젝트 루트로 적용하는 목록입니다.
+`files`는 dock 안의 파일 또는 디렉터리를 프로젝트 루트로 적용하는 목록입니다.
 
 ```yaml
 files:
+  - from: files/.agents
+    to: .agents
+    update: managed_file
+
   - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
@@ -192,11 +200,13 @@ files:
 
 | 필드 | 필수 | 설명 |
 |---|---:|---|
-| `from` | 필수 | dock root 기준 소스 파일 경로입니다. |
+| `from` | 필수 | dock root 기준 소스 파일 또는 디렉터리 경로입니다. |
 | `to` | 필수 | 설치 대상 프로젝트 기준 경로입니다. |
 | `update` | 필수 | 기존 파일이 있을 때의 업데이트 정책입니다. |
 
-`from`, `to`는 안전한 상대 경로여야 합니다. 빈 문자열, 절대 경로, `../` 같은 상위 이동은 거부됩니다. 현재 구현은 파일 단위만 지원하므로 필요한 파일을 각각 나열하세요.
+`from`, `to`는 안전한 상대 경로여야 합니다. 빈 문자열, 절대 경로, `../` 같은 상위 이동은 거부됩니다.
+
+`from`이 파일이면 `to`도 대상 파일 경로입니다. `from`이 디렉터리이면 OpenDock은 디렉터리 안의 regular file을 재귀적으로 펼쳐서 `to` 아래 같은 상대 경로로 적용합니다. 예를 들어 `from: files/.agents`, `to: .agents`는 `files/.agents/skills/design/SKILL.md`를 `.agents/skills/design/SKILL.md`로 적용합니다. 빈 디렉터리는 생성하지 않고, source나 target 경로 구성 요소에 symlink가 있으면 거부됩니다.
 
 ### update 정책
 
@@ -220,6 +230,23 @@ files:
 ```
 
 다시 설치하거나 업데이트하면 같은 marker 안의 내용만 교체됩니다. 사용자가 블록 바깥에 쓴 내용은 유지됩니다. `DESIGN.md`, `AGENTS.md`, 규칙 문서처럼 OpenDock이 지속적으로 업데이트해야 하는 파일에 적합합니다.
+
+#### `managed_file`
+
+파일 전체를 OpenDock이 관리하되, git처럼 conflict를 자동 병합하지는 않습니다.
+
+```yaml
+files:
+  - from: files/.agents
+    to: .agents
+    update: managed_file
+```
+
+OpenDock은 마지막으로 적용한 파일 hash를 `.opendock/project.yml`에 기록합니다. install/update 때 현재 파일 hash가 마지막 적용 hash와 같으면 새 dock 내용으로 교체하거나, 새 dock에서 빠진 파일을 삭제합니다. 사용자가 파일을 수정해 hash가 달라졌으면 기본적으로 파일 적용과 lifecycle 실행 전에 중단하고 `review required`로 보고합니다.
+
+`opendock install owner/name --force` 또는 `opendock update --force`를 쓰면 수정된 `managed_file`도 dock 내용으로 강제 덮어쓰거나, 새 dock에서 빠진 managed file을 강제로 삭제합니다.
+
+이 정책은 `.agents/`, 하네스, 생성된 설정 묶음처럼 OpenDock이 소유권을 갖는 파일 트리에 적합합니다. 사용자가 직접 편집할 가능성이 큰 README나 제품 문서는 `manual_review`가 더 안전합니다.
 
 #### `manual_review`
 
@@ -264,7 +291,7 @@ lifecycle:
 | `update` | `opendock update` | 이미 설치된 dock을 최신 버전 또는 최신 상태로 갱신 |
 | `doctor` | `opendock doctor` | 현재 프로젝트 상태 점검 |
 
-파일 적용은 `install` 또는 `update` lifecycle 실행보다 먼저 일어납니다. lifecycle이 실패하면 실패 로그가 남고, `.opendock` 상태 기록은 완료되지 않습니다.
+OpenDock은 먼저 review-required 파일을 검사합니다. 수정된 `managed_file`처럼 자동 반영이 위험한 항목이 있으면 기본적으로 파일 적용과 `install`/`update` lifecycle 실행 전에 중단합니다. `--force`를 쓰거나 review-required가 없으면 파일 적용이 lifecycle 실행보다 먼저 일어납니다. lifecycle이 실패하면 실패 로그가 남고, `.opendock` 상태 기록은 완료되지 않습니다.
 
 ### lifecycle step 필드
 
@@ -571,7 +598,9 @@ lifecycle:
       timeout_ms: 60000
 ```
 
-파일 업데이트는 `files[].update` 정책에 따라 `update`에서도 다시 적용됩니다. 예를 들어 `managed_block` 파일은 OpenDock block이 새 dock 내용으로 교체되고, `append_unique`는 새 라인만 추가됩니다.
+파일 업데이트는 `files[].update` 정책에 따라 `update`에서도 다시 적용됩니다. 예를 들어 `managed_block` 파일은 OpenDock block이 새 dock 내용으로 교체되고, `managed_file`은 이전 적용 hash와 일치하는 파일만 교체/삭제하며, `append_unique`는 새 라인만 추가됩니다.
+
+OpenDock은 git conflict resolver가 아닙니다. 예를 들어 `0.1.0`에서 `project/test.md`를 만들고, `0.2.0`에서 삭제하고, `0.3.0`에서 `project/machine.md`를 추가했을 때 사용자가 `0.1.0`에서 바로 `0.3.0`으로 업데이트해도 단계별 git merge를 수행하지 않습니다. 대신 `.opendock/project.yml`의 hash를 기준으로 `test.md`가 그대로면 삭제하고, 사용자가 수정했으면 파일 적용과 lifecycle 전에 중단합니다. 사용자가 의도적으로 OpenDock 쪽을 우선하려면 `opendock update --force`로 강제 반영합니다.
 
 ## 기존 프로젝트 파일을 보호하는 기준
 
@@ -583,6 +612,7 @@ dock은 사용자가 이미 작성한 파일을 함부로 덮어쓰면 안 됩�
 |---|---|---|
 | `DESIGN.md` | `managed_block` | 디자인 시스템 기본값은 업데이트되어야 하지만 사용자 메모도 남아야 합니다. |
 | `AGENTS.md` | `managed_block` | OpenDock/Codex 작업 규칙 영역을 명확히 분리할 수 있습니다. |
+| `.agents/`, 하네스 파일 | `managed_file` | OpenDock이 소유하는 파일 묶음은 hash가 같을 때 자동 교체/삭제할 수 있습니다. |
 | `README.md` | `manual_review` | 프로젝트 설명은 사용자 문맥이 강합니다. |
 | `.gitignore` | `append_unique` | 라인 단위 누적이 자연스럽고 중복을 피할 수 있습니다. |
 | 설정 파일 일부 | `managed_block` | 파일 전체보다 관리 영역만 교체하는 편이 안전합니다. |
@@ -794,7 +824,7 @@ lifecycle:
 ## 현재 MVP에서 피해야 할 것
 
 - 의존성 선언만으로 자동 설치를 기대하지 마세요. 현재는 lifecycle로 표현해야 합니다.
-- 디렉터리 전체를 한 항목으로 관리한다고 가정하지 마세요. 현재는 파일 단위 `files`만 지원합니다.
+- 디렉터리 매핑은 regular file만 재귀 적용합니다. 빈 디렉터리 생성이나 symlink 복사는 기대하지 마세요.
 - `repair`가 doctor 실패를 자동 수정한다고 기대하지 마세요.
 - shell script처럼 `&&`, pipe, redirect를 쓰지 마세요.
 - 검증 없이 `run`만 늘어놓지 마세요. 가능한 step에는 `check`를 붙여 재실행해도 안전하게 만드세요.
@@ -810,6 +840,10 @@ id: owner/name
 version: 0.1.0
 
 files:
+  - from: files/.agents
+    to: .agents
+    update: managed_file
+
   - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block

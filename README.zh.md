@@ -84,7 +84,9 @@ README.md
 | `opendock install opendock/codex` | 将已审核 dock 安装到当前目录。 |
 | `opendock install opendock/codex@1.5` | 使用 version selector 安装。 |
 | `opendock install opendock/codex --platform windows` | 使用显式 target platform，而不是自动检测 host。 |
+| `opendock install opendock/codex --force` | 在 install 时强制应用 OpenDock 管理的变更。 |
 | `opendock update` | 重新解析已安装 dock，并使用 lock 中的平台安全应用新版本。 |
+| `opendock update --force` | 即使检测到已编辑的 managed file，也强制应用 OpenDock 管理的变更。 |
 | `opendock doctor` | 使用 lock 中的平台显示当前目录的 OpenDock state。 |
 | `opendock log` | 输出当前项目最近的 OpenDock 运行记录。 |
 | `opendock version` | 输出 CLI version、schema version 和 default hub。 |
@@ -112,7 +114,7 @@ OpenDock 会把用户请求的 selector 和解析出的 exact version 都写入
 
 ## Dock 格式
 
-dock 是一个目录，包含 `dock.yml` 文件，以及 `files[].from` 引用的 source 文件。
+dock 是一个目录，包含 `dock.yml` 文件，以及 `files[].from` 引用的 source 文件或目录。
 详见 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) 中的韩语编写指南。
 
 ```yaml
@@ -121,6 +123,10 @@ id: opendock/codex
 version: 0.1.0
 
 files:
+  - from: files/.agents
+    to: .agents
+    update: managed_file
+
   - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
@@ -181,6 +187,10 @@ lifecycle:
 ```
 
 `from` 路径相对于 dock root。`files/` 只是推荐的示例文件夹名；OpenDock 不要求特殊的 payload 目录。
+
+目录 source 会递归展开。`managed_file` 只有在当前文件 hash 与 OpenDock 上次应用的 hash
+一致时才会替换或删除文件。检测到已编辑的 managed file 时，install/update 会在文件变更和
+lifecycle 命令之前停止。`--force` 会覆盖或删除这些 managed file。
 
 平台专用 lifecycle 命令仍保持在普通的 top-to-bottom `install`、`update`、`doctor`
 顺序内。带有 `platforms` 的 step 保留一个逻辑 `id`，OpenDock 会合并匹配平台的 override：

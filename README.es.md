@@ -100,7 +100,9 @@ README.md
 | `opendock install opendock/codex` | Instala un dock aprobado en el directorio actual. |
 | `opendock install opendock/codex@1.5` | Instala usando un version selector. |
 | `opendock install opendock/codex --platform windows` | Instala con una target platform explícita en lugar de detectar el host. |
+| `opendock install opendock/codex --force` | Fuerza los cambios managed por OpenDock durante install. |
 | `opendock update` | Vuelve a resolver los docks instalados y aplica versiones nuevas de forma segura usando la platform bloqueada. |
+| `opendock update --force` | Fuerza los cambios managed por OpenDock aunque se detecten managed files editados. |
 | `opendock doctor` | Muestra el estado OpenDock del directorio actual usando la platform bloqueada. |
 | `opendock log` | Imprime las ejecuciones recientes de OpenDock para el proyecto actual. |
 | `opendock version` | Imprime la versión de la CLI, la versión del schema y el Hub por defecto. |
@@ -129,8 +131,8 @@ moverse dentro de `1.5.x`.
 
 ## Formato Del Dock
 
-Un dock es un directorio con un archivo `dock.yml` y cualquier archivo fuente
-referenciado por `files[].from`.
+Un dock es un directorio con un archivo `dock.yml` y cualquier archivo o
+directorio fuente referenciado por `files[].from`.
 Consulta [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) para la guía
 detallada de autoría en coreano.
 
@@ -140,6 +142,10 @@ id: opendock/codex
 version: 0.1.0
 
 files:
+  - from: files/.agents
+    to: .agents
+    update: managed_file
+
   - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
@@ -202,6 +208,12 @@ lifecycle:
 Las rutas `from` son relativas a la raíz del dock. `files/` es solo el nombre de
 carpeta recomendado en el ejemplo; OpenDock no requiere un directorio especial
 de payload.
+
+Los directorios source se expanden recursivamente. `managed_file` reemplaza o
+elimina un archivo solo cuando su hash actual coincide con el último hash
+aplicado por OpenDock. Los managed files editados detienen install/update antes
+de cambios de archivos o comandos lifecycle. `--force` sobrescribe o elimina
+esos managed files.
 
 Los comandos lifecycle específicos por platform permanecen dentro del orden
 normal top-to-bottom de `install`, `update` y `doctor`. Un step con `platforms`

@@ -97,7 +97,9 @@ README.md
 | `opendock install opendock/codex` | Install an approved dock into the current directory. |
 | `opendock install opendock/codex@1.5` | Install using a version selector. |
 | `opendock install opendock/codex --platform windows` | Install using an explicit target platform instead of auto-detecting the host. |
+| `opendock install opendock/codex --force` | Force OpenDock-managed file changes during install. |
 | `opendock update` | Re-resolve installed docks and apply newer versions safely using the locked platform. |
+| `opendock update --force` | Force OpenDock-managed file changes even when edited managed files are detected. |
 | `opendock doctor` | Show whether the current directory has valid OpenDock state using the locked platform. |
 | `opendock log` | Print recent OpenDock runs for the current project. |
 | `opendock version` | Print CLI version, schema version, and default hub. |
@@ -125,8 +127,8 @@ an install pinned to `@1.5.2` stays pinned while `@1.5` can move within `1.5.x`.
 
 ## Dock Format
 
-A dock is a directory with a `dock.yml` file and any source files referenced by
-`files[].from`.
+A dock is a directory with a `dock.yml` file and any source files or directories
+referenced by `files[].from`.
 See [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) for the detailed
 Korean authoring guide.
 
@@ -136,6 +138,10 @@ id: opendock/codex
 version: 0.1.0
 
 files:
+  - from: files/.agents
+    to: .agents
+    update: managed_file
+
   - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
@@ -194,6 +200,11 @@ lifecycle:
       check: codex --version
       timeout_ms: 60000
 ```
+
+Directory sources are expanded recursively. `managed_file` replaces or deletes a
+file only when its current hash matches the last OpenDock-applied hash; edited
+managed files stop install/update before file changes or lifecycle commands run.
+Use `--force` to overwrite or delete those managed files.
 
 `from` paths are relative to the dock root. `files/` is only the recommended
 example folder name; OpenDock does not require a special payload directory.

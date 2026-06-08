@@ -99,7 +99,9 @@ README.md
 | `opendock install opendock/codex` | Installiert ein geprüftes Dock im aktuellen Verzeichnis. |
 | `opendock install opendock/codex@1.5` | Installiert mit einem version selector. |
 | `opendock install opendock/codex --platform windows` | Installiert mit einer expliziten target platform statt host auto-detection. |
+| `opendock install opendock/codex --force` | Erzwingt OpenDock-managed file changes während install. |
 | `opendock update` | Löst installierte Docks erneut auf und wendet neue Versionen sicher mit der gelockten platform an. |
+| `opendock update --force` | Erzwingt OpenDock-managed file changes, auch wenn bearbeitete managed files erkannt werden. |
 | `opendock doctor` | Zeigt den OpenDock state des aktuellen Verzeichnisses mit der gelockten platform. |
 | `opendock log` | Gibt die letzten OpenDock runs für das aktuelle Projekt aus. |
 | `opendock version` | Gibt CLI version, schema version und default hub aus. |
@@ -128,8 +130,8 @@ bleibt, während `@1.5` sich innerhalb von `1.5.x` bewegen kann.
 
 ## Dock-Format
 
-Ein Dock ist ein Verzeichnis mit einer `dock.yml` Datei und allen Quelldateien,
-die von `files[].from` referenziert werden.
+Ein Dock ist ein Verzeichnis mit einer `dock.yml` Datei und allen Quelldateien
+oder Verzeichnissen, die von `files[].from` referenziert werden.
 Siehe [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) für den detaillierten
 koreanischen Authoring Guide.
 
@@ -139,6 +141,10 @@ id: opendock/codex
 version: 0.1.0
 
 files:
+  - from: files/.agents
+    to: .agents
+    update: managed_file
+
   - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
@@ -200,6 +206,12 @@ lifecycle:
 
 `from` paths sind relativ zum Dock-Root. `files/` ist nur der empfohlene
 Beispielordnername; OpenDock benötigt kein spezielles payload directory.
+
+Directory sources werden rekursiv entfaltet. `managed_file` ersetzt oder löscht
+eine Datei nur, wenn ihr aktueller Hash dem zuletzt von OpenDock angewendeten
+Hash entspricht. Bearbeitete managed files stoppen install/update vor file
+changes oder lifecycle commands. `--force` überschreibt oder löscht diese
+managed files.
 
 Platform-spezifische lifecycle commands bleiben innerhalb der normalen
 top-to-bottom Reihenfolge von `install`, `update` und `doctor`. Ein step mit

@@ -97,7 +97,9 @@ README.md
 | `opendock install opendock/codex` | 承認済み dock を現在のディレクトリにインストールします。 |
 | `opendock install opendock/codex@1.5` | version selector を使ってインストールします。 |
 | `opendock install opendock/codex --platform windows` | host の自動検出ではなく明示した target platform でインストールします。 |
+| `opendock install opendock/codex --force` | install 中に OpenDock managed changes を強制適用します。 |
 | `opendock update` | インストール済み dock を再 resolve し、lock 済み platform で安全に新しい version を適用します。 |
+| `opendock update --force` | 編集済み managed file があっても OpenDock managed changes を強制適用します。 |
 | `opendock doctor` | 現在のディレクトリの OpenDock state を lock 済み platform で表示します。 |
 | `opendock log` | 現在のプロジェクトの最近の OpenDock 実行を出力します。 |
 | `opendock version` | CLI version、schema version、default hub を表示します。 |
@@ -126,8 +128,8 @@ selector を再利用するため、`@1.5.2` でインストールした dock �
 
 ## Dock Format
 
-dock は `dock.yml` ファイルと、`files[].from` で参照される source ファイルを
-含むディレクトリです。詳細は [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
+dock は `dock.yml` ファイルと、`files[].from` で参照される source ファイルまたは
+ディレクトリを含むディレクトリです。詳細は [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
 の韓国語 authoring guide を参照してください。
 
 ```yaml
@@ -136,6 +138,10 @@ id: opendock/codex
 version: 0.1.0
 
 files:
+  - from: files/.agents
+    to: .agents
+    update: managed_file
+
   - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
@@ -197,6 +203,11 @@ lifecycle:
 
 `from` path は dock root からの相対 path です。`files/` は推奨例としての
 フォルダ名であり、OpenDock は特別な payload directory を要求しません。
+
+directory source は再帰的に展開されます。`managed_file` は現在の hash が最後に
+OpenDock が適用した hash と一致する場合だけファイルを置換または削除します。編集済み
+managed file がある場合、install/update は file changes や lifecycle commands の前に停止します。
+`--force` はその managed file を上書きまたは削除します。
 
 platform 固有の lifecycle コマンドは、通常の top-to-bottom の `install`,
 `update`, `doctor` 順序の中に残ります。`platforms` を持つ step は 1 つの

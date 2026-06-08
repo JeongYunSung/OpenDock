@@ -94,7 +94,9 @@ README.md
 | `opendock install opendock/codex` | 현재 디렉터리에 승인된 dock을 설치합니다. |
 | `opendock install opendock/codex@1.5` | version selector를 사용해 설치합니다. |
 | `opendock install opendock/codex --platform windows` | host 자동 감지 대신 명시한 target platform으로 설치합니다. |
+| `opendock install opendock/codex --force` | install 중 OpenDock 관리 파일 변경을 강제로 반영합니다. |
 | `opendock update` | 설치된 dock을 다시 resolve하고 lock에 기록된 platform 기준으로 안전하게 새 버전을 적용합니다. |
+| `opendock update --force` | 수정된 managed file이 있어도 OpenDock 관리 변경을 강제로 반영합니다. |
 | `opendock doctor` | 현재 디렉터리의 OpenDock 상태를 lock에 기록된 platform 기준으로 표시합니다. |
 | `opendock log` | 현재 프로젝트의 최근 OpenDock 실행 기록을 출력합니다. |
 | `opendock version` | CLI 버전, schema 버전, 기본 Hub를 출력합니다. |
@@ -123,8 +125,8 @@ OpenDock은 요청한 selector와 resolve된 exact version을 모두
 
 ## Dock 형식
 
-dock은 `dock.yml` 파일과 `files[].from`에서 참조하는 source 파일로 구성된
-디렉터리입니다. 자세한 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
+dock은 `dock.yml` 파일과 `files[].from`에서 참조하는 source 파일 또는 디렉터리로
+구성된 디렉터리입니다. 자세한 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
 한국어 가이드를 참고하세요.
 
 ```yaml
@@ -133,6 +135,10 @@ id: opendock/codex
 version: 0.1.0
 
 files:
+  - from: files/.agents
+    to: .agents
+    update: managed_file
+
   - from: files/DESIGN.md
     to: DESIGN.md
     update: managed_block
@@ -194,6 +200,11 @@ lifecycle:
 
 `from` 경로는 dock root 기준입니다. `files/`는 권장 예시 폴더명일 뿐이며,
 OpenDock은 특별한 payload 디렉터리를 요구하지 않습니다.
+
+디렉터리 source는 재귀적으로 펼쳐집니다. `managed_file`은 현재 파일 hash가 마지막으로
+OpenDock이 적용한 hash와 같을 때만 교체하거나 삭제합니다. 사용자가 수정한 managed file이
+있으면 기본적으로 파일 변경과 lifecycle 실행 전에 중단됩니다. `--force`를 쓰면 해당 managed
+file을 강제로 덮어쓰거나 삭제합니다.
 
 Platform별 lifecycle 명령은 일반적인 top-to-bottom `install`, `update`,
 `doctor` 순서 안에 머뭅니다. `platforms`가 있는 step은 하나의 논리적 `id`를
