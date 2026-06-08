@@ -16,7 +16,9 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { c as createTar } from "tar";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { TokenStore } from "../src/auth.js";
 import { bootstrapMac, HOMEBREW_INSTALL_COMMAND } from "../src/bootstrap.js";
+import { performBrowserLogin } from "../src/browser-auth.js";
 import { DockRef, dockManifestSchema, versionSatisfiesSelector } from "../src/dock.js";
 import { type DockResolver, install } from "../src/installer.js";
 import { lockDocks, readLock, readProjectFile } from "../src/project.js";
@@ -647,6 +649,46 @@ files:
         },
       }),
     ]);
+  });
+
+  it("performs browser auth through localhost callback and stores the cli token", async () => {
+    const authRoot = await tempDir();
+    let callbackUri = "";
+    const messages: string[] = [];
+    const tokenStore = new TokenStore(authRoot);
+    const token = await performBrowserLogin({
+      tokenStore,
+      write: (message) => messages.push(message),
+      client: {
+        async startCliLogin(redirectUri: string) {
+          callbackUri = redirectUri;
+          return {
+            authUrl: "https://accounts.example.test/login",
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+          };
+        },
+        async exchangeCliCode(code: string) {
+          expect(code).toBe("oc_test_login_code");
+          return {
+            token: "od_test_cli_token",
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+            user: {
+              id: "11111111-1111-1111-1111-111111111111",
+              email: "designer@example.com",
+              displayName: "Designer",
+            },
+          };
+        },
+      },
+      openBrowser: async () => {
+        const response = await fetch(`${callbackUri}?code=oc_test_login_code`);
+        expect(response.status).toBe(200);
+      },
+    });
+
+    expect(token.token).toBe("od_test_cli_token");
+    expect(tokenStore.loadToken()).toBe("od_test_cli_token");
+    expect(messages.join("\n")).toContain("Logged in as designer@example.com.");
   });
 
   it("supports opendock v1 files lifecycle and doctor checks", async () => {
@@ -1491,12 +1533,18 @@ lifecycle:
     }
   });
 
-  it("requires login before deploy", async () => {
+  it("validates deploy files before starting browser login", async () => {
     const project = await tempDir();
     const home = await tempDir();
-    const result = runCli(project, { HOME: home }, ["deploy", "codex"]);
+    writeFileSync(join(project, "dock.yml"), "opendock: 1\nid: test/logo\nlogo: logo.svg\n");
+    writeFileSync(join(project, "logo.svg"), "<svg />\n");
+
+    const result = runCli(project, { HOME: home }, ["deploy", "test/logo"]);
+
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("not logged in");
+    expect(result.stderr).toContain(
+      "manifest `logo` path must point to a png, jpg, jpeg, or webp file",
+    );
   });
 
   it("rejects deploy readme paths outside the dock directory", async () => {

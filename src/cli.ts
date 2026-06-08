@@ -1,18 +1,23 @@
 #!/usr/bin/env node
 import { readFileSync, realpathSync, statSync } from "node:fs";
 import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
-import { stdin as input, stdout as output } from "node:process";
-import { createInterface } from "node:readline/promises";
 import { Command } from "commander";
 import { TokenStore } from "./auth.js";
 import { bootstrapMac } from "./bootstrap.js";
+import { performBrowserLogin } from "./browser-auth.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
 import { type DockManifest, DockRef, parseManifestFile } from "./dock.js";
 import { type InstallReport, install } from "./installer.js";
 import { readProjectLogs } from "./logging.js";
 import { detectPlatform, type OpenDockPlatform, parsePlatform } from "./platform.js";
 import { hasProjectState, lockDocks, readLock } from "./project.js";
-import { OpenDockRegistryClient, type SubmissionLogoRequest } from "./registry.js";
+import {
+  OpenDockRegistryClient,
+  RegistryRequestError,
+  type SubmissionLogoRequest,
+  type SubmissionRequest,
+  type SubmissionResponse,
+} from "./registry.js";
 import { resolveDock } from "./resolver.js";
 import { runLifecycle } from "./runner.js";
 
@@ -123,11 +128,45 @@ export async function run(argv = process.argv): Promise<void> {
   auth
     .command("login")
     .description("Log in to OpenDock Registry.")
-    .option("--token <token>", "Token to store")
+    .option("--token <token>", "Existing CLI token to store without opening a browser")
     .action(async (options: { token?: string }) => {
-      const token = options.token ?? (await promptToken());
-      await new TokenStore().saveToken(token);
-      console.log("Logged in to OpenDock Registry.");
+      const tokenStore = new TokenStore();
+      if (options.token) {
+        await tokenStore.saveToken(options.token);
+        console.log("Logged in to OpenDock Registry.");
+        return;
+      }
+      await performBrowserLogin({ tokenStore });
+    });
+  auth
+    .command("status")
+    .description("Show the current OpenDock Registry login.")
+    .action(async () => {
+      const token = new TokenStore().loadToken();
+      if (!token) {
+        console.log("Not logged in.");
+        return;
+      }
+      const user = await new OpenDockRegistryClient().currentUser(token);
+      console.log(`Logged in as ${user.email}.`);
+    });
+  auth
+    .command("logout")
+    .description("Log out of OpenDock Registry on this machine.")
+    .action(async () => {
+      const tokenStore = new TokenStore();
+      const token = tokenStore.loadToken();
+      if (token) {
+        try {
+          await new OpenDockRegistryClient().logout(token);
+        } catch (error) {
+          if (!(error instanceof RegistryRequestError && error.status === 401)) {
+            throw error;
+          }
+        }
+      }
+      tokenStore.clearToken();
+      console.log("Logged out of OpenDock Registry.");
     });
 
   program
@@ -135,10 +174,6 @@ export async function run(argv = process.argv): Promise<void> {
     .description("Submit a dock to OpenDock Registry for review.")
     .argument("<dock-name>")
     .action(async (dockName: string) => {
-      const token = new TokenStore().loadToken();
-      if (!token) {
-        throw new Error("not logged in; run `opendock auth login` first");
-      }
       const manifest = readFileSync("dock.yml", "utf8");
       const parsedManifest = parseManifestFile(join(process.cwd(), "dock.yml"));
       const readmeMarkdown = readDeployReadme(process.cwd(), parsedManifest);
@@ -150,7 +185,7 @@ export async function run(argv = process.argv): Promise<void> {
         ...(readmeMarkdown === undefined ? {} : { readme_markdown: readmeMarkdown }),
         ...(logo === undefined ? {} : { logo }),
       };
-      const response = await client.submitDock(request, token);
+      const response = await submitDockWithLogin(client, new TokenStore(), request);
       console.log(`Submitted ${dockName} for review: ${response.id} (${response.status})`);
     });
 
@@ -264,6 +299,35 @@ function formatFileSummary(report: InstallReport): string {
   return `${report.filesCreated} files created, ${report.filesUpdated} files updated, ${report.filesDeleted} files deleted, ${report.filesReviewRequired} review required`;
 }
 
+async function submitDockWithLogin(
+  client: OpenDockRegistryClient,
+  tokenStore: TokenStore,
+  request: SubmissionRequest,
+): Promise<SubmissionResponse> {
+  let token = await loadOrLoginToken(client, tokenStore);
+  try {
+    return await client.submitDock(request, token);
+  } catch (error) {
+    if (!(error instanceof RegistryRequestError && error.status === 401)) {
+      throw error;
+    }
+    tokenStore.clearToken();
+    token = (await performBrowserLogin({ client, tokenStore })).token;
+    return client.submitDock(request, token);
+  }
+}
+
+async function loadOrLoginToken(
+  client: OpenDockRegistryClient,
+  tokenStore: TokenStore,
+): Promise<string> {
+  const token = tokenStore.loadToken();
+  if (token) {
+    return token;
+  }
+  return (await performBrowserLogin({ client, tokenStore })).token;
+}
+
 async function printDoctor(cwd: string, platformOverride?: string): Promise<void> {
   console.log("OpenDock Doctor");
   console.log(`Project: ${cwd}`);
@@ -306,19 +370,6 @@ async function printDockDoctorChecks(
     }
   } catch (error) {
     console.log(`! ${dockRef.id()} doctor checks unavailable: ${(error as Error).message}`);
-  }
-}
-
-async function promptToken(): Promise<string> {
-  const readline = createInterface({ input, output });
-  try {
-    const token = (await readline.question("OpenDock Registry token: ")).trim();
-    if (token === "") {
-      throw new Error("empty token");
-    }
-    return token;
-  } finally {
-    readline.close();
   }
 }
 

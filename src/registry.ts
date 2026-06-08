@@ -15,6 +15,25 @@ export interface LoginResponse {
   token: string;
 }
 
+export interface CliLoginStartResponse {
+  authUrl: string;
+  expiresAt: string;
+}
+
+export interface CliTokenResponse {
+  token: string;
+  expiresAt: string;
+  user: AuthUserResponse;
+}
+
+export interface AuthUserResponse {
+  id: string;
+  email: string;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  hostedDomain?: string | null;
+}
+
 export interface SubmissionRequest {
   dock_name: string;
   manifest: string;
@@ -43,6 +62,8 @@ export interface SubmissionLogoMetadataResponse {
 }
 
 export class OpenDockRegistryClient {
+  constructor(private readonly registryUrl = DEFAULT_REGISTRY_URL) {}
+
   async resolveDockVersion(
     owner: string,
     name: string,
@@ -69,6 +90,39 @@ export class OpenDockRegistryClient {
     return readResponseBytes(response, maxBytes);
   }
 
+  async startCliLogin(redirectUri: string): Promise<CliLoginStartResponse> {
+    const url = `${this.apiBase()}/auth/cli/start`;
+    return this.requestJson<CliLoginStartResponse>(url, {
+      method: "POST",
+      body: JSON.stringify({ redirectUri }),
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  async exchangeCliCode(code: string): Promise<CliTokenResponse> {
+    const url = `${this.apiBase()}/auth/cli/exchange`;
+    return this.requestJson<CliTokenResponse>(url, {
+      method: "POST",
+      body: JSON.stringify({ code }),
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  async currentUser(token: string): Promise<AuthUserResponse> {
+    const url = `${this.apiBase()}/auth/me`;
+    return this.requestJson<AuthUserResponse>(url, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+  }
+
+  async logout(token: string): Promise<void> {
+    const url = `${this.apiBase()}/auth/logout`;
+    await this.requestJson<void>(url, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}` },
+    });
+  }
+
   async loginWithToken(token: string): Promise<LoginResponse> {
     const url = `${this.apiBase()}/auth/login`;
     return this.requestJson<LoginResponse>(url, {
@@ -91,15 +145,19 @@ export class OpenDockRegistryClient {
   }
 
   private apiBase(): string {
-    return `${DEFAULT_REGISTRY_URL}${API_PREFIX}`;
+    return `${this.registryUrl}${API_PREFIX}`;
   }
 
   private async requestJson<T>(url: string, init?: RequestInit): Promise<T> {
     const response = await this.fetchWithTimeout(url, init);
     if (!response.ok) {
-      throw new Error(`failed to request ${url}: ${response.status} ${response.statusText}`);
+      throw await RegistryRequestError.fromResponse(url, response);
     }
-    return (await response.json()) as T;
+    if (response.status === 204) {
+      return undefined as T;
+    }
+    const text = await response.text();
+    return (text === "" ? undefined : JSON.parse(text)) as T;
   }
 
   private async fetchWithTimeout(url: string, init: RequestInit = {}): Promise<Response> {
@@ -116,6 +174,42 @@ export class OpenDockRegistryClient {
     } finally {
       clearTimeout(timeout);
     }
+  }
+}
+
+export class RegistryRequestError extends Error {
+  constructor(
+    readonly url: string,
+    readonly status: number,
+    readonly statusText: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = "RegistryRequestError";
+  }
+
+  static async fromResponse(url: string, response: Response): Promise<RegistryRequestError> {
+    const body = await response.text();
+    let message = body.trim();
+    if (body.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(body) as { message?: unknown };
+        if (typeof parsed.message === "string" && parsed.message.trim() !== "") {
+          message = parsed.message;
+        }
+      } catch {
+        message = body.trim();
+      }
+    }
+    if (message === "") {
+      message = `${response.status} ${response.statusText}`;
+    }
+    return new RegistryRequestError(
+      url,
+      response.status,
+      response.statusText,
+      `failed to request ${url}: ${message}`,
+    );
   }
 }
 

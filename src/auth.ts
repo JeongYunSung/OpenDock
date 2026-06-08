@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { chmod } from "node:fs/promises";
 import { join } from "node:path";
 import { dataRoot } from "./paths.js";
@@ -26,6 +26,13 @@ export class TokenStore {
     }
     const token = readFileSync(path, "utf8").trim();
     return token === "" ? undefined : token;
+  }
+
+  clearToken(): void {
+    const path = this.tokenPath();
+    if (existsSync(path)) {
+      rmSync(path);
+    }
   }
 
   tokenPath(): string {
