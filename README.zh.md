@@ -38,7 +38,7 @@ opendock deploy codex
 AI 工作区设置通常会变成一堆一次性 shell 命令、复制来的 prompt 文件、版本漂移，以及记不清的项目约定。OpenDock 把这些变成一个经过审核的 dock：
 
 - **项目级作用域**：安装到当前目录，并写入本地 `.opendock/` state。
-- **默认走审核**：远程 dock 必须来自 OpenDock Hub 已批准的 metadata。
+- **默认走审核**：远程 dock 必须来自 OpenDock Registry 已批准的 metadata。
 - **保护已有文件**：每个文件声明自己的 update policy，例如 managed block、manual review 或 unique-line append。
 - **小命令面**：只保留 install、update、diagnose、查看 log、auth 和 deploy。
 - **适合自动化**：lifecycle step 可以运行 `git`、`brew`、`winget`、`npm`、`bun`、`pip`、`uv`、`codex`、`claude`、`oma`、`omx` 等允许的命令，但不允许 shell pipeline。
@@ -89,10 +89,10 @@ README.md
 | `opendock update --force` | 即使检测到已编辑的 managed file，也强制应用 OpenDock 管理的变更。 |
 | `opendock doctor` | 使用 lock 中的平台显示当前目录的 OpenDock state。 |
 | `opendock log` | 输出当前项目最近的 OpenDock 运行记录。 |
-| `opendock version` | 输出 CLI version、schema version 和 default hub。 |
+| `opendock version` | 输出 CLI version、schema version 和 default registry。 |
 | `opendock bootstrap mac` | 检查或安装 macOS dock 所需的 Homebrew。 |
-| `opendock auth login` | 保存 OpenDock Hub token。 |
-| `opendock deploy codex` | 将本地 `dock.yml` dock 提交到 OpenDock Hub 审核。 |
+| `opendock auth login` | 保存 OpenDock Registry token。 |
+| `opendock deploy codex` | 将本地 `dock.yml` dock 提交到 OpenDock Registry 审核。 |
 
 `install` 是公开命令。`deploy` 需要先运行 `opendock auth login`。
 如果缺少 Homebrew，请先运行 `opendock bootstrap mac`。
@@ -235,9 +235,9 @@ lifecycle:
 src/
   cli.ts              # commander CLI entrypoint
   installer.ts        # install/update dock file application
-  resolver.ts         # local and OpenDock Hub dock resolution
+  resolver.ts         # local and OpenDock Registry dock resolution
   runner.ts           # lifecycle command runner
-  registry.ts         # OpenDock Hub API client boundary
+  registry.ts         # OpenDock Registry API client boundary
 tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
@@ -247,7 +247,6 @@ examples/
   claude-code/        # Claude Code example
   oh-my-codex/        # Oh My Codex example
   oh-my-openagent/    # Oh My OpenAgent Codex Light example
-docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide
 ```
@@ -263,21 +262,6 @@ bun run check
 
 integration test 使用临时目录和生成的本地 dock fixture。`examples/` 下的 dock 是真实的编写示例。
 
-## 当前范围
-
-OpenDock 目前是 MVP CLI。以下内容尚未提供：
-
-- 托管的 OpenDock Hub 审核服务
-- package manager 分发
-- `https://hub.opendock.app` 的完整 dock catalog UX
-- binary release automation
-
-CLI 已经包含 local fixture flow、remote Hub API client boundary、project state、
-logging、auth token storage、deploy submission plumbing 和 regression tests。
-
-hosted service 发布后，`https://opendock.app` 是 product site，
-`https://hub.opendock.app` 是面向人的 dock catalog，
-`https://hub.opendock.app/v1/docks` 是 CLI Hub API root。
 
 ## 生态
 

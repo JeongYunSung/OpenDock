@@ -49,7 +49,7 @@ révisé :
 - **Portée projet** : installe dans le répertoire courant et écrit l'état local
   `.opendock/`.
 - **Approuvé par conception** : les docks distants doivent provenir de metadata
-  approuvées par OpenDock Hub.
+  approuvées par OpenDock Registry.
 - **Sûr avec les fichiers existants** : chaque fichier déclare sa propre
   politique d'update, comme managed blocks, manual review ou unique-line append.
 - **Surface de commande réduite** : install, update, diagnostiquer, inspecter
@@ -105,10 +105,10 @@ README.md
 | `opendock update --force` | Force les changements managed par OpenDock même si des managed files modifiés sont détectés. |
 | `opendock doctor` | Affiche l'état OpenDock du répertoire courant avec la platform verrouillée. |
 | `opendock log` | Imprime les exécutions OpenDock récentes du projet courant. |
-| `opendock version` | Imprime la version CLI, la version du schema et le Hub par défaut. |
+| `opendock version` | Imprime la version CLI, la version du schema et le Registry par défaut. |
 | `opendock bootstrap mac` | Vérifie ou installe Homebrew pour les docks macOS. |
-| `opendock auth login` | Enregistre un token OpenDock Hub. |
-| `opendock deploy codex` | Soumet un dock local `dock.yml` pour revue dans OpenDock Hub. |
+| `opendock auth login` | Enregistre un token OpenDock Registry. |
+| `opendock deploy codex` | Soumet un dock local `dock.yml` pour revue dans OpenDock Registry. |
 
 `install` est public. `deploy` nécessite `opendock auth login`.
 Exécutez d'abord `opendock bootstrap mac` si Homebrew est absent.
@@ -261,9 +261,9 @@ lifecycle:
 src/
   cli.ts              # commander CLI entrypoint
   installer.ts        # install/update dock file application
-  resolver.ts         # local and OpenDock Hub dock resolution
+  resolver.ts         # local and OpenDock Registry dock resolution
   runner.ts           # lifecycle command runner
-  registry.ts         # OpenDock Hub API client boundary
+  registry.ts         # OpenDock Registry API client boundary
 tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
@@ -273,7 +273,6 @@ examples/
   claude-code/        # Claude Code example
   oh-my-codex/        # Oh My Codex example
   oh-my-openagent/    # Oh My OpenAgent Codex Light example
-docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide
 ```
@@ -290,22 +289,6 @@ bun run check
 Les tests d'intégration utilisent des répertoires temporaires et des fixtures de
 dock local générées. Les docks dans `examples/` sont de vrais exemples de rédaction.
 
-## Portée Actuelle
-
-OpenDock est une CLI MVP. Les éléments suivants ne sont pas encore fournis :
-
-- service hosted de revue OpenDock Hub
-- distribution via package manager
-- UX complète du dock catalog sur `https://hub.opendock.app`
-- automatisation des binary releases
-
-La CLI inclut déjà local fixture flow, remote Hub API client boundary, project
-state, logging, auth token storage, deploy submission plumbing et regression
-tests.
-
-Lorsque le service hosted sera disponible, `https://opendock.app` sera le
-product site, `https://hub.opendock.app` le dock catalog pour les humains,
-et `https://hub.opendock.app/v1/docks` la racine de l'API Hub de la CLI.
 
 ## Écosystème
 

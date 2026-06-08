@@ -2,7 +2,7 @@
 
 `dock.yml`은 OpenDock dock의 진입점입니다. 어떤 파일을 프로젝트에 넣을지, 기존 파일을 어떻게 보존할지, 설치와 업데이트 때 어떤 명령을 실행할지, doctor에서 어떤 상태를 점검할지를 선언합니다.
 
-이 문서는 현재 OpenDock CLI 구현 기준입니다. 미래에 추가될 수 있는 dock catalog UI나 OpenDock Hub 운영 정책이 아니라, 지금 `src/dock.ts`, `src/installer.ts`, `src/runner.ts`가 실제로 해석하는 형식을 설명합니다.
+이 문서는 현재 OpenDock CLI 구현 기준입니다. 미래에 추가될 수 있는 dock catalog UI나 OpenDock Registry 운영 정책이 아니라, 지금 `src/dock.ts`, `src/installer.ts`, `src/runner.ts`가 실제로 해석하는 형식을 설명합니다.
 
 실제 예제 dock은 `examples/` 아래에 역할별로 나뉘어 있습니다.
 
@@ -172,7 +172,7 @@ opendock install opendock/codex@1.5.2
 opendock install opendock/codex@v1
 ```
 
-selector가 없으면 `latest`로 해석합니다. `1`은 최신 `1.x`, `1.5`는 최신 `1.5.x`, `1.5.2`는 exact version 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 selector와 Hub가 돌려준 exact version을 함께 기록합니다.
+selector가 없으면 `latest`로 해석합니다. `1`은 최신 `1.x`, `1.5`는 최신 `1.5.x`, `1.5.2`는 exact version 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 selector와 Registry가 돌려준 exact version을 함께 기록합니다.
 
 ```yaml
 docks:
@@ -522,7 +522,7 @@ lifecycle:
       timeout_ms: 600000
 ```
 
-`interactive: scripted`는 macOS의 `expect`를 사용해 pseudo-terminal에서 키 입력을 보냅니다. 승인된 OpenDock Hub dock에서만 신중하게 쓰는 것이 좋습니다.
+`interactive: scripted`는 macOS의 `expect`를 사용해 pseudo-terminal에서 키 입력을 보냅니다. 승인된 OpenDock Registry dock에서만 신중하게 쓰는 것이 좋습니다.
 
 지원하는 key 값은 다음과 같습니다.
 
@@ -621,18 +621,18 @@ dock은 사용자가 이미 작성한 파일을 함부로 덮어쓰면 안 됩�
 
 ## 보안과 배포 기준
 
-OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 런타임 환경변수로 바꿀 수 없게 고정합니다. 현재 Hub는 `https://hub.opendock.app`입니다.
+OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 런타임 환경변수로 바꿀 수 없게 고정합니다. 현재 Registry는 `https://registry.opendock.app`입니다.
 
-사람이 탐색하는 dock catalog는 `https://hub.opendock.app`, CLI가 사용하는 Hub API root는 `https://hub.opendock.app/v1/docks`입니다.
+사람이 탐색하는 dock catalog는 `https://hub.opendock.app`, CLI가 사용하는 Registry API root는 `https://registry.opendock.app/v1/docks`입니다.
 
 배포 흐름은 다음 원칙을 따릅니다.
 
 1. dock author가 `dock.yml`과 `files[].from`에 명시한 source 파일을 작성합니다.
 2. `opendock auth login`으로 로그인합니다.
 3. `opendock deploy <dock-name>`으로 제출합니다.
-4. OpenDock Hub 검토를 통과한 dock만 Hub에서 설치될 수 있습니다.
+4. OpenDock Registry 검토를 통과한 dock만 Registry에서 설치될 수 있습니다.
 
-`install`은 공개 명령이지만, 설치 대상 dock은 승인된 Hub metadata, signature, checksum 검증을 통과해야 합니다.
+`install`은 공개 명령이지만, 설치 대상 dock은 승인된 Registry metadata, signature, checksum 검증을 통과해야 합니다.
 
 ## 작성 체크리스트
 

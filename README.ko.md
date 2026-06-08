@@ -44,7 +44,7 @@ AI 작업공간 설정은 보통 일회성 shell 명령, 복사된 prompt 파일
 검토된 dock으로 바꿉니다.
 
 - **프로젝트 단위**: 현재 디렉터리에 설치하고 로컬 `.opendock/` 상태를 씁니다.
-- **승인 중심 설계**: 원격 dock은 OpenDock Hub가 승인한 metadata에서만
+- **승인 중심 설계**: 원격 dock은 OpenDock Registry가 승인한 metadata에서만
   와야 합니다.
 - **기존 파일 보호**: 각 파일은 managed block, manual review, unique-line append
   같은 update 정책을 직접 선언합니다.
@@ -99,10 +99,10 @@ README.md
 | `opendock update --force` | 수정된 managed file이 있어도 OpenDock 관리 변경을 강제로 반영합니다. |
 | `opendock doctor` | 현재 디렉터리의 OpenDock 상태를 lock에 기록된 platform 기준으로 표시합니다. |
 | `opendock log` | 현재 프로젝트의 최근 OpenDock 실행 기록을 출력합니다. |
-| `opendock version` | CLI 버전, schema 버전, 기본 Hub를 출력합니다. |
+| `opendock version` | CLI 버전, schema 버전, 기본 Registry를 출력합니다. |
 | `opendock bootstrap mac` | macOS dock용 Homebrew를 확인하거나 설치합니다. |
-| `opendock auth login` | OpenDock Hub token을 저장합니다. |
-| `opendock deploy codex` | 로컬 `dock.yml` dock을 OpenDock Hub 검토용으로 제출합니다. |
+| `opendock auth login` | OpenDock Registry token을 저장합니다. |
+| `opendock deploy codex` | 로컬 `dock.yml` dock을 OpenDock Registry 검토용으로 제출합니다. |
 
 `install`은 공개 명령입니다. `deploy`에는 `opendock auth login`이 필요합니다.
 Homebrew가 없다면 먼저 `opendock bootstrap mac`을 실행하세요.
@@ -252,9 +252,9 @@ lifecycle:
 src/
   cli.ts              # commander CLI entrypoint
   installer.ts        # install/update dock file application
-  resolver.ts         # local and OpenDock Hub dock resolution
+  resolver.ts         # local and OpenDock Registry dock resolution
   runner.ts           # lifecycle command runner
-  registry.ts         # OpenDock Hub API client boundary
+  registry.ts         # OpenDock Registry API client boundary
 tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
@@ -264,7 +264,6 @@ examples/
   claude-code/        # Claude Code example
   oh-my-codex/        # Oh My Codex example
   oh-my-openagent/    # Oh My OpenAgent Codex Light example
-docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide
 ```
@@ -281,22 +280,6 @@ bun run check
 Integration test는 임시 디렉터리와 생성된 로컬 dock fixture를 사용합니다.
 `examples/`의 dock은 실제 작성 예시입니다.
 
-## 현재 범위
-
-OpenDock은 MVP CLI입니다. 다음 항목은 아직 제공하지 않습니다.
-
-- hosted OpenDock Hub 검토 서비스
-- package manager 배포
-- `https://hub.opendock.app`의 전체 dock catalog UX
-- binary release automation
-
-CLI에는 이미 local fixture flow, remote Hub API client boundary, project
-state, logging, auth token storage, deploy submission plumbing, regression
-test가 들어 있습니다.
-
-Hosted service가 출시되면 `https://opendock.app`은 product site,
-`https://hub.opendock.app`은 사람이 보는 dock catalog,
-`https://hub.opendock.app/v1/docks`는 CLI Hub API root입니다.
 
 ## 생태계
 
