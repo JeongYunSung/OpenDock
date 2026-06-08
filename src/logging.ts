@@ -10,7 +10,6 @@ export interface RunLog {
   project_path: string;
   command: string;
   dock_id?: string;
-  pack_id?: string;
   status: RunStatus;
   message: string;
 }

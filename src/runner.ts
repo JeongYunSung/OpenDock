@@ -82,24 +82,6 @@ function rawLifecycleSteps(manifest: DockManifest, phase: LifecyclePhase): Lifec
   return manifest.lifecycle[phase] ?? [];
 }
 
-export function hasLifecycleSteps(
-  manifest: DockManifest,
-  phase: LifecyclePhase,
-  options: LifecycleOptions = {},
-): boolean {
-  return getLifecycleSteps(manifest, phase, options).length > 0;
-}
-
-export function hasExplicitLifecycleSteps(
-  manifest: DockManifest,
-  phase: LifecyclePhase,
-  options: LifecycleOptions = {},
-): boolean {
-  const platform = options.platform ?? detectPlatform();
-  assertManifestSupportsPlatform(manifest, platform);
-  return selectLifecycleSteps(manifest.lifecycle[phase] ?? [], platform).length > 0;
-}
-
 export async function runLifecycle(
   manifest: DockManifest,
   phase: LifecyclePhase,

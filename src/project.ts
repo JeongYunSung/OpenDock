@@ -31,14 +31,12 @@ export interface LockedDock {
 export interface ProjectFile {
   schema: string;
   applied_docks?: AppliedDock[];
-  applied_packs?: AppliedDock[];
   files: ProjectFileRecord[];
 }
 
 export interface LockFile {
   schema: string;
   docks?: LockedDock[];
-  packs?: LockedDock[];
 }
 
 export function writeProjectState(
@@ -110,12 +108,8 @@ export function readLock(projectDir: string): LockFile {
   }
 }
 
-export function projectDocks(project: ProjectFile): AppliedDock[] {
-  return project.applied_docks ?? project.applied_packs ?? [];
-}
-
 export function lockDocks(lock: LockFile): LockedDock[] {
-  return lock.docks ?? lock.packs ?? [];
+  return lock.docks ?? [];
 }
 
 export function hasProjectState(projectDir: string): boolean {

@@ -85,10 +85,8 @@ describe("opendock TypeScript CLI", () => {
     expect(existsSync(join(project, ".opendock", "dock.lock.yml"))).toBe(true);
     const projectState = readFileSync(join(project, ".opendock", "project.yml"), "utf8");
     expect(projectState).toContain("applied_docks:");
-    expect(projectState).not.toContain("applied_packs:");
     const lockState = readFileSync(join(project, ".opendock", "dock.lock.yml"), "utf8");
     expect(lockState).toContain("docks:");
-    expect(lockState).not.toContain("packs:");
     expect(existsSync(join(project, "AGENTS.md"))).toBe(true);
     expect(existsSync(join(project, "DESIGN.md"))).toBe(true);
   });
