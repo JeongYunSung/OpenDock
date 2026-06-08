@@ -50,7 +50,6 @@ const commonAllowedCommands = new Set([
   "node",
   "npm",
   "npx",
-  "omo",
   "oma",
   "omx",
   "pip",
@@ -667,10 +666,7 @@ function isAllowedCommandShape(program: string, args: string[]): boolean {
     return isSafeOmaCommand(args);
   }
   if (program === "omx") {
-    return isExact(args, ["doctor"]) || isExact(args, ["--version"]);
-  }
-  if (program === "omo") {
-    return isExact(args, ["version"]) || isExact(args, ["doctor"]) || isExact(args, ["--version"]);
+    return isSafeOmxCommand(args);
   }
   return false;
 }
@@ -743,6 +739,21 @@ function isSafeOmaCommand(args: string[]): boolean {
   }
   const allowed = new Set(["update", "-y"]);
   return args.every((arg) => allowed.has(arg));
+}
+
+function isSafeOmxCommand(args: string[]): boolean {
+  if (args.length === 0) {
+    return true;
+  }
+  if (
+    isExact(args, ["--version"]) ||
+    isExact(args, ["setup"]) ||
+    isExact(args, ["doctor"]) ||
+    isExact(args, ["update"])
+  ) {
+    return true;
+  }
+  return false;
 }
 
 function isSafeWingetCommand(args: string[]): boolean {

@@ -92,12 +92,12 @@ describe("opendock TypeScript CLI", () => {
     expect(existsSync(join(project, "DESIGN.md"))).toBe(true);
   });
 
-  it("reports log output and fixed registry version", async () => {
+  it("reports log output and fixed hub version", async () => {
     const project = await tempDir();
     const docks = await tempDir();
-    const data = await tempDir();
+    const home = await tempDir();
     writeTestDock(docks, "test", "harness", "1.0.0", "# Starter README\n");
-    await withEnv({ OPENDOCK_DATA_DIR: data }, async () => {
+    await withEnv({ HOME: home }, async () => {
       await install({
         dockRef: DockRef.parse("test/harness"),
         projectDir: project,
@@ -108,18 +108,16 @@ describe("opendock TypeScript CLI", () => {
       });
     });
 
-    const logs = runCli(project, { OPENDOCK_DATA_DIR: data }, ["log"]);
+    const logs = runCli(project, { HOME: home }, ["log"]);
     expect(logs.status).toBe(0);
     expect(logs.stdout).toContain("install test/harness");
 
     const version = runCli(project, {}, ["version"]);
     expect(version.status).toBe(0);
-    expect(version.stdout).toContain("registry https://registry.opendock.app");
+    expect(version.stdout).toContain("hub https://hub.opendock.app");
   });
 
-  it("ignores dock source and registry environment overrides", async () => {
-    const docks = await tempDir();
-    writeTestDock(docks, "test", "harness", "9.9.9", "# Malicious Local Dock\n");
+  it("uses the fixed OpenDock Hub endpoint for remote resolution", async () => {
     const urls: string[] = [];
     const originalFetch = globalThis.fetch;
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
@@ -128,22 +126,14 @@ describe("opendock TypeScript CLI", () => {
     }) as typeof fetch;
 
     try {
-      await withEnv(
-        {
-          OPENDOCK_DOCKS_DIR: docks,
-          OPENDOCK_REGISTRY_URL: "http://127.0.0.1:9",
-        },
-        async () => {
-          await expect(resolveDock(DockRef.parse("test/harness"))).rejects.toThrow(
-            "https://registry.opendock.app/v1/docks/test/harness/versions/latest",
-          );
-        },
+      await expect(resolveDock(DockRef.parse("test/harness"))).rejects.toThrow(
+        "https://hub.opendock.app/v1/docks/test/harness/versions/latest",
       );
     } finally {
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/latest"]);
+    expect(urls).toEqual(["https://hub.opendock.app/v1/docks/test/harness/versions/latest"]);
   });
 
   it("resolves remote docks using explicit version selectors", async () => {
@@ -156,18 +146,18 @@ describe("opendock TypeScript CLI", () => {
 
     try {
       await expect(resolveDock(DockRef.parse("test/harness@1.5"))).rejects.toThrow(
-        "https://registry.opendock.app/v1/docks/test/harness/versions/1.5",
+        "https://hub.opendock.app/v1/docks/test/harness/versions/1.5",
       );
     } finally {
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/1.5"]);
+    expect(urls).toEqual(["https://hub.opendock.app/v1/docks/test/harness/versions/1.5"]);
   });
 
   it("installs remote docks with selector metadata and stores the requested selector", async () => {
     const project = await tempDir();
-    const data = await tempDir();
+    const home = await tempDir();
     const archiveRoot = await tempDir();
     const archive = await createRemoteDockArchive(archiveRoot, "test", "remote", "1.5.2");
     const checksum = sha256Bytes(archive);
@@ -176,26 +166,26 @@ describe("opendock TypeScript CLI", () => {
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
       const url = String(input);
       urls.push(url);
-      if (url === "https://registry.opendock.app/v1/docks/test/remote/versions/1.5") {
+      if (url === "https://hub.opendock.app/v1/docks/test/remote/versions/1.5") {
         return new Response(
           JSON.stringify({
             approved: true,
             checksum,
             id: "test/remote",
-            signature: "registry-signature",
+            signature: "hub-signature",
             version: "1.5.2",
           }),
           { headers: { "content-type": "application/json" }, status: 200 },
         );
       }
-      if (url === "https://registry.opendock.app/v1/docks/test/remote/versions/1.5.2/download") {
+      if (url === "https://hub.opendock.app/v1/docks/test/remote/versions/1.5.2/download") {
         return new Response(archive, { status: 200 });
       }
       return new Response("{}", { status: 404, statusText: "Not Found" });
     }) as typeof fetch;
 
     try {
-      const report = await withEnv({ OPENDOCK_DATA_DIR: data }, () =>
+      const report = await withEnv({ HOME: home }, () =>
         install({
           dockRef: DockRef.parse("test/remote@1.5"),
           projectDir: project,
@@ -211,8 +201,8 @@ describe("opendock TypeScript CLI", () => {
     }
 
     expect(urls).toEqual([
-      "https://registry.opendock.app/v1/docks/test/remote/versions/1.5",
-      "https://registry.opendock.app/v1/docks/test/remote/versions/1.5.2/download",
+      "https://hub.opendock.app/v1/docks/test/remote/versions/1.5",
+      "https://hub.opendock.app/v1/docks/test/remote/versions/1.5.2/download",
     ]);
     expect(readFileSync(join(project, "README.md"), "utf8")).toBe("# Remote Dock\n");
     const lockedDock = lockDocks(readLock(project))[0];
@@ -223,7 +213,7 @@ describe("opendock TypeScript CLI", () => {
       checksum,
       id: "test/remote",
       requested: "1.5",
-      signature: "registry-signature",
+      signature: "hub-signature",
       version: "1.5.2",
     });
   });
@@ -236,7 +226,7 @@ describe("opendock TypeScript CLI", () => {
           approved: true,
           checksum: "unused",
           id: "test/unsafe-version",
-          signature: "registry-signature",
+          signature: "hub-signature",
           version: "../../bad",
         }),
         { headers: { "content-type": "application/json" }, status: 200 },
@@ -265,19 +255,19 @@ describe("opendock TypeScript CLI", () => {
     }
 
     const project = await tempDir();
-    const data = await tempDir();
+    const home = await tempDir();
     const archiveRoot = await tempDir();
     const archive = await createSymlinkDockArchive(archiveRoot, "test", "symlink-archive", "1.0.0");
     const checksum = sha256Bytes(archive);
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
       const url = String(input);
-      if (url === "https://registry.opendock.app/v1/docks/test/symlink-archive/versions/latest") {
+      if (url === "https://hub.opendock.app/v1/docks/test/symlink-archive/versions/latest") {
         return new Response(
           JSON.stringify({
             approved: true,
             checksum,
             id: "test/symlink-archive",
-            signature: "registry-signature",
+            signature: "hub-signature",
             version: "1.0.0",
           }),
           { headers: { "content-type": "application/json" }, status: 200 },
@@ -288,7 +278,7 @@ describe("opendock TypeScript CLI", () => {
 
     try {
       await expect(
-        withEnv({ OPENDOCK_DATA_DIR: data }, () =>
+        withEnv({ HOME: home }, () =>
           install({
             dockRef: DockRef.parse("test/symlink-archive"),
             projectDir: project,
@@ -302,7 +292,7 @@ describe("opendock TypeScript CLI", () => {
     }
   });
 
-  it("submits docks only to the fixed OpenDock Registry", async () => {
+  it("submits docks only to the fixed OpenDock Hub", async () => {
     const urls: string[] = [];
     const bodies: string[] = [];
     const originalFetch = globalThis.fetch;
@@ -318,18 +308,16 @@ describe("opendock TypeScript CLI", () => {
     }) as typeof fetch;
 
     try {
-      await withEnv({ OPENDOCK_REGISTRY_URL: "http://127.0.0.1:9" }, async () => {
-        const response = await new OpenDockRegistryClient().submitDock(
-          { dock_name: "codex", manifest: "opendock: 1" },
-          "token",
-        );
-        expect(response.status).toBe("pending");
-      });
+      const response = await new OpenDockRegistryClient().submitDock(
+        { dock_name: "codex", manifest: "opendock: 1" },
+        "token",
+      );
+      expect(response.status).toBe("pending");
     } finally {
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/submissions"]);
+    expect(urls).toEqual(["https://hub.opendock.app/v1/docks/submissions"]);
     expect(bodies).toEqual([JSON.stringify({ dock_name: "codex", manifest: "opendock: 1" })]);
   });
 
@@ -391,12 +379,12 @@ describe("opendock TypeScript CLI", () => {
     expect(existsSync(join(project, ".opendock-updated"))).toBe(true);
   });
 
-  it("does not implicitly apply templates folders", async () => {
+  it("applies only files listed in the manifest", async () => {
     const project = await tempDir();
     const docks = await tempDir();
     const dockRoot = join(docks, "test", "explicit-files");
-    mkdirSync(join(dockRoot, "templates"), { recursive: true });
-    writeFileSync(join(dockRoot, "templates", "README.md"), "# Legacy README\n");
+    mkdirSync(join(dockRoot, "unlisted"), { recursive: true });
+    writeFileSync(join(dockRoot, "unlisted", "README.md"), "# Unlisted README\n");
     writeFileSync(
       join(dockRoot, "dock.yml"),
       `opendock: 1
@@ -676,19 +664,19 @@ echo "Downloading oh-my-agent"
     const bin = await tempDir();
 
     await expect(
-      runCommand('node -e "console.log(process.env.OPENDOCK_AUTH_TOKEN)"', project),
+      runCommand('node -e "console.log(process.env.PRIVATE_SECRET_TOKEN)"', project),
     ).rejects.toThrow("not allowed for OpenDock lifecycle");
 
     writeExecutable(
       join(bin, "oma"),
       `#!/bin/sh
-echo "token=\${OPENDOCK_AUTH_TOKEN:-missing}"
+echo "token=\${PRIVATE_SECRET_TOKEN:-missing}"
 `,
     );
 
     await withEnv(
       {
-        OPENDOCK_AUTH_TOKEN: "secret-token",
+        PRIVATE_SECRET_TOKEN: "secret-token",
         PATH: `${bin}:${process.env.PATH ?? ""}`,
       },
       async () => {
@@ -846,7 +834,7 @@ if (!result.success) {
   it("allows documented AI CLI doctor commands", async () => {
     const project = await tempDir();
     const bin = await tempDir();
-    for (const command of ["bunx", "claude", "codex", "omo", "omx"]) {
+    for (const command of ["claude", "codex", "oma", "omx"]) {
       writeExecutable(
         join(bin, command),
         `#!/bin/sh
@@ -862,8 +850,7 @@ echo "${command} 1.2.3"
         doctor: [
           { id: "claude", check: "claude --version", version: ">=1.0.0" },
           { id: "codex", check: "codex --version", version: ">=1.0.0" },
-          { id: "bunx", check: "bunx oh-my-openagent doctor" },
-          { id: "omo", check: "omo version", version: ">=1.0.0" },
+          { id: "oma", check: "oma doctor" },
           { id: "omx", check: "omx doctor" },
         ],
       },
@@ -877,7 +864,6 @@ echo "${command} 1.2.3"
       "Ready",
       "Ready",
       "Ready",
-      "Ready",
     ]);
   });
 
@@ -887,41 +873,41 @@ echo "${command} 1.2.3"
     expect(result.stderr).toContain("owner/name");
   });
 
-  it("rejects schema-only manifests", async () => {
+  it("rejects unsupported manifest fields", async () => {
     const docks = await tempDir();
-    const dockRoot = join(docks, "test", "schema-only");
+    const dockRoot = join(docks, "test", "unsupported-field");
     mkdirSync(dockRoot, { recursive: true });
     writeFileSync(
       join(dockRoot, "dock.yml"),
-      `schema: opendock/v1
-kind: starterpack
-id: test/schema-only
-version: 1.0.0
-setup:
-  - id: marker
-    run: mkdir .old-manifest
-`,
-    );
-
-    expect(() => resolveLocalDock(docks, DockRef.parse("test/schema-only"))).toThrow(
-      "failed to parse",
-    );
-
-    const setupDockRoot = join(docks, "test", "with-setup");
-    mkdirSync(setupDockRoot, { recursive: true });
-    writeFileSync(
-      join(setupDockRoot, "dock.yml"),
       `opendock: 1
-id: test/with-setup
+id: test/unsupported-field
 version: 1.0.0
-setup:
-  - id: marker
-    run: mkdir .old-manifest
+unsupported_field: true
 `,
     );
 
-    expect(() => resolveLocalDock(docks, DockRef.parse("test/with-setup"))).toThrow(
+    expect(() => resolveLocalDock(docks, DockRef.parse("test/unsupported-field"))).toThrow(
       "failed to parse",
+    );
+  });
+
+  it("rejects manifests without opendock version", async () => {
+    const docks = await tempDir();
+    const dockRoot = join(docks, "test", "missing-opendock");
+    mkdirSync(dockRoot, { recursive: true });
+    writeFileSync(
+      join(dockRoot, "dock.yml"),
+      `id: test/missing-opendock
+version: 1.0.0
+lifecycle:
+  install:
+    - id: marker
+      run: mkdir .unsupported-manifest
+`,
+    );
+
+    expect(() => resolveLocalDock(docks, DockRef.parse("test/missing-opendock"))).toThrow(
+      "must declare `opendock: 1`",
     );
   });
 
@@ -977,18 +963,19 @@ setup:
   });
 
   it("stores auth tokens with private permissions", async () => {
-    const data = await tempDir();
-    const result = runCli(process.cwd(), { OPENDOCK_DATA_DIR: data }, [
+    const home = await tempDir();
+    const authPath = join(home, "Library", "Application Support", "OpenDock", "auth-token");
+    const result = runCli(process.cwd(), { HOME: home }, [
       "auth",
       "login",
       "--token",
       "test-token",
     ]);
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain("Logged in to OpenDock Registry.");
-    expect(readFileSync(join(data, "auth-token"), "utf8")).toBe("test-token");
+    expect(result.stdout).toContain("Logged in to OpenDock Hub.");
+    expect(readFileSync(authPath, "utf8")).toBe("test-token");
     if (process.platform !== "win32") {
-      expect(statSync(join(data, "auth-token")).mode & 0o777).toBe(0o600);
+      expect(statSync(authPath).mode & 0o777).toBe(0o600);
     }
   });
 
@@ -1069,8 +1056,8 @@ setup:
 
   it("requires login before deploy", async () => {
     const project = await tempDir();
-    const data = await tempDir();
-    const result = runCli(project, { OPENDOCK_DATA_DIR: data }, ["deploy", "codex"]);
+    const home = await tempDir();
+    const result = runCli(project, { HOME: home }, ["deploy", "codex"]);
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("not logged in");
   });
@@ -1187,7 +1174,7 @@ setup:
   it("writes failure logs for rejected lifecycle commands", async () => {
     const project = await tempDir();
     const docks = await tempDir();
-    const data = await tempDir();
+    const home = await tempDir();
     const dockRoot = join(docks, "test", "bad");
     mkdirSync(dockRoot, { recursive: true });
     writeFileSync(
@@ -1204,7 +1191,7 @@ lifecycle:
 `,
     );
 
-    await withEnv({ OPENDOCK_DATA_DIR: data }, async () => {
+    await withEnv({ HOME: home }, async () => {
       await expect(
         install({
           dockRef: DockRef.parse("test/bad"),
@@ -1217,7 +1204,7 @@ lifecycle:
       ).rejects.toThrow("not allowed");
     });
 
-    const logs = runCli(project, { OPENDOCK_DATA_DIR: data }, ["log"]);
+    const logs = runCli(project, { HOME: home }, ["log"]);
     expect(logs.status).toBe(0);
     expect(logs.stdout).toContain("Failure");
     expect(logs.stdout).toContain("not allowed");
@@ -1691,9 +1678,19 @@ fi
 `,
   );
   writeExecutable(
+    join(bin, "npx"),
+    `#!/bin/sh
+echo "npx $*"
+`,
+  );
+  writeExecutable(
     join(bin, "omx"),
     `#!/bin/sh
-echo "omx 1.2.3"
+if [ "$1" = "--version" ]; then
+  echo "0.18.10"
+else
+  echo "omx $*"
+fi
 `,
   );
   writeExecutable(

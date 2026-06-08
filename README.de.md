@@ -47,7 +47,7 @@ daraus ein geprüftes Dock:
 
 - **Projektbezogen**: installiert in das aktuelle Verzeichnis und schreibt
   lokalen `.opendock/` state.
-- **Approval by design**: Remote-Docks müssen aus von OpenDock Registry
+- **Approval by design**: Remote-Docks müssen aus von OpenDock Hub
   genehmigter metadata stammen.
 - **Sicher mit bestehenden Dateien**: Jede Datei deklariert ihre eigene
   update policy, etwa managed blocks, manual review oder unique-line append.
@@ -55,7 +55,7 @@ daraus ein geprüftes Dock:
   deploy.
 - **Automatisierungsbereit**: lifecycle steps können erlaubte Befehle wie
   `git`, `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude` und
-  `omx` ausführen, ohne shell pipelines zu erlauben.
+  `oma` ausführen, ohne shell pipelines zu erlauben.
 
 ## Schnellstart
 
@@ -102,10 +102,10 @@ README.md
 | `opendock update` | Löst installierte Docks erneut auf und wendet neue Versionen sicher mit der gelockten platform an. |
 | `opendock doctor` | Zeigt den OpenDock state des aktuellen Verzeichnisses mit der gelockten platform. |
 | `opendock log` | Gibt die letzten OpenDock runs für das aktuelle Projekt aus. |
-| `opendock version` | Gibt CLI version, schema version und default registry aus. |
+| `opendock version` | Gibt CLI version, schema version und default hub aus. |
 | `opendock bootstrap mac` | Prüft oder installiert Homebrew für macOS-Docks. |
-| `opendock auth login` | Speichert ein OpenDock Registry token. |
-| `opendock deploy codex` | Reicht ein lokales `dock.yml` Dock zur OpenDock Registry review ein. |
+| `opendock auth login` | Speichert ein OpenDock Hub token. |
+| `opendock deploy codex` | Reicht ein lokales `dock.yml` Dock zur OpenDock Hub review ein. |
 
 `install` ist öffentlich. `deploy` erfordert `opendock auth login`.
 Führe zuerst `opendock bootstrap mac` aus, wenn Homebrew fehlt.
@@ -242,22 +242,15 @@ lifecycle:
           - key: enter
 ```
 
-## Umgebungsvariablen
-
-| Variable | Verwendung |
-|---|---|
-| `OPENDOCK_DATA_DIR` | Überschreibt das user data/cache/log directory. |
-| `OPENDOCK_AUTH_TOKEN` | Stellt einen login token nicht-interaktiv bereit. |
-
 ## Repository-Struktur
 
 ```text
 src/
   cli.ts              # commander CLI entrypoint
   installer.ts        # install/update dock file application
-  resolver.ts         # local and OpenDock Registry dock resolution
+  resolver.ts         # local and OpenDock Hub dock resolution
   runner.ts           # lifecycle command runner
-  registry.ts         # OpenDock Registry API client boundary
+  registry.ts         # OpenDock Hub API client boundary
 tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
@@ -265,8 +258,6 @@ examples/
   codex/              # Codex CLI + project files example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
-  oh-my-codex/        # Codex CLI + Oh My Codex example
-  oh-my-openagent/    # Codex CLI + Oh My OpenAgent example
 docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide
@@ -288,18 +279,18 @@ Dock-Fixtures. Die Docks in `examples/` sind echte Authoring-Beispiele.
 
 OpenDock ist eine MVP CLI. Folgendes wird noch nicht ausgeliefert:
 
-- gehosteter OpenDock Registry Review-Service
+- gehosteter OpenDock Hub Review-Service
 - Distribution über package manager
-- vollständige dock catalog UX auf `https://registry.opendock.app`
+- vollständige dock catalog UX auf `https://hub.opendock.app`
 - Automatisierung von Binary-Releases
 
-Die CLI enthält bereits local fixture flow, remote registry client boundary,
+Die CLI enthält bereits local fixture flow, remote Hub API client boundary,
 project state, logging, auth token storage, deploy submission plumbing und
 regression tests.
 
 Wenn der hosted service verfügbar ist, ist `https://opendock.app` die product
-site, `https://registry.opendock.app` der für Menschen lesbare dock catalog und
-`https://registry.opendock.app/v1/docks` die CLI registry API root.
+site, `https://hub.opendock.app` der für Menschen lesbare dock catalog und
+`https://hub.opendock.app/v1/docks` die CLI Hub API root.
 
 ## Ökosystem
 

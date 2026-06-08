@@ -46,14 +46,14 @@ OpenDock はそれをレビュー済みの dock に変えます。
 
 - **プロジェクト単位**: 現在のディレクトリにインストールし、ローカルの
   `.opendock/` state を書き込みます。
-- **承認を前提にした設計**: リモート dock は OpenDock Registry で承認された
+- **承認を前提にした設計**: リモート dock は OpenDock Hub で承認された
   metadata から取得される必要があります。
 - **既存ファイルに安全**: 各ファイルは managed block、manual review、
   unique-line append などの update policy を宣言します。
 - **小さなコマンド面**: install、update、diagnose、log 確認、auth、deploy に
   絞ります。
 - **自動化対応**: lifecycle step は shell pipeline を許可せず、`git`,
-  `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `omx`
+  `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `oma`
   などの許可済みコマンドを実行できます。
 
 ## クイックスタート
@@ -100,10 +100,10 @@ README.md
 | `opendock update` | インストール済み dock を再 resolve し、lock 済み platform で安全に新しい version を適用します。 |
 | `opendock doctor` | 現在のディレクトリの OpenDock state を lock 済み platform で表示します。 |
 | `opendock log` | 現在のプロジェクトの最近の OpenDock 実行を出力します。 |
-| `opendock version` | CLI version、schema version、default registry を表示します。 |
+| `opendock version` | CLI version、schema version、default hub を表示します。 |
 | `opendock bootstrap mac` | macOS dock 用に Homebrew を確認またはインストールします。 |
-| `opendock auth login` | OpenDock Registry token を保存します。 |
-| `opendock deploy codex` | ローカルの `dock.yml` dock を OpenDock Registry review に提出します。 |
+| `opendock auth login` | OpenDock Hub token を保存します。 |
+| `opendock deploy codex` | ローカルの `dock.yml` dock を OpenDock Hub review に提出します。 |
 
 `install` は公開コマンドです。`deploy` には `opendock auth login` が必要です。
 Homebrew がない場合は、先に `opendock bootstrap mac` を実行してください。
@@ -238,22 +238,15 @@ lifecycle:
           - key: enter
 ```
 
-## 環境変数
-
-| 変数 | 用途 |
-|---|---|
-| `OPENDOCK_DATA_DIR` | user data/cache/log directory を上書きします。 |
-| `OPENDOCK_AUTH_TOKEN` | login token を非対話で提供します。 |
-
 ## リポジトリ構成
 
 ```text
 src/
   cli.ts              # commander CLI entrypoint
   installer.ts        # install/update dock file application
-  resolver.ts         # local and OpenDock Registry dock resolution
+  resolver.ts         # local and OpenDock Hub dock resolution
   runner.ts           # lifecycle command runner
-  registry.ts         # OpenDock Registry API client boundary
+  registry.ts         # OpenDock Hub API client boundary
 tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
@@ -261,8 +254,6 @@ examples/
   codex/              # Codex CLI + project files example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
-  oh-my-codex/        # Codex CLI + Oh My Codex example
-  oh-my-openagent/    # Codex CLI + Oh My OpenAgent example
 docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide
@@ -284,18 +275,18 @@ integration test は一時ディレクトリと生成された local dock fixtur
 
 OpenDock は MVP CLI です。次のものはまだ提供していません。
 
-- ホスト型 OpenDock Registry review service
+- ホスト型 OpenDock Hub review service
 - package manager での配布
-- `https://registry.opendock.app` の完全な dock catalog UX
+- `https://hub.opendock.app` の完全な dock catalog UX
 - binary release の自動化
 
-CLI にはすでに local fixture flow、remote registry client boundary、project
+CLI にはすでに local fixture flow、remote Hub API client boundary、project
 state、logging、auth token storage、deploy submission plumbing、regression
 tests が含まれています。
 
 hosted service が提供されると、`https://opendock.app` は product site、
-`https://registry.opendock.app` は人が閲覧する dock catalog、
-`https://registry.opendock.app/v1/docks` は CLI registry API root になります。
+`https://hub.opendock.app` は人が閲覧する dock catalog、
+`https://hub.opendock.app/v1/docks` は CLI Hub API root になります。
 
 ## エコシステム
 

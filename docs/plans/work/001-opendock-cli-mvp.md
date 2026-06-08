@@ -20,7 +20,7 @@ opendock auth login
 opendock deploy codex
 ```
 
-The MVP applies approved docks to the current directory, preserves user-authored files with declared update policies, writes `.opendock/` project state, exposes diagnostics and logs, stores OpenDock Registry auth tokens, and provides deploy submission plumbing.
+The MVP applies approved docks to the current directory, preserves user-authored files with declared update policies, writes `.opendock/` project state, exposes diagnostics and logs, stores OpenDock Hub auth tokens, and provides deploy submission plumbing.
 
 ## Context
 
@@ -43,15 +43,15 @@ Core decisions:
 ## Constraints
 
 - Do not modify parent `.agents/` SSOT files.
-- Registry/auth/deploy code must keep the runtime dock source fixed to the approved registry.
+- Hub/auth/deploy code must keep the runtime dock source fixed to the approved Hub.
 - Commands that execute lifecycle steps must use an allowlist and must not execute arbitrary shell pipelines.
 - Generated build output stays out of source control.
 
 ## API Contracts
 
-OpenDock Registry API draft:
+OpenDock Hub API draft:
 
-Base URL: `https://registry.opendock.app`
+Base URL: `https://hub.opendock.app`
 
 | Endpoint | Purpose | Auth |
 |---|---|---|
@@ -63,8 +63,7 @@ Base URL: `https://registry.opendock.app`
 
 Local development contract:
 
-- `OPENDOCK_DATA_DIR` may override the local data/cache/log directory.
-- Dock source and registry host are not configurable by runtime environment variables.
+- Dock source and Hub host are not configurable by runtime environment variables.
 - Install refs support `owner/name@selector`; the CLI stores both requested selector and resolved exact version in lock state.
 
 ## Tasks
@@ -74,7 +73,7 @@ Local development contract:
 | 1 | Create TypeScript package scaffold and baseline CLI | cli | P0 | DONE |
 | 2 | Implement `dock.yml` parser and schema validation | core | P0 | DONE |
 | 3 | Implement dock reference parsing and local/remote resolver | core | P0 | DONE |
-| 4 | Implement template application with update policies | core | P0 | DONE |
+| 4 | Implement file application with update policies | core | P0 | DONE |
 | 5 | Write `.opendock/project.yml` and `.opendock/dock.lock.yml` | core | P0 | DONE |
 | 6 | Implement lifecycle runner with command allowlist | core | P0 | DONE |
 | 7 | Implement `install`, `doctor`, `log`, `version`, and `update` | cli | P0 | DONE |
@@ -88,7 +87,7 @@ Local development contract:
 - [x] `bun run typecheck` passes.
 - [x] `bun run test` passes.
 - [x] `bun run lint` passes.
-- [x] `opendock version` prints CLI, schema, and registry info.
+- [x] `opendock version` prints CLI, schema, and hub info.
 - [x] `opendock install opendock/codex` can install from a configured local dock fixture.
 - [x] Existing files are not overwritten.
 - [x] Re-running `install` does not duplicate managed blocks.

@@ -22,7 +22,7 @@ archivo generado auditable.
 OpenDock es una CLI Bun-first en TypeScript para instalar docks aprobados en el
 directorio actual del proyecto.
 
-El primer dock es `opendock/codex`: un starter general para Codex que verifica
+El primer dock es `opendock/codex`: un dock general de setup para Codex que verifica
 Node, instala la CLI de Codex, aplica archivos de proyecto revisables y mantiene
 la configuración registrada en el estado de OpenDock.
 
@@ -49,14 +49,14 @@ revisado:
 - **Con alcance de proyecto**: instala en el directorio actual y escribe estado
   local en `.opendock/`.
 - **Aprobado por diseño**: los docks remotos deben venir de metadata aprobada
-  por OpenDock Registry.
+  por OpenDock Hub.
 - **Seguro con archivos existentes**: cada archivo declara su propia política de
   actualización, como managed blocks, manual review o unique-line append.
 - **Superficie de comandos pequeña**: install, update, diagnosticar,
   inspeccionar logs, auth y deploy.
 - **Listo para automatización**: los lifecycle steps pueden ejecutar comandos
   permitidos como `git`, `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`,
-  `claude` y `omx` sin permitir pipelines de shell.
+  `claude` y `oma` sin permitir pipelines de shell.
 
 ## Inicio Rápido
 
@@ -103,10 +103,10 @@ README.md
 | `opendock update` | Vuelve a resolver los docks instalados y aplica versiones nuevas de forma segura usando la platform bloqueada. |
 | `opendock doctor` | Muestra el estado OpenDock del directorio actual usando la platform bloqueada. |
 | `opendock log` | Imprime las ejecuciones recientes de OpenDock para el proyecto actual. |
-| `opendock version` | Imprime la versión de la CLI, la versión del schema y el registry por defecto. |
+| `opendock version` | Imprime la versión de la CLI, la versión del schema y el Hub por defecto. |
 | `opendock bootstrap mac` | Verifica o instala Homebrew para docks de macOS. |
-| `opendock auth login` | Guarda un token de OpenDock Registry. |
-| `opendock deploy codex` | Envía un dock local `dock.yml` para revisión en OpenDock Registry. |
+| `opendock auth login` | Guarda un token de OpenDock Hub. |
+| `opendock deploy codex` | Envía un dock local `dock.yml` para revisión en OpenDock Hub. |
 
 `install` es público. `deploy` requiere `opendock auth login`.
 Ejecuta `opendock bootstrap mac` primero si falta Homebrew.
@@ -243,22 +243,15 @@ lifecycle:
           - key: enter
 ```
 
-## Variables De Entorno
-
-| Variable | Uso |
-|---|---|
-| `OPENDOCK_DATA_DIR` | Sobrescribe el directorio de user data/cache/log. |
-| `OPENDOCK_AUTH_TOKEN` | Proporciona un login token de forma no interactiva. |
-
 ## Estructura Del Repositorio
 
 ```text
 src/
   cli.ts              # commander CLI entrypoint
   installer.ts        # install/update dock file application
-  resolver.ts         # local and OpenDock Registry dock resolution
+  resolver.ts         # local and OpenDock Hub dock resolution
   runner.ts           # lifecycle command runner
-  registry.ts         # OpenDock Registry API client boundary
+  registry.ts         # OpenDock Hub API client boundary
 tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
@@ -266,8 +259,6 @@ examples/
   codex/              # Codex CLI + project files example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
-  oh-my-codex/        # Codex CLI + Oh My Codex example
-  oh-my-openagent/    # Codex CLI + Oh My OpenAgent example
 docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide
@@ -289,18 +280,18 @@ generados. Los docks de `examples/` son ejemplos reales de autoría.
 
 OpenDock es una CLI MVP. Lo siguiente todavía no está incluido:
 
-- servicio hosted de revisión de OpenDock Registry
+- servicio hosted de revisión de OpenDock Hub
 - distribución mediante package manager
-- UX completa del dock catalog en `https://registry.opendock.app`
+- UX completa del dock catalog en `https://hub.opendock.app`
 - automatización de binary releases
 
-La CLI ya incluye local fixture flow, remote registry client boundary, project
+La CLI ya incluye local fixture flow, remote Hub API client boundary, project
 state, logging, auth token storage, deploy submission plumbing y regression
 tests.
 
 Cuando el servicio hosted esté disponible, `https://opendock.app` será el
-product site, `https://registry.opendock.app` será el dock catalog para personas
-y `https://registry.opendock.app/v1/docks` será la raíz de la API del registry
+product site, `https://hub.opendock.app` será el dock catalog para personas
+y `https://hub.opendock.app/v1/docks` será la raíz de la API del Hub
 para la CLI.
 
 ## Ecosistema

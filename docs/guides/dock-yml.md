@@ -2,7 +2,7 @@
 
 `dock.yml`은 OpenDock dock의 진입점입니다. 어떤 파일을 프로젝트에 넣을지, 기존 파일을 어떻게 보존할지, 설치와 업데이트 때 어떤 명령을 실행할지, doctor에서 어떤 상태를 점검할지를 선언합니다.
 
-이 문서는 현재 OpenDock CLI 구현 기준입니다. 미래에 추가될 수 있는 dock catalog UI나 OpenDock Registry 운영 정책이 아니라, 지금 `src/dock.ts`, `src/installer.ts`, `src/runner.ts`가 실제로 해석하는 형식을 설명합니다.
+이 문서는 현재 OpenDock CLI 구현 기준입니다. 미래에 추가될 수 있는 dock catalog UI나 OpenDock Hub 운영 정책이 아니라, 지금 `src/dock.ts`, `src/installer.ts`, `src/runner.ts`가 실제로 해석하는 형식을 설명합니다.
 
 실제 예제 dock은 `examples/` 아래에 역할별로 나뉘어 있습니다.
 
@@ -12,8 +12,6 @@
 | `examples/codex/dock.yml` | Codex CLI와 기본 프로젝트 파일을 적용하는 dock |
 | `examples/oma/dock.yml` | 파일 payload 없이 Oh My Agent를 적용하는 dock |
 | `examples/claude-code/dock.yml` | Claude Code를 설치하는 dock |
-| `examples/oh-my-codex/dock.yml` | Codex CLI와 Oh My Codex를 설치하는 dock |
-| `examples/oh-my-openagent/dock.yml` | Codex CLI와 Oh My OpenAgent Codex Light를 설치하는 dock |
 
 ## 기본 구조
 
@@ -42,7 +40,7 @@ files:
     update: managed_block
 ```
 
-`from` 경로는 dock root 기준입니다. `files/`는 예시에서 쓰는 권장 폴더명일 뿐이고, OpenDock은 특수한 `templates/` 폴더나 암묵적 fallback을 사용하지 않습니다. 프로젝트에 넣을 파일은 항상 `files` 목록에 명시하세요.
+`from` 경로는 dock root 기준입니다. `files/`는 예시에서 쓰는 권장 폴더명일 뿐입니다. OpenDock은 `files` 목록에 명시된 항목만 프로젝트에 적용합니다.
 
 현재 형식은 `opendock: 1`입니다. 새 dock은 `opendock`, `files`, `lifecycle` 중심으로 작성하세요.
 
@@ -168,7 +166,7 @@ opendock install opendock/codex@1.5.2
 opendock install opendock/codex@v1
 ```
 
-selector가 없으면 `latest`로 해석합니다. `1`은 최신 `1.x`, `1.5`는 최신 `1.5.x`, `1.5.2`는 exact version 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 selector와 registry가 돌려준 exact version을 함께 기록합니다.
+selector가 없으면 `latest`로 해석합니다. `1`은 최신 `1.x`, `1.5`는 최신 `1.5.x`, `1.5.2`는 exact version 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 selector와 Hub가 돌려준 exact version을 함께 기록합니다.
 
 ```yaml
 docks:
@@ -196,7 +194,7 @@ files:
 | `to` | 필수 | 설치 대상 프로젝트 기준 경로입니다. |
 | `update` | 필수 | 기존 파일이 있을 때의 업데이트 정책입니다. |
 
-`from`, `to`는 안전한 상대 경로여야 합니다. 빈 문자열, 절대 경로, `../` 같은 상위 이동은 거부됩니다. 현재 구현은 파일 단위만 지원합니다. 디렉터리 전체를 관리하는 `managed_tree`는 아직 지원되지 않으므로 필요한 파일을 각각 나열하세요.
+`from`, `to`는 안전한 상대 경로여야 합니다. 빈 문자열, 절대 경로, `../` 같은 상위 이동은 거부됩니다. 현재 구현은 파일 단위만 지원하므로 필요한 파일을 각각 나열하세요.
 
 ### update 정책
 
@@ -416,8 +414,7 @@ mkdir
 node
 npm
 npx
-omo
-omx
+oma
 pip
 pip3
 pipx
@@ -495,7 +492,7 @@ lifecycle:
       timeout_ms: 600000
 ```
 
-`interactive: scripted`는 macOS의 `expect`를 사용해 pseudo-terminal에서 키 입력을 보냅니다. 승인된 OpenDock Registry dock에서만 신중하게 쓰는 것이 좋습니다.
+`interactive: scripted`는 macOS의 `expect`를 사용해 pseudo-terminal에서 키 입력을 보냅니다. 승인된 OpenDock Hub dock에서만 신중하게 쓰는 것이 좋습니다.
 
 지원하는 key 값은 다음과 같습니다.
 
@@ -591,18 +588,18 @@ dock은 사용자가 이미 작성한 파일을 함부로 덮어쓰면 안 됩�
 
 ## 보안과 배포 기준
 
-OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 런타임 환경변수로 바꿀 수 없게 고정합니다. 현재 registry는 `https://registry.opendock.app`입니다.
+OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 런타임 환경변수로 바꿀 수 없게 고정합니다. 현재 Hub는 `https://hub.opendock.app`입니다.
 
-사람이 탐색하는 dock catalog는 `https://registry.opendock.app`, CLI가 사용하는 registry API root는 `https://registry.opendock.app/v1/docks`입니다.
+사람이 탐색하는 dock catalog는 `https://hub.opendock.app`, CLI가 사용하는 Hub API root는 `https://hub.opendock.app/v1/docks`입니다.
 
 배포 흐름은 다음 원칙을 따릅니다.
 
 1. dock author가 `dock.yml`과 `files[].from`에 명시한 source 파일을 작성합니다.
 2. `opendock auth login`으로 로그인합니다.
 3. `opendock deploy <dock-name>`으로 제출합니다.
-4. OpenDock Registry 검토를 통과한 dock만 registry에서 설치될 수 있습니다.
+4. OpenDock Hub 검토를 통과한 dock만 Hub에서 설치될 수 있습니다.
 
-`install`은 공개 명령이지만, 설치 대상 dock은 승인된 registry metadata, signature, checksum 검증을 통과해야 합니다.
+`install`은 공개 명령이지만, 설치 대상 dock은 승인된 Hub metadata, signature, checksum 검증을 통과해야 합니다.
 
 ## 작성 체크리스트
 
@@ -728,65 +725,10 @@ lifecycle:
 
 Anthropic 공식 문서는 npm 글로벌 설치를 지원하며, 업그레이드도 `npm install -g @anthropic-ai/claude-code@latest`를 권장합니다. `sudo npm install -g`는 피하세요.
 
-### Oh My OpenAgent 설치 예시
-
-```yaml
-lifecycle:
-  install:
-    - id: install-bun
-      check: bun --version
-      version: ">=1.3.0"
-      platforms:
-        macos:
-          run: brew install bun
-        windows:
-          run: npm install --global bun
-
-    - id: install-oh-my-openagent-codex
-      check: bunx oh-my-openagent doctor
-      run: bunx oh-my-openagent install --no-tui --platform=codex --codex-autonomous
-      timeout_ms: 600000
-
-  update:
-    - id: update-oh-my-openagent-codex
-      run: bunx oh-my-openagent install --no-tui --platform=codex --codex-autonomous
-      timeout_ms: 600000
-
-  doctor:
-    - id: bun
-      check: bun --version
-      version: ">=1.3.0"
-
-    - id: oh-my-openagent
-      check: bunx oh-my-openagent doctor
-      timeout_ms: 60000
-```
-
-Oh My OpenAgent는 OpenCode용 Ultimate와 Codex용 Light 구성이 나뉩니다. Codex 설치 dock에서는 `--platform=codex`를 명시하세요. 공식 문서의 Codex-only 예시는 `npx lazycodex-ai install --no-tui --codex-autonomous`도 안내합니다. OpenDock에서는 둘 중 하나를 dock 정책으로 정해 일관되게 쓰면 됩니다.
-
-### Oh My Codex 설치 예시
-
-```yaml
-lifecycle:
-  install:
-    - id: install-oh-my-codex
-      check: omx doctor
-      run: npm install --global oh-my-codex@latest
-
-  update:
-    - id: update-oh-my-codex
-      run: npm install --global oh-my-codex@latest
-
-  doctor:
-    - id: oh-my-codex
-      check: omx doctor
-      timeout_ms: 60000
-```
-
 ## 현재 MVP에서 피해야 할 것
 
-- `requires.tools` 같은 별도 의존성 블록에 자동 설치를 기대하지 마세요. 현재는 lifecycle로 표현해야 합니다.
-- `managed_tree`로 디렉터리 전체를 관리하려고 하지 마세요. 현재는 파일 단위 `files`만 지원합니다.
+- 의존성 선언만으로 자동 설치를 기대하지 마세요. 현재는 lifecycle로 표현해야 합니다.
+- 디렉터리 전체를 한 항목으로 관리한다고 가정하지 마세요. 현재는 파일 단위 `files`만 지원합니다.
 - `repair`가 doctor 실패를 자동 수정한다고 기대하지 마세요.
 - shell script처럼 `&&`, pipe, redirect를 쓰지 마세요.
 - 검증 없이 `run`만 늘어놓지 마세요. 가능한 step에는 `check`를 붙여 재실행해도 안전하게 만드세요.

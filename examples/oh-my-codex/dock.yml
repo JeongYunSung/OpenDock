@@ -1,6 +1,6 @@
 opendock: 1
 id: opendock/oh-my-codex
-version: 0.1.0
+version: 0.2.0
 
 lifecycle:
   install:
@@ -19,15 +19,25 @@ lifecycle:
       run: npm install --global @openai/codex@latest
 
     - id: install-oh-my-codex
-      check: omx doctor
+      check: omx --version
+      version: ">=0.18.0"
       run: npm install --global oh-my-codex@latest
+
+    - id: setup-oh-my-codex
+      run: omx setup
+      timeout_ms: 600000
+
+    - id: verify-oh-my-codex
+      run: omx doctor
+      timeout_ms: 60000
 
   update:
     - id: update-codex-cli
       run: npm install --global @openai/codex@latest
 
     - id: update-oh-my-codex
-      run: npm install --global oh-my-codex@latest
+      run: omx update
+      timeout_ms: 600000
 
     - id: verify-oh-my-codex
       run: omx doctor
@@ -45,6 +55,10 @@ lifecycle:
     - id: codex
       check: codex --version
       version: ">=0.0.0"
+
+    - id: oh-my-codex-version
+      check: omx --version
+      version: ">=0.18.0"
 
     - id: oh-my-codex
       check: omx doctor
