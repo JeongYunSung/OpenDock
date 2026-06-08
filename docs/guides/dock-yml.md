@@ -22,6 +22,7 @@ dock은 보통 다음 구조를 가집니다.
 ```text
 my-dock/
   dock.yml
+  DOCK.md
   files/
     README.md
     DESIGN.md
@@ -35,6 +36,7 @@ my-dock/
 opendock: 1
 id: opendock/codex
 version: 0.1.0
+readme: DOCK.md
 
 files:
   - from: files/README.md
@@ -44,6 +46,8 @@ files:
 
 `from` 경로는 dock root 기준입니다. `files/`는 예시에서 쓰는 권장 폴더명일 뿐입니다. OpenDock은 `files` 목록에 명시된 항목만 프로젝트에 적용합니다.
 
+`readme`는 설치 대상 프로젝트에 복사되는 파일이 아닙니다. `opendock deploy`가 Registry review submission을 만들 때 읽어 Hub 상세 페이지 본문으로 함께 제출하는 Markdown 파일 경로입니다. GitHub의 repository `README.md`처럼 사람이 dock을 이해하기 위한 문서를 `DOCK.md` 같은 별도 파일에 둘 때 사용합니다.
+
 현재 형식은 `opendock: 1`입니다. 새 dock은 `opendock`, `files`, `lifecycle` 중심으로 작성하세요.
 
 ## 전체 예제
@@ -52,6 +56,8 @@ files:
 opendock: 1
 id: opendock/codex
 version: 0.1.0
+summary: Codex CLI setup with managed workspace files.
+readme: DOCK.md
 
 files:
   - from: files/.agents
@@ -133,10 +139,27 @@ lifecycle:
 | `id` | 필수 | dock 식별자입니다. 설치 요청의 `owner/name`과 정확히 같아야 합니다. |
 | `name` | 선택 | 사람이 읽는 이름입니다. 현재 실행 로직에는 영향이 없습니다. |
 | `summary` | 선택 | 설명 문자열입니다. 기본값은 빈 문자열입니다. |
+| `readme` | 선택 | Registry 제출 시 Hub 상세 본문으로 함께 전송할 Markdown 파일 경로입니다. 예: `DOCK.md`. |
 | `version` | 권장 필수 | dock 버전입니다. 없으면 `0.1.0`으로 해석됩니다. |
 | `files` | 선택 | 프로젝트에 적용할 파일 목록입니다. |
 | `lifecycle` | 선택 | `install`, `update`, `doctor` 단계별 명령 목록입니다. |
 | `needs` | 선택 | 현재는 파싱만 됩니다. 실제 설치 판단은 `lifecycle`의 `check`, `version`, `run`으로 표현하세요. |
+
+### readme
+
+`readme`는 dock package 내부의 Markdown 문서를 가리키는 안전한 상대 경로입니다.
+
+```yaml
+readme: DOCK.md
+```
+
+`opendock deploy`는 이 경로가 있으면 파일 내용을 `readme_markdown`으로 Registry submission에 포함합니다. Registry가 승인한 버전의 본문은 Hub 상세 API의 `readmeMarkdown`으로 내려가며, Hub에서는 dock 제목, 요약 설명, 설치 명령과 함께 표시할 수 있습니다.
+
+주의할 점은 다음과 같습니다.
+
+- `readme` 파일은 설치 대상 프로젝트에 자동 복사되지 않습니다. 프로젝트에 복사하려면 `files`에도 별도로 선언해야 합니다.
+- 경로는 dock root 안에 있어야 하며 절대 경로나 `../`로 바깥을 가리키면 deploy가 실패합니다.
+- 현재 CLI는 deploy 시 최대 65536 bytes까지 제출합니다.
 
 ### id 규칙
 

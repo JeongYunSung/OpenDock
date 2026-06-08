@@ -617,7 +617,7 @@ files:
 
     try {
       const response = await new OpenDockRegistryClient().submitDock(
-        { dock_name: "codex", manifest: "opendock: 1" },
+        { dock_name: "codex", manifest: "opendock: 1", readme_markdown: "# Dock docs\n" },
         "token",
       );
       expect(response.status).toBe("pending");
@@ -626,7 +626,13 @@ files:
     }
 
     expect(urls).toEqual(["https://registry.opendock.app/v1/docks/submissions"]);
-    expect(bodies).toEqual([JSON.stringify({ dock_name: "codex", manifest: "opendock: 1" })]);
+    expect(bodies).toEqual([
+      JSON.stringify({
+        dock_name: "codex",
+        manifest: "opendock: 1",
+        readme_markdown: "# Dock docs\n",
+      }),
+    ]);
   });
 
   it("supports opendock v1 files lifecycle and doctor checks", async () => {

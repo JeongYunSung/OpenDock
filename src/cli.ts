@@ -1,12 +1,13 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync, statSync } from "node:fs";
+import { isAbsolute, join, relative, resolve } from "node:path";
 import { stdin as input, stdout as output } from "node:process";
 import { createInterface } from "node:readline/promises";
 import { Command } from "commander";
 import { TokenStore } from "./auth.js";
 import { bootstrapMac } from "./bootstrap.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
-import { DockRef } from "./dock.js";
+import { DockRef, parseManifestFile } from "./dock.js";
 import { type InstallReport, install } from "./installer.js";
 import { readProjectLogs } from "./logging.js";
 import { detectPlatform, type OpenDockPlatform, parsePlatform } from "./platform.js";
@@ -14,6 +15,8 @@ import { hasProjectState, lockDocks, readLock } from "./project.js";
 import { OpenDockRegistryClient } from "./registry.js";
 import { resolveDock } from "./resolver.js";
 import { runLifecycle } from "./runner.js";
+
+const maxDeployReadmeBytes = 64 * 1024;
 
 export async function run(argv = process.argv): Promise<void> {
   const program = new Command();
@@ -136,12 +139,52 @@ export async function run(argv = process.argv): Promise<void> {
         throw new Error("not logged in; run `opendock auth login` first");
       }
       const manifest = readFileSync("dock.yml", "utf8");
+      const readmeMarkdown = readDeployReadme(process.cwd(), "dock.yml");
       const client = new OpenDockRegistryClient();
-      const response = await client.submitDock({ dock_name: dockName, manifest }, token);
+      const request =
+        readmeMarkdown === undefined
+          ? { dock_name: dockName, manifest }
+          : { dock_name: dockName, manifest, readme_markdown: readmeMarkdown };
+      const response = await client.submitDock(request, token);
       console.log(`Submitted ${dockName} for review: ${response.id} (${response.status})`);
     });
 
   await program.parseAsync(argv);
+}
+
+function readDeployReadme(projectDir: string, manifestPath: string): string | undefined {
+  const manifest = parseManifestFile(join(projectDir, manifestPath));
+  if (manifest.readme === undefined) {
+    return undefined;
+  }
+
+  const relativePath = manifest.readme.trim();
+  if (relativePath === "") {
+    throw new Error("manifest `readme` path cannot be empty");
+  }
+
+  const root = realpathSync(projectDir);
+  const candidate = resolve(root, relativePath);
+  const realCandidate = realpathSync(candidate);
+  const rel = relative(root, realCandidate);
+  if (
+    isAbsolute(rel) ||
+    rel === ".." ||
+    rel.startsWith(`..${"/"}`) ||
+    rel.startsWith(`..${"\\"}`)
+  ) {
+    throw new Error("manifest `readme` path must stay inside the dock directory");
+  }
+
+  const stats = statSync(realCandidate);
+  if (!stats.isFile()) {
+    throw new Error("manifest `readme` path must point to a file");
+  }
+  if (stats.size > maxDeployReadmeBytes) {
+    throw new Error(`manifest \`readme\` file exceeds ${maxDeployReadmeBytes} bytes`);
+  }
+
+  return readFileSync(realCandidate, "utf8");
 }
 
 function resolveCliPlatform(value: string | undefined): OpenDockPlatform {

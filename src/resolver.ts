@@ -12,12 +12,11 @@ import {
 import { tmpdir } from "node:os";
 import { join, relative, resolve, sep } from "node:path";
 import { x as extractTar } from "tar";
-import YAML from "yaml";
 import {
   assertVersionSatisfiesSelector,
   type DockManifest,
   type DockRef,
-  dockManifestSchema,
+  parseManifestFile,
   validateManifestFor,
 } from "./dock.js";
 import { cacheRoot } from "./paths.js";
@@ -47,7 +46,7 @@ export function resolveLocalDock(docksRoot: string, dockRef: DockRef): ResolvedD
   }
 
   const manifestPath = join(dockRoot, "dock.yml");
-  const manifest = parseManifest(manifestPath);
+  const manifest = parseManifestFile(manifestPath);
   validateManifestFor(manifest, dockRef);
 
   return {
@@ -118,7 +117,7 @@ async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
     throw new Error(`downloaded dock \`${dockRef}\` did not contain dock.yml`);
   }
 
-  const manifest = parseManifest(join(dockRoot, "dock.yml"));
+  const manifest = parseManifestFile(join(dockRoot, "dock.yml"));
   validateManifestFor(manifest, dockRef);
 
   return {
@@ -127,14 +126,6 @@ async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
     checksum: actualChecksum,
     signature: metadata.signature,
   };
-}
-
-function parseManifest(path: string): DockManifest {
-  try {
-    return dockManifestSchema.parse(YAML.parse(readFileSync(path, "utf8")));
-  } catch (error) {
-    throw new Error(`failed to parse ${path}: ${(error as Error).message}`);
-  }
 }
 
 function findLocalDockRoot(docksRoot: string, dockRef: DockRef): string | undefined {

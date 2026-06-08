@@ -18,6 +18,7 @@ export interface LoginResponse {
 export interface SubmissionRequest {
   dock_name: string;
   manifest: string;
+  readme_markdown?: string;
 }
 
 export interface SubmissionResponse {

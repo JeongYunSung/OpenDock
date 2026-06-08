@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import YAML from "yaml";
 import { z } from "zod";
 import { isOpenDockPlatform } from "./platform.js";
 
@@ -159,6 +161,7 @@ export const dockManifestSchema = z
     id: z.string(),
     name: z.string().optional(),
     summary: z.string().default(""),
+    readme: z.string().optional(),
     version: z.string().default("0.1.0"),
     needs: z.record(z.string(), z.string()).default({}),
     files: z.array(fileSpecSchema).default([]),
@@ -171,6 +174,14 @@ export type FileSpec = z.infer<typeof fileSpecSchema>;
 export type FileUpdatePolicy = z.infer<typeof fileUpdatePolicySchema>;
 export type LifecycleStep = z.infer<typeof lifecycleStepSchema>;
 export type LifecyclePhase = keyof z.infer<typeof lifecycleSchema>;
+
+export function parseManifestFile(path: string): DockManifest {
+  try {
+    return dockManifestSchema.parse(YAML.parse(readFileSync(path, "utf8")));
+  } catch (error) {
+    throw new Error(`failed to parse ${path}: ${(error as Error).message}`);
+  }
+}
 
 export function validateManifestFor(manifest: DockManifest, requested: DockRef): void {
   if (manifest.opendock === undefined) {
