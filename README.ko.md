@@ -2,24 +2,60 @@
 
 # OpenDock
 
-**AI 작업공간을 위한 승인형 dock CLI.**
+**AI 작업공간을 위한 승인된 dock.**
 
-신뢰할 수 있는 프로젝트 세팅을 한 줄로 설치하고, 생성된 파일과 실행 기록을
-프로젝트 단위로 추적합니다.
+신뢰할 수 있는 프로젝트 설정을 한 명령으로 설치하세요. 명령 표면은 작게,
+설정은 반복 가능하게, 생성된 모든 파일은 검토 가능하게 유지합니다.
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
+
+![status](https://img.shields.io/badge/status-MVP-2563eb)
+![language](https://img.shields.io/badge/language-TypeScript-3178c6)
+![schema](https://img.shields.io/badge/schema-opendock%201-111827)
+![platform](https://img.shields.io/badge/platform-macOS_%2B_Windows-0f766e)
 
 </div>
 
 ---
 
-OpenDock은 현재 디렉터리에 승인된 dock을 적용하는 Bun-first TypeScript
-CLI입니다. 첫 dock은 `opendock/codex`이며, Node와 Codex CLI를 확인하고
-설치한 뒤 검토 가능한 프로젝트 파일과 OpenDock 상태를 함께 남깁니다.
+OpenDock은 현재 프로젝트 디렉터리에 승인된 dock을 설치하는 Bun-first
+TypeScript CLI입니다.
+
+첫 dock은 `opendock/codex`입니다. Node를 확인하고, Codex CLI를 설치하고,
+검토 가능한 프로젝트 파일을 적용하며, 설정 상태를 OpenDock state로 추적합니다.
+
+OpenDock은 터미널 대체재가 아닙니다. 프로젝트에 검증된 AI 설정이 필요할 때
+실행하는 작은 바이너리입니다.
+
+```bash
+opendock install opendock/codex
+opendock update
+opendock doctor
+opendock log
+opendock version
+opendock auth login
+opendock deploy codex
+```
+
+## OpenDock이 필요한 이유
+
+AI 작업공간 설정은 보통 일회성 shell 명령, 복사된 prompt 파일, 버전 drift,
+희미하게 기억나는 프로젝트 규칙의 묶음이 되기 쉽습니다. OpenDock은 이를
+검토된 dock으로 바꿉니다.
+
+- **프로젝트 단위**: 현재 디렉터리에 설치하고 로컬 `.opendock/` 상태를 씁니다.
+- **승인 중심 설계**: 원격 dock은 OpenDock Registry가 승인한 metadata에서만
+  와야 합니다.
+- **기존 파일 보호**: 각 파일은 managed block, manual review, unique-line append
+  같은 update 정책을 직접 선언합니다.
+- **작은 명령 표면**: install, update, diagnose, log 확인, auth, deploy만 둡니다.
+- **자동화 준비**: lifecycle step은 shell pipeline 없이 `git`, `brew`,
+  `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `omx` 같은 허용된
+  명령을 실행할 수 있습니다.
 
 ## 빠른 시작
 
-아직 패키지 매니저 배포 전이므로 소스에서 빌드합니다.
+OpenDock은 아직 패키지 매니저로 배포되지 않았습니다. 소스에서 빌드하세요.
 
 ```bash
 bun install
@@ -27,7 +63,7 @@ bun run build
 bin/opendock.js version
 ```
 
-승인된 dock을 임시 프로젝트에서 실행합니다.
+승인된 `opendock/codex` dock을 임시 프로젝트에서 실행해 보세요.
 
 ```bash
 repo=$PWD
@@ -39,28 +75,129 @@ cd "$project"
 "$repo/bin/opendock.js" log
 ```
 
+설치 후 프로젝트에는 다음 항목이 생깁니다.
+
+```text
+.opendock/
+  dock.lock.yml
+  project.yml
+AGENTS.md
+DESIGN.md
+README.md
+.gitignore
+```
+
 ## 명령어
 
 | 명령어 | 역할 |
 |---|---|
 | `opendock install opendock/codex` | 현재 디렉터리에 승인된 dock을 설치합니다. |
-| `opendock install opendock/codex@1.5` | 버전 selector를 지정해 설치합니다. |
-| `opendock install opendock/codex --platform windows` | 자동 감지 대신 명시한 플랫폼 기준으로 설치합니다. |
-| `opendock update` | 설치된 dock의 새 버전을 확인하고 lock에 기록된 플랫폼 기준으로 적용합니다. |
-| `opendock doctor` | lock에 기록된 플랫폼 기준으로 프로젝트의 OpenDock 상태를 진단합니다. |
-| `opendock log` | 현재 프로젝트의 최근 실행 로그를 보여줍니다. |
-| `opendock version` | CLI, 스키마, 기본 레지스트리 정보를 출력합니다. |
+| `opendock install opendock/codex@1.5` | version selector를 사용해 설치합니다. |
+| `opendock install opendock/codex --platform windows` | host 자동 감지 대신 명시한 target platform으로 설치합니다. |
+| `opendock update` | 설치된 dock을 다시 resolve하고 lock에 기록된 platform 기준으로 안전하게 새 버전을 적용합니다. |
+| `opendock doctor` | 현재 디렉터리의 OpenDock 상태를 lock에 기록된 platform 기준으로 표시합니다. |
+| `opendock log` | 현재 프로젝트의 최근 OpenDock 실행 기록을 출력합니다. |
+| `opendock version` | CLI 버전, schema 버전, 기본 registry를 출력합니다. |
 | `opendock bootstrap mac` | macOS dock용 Homebrew를 확인하거나 설치합니다. |
-| `opendock auth login` | OpenDock Registry 토큰을 저장합니다. |
+| `opendock auth login` | OpenDock Registry token을 저장합니다. |
 | `opendock deploy codex` | 로컬 `dock.yml` dock을 OpenDock Registry 검토용으로 제출합니다. |
 
-버전 selector는 `owner/name@selector` 형식입니다. selector가 없으면 `latest`로 해석합니다. `@1`은 최신 `1.x`, `@1.5`는 최신 `1.5.x`, `@1.5.2`는 exact version 요청입니다. OpenDock은 lock에 사용자가 요청한 selector와 실제 설치된 exact version을 함께 저장하고, `update` 때 같은 selector를 재사용합니다.
+`install`은 공개 명령입니다. `deploy`에는 `opendock auth login`이 필요합니다.
+Homebrew가 없다면 먼저 `opendock bootstrap mac`을 실행하세요.
 
-## dock.yml 작성 가이드
+dock reference는 npm 스타일 version selector를 지원합니다.
 
-Codex CLI 설치 기준의 상세 dock 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)를 참고하세요. `examples/git`, `examples/codex`, `examples/oma`, `examples/claude-code`, `examples/oh-my-codex`, `examples/oh-my-openagent`에도 실제 예시가 들어 있습니다.
+```text
+owner/name          -> latest
+owner/name@latest   -> latest
+owner/name@1        -> latest approved 1.x
+owner/name@1.5      -> latest approved 1.5.x
+owner/name@1.5.2    -> exact approved version
+owner/name@v1       -> latest approved 1.x
+```
 
-플랫폼별 명령은 lifecycle 순서를 깨지 않고 step 안의 `platforms`로 작성합니다.
+OpenDock은 요청한 selector와 resolve된 exact version을 모두
+`.opendock/dock.lock.yml`에 저장합니다. `opendock update`는 요청한 selector를
+재사용하므로 `@1.5.2`로 설치한 dock은 고정되고, `@1.5`는 `1.5.x` 범위 안에서
+이동할 수 있습니다.
+
+## Dock 형식
+
+dock은 `dock.yml` 파일과 `files[].from`에서 참조하는 source 파일로 구성된
+디렉터리입니다. 자세한 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
+한국어 가이드를 참고하세요.
+
+```yaml
+opendock: 1
+id: opendock/codex
+version: 0.1.0
+
+files:
+  - from: files/DESIGN.md
+    to: DESIGN.md
+    update: managed_block
+
+  - from: files/README.md
+    to: README.md
+    update: manual_review
+
+  - from: files/.gitignore
+    to: .gitignore
+    update: append_unique
+
+lifecycle:
+  install:
+    - id: git-init
+      check: git status
+      run: git init -b main
+
+    - id: install-node
+      check: node --version
+      version: ">=22.0.0 <25.0.0"
+      platforms:
+        macos:
+          run: brew install node
+        windows:
+          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
+
+    - id: install-codex-cli
+      check: codex --version
+      version: ">=0.0.0"
+      run: npm install --global @openai/codex@latest
+
+    - id: verify-codex-cli
+      run: codex --version
+      timeout_ms: 60000
+
+  update:
+    - id: update-codex-cli
+      run: npm install --global @openai/codex@latest
+
+    - id: verify-codex-cli
+      run: codex --version
+      timeout_ms: 60000
+
+  doctor:
+    - id: node
+      version: ">=22.0.0 <25.0.0"
+      check: node --version
+
+    - id: npm
+      version: ">=10.0.0"
+      check: npm --version
+
+    - id: codex
+      version: ">=0.0.0"
+      check: codex --version
+      timeout_ms: 60000
+```
+
+`from` 경로는 dock root 기준입니다. `files/`는 권장 예시 폴더명일 뿐이며,
+OpenDock은 특별한 payload 디렉터리를 요구하지 않습니다.
+
+Platform별 lifecycle 명령은 일반적인 top-to-bottom `install`, `update`,
+`doctor` 순서 안에 머뭅니다. `platforms`가 있는 step은 하나의 논리적 `id`를
+유지하고, OpenDock이 현재 platform에 맞는 override를 병합합니다.
 
 ```yaml
 lifecycle:
@@ -75,28 +212,92 @@ lifecycle:
           run: npm install --global bun
 ```
 
-`platforms`가 없는 step은 모든 플랫폼 공통으로 실행됩니다. 설치 시 선택된 플랫폼은 `.opendock/dock.lock.yml`에 기록되고 `update`, `doctor`에서 재사용됩니다.
+`platforms`가 없는 step은 모든 platform에서 실행됩니다. 선택된 platform은
+`.opendock/dock.lock.yml`에 저장되고 `opendock update`, `opendock doctor`에서
+재사용됩니다.
 
-## 안전 모델
+대화형 lifecycle step은 사용자가 직접 조작하게 하거나, macOS `expect` PTY를 통해
+승인된 작은 key sequence를 보낼 수 있습니다.
 
-- dock reference는 `owner/name` 형식만 허용합니다.
-- dock source와 registry host는 런타임 환경변수로 바꿀 수 없으며 `https://registry.opendock.app`에 고정됩니다.
-- 원격 dock은 OpenDock Registry 승인, 서명, 체크섬 검증을 통과해야 합니다.
-- 기존 파일은 덮어쓰지 않고 OpenDock 관리 블록으로 append합니다.
-- `.gitignore`는 중복 라인을 만들지 않습니다.
-- lifecycle 명령은 allowlist 기반이며 pipe, redirect, `&&`, `||` 같은 shell 연산자를 차단합니다.
-- `brew`는 macOS step에서만, `winget`은 Windows step에서만 허용합니다.
-- Homebrew 자체 설치는 dock이 아니라 `opendock bootstrap mac` first-party 명령에서 사용자 확인 후 처리합니다.
-- `install`과 `update`는 허용된 명령의 출력을 실시간으로 보여주고, 실행 후 check를 다시 돌려 요구 버전이나 상태가 실제로 충족됐는지 확인합니다.
-- `interactive: user`는 실제 터미널 TTY에서 사용자가 직접 진행하고, `interactive: scripted`는 macOS `expect` PTY로 승인된 키 입력을 자동 전달합니다.
-- `doctor` lifecycle check에는 기본 timeout이 있으며, step별로 `timeout_ms`를 지정할 수 있습니다.
-- 프로젝트 상태는 `.opendock/`에, 상세 로그는 사용자 데이터 디렉터리에 저장합니다.
+```yaml
+lifecycle:
+  install:
+    - id: user-driven-tui
+      run: codex
+      interactive: user
+
+    - id: scripted-tui
+      run: codex
+      interactive:
+        mode: scripted
+        inputs:
+          - key: tab
+          - key: enter
+```
+
+## 환경 변수
+
+| 변수 | 용도 |
+|---|---|
+| `OPENDOCK_DATA_DIR` | 사용자 data/cache/log 디렉터리를 override합니다. |
+| `OPENDOCK_AUTH_TOKEN` | login token을 비대화형으로 제공합니다. |
+
+## 저장소 구조
+
+```text
+src/
+  cli.ts              # commander CLI entrypoint
+  installer.ts        # install/update dock file application
+  resolver.ts         # local and OpenDock Registry dock resolution
+  runner.ts           # lifecycle command runner
+  registry.ts         # OpenDock Registry API client boundary
+tests/
+  cli-flow.test.ts    # temp-dir CLI integration tests
+examples/
+  git/                # Git install/init example
+  codex/              # Codex CLI + project files example
+  oma/                # Oh My Agent dock.yml-only example
+  claude-code/        # Claude Code example
+  oh-my-codex/        # Codex CLI + Oh My Codex example
+  oh-my-openagent/    # Codex CLI + Oh My OpenAgent example
+docs/plans/work/      # implementation plan and verification notes
+docs/guides/
+  dock-yml.md         # detailed Korean dock.yml authoring guide
+```
+
+## 개발
+
+```bash
+bun run typecheck
+bun run test
+bun run lint
+bun run check
+```
+
+Integration test는 임시 디렉터리와 생성된 로컬 dock fixture를 사용합니다.
+`examples/`의 dock은 실제 작성 예시입니다.
 
 ## 현재 범위
 
-이 저장소는 CLI MVP입니다. 로컬 fixture, 원격 registry client 경계, 인증 토큰
-저장, deploy 제출 plumbing, update, doctor, log, 테스트가 구현되어 있습니다.
-호스팅 OpenDock Registry 서비스와 패키지 매니저 배포는 다음 단계입니다.
-메인 사이트는 `https://opendock.app`, 사람이 보는 dock 카탈로그는
-`https://registry.opendock.app`, CLI registry API는
-`https://registry.opendock.app/v1/docks` 기준으로 설계합니다.
+OpenDock은 MVP CLI입니다. 다음 항목은 아직 제공하지 않습니다.
+
+- hosted OpenDock Registry 검토 서비스
+- package manager 배포
+- `https://registry.opendock.app`의 전체 dock catalog UX
+- binary release automation
+
+CLI에는 이미 local fixture flow, remote registry client boundary, project
+state, logging, auth token storage, deploy submission plumbing, regression
+test가 들어 있습니다.
+
+Hosted service가 출시되면 `https://opendock.app`은 product site,
+`https://registry.opendock.app`은 사람이 보는 dock catalog,
+`https://registry.opendock.app/v1/docks`는 CLI registry API root입니다.
+
+## 생태계
+
+OpenDock은 [Open Design](https://github.com/nexu-io/open-design),
+[OpenCode](https://github.com/anomalyco/opencode),
+[oh-my-agent](https://github.com/first-fluke/oh-my-agent) 같은 agent-native
+도구와 자연스럽게 함께 쓰이도록 설계되었습니다. OpenDock은 로컬 프로젝트
+workflow를 더 portable하고, inspectable하며, repeatable하게 만듭니다.
