@@ -56,7 +56,7 @@ revisado:
   inspeccionar logs, auth y deploy.
 - **Listo para automatización**: los lifecycle steps pueden ejecutar comandos
   permitidos como `git`, `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`,
-  `claude` y `oma` sin permitir pipelines de shell.
+  `claude`, `oma` y `omx` sin permitir pipelines de shell.
 
 ## Inicio Rápido
 
@@ -259,6 +259,8 @@ examples/
   codex/              # Codex CLI + project files example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
+  oh-my-codex/        # Oh My Codex example
+  oh-my-openagent/    # Oh My OpenAgent Codex Light example
 docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide

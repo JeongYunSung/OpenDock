@@ -54,8 +54,8 @@ daraus ein geprüftes Dock:
 - **Kleine Befehlsoberfläche**: install, update, diagnose, Logs prüfen, auth und
   deploy.
 - **Automatisierungsbereit**: lifecycle steps können erlaubte Befehle wie
-  `git`, `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude` und
-  `oma` ausführen, ohne shell pipelines zu erlauben.
+  `git`, `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `oma`
+  und `omx` ausführen, ohne shell pipelines zu erlauben.
 
 ## Schnellstart
 
@@ -258,6 +258,8 @@ examples/
   codex/              # Codex CLI + project files example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
+  oh-my-codex/        # Oh My Codex example
+  oh-my-openagent/    # Oh My OpenAgent Codex Light example
 docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide

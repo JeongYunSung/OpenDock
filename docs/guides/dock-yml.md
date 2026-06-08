@@ -12,6 +12,8 @@
 | `examples/codex/dock.yml` | Codex CLI와 기본 프로젝트 파일을 적용하는 dock |
 | `examples/oma/dock.yml` | 파일 payload 없이 Oh My Agent를 적용하는 dock |
 | `examples/claude-code/dock.yml` | Claude Code를 설치하는 dock |
+| `examples/oh-my-codex/dock.yml` | Oh My Codex를 설치하고 `omx setup`을 실행하는 dock |
+| `examples/oh-my-openagent/dock.yml` | Oh My OpenAgent Codex Light를 설치하는 dock |
 
 ## 기본 구조
 
@@ -415,6 +417,7 @@ node
 npm
 npx
 oma
+omx
 pip
 pip3
 pipx
@@ -724,6 +727,69 @@ lifecycle:
 ```
 
 Anthropic 공식 문서는 npm 글로벌 설치를 지원하며, 업그레이드도 `npm install -g @anthropic-ai/claude-code@latest`를 권장합니다. `sudo npm install -g`는 피하세요.
+
+### Oh My Codex 설치 예시
+
+Oh My Codex는 npm global package가 `omx` CLI를 제공합니다. 현재 문서 기준 흐름은 global install, `omx setup`, `omx doctor`입니다. 업데이트는 `omx update`로 npm 확인과 setup refresh를 함께 처리합니다.
+
+```yaml
+lifecycle:
+  install:
+    - id: install-oh-my-codex
+      check: omx --version
+      version: ">=0.18.0"
+      run: npm install --global oh-my-codex@latest
+
+    - id: setup-oh-my-codex
+      run: omx setup
+      timeout_ms: 600000
+
+    - id: verify-oh-my-codex
+      run: omx doctor
+      timeout_ms: 60000
+
+  update:
+    - id: update-oh-my-codex
+      run: omx update
+      timeout_ms: 600000
+
+    - id: verify-oh-my-codex
+      run: omx doctor
+      timeout_ms: 60000
+
+  doctor:
+    - id: oh-my-codex-version
+      check: omx --version
+      version: ">=0.18.0"
+
+    - id: oh-my-codex
+      check: omx doctor
+      timeout_ms: 60000
+```
+
+### Oh My OpenAgent Codex Light 설치 예시
+
+Oh My OpenAgent의 Codex용 Light edition은 현재 `lazycodex-ai` installer를 사용합니다. OpenCode Ultimate를 설치하는 `bunx oh-my-openagent install`과 다르게 Codex Light는 Node/npm 기반 `npx lazycodex-ai install`이 공식 경로입니다.
+
+```yaml
+lifecycle:
+  install:
+    - id: install-oh-my-openagent-light
+      run: npx lazycodex-ai install --no-tui --codex-autonomous
+      timeout_ms: 600000
+
+  update:
+    - id: update-oh-my-openagent-light
+      run: npx lazycodex-ai install --no-tui --codex-autonomous
+      timeout_ms: 600000
+
+  doctor:
+    - id: codex
+      check: codex --version
+      version: ">=0.0.0"
+```
+
+`--codex-autonomous`는 Codex Light를 agent-style full-permissions mode로 구성합니다. 사용자가 보수적인 권한 설정을 원하면 dock 정책상 `--no-codex-autonomous`로 바꾸세요.
 
 ## 현재 MVP에서 피해야 할 것
 

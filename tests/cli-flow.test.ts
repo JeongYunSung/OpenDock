@@ -859,12 +859,7 @@ echo "${command} 1.2.3"
     const reports = await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
       runLifecycle(manifest, "doctor", project),
     );
-    expect(reports.map((report) => report.status)).toEqual([
-      "Ready",
-      "Ready",
-      "Ready",
-      "Ready",
-    ]);
+    expect(reports.map((report) => report.status)).toEqual(["Ready", "Ready", "Ready", "Ready"]);
   });
 
   it("rejects invalid dock references", () => {

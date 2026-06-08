@@ -53,7 +53,7 @@ OpenDock はそれをレビュー済みの dock に変えます。
 - **小さなコマンド面**: install、update、diagnose、log 確認、auth、deploy に
   絞ります。
 - **自動化対応**: lifecycle step は shell pipeline を許可せず、`git`,
-  `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `oma`
+  `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `oma`, `omx`
   などの許可済みコマンドを実行できます。
 
 ## クイックスタート
@@ -254,6 +254,8 @@ examples/
   codex/              # Codex CLI + project files example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
+  oh-my-codex/        # Oh My Codex example
+  oh-my-openagent/    # Oh My OpenAgent Codex Light example
 docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide

@@ -50,7 +50,7 @@ AI 작업공간 설정은 보통 일회성 shell 명령, 복사된 prompt 파일
   같은 update 정책을 직접 선언합니다.
 - **작은 명령 표면**: install, update, diagnose, log 확인, auth, deploy만 둡니다.
 - **자동화 준비**: lifecycle step은 shell pipeline 없이 `git`, `brew`,
-  `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `oma` 같은 허용된
+  `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `oma`, `omx` 같은 허용된
   명령을 실행할 수 있습니다.
 
 ## 빠른 시작
@@ -251,6 +251,8 @@ examples/
   codex/              # Codex CLI + project files example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
+  oh-my-codex/        # Oh My Codex example
+  oh-my-openagent/    # Oh My OpenAgent Codex Light example
 docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide

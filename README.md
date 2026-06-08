@@ -53,7 +53,7 @@ that into a reviewed dock:
 - **Small command surface**: install, update, diagnose, inspect logs, auth, and
   deploy.
 - **Automation-ready**: lifecycle steps can run allowed commands such as `git`,
-  `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, and `oma`
+  `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `oma`, and `omx`
   without allowing shell pipelines.
 
 ## Quick Start
@@ -254,6 +254,8 @@ examples/
   codex/              # Codex CLI + project files example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
+  oh-my-codex/        # Oh My Codex example
+  oh-my-openagent/    # Oh My OpenAgent Codex Light example
 docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide

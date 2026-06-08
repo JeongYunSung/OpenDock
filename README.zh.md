@@ -41,7 +41,7 @@ AI 工作区设置通常会变成一堆一次性 shell 命令、复制来的 pro
 - **默认走审核**：远程 dock 必须来自 OpenDock Hub 已批准的 metadata。
 - **保护已有文件**：每个文件声明自己的 update policy，例如 managed block、manual review 或 unique-line append。
 - **小命令面**：只保留 install、update、diagnose、查看 log、auth 和 deploy。
-- **适合自动化**：lifecycle step 可以运行 `git`、`brew`、`winget`、`npm`、`bun`、`pip`、`uv`、`codex`、`claude`、`oma` 等允许的命令，但不允许 shell pipeline。
+- **适合自动化**：lifecycle step 可以运行 `git`、`brew`、`winget`、`npm`、`bun`、`pip`、`uv`、`codex`、`claude`、`oma`、`omx` 等允许的命令，但不允许 shell pipeline。
 
 ## 快速开始
 
@@ -235,6 +235,8 @@ examples/
   codex/              # Codex CLI + project files example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
+  oh-my-codex/        # Oh My Codex example
+  oh-my-openagent/    # Oh My OpenAgent Codex Light example
 docs/plans/work/      # implementation plan and verification notes
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide
