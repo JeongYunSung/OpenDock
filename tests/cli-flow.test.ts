@@ -13,6 +13,7 @@ import {
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { PassThrough } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { c as createTar } from "tar";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -794,6 +795,59 @@ files:
     ).rejects.toThrow("OpenDock login failed: access_denied");
 
     expect(tokenStore.loadToken()).toBeUndefined();
+  });
+
+  it("prints a manual login url and rechecks waiting status from tty input", async () => {
+    const authRoot = await tempDir();
+    let callbackUri = "";
+    const messages: string[] = [];
+    const input = Object.assign(new PassThrough(), { isTTY: true });
+    const output = Object.assign(new PassThrough(), { isTTY: true });
+    const tokenStore = new TokenStore(authRoot);
+
+    const login = performBrowserLogin({
+      input,
+      output,
+      tokenStore,
+      write: (message) => messages.push(message),
+      client: {
+        async startCliLogin(redirectUri: string) {
+          callbackUri = redirectUri;
+          return {
+            authUrl: "https://accounts.example.test/login",
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+          };
+        },
+        async exchangeCliCode(code: string) {
+          expect(code).toBe("oc_tty_code");
+          return {
+            token: "od_tty_token",
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+            user: {
+              id: "22222222-2222-2222-2222-222222222222",
+              email: "designer@example.com",
+            },
+          };
+        },
+      },
+      openBrowser: async () => {
+        throw new Error("browser unavailable");
+      },
+    });
+
+    await waitFor(() => messages.some((message) => message.includes("Open this URL")));
+    input.write("\n");
+    await waitFor(() => messages.includes("Still waiting for browser login..."));
+
+    const response = await fetch(`${callbackUri}?code=oc_tty_code`);
+    expect(response.status).toBe(200);
+
+    const token = await login;
+    expect(token.token).toBe("od_tty_token");
+    expect(tokenStore.loadToken()).toBe("od_tty_token");
+    expect(messages.join("\n")).toContain(
+      "Open this URL to continue: https://accounts.example.test/login",
+    );
   });
 
   it("supports opendock v1 files lifecycle and doctor checks", async () => {
@@ -1932,6 +1986,17 @@ async function withEnv<T>(env: NodeJS.ProcessEnv, callback: () => Promise<T> | T
       }
     }
   }
+}
+
+async function waitFor(predicate: () => boolean, timeoutMs = 1_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (predicate()) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  throw new Error("timed out waiting for condition");
 }
 
 function runCli(cwd: string, env: NodeJS.ProcessEnv, args: string[]) {
