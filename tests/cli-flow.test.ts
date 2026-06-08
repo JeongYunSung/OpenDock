@@ -738,10 +738,13 @@ lifecycle:
     for (const ref of refs) {
       const resolved = resolveLocalDock(join(repoRoot, "examples"), DockRef.parse(ref));
       expect(resolved.manifest.id).toBe(ref);
+      expect(resolved.manifest.summary).not.toBe("");
+      expect(resolved.manifest.readme).toBe("DOCK.md");
+      expect(existsSync(join(resolved.root, resolved.manifest.readme ?? ""))).toBe(true);
     }
   });
 
-  it("keeps the bundled oma example as dock-yml only", () => {
+  it("keeps the bundled oma example without project file payload", () => {
     const resolved = resolveLocalDock(join(repoRoot, "examples"), DockRef.parse("opendock/oma"));
 
     expect(resolved.manifest.files).toHaveLength(0);
@@ -1475,6 +1478,23 @@ lifecycle:
     const result = runCli(project, { HOME: home }, ["deploy", "codex"]);
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("not logged in");
+  });
+
+  it("rejects deploy readme paths outside the dock directory", async () => {
+    const project = await tempDir();
+    const home = await tempDir();
+    writeFileSync(
+      join(project, "dock.yml"),
+      "opendock: 1\nid: test/readme\nreadme: ../OUTSIDE.md\n",
+    );
+    writeFileSync(join(project, "..", "OUTSIDE.md"), "# Outside\n");
+    const login = runCli(project, { HOME: home }, ["auth", "login", "--token", "test-token"]);
+    expect(login.status).toBe(0);
+
+    const result = runCli(project, { HOME: home }, ["deploy", "test/readme"]);
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("manifest `readme` path must stay inside the dock directory");
   });
 
   it("reapplies newer dock versions", async () => {

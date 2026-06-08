@@ -1,6 +1,8 @@
 opendock: 1
 id: opendock/oma
 version: 0.1.0
+summary: Oh My Agent setup with interactive project bootstrap.
+readme: DOCK.md
 
 lifecycle:
   install:

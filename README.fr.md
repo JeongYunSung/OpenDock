@@ -140,6 +140,8 @@ détaillé de rédaction en coréen.
 opendock: 1
 id: opendock/codex
 version: 0.1.0
+summary: Codex CLI setup with managed workspace files.
+readme: DOCK.md
 
 files:
   - from: files/.agents

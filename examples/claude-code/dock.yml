@@ -1,6 +1,8 @@
 opendock: 1
 id: opendock/claude-code
 version: 0.1.0
+summary: Claude Code CLI setup for project workspaces.
+readme: DOCK.md
 
 lifecycle:
   install:
