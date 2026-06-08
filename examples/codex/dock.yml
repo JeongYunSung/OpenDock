@@ -3,6 +3,7 @@ id: opendock/codex
 version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
+logo: logo.png
 
 files:
   - from: files/DESIGN.md

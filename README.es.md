@@ -132,7 +132,9 @@ moverse dentro de `1.5.x`.
 ## Formato Del Dock
 
 Un dock es un directorio con un archivo `dock.yml` y cualquier archivo o
-directorio fuente referenciado por `files[].from`.
+directorio fuente referenciado por `files[].from`. Las rutas opcionales
+`readme` y `logo` se envían a OpenDock Registry como metadata de catálogo; no se
+instalan salvo que también estén listadas en `files`.
 Consulta [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) para la guía
 detallada de autoría en coreano.
 
@@ -142,6 +144,7 @@ id: opendock/codex
 version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
+logo: logo.png
 
 files:
   - from: files/.agents

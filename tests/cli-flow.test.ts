@@ -617,7 +617,16 @@ files:
 
     try {
       const response = await new OpenDockRegistryClient().submitDock(
-        { dock_name: "codex", manifest: "opendock: 1", readme_markdown: "# Dock docs\n" },
+        {
+          dock_name: "codex",
+          manifest: "opendock: 1",
+          readme_markdown: "# Dock docs\n",
+          logo: {
+            filename: "logo.png",
+            content_type: "image/png",
+            data_base64: "iVBORw0KGgo=",
+          },
+        },
         "token",
       );
       expect(response.status).toBe("pending");
@@ -631,6 +640,11 @@ files:
         dock_name: "codex",
         manifest: "opendock: 1",
         readme_markdown: "# Dock docs\n",
+        logo: {
+          filename: "logo.png",
+          content_type: "image/png",
+          data_base64: "iVBORw0KGgo=",
+        },
       }),
     ]);
   });
@@ -741,6 +755,11 @@ lifecycle:
       expect(resolved.manifest.summary).not.toBe("");
       expect(resolved.manifest.readme).toBe("DOCK.md");
       expect(existsSync(join(resolved.root, resolved.manifest.readme ?? ""))).toBe(true);
+      expect(resolved.manifest.logo).toMatch(/^logo\.(jpg|png)$/);
+      const logoPath = join(resolved.root, resolved.manifest.logo ?? "");
+      expect(existsSync(logoPath)).toBe(true);
+      expect(statSync(logoPath).size).toBeGreaterThan(0);
+      expect(statSync(logoPath).size).toBeLessThanOrEqual(512 * 1024);
     }
   });
 
@@ -1495,6 +1514,36 @@ lifecycle:
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("manifest `readme` path must stay inside the dock directory");
+  });
+
+  it("rejects unsupported deploy logo extensions before submission", async () => {
+    const project = await tempDir();
+    const home = await tempDir();
+    writeFileSync(join(project, "dock.yml"), "opendock: 1\nid: test/logo\nlogo: logo.svg\n");
+    writeFileSync(join(project, "logo.svg"), "<svg />\n");
+    const login = runCli(project, { HOME: home }, ["auth", "login", "--token", "test-token"]);
+    expect(login.status).toBe(0);
+
+    const result = runCli(project, { HOME: home }, ["deploy", "test/logo"]);
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(
+      "manifest `logo` path must point to a png, jpg, jpeg, or webp file",
+    );
+  });
+
+  it("rejects deploy logo bytes that do not match the extension", async () => {
+    const project = await tempDir();
+    const home = await tempDir();
+    writeFileSync(join(project, "dock.yml"), "opendock: 1\nid: test/logo\nlogo: logo.png\n");
+    writeFileSync(join(project, "logo.png"), "not really png\n");
+    const login = runCli(project, { HOME: home }, ["auth", "login", "--token", "test-token"]);
+    expect(login.status).toBe(0);
+
+    const result = runCli(project, { HOME: home }, ["deploy", "test/logo"]);
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("manifest `logo` bytes do not match file type");
   });
 
   it("reapplies newer dock versions", async () => {

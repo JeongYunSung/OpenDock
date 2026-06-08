@@ -3,6 +3,7 @@ id: opendock/git
 version: 0.1.0
 summary: Git setup and project initialization.
 readme: DOCK.md
+logo: logo.png
 
 lifecycle:
   install:

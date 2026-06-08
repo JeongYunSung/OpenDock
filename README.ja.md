@@ -129,7 +129,9 @@ selector を再利用するため、`@1.5.2` でインストールした dock �
 ## Dock Format
 
 dock は `dock.yml` ファイルと、`files[].from` で参照される source ファイルまたは
-ディレクトリを含むディレクトリです。詳細は [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
+ディレクトリを含むディレクトリです。任意の `readme` と `logo` パスは
+OpenDock Registry の catalog metadata として提出され、`files` にも宣言しない限り
+インストールされません。詳細は [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
 の韓国語 authoring guide を参照してください。
 
 ```yaml
@@ -138,6 +140,7 @@ id: opendock/codex
 version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
+logo: logo.png
 
 files:
   - from: files/.agents

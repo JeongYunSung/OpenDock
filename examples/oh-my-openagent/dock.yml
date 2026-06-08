@@ -3,6 +3,7 @@ id: opendock/oh-my-openagent
 version: 0.2.0
 summary: Oh My OpenAgent light setup for Codex workflows.
 readme: DOCK.md
+logo: logo.png
 
 lifecycle:
   install:

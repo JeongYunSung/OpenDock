@@ -128,7 +128,9 @@ an install pinned to `@1.5.2` stays pinned while `@1.5` can move within `1.5.x`.
 ## Dock Format
 
 A dock is a directory with a `dock.yml` file and any source files or directories
-referenced by `files[].from`.
+referenced by `files[].from`. Optional `readme` and `logo` paths are submitted
+to OpenDock Registry as catalog metadata; they are not installed unless also
+listed in `files`.
 See [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) for the detailed
 Korean authoring guide.
 
@@ -138,6 +140,7 @@ id: opendock/codex
 version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
+logo: logo.png
 
 files:
   - from: files/.agents

@@ -1,22 +1,23 @@
 #!/usr/bin/env node
 import { readFileSync, realpathSync, statSync } from "node:fs";
-import { isAbsolute, join, relative, resolve } from "node:path";
+import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { stdin as input, stdout as output } from "node:process";
 import { createInterface } from "node:readline/promises";
 import { Command } from "commander";
 import { TokenStore } from "./auth.js";
 import { bootstrapMac } from "./bootstrap.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
-import { DockRef, parseManifestFile } from "./dock.js";
+import { type DockManifest, DockRef, parseManifestFile } from "./dock.js";
 import { type InstallReport, install } from "./installer.js";
 import { readProjectLogs } from "./logging.js";
 import { detectPlatform, type OpenDockPlatform, parsePlatform } from "./platform.js";
 import { hasProjectState, lockDocks, readLock } from "./project.js";
-import { OpenDockRegistryClient } from "./registry.js";
+import { OpenDockRegistryClient, type SubmissionLogoRequest } from "./registry.js";
 import { resolveDock } from "./resolver.js";
 import { runLifecycle } from "./runner.js";
 
 const maxDeployReadmeBytes = 64 * 1024;
+const maxDeployLogoBytes = 512 * 1024;
 
 export async function run(argv = process.argv): Promise<void> {
   const program = new Command();
@@ -139,12 +140,16 @@ export async function run(argv = process.argv): Promise<void> {
         throw new Error("not logged in; run `opendock auth login` first");
       }
       const manifest = readFileSync("dock.yml", "utf8");
-      const readmeMarkdown = readDeployReadme(process.cwd(), "dock.yml");
+      const parsedManifest = parseManifestFile(join(process.cwd(), "dock.yml"));
+      const readmeMarkdown = readDeployReadme(process.cwd(), parsedManifest);
+      const logo = readDeployLogo(process.cwd(), parsedManifest);
       const client = new OpenDockRegistryClient();
-      const request =
-        readmeMarkdown === undefined
-          ? { dock_name: dockName, manifest }
-          : { dock_name: dockName, manifest, readme_markdown: readmeMarkdown };
+      const request = {
+        dock_name: dockName,
+        manifest,
+        ...(readmeMarkdown === undefined ? {} : { readme_markdown: readmeMarkdown }),
+        ...(logo === undefined ? {} : { logo }),
+      };
       const response = await client.submitDock(request, token);
       console.log(`Submitted ${dockName} for review: ${response.id} (${response.status})`);
     });
@@ -152,15 +157,44 @@ export async function run(argv = process.argv): Promise<void> {
   await program.parseAsync(argv);
 }
 
-function readDeployReadme(projectDir: string, manifestPath: string): string | undefined {
-  const manifest = parseManifestFile(join(projectDir, manifestPath));
+function readDeployReadme(projectDir: string, manifest: DockManifest): string | undefined {
   if (manifest.readme === undefined) {
     return undefined;
   }
+  return readFileSync(
+    resolveDeployFile(projectDir, manifest.readme, "readme", maxDeployReadmeBytes),
+    "utf8",
+  );
+}
 
-  const relativePath = manifest.readme.trim();
+function readDeployLogo(
+  projectDir: string,
+  manifest: DockManifest,
+): SubmissionLogoRequest | undefined {
+  if (manifest.logo === undefined) {
+    return undefined;
+  }
+
+  const logoPath = resolveDeployFile(projectDir, manifest.logo, "logo", maxDeployLogoBytes);
+  const logoBytes = readFileSync(logoPath);
+  const contentType = logoContentType(logoPath);
+  validateLogoSignature(contentType, logoBytes);
+  return {
+    filename: basename(logoPath),
+    content_type: contentType,
+    data_base64: logoBytes.toString("base64"),
+  };
+}
+
+function resolveDeployFile(
+  projectDir: string,
+  relativePathValue: string,
+  manifestField: "logo" | "readme",
+  maxBytes: number,
+): string {
+  const relativePath = relativePathValue.trim();
   if (relativePath === "") {
-    throw new Error("manifest `readme` path cannot be empty");
+    throw new Error(`manifest \`${manifestField}\` path cannot be empty`);
   }
 
   const root = realpathSync(projectDir);
@@ -173,18 +207,53 @@ function readDeployReadme(projectDir: string, manifestPath: string): string | un
     rel.startsWith(`..${"/"}`) ||
     rel.startsWith(`..${"\\"}`)
   ) {
-    throw new Error("manifest `readme` path must stay inside the dock directory");
+    throw new Error(`manifest \`${manifestField}\` path must stay inside the dock directory`);
   }
 
   const stats = statSync(realCandidate);
   if (!stats.isFile()) {
-    throw new Error("manifest `readme` path must point to a file");
+    throw new Error(`manifest \`${manifestField}\` path must point to a file`);
   }
-  if (stats.size > maxDeployReadmeBytes) {
-    throw new Error(`manifest \`readme\` file exceeds ${maxDeployReadmeBytes} bytes`);
+  if (manifestField === "logo" && stats.size === 0) {
+    throw new Error("manifest `logo` file cannot be empty");
+  }
+  if (stats.size > maxBytes) {
+    throw new Error(`manifest \`${manifestField}\` file exceeds ${maxBytes} bytes`);
   }
 
-  return readFileSync(realCandidate, "utf8");
+  return realCandidate;
+}
+
+function logoContentType(path: string): SubmissionLogoRequest["content_type"] {
+  switch (extname(path).toLowerCase()) {
+    case ".png":
+      return "image/png";
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".webp":
+      return "image/webp";
+    default:
+      throw new Error("manifest `logo` path must point to a png, jpg, jpeg, or webp file");
+  }
+}
+
+function validateLogoSignature(
+  contentType: SubmissionLogoRequest["content_type"],
+  bytes: Buffer,
+): void {
+  const valid =
+    contentType === "image/png"
+      ? bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+      : contentType === "image/jpeg"
+        ? bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
+        : bytes.length >= 12 &&
+          bytes.subarray(0, 4).toString("ascii") === "RIFF" &&
+          bytes.subarray(8, 12).toString("ascii") === "WEBP";
+
+  if (!valid) {
+    throw new Error("manifest `logo` bytes do not match file type");
+  }
 }
 
 function resolveCliPlatform(value: string | undefined): OpenDockPlatform {

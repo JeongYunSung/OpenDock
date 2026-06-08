@@ -19,11 +19,27 @@ export interface SubmissionRequest {
   dock_name: string;
   manifest: string;
   readme_markdown?: string;
+  logo?: SubmissionLogoRequest;
+}
+
+export interface SubmissionLogoRequest {
+  filename: string;
+  content_type: "image/png" | "image/jpeg" | "image/webp";
+  data_base64: string;
 }
 
 export interface SubmissionResponse {
   id: string;
   status: string;
+  logo?: SubmissionLogoMetadataResponse | null;
+}
+
+export interface SubmissionLogoMetadataResponse {
+  filename: string;
+  storageBackend: string;
+  path: string;
+  contentType: string;
+  sizeBytes: number;
 }
 
 export class OpenDockRegistryClient {

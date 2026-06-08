@@ -115,7 +115,9 @@ OpenDock 会把用户请求的 selector 和解析出的 exact version 都写入
 ## Dock 格式
 
 dock 是一个目录，包含 `dock.yml` 文件，以及 `files[].from` 引用的 source 文件或目录。
-详见 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) 中的韩语编写指南。
+可选的 `readme` 和 `logo` 路径会作为 OpenDock Registry catalog metadata 提交；
+除非也列在 `files` 中，否则不会安装到项目里。详见 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
+中的韩语编写指南。
 
 ```yaml
 opendock: 1
@@ -123,6 +125,7 @@ id: opendock/codex
 version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
+logo: logo.png
 
 files:
   - from: files/.agents

@@ -126,8 +126,9 @@ OpenDock은 요청한 selector와 resolve된 exact version을 모두
 ## Dock 형식
 
 dock은 `dock.yml` 파일과 `files[].from`에서 참조하는 source 파일 또는 디렉터리로
-구성된 디렉터리입니다. 자세한 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
-한국어 가이드를 참고하세요.
+구성된 디렉터리입니다. 선택 사항인 `readme`와 `logo` 경로는 OpenDock Registry
+catalog 메타데이터로 제출되며, `files`에도 선언하지 않으면 설치되지는 않습니다.
+자세한 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) 한국어 가이드를 참고하세요.
 
 ```yaml
 opendock: 1
@@ -135,6 +136,7 @@ id: opendock/codex
 version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
+logo: logo.png
 
 files:
   - from: files/.agents

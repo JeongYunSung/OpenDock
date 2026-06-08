@@ -23,6 +23,7 @@ dock은 보통 다음 구조를 가집니다.
 my-dock/
   dock.yml
   DOCK.md
+  logo.png
   files/
     README.md
     DESIGN.md
@@ -38,6 +39,7 @@ id: opendock/codex
 version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
+logo: logo.png
 
 files:
   - from: files/README.md
@@ -47,7 +49,7 @@ files:
 
 `from` 경로는 dock root 기준입니다. `files/`는 예시에서 쓰는 권장 폴더명일 뿐입니다. OpenDock은 `files` 목록에 명시된 항목만 프로젝트에 적용합니다.
 
-`readme`는 설치 대상 프로젝트에 복사되는 파일이 아닙니다. `opendock deploy`가 Registry review submission을 만들 때 읽어 catalog 상세 페이지 본문으로 함께 제출하는 Markdown 파일 경로입니다. GitHub의 repository `README.md`처럼 사람이 dock을 이해하기 위한 문서를 `DOCK.md` 같은 별도 파일에 둘 때 사용합니다.
+`readme`와 `logo`는 설치 대상 프로젝트에 복사되는 파일이 아닙니다. `opendock deploy`가 Registry review submission을 만들 때 catalog 상세 페이지용 메타데이터로 함께 제출합니다. GitHub의 repository `README.md`처럼 사람이 dock을 이해하기 위한 문서는 `DOCK.md`, catalog 목록에서 보일 대표 이미지는 `logo.png` 같은 별도 파일에 둡니다.
 
 현재 형식은 `opendock: 1`입니다. 새 dock은 `opendock`, `files`, `lifecycle` 중심으로 작성하세요.
 
@@ -59,6 +61,7 @@ id: opendock/codex
 version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
+logo: logo.png
 
 files:
   - from: files/.agents
@@ -141,6 +144,7 @@ lifecycle:
 | `name` | 선택 | 사람이 읽는 이름입니다. 현재 실행 로직에는 영향이 없습니다. |
 | `summary` | 선택 | 설명 문자열입니다. 기본값은 빈 문자열입니다. |
 | `readme` | 선택 | Registry 제출 시 catalog 상세 본문으로 함께 전송할 Markdown 파일 경로입니다. 예: `DOCK.md`. |
+| `logo` | 선택 | Registry 제출 시 catalog 대표 이미지로 함께 전송할 PNG, JPEG, WebP 파일 경로입니다. 예: `logo.png`. |
 | `version` | 권장 필수 | dock 버전입니다. 없으면 `0.1.0`으로 해석됩니다. |
 | `files` | 선택 | 프로젝트에 적용할 파일 목록입니다. |
 | `lifecycle` | 선택 | `install`, `update`, `doctor` 단계별 명령 목록입니다. |
@@ -161,6 +165,24 @@ readme: DOCK.md
 - `readme` 파일은 설치 대상 프로젝트에 자동 복사되지 않습니다. 프로젝트에 복사하려면 `files`에도 별도로 선언해야 합니다.
 - 경로는 dock root 안에 있어야 하며 절대 경로나 `../`로 바깥을 가리키면 deploy가 실패합니다.
 - 현재 CLI는 deploy 시 최대 65536 bytes까지 제출합니다.
+
+### logo
+
+`logo`는 dock package 내부의 이미지 파일을 가리키는 안전한 상대 경로입니다.
+
+```yaml
+logo: logo.png
+```
+
+`opendock deploy`는 이 경로가 있으면 파일을 읽어 Registry submission의 `logo` 객체로 포함합니다. 전송 형식은 `filename`, `content_type`, `data_base64`이며 Registry가 승인한 버전의 catalog 목록과 상세 화면에서 대표 이미지로 사용할 수 있습니다.
+
+주의할 점은 다음과 같습니다.
+
+- `logo` 파일은 설치 대상 프로젝트에 자동 복사되지 않습니다. 프로젝트에 복사하려면 `files`에도 별도로 선언해야 합니다.
+- 경로는 dock root 안에 있어야 하며 절대 경로나 `../`로 바깥을 가리키면 deploy가 실패합니다.
+- 허용 타입은 PNG, JPEG, WebP입니다. SVG는 실행 가능한 내용을 담을 수 있어 제출하지 않습니다.
+- 현재 CLI는 deploy 시 최대 524288 bytes까지 제출합니다.
+- CLI는 확장자와 실제 파일 바이트가 맞는지 확인합니다. 예를 들어 `logo.png`가 실제 PNG가 아니면 deploy가 실패합니다.
 
 ### id 규칙
 
@@ -651,7 +673,7 @@ OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 �
 
 배포 흐름은 다음 원칙을 따릅니다.
 
-1. dock author가 `dock.yml`과 `files[].from`에 명시한 source 파일을 작성합니다.
+1. dock author가 `dock.yml`, `readme`, `logo`, `files[].from`에 명시한 source 파일을 작성합니다.
 2. `opendock auth login`으로 로그인합니다.
 3. `opendock deploy <dock-name>`으로 제출합니다.
 4. OpenDock Registry 검토를 통과한 dock만 Registry에서 설치될 수 있습니다.
@@ -665,20 +687,21 @@ OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 �
 1. `id`가 설치 명령의 `owner/name`과 같은가?
 2. `opendock: 1`을 선언했는가?
 3. `version`을 명시했는가?
-4. 모든 `files[].from` 파일이 실제로 존재하는가?
-5. `files[].to`가 프로젝트 루트 기준 안전한 상대 경로인가?
-6. 기존 사용자 파일에 맞는 update 정책을 골랐는가?
-7. `install` step은 `check`로 idempotent하게 설계했는가?
-8. 버전이 중요한 도구에는 `version` 범위를 넣었는가?
-9. `update`는 최초 설치가 아니라 유지보수 관점으로 작성했는가?
-10. `doctor`는 상태 점검만 하도록 구성했는가?
-11. 대화형 명령은 `interactive: user` 또는 승인된 `interactive: scripted`로 명시했는가?
-12. shell operator, pipe, redirect, command substitution을 쓰지 않았는가?
-13. 한 step에 여러 명령을 묶지 않고 단계별로 나눴는가?
-14. 오래 걸리는 명령에는 `timeout_ms`를 넣었는가?
-15. macOS/Windows 명령이 다르면 같은 `id` 아래 `platforms`로 묶었는가?
-16. 공통 step에 `brew`, `winget`처럼 특정 OS 전용 package manager를 넣지 않았는가?
-17. `repair`, `messages`, `copy`, `needs`에 자동 동작을 기대하지 않았는가?
+4. `readme`와 `logo` 경로가 있다면 dock root 안의 실제 파일인가?
+5. 모든 `files[].from` 파일이 실제로 존재하는가?
+6. `files[].to`가 프로젝트 루트 기준 안전한 상대 경로인가?
+7. 기존 사용자 파일에 맞는 update 정책을 골랐는가?
+8. `install` step은 `check`로 idempotent하게 설계했는가?
+9. 버전이 중요한 도구에는 `version` 범위를 넣었는가?
+10. `update`는 최초 설치가 아니라 유지보수 관점으로 작성했는가?
+11. `doctor`는 상태 점검만 하도록 구성했는가?
+12. 대화형 명령은 `interactive: user` 또는 승인된 `interactive: scripted`로 명시했는가?
+13. shell operator, pipe, redirect, command substitution을 쓰지 않았는가?
+14. 한 step에 여러 명령을 묶지 않고 단계별로 나눴는가?
+15. 오래 걸리는 명령에는 `timeout_ms`를 넣었는가?
+16. macOS/Windows 명령이 다르면 같은 `id` 아래 `platforms`로 묶었는가?
+17. 공통 step에 `brew`, `winget`처럼 특정 OS 전용 package manager를 넣지 않았는가?
+18. `repair`, `messages`, `copy`, `needs`에 자동 동작을 기대하지 않았는가?
 
 ## 추천 작성 순서
 
