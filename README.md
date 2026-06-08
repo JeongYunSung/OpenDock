@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./assets/opendock-logo-512.png" alt="OpenDock logo" width="112">
+
 # OpenDock
 
 **Approved docks for AI workspaces.**
