@@ -11,7 +11,7 @@ export interface ProjectFileRecord {
   update?: FileUpdatePolicy;
 }
 
-export interface AppliedDock {
+interface AppliedDock {
   id: string;
   name: string;
   platform?: OpenDockPlatform;

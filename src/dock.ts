@@ -60,19 +60,19 @@ export class DockRef {
   }
 }
 
-export const copySpecSchema = z.object({
+const copySpecSchema = z.object({
   from: z.string(),
   to: z.string(),
 });
 
-export const fileUpdatePolicySchema = z.enum([
+const fileUpdatePolicySchema = z.enum([
   "append_unique",
   "managed_block",
   "managed_file",
   "manual_review",
 ]);
 
-export const fileSpecSchema = z.object({
+const fileSpecSchema = z.object({
   from: z.string(),
   to: z.string(),
   update: fileUpdatePolicySchema,
@@ -102,7 +102,7 @@ const interactiveInputSchema = z.union([
   }),
 ]);
 
-export const interactiveSchema = z.union([
+const interactiveSchema = z.union([
   z.literal("user"),
   z.literal("scripted"),
   z.object({
@@ -142,12 +142,12 @@ const lifecyclePlatformsSchema = z
     }
   });
 
-export const lifecycleStepSchema = lifecycleStepFieldsSchema.extend({
+const lifecycleStepSchema = lifecycleStepFieldsSchema.extend({
   id: z.string(),
   platforms: lifecyclePlatformsSchema,
 });
 
-export const lifecycleSchema = z.object({
+const lifecycleSchema = z.object({
   install: z.array(lifecycleStepSchema).default([]),
   update: z.array(lifecycleStepSchema).default([]),
   doctor: z.array(lifecycleStepSchema).default([]),

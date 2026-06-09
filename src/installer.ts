@@ -467,12 +467,7 @@ function appendUniqueLines(path: string, addition: string): void {
   writeFileSync(path, `${output}\n`);
 }
 
-export function upsertManagedBlock(
-  path: string,
-  dockId: string,
-  relPath: string,
-  content: string,
-): void {
+function upsertManagedBlock(path: string, dockId: string, relPath: string, content: string): void {
   const existing = existsSync(path) ? readFileSync(path, "utf8") : "";
   const start = `<!-- OPENDOCK:START ${dockId}:${relPath} -->`;
   const end = `<!-- OPENDOCK:END ${dockId}:${relPath} -->`;

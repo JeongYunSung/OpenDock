@@ -68,7 +68,7 @@ const platformAllowedCommands: Record<OpenDockPlatform, Set<string>> = {
   windows: new Set(["winget"]),
 };
 
-export function getLifecycleSteps(
+function getLifecycleSteps(
   manifest: DockManifest,
   phase: LifecyclePhase,
   options: LifecycleOptions = {},

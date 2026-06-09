@@ -19,7 +19,7 @@ export interface BrowserLoginOptions {
   output?: NodeJS.WritableStream;
 }
 
-export interface BrowserLoginClient {
+interface BrowserLoginClient {
   startCliLogin(redirectUri: string): Promise<{ authUrl: string; expiresAt: string }>;
   exchangeCliCode(code: string): Promise<CliTokenResponse>;
 }
@@ -62,7 +62,7 @@ export async function performBrowserLogin(
   }
 }
 
-export async function openSystemBrowser(url: string): Promise<void> {
+async function openSystemBrowser(url: string): Promise<void> {
   const command =
     process.platform === "darwin" ? "open" : process.platform === "win32" ? "cmd" : "xdg-open";
   const args =

@@ -11,10 +11,6 @@ export interface DockVersionResponse {
   signature: string;
 }
 
-export interface LoginResponse {
-  token: string;
-}
-
 export interface CliLoginStartResponse {
   authUrl: string;
   expiresAt: string;
@@ -53,7 +49,7 @@ export interface SubmissionResponse {
   logo?: SubmissionLogoMetadataResponse | null;
 }
 
-export interface SubmissionLogoMetadataResponse {
+interface SubmissionLogoMetadataResponse {
   filename: string;
   storageBackend: string;
   path: string;
@@ -120,15 +116,6 @@ export class OpenDockRegistryClient {
     await this.requestJson<void>(url, {
       method: "POST",
       headers: { authorization: `Bearer ${token}` },
-    });
-  }
-
-  async loginWithToken(token: string): Promise<LoginResponse> {
-    const url = `${this.apiBase()}/auth/login`;
-    return this.requestJson<LoginResponse>(url, {
-      method: "POST",
-      body: JSON.stringify({ token }),
-      headers: { "content-type": "application/json" },
     });
   }
 

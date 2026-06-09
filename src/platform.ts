@@ -1,4 +1,4 @@
-export const SUPPORTED_PLATFORMS = ["macos", "windows", "linux"] as const;
+const SUPPORTED_PLATFORMS = ["macos", "windows", "linux"] as const;
 
 export type OpenDockPlatform = (typeof SUPPORTED_PLATFORMS)[number];
 

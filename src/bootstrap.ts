@@ -3,8 +3,7 @@ import { existsSync } from "node:fs";
 import { stdin as defaultInput, stdout as defaultOutput } from "node:process";
 import { createInterface } from "node:readline/promises";
 
-export const HOMEBREW_INSTALL_URL =
-  "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh";
+const HOMEBREW_INSTALL_URL = "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh";
 export const HOMEBREW_INSTALL_COMMAND = `/bin/bash -c "$(curl -fsSL ${HOMEBREW_INSTALL_URL})"`;
 
 const homebrewInstallProgram = "/bin/bash";
@@ -21,7 +20,7 @@ export interface BootstrapMacOptions {
   write?: (message: string) => void;
 }
 
-export type BootstrapMacStatus = "ready" | "installed" | "path-missing" | "skipped";
+type BootstrapMacStatus = "ready" | "installed" | "path-missing" | "skipped";
 
 export interface BootstrapMacReport {
   status: BootstrapMacStatus;
