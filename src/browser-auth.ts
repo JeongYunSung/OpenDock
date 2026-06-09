@@ -6,7 +6,7 @@ import { createInterface } from "node:readline";
 import { TokenStore } from "./auth.js";
 import { type CliTokenResponse, OpenDockRegistryClient } from "./registry.js";
 
-const loginTimeoutMs = 2 * 60 * 1000;
+const loginTimeoutMs = 5 * 60 * 1000;
 const callbackHost = "127.0.0.1";
 
 export interface BrowserLoginOptions {
