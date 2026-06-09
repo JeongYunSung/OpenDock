@@ -18,14 +18,21 @@ import { fileURLToPath } from "node:url";
 import { c as createTar, t as listTar } from "tar";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { TokenStore } from "../src/auth.js";
-import { bootstrapMac, HOMEBREW_INSTALL_COMMAND } from "../src/bootstrap.js";
+import { bootstrapMac } from "../src/bootstrap.js";
 import { performBrowserLogin } from "../src/browser-auth.js";
-import { DockRef, dockManifestSchema, versionSatisfiesSelector } from "../src/dock.js";
-import { type DockResolver, install } from "../src/installer.js";
+import {
+  assertVersionSatisfiesSelector,
+  type DockManifest,
+  DockRef,
+  type LifecycleStep,
+  parseManifestFile,
+  validateManifestFor,
+} from "../src/dock.js";
+import { install } from "../src/installer.js";
 import { lockDocks, readLock, readProjectFile } from "../src/project.js";
 import { OpenDockRegistryClient } from "../src/registry.js";
-import { resolveDock, resolveLocalDock } from "../src/resolver.js";
-import { runCommand, runLifecycle } from "../src/runner.js";
+import { type ResolvedDock, resolveDock } from "../src/resolver.js";
+import { runLifecycle } from "../src/runner.js";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const builtCli = join(repoRoot, "bin", "opendock.js");
@@ -1045,7 +1052,7 @@ lifecycle:
       "opendock/oh-my-openagent",
     ];
     for (const ref of refs) {
-      const resolved = resolveLocalDock(
+      const resolved = resolveLocalDockForTest(
         join(repoRoot, "examples"),
         DockRef.parse(`${ref}@local-dev`),
       );
@@ -1062,7 +1069,7 @@ lifecycle:
   });
 
   it("keeps the bundled oma example without project file payload", () => {
-    const resolved = resolveLocalDock(
+    const resolved = resolveLocalDockForTest(
       join(repoRoot, "examples"),
       DockRef.parse("opendock/oma@local-dev"),
     );
@@ -1136,7 +1143,7 @@ lifecycle:
           });
           expect(updateReport.dockId).toBe(ref);
 
-          const resolved = resolveLocalDock(examplesRoot, dockRef);
+          const resolved = resolveLocalDockForTest(examplesRoot, dockRef);
           const doctor = await runLifecycle(resolved.manifest, "doctor", project, { platform });
           expect(doctor.map((report) => report.status)).toEqual(doctor.map(() => "Ready" as const));
         }
@@ -1173,7 +1180,7 @@ lifecycle:
     }
     expect(lockedPlatform).toBe("windows");
 
-    const resolved = resolveLocalDock(docks, DockRef.parse("test/platforms@1.0.0"));
+    const resolved = resolveLocalDockForTest(docks, DockRef.parse("test/platforms@1.0.0"));
     const doctor = await runLifecycle(resolved.manifest, "doctor", project, {
       platform: lockedPlatform,
     });
@@ -1217,7 +1224,7 @@ lifecycle:
     expect(existsSync(join(project, "README.md"))).toBe(false);
     expect(existsSync(join(project, ".opendock", "dock.lock.yml"))).toBe(false);
 
-    const macOnly = dockManifestSchema.parse({
+    const macOnly = testManifest({
       opendock: 1,
       id: "test/mac-only",
       lifecycle: {
@@ -1237,7 +1244,7 @@ lifecycle:
       runLifecycle(macOnly, "install", project, { platform: "windows" }),
     ).rejects.toThrow("does not support platform `windows`");
 
-    const unsafeWindows = dockManifestSchema.parse({
+    const unsafeWindows = testManifest({
       opendock: 1,
       id: "test/unsafe-windows",
       lifecycle: {
@@ -1305,13 +1312,31 @@ echo "Downloading oh-my-agent"
     const bin = await tempDir();
 
     await expect(
-      runCommand('node -e "console.log(process.env.PRIVATE_SECRET_TOKEN)"', project),
+      runLifecycle(
+        testManifest({
+          id: "test/inline-interpreter",
+          lifecycle: {
+            install: [
+              {
+                id: "inline",
+                run: 'node -e "console.log(process.env.PRIVATE_SECRET_TOKEN)"',
+              },
+            ],
+          },
+        }),
+        "install",
+        project,
+      ),
     ).rejects.toThrow("not allowed for OpenDock lifecycle");
 
     writeExecutable(
       join(bin, "oma"),
       `#!/bin/sh
-echo "token=\${PRIVATE_SECRET_TOKEN:-missing}"
+if [ -n "$PRIVATE_SECRET_TOKEN" ]; then
+  echo "token-present"
+  exit 1
+fi
+echo "token=missing"
 `,
     );
 
@@ -1321,9 +1346,17 @@ echo "token=\${PRIVATE_SECRET_TOKEN:-missing}"
         PATH: `${bin}:${process.env.PATH ?? ""}`,
       },
       async () => {
-        const result = await runCommand("oma --version", project);
-        expect(result.success).toBe(true);
-        expect(result.stdout).toContain("token=missing");
+        const reports = await runLifecycle(
+          testManifest({
+            id: "test/scrubbed-env",
+            lifecycle: {
+              doctor: [{ id: "oma", run: "oma --version" }],
+            },
+          }),
+          "doctor",
+          project,
+        );
+        expect(reports).toMatchObject([{ id: "oma", status: "Ready" }]);
       },
     );
   });
@@ -1355,7 +1388,7 @@ files:
         operation: "install",
         resolve: () => ({
           checksum: "local",
-          manifest: dockManifestSchema.parse({
+          manifest: testManifest({
             files: [
               {
                 from: "files/README.md",
@@ -1510,18 +1543,23 @@ files: []
       ).rejects.toThrow("interactive step requires a TTY");
 
       const userScript = join(project, "run-user-interactive.ts");
+      const userManifest = testManifest({
+        id: "test/interactive-user",
+        lifecycle: {
+          install: [
+            {
+              id: "interactive-user",
+              interactive: "user",
+              run: "oma",
+              timeout_ms: 5000,
+            },
+          ],
+        },
+      });
       writeFileSync(
         userScript,
-        `import { runCommand } from ${JSON.stringify(join(repoRoot, "src", "runner.ts"))};
-const result = await runCommand("oma", process.cwd(), {
-  interactive: "user",
-  live: true,
-  timeoutMs: 5000,
-});
-if (!result.success) {
-  console.error(result.stderr);
-  process.exit(1);
-}
+        `import { runLifecycle } from ${JSON.stringify(join(repoRoot, "src", "runner.ts"))};
+await runLifecycle(${JSON.stringify(userManifest)}, "install", process.cwd());
 `,
       );
       const userInstall = runCliInPty(project, ["bun", userScript], {
@@ -1561,7 +1599,7 @@ if (!result.success) {
       resolve: localResolver(docks),
     });
 
-    const resolved = resolveLocalDock(docks, DockRef.parse("test/timeout@1.0.0"));
+    const resolved = resolveLocalDockForTest(docks, DockRef.parse("test/timeout@1.0.0"));
     const doctor = await withEnv(
       { _VOLTA_TOOL_RECURSION: "1", PATH: `${bin}:${process.env.PATH ?? ""}` },
       () => runLifecycle(resolved.manifest, "doctor", project),
@@ -1582,7 +1620,7 @@ echo "${command} 1.2.3"
       );
     }
 
-    const manifest = dockManifestSchema.parse({
+    const manifest = testManifest({
       opendock: 1,
       id: "test/ai-tools",
       lifecycle: {
@@ -1619,9 +1657,9 @@ unsupported_field: true
 `,
     );
 
-    expect(() => resolveLocalDock(docks, DockRef.parse("test/unsupported-field@1.0.0"))).toThrow(
-      "failed to parse",
-    );
+    expect(() =>
+      resolveLocalDockForTest(docks, DockRef.parse("test/unsupported-field@1.0.0")),
+    ).toThrow("failed to parse");
   });
 
   it("rejects manifests without opendock version", async () => {
@@ -1638,9 +1676,9 @@ lifecycle:
 `,
     );
 
-    expect(() => resolveLocalDock(docks, DockRef.parse("test/missing-opendock@1.0.0"))).toThrow(
-      "must declare `opendock: 1`",
-    );
+    expect(() =>
+      resolveLocalDockForTest(docks, DockRef.parse("test/missing-opendock@1.0.0")),
+    ).toThrow("must declare `opendock: 1`");
   });
 
   it("parses exact dock version selectors", () => {
@@ -1674,7 +1712,7 @@ lifecycle:
       ["designer-build", "designer-build"],
     ];
     for (const [version, selector] of accepted) {
-      expect(versionSatisfiesSelector(version, selector)).toBe(true);
+      expect(() => assertVersionSatisfiesSelector(version, selector)).not.toThrow();
     }
 
     const rejected: Array<[string, string]> = [
@@ -1683,7 +1721,9 @@ lifecycle:
       ["designer-build", "designer"],
     ];
     for (const [version, selector] of rejected) {
-      expect(versionSatisfiesSelector(version, selector)).toBe(false);
+      expect(() => assertVersionSatisfiesSelector(version, selector)).toThrow(
+        `resolved version ${version} does not satisfy selector ${selector}`,
+      );
     }
   });
 
@@ -1749,7 +1789,7 @@ lifecycle:
     });
     expect(skipped.status).toBe("skipped");
     expect(skippedInstallRuns).toBe(0);
-    expect(skippedMessages.join("\n")).toContain(HOMEBREW_INSTALL_COMMAND);
+    expect(skippedMessages.join("\n")).toContain("raw.githubusercontent.com/Homebrew/install");
 
     let installRuns = 0;
     const installed = await bootstrapMac({
@@ -2039,8 +2079,98 @@ async function tempDir(): Promise<string> {
   return path;
 }
 
-function localResolver(root: string): DockResolver {
-  return (dockRef) => resolveLocalDock(root, dockRef);
+type TestLifecyclePlatformStep = Partial<Omit<LifecycleStep, "id" | "platforms">>;
+type TestLifecycleStep = Partial<Omit<LifecycleStep, "platforms">> & {
+  id: string;
+  platforms?: Record<string, TestLifecyclePlatformStep>;
+};
+type TestManifestInput = Omit<Partial<DockManifest>, "lifecycle"> & {
+  id: string;
+  lifecycle?: {
+    doctor?: TestLifecycleStep[];
+    install?: TestLifecycleStep[];
+    update?: TestLifecycleStep[];
+  };
+};
+
+function testManifest(input: TestManifestInput): DockManifest {
+  const manifest: DockManifest = {
+    files: input.files ?? [],
+    id: input.id,
+    lifecycle: {
+      doctor: testLifecycleSteps(input.lifecycle?.doctor),
+      install: testLifecycleSteps(input.lifecycle?.install),
+      update: testLifecycleSteps(input.lifecycle?.update),
+    },
+    needs: input.needs ?? {},
+    summary: input.summary ?? "",
+  };
+  if (input.logo !== undefined) {
+    manifest.logo = input.logo;
+  }
+  if (input.name !== undefined) {
+    manifest.name = input.name;
+  }
+  if (input.opendock !== undefined) {
+    manifest.opendock = input.opendock;
+  }
+  if (input.readme !== undefined) {
+    manifest.readme = input.readme;
+  }
+  return manifest;
+}
+
+function testLifecycleSteps(steps: TestLifecycleStep[] | undefined): LifecycleStep[] {
+  return (steps ?? []).map((step) => ({
+    ...step,
+    messages: step.messages ?? {},
+    platforms: Object.fromEntries(
+      Object.entries(step.platforms ?? {}).map(([platform, override]) => [
+        platform,
+        {
+          messages: override.messages ?? {},
+          ...override,
+        },
+      ]),
+    ),
+  })) as LifecycleStep[];
+}
+
+function localResolver(root: string): NonNullable<Parameters<typeof install>[0]["resolve"]> {
+  return (dockRef) => resolveLocalDockForTest(root, dockRef);
+}
+
+function resolveLocalDockForTest(docksRoot: string, dockRef: DockRef): ResolvedDock {
+  const dockRoot = [
+    join(docksRoot, dockRef.owner, dockRef.name),
+    join(docksRoot, `${dockRef.owner}__${dockRef.name}`),
+    join(docksRoot, dockRef.name),
+  ].find((candidate) => existsSync(join(candidate, "dock.yml")));
+  if (!dockRoot) {
+    throw new Error(`dock \`${dockRef}\` was not found in ${docksRoot}`);
+  }
+
+  const manifest = parseManifestFile(join(dockRoot, "dock.yml"));
+  validateManifestFor(manifest, dockRef);
+
+  return {
+    checksum: `test-local:${sha256Bytes(Buffer.from(dockRoot))}`,
+    manifest,
+    root: dockRoot,
+    signature: "local-dev",
+    version: localDockVersionForTest(dockRoot, dockRef),
+  };
+}
+
+function localDockVersionForTest(dockRoot: string, dockRef: DockRef): string {
+  const sidecar = join(dockRoot, ".opendock-version");
+  if (existsSync(sidecar)) {
+    const version = readFileSync(sidecar, "utf8").trim();
+    if (version !== "") {
+      return version;
+    }
+  }
+  return dockRef.requested();
 }
 
 async function createRemoteDockArchive(root: string, owner: string, name: string): Promise<Buffer> {

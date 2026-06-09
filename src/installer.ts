@@ -21,9 +21,9 @@ import { type ProjectFileRecord, readProjectFile, writeProjectState } from "./pr
 import { fileChecksum, isFile, type ResolvedDock, resolveDock, textChecksum } from "./resolver.js";
 import { assertManifestSupportsPlatform, runLifecycle, type StepReport } from "./runner.js";
 
-export type DockResolver = (dockRef: DockRef) => Promise<ResolvedDock> | ResolvedDock;
+type DockResolver = (dockRef: DockRef) => Promise<ResolvedDock> | ResolvedDock;
 
-export interface InstallOptions {
+interface InstallOptions {
   dockRef: DockRef;
   force?: boolean;
   projectDir: string;

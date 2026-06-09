@@ -39,7 +39,7 @@ export interface SubmissionRequest {
   logo?: SubmissionLogoRequest;
 }
 
-export interface SubmissionArchiveRequest {
+interface SubmissionArchiveRequest {
   filename: string;
   content_type: "application/gzip";
   data_base64: string;

@@ -161,7 +161,7 @@ const lifecycleSchema = z.object({
   doctor: z.array(lifecycleStepSchema).default([]),
 });
 
-export const dockManifestSchema = z
+const dockManifestSchema = z
   .object({
     opendock: z.number().optional(),
     id: z.string(),
@@ -210,7 +210,7 @@ export function assertVersionSatisfiesSelector(version: string, selector: string
   throw new Error(`resolved version ${version} does not satisfy selector ${selector}`);
 }
 
-export function versionSatisfiesSelector(version: string, selector: string): boolean {
+function versionSatisfiesSelector(version: string, selector: string): boolean {
   return version === selector;
 }
 

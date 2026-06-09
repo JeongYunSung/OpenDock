@@ -229,7 +229,7 @@ async function runDoctorSteps(
   return reports;
 }
 
-export async function runCommand(
+async function runCommand(
   command: string,
   cwd: string,
   options: CommandOptions = {},

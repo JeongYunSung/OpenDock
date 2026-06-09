@@ -4,7 +4,7 @@ import { stdin as defaultInput, stdout as defaultOutput } from "node:process";
 import { createInterface } from "node:readline/promises";
 
 const HOMEBREW_INSTALL_URL = "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh";
-export const HOMEBREW_INSTALL_COMMAND = `/bin/bash -c "$(curl -fsSL ${HOMEBREW_INSTALL_URL})"`;
+const HOMEBREW_INSTALL_COMMAND = `/bin/bash -c "$(curl -fsSL ${HOMEBREW_INSTALL_URL})"`;
 
 const homebrewInstallProgram = "/bin/bash";
 const homebrewInstallArgs = ["-c", `$(curl -fsSL ${HOMEBREW_INSTALL_URL})`];

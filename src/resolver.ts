@@ -10,7 +10,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, relative, resolve, sep } from "node:path";
+import { join, resolve, sep } from "node:path";
 import { x as extractTar } from "tar";
 import {
   assertVersionSatisfiesSelector,
@@ -38,25 +38,6 @@ export interface ResolvedDock {
 
 export async function resolveDock(dockRef: DockRef): Promise<ResolvedDock> {
   return resolveRemoteDock(dockRef);
-}
-
-export function resolveLocalDock(docksRoot: string, dockRef: DockRef): ResolvedDock {
-  const dockRoot = findLocalDockRoot(docksRoot, dockRef);
-  if (!dockRoot) {
-    throw new Error(`dock \`${dockRef}\` was not found in ${docksRoot}`);
-  }
-
-  const manifestPath = join(dockRoot, "dock.yml");
-  const manifest = parseManifestFile(manifestPath);
-  validateManifestFor(manifest, dockRef);
-
-  return {
-    manifest,
-    version: localDockVersion(dockRoot, dockRef),
-    root: dockRoot,
-    checksum: checksumDir(dockRoot),
-    signature: "local-dev",
-  };
 }
 
 async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
@@ -129,56 +110,6 @@ async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
     checksum: actualChecksum,
     signature: metadata.signature,
   };
-}
-
-function localDockVersion(dockRoot: string, dockRef: DockRef): string {
-  const sidecar = join(dockRoot, ".opendock-version");
-  if (existsSync(sidecar)) {
-    const version = readFileSync(sidecar, "utf8").trim();
-    if (version !== "") {
-      return version;
-    }
-  }
-  return dockRef.requested();
-}
-
-function findLocalDockRoot(docksRoot: string, dockRef: DockRef): string | undefined {
-  const candidates = [
-    join(docksRoot, dockRef.owner, dockRef.name),
-    join(docksRoot, `${dockRef.owner}__${dockRef.name}`),
-    join(docksRoot, dockRef.name),
-  ];
-  return candidates.find((candidate) => existsSync(join(candidate, "dock.yml")));
-}
-
-function checksumDir(root: string): string {
-  const files = listFiles(root).sort();
-  const hash = createHash("sha256");
-  for (const file of files) {
-    const rel = normalizePath(relative(root, file));
-    hash.update(rel);
-    hash.update(Buffer.from([0]));
-    hash.update(readFileSync(file));
-    hash.update(Buffer.from([0]));
-  }
-  return hash.digest("hex");
-}
-
-function listFiles(root: string): string[] {
-  const entries = readdirSync(root, { withFileTypes: true });
-  const files: string[] = [];
-  for (const entry of entries) {
-    const path = join(root, entry.name);
-    if (entry.isSymbolicLink()) {
-      throw new Error(`dock cache entry cannot be a symlink: ${path}`);
-    }
-    if (entry.isDirectory()) {
-      files.push(...listFiles(path));
-    } else if (entry.isFile()) {
-      files.push(path);
-    }
-  }
-  return files;
 }
 
 function sha256Bytes(bytes: Buffer): string {
@@ -256,10 +187,6 @@ function isSafeArchiveEntry(
   }
 
   return true;
-}
-
-function normalizePath(path: string): string {
-  return path.split(sep).join("/");
 }
 
 export function fileChecksum(path: string): string {
