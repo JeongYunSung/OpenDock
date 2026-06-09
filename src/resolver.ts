@@ -22,7 +22,7 @@ import {
 import { cacheRoot } from "./paths.js";
 import { OpenDockRegistryClient } from "./registry.js";
 
-const safeResolvedVersionPattern = /^v?\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
+const safeResolvedVersionPattern = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,79}$/;
 const allowedArchiveEntryTypes = new Set(["File", "OldFile", "Directory"]);
 const maxExtractedArchiveBytes = 100 * 1024 * 1024;
 const maxExtractedEntryBytes = 25 * 1024 * 1024;

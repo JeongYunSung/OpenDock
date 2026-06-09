@@ -99,7 +99,7 @@ README.md
 | Command | Purpose |
 |---|---|
 | `opendock install opendock/codex` | Install an approved dock into the current directory. |
-| `opendock install opendock/codex@1.5` | Install using a version selector. |
+| `opendock install opendock/codex@designer-build` | Install using an exact version identifier. |
 | `opendock install opendock/codex --platform windows` | Install using an explicit target platform instead of auto-detecting the host. |
 | `opendock install opendock/codex --force` | Force OpenDock-managed file changes during install. |
 | `opendock update` | Re-resolve installed docks and apply newer versions safely using the locked platform. |
@@ -117,20 +117,21 @@ README.md
 `opendock auth status` or `opendock auth logout` to inspect or clear it.
 Run `opendock bootstrap mac` first when Homebrew is missing.
 
-Dock references support npm-style version selectors:
+Dock references support `latest` or an exact version identifier. OpenDock does
+not sort versions as semantic versions; Registry `latest` is the most recently
+approved non-revoked version.
 
 ```text
-owner/name          -> latest
-owner/name@latest   -> latest
-owner/name@1        -> latest approved 1.x
-owner/name@1.5      -> latest approved 1.5.x
-owner/name@1.5.2    -> exact approved version
-owner/name@v1       -> latest approved 1.x
+owner/name                  -> latest
+owner/name@latest           -> latest
+owner/name@1.2.0            -> exact approved version identifier
+owner/name@designer-build   -> exact approved version identifier
 ```
 
 OpenDock stores both the requested selector and the resolved exact version in
 `.opendock/dock.lock.yml`. `opendock update` reuses the requested selector, so
-an install pinned to `@1.5.2` stays pinned while `@1.5` can move within `1.5.x`.
+an install pinned to an exact identifier stays pinned while `latest` can move
+when a newer version is approved.
 
 ## Dock Format
 

@@ -447,7 +447,7 @@ files:
     expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/latest"]);
   });
 
-  it("resolves remote docks using explicit version selectors", async () => {
+  it("resolves remote docks using exact version selectors", async () => {
     const urls: string[] = [];
     const originalFetch = globalThis.fetch;
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
@@ -456,17 +456,19 @@ files:
     }) as typeof fetch;
 
     try {
-      await expect(resolveDock(DockRef.parse("test/harness@1.5"))).rejects.toThrow(
-        "https://registry.opendock.app/v1/docks/test/harness/versions/1.5",
+      await expect(resolveDock(DockRef.parse("test/harness@designer-build"))).rejects.toThrow(
+        "https://registry.opendock.app/v1/docks/test/harness/versions/designer-build",
       );
     } finally {
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/1.5"]);
+    expect(urls).toEqual([
+      "https://registry.opendock.app/v1/docks/test/harness/versions/designer-build",
+    ]);
   });
 
-  it("installs remote docks with selector metadata and stores the requested selector", async () => {
+  it("installs remote docks with exact selector metadata and stores the requested selector", async () => {
     const project = await tempDir();
     const home = await tempDir();
     const archiveRoot = await tempDir();
@@ -477,7 +479,7 @@ files:
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
       const url = String(input);
       urls.push(url);
-      if (url === "https://registry.opendock.app/v1/docks/test/remote/versions/1.5") {
+      if (url === "https://registry.opendock.app/v1/docks/test/remote/versions/1.5.2") {
         return new Response(
           JSON.stringify({
             approved: true,
@@ -498,7 +500,7 @@ files:
     try {
       const report = await withEnv({ HOME: home }, () =>
         install({
-          dockRef: DockRef.parse("test/remote@1.5"),
+          dockRef: DockRef.parse("test/remote@1.5.2"),
           projectDir: project,
           runCommands: true,
           operation: "install",
@@ -512,7 +514,7 @@ files:
     }
 
     expect(urls).toEqual([
-      "https://registry.opendock.app/v1/docks/test/remote/versions/1.5",
+      "https://registry.opendock.app/v1/docks/test/remote/versions/1.5.2",
       "https://registry.opendock.app/v1/docks/test/remote/versions/1.5.2/download",
     ]);
     expect(readFileSync(join(project, "README.md"), "utf8")).toBe("# Remote Dock\n");
@@ -523,7 +525,7 @@ files:
     expect(lockedDock).toMatchObject({
       checksum,
       id: "test/remote",
-      requested: "1.5",
+      requested: "1.5.2",
       signature: "registry-signature",
       version: "1.5.2",
     });
@@ -1559,47 +1561,37 @@ lifecycle:
     expect(DockRef.parse("opendock/codex").requested()).toBe("latest");
     expect(DockRef.parse("opendock/codex@latest").requested()).toBe("latest");
     expect(DockRef.parse("opendock/codex@1").requested()).toBe("1");
-    expect(DockRef.parse("opendock/codex@v1").requested()).toBe("v1");
     expect(DockRef.parse("opendock/codex@1.5").requested()).toBe("1.5");
-    expect(DockRef.parse("opendock/codex@v1.5").requested()).toBe("v1.5");
+    expect(DockRef.parse("opendock/codex@designer-build").requested()).toBe("designer-build");
     expect(DockRef.parse("opendock/codex@1.5.2").requested()).toBe("1.5.2");
     expect(DockRef.parse("opendock/codex@1.5.2").id()).toBe("opendock/codex");
     expect(DockRef.parse("opendock/codex@1.5.2").toString()).toBe("opendock/codex@1.5.2");
     expect(() => DockRef.parse("opendock/codex@")).toThrow("selector cannot be empty");
-    expect(() => DockRef.parse("opendock/codex@beta")).toThrow(
-      "dock version selector must be latest",
-    );
     expect(() => DockRef.parse("opendock/codex@1@2")).toThrow(
       "may contain only one version selector",
     );
-    expect(() => DockRef.parse("opendock/codex@v")).toThrow("dock version selector must be latest");
-    expect(() => DockRef.parse("opendock/codex@latest.1")).toThrow(
+    expect(() => DockRef.parse("opendock/codex@bad/version")).toThrow(
       "dock version selector must be latest",
     );
-    expect(() => DockRef.parse("opendock/codex@1.5.2.3")).toThrow(
+    expect(() => DockRef.parse("opendock/codex@bad*version")).toThrow(
       "dock version selector must be latest",
     );
   });
 
-  it("matches resolved dock versions against major minor exact and v-prefixed selectors", () => {
+  it("matches resolved dock versions against latest or exact selectors", () => {
     const accepted: Array<[string, string]> = [
       ["1.5.2", "latest"],
-      ["1.5.2", "1"],
-      ["1.5.2", "v1"],
-      ["1.5.2", "1.5"],
-      ["v1.5.2", "v1.5"],
       ["1.5.2", "1.5.2"],
+      ["designer-build", "designer-build"],
     ];
     for (const [version, selector] of accepted) {
       expect(versionSatisfiesSelector(version, selector)).toBe(true);
     }
 
     const rejected: Array<[string, string]> = [
-      ["2.0.0", "1"],
-      ["1.6.0", "1.5"],
+      ["1.5.2", "1.5"],
       ["1.5.3", "1.5.2"],
-      ["1.5", "1.5"],
-      ["1.5.x", "1.5"],
+      ["designer-build", "designer"],
     ];
     for (const [version, selector] of rejected) {
       expect(versionSatisfiesSelector(version, selector)).toBe(false);
@@ -1799,7 +1791,7 @@ lifecycle:
     writeTestDock(docks, "test", "demo", "1.5.2", "# Version\n");
 
     await install({
-      dockRef: DockRef.parse("test/demo@1.5"),
+      dockRef: DockRef.parse("test/demo@1.5.2"),
       projectDir: project,
       runCommands: true,
       operation: "install",
@@ -1808,11 +1800,11 @@ lifecycle:
     });
 
     const projectState = readFileSync(join(project, ".opendock", "project.yml"), "utf8");
-    expect(projectState).toMatch(/requested: "?1\.5"?/);
+    expect(projectState).toMatch(/requested: "?1\.5\.2"?/);
     const lockState = readFileSync(join(project, ".opendock", "dock.lock.yml"), "utf8");
-    expect(lockState).toMatch(/requested: "?1\.5"?/);
+    expect(lockState).toMatch(/requested: "?1\.5\.2"?/);
     expect(lockState).toContain("version: 1.5.2");
-    expect(lockDocks(readLock(project))[0]?.requested).toBe("1.5");
+    expect(lockDocks(readLock(project))[0]?.requested).toBe("1.5.2");
   });
 
   it("rejects resolved versions outside the requested selector", async () => {

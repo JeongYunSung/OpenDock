@@ -186,7 +186,7 @@ logo: logo.png
 
 ### id 규칙
 
-`id`는 `owner/name` 형식이어야 합니다. 설치 명령에서는 뒤에 `@selector`를 붙여 버전 범위를 고를 수 있지만, `dock.yml`의 `id`에는 selector를 쓰지 않습니다.
+`id`는 `owner/name` 형식이어야 합니다. 설치 명령에서는 뒤에 `@selector`를 붙여 `latest` 또는 정확한 version identifier를 고를 수 있지만, `dock.yml`의 `id`에는 selector를 쓰지 않습니다.
 
 ```yaml
 id: opendock/codex
@@ -207,27 +207,25 @@ id: opendock/codex/designer
 
 ### 버전 selector
 
-설치할 때는 npm처럼 `@` 뒤에 selector를 붙일 수 있습니다.
+설치할 때는 `@` 뒤에 selector를 붙일 수 있습니다. OpenDock은 version을 semantic version으로 정렬하지 않고, Registry의 `latest`는 가장 최근에 승인된 non-revoked version입니다.
 
 ```bash
 opendock install opendock/codex
 opendock install opendock/codex@latest
-opendock install opendock/codex@1
-opendock install opendock/codex@1.5
 opendock install opendock/codex@1.5.2
-opendock install opendock/codex@v1
+opendock install opendock/codex@designer-build
 ```
 
-selector가 없으면 `latest`로 해석합니다. `1`은 최신 `1.x`, `1.5`는 최신 `1.5.x`, `1.5.2`는 exact version 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 selector와 Registry가 돌려준 exact version을 함께 기록합니다.
+selector가 없으면 `latest`로 해석합니다. `1.5.2`나 `designer-build`는 exact version identifier 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 selector와 Registry가 돌려준 exact version을 함께 기록합니다.
 
 ```yaml
 docks:
   - id: opendock/codex
-    requested: 1.5
+    requested: latest
     version: 1.5.2
 ```
 
-`opendock update`는 lock의 `requested`를 다시 사용합니다. 즉 `@1.5`로 설치한 dock은 `1.5.x` 안에서만 움직이고, `@1.5.2`처럼 exact version으로 설치한 dock은 update에서도 고정됩니다.
+`opendock update`는 lock의 `requested`를 다시 사용합니다. 즉 `latest`로 설치한 dock은 새로운 version이 승인되면 이동할 수 있고, `@1.5.2`처럼 exact version으로 설치한 dock은 update에서도 고정됩니다.
 
 ## files 작성법
 

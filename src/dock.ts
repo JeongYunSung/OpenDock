@@ -4,7 +4,7 @@ import { z } from "zod";
 import { isOpenDockPlatform } from "./platform.js";
 
 const safeSegmentPattern = /^[A-Za-z0-9._-]+$/;
-const versionSelectorPattern = /^(latest|v?\d+(?:\.\d+){0,2})$/;
+const versionSelectorPattern = /^(latest|[A-Za-z0-9][A-Za-z0-9._+-]{0,79})$/;
 
 export class DockRef {
   constructor(
@@ -23,9 +23,7 @@ export class DockRef {
       throw new Error("dock version selector cannot be empty");
     }
     if (!isSafeVersionSelector(selector)) {
-      throw new Error(
-        "dock version selector must be latest, a major version, a minor version, or an exact version",
-      );
+      throw new Error("dock version selector must be latest or an exact version identifier");
     }
 
     const parts = namePart.split("/");
@@ -209,19 +207,7 @@ export function versionSatisfiesSelector(version: string, selector: string): boo
   if (selector === "latest") {
     return true;
   }
-
-  const normalizedVersion = version.startsWith("v") ? version.slice(1) : version;
-  const normalizedSelector = selector.startsWith("v") ? selector.slice(1) : selector;
-  const versionParts = normalizedVersion.split(".");
-  const selectorParts = normalizedSelector.split(".");
-
-  if (versionParts.length < 3 || !versionParts.every(isNumericPart)) {
-    return false;
-  }
-  if (!selectorParts.every(isNumericPart)) {
-    return false;
-  }
-  return selectorParts.every((part, index) => versionParts[index] === part);
+  return version === selector;
 }
 
 function isSafeSegment(value: string): boolean {
@@ -233,8 +219,4 @@ function isSafeSegment(value: string): boolean {
 
 function isSafeVersionSelector(value: string): boolean {
   return versionSelectorPattern.test(value);
-}
-
-function isNumericPart(value: string): boolean {
-  return /^\d+$/.test(value);
 }

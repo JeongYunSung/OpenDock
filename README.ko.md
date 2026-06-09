@@ -94,7 +94,7 @@ README.md
 | 명령어 | 역할 |
 |---|---|
 | `opendock install opendock/codex` | 현재 디렉터리에 승인된 dock을 설치합니다. |
-| `opendock install opendock/codex@1.5` | version selector를 사용해 설치합니다. |
+| `opendock install opendock/codex@designer-build` | 정확한 version identifier로 설치합니다. |
 | `opendock install opendock/codex --platform windows` | host 자동 감지 대신 명시한 target platform으로 설치합니다. |
 | `opendock install opendock/codex --force` | install 중 OpenDock 관리 파일 변경을 강제로 반영합니다. |
 | `opendock update` | 설치된 dock을 다시 resolve하고 lock에 기록된 platform 기준으로 안전하게 새 버전을 적용합니다. |
@@ -112,21 +112,21 @@ README.md
 로그인 상태 확인과 해제에는 `opendock auth status`, `opendock auth logout`을 사용하세요.
 Homebrew가 없다면 먼저 `opendock bootstrap mac`을 실행하세요.
 
-dock reference는 npm 스타일 version selector를 지원합니다.
+dock reference는 `latest` 또는 정확한 version identifier만 지원합니다.
+OpenDock은 version을 semantic version으로 정렬하지 않습니다. Registry의
+`latest`는 가장 최근에 승인된 non-revoked version입니다.
 
 ```text
-owner/name          -> latest
-owner/name@latest   -> latest
-owner/name@1        -> latest approved 1.x
-owner/name@1.5      -> latest approved 1.5.x
-owner/name@1.5.2    -> exact approved version
-owner/name@v1       -> latest approved 1.x
+owner/name                  -> latest
+owner/name@latest           -> latest
+owner/name@1.2.0            -> exact approved version identifier
+owner/name@designer-build   -> exact approved version identifier
 ```
 
 OpenDock은 요청한 selector와 resolve된 exact version을 모두
 `.opendock/dock.lock.yml`에 저장합니다. `opendock update`는 요청한 selector를
-재사용하므로 `@1.5.2`로 설치한 dock은 고정되고, `@1.5`는 `1.5.x` 범위 안에서
-이동할 수 있습니다.
+재사용하므로 정확한 identifier로 설치한 dock은 고정되고, `latest`는 더 새로운
+version이 승인되면 이동할 수 있습니다.
 
 ## Dock 형식
 
