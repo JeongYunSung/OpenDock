@@ -145,8 +145,9 @@ dock은 `dock.yml` 파일과 `files[].from`에서 참조하는 source 파일 또
 catalog 메타데이터로 제출되며, `files`에도 선언하지 않으면 설치되지는 않습니다.
 release version은 `dock.yml`에 선언하지 않습니다. 버전은
 `opendock deploy owner/name@version`의 deploy reference에서 옵니다. deploy는
-참조된 파일, `dock.yml`, `readme`, `logo`를 `.tgz` submission archive로 묶어
-검토용으로 제출합니다.
+`dock.yml`과 `files[].from`, lifecycle `copy.from`의 설치 payload만 `.tgz`
+submission archive로 묶어 검토용으로 제출합니다. `readme`와 `logo`는 `files`나
+`copy.from`에도 명시하지 않는 한 catalog metadata로만 제출됩니다.
 자세한 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) 한국어 가이드를 참고하세요.
 
 ```yaml

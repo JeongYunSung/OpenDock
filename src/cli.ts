@@ -391,12 +391,6 @@ async function createDeployArchive(
 
 function collectDeployArchiveEntries(projectDir: string, manifest: DockManifest): string[] {
   const roots = new Set<string>(["dock.yml"]);
-  if (manifest.readme !== undefined) {
-    roots.add(manifest.readme);
-  }
-  if (manifest.logo !== undefined) {
-    roots.add(manifest.logo);
-  }
   for (const file of manifest.files) {
     roots.add(file.from);
   }

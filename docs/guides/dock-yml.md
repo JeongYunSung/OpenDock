@@ -48,7 +48,7 @@ files:
 
 `from` 경로는 dock root 기준입니다. `files/`는 예시에서 쓰는 권장 폴더명일 뿐입니다. OpenDock은 `files` 목록에 명시된 항목만 프로젝트에 적용합니다.
 
-`readme`와 `logo`는 설치 대상 프로젝트에 복사되는 파일이 아닙니다. `opendock deploy`가 Registry review submission을 만들 때 catalog 상세 페이지용 메타데이터로 함께 제출합니다. GitHub의 repository `README.md`처럼 사람이 dock을 이해하기 위한 문서는 `DOCK.md`, catalog 목록에서 보일 대표 이미지는 `logo.png` 같은 별도 파일에 둡니다.
+`readme`와 `logo`는 설치 대상 프로젝트에 복사되는 파일이 아니고 `.tgz` 설치 archive에도 기본 포함되지 않습니다. `opendock deploy`가 Registry review submission을 만들 때 catalog 상세 페이지용 메타데이터로만 함께 제출합니다. GitHub의 repository `README.md`처럼 사람이 dock을 이해하기 위한 문서는 `DOCK.md`, catalog 목록에서 보일 대표 이미지는 `logo.png` 같은 별도 파일에 둡니다.
 
 현재 형식은 `opendock: 1`입니다. 새 dock은 `opendock`, `files`, `lifecycle` 중심으로 작성하세요.
 
@@ -234,7 +234,7 @@ opendock deploy opendock/codex@designer-build
 
 `opendock deploy opendock/codex`처럼 version이 없거나 `opendock deploy opendock/codex@latest`처럼 `latest`를 쓰면 실패합니다.
 
-deploy는 `dock.yml`, `readme`, `logo`, `files[].from`, lifecycle `copy.from`에 명시된 파일과 디렉터리를 `.tgz` archive로 묶어 Registry submission에 포함합니다. Registry 검토가 승인되면 그 archive가 해당 release의 다운로드 대상이 됩니다.
+deploy는 `dock.yml`, `files[].from`, lifecycle `copy.from`에 명시된 파일과 디렉터리를 `.tgz` archive로 묶어 Registry submission에 포함합니다. `readme`와 `logo`는 catalog metadata로 별도 제출되며 archive에는 기본 포함되지 않습니다. Registry 검토가 승인되면 archive가 해당 release의 다운로드 대상이 됩니다.
 
 ## files 작성법
 

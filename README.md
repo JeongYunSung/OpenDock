@@ -151,8 +151,10 @@ referenced by `files[].from`. Optional `readme` and `logo` paths are submitted
 to OpenDock Registry as catalog metadata; they are not installed unless also
 listed in `files`.
 Release versions are not declared in `dock.yml`; the version comes from
-`opendock deploy owner/name@version`. Deploy packages the referenced files,
-`dock.yml`, `readme`, and `logo` into a `.tgz` submission archive for review.
+`opendock deploy owner/name@version`. Deploy packages `dock.yml` and install
+payloads from `files[].from` and lifecycle `copy.from` into a `.tgz` submission
+archive for review. `readme` and `logo` are submitted as catalog metadata only
+unless they are also listed as install payloads.
 See [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) for the detailed
 Korean authoring guide.
 

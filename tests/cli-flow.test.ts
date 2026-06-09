@@ -15,7 +15,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { PassThrough } from "node:stream";
 import { fileURLToPath } from "node:url";
-import { c as createTar } from "tar";
+import { c as createTar, t as listTar } from "tar";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { TokenStore } from "../src/auth.js";
 import { bootstrapMac, HOMEBREW_INSTALL_COMMAND } from "../src/bootstrap.js";
@@ -665,6 +665,80 @@ files:
         },
       }),
     ]);
+  });
+
+  it("keeps readme and logo out of deploy archives while submitting catalog metadata", async () => {
+    const project = await tempDir();
+    const home = await tempDir();
+    const bodyPath = join(project, "submission-body.json");
+    const mockFetchPath = join(project, "mock-fetch.mjs");
+    const archivePath = join(project, "submitted.tgz");
+    mkdirSync(join(project, "files"), { recursive: true });
+    writeFileSync(
+      join(project, "dock.yml"),
+      `opendock: 1
+id: test/catalog-metadata
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/config.txt
+    to: config.txt
+    update: managed_file
+`,
+    );
+    writeFileSync(join(project, "DOCK.md"), "# Catalog docs\n");
+    writeFileSync(
+      join(project, "logo.png"),
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    );
+    writeFileSync(join(project, "files", "config.txt"), "installed payload\n");
+    writeFileSync(
+      mockFetchPath,
+      `import { writeFileSync } from "node:fs";
+
+globalThis.fetch = async (input, init = {}) => {
+  const url = String(input);
+  if (url === "https://registry.opendock.app/v1/docks/submissions") {
+    writeFileSync(process.env.OPENDOCK_CAPTURE_BODY, String(init.body ?? ""));
+    return new Response(JSON.stringify({ id: "submission-1", status: "pending" }), {
+      headers: { "content-type": "application/json" },
+      status: 200,
+    });
+  }
+  throw new Error(\`unexpected fetch \${url}\`);
+};
+`,
+    );
+    const login = runCli(project, { HOME: home }, ["auth", "login", "--token", "test-token"]);
+    expect(login.status).toBe(0);
+
+    const result = runCli(
+      project,
+      {
+        HOME: home,
+        NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ""} --import ${mockFetchPath}`.trim(),
+        OPENDOCK_CAPTURE_BODY: bodyPath,
+      },
+      ["deploy", "test/catalog-metadata@1.0.0"],
+    );
+
+    expect(result.status).toBe(0);
+    const request = JSON.parse(readFileSync(bodyPath, "utf8"));
+    expect(request.readme_markdown).toBe("# Catalog docs\n");
+    expect(request.logo).toMatchObject({
+      content_type: "image/png",
+      filename: "logo.png",
+    });
+    writeFileSync(archivePath, Buffer.from(request.archive.data_base64, "base64"));
+    const entries: string[] = [];
+    await listTar({
+      file: archivePath,
+      onentry: (entry) => entries.push(entry.path),
+    });
+    expect(entries).toContain("dock.yml");
+    expect(entries).toContain("files/config.txt");
+    expect(entries).not.toContain("DOCK.md");
+    expect(entries).not.toContain("logo.png");
   });
 
   it("uses the fixed OpenDock Registry for cli auth endpoints", async () => {
