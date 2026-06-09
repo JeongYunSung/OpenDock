@@ -4,26 +4,34 @@ import { z } from "zod";
 import { isOpenDockPlatform } from "./platform.js";
 
 const safeSegmentPattern = /^[A-Za-z0-9._-]+$/;
-const versionSelectorPattern = /^(latest|[A-Za-z0-9][A-Za-z0-9._+-]{0,79})$/;
+const versionSelectorPattern = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,79}$/;
 
 export class DockRef {
   constructor(
     readonly owner: string,
     readonly name: string,
-    readonly selector = "latest",
+    readonly selector: string,
   ) {}
 
   static parse(value: string): DockRef {
     const trimmed = value.trim();
-    const [namePart = "", selector = "latest", extraSelector] = trimmed.split("@");
+    const [namePart = "", selector, extraSelector] = trimmed.split("@");
     if (extraSelector !== undefined) {
       throw new Error("dock reference may contain only one version selector");
+    }
+    if (selector === undefined) {
+      throw new Error(
+        "dock reference must include an exact version identifier, e.g. owner/name@1.0.0",
+      );
     }
     if (selector.trim() === "") {
       throw new Error("dock version selector cannot be empty");
     }
+    if (selector === "latest") {
+      throw new Error("dock version selector must be an exact version identifier");
+    }
     if (!isSafeVersionSelector(selector)) {
-      throw new Error("dock version selector must be latest or an exact version identifier");
+      throw new Error("dock version selector must be an exact version identifier");
     }
 
     const parts = namePart.split("/");
@@ -56,7 +64,7 @@ export class DockRef {
   }
 
   toString(): string {
-    return this.selector === "latest" ? this.id() : `${this.id()}@${this.selector}`;
+    return `${this.id()}@${this.selector}`;
   }
 }
 
@@ -203,9 +211,6 @@ export function assertVersionSatisfiesSelector(version: string, selector: string
 }
 
 export function versionSatisfiesSelector(version: string, selector: string): boolean {
-  if (selector === "latest") {
-    return true;
-  }
   return version === selector;
 }
 

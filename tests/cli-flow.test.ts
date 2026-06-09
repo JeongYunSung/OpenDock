@@ -56,7 +56,7 @@ describe("opendock TypeScript CLI", () => {
 
     const resolver = localResolver(docks);
     const first = await install({
-      dockRef: DockRef.parse("test/harness"),
+      dockRef: DockRef.parse("test/harness@1.0.0"),
       projectDir: project,
       runCommands: true,
       operation: "install",
@@ -67,7 +67,7 @@ describe("opendock TypeScript CLI", () => {
     expect(first.version).toBe("1.0.0");
 
     const second = await install({
-      dockRef: DockRef.parse("test/harness"),
+      dockRef: DockRef.parse("test/harness@1.0.0"),
       projectDir: project,
       runCommands: true,
       operation: "install",
@@ -99,7 +99,7 @@ describe("opendock TypeScript CLI", () => {
     const docks = await tempDir();
     writeTestDock(docks, "test", "harness", "1.0.0", "# Starter README\n");
     await install({
-      dockRef: DockRef.parse("test/harness"),
+      dockRef: DockRef.parse("test/harness@1.0.0"),
       projectDir: project,
       runCommands: true,
       operation: "install",
@@ -125,7 +125,7 @@ describe("opendock TypeScript CLI", () => {
     });
 
     const report = await install({
-      dockRef: DockRef.parse("test/directory-managed"),
+      dockRef: DockRef.parse("test/directory-managed@1.0.0"),
       projectDir: project,
       runCommands: false,
       operation: "install",
@@ -164,7 +164,7 @@ describe("opendock TypeScript CLI", () => {
 
     await expect(
       install({
-        dockRef: DockRef.parse("test/directory-managed"),
+        dockRef: DockRef.parse("test/directory-managed@1.0.0"),
         projectDir: project,
         runCommands: false,
         operation: "install",
@@ -175,7 +175,7 @@ describe("opendock TypeScript CLI", () => {
     expect(existsSync(join(project, ".opendock", "project.yml"))).toBe(false);
 
     const report = await install({
-      dockRef: DockRef.parse("test/directory-managed"),
+      dockRef: DockRef.parse("test/directory-managed@1.0.0"),
       force: true,
       projectDir: project,
       runCommands: false,
@@ -198,7 +198,7 @@ describe("opendock TypeScript CLI", () => {
     const resolver = localResolver(docks);
 
     await install({
-      dockRef: DockRef.parse("test/directory-managed"),
+      dockRef: DockRef.parse("test/directory-managed@0.1.0"),
       projectDir: project,
       runCommands: false,
       operation: "install",
@@ -209,7 +209,7 @@ describe("opendock TypeScript CLI", () => {
       "machine.md": "version 0.3\n",
     });
     const report = await install({
-      dockRef: DockRef.parse("test/directory-managed"),
+      dockRef: DockRef.parse("test/directory-managed@0.3.0"),
       projectDir: project,
       runCommands: false,
       operation: "update",
@@ -236,7 +236,7 @@ describe("opendock TypeScript CLI", () => {
     const resolver = localResolver(docks);
 
     await install({
-      dockRef: DockRef.parse("test/directory-managed"),
+      dockRef: DockRef.parse("test/directory-managed@0.1.0"),
       projectDir: project,
       runCommands: false,
       operation: "install",
@@ -255,7 +255,7 @@ describe("opendock TypeScript CLI", () => {
 
     await expect(
       install({
-        dockRef: DockRef.parse("test/directory-managed"),
+        dockRef: DockRef.parse("test/directory-managed@0.3.0"),
         projectDir: project,
         runCommands: true,
         operation: "update",
@@ -283,7 +283,7 @@ describe("opendock TypeScript CLI", () => {
     const resolver = localResolver(docks);
 
     await install({
-      dockRef: DockRef.parse("test/directory-managed"),
+      dockRef: DockRef.parse("test/directory-managed@0.1.0"),
       projectDir: project,
       runCommands: false,
       operation: "install",
@@ -295,7 +295,7 @@ describe("opendock TypeScript CLI", () => {
       "machine.md": "version 0.3\n",
     });
     const report = await install({
-      dockRef: DockRef.parse("test/directory-managed"),
+      dockRef: DockRef.parse("test/directory-managed@0.3.0"),
       force: true,
       projectDir: project,
       runCommands: false,
@@ -323,7 +323,7 @@ describe("opendock TypeScript CLI", () => {
     const resolver = localResolver(docks);
 
     await install({
-      dockRef: DockRef.parse("test/directory-managed"),
+      dockRef: DockRef.parse("test/directory-managed@1.0.0"),
       projectDir: project,
       runCommands: false,
       operation: "install",
@@ -336,7 +336,7 @@ describe("opendock TypeScript CLI", () => {
     });
     await expect(
       install({
-        dockRef: DockRef.parse("test/directory-managed"),
+        dockRef: DockRef.parse("test/directory-managed@1.1.0"),
         projectDir: project,
         runCommands: false,
         operation: "update",
@@ -363,7 +363,7 @@ describe("opendock TypeScript CLI", () => {
     const resolver = localResolver(docks);
 
     await install({
-      dockRef: DockRef.parse("test/directory-managed"),
+      dockRef: DockRef.parse("test/directory-managed@1.0.0"),
       projectDir: project,
       runCommands: false,
       operation: "install",
@@ -375,7 +375,7 @@ describe("opendock TypeScript CLI", () => {
       "config.yml": "tool: new\n",
     });
     const report = await install({
-      dockRef: DockRef.parse("test/directory-managed"),
+      dockRef: DockRef.parse("test/directory-managed@1.1.0"),
       force: true,
       projectDir: project,
       runCommands: false,
@@ -418,7 +418,7 @@ files:
 
     await expect(
       install({
-        dockRef: DockRef.parse("test/duplicate-target"),
+        dockRef: DockRef.parse("test/duplicate-target@1.0.0"),
         projectDir: project,
         runCommands: false,
         operation: "install",
@@ -427,7 +427,7 @@ files:
     ).rejects.toThrow("duplicate file mapping target");
   });
 
-  it("uses the fixed OpenDock Registry endpoint for remote resolution", async () => {
+  it("uses the fixed OpenDock Registry endpoint for exact remote resolution", async () => {
     const urls: string[] = [];
     const originalFetch = globalThis.fetch;
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
@@ -436,14 +436,14 @@ files:
     }) as typeof fetch;
 
     try {
-      await expect(resolveDock(DockRef.parse("test/harness"))).rejects.toThrow(
-        "https://registry.opendock.app/v1/docks/test/harness/versions/latest",
+      await expect(resolveDock(DockRef.parse("test/harness@1.0.0"))).rejects.toThrow(
+        "https://registry.opendock.app/v1/docks/test/harness/versions/1.0.0",
       );
     } finally {
       globalThis.fetch = originalFetch;
     }
 
-    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/latest"]);
+    expect(urls).toEqual(["https://registry.opendock.app/v1/docks/test/harness/versions/1.0.0"]);
   });
 
   it("resolves remote docks using exact version selectors", async () => {
@@ -545,8 +545,8 @@ files:
       )) as typeof fetch;
 
     try {
-      await expect(resolveDock(DockRef.parse("test/unsafe-version"))).rejects.toThrow(
-        "unsafe dock version",
+      await expect(resolveDock(DockRef.parse("test/unsafe-version@1.0.0"))).rejects.toThrow(
+        "does not satisfy selector 1.0.0",
       );
     } finally {
       globalThis.fetch = originalFetch;
@@ -573,7 +573,7 @@ files:
     const checksum = sha256Bytes(archive);
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
       const url = String(input);
-      if (url === "https://registry.opendock.app/v1/docks/test/symlink-archive/versions/latest") {
+      if (url === "https://registry.opendock.app/v1/docks/test/symlink-archive/versions/1.0.0") {
         return new Response(
           JSON.stringify({
             approved: true,
@@ -592,7 +592,7 @@ files:
       await expect(
         withEnv({ HOME: home }, () =>
           install({
-            dockRef: DockRef.parse("test/symlink-archive"),
+            dockRef: DockRef.parse("test/symlink-archive@1.0.0"),
             projectDir: project,
             runCommands: false,
             operation: "install",
@@ -881,7 +881,7 @@ files:
     const resolver = localResolver(docks);
 
     const installReport = await install({
-      dockRef: DockRef.parse("test/modern"),
+      dockRef: DockRef.parse("test/modern@1.0.0"),
       projectDir: project,
       runCommands: true,
       operation: "install",
@@ -901,7 +901,7 @@ files:
     expect(gitignore).toContain(".DS_Store");
 
     const reinstall = await install({
-      dockRef: DockRef.parse("test/modern"),
+      dockRef: DockRef.parse("test/modern@1.0.0"),
       projectDir: project,
       runCommands: true,
       operation: "install",
@@ -913,13 +913,13 @@ files:
     expect(reinstalledDesign).toContain("# User Design");
     expect(reinstalledDesign.match(/OPENDOCK:START test\/modern:DESIGN\.md/g)).toHaveLength(1);
 
-    const resolved = await resolver(DockRef.parse("test/modern"));
+    const resolved = await resolver(DockRef.parse("test/modern@1.0.0"));
     const doctor = await runLifecycle(resolved.manifest, "doctor", project);
     expect(doctor.find((report) => report.id === "node")?.status).toBe("Ready");
     expect(doctor.find((report) => report.id === "fixture")?.status).toBe("Ready");
 
     await install({
-      dockRef: DockRef.parse("test/modern"),
+      dockRef: DockRef.parse("test/modern@1.0.0"),
       projectDir: project,
       runCommands: true,
       operation: "update",
@@ -947,7 +947,7 @@ lifecycle:
     );
 
     const report = await install({
-      dockRef: DockRef.parse("test/explicit-files"),
+      dockRef: DockRef.parse("test/explicit-files@1.0.0"),
       projectDir: project,
       runCommands: true,
       operation: "install",
@@ -971,7 +971,10 @@ lifecycle:
       "opendock/oh-my-openagent",
     ];
     for (const ref of refs) {
-      const resolved = resolveLocalDock(join(repoRoot, "examples"), DockRef.parse(ref));
+      const resolved = resolveLocalDock(
+        join(repoRoot, "examples"),
+        DockRef.parse(`${ref}@local-dev`),
+      );
       expect(resolved.manifest.id).toBe(ref);
       expect(resolved.manifest.summary).not.toBe("");
       expect(resolved.manifest.readme).toBe("DOCK.md");
@@ -985,7 +988,10 @@ lifecycle:
   });
 
   it("keeps the bundled oma example without project file payload", () => {
-    const resolved = resolveLocalDock(join(repoRoot, "examples"), DockRef.parse("opendock/oma"));
+    const resolved = resolveLocalDock(
+      join(repoRoot, "examples"),
+      DockRef.parse("opendock/oma@local-dev"),
+    );
 
     expect(resolved.manifest.files).toHaveLength(0);
     expect(resolved.manifest.lifecycle.install.map((step) => step.id)).toEqual([
@@ -1020,7 +1026,7 @@ lifecycle:
       await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
         for (const ref of refs) {
           const project = await tempDir();
-          const dockRef = DockRef.parse(ref);
+          const dockRef = DockRef.parse(`${ref}@local-dev`);
           const resolver = localResolver(examplesRoot);
 
           const installReport = await install({
@@ -1070,7 +1076,7 @@ lifecycle:
     writePlatformDock(docks);
 
     const installReport = await install({
-      dockRef: DockRef.parse("test/platforms"),
+      dockRef: DockRef.parse("test/platforms@1.0.0"),
       projectDir: project,
       runCommands: true,
       operation: "install",
@@ -1093,7 +1099,7 @@ lifecycle:
     }
     expect(lockedPlatform).toBe("windows");
 
-    const resolved = resolveLocalDock(docks, DockRef.parse("test/platforms"));
+    const resolved = resolveLocalDock(docks, DockRef.parse("test/platforms@1.0.0"));
     const doctor = await runLifecycle(resolved.manifest, "doctor", project, {
       platform: lockedPlatform,
     });
@@ -1125,7 +1131,7 @@ lifecycle:
 
     await expect(
       install({
-        dockRef: DockRef.parse("test/mac-only"),
+        dockRef: DockRef.parse("test/mac-only@1.0.0"),
         projectDir: project,
         runCommands: true,
         operation: "install",
@@ -1209,7 +1215,7 @@ echo "Downloading oh-my-agent"
     await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
       await expect(
         install({
-          dockRef: DockRef.parse("test/version-fail"),
+          dockRef: DockRef.parse("test/version-fail@1.0.0"),
           projectDir: project,
           runCommands: true,
           operation: "install",
@@ -1269,7 +1275,7 @@ files:
 
     await expect(
       install({
-        dockRef: DockRef.parse("test/source-symlink"),
+        dockRef: DockRef.parse("test/source-symlink@1.0.0"),
         projectDir: sourceProject,
         runCommands: false,
         operation: "install",
@@ -1300,7 +1306,7 @@ files:
 
     await expect(
       install({
-        dockRef: DockRef.parse("test/target-symlink"),
+        dockRef: DockRef.parse("test/target-symlink@1.0.0"),
         projectDir: targetProject,
         runCommands: false,
         operation: "install",
@@ -1331,7 +1337,7 @@ files:
 
     await expect(
       install({
-        dockRef: DockRef.parse("test/target-parent-symlink"),
+        dockRef: DockRef.parse("test/target-parent-symlink@1.0.0"),
         projectDir: project,
         runCommands: false,
         operation: "install",
@@ -1351,7 +1357,7 @@ files:
     const resolver = localResolver(docks);
 
     await install({
-      dockRef: DockRef.parse("test/directory-managed"),
+      dockRef: DockRef.parse("test/directory-managed@1.0.0"),
       projectDir: project,
       runCommands: false,
       operation: "install",
@@ -1373,7 +1379,7 @@ files: []
 
     await expect(
       install({
-        dockRef: DockRef.parse("test/directory-managed"),
+        dockRef: DockRef.parse("test/directory-managed@1.0.0"),
         projectDir: project,
         runCommands: false,
         operation: "update",
@@ -1399,7 +1405,7 @@ files: []
 
     await expect(
       install({
-        dockRef: DockRef.parse("test/directory-managed"),
+        dockRef: DockRef.parse("test/directory-managed@1.0.0"),
         projectDir: project,
         runCommands: false,
         operation: "install",
@@ -1420,7 +1426,7 @@ files: []
     await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
       await expect(
         install({
-          dockRef: DockRef.parse("test/interactive-user"),
+          dockRef: DockRef.parse("test/interactive-user@1.0.0"),
           projectDir: project,
           runCommands: true,
           operation: "install",
@@ -1453,7 +1459,7 @@ if (!result.success) {
       expect(readFileSync(join(project, "user-input.txt"), "utf8")).toMatch(/^75(?:0a|0d)$/);
 
       const scriptedInstall = await install({
-        dockRef: DockRef.parse("test/interactive-scripted"),
+        dockRef: DockRef.parse("test/interactive-scripted@1.0.0"),
         projectDir: project,
         runCommands: true,
         operation: "install",
@@ -1473,7 +1479,7 @@ if (!result.success) {
     writeTimeoutDoctorDock(docks);
 
     await install({
-      dockRef: DockRef.parse("test/timeout"),
+      dockRef: DockRef.parse("test/timeout@1.0.0"),
       projectDir: project,
       runCommands: true,
       operation: "install",
@@ -1481,7 +1487,7 @@ if (!result.success) {
       resolve: localResolver(docks),
     });
 
-    const resolved = resolveLocalDock(docks, DockRef.parse("test/timeout"));
+    const resolved = resolveLocalDock(docks, DockRef.parse("test/timeout@1.0.0"));
     const doctor = await withEnv(
       { _VOLTA_TOOL_RECURSION: "1", PATH: `${bin}:${process.env.PATH ?? ""}` },
       () => runLifecycle(resolved.manifest, "doctor", project),
@@ -1539,7 +1545,7 @@ unsupported_field: true
 `,
     );
 
-    expect(() => resolveLocalDock(docks, DockRef.parse("test/unsupported-field"))).toThrow(
+    expect(() => resolveLocalDock(docks, DockRef.parse("test/unsupported-field@1.0.0"))).toThrow(
       "failed to parse",
     );
   });
@@ -1558,14 +1564,18 @@ lifecycle:
 `,
     );
 
-    expect(() => resolveLocalDock(docks, DockRef.parse("test/missing-opendock"))).toThrow(
+    expect(() => resolveLocalDock(docks, DockRef.parse("test/missing-opendock@1.0.0"))).toThrow(
       "must declare `opendock: 1`",
     );
   });
 
-  it("parses dock version selectors", () => {
-    expect(DockRef.parse("opendock/codex").requested()).toBe("latest");
-    expect(DockRef.parse("opendock/codex@latest").requested()).toBe("latest");
+  it("parses exact dock version selectors", () => {
+    expect(() => DockRef.parse("opendock/codex")).toThrow(
+      "must include an exact version identifier",
+    );
+    expect(() => DockRef.parse("opendock/codex@latest")).toThrow(
+      "must be an exact version identifier",
+    );
     expect(DockRef.parse("opendock/codex@1").requested()).toBe("1");
     expect(DockRef.parse("opendock/codex@1.5").requested()).toBe("1.5");
     expect(DockRef.parse("opendock/codex@designer-build").requested()).toBe("designer-build");
@@ -1577,16 +1587,15 @@ lifecycle:
       "may contain only one version selector",
     );
     expect(() => DockRef.parse("opendock/codex@bad/version")).toThrow(
-      "dock version selector must be latest",
+      "dock version selector must be an exact version identifier",
     );
     expect(() => DockRef.parse("opendock/codex@bad*version")).toThrow(
-      "dock version selector must be latest",
+      "dock version selector must be an exact version identifier",
     );
   });
 
-  it("matches resolved dock versions against latest or exact selectors", () => {
+  it("matches resolved dock versions against exact selectors", () => {
     const accepted: Array<[string, string]> = [
-      ["1.5.2", "latest"],
       ["1.5.2", "1.5.2"],
       ["designer-build", "designer-build"],
     ];
@@ -1696,17 +1705,29 @@ lifecycle:
     }
   });
 
+  it("requires an exact install version and rejects latest", async () => {
+    const project = await tempDir();
+
+    const missingVersion = runCli(project, {}, ["install", "test/demo"]);
+    expect(missingVersion.status).not.toBe(0);
+    expect(missingVersion.stderr).toContain("owner/name@version");
+
+    const latestVersion = runCli(project, {}, ["install", "test/demo@latest"]);
+    expect(latestVersion.status).not.toBe(0);
+    expect(latestVersion.stderr).toContain("must be an exact version identifier");
+  });
+
   it("requires an exact deploy version and rejects latest", async () => {
     const project = await tempDir();
     writeFileSync(join(project, "dock.yml"), "opendock: 1\nid: test/deploy\n");
 
     const missingVersion = runCli(project, {}, ["deploy", "test/deploy"]);
     expect(missingVersion.status).not.toBe(0);
-    expect(missingVersion.stderr).toContain("deploy reference must include an exact version");
+    expect(missingVersion.stderr).toContain("owner/name@version");
 
     const latestVersion = runCli(project, {}, ["deploy", "test/deploy@latest"]);
     expect(latestVersion.status).not.toBe(0);
-    expect(latestVersion.stderr).toContain("latest is only for install/update");
+    expect(latestVersion.stderr).toContain("must be an exact version identifier");
   });
 
   it("validates deploy files before starting browser login", async () => {
@@ -1793,13 +1814,13 @@ files:
     expect(result.stderr).toContain("manifest `logo` bytes do not match file type");
   });
 
-  it("reapplies newer dock versions", async () => {
+  it("reapplies explicitly selected newer dock versions", async () => {
     const project = await tempDir();
     const docks = await tempDir();
     writeTestDock(docks, "test", "demo", "1.0.0", "# Version One\n");
 
     await install({
-      dockRef: DockRef.parse("test/demo"),
+      dockRef: DockRef.parse("test/demo@1.0.0"),
       projectDir: project,
       runCommands: true,
       operation: "install",
@@ -1810,7 +1831,7 @@ files:
     writeTestDock(docks, "test", "demo", "2.0.0", "# Version Two\n");
 
     const update = await install({
-      dockRef: DockRef.parse("test/demo"),
+      dockRef: DockRef.parse("test/demo@2.0.0"),
       projectDir: project,
       runCommands: true,
       operation: "update",
@@ -1922,7 +1943,7 @@ lifecycle:
 
     await expect(
       install({
-        dockRef: DockRef.parse("test/bad"),
+        dockRef: DockRef.parse("test/bad@1.0.0"),
         projectDir: project,
         runCommands: true,
         operation: "install",

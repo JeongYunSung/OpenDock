@@ -139,7 +139,7 @@ function localDockVersion(dockRoot: string, dockRef: DockRef): string {
       return version;
     }
   }
-  return dockRef.requested() === "latest" ? "local-dev" : dockRef.requested();
+  return dockRef.requested();
 }
 
 function findLocalDockRoot(docksRoot: string, dockRef: DockRef): string | undefined {

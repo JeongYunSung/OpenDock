@@ -46,13 +46,13 @@ export async function run(argv = process.argv): Promise<void> {
   program
     .command("install")
     .description("Install an approved dock into the current directory.")
-    .argument("<dock>", "Dock reference: owner/name[@selector]")
+    .argument("<dock>", "Dock reference: owner/name@version")
     .option("--force", "Overwrite user-edited managed files")
     .option("--platform <platform>", "Target platform: macos, windows, or linux")
     .action(async (dock: string, options: { force?: boolean; platform?: string }) => {
       const platform = resolveCliPlatform(options.platform);
       const report = await install({
-        dockRef: DockRef.parse(dock),
+        dockRef: parseInstallRef(dock),
         force: options.force === true,
         projectDir: process.cwd(),
         runCommands: true,
@@ -73,7 +73,7 @@ export async function run(argv = process.argv): Promise<void> {
     .action(async (options: { force?: boolean; platform?: string }) => {
       const lock = readLock(process.cwd());
       for (const dock of lockDocks(lock)) {
-        const dockRef = DockRef.parse(`${dock.id}@${dock.requested ?? "latest"}`);
+        const dockRef = DockRef.parse(`${dock.id}@${lockedDockVersionSelector(dock)}`);
         const platform = resolveCliPlatform(options.platform ?? dock.platform);
         const report = await install({
           dockRef,
@@ -212,16 +212,28 @@ export async function run(argv = process.argv): Promise<void> {
 function parseDeployRef(value: string): DockRef {
   if (!value.includes("@")) {
     throw new Error(
-      "deploy reference must include an exact version identifier, e.g. opendock/oma@1.0.0",
+      "deploy reference must use owner/name@version with an exact version identifier, e.g. opendock/oma@1.0.0",
     );
   }
   const dockRef = DockRef.parse(value);
-  if (dockRef.requested() === "latest") {
+  return dockRef;
+}
+
+function parseInstallRef(value: string): DockRef {
+  if (!value.includes("@")) {
     throw new Error(
-      "deploy reference must use an exact version identifier; latest is only for install/update",
+      "install reference must use owner/name@version with an exact version identifier, e.g. opendock/codex@1.0.0",
     );
   }
-  return dockRef;
+  return DockRef.parse(value);
+}
+
+function lockedDockVersionSelector(dock: { requested?: string; version: string }): string {
+  const requested = dock.requested?.trim();
+  if (requested !== undefined && requested !== "" && requested !== "latest") {
+    return requested;
+  }
+  return dock.version;
 }
 
 function readDeployReadme(projectDir: string, manifest: DockManifest): string | undefined {
@@ -512,7 +524,7 @@ async function printDoctor(cwd: string, platformOverride?: string): Promise<void
       console.log(`✓ ${dock.id}@${dock.version} [${platform}]`);
       await printDockDoctorChecks(
         cwd,
-        DockRef.parse(`${dock.id}@${dock.requested ?? "latest"}`),
+        DockRef.parse(`${dock.id}@${lockedDockVersionSelector(dock)}`),
         platform,
       );
     }
