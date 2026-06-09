@@ -30,6 +30,8 @@ opendock doctor
 opendock log
 opendock version
 opendock auth login
+opendock auth status
+opendock auth logout
 opendock deploy codex
 ```
 
@@ -91,10 +93,13 @@ README.md
 | `opendock log` | 输出当前项目最近的 OpenDock 运行记录。 |
 | `opendock version` | 输出 CLI version、schema version 和 default registry。 |
 | `opendock bootstrap mac` | 检查或安装 macOS dock 所需的 Homebrew。 |
-| `opendock auth login` | 保存 OpenDock Registry token。 |
+| `opendock auth login` | 登录 OpenDock Registry。 |
+| `opendock auth status` | 显示当前 OpenDock Registry 登录状态。 |
+| `opendock auth logout` | 在本机退出 OpenDock Registry。 |
 | `opendock deploy codex` | 将本地 `dock.yml` dock 提交到 OpenDock Registry 审核。 |
 
-`install` 是公开命令。`deploy` 需要先运行 `opendock auth login`。
+`install` 是公开命令。`deploy` 使用 OpenDock Registry 登录。
+可用 `opendock auth status` 或 `opendock auth logout` 查看或清除登录状态。
 如果缺少 Homebrew，请先运行 `opendock bootstrap mac`。
 
 dock reference 支持 npm 风格的 version selector：

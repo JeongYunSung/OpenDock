@@ -674,9 +674,11 @@ OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 �
 배포 흐름은 다음 원칙을 따릅니다.
 
 1. dock author가 `dock.yml`, `readme`, `logo`, `files[].from`에 명시한 source 파일을 작성합니다.
-2. `opendock auth login`으로 로그인합니다.
+2. 필요한 경우 `opendock auth login`으로 OpenDock Registry에 로그인합니다.
 3. `opendock deploy <dock-name>`으로 제출합니다.
 4. OpenDock Registry 검토를 통과한 dock만 Registry에서 설치될 수 있습니다.
+
+로컬 로그인 상태는 `opendock auth status`로 확인하고, 이 머신에서 해제하려면 `opendock auth logout`을 사용합니다.
 
 `install`은 공개 명령이지만, 설치 대상 dock은 승인된 Registry metadata, signature, checksum 검증을 통과해야 합니다.
 

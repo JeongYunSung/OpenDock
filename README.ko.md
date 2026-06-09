@@ -34,6 +34,8 @@ opendock doctor
 opendock log
 opendock version
 opendock auth login
+opendock auth status
+opendock auth logout
 opendock deploy codex
 ```
 
@@ -101,10 +103,13 @@ README.md
 | `opendock log` | 현재 프로젝트의 최근 OpenDock 실행 기록을 출력합니다. |
 | `opendock version` | CLI 버전, schema 버전, 기본 Registry를 출력합니다. |
 | `opendock bootstrap mac` | macOS dock용 Homebrew를 확인하거나 설치합니다. |
-| `opendock auth login` | OpenDock Registry token을 저장합니다. |
+| `opendock auth login` | OpenDock Registry에 로그인합니다. |
+| `opendock auth status` | 현재 OpenDock Registry 로그인 상태를 표시합니다. |
+| `opendock auth logout` | 이 머신에서 OpenDock Registry 로그인을 해제합니다. |
 | `opendock deploy codex` | 로컬 `dock.yml` dock을 OpenDock Registry 검토용으로 제출합니다. |
 
-`install`은 공개 명령입니다. `deploy`에는 `opendock auth login`이 필요합니다.
+`install`은 공개 명령입니다. `deploy`는 OpenDock Registry 로그인을 사용합니다.
+로그인 상태 확인과 해제에는 `opendock auth status`, `opendock auth logout`을 사용하세요.
 Homebrew가 없다면 먼저 `opendock bootstrap mac`을 실행하세요.
 
 dock reference는 npm 스타일 version selector를 지원합니다.

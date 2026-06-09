@@ -36,6 +36,8 @@ opendock doctor
 opendock log
 opendock version
 opendock auth login
+opendock auth status
+opendock auth logout
 opendock deploy codex
 ```
 
@@ -106,10 +108,13 @@ README.md
 | `opendock log` | Gibt die letzten OpenDock runs für das aktuelle Projekt aus. |
 | `opendock version` | Gibt CLI version, schema version und default registry aus. |
 | `opendock bootstrap mac` | Prüft oder installiert Homebrew für macOS-Docks. |
-| `opendock auth login` | Speichert ein OpenDock Registry token. |
+| `opendock auth login` | Meldet dich bei OpenDock Registry an. |
+| `opendock auth status` | Zeigt die aktuelle OpenDock Registry Anmeldung. |
+| `opendock auth logout` | Meldet diese Maschine von OpenDock Registry ab. |
 | `opendock deploy codex` | Reicht ein lokales `dock.yml` Dock zur OpenDock Registry review ein. |
 
-`install` ist öffentlich. `deploy` erfordert `opendock auth login`.
+`install` ist öffentlich. `deploy` verwendet die OpenDock Registry Anmeldung.
+Nutze `opendock auth status` oder `opendock auth logout`, um sie zu prüfen oder zu entfernen.
 Führe zuerst `opendock bootstrap mac` aus, wenn Homebrew fehlt.
 
 Dock-Referenzen unterstützen npm-artige version selectors:

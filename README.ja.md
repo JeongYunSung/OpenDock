@@ -35,6 +35,8 @@ opendock doctor
 opendock log
 opendock version
 opendock auth login
+opendock auth status
+opendock auth logout
 opendock deploy codex
 ```
 
@@ -104,10 +106,13 @@ README.md
 | `opendock log` | 現在のプロジェクトの最近の OpenDock 実行を出力します。 |
 | `opendock version` | CLI version、schema version、default registry を表示します。 |
 | `opendock bootstrap mac` | macOS dock 用に Homebrew を確認またはインストールします。 |
-| `opendock auth login` | OpenDock Registry token を保存します。 |
+| `opendock auth login` | OpenDock Registry にログインします。 |
+| `opendock auth status` | 現在の OpenDock Registry login を表示します。 |
+| `opendock auth logout` | このマシンで OpenDock Registry からログアウトします。 |
 | `opendock deploy codex` | ローカルの `dock.yml` dock を OpenDock Registry review に提出します。 |
 
-`install` は公開コマンドです。`deploy` には `opendock auth login` が必要です。
+`install` は公開コマンドです。`deploy` は OpenDock Registry login を使用します。
+状態確認や解除には `opendock auth status`、`opendock auth logout` を使ってください。
 Homebrew がない場合は、先に `opendock bootstrap mac` を実行してください。
 
 dock reference は npm 風の version selector をサポートします。
