@@ -30,6 +30,7 @@ const maxExtractedFiles = 2_000;
 
 export interface ResolvedDock {
   manifest: DockManifest;
+  version: string;
   root: string;
   checksum: string;
   signature: string;
@@ -51,6 +52,7 @@ export function resolveLocalDock(docksRoot: string, dockRef: DockRef): ResolvedD
 
   return {
     manifest,
+    version: localDockVersion(dockRoot, dockRef),
     root: dockRoot,
     checksum: checksumDir(dockRoot),
     signature: "local-dev",
@@ -122,10 +124,22 @@ async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
 
   return {
     manifest,
+    version: metadata.version,
     root: dockRoot,
     checksum: actualChecksum,
     signature: metadata.signature,
   };
+}
+
+function localDockVersion(dockRoot: string, dockRef: DockRef): string {
+  const sidecar = join(dockRoot, ".opendock-version");
+  if (existsSync(sidecar)) {
+    const version = readFileSync(sidecar, "utf8").trim();
+    if (version !== "") {
+      return version;
+    }
+  }
+  return dockRef.requested() === "latest" ? "local-dev" : dockRef.requested();
 }
 
 function findLocalDockRoot(docksRoot: string, dockRef: DockRef): string | undefined {

@@ -64,7 +64,7 @@ interface ExpandedFileSpec extends FileSpec {
 
 export async function install(options: InstallOptions): Promise<InstallReport> {
   const resolved = await (options.resolve ?? resolveDock)(options.dockRef);
-  assertVersionSatisfiesSelector(resolved.manifest.version, options.dockRef.requested());
+  assertVersionSatisfiesSelector(resolved.version, options.dockRef.requested());
   const platform = options.platform ?? detectPlatform();
   assertManifestSupportsPlatform(resolved.manifest, platform);
   const priorRecords = readProjectFile(options.projectDir)?.files ?? [];
@@ -117,6 +117,7 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
   writeProjectState(
     options.projectDir,
     resolved.manifest,
+    resolved.version,
     options.dockRef.requested(),
     resolved.checksum,
     resolved.signature,
@@ -126,7 +127,7 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
 
   const report: InstallReport = {
     dockId: resolved.manifest.id,
-    version: resolved.manifest.version,
+    version: resolved.version,
     filesCreated: fileReport.created,
     filesDeleted: fileReport.deleted,
     filesReviewRequired: fileReport.reviewRequired,

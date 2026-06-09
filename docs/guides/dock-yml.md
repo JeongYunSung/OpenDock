@@ -36,7 +36,6 @@ my-dock/
 ```yaml
 opendock: 1
 id: opendock/codex
-version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
 logo: logo.png
@@ -58,7 +57,6 @@ files:
 ```yaml
 opendock: 1
 id: opendock/codex
-version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
 logo: logo.png
@@ -145,7 +143,6 @@ lifecycle:
 | `summary` | 선택 | 설명 문자열입니다. 기본값은 빈 문자열입니다. |
 | `readme` | 선택 | Registry 제출 시 catalog 상세 본문으로 함께 전송할 Markdown 파일 경로입니다. 예: `DOCK.md`. |
 | `logo` | 선택 | Registry 제출 시 catalog 대표 이미지로 함께 전송할 PNG, JPEG, WebP 파일 경로입니다. 예: `logo.png`. |
-| `version` | 권장 필수 | dock 버전입니다. 없으면 `0.1.0`으로 해석됩니다. |
 | `files` | 선택 | 프로젝트에 적용할 파일 목록입니다. |
 | `lifecycle` | 선택 | `install`, `update`, `doctor` 단계별 명령 목록입니다. |
 | `needs` | 선택 | 현재는 파싱만 됩니다. 실제 설치 판단은 `lifecycle`의 `check`, `version`, `run`으로 표현하세요. |
@@ -226,6 +223,19 @@ docks:
 ```
 
 `opendock update`는 lock의 `requested`를 다시 사용합니다. 즉 `latest`로 설치한 dock은 새로운 version이 승인되면 이동할 수 있고, `@1.5.2`처럼 exact version으로 설치한 dock은 update에서도 고정됩니다.
+
+### release version과 deploy
+
+release version은 `dock.yml`에 쓰지 않습니다. Registry에 제출할 때 명령의 dock reference에서 정합니다.
+
+```bash
+opendock deploy opendock/codex@1.0.0
+opendock deploy opendock/codex@designer-build
+```
+
+`opendock deploy opendock/codex`처럼 version이 없거나 `opendock deploy opendock/codex@latest`처럼 `latest`를 쓰면 실패합니다. `latest`는 install/update에서만 쓰는 selector입니다.
+
+deploy는 `dock.yml`, `readme`, `logo`, `files[].from`, lifecycle `copy.from`에 명시된 파일과 디렉터리를 `.tgz` archive로 묶어 Registry submission에 포함합니다. Registry 검토가 승인되면 그 archive가 해당 release의 다운로드 대상이 됩니다.
 
 ## files 작성법
 
@@ -673,7 +683,7 @@ OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 �
 
 1. dock author가 `dock.yml`, `readme`, `logo`, `files[].from`에 명시한 source 파일을 작성합니다.
 2. 필요한 경우 `opendock auth login`으로 OpenDock Registry에 로그인합니다.
-3. `opendock deploy <dock-name>`으로 제출합니다.
+3. `opendock deploy <owner/name@version>`으로 제출합니다.
 4. OpenDock Registry 검토를 통과한 dock만 Registry에서 설치될 수 있습니다.
 
 로컬 로그인 상태는 `opendock auth status`로 확인하고, 이 머신에서 해제하려면 `opendock auth logout`을 사용합니다.
@@ -686,13 +696,13 @@ OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 �
 
 1. `id`가 설치 명령의 `owner/name`과 같은가?
 2. `opendock: 1`을 선언했는가?
-3. `version`을 명시했는가?
+3. release version은 `opendock deploy owner/name@version`에서 정했는가?
 4. `readme`와 `logo` 경로가 있다면 dock root 안의 실제 파일인가?
 5. 모든 `files[].from` 파일이 실제로 존재하는가?
 6. `files[].to`가 프로젝트 루트 기준 안전한 상대 경로인가?
 7. 기존 사용자 파일에 맞는 update 정책을 골랐는가?
 8. `install` step은 `check`로 idempotent하게 설계했는가?
-9. 버전이 중요한 도구에는 `version` 범위를 넣었는가?
+9. 버전이 중요한 도구에는 lifecycle step의 `version` 범위를 넣었는가?
 10. `update`는 최초 설치가 아니라 유지보수 관점으로 작성했는가?
 11. `doctor`는 상태 점검만 하도록 구성했는가?
 12. 대화형 명령은 `interactive: user` 또는 승인된 `interactive: scripted`로 명시했는가?
@@ -707,7 +717,7 @@ OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 �
 
 처음부터 큰 dock을 만들기보다 아래 순서로 작성하면 실수가 줄어듭니다.
 
-1. `id`, `version`, 최소 `files` 한 개만 둔 `dock.yml`을 만든다.
+1. `id`, 최소 `files` 한 개만 둔 `dock.yml`을 만든다.
 2. `README.md`, `DESIGN.md`, `AGENTS.md`, `.gitignore` 순서로 파일 정책을 정한다.
 3. `doctor`에 필요한 도구 버전 점검을 먼저 쓴다.
 4. `install`에 doctor 실패를 고칠 수 있는 설치 step을 추가한다.
@@ -884,7 +894,6 @@ lifecycle:
 ```yaml
 opendock: 1
 id: owner/name
-version: 0.1.0
 
 files:
   - from: files/.agents

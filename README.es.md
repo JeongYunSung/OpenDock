@@ -38,7 +38,7 @@ opendock version
 opendock auth login
 opendock auth status
 opendock auth logout
-opendock deploy codex
+opendock deploy opendock/codex@1.0.0
 ```
 
 ## Por Qué OpenDock
@@ -100,7 +100,7 @@ README.md
 | Comando | Propósito |
 |---|---|
 | `opendock install opendock/codex` | Instala un dock aprobado en el directorio actual. |
-| `opendock install opendock/codex@1.5` | Instala usando un version selector. |
+| `opendock install opendock/codex@designer-build` | Instala usando un identificador de versión exacto. |
 | `opendock install opendock/codex --platform windows` | Instala con una target platform explícita en lugar de detectar el host. |
 | `opendock install opendock/codex --force` | Fuerza los cambios managed por OpenDock durante install. |
 | `opendock update` | Vuelve a resolver los docks instalados y aplica versiones nuevas de forma segura usando la platform bloqueada. |
@@ -112,27 +112,29 @@ README.md
 | `opendock auth login` | Inicia sesión en OpenDock Registry. |
 | `opendock auth status` | Muestra la sesión actual de OpenDock Registry. |
 | `opendock auth logout` | Cierra la sesión de OpenDock Registry en esta máquina. |
-| `opendock deploy codex` | Envía un dock local `dock.yml` para revisión en OpenDock Registry. |
+| `opendock deploy opendock/codex@1.0.0` | Envía un dock local `dock.yml` para revisión en OpenDock Registry. |
 
 `install` es público. `deploy` usa la sesión de OpenDock Registry.
 Usa `opendock auth status` o `opendock auth logout` para verla o cerrarla.
 Ejecuta `opendock bootstrap mac` primero si falta Homebrew.
 
-Las referencias dock soportan version selectors estilo npm:
+Las referencias dock soportan `latest` o un identificador de versión exacto:
 
 ```text
-owner/name          -> latest
-owner/name@latest   -> latest
-owner/name@1        -> latest approved 1.x
-owner/name@1.5      -> latest approved 1.5.x
-owner/name@1.5.2    -> exact approved version
-owner/name@v1       -> latest approved 1.x
+owner/name                  -> latest
+owner/name@latest           -> latest
+owner/name@1.2.0            -> exact approved version identifier
+owner/name@designer-build   -> exact approved version identifier
 ```
+
+Deploy siempre requiere un identificador exacto de release, por ejemplo
+`opendock deploy owner/name@1.0.0`. `latest` solo se usa como selector de
+install/update.
 
 OpenDock guarda tanto el selector solicitado como la versión exacta resuelta en
 `.opendock/dock.lock.yml`. `opendock update` reutiliza el selector solicitado,
-así que una instalación fijada en `@1.5.2` queda fija, mientras `@1.5` puede
-moverse dentro de `1.5.x`.
+así que una instalación fijada en `@1.5.2` queda fija, mientras `latest` puede
+moverse a una versión aprobada más reciente.
 
 ## Formato Del Dock
 
@@ -146,7 +148,6 @@ detallada de autoría en coreano.
 ```yaml
 opendock: 1
 id: opendock/codex
-version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
 logo: logo.png

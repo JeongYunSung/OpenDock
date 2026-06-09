@@ -32,7 +32,7 @@ opendock version
 opendock auth login
 opendock auth status
 opendock auth logout
-opendock deploy codex
+opendock deploy opendock/codex@1.0.0
 ```
 
 ## 为什么需要 OpenDock
@@ -84,7 +84,7 @@ README.md
 | 命令 | 用途 |
 |---|---|
 | `opendock install opendock/codex` | 将已审核 dock 安装到当前目录。 |
-| `opendock install opendock/codex@1.5` | 使用 version selector 安装。 |
+| `opendock install opendock/codex@designer-build` | 使用精确 version identifier 安装。 |
 | `opendock install opendock/codex --platform windows` | 使用显式 target platform，而不是自动检测 host。 |
 | `opendock install opendock/codex --force` | 在 install 时强制应用 OpenDock 管理的变更。 |
 | `opendock update` | 重新解析已安装 dock，并使用 lock 中的平台安全应用新版本。 |
@@ -96,26 +96,27 @@ README.md
 | `opendock auth login` | 登录 OpenDock Registry。 |
 | `opendock auth status` | 显示当前 OpenDock Registry 登录状态。 |
 | `opendock auth logout` | 在本机退出 OpenDock Registry。 |
-| `opendock deploy codex` | 将本地 `dock.yml` dock 提交到 OpenDock Registry 审核。 |
+| `opendock deploy opendock/codex@1.0.0` | 将本地 `dock.yml` dock 提交到 OpenDock Registry 审核。 |
 
 `install` 是公开命令。`deploy` 使用 OpenDock Registry 登录。
 可用 `opendock auth status` 或 `opendock auth logout` 查看或清除登录状态。
 如果缺少 Homebrew，请先运行 `opendock bootstrap mac`。
 
-dock reference 支持 npm 风格的 version selector：
+dock reference 支持 `latest` 或精确 version identifier：
 
 ```text
-owner/name          -> latest
-owner/name@latest   -> latest
-owner/name@1        -> latest approved 1.x
-owner/name@1.5      -> latest approved 1.5.x
-owner/name@1.5.2    -> exact approved version
-owner/name@v1       -> latest approved 1.x
+owner/name                  -> latest
+owner/name@latest           -> latest
+owner/name@1.2.0            -> exact approved version identifier
+owner/name@designer-build   -> exact approved version identifier
 ```
+
+Deploy 始终需要精确 release identifier，例如
+`opendock deploy owner/name@1.0.0`。`latest` 只用于 install/update selector。
 
 OpenDock 会把用户请求的 selector 和解析出的 exact version 都写入
 `.opendock/dock.lock.yml`。`opendock update` 会复用请求的 selector，因此用
-`@1.5.2` 安装的 dock 会保持固定，而 `@1.5` 可以在 `1.5.x` 范围内更新。
+`@1.5.2` 安装的 dock 会保持固定，而 `latest` 可以移动到更新的已批准版本。
 
 ## Dock 格式
 
@@ -127,7 +128,6 @@ dock 是一个目录，包含 `dock.yml` 文件，以及 `files[].from` 引用�
 ```yaml
 opendock: 1
 id: opendock/codex
-version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
 logo: logo.png

@@ -1,12 +1,23 @@
 #!/usr/bin/env node
-import { readFileSync, realpathSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
+import {
+  lstatSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  statSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { Command } from "commander";
+import { c as createTar } from "tar";
 import { TokenStore } from "./auth.js";
 import { bootstrapMac } from "./bootstrap.js";
 import { performBrowserLogin } from "./browser-auth.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
-import { type DockManifest, DockRef, parseManifestFile } from "./dock.js";
+import { type DockManifest, DockRef, parseManifestFile, validateManifestFor } from "./dock.js";
 import { type InstallReport, install } from "./installer.js";
 import { readProjectLogs } from "./logging.js";
 import { detectPlatform, type OpenDockPlatform, parsePlatform } from "./platform.js";
@@ -23,6 +34,7 @@ import { runLifecycle } from "./runner.js";
 
 const maxDeployReadmeBytes = 64 * 1024;
 const maxDeployLogoBytes = 512 * 1024;
+const maxDeployArchiveBytes = 50 * 1024 * 1024;
 
 export async function run(argv = process.argv): Promise<void> {
   const program = new Command();
@@ -172,24 +184,44 @@ export async function run(argv = process.argv): Promise<void> {
   program
     .command("deploy")
     .description("Submit a dock to OpenDock Registry for review.")
-    .argument("<dock-name>")
+    .argument("<dock>", "Dock release reference: owner/name@version")
     .action(async (dockName: string) => {
+      const dockRef = parseDeployRef(dockName);
       const manifest = readFileSync("dock.yml", "utf8");
       const parsedManifest = parseManifestFile(join(process.cwd(), "dock.yml"));
+      validateManifestFor(parsedManifest, dockRef);
       const readmeMarkdown = readDeployReadme(process.cwd(), parsedManifest);
       const logo = readDeployLogo(process.cwd(), parsedManifest);
+      const archive = await createDeployArchive(process.cwd(), parsedManifest, dockRef.requested());
       const client = new OpenDockRegistryClient();
       const request = {
-        dock_name: dockName,
+        dock_name: dockRef.id(),
+        version: dockRef.requested(),
         manifest,
+        archive,
         ...(readmeMarkdown === undefined ? {} : { readme_markdown: readmeMarkdown }),
         ...(logo === undefined ? {} : { logo }),
       };
       const response = await submitDockWithLogin(client, new TokenStore(), request);
-      console.log(`Submitted ${dockName} for review: ${response.id} (${response.status})`);
+      console.log(`Submitted ${dockRef} for review: ${response.id} (${response.status})`);
     });
 
   await program.parseAsync(argv);
+}
+
+function parseDeployRef(value: string): DockRef {
+  if (!value.includes("@")) {
+    throw new Error(
+      "deploy reference must include an exact version identifier, e.g. opendock/oma@1.0.0",
+    );
+  }
+  const dockRef = DockRef.parse(value);
+  if (dockRef.requested() === "latest") {
+    throw new Error(
+      "deploy reference must use an exact version identifier; latest is only for install/update",
+    );
+  }
+  return dockRef;
 }
 
 function readDeployReadme(projectDir: string, manifest: DockManifest): string | undefined {
@@ -235,15 +267,7 @@ function resolveDeployFile(
   const root = realpathSync(projectDir);
   const candidate = resolve(root, relativePath);
   const realCandidate = realpathSync(candidate);
-  const rel = relative(root, realCandidate);
-  if (
-    isAbsolute(rel) ||
-    rel === ".." ||
-    rel.startsWith(`..${"/"}`) ||
-    rel.startsWith(`..${"\\"}`)
-  ) {
-    throw new Error(`manifest \`${manifestField}\` path must stay inside the dock directory`);
-  }
+  assertInsideDeployRoot(root, realCandidate, manifestField);
 
   const stats = statSync(realCandidate);
   if (!stats.isFile()) {
@@ -257,6 +281,32 @@ function resolveDeployFile(
   }
 
   return realCandidate;
+}
+
+function assertInsideDeployRoot(root: string, candidate: string, field: string): void {
+  const rel = relative(root, candidate);
+  if (
+    isAbsolute(rel) ||
+    rel === ".." ||
+    rel.startsWith(`..${"/"}`) ||
+    rel.startsWith(`..${"\\"}`)
+  ) {
+    throw new Error(`manifest \`${field}\` path must stay inside the dock directory`);
+  }
+}
+
+function normalizeDeployPath(value: string): string {
+  const normalized = value.trim().replaceAll("\\", "/");
+  if (
+    normalized === "" ||
+    normalized === "." ||
+    normalized === ".." ||
+    isAbsolute(normalized) ||
+    normalized.split("/").some((segment) => segment === "..")
+  ) {
+    throw new Error(`unsafe deploy archive path: ${value}`);
+  }
+  return normalized;
 }
 
 function logoContentType(path: string): SubmissionLogoRequest["content_type"] {
@@ -289,6 +339,125 @@ function validateLogoSignature(
   if (!valid) {
     throw new Error("manifest `logo` bytes do not match file type");
   }
+}
+
+async function createDeployArchive(
+  projectDir: string,
+  manifest: DockManifest,
+  version: string,
+): Promise<SubmissionRequest["archive"]> {
+  const entries = collectDeployArchiveEntries(projectDir, manifest);
+  const temp = mkdtempSync(join(tmpdir(), "opendock-deploy-"));
+  const archivePath = join(temp, "dock.tgz");
+  try {
+    await createTar(
+      {
+        cwd: projectDir,
+        file: archivePath,
+        gzip: true,
+        noMtime: true,
+        portable: true,
+        strict: true,
+      },
+      entries,
+    );
+    const stats = statSync(archivePath);
+    if (stats.size > maxDeployArchiveBytes) {
+      throw new Error(`dock archive exceeds ${maxDeployArchiveBytes} bytes`);
+    }
+    const bytes = readFileSync(archivePath);
+    return {
+      filename: `${manifest.id.replace("/", "-")}-${version}.tgz`,
+      content_type: "application/gzip",
+      data_base64: bytes.toString("base64"),
+      checksum: createHash("sha256").update(bytes).digest("hex"),
+    };
+  } finally {
+    rmSync(temp, { force: true, recursive: true });
+  }
+}
+
+function collectDeployArchiveEntries(projectDir: string, manifest: DockManifest): string[] {
+  const roots = new Set<string>(["dock.yml"]);
+  if (manifest.readme !== undefined) {
+    roots.add(manifest.readme);
+  }
+  if (manifest.logo !== undefined) {
+    roots.add(manifest.logo);
+  }
+  for (const file of manifest.files) {
+    roots.add(file.from);
+  }
+  for (const phase of Object.values(manifest.lifecycle)) {
+    for (const step of phase) {
+      if (step.copy?.from !== undefined) {
+        roots.add(step.copy.from);
+      }
+      for (const platformStep of Object.values(step.platforms)) {
+        if (platformStep.copy?.from !== undefined) {
+          roots.add(platformStep.copy.from);
+        }
+      }
+    }
+  }
+
+  const entries = new Set<string>();
+  for (const root of roots) {
+    for (const entry of expandDeployArchiveRoot(projectDir, root)) {
+      entries.add(entry);
+    }
+  }
+  return [...entries].sort();
+}
+
+function expandDeployArchiveRoot(projectDir: string, relativePathValue: string): string[] {
+  const rel = normalizeDeployPath(relativePathValue);
+  const path = resolveDeployFileOrDirectory(projectDir, rel);
+  const stats = lstatSync(path);
+  if (stats.isSymbolicLink()) {
+    throw new Error(`deploy archive entry cannot be a symlink: ${rel}`);
+  }
+  if (stats.isFile()) {
+    return [rel];
+  }
+  if (!stats.isDirectory()) {
+    throw new Error(`deploy archive entry must be a regular file or directory: ${rel}`);
+  }
+  return listDeployDirectoryFiles(projectDir, path);
+}
+
+function listDeployDirectoryFiles(projectDir: string, root: string): string[] {
+  const entries = readdirSync(root, { withFileTypes: true }).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+  const files: string[] = [];
+  for (const entry of entries) {
+    const path = join(root, entry.name);
+    const rel = normalizeDeployPath(relative(projectDir, path));
+    if (entry.isSymbolicLink()) {
+      throw new Error(`deploy archive entry cannot be a symlink: ${rel}`);
+    }
+    if (entry.isDirectory()) {
+      files.push(...listDeployDirectoryFiles(projectDir, path));
+      continue;
+    }
+    if (!entry.isFile()) {
+      throw new Error(`deploy archive entry must be a regular file: ${rel}`);
+    }
+    files.push(rel);
+  }
+  return files;
+}
+
+function resolveDeployFileOrDirectory(projectDir: string, relativePathValue: string): string {
+  const root = realpathSync(projectDir);
+  const candidate = resolve(root, relativePathValue);
+  if (lstatSync(candidate).isSymbolicLink()) {
+    throw new Error(`deploy archive entry cannot be a symlink: ${relativePathValue}`);
+  }
+  const realCandidate = realpathSync(candidate);
+  assertInsideDeployRoot(root, realCandidate, "archive entry");
+  return realCandidate;
 }
 
 function resolveCliPlatform(value: string | undefined): OpenDockPlatform {

@@ -161,7 +161,6 @@ export const dockManifestSchema = z
     summary: z.string().default(""),
     readme: z.string().optional(),
     logo: z.string().optional(),
-    version: z.string().default("0.1.0"),
     needs: z.record(z.string(), z.string()).default({}),
     files: z.array(fileSpecSchema).default([]),
     lifecycle: lifecycleSchema.default({ install: [], update: [], doctor: [] }),

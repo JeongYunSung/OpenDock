@@ -37,7 +37,7 @@ opendock version
 opendock auth login
 opendock auth status
 opendock auth logout
-opendock deploy codex
+opendock deploy opendock/codex@1.0.0
 ```
 
 ## OpenDock を使う理由
@@ -97,7 +97,7 @@ README.md
 | コマンド | 目的 |
 |---|---|
 | `opendock install opendock/codex` | 承認済み dock を現在のディレクトリにインストールします。 |
-| `opendock install opendock/codex@1.5` | version selector を使ってインストールします。 |
+| `opendock install opendock/codex@designer-build` | exact version identifier を使ってインストールします。 |
 | `opendock install opendock/codex --platform windows` | host の自動検出ではなく明示した target platform でインストールします。 |
 | `opendock install opendock/codex --force` | install 中に OpenDock managed changes を強制適用します。 |
 | `opendock update` | インストール済み dock を再 resolve し、lock 済み platform で安全に新しい version を適用します。 |
@@ -109,27 +109,29 @@ README.md
 | `opendock auth login` | OpenDock Registry にログインします。 |
 | `opendock auth status` | 現在の OpenDock Registry login を表示します。 |
 | `opendock auth logout` | このマシンで OpenDock Registry からログアウトします。 |
-| `opendock deploy codex` | ローカルの `dock.yml` dock を OpenDock Registry review に提出します。 |
+| `opendock deploy opendock/codex@1.0.0` | ローカルの `dock.yml` dock を OpenDock Registry review に提出します。 |
 
 `install` は公開コマンドです。`deploy` は OpenDock Registry login を使用します。
 状態確認や解除には `opendock auth status`、`opendock auth logout` を使ってください。
 Homebrew がない場合は、先に `opendock bootstrap mac` を実行してください。
 
-dock reference は npm 風の version selector をサポートします。
+dock reference は `latest` または exact version identifier をサポートします。
 
 ```text
-owner/name          -> latest
-owner/name@latest   -> latest
-owner/name@1        -> latest approved 1.x
-owner/name@1.5      -> latest approved 1.5.x
-owner/name@1.5.2    -> exact approved version
-owner/name@v1       -> latest approved 1.x
+owner/name                  -> latest
+owner/name@latest           -> latest
+owner/name@1.2.0            -> exact approved version identifier
+owner/name@designer-build   -> exact approved version identifier
 ```
+
+Deploy には常に exact release identifier が必要です。例:
+`opendock deploy owner/name@1.0.0`。`latest` は install/update 専用の
+selector です。
 
 OpenDock は、要求された selector と resolve された exact version の両方を
 `.opendock/dock.lock.yml` に保存します。`opendock update` は要求された
 selector を再利用するため、`@1.5.2` でインストールした dock は固定され、
-`@1.5` は `1.5.x` の範囲で更新できます。
+`latest` はより新しく承認された version へ移動できます。
 
 ## Dock Format
 
@@ -142,7 +144,6 @@ OpenDock Registry の catalog metadata として提出され、`files` にも宣
 ```yaml
 opendock: 1
 id: opendock/codex
-version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
 logo: logo.png

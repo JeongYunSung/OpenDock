@@ -32,9 +32,18 @@ export interface AuthUserResponse {
 
 export interface SubmissionRequest {
   dock_name: string;
+  version: string;
   manifest: string;
+  archive: SubmissionArchiveRequest;
   readme_markdown?: string;
   logo?: SubmissionLogoRequest;
+}
+
+export interface SubmissionArchiveRequest {
+  filename: string;
+  content_type: "application/gzip";
+  data_base64: string;
+  checksum: string;
 }
 
 export interface SubmissionLogoRequest {

@@ -36,7 +36,7 @@ opendock version
 opendock auth login
 opendock auth status
 opendock auth logout
-opendock deploy codex
+opendock deploy opendock/codex@1.0.0
 ```
 
 ## OpenDock이 필요한 이유
@@ -106,7 +106,7 @@ README.md
 | `opendock auth login` | OpenDock Registry에 로그인합니다. |
 | `opendock auth status` | 현재 OpenDock Registry 로그인 상태를 표시합니다. |
 | `opendock auth logout` | 이 머신에서 OpenDock Registry 로그인을 해제합니다. |
-| `opendock deploy codex` | 로컬 `dock.yml` dock을 OpenDock Registry 검토용으로 제출합니다. |
+| `opendock deploy opendock/codex@1.0.0` | 로컬 dock release를 OpenDock Registry 검토용으로 제출합니다. |
 
 `install`은 공개 명령입니다. `deploy`는 OpenDock Registry 로그인을 사용합니다.
 로그인 상태 확인과 해제에는 `opendock auth status`, `opendock auth logout`을 사용하세요.
@@ -123,6 +123,15 @@ owner/name@1.2.0            -> exact approved version identifier
 owner/name@designer-build   -> exact approved version identifier
 ```
 
+배포는 항상 정확한 release identifier가 필요합니다.
+
+```bash
+opendock deploy owner/name@1.0.0
+```
+
+`opendock deploy owner/name`, `opendock deploy owner/name@latest`는 거부됩니다.
+`latest`는 install/update에서만 쓰는 소비자 selector입니다.
+
 OpenDock은 요청한 selector와 resolve된 exact version을 모두
 `.opendock/dock.lock.yml`에 저장합니다. `opendock update`는 요청한 selector를
 재사용하므로 정확한 identifier로 설치한 dock은 고정되고, `latest`는 더 새로운
@@ -133,12 +142,15 @@ version이 승인되면 이동할 수 있습니다.
 dock은 `dock.yml` 파일과 `files[].from`에서 참조하는 source 파일 또는 디렉터리로
 구성된 디렉터리입니다. 선택 사항인 `readme`와 `logo` 경로는 OpenDock Registry
 catalog 메타데이터로 제출되며, `files`에도 선언하지 않으면 설치되지는 않습니다.
+release version은 `dock.yml`에 선언하지 않습니다. 버전은
+`opendock deploy owner/name@version`의 deploy reference에서 옵니다. deploy는
+참조된 파일, `dock.yml`, `readme`, `logo`를 `.tgz` submission archive로 묶어
+검토용으로 제출합니다.
 자세한 작성법은 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) 한국어 가이드를 참고하세요.
 
 ```yaml
 opendock: 1
 id: opendock/codex
-version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
 logo: logo.png

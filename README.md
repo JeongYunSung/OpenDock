@@ -39,7 +39,7 @@ opendock version
 opendock auth login
 opendock auth status
 opendock auth logout
-opendock deploy codex
+opendock deploy opendock/codex@1.0.0
 ```
 
 ## Why OpenDock
@@ -111,7 +111,7 @@ README.md
 | `opendock auth login` | Log in to OpenDock Registry. |
 | `opendock auth status` | Show the current OpenDock Registry login. |
 | `opendock auth logout` | Log out of OpenDock Registry on this machine. |
-| `opendock deploy codex` | Submit a local `dock.yml` dock for OpenDock Registry review. |
+| `opendock deploy opendock/codex@1.0.0` | Submit a local dock release for OpenDock Registry review. |
 
 `install` is public. `deploy` uses OpenDock Registry login; use
 `opendock auth status` or `opendock auth logout` to inspect or clear it.
@@ -128,6 +128,15 @@ owner/name@1.2.0            -> exact approved version identifier
 owner/name@designer-build   -> exact approved version identifier
 ```
 
+Deploy always requires an exact release identifier:
+
+```bash
+opendock deploy owner/name@1.0.0
+```
+
+`opendock deploy owner/name` and `opendock deploy owner/name@latest` are
+rejected. `latest` is only a consumer selector for install/update.
+
 OpenDock stores both the requested selector and the resolved exact version in
 `.opendock/dock.lock.yml`. `opendock update` reuses the requested selector, so
 an install pinned to an exact identifier stays pinned while `latest` can move
@@ -139,13 +148,15 @@ A dock is a directory with a `dock.yml` file and any source files or directories
 referenced by `files[].from`. Optional `readme` and `logo` paths are submitted
 to OpenDock Registry as catalog metadata; they are not installed unless also
 listed in `files`.
+Release versions are not declared in `dock.yml`; the version comes from
+`opendock deploy owner/name@version`. Deploy packages the referenced files,
+`dock.yml`, `readme`, and `logo` into a `.tgz` submission archive for review.
 See [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) for the detailed
 Korean authoring guide.
 
 ```yaml
 opendock: 1
 id: opendock/codex
-version: 0.1.0
 summary: Codex CLI setup with managed workspace files.
 readme: DOCK.md
 logo: logo.png

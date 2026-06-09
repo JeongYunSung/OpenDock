@@ -42,6 +42,7 @@ export interface LockFile {
 export function writeProjectState(
   projectDir: string,
   manifest: DockManifest,
+  version: string,
   requested: string,
   checksum: string,
   signature: string,
@@ -55,7 +56,7 @@ export function writeProjectState(
     id: manifest.id,
     name: manifest.name ?? manifest.id,
     requested,
-    version: manifest.version,
+    version,
   };
   if (platform !== undefined) {
     appliedDock.platform = platform;
@@ -70,7 +71,7 @@ export function writeProjectState(
   const lockedDock: LockedDock = {
     id: manifest.id,
     requested,
-    version: manifest.version,
+    version,
     checksum,
     signature,
   };

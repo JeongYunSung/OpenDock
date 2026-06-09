@@ -1,6 +1,5 @@
 opendock: 1
 id: opendock/oh-my-codex
-version: 0.2.0
 summary: Oh My Codex setup for Codex agent workflows.
 readme: DOCK.md
 logo: logo.jpg

@@ -406,7 +406,6 @@ describe("opendock TypeScript CLI", () => {
       join(dockRoot, "dock.yml"),
       `opendock: 1
 id: test/duplicate-target
-version: 1.0.0
 files:
   - from: files/first.md
     to: README.md
@@ -472,7 +471,7 @@ files:
     const project = await tempDir();
     const home = await tempDir();
     const archiveRoot = await tempDir();
-    const archive = await createRemoteDockArchive(archiveRoot, "test", "remote", "1.5.2");
+    const archive = await createRemoteDockArchive(archiveRoot, "test", "remote");
     const checksum = sha256Bytes(archive);
     const urls: string[] = [];
     const originalFetch = globalThis.fetch;
@@ -570,7 +569,7 @@ files:
     const project = await tempDir();
     const home = await tempDir();
     const archiveRoot = await tempDir();
-    const archive = await createSymlinkDockArchive(archiveRoot, "test", "symlink-archive", "1.0.0");
+    const archive = await createSymlinkDockArchive(archiveRoot, "test", "symlink-archive");
     const checksum = sha256Bytes(archive);
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
       const url = String(input);
@@ -624,7 +623,14 @@ files:
       const response = await new OpenDockRegistryClient().submitDock(
         {
           dock_name: "codex",
+          version: "1.0.0",
           manifest: "opendock: 1",
+          archive: {
+            filename: "codex-1.0.0.tgz",
+            content_type: "application/gzip",
+            data_base64: "H4sIAAAAAAAAE0ssSs7ILEvVTaosSS0GAB6AnpANAAAA",
+            checksum: "46e631df237a72dbcbd748af82ac23cd2e1cb8e4d989ad6b9daafa2f5b1f1226",
+          },
           readme_markdown: "# Dock docs\n",
           logo: {
             filename: "logo.png",
@@ -643,7 +649,14 @@ files:
     expect(bodies).toEqual([
       JSON.stringify({
         dock_name: "codex",
+        version: "1.0.0",
         manifest: "opendock: 1",
+        archive: {
+          filename: "codex-1.0.0.tgz",
+          content_type: "application/gzip",
+          data_base64: "H4sIAAAAAAAAE0ssSs7ILEvVTaosSS0GAB6AnpANAAAA",
+          checksum: "46e631df237a72dbcbd748af82ac23cd2e1cb8e4d989ad6b9daafa2f5b1f1226",
+        },
         readme_markdown: "# Dock docs\n",
         logo: {
           filename: "logo.png",
@@ -926,7 +939,6 @@ files:
       join(dockRoot, "dock.yml"),
       `opendock: 1
 id: test/explicit-files
-version: 1.0.0
 lifecycle:
   install:
     - id: marker
@@ -1098,7 +1110,6 @@ lifecycle:
       join(dockRoot, "dock.yml"),
       `opendock: 1
 id: test/mac-only
-version: 1.0.0
 files:
   - from: files/README.md
     to: README.md
@@ -1249,7 +1260,6 @@ echo "token=\${PRIVATE_SECRET_TOKEN:-missing}"
       join(sourceDock, "dock.yml"),
       `opendock: 1
 id: test/source-symlink
-version: 1.0.0
 files:
   - from: files/README.md
     to: README.md
@@ -1275,10 +1285,10 @@ files:
             ],
             id: "test/source-symlink",
             opendock: 1,
-            version: "1.0.0",
           }),
           root: sourceDock,
           signature: "local",
+          version: "1.0.0",
         }),
       }),
     ).rejects.toThrow("cannot be a symlink");
@@ -1311,7 +1321,6 @@ files:
       join(dockRoot, "dock.yml"),
       `opendock: 1
 id: test/target-parent-symlink
-version: 1.0.0
 files:
   - from: files/safe.md
     to: project/safe.md
@@ -1358,7 +1367,6 @@ files:
       join(dockRoot, "dock.yml"),
       `opendock: 1
 id: test/directory-managed
-version: 1.1.0
 files: []
 `,
     );
@@ -1527,7 +1535,6 @@ echo "${command} 1.2.3"
       join(dockRoot, "dock.yml"),
       `opendock: 1
 id: test/unsupported-field
-version: 1.0.0
 unsupported_field: true
 `,
     );
@@ -1544,7 +1551,6 @@ unsupported_field: true
     writeFileSync(
       join(dockRoot, "dock.yml"),
       `id: test/missing-opendock
-version: 1.0.0
 lifecycle:
   install:
     - id: marker
@@ -1690,13 +1696,26 @@ lifecycle:
     }
   });
 
+  it("requires an exact deploy version and rejects latest", async () => {
+    const project = await tempDir();
+    writeFileSync(join(project, "dock.yml"), "opendock: 1\nid: test/deploy\n");
+
+    const missingVersion = runCli(project, {}, ["deploy", "test/deploy"]);
+    expect(missingVersion.status).not.toBe(0);
+    expect(missingVersion.stderr).toContain("deploy reference must include an exact version");
+
+    const latestVersion = runCli(project, {}, ["deploy", "test/deploy@latest"]);
+    expect(latestVersion.status).not.toBe(0);
+    expect(latestVersion.stderr).toContain("latest is only for install/update");
+  });
+
   it("validates deploy files before starting browser login", async () => {
     const project = await tempDir();
     const home = await tempDir();
     writeFileSync(join(project, "dock.yml"), "opendock: 1\nid: test/logo\nlogo: logo.svg\n");
     writeFileSync(join(project, "logo.svg"), "<svg />\n");
 
-    const result = runCli(project, { HOME: home }, ["deploy", "test/logo"]);
+    const result = runCli(project, { HOME: home }, ["deploy", "test/logo@1.0.0"]);
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain(
@@ -1715,10 +1734,33 @@ lifecycle:
     const login = runCli(project, { HOME: home }, ["auth", "login", "--token", "test-token"]);
     expect(login.status).toBe(0);
 
-    const result = runCli(project, { HOME: home }, ["deploy", "test/readme"]);
+    const result = runCli(project, { HOME: home }, ["deploy", "test/readme@1.0.0"]);
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("manifest `readme` path must stay inside the dock directory");
+  });
+
+  it("rejects symlinked deploy archive entries before submission", async () => {
+    const project = await tempDir();
+    const outside = await tempDir();
+    mkdirSync(join(project, "files"), { recursive: true });
+    writeFileSync(join(outside, "README.md"), "# Outside\n");
+    symlinkSync(join(outside, "README.md"), join(project, "files", "README.md"));
+    writeFileSync(
+      join(project, "dock.yml"),
+      `opendock: 1
+id: test/archive-symlink
+files:
+  - from: files/README.md
+    to: README.md
+    update: manual_review
+`,
+    );
+
+    const result = runCli(project, {}, ["deploy", "test/archive-symlink@1.0.0"]);
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("deploy archive entry cannot be a symlink");
   });
 
   it("rejects unsupported deploy logo extensions before submission", async () => {
@@ -1729,7 +1771,7 @@ lifecycle:
     const login = runCli(project, { HOME: home }, ["auth", "login", "--token", "test-token"]);
     expect(login.status).toBe(0);
 
-    const result = runCli(project, { HOME: home }, ["deploy", "test/logo"]);
+    const result = runCli(project, { HOME: home }, ["deploy", "test/logo@1.0.0"]);
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain(
@@ -1745,7 +1787,7 @@ lifecycle:
     const login = runCli(project, { HOME: home }, ["auth", "login", "--token", "test-token"]);
     expect(login.status).toBe(0);
 
-    const result = runCli(project, { HOME: home }, ["deploy", "test/logo"]);
+    const result = runCli(project, { HOME: home }, ["deploy", "test/logo@1.0.0"]);
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("manifest `logo` bytes do not match file type");
@@ -1870,7 +1912,6 @@ lifecycle:
       `opendock: 1
 id: test/bad
 name: Bad Dock
-version: 1.0.0
 lifecycle:
   install:
     - id: dangerous
@@ -1907,19 +1948,13 @@ function localResolver(root: string): DockResolver {
   return (dockRef) => resolveLocalDock(root, dockRef);
 }
 
-async function createRemoteDockArchive(
-  root: string,
-  owner: string,
-  name: string,
-  version: string,
-): Promise<Buffer> {
+async function createRemoteDockArchive(root: string, owner: string, name: string): Promise<Buffer> {
   const dockRoot = join(root, "remote-dock");
   mkdirSync(join(dockRoot, "files"), { recursive: true });
   writeFileSync(
     join(dockRoot, "dock.yml"),
     `opendock: 1
 id: ${owner}/${name}
-version: ${version}
 files:
   - from: files/README.md
     to: README.md
@@ -1936,7 +1971,6 @@ async function createSymlinkDockArchive(
   root: string,
   owner: string,
   name: string,
-  version: string,
 ): Promise<Buffer> {
   const dockRoot = join(root, "symlink-dock");
   mkdirSync(join(dockRoot, "files"), { recursive: true });
@@ -1944,7 +1978,6 @@ async function createSymlinkDockArchive(
     join(dockRoot, "dock.yml"),
     `opendock: 1
 id: ${owner}/${name}
-version: ${version}
 files:
   - from: files/README.md
     to: README.md
@@ -2054,7 +2087,6 @@ function writeTestDock(
     `opendock: 1
 id: ${owner}/${name}
 name: Demo Dock
-version: ${version}
 files:
   - from: files/README.md
     to: README.md
@@ -2074,6 +2106,7 @@ files:
   writeFileSync(join(dockRoot, "files", ".gitignore"), "node_modules/\n.DS_Store\n");
   writeFileSync(join(dockRoot, "files", "AGENTS.md"), "# Agents\n");
   writeFileSync(join(dockRoot, "files", "DESIGN.md"), "# Design\n");
+  writeFileSync(join(dockRoot, ".opendock-version"), `${version}\n`);
 }
 
 function writeDirectoryManagedDock(
@@ -2091,7 +2124,6 @@ function writeDirectoryManagedDock(
     `opendock: 1
 id: test/directory-managed
 name: Directory Managed Dock
-version: ${version}
 files:
   - from: files/project
     to: project
@@ -2104,6 +2136,7 @@ ${options.updateMarker === true ? "lifecycle:\n  update:\n    - id: update-marke
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, content);
   }
+  writeFileSync(join(dockRoot, ".opendock-version"), `${version}\n`);
 }
 
 function writeModernDock(root: string): void {
@@ -2113,7 +2146,6 @@ function writeModernDock(root: string): void {
     join(dockRoot, "dock.yml"),
     `opendock: 1
 id: test/modern
-version: 1.0.0
 files:
   - from: files/DESIGN.md
     to: DESIGN.md
@@ -2143,6 +2175,7 @@ lifecycle:
   writeFileSync(join(dockRoot, "files", "README.md"), "# Starter README\n");
   writeFileSync(join(dockRoot, "files", ".gitignore"), "node_modules/\n.DS_Store\n");
   writeFileSync(join(dockRoot, "files", "DESIGN.md"), "# Design\n");
+  writeFileSync(join(dockRoot, ".opendock-version"), "1.0.0\n");
 }
 
 function writeVersionFailureDock(root: string): void {
@@ -2152,7 +2185,6 @@ function writeVersionFailureDock(root: string): void {
     join(dockRoot, "dock.yml"),
     `opendock: 1
 id: test/version-fail
-version: 1.0.0
 lifecycle:
   install:
     - id: install-oma-cli
@@ -2161,6 +2193,7 @@ lifecycle:
       run: bun install --global oh-my-agent@latest
 `,
   );
+  writeFileSync(join(dockRoot, ".opendock-version"), "1.0.0\n");
 }
 
 function writePlatformDock(root: string): void {
@@ -2170,7 +2203,6 @@ function writePlatformDock(root: string): void {
     join(dockRoot, "dock.yml"),
     `opendock: 1
 id: test/platforms
-version: 1.0.0
 lifecycle:
   install:
     - id: common-start
@@ -2197,6 +2229,7 @@ lifecycle:
           check: test -d .windows-tool
 `,
   );
+  writeFileSync(join(dockRoot, ".opendock-version"), "1.0.0\n");
 }
 
 function writeTimeoutDoctorDock(root: string): void {
@@ -2206,7 +2239,6 @@ function writeTimeoutDoctorDock(root: string): void {
     join(dockRoot, "dock.yml"),
     `opendock: 1
 id: test/timeout
-version: 1.0.0
 lifecycle:
   doctor:
     - id: volta-env
@@ -2216,6 +2248,7 @@ lifecycle:
       timeout_ms: 50
 `,
   );
+  writeFileSync(join(dockRoot, ".opendock-version"), "1.0.0\n");
 }
 
 function writeInteractiveDock(root: string): void {
@@ -2249,7 +2282,6 @@ function writeInteractiveDockVariant(
     join(dockRoot, "dock.yml"),
     `opendock: 1
 id: test/${name}
-version: 1.0.0
 files:
   - from: files/${scriptName}
     to: ${scriptName}
@@ -2262,6 +2294,7 @@ lifecycle:
       timeout_ms: 5000
 ${extraRun}`,
   );
+  writeFileSync(join(dockRoot, ".opendock-version"), "1.0.0\n");
   writeFileSync(
     join(dockRoot, "files", scriptName),
     `const fs = require("node:fs");
