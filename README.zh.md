@@ -24,7 +24,7 @@ OpenDock 是一个 Bun-first TypeScript CLI，用于把已审核的 dock 安装�
 OpenDock 有意不做终端替代品。它是一个小型 binary，在项目需要可靠的 AI 设置时运行。
 
 ```bash
-opendock install opendock/codex
+opendock install opendock/codex@1.0.0
 opendock update
 opendock doctor
 opendock log
@@ -83,10 +83,10 @@ README.md
 
 | 命令 | 用途 |
 |---|---|
-| `opendock install opendock/codex` | 将已审核 dock 安装到当前目录。 |
+| `opendock install opendock/codex@1.0.0` | 将已审核 dock 安装到当前目录。 |
 | `opendock install opendock/codex@designer-build` | 使用精确 version identifier 安装。 |
-| `opendock install opendock/codex --platform windows` | 使用显式 target platform，而不是自动检测 host。 |
-| `opendock install opendock/codex --force` | 在 install 时强制应用 OpenDock 管理的变更。 |
+| `opendock install opendock/codex@1.0.0 --platform windows` | 使用显式 target platform，而不是自动检测 host。 |
+| `opendock install opendock/codex@1.0.0 --force` | 在 install 时强制应用 OpenDock 管理的变更。 |
 | `opendock update` | 重新解析已安装 dock，并使用 lock 中的平台安全应用新版本。 |
 | `opendock update --force` | 即使检测到已编辑的 managed file，也强制应用 OpenDock 管理的变更。 |
 | `opendock doctor` | 使用 lock 中的平台显示当前目录的 OpenDock state。 |
@@ -102,21 +102,22 @@ README.md
 可用 `opendock auth status` 或 `opendock auth logout` 查看或清除登录状态。
 如果缺少 Homebrew，请先运行 `opendock bootstrap mac`。
 
-dock reference 支持 `latest` 或精确 version identifier：
+dock reference 必须使用精确 version identifier：
 
 ```text
-owner/name                  -> latest
-owner/name@latest           -> latest
+owner/name                  -> rejected
+owner/name@latest           -> rejected
 owner/name@1.2.0            -> exact approved version identifier
 owner/name@designer-build   -> exact approved version identifier
 ```
 
-Deploy 始终需要精确 release identifier，例如
-`opendock deploy owner/name@1.0.0`。`latest` 只用于 install/update selector。
+Install 和 deploy 都需要精确 release identifier，例如
+`opendock install owner/name@1.0.0` 和 `opendock deploy owner/name@1.0.0`。
 
-OpenDock 会把用户请求的 selector 和解析出的 exact version 都写入
-`.opendock/dock.lock.yml`。`opendock update` 会复用请求的 selector，因此用
-`@1.5.2` 安装的 dock 会保持固定，而 `latest` 可以移动到更新的已批准版本。
+OpenDock 会把用户请求的 version identifier 和解析出的 exact version 都写入
+`.opendock/dock.lock.yml`。`opendock update` 会复用请求的 version identifier，
+因此用 `@1.5.2` 安装的 dock 会保持固定。要切换到其他 release，请运行
+`opendock install owner/name@new-version`。
 
 ## Dock 格式
 

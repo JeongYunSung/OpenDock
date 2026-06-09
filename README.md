@@ -31,7 +31,7 @@ OpenDock is intentionally not a terminal replacement. It is the small binary you
 run when a project needs a known-good AI setup.
 
 ```bash
-opendock install opendock/codex
+opendock install opendock/codex@1.0.0
 opendock update
 opendock doctor
 opendock log
@@ -98,10 +98,10 @@ README.md
 
 | Command | Purpose |
 |---|---|
-| `opendock install opendock/codex` | Install an approved dock into the current directory. |
+| `opendock install opendock/codex@1.0.0` | Install an approved dock into the current directory. |
 | `opendock install opendock/codex@designer-build` | Install using an exact version identifier. |
-| `opendock install opendock/codex --platform windows` | Install using an explicit target platform instead of auto-detecting the host. |
-| `opendock install opendock/codex --force` | Force OpenDock-managed file changes during install. |
+| `opendock install opendock/codex@1.0.0 --platform windows` | Install using an explicit target platform instead of auto-detecting the host. |
+| `opendock install opendock/codex@1.0.0 --force` | Force OpenDock-managed file changes during install. |
 | `opendock update` | Re-resolve installed docks and apply newer versions safely using the locked platform. |
 | `opendock update --force` | Force OpenDock-managed file changes even when edited managed files are detected. |
 | `opendock doctor` | Show whether the current directory has valid OpenDock state using the locked platform. |
@@ -117,30 +117,32 @@ README.md
 `opendock auth status` or `opendock auth logout` to inspect or clear it.
 Run `opendock bootstrap mac` first when Homebrew is missing.
 
-Dock references support `latest` or an exact version identifier. OpenDock does
-not sort versions as semantic versions; Registry `latest` is the most recently
-approved non-revoked version.
+Dock references require an exact version identifier. OpenDock does not sort
+versions as semantic versions; the identifier after `@` is matched exactly.
 
 ```text
-owner/name                  -> latest
-owner/name@latest           -> latest
+owner/name                  -> rejected
+owner/name@latest           -> rejected
 owner/name@1.2.0            -> exact approved version identifier
 owner/name@designer-build   -> exact approved version identifier
 ```
 
-Deploy always requires an exact release identifier:
+Install and deploy both require exact release identifiers:
 
 ```bash
+opendock install owner/name@1.0.0
 opendock deploy owner/name@1.0.0
 ```
 
-`opendock deploy owner/name` and `opendock deploy owner/name@latest` are
-rejected. `latest` is only a consumer selector for install/update.
+`opendock install owner/name`, `opendock install owner/name@latest`,
+`opendock deploy owner/name`, and `opendock deploy owner/name@latest` are
+rejected.
 
-OpenDock stores both the requested selector and the resolved exact version in
-`.opendock/dock.lock.yml`. `opendock update` reuses the requested selector, so
-an install pinned to an exact identifier stays pinned while `latest` can move
-when a newer version is approved.
+OpenDock stores both the requested version identifier and the resolved exact
+version in `.opendock/dock.lock.yml`. `opendock update` reuses the requested
+version identifier, so an install pinned to an exact identifier stays pinned.
+To move a project to a different dock release, run
+`opendock install owner/name@new-version`.
 
 ## Dock Format
 

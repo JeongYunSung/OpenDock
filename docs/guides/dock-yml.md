@@ -183,7 +183,7 @@ logo: logo.png
 
 ### id 규칙
 
-`id`는 `owner/name` 형식이어야 합니다. 설치 명령에서는 뒤에 `@selector`를 붙여 `latest` 또는 정확한 version identifier를 고를 수 있지만, `dock.yml`의 `id`에는 selector를 쓰지 않습니다.
+`id`는 `owner/name` 형식이어야 합니다. 설치 명령에서는 뒤에 정확한 `@version` identifier를 붙여야 하지만, `dock.yml`의 `id`에는 version을 쓰지 않습니다.
 
 ```yaml
 id: opendock/codex
@@ -202,27 +202,26 @@ id: ../codex
 id: opendock/codex/designer
 ```
 
-### 버전 selector
+### 버전 identifier
 
-설치할 때는 `@` 뒤에 selector를 붙일 수 있습니다. OpenDock은 version을 semantic version으로 정렬하지 않고, Registry의 `latest`는 가장 최근에 승인된 non-revoked version입니다.
+설치할 때는 `@` 뒤에 정확한 version identifier를 반드시 붙입니다. OpenDock은 version을 semantic version으로 정렬하지 않고, Registry가 돌려준 version과 요청한 identifier를 정확히 비교합니다.
 
 ```bash
-opendock install opendock/codex
-opendock install opendock/codex@latest
+opendock install opendock/codex@1.0.0
 opendock install opendock/codex@1.5.2
 opendock install opendock/codex@designer-build
 ```
 
-selector가 없으면 `latest`로 해석합니다. `1.5.2`나 `designer-build`는 exact version identifier 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 selector와 Registry가 돌려준 exact version을 함께 기록합니다.
+version이 없거나 `@latest`를 쓰면 실패합니다. `1.5.2`나 `designer-build`는 exact version identifier 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 version identifier와 Registry가 돌려준 exact version을 함께 기록합니다.
 
 ```yaml
 docks:
   - id: opendock/codex
-    requested: latest
+    requested: 1.5.2
     version: 1.5.2
 ```
 
-`opendock update`는 lock의 `requested`를 다시 사용합니다. 즉 `latest`로 설치한 dock은 새로운 version이 승인되면 이동할 수 있고, `@1.5.2`처럼 exact version으로 설치한 dock은 update에서도 고정됩니다.
+`opendock update`는 lock의 `requested` version identifier를 다시 사용합니다. 따라서 설치한 exact version은 update에서도 고정됩니다. 다른 release로 이동하려면 `opendock install opendock/codex@new-version`처럼 새 exact version을 명시해 다시 적용합니다.
 
 ### release version과 deploy
 
@@ -233,7 +232,7 @@ opendock deploy opendock/codex@1.0.0
 opendock deploy opendock/codex@designer-build
 ```
 
-`opendock deploy opendock/codex`처럼 version이 없거나 `opendock deploy opendock/codex@latest`처럼 `latest`를 쓰면 실패합니다. `latest`는 install/update에서만 쓰는 selector입니다.
+`opendock deploy opendock/codex`처럼 version이 없거나 `opendock deploy opendock/codex@latest`처럼 `latest`를 쓰면 실패합니다.
 
 deploy는 `dock.yml`, `readme`, `logo`, `files[].from`, lifecycle `copy.from`에 명시된 파일과 디렉터리를 `.tgz` archive로 묶어 Registry submission에 포함합니다. Registry 검토가 승인되면 그 archive가 해당 release의 다운로드 대상이 됩니다.
 
@@ -298,7 +297,7 @@ files:
 
 OpenDock은 마지막으로 적용한 파일 hash를 `.opendock/project.yml`에 기록합니다. install/update 때 현재 파일 hash가 마지막 적용 hash와 같으면 새 dock 내용으로 교체하거나, 새 dock에서 빠진 파일을 삭제합니다. 사용자가 파일을 수정해 hash가 달라졌으면 기본적으로 파일 적용과 lifecycle 실행 전에 중단하고 `review required`로 보고합니다.
 
-`opendock install owner/name --force` 또는 `opendock update --force`를 쓰면 수정된 `managed_file`도 dock 내용으로 강제 덮어쓰거나, 새 dock에서 빠진 managed file을 강제로 삭제합니다.
+`opendock install owner/name@1.0.0 --force` 또는 `opendock update --force`를 쓰면 수정된 `managed_file`도 dock 내용으로 강제 덮어쓰거나, 새 dock에서 빠진 managed file을 강제로 삭제합니다.
 
 이 정책은 `.agents/`, 하네스, 생성된 설정 묶음처럼 OpenDock이 소유권을 갖는 파일 트리에 적합합니다. 사용자가 직접 편집할 가능성이 큰 README나 제품 문서는 `manual_review`가 더 안전합니다.
 
@@ -341,8 +340,8 @@ lifecycle:
 
 | phase | 실행 시점 | 목적 |
 |---|---|---|
-| `install` | `opendock install owner/name` | 최초 설치, 도구 설치, 프로젝트 적용 |
-| `update` | `opendock update` | 이미 설치된 dock을 최신 버전 또는 최신 상태로 갱신 |
+| `install` | `opendock install owner/name@1.0.0` | 최초 설치, 도구 설치, 프로젝트 적용 |
+| `update` | `opendock update` | 이미 설치된 exact dock release의 파일과 lifecycle 유지보수 |
 | `doctor` | `opendock doctor` | 현재 프로젝트 상태 점검 |
 
 OpenDock은 먼저 review-required 파일을 검사합니다. 수정된 `managed_file`처럼 자동 반영이 위험한 항목이 있으면 기본적으로 파일 적용과 `install`/`update` lifecycle 실행 전에 중단합니다. `--force`를 쓰거나 review-required가 없으면 파일 적용이 lifecycle 실행보다 먼저 일어납니다. lifecycle이 실패하면 실패 로그가 남고, `.opendock` 상태 기록은 완료되지 않습니다.
@@ -447,7 +446,7 @@ lifecycle:
 
 선택 platform은 다음 순서로 결정됩니다.
 
-1. `opendock install owner/name --platform windows`처럼 CLI 옵션을 주면 그 값을 사용합니다.
+1. `opendock install owner/name@1.0.0 --platform windows`처럼 CLI 옵션을 주면 그 값을 사용합니다.
 2. 옵션이 없으면 현재 host OS를 자동 감지합니다. `darwin`은 `macos`, `win32`는 `windows`, `linux`는 `linux`로 매핑됩니다.
 3. 설치 후 `.opendock/dock.lock.yml`에 platform을 기록합니다.
 4. `opendock update`와 `opendock doctor`는 lock에 기록된 platform을 기본값으로 재사용합니다.

@@ -28,7 +28,7 @@ OpenDock은 터미널 대체재가 아닙니다. 프로젝트에 검증된 AI �
 실행하는 작은 바이너리입니다.
 
 ```bash
-opendock install opendock/codex
+opendock install opendock/codex@1.0.0
 opendock update
 opendock doctor
 opendock log
@@ -93,10 +93,10 @@ README.md
 
 | 명령어 | 역할 |
 |---|---|
-| `opendock install opendock/codex` | 현재 디렉터리에 승인된 dock을 설치합니다. |
+| `opendock install opendock/codex@1.0.0` | 현재 디렉터리에 승인된 dock을 설치합니다. |
 | `opendock install opendock/codex@designer-build` | 정확한 version identifier로 설치합니다. |
-| `opendock install opendock/codex --platform windows` | host 자동 감지 대신 명시한 target platform으로 설치합니다. |
-| `opendock install opendock/codex --force` | install 중 OpenDock 관리 파일 변경을 강제로 반영합니다. |
+| `opendock install opendock/codex@1.0.0 --platform windows` | host 자동 감지 대신 명시한 target platform으로 설치합니다. |
+| `opendock install opendock/codex@1.0.0 --force` | install 중 OpenDock 관리 파일 변경을 강제로 반영합니다. |
 | `opendock update` | 설치된 dock을 다시 resolve하고 lock에 기록된 platform 기준으로 안전하게 새 버전을 적용합니다. |
 | `opendock update --force` | 수정된 managed file이 있어도 OpenDock 관리 변경을 강제로 반영합니다. |
 | `opendock doctor` | 현재 디렉터리의 OpenDock 상태를 lock에 기록된 platform 기준으로 표시합니다. |
@@ -112,30 +112,31 @@ README.md
 로그인 상태 확인과 해제에는 `opendock auth status`, `opendock auth logout`을 사용하세요.
 Homebrew가 없다면 먼저 `opendock bootstrap mac`을 실행하세요.
 
-dock reference는 `latest` 또는 정확한 version identifier만 지원합니다.
-OpenDock은 version을 semantic version으로 정렬하지 않습니다. Registry의
-`latest`는 가장 최근에 승인된 non-revoked version입니다.
+dock reference는 정확한 version identifier를 반드시 요구합니다. OpenDock은
+version을 semantic version으로 정렬하지 않고, `@` 뒤 identifier를 정확히 비교합니다.
 
 ```text
-owner/name                  -> latest
-owner/name@latest           -> latest
+owner/name                  -> rejected
+owner/name@latest           -> rejected
 owner/name@1.2.0            -> exact approved version identifier
 owner/name@designer-build   -> exact approved version identifier
 ```
 
-배포는 항상 정확한 release identifier가 필요합니다.
+install과 deploy는 모두 정확한 release identifier가 필요합니다.
 
 ```bash
+opendock install owner/name@1.0.0
 opendock deploy owner/name@1.0.0
 ```
 
+`opendock install owner/name`, `opendock install owner/name@latest`,
 `opendock deploy owner/name`, `opendock deploy owner/name@latest`는 거부됩니다.
-`latest`는 install/update에서만 쓰는 소비자 selector입니다.
 
-OpenDock은 요청한 selector와 resolve된 exact version을 모두
-`.opendock/dock.lock.yml`에 저장합니다. `opendock update`는 요청한 selector를
-재사용하므로 정확한 identifier로 설치한 dock은 고정되고, `latest`는 더 새로운
-version이 승인되면 이동할 수 있습니다.
+OpenDock은 요청한 version identifier와 resolve된 exact version을 모두
+`.opendock/dock.lock.yml`에 저장합니다. `opendock update`는 요청한 version
+identifier를 재사용하므로 정확한 identifier로 설치한 dock은 고정됩니다. 다른
+dock release로 이동하려면 `opendock install owner/name@new-version`을 다시
+실행합니다.
 
 ## Dock 형식
 

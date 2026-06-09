@@ -30,7 +30,7 @@ OpenDock n'est volontairement pas un remplacement du terminal. C'est le petit
 binaire à exécuter lorsqu'un projet a besoin d'une configuration IA fiable.
 
 ```bash
-opendock install opendock/codex
+opendock install opendock/codex@1.0.0
 opendock update
 opendock doctor
 opendock log
@@ -99,10 +99,10 @@ README.md
 
 | Commande | Objectif |
 |---|---|
-| `opendock install opendock/codex` | Installe un dock approuvé dans le répertoire courant. |
+| `opendock install opendock/codex@1.0.0` | Installe un dock approuvé dans le répertoire courant. |
 | `opendock install opendock/codex@designer-build` | Installe avec un identifiant de version exact. |
-| `opendock install opendock/codex --platform windows` | Installe avec une target platform explicite au lieu de détecter le host. |
-| `opendock install opendock/codex --force` | Force les changements managed par OpenDock pendant install. |
+| `opendock install opendock/codex@1.0.0 --platform windows` | Installe avec une target platform explicite au lieu de détecter le host. |
+| `opendock install opendock/codex@1.0.0 --force` | Force les changements managed par OpenDock pendant install. |
 | `opendock update` | Re-résout les docks installés et applique les nouvelles versions en sécurité avec la platform verrouillée. |
 | `opendock update --force` | Force les changements managed par OpenDock même si des managed files modifiés sont détectés. |
 | `opendock doctor` | Affiche l'état OpenDock du répertoire courant avec la platform verrouillée. |
@@ -118,23 +118,22 @@ README.md
 Utilisez `opendock auth status` ou `opendock auth logout` pour l'inspecter ou la supprimer.
 Exécutez d'abord `opendock bootstrap mac` si Homebrew est absent.
 
-Les références dock prennent en charge `latest` ou un identifiant de version exact :
+Les références dock exigent un identifiant de version exact :
 
 ```text
-owner/name                  -> latest
-owner/name@latest           -> latest
+owner/name                  -> rejected
+owner/name@latest           -> rejected
 owner/name@1.2.0            -> exact approved version identifier
 owner/name@designer-build   -> exact approved version identifier
 ```
 
-Deploy requiert toujours un identifiant de release exact, par exemple
-`opendock deploy owner/name@1.0.0`. `latest` est seulement un selector pour
-install/update.
+Install et deploy requièrent tous deux un identifiant de release exact, par exemple
+`opendock install owner/name@1.0.0` et `opendock deploy owner/name@1.0.0`.
 
-OpenDock stocke à la fois le selector demandé et la version exacte résolue dans
-`.opendock/dock.lock.yml`. `opendock update` réutilise le selector demandé :
-une installation fixée à `@1.5.2` reste fixée, tandis que `latest` peut évoluer
-vers une version approuvée plus récente.
+OpenDock stocke à la fois le version identifier demandé et la version exacte
+résolue dans `.opendock/dock.lock.yml`. `opendock update` réutilise le version
+identifier demandé : une installation fixée à `@1.5.2` reste fixée. Pour passer
+à une autre release, exécutez `opendock install owner/name@new-version`.
 
 ## Format Du Dock
 

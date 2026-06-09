@@ -29,7 +29,7 @@ OpenDock はターミナルの代替ではありません。プロジェクト�
 設定が必要なときに実行する小さなバイナリです。
 
 ```bash
-opendock install opendock/codex
+opendock install opendock/codex@1.0.0
 opendock update
 opendock doctor
 opendock log
@@ -96,10 +96,10 @@ README.md
 
 | コマンド | 目的 |
 |---|---|
-| `opendock install opendock/codex` | 承認済み dock を現在のディレクトリにインストールします。 |
+| `opendock install opendock/codex@1.0.0` | 承認済み dock を現在のディレクトリにインストールします。 |
 | `opendock install opendock/codex@designer-build` | exact version identifier を使ってインストールします。 |
-| `opendock install opendock/codex --platform windows` | host の自動検出ではなく明示した target platform でインストールします。 |
-| `opendock install opendock/codex --force` | install 中に OpenDock managed changes を強制適用します。 |
+| `opendock install opendock/codex@1.0.0 --platform windows` | host の自動検出ではなく明示した target platform でインストールします。 |
+| `opendock install opendock/codex@1.0.0 --force` | install 中に OpenDock managed changes を強制適用します。 |
 | `opendock update` | インストール済み dock を再 resolve し、lock 済み platform で安全に新しい version を適用します。 |
 | `opendock update --force` | 編集済み managed file があっても OpenDock managed changes を強制適用します。 |
 | `opendock doctor` | 現在のディレクトリの OpenDock state を lock 済み platform で表示します。 |
@@ -115,23 +115,22 @@ README.md
 状態確認や解除には `opendock auth status`、`opendock auth logout` を使ってください。
 Homebrew がない場合は、先に `opendock bootstrap mac` を実行してください。
 
-dock reference は `latest` または exact version identifier をサポートします。
+dock reference は exact version identifier を必須にします。
 
 ```text
-owner/name                  -> latest
-owner/name@latest           -> latest
+owner/name                  -> rejected
+owner/name@latest           -> rejected
 owner/name@1.2.0            -> exact approved version identifier
 owner/name@designer-build   -> exact approved version identifier
 ```
 
-Deploy には常に exact release identifier が必要です。例:
-`opendock deploy owner/name@1.0.0`。`latest` は install/update 専用の
-selector です。
+Install と deploy はどちらも exact release identifier が必要です。例:
+`opendock install owner/name@1.0.0`、`opendock deploy owner/name@1.0.0`。
 
-OpenDock は、要求された selector と resolve された exact version の両方を
+OpenDock は、要求された version identifier と resolve された exact version の両方を
 `.opendock/dock.lock.yml` に保存します。`opendock update` は要求された
-selector を再利用するため、`@1.5.2` でインストールした dock は固定され、
-`latest` はより新しく承認された version へ移動できます。
+version identifier を再利用するため、`@1.5.2` でインストールした dock は固定され、
+別の release に移動するには `opendock install owner/name@new-version` を実行します。
 
 ## Dock Format
 
