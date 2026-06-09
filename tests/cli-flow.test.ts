@@ -765,6 +765,9 @@ files:
     expect(token.token).toBe("od_test_cli_token");
     expect(tokenStore.loadToken()).toBe("od_test_cli_token");
     expect(messages.join("\n")).toContain("Logged in as designer@example.com.");
+    expect(messages.join("\n")).toContain(
+      "Open this URL if the browser does not open: https://accounts.example.test/login",
+    );
   });
 
   it("fails browser auth cleanly when the callback receives an error", async () => {
@@ -846,7 +849,10 @@ files:
     expect(token.token).toBe("od_tty_token");
     expect(tokenStore.loadToken()).toBe("od_tty_token");
     expect(messages.join("\n")).toContain(
-      "Open this URL to continue: https://accounts.example.test/login",
+      "Open this URL if the browser does not open: https://accounts.example.test/login",
+    );
+    expect(messages.join("\n")).toContain(
+      "Browser did not open automatically. Continue with the URL above.",
     );
   });
 

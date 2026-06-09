@@ -43,11 +43,12 @@ export async function performBrowserLogin(
   try {
     const login = await client.startCliLogin(redirectUri);
     write("Opening browser for OpenDock login.");
+    write(`Open this URL if the browser does not open: ${login.authUrl}`);
     write("Waiting for login... press Enter to check again.");
     try {
       await openBrowser(login.authUrl);
     } catch {
-      write(`Open this URL to continue: ${login.authUrl}`);
+      write("Browser did not open automatically. Continue with the URL above.");
     }
     const code = await waitForCode;
     const token = await client.exchangeCliCode(code);
