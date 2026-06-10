@@ -20,10 +20,12 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { TokenStore } from "../src/auth.js";
 import { bootstrapMac } from "../src/bootstrap.js";
 import { performBrowserLogin } from "../src/browser-auth.js";
+import { run as runCliProgram } from "../src/cli.js";
 import {
   assertVersionSatisfiesSelector,
   type DockManifest,
   DockRef,
+  type FileUpdatePolicy,
   type LifecycleStep,
   parseManifestFile,
   validateManifestFor,
@@ -31,7 +33,7 @@ import {
 import { install } from "../src/installer.js";
 import { lockDocks, readLock, readProjectFile } from "../src/project.js";
 import { OpenDockRegistryClient } from "../src/registry.js";
-import { type ResolvedDock, resolveDock } from "../src/resolver.js";
+import { type ResolvedDock, resolveDock, resolveLatestDock } from "../src/resolver.js";
 import { runLifecycle } from "../src/runner.js";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -321,6 +323,199 @@ describe("opendock TypeScript CLI", () => {
     ]);
   });
 
+  it("recreates missing tracked files on update for every file policy", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writePolicyDock(docks, "test", "missing-files", "1.0.0", [
+      { content: "managed v1\n", path: "managed.txt", update: "managed_file" },
+      { content: "block v1\n", path: "block.md", update: "managed_block" },
+      { content: "manual v1\n", path: "manual.md", update: "manual_review" },
+      { content: "append v1\n", path: "append.txt", update: "append_unique" },
+    ]);
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/missing-files@1.0.0"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+    for (const path of ["managed.txt", "block.md", "manual.md", "append.txt"]) {
+      rmSync(join(project, path), { force: true });
+    }
+
+    writePolicyDock(docks, "test", "missing-files", "1.0.1", [
+      { content: "managed v2\n", path: "managed.txt", update: "managed_file" },
+      { content: "block v2\n", path: "block.md", update: "managed_block" },
+      { content: "manual v2\n", path: "manual.md", update: "manual_review" },
+      { content: "append v2\n", path: "append.txt", update: "append_unique" },
+    ]);
+    const report = await install({
+      dockRef: DockRef.parse("test/missing-files@1.0.1"),
+      projectDir: project,
+      runCommands: false,
+      operation: "update",
+      phase: "update",
+      resolve: resolver,
+    });
+
+    expect(report.filesCreated).toBe(4);
+    expect(readFileSync(join(project, "managed.txt"), "utf8")).toBe("managed v2\n");
+    expect(readFileSync(join(project, "block.md"), "utf8")).toBe("block v2\n");
+    expect(readFileSync(join(project, "manual.md"), "utf8")).toBe("manual v2\n");
+    expect(readFileSync(join(project, "append.txt"), "utf8")).toBe("append v2\n");
+    expect(
+      readProjectFile(project)
+        ?.files.map((file) => file.path)
+        .sort(),
+    ).toEqual(["append.txt", "block.md", "managed.txt", "manual.md"]);
+  });
+
+  it("removes managed_block payloads missing from a newer release while preserving outside text", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeFileSync(join(project, "NOTES.md"), "# User Notes\n");
+    writePolicyDock(docks, "test", "removed-block", "1.0.0", [
+      { content: "dock block v1\n", path: "NOTES.md", update: "managed_block" },
+    ]);
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/removed-block@1.0.0"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+    expect(readFileSync(join(project, "NOTES.md"), "utf8")).toContain(
+      "OPENDOCK:START test/removed-block:NOTES.md",
+    );
+
+    writePolicyDock(docks, "test", "removed-block", "1.0.1", []);
+    const report = await install({
+      dockRef: DockRef.parse("test/removed-block@1.0.1"),
+      projectDir: project,
+      runCommands: false,
+      operation: "update",
+      phase: "update",
+      resolve: resolver,
+    });
+
+    expect(report.filesUpdated).toBe(1);
+    expect(readFileSync(join(project, "NOTES.md"), "utf8")).toBe("# User Notes\n");
+    expect(readProjectFile(project)?.files).toEqual([]);
+  });
+
+  it("stops when a removed managed_block file without markers was user-edited", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writePolicyDock(docks, "test", "removed-raw-block", "1.0.0", [
+      { content: "dock block v1\n", path: "NOTES.md", update: "managed_block" },
+    ]);
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/removed-raw-block@1.0.0"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+    writeFileSync(join(project, "NOTES.md"), "user edit\n");
+
+    writePolicyDock(docks, "test", "removed-raw-block", "1.0.1", []);
+    await expect(
+      install({
+        dockRef: DockRef.parse("test/removed-raw-block@1.0.1"),
+        projectDir: project,
+        runCommands: false,
+        operation: "update",
+        phase: "update",
+        resolve: resolver,
+      }),
+    ).rejects.toThrow("require review");
+
+    expect(readFileSync(join(project, "NOTES.md"), "utf8")).toBe("user edit\n");
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      requested: "1.0.0",
+      version: "1.0.0",
+    });
+  });
+
+  it("keeps local manual_review and append_unique files when removed from a newer release", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writePolicyDock(docks, "test", "removed-soft-files", "1.0.0", [
+      { content: "manual v1\n", path: "manual.md", update: "manual_review" },
+      { content: "append v1\n", path: "append.txt", update: "append_unique" },
+    ]);
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/removed-soft-files@1.0.0"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+
+    writePolicyDock(docks, "test", "removed-soft-files", "1.0.1", []);
+    await install({
+      dockRef: DockRef.parse("test/removed-soft-files@1.0.1"),
+      projectDir: project,
+      runCommands: false,
+      operation: "update",
+      phase: "update",
+      resolve: resolver,
+    });
+
+    expect(readFileSync(join(project, "manual.md"), "utf8")).toBe("manual v1\n");
+    expect(readFileSync(join(project, "append.txt"), "utf8")).toBe("append v1\n");
+    expect(readProjectFile(project)?.files).toEqual([]);
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      requested: "1.0.1",
+      version: "1.0.1",
+    });
+  });
+
+  it("preserves user-edited manual_review files while updating the dock version", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writePolicyDock(docks, "test", "manual-review-update", "1.0.0", [
+      { content: "manual v1\n", path: "README.md", update: "manual_review" },
+    ]);
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/manual-review-update@1.0.0"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+    writeFileSync(join(project, "README.md"), "user readme\n");
+
+    writePolicyDock(docks, "test", "manual-review-update", "1.0.1", [
+      { content: "manual v2\n", path: "README.md", update: "manual_review" },
+    ]);
+    const report = await install({
+      dockRef: DockRef.parse("test/manual-review-update@1.0.1"),
+      projectDir: project,
+      runCommands: false,
+      operation: "update",
+      phase: "update",
+      resolve: resolver,
+    });
+
+    expect(report.filesReviewRequired).toBe(0);
+    expect(readFileSync(join(project, "README.md"), "utf8")).toBe("user readme\n");
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      requested: "1.0.1",
+      version: "1.0.1",
+    });
+  });
+
   it("stops before replacing user-edited managed files", async () => {
     const project = await tempDir();
     const docks = await tempDir();
@@ -534,6 +729,589 @@ files:
       requested: "1.5.2",
       signature: "registry-signature",
       version: "1.5.2",
+    });
+  });
+
+  it("resolves latest remote docks from Registry metadata", async () => {
+    const archiveRoot = await tempDir();
+    const archive = await createRemoteDockArchive(archiveRoot, "test", "remote-latest");
+    const checksum = sha256Bytes(archive);
+    const urls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+      const url = String(input);
+      urls.push(url);
+      if (url === "https://registry.opendock.app/v1/docks/test/remote-latest/versions/latest") {
+        return new Response(
+          JSON.stringify({
+            approved: true,
+            checksum,
+            id: "test/remote-latest",
+            signature: "registry-signature",
+            version: "1.0.1",
+          }),
+          { headers: { "content-type": "application/json" }, status: 200 },
+        );
+      }
+      if (
+        url === "https://registry.opendock.app/v1/docks/test/remote-latest/versions/1.0.1/download"
+      ) {
+        return new Response(archive, { status: 200 });
+      }
+      return new Response("{}", { status: 404, statusText: "Not Found" });
+    }) as typeof fetch;
+
+    try {
+      const resolved = await resolveLatestDock("test", "remote-latest");
+      expect(resolved.version).toBe("1.0.1");
+      expect(resolved.manifest.id).toBe("test/remote-latest");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(urls).toEqual([
+      "https://registry.opendock.app/v1/docks/test/remote-latest/versions/latest",
+      "https://registry.opendock.app/v1/docks/test/remote-latest/versions/1.0.1/download",
+    ]);
+  });
+
+  it("updates installed CLI docks to the latest approved Registry release", async () => {
+    const project = await tempDir();
+    const archiveRoot = await tempDir();
+    const firstArchive = await createRemoteDockArchive(
+      join(archiveRoot, "first"),
+      "test",
+      "remote-update",
+      "# Version One\n",
+    );
+    const latestArchive = await createRemoteDockArchive(
+      join(archiveRoot, "latest"),
+      "test",
+      "remote-update",
+      "# Version Two\n",
+    );
+    const originalFetch = globalThis.fetch;
+    const urls: string[] = [];
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+      const url = String(input);
+      urls.push(url);
+      if (url === "https://registry.opendock.app/v1/docks/test/remote-update/versions/1.0.0") {
+        return new Response(
+          JSON.stringify({
+            approved: true,
+            checksum: sha256Bytes(firstArchive),
+            id: "test/remote-update",
+            signature: "registry-signature",
+            version: "1.0.0",
+          }),
+          { headers: { "content-type": "application/json" }, status: 200 },
+        );
+      }
+      if (url === "https://registry.opendock.app/v1/docks/test/remote-update/versions/latest") {
+        return new Response(
+          JSON.stringify({
+            approved: true,
+            checksum: sha256Bytes(latestArchive),
+            id: "test/remote-update",
+            signature: "registry-signature",
+            version: "1.0.1",
+          }),
+          { headers: { "content-type": "application/json" }, status: 200 },
+        );
+      }
+      if (
+        url === "https://registry.opendock.app/v1/docks/test/remote-update/versions/1.0.0/download"
+      ) {
+        return new Response(firstArchive, { status: 200 });
+      }
+      if (
+        url === "https://registry.opendock.app/v1/docks/test/remote-update/versions/1.0.1/download"
+      ) {
+        return new Response(latestArchive, { status: 200 });
+      }
+      return new Response("{}", { status: 404, statusText: "Not Found" });
+    }) as typeof fetch;
+
+    try {
+      await withCwd(project, () =>
+        runCliProgram(["node", "opendock", "install", "test/remote-update@1.0.0"]),
+      );
+      expect(readFileSync(join(project, "README.md"), "utf8")).toContain("# Version One");
+
+      await withCwd(project, () => runCliProgram(["node", "opendock", "update"]));
+      expect(readFileSync(join(project, "README.md"), "utf8")).toContain("# Version Two");
+      expect(lockDocks(readLock(project))[0]).toMatchObject({
+        requested: "1.0.1",
+        version: "1.0.1",
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(urls).toEqual([
+      "https://registry.opendock.app/v1/docks/test/remote-update/versions/1.0.0",
+      "https://registry.opendock.app/v1/docks/test/remote-update/versions/1.0.0/download",
+      "https://registry.opendock.app/v1/docks/test/remote-update/versions/latest",
+      "https://registry.opendock.app/v1/docks/test/remote-update/versions/1.0.1/download",
+    ]);
+  });
+
+  it("updates CLI docks by removing unchanged managed files missing from the latest release", async () => {
+    const project = await tempDir();
+    const archiveRoot = await tempDir();
+    const firstArchive = await createRemoteDirectoryDockArchive(
+      join(archiveRoot, "first"),
+      "test",
+      "remote-prune",
+      {
+        "old.txt": "version 1\n",
+      },
+    );
+    const latestArchive = await createRemoteDirectoryDockArchive(
+      join(archiveRoot, "latest"),
+      "test",
+      "remote-prune",
+      {
+        "machine.md": "version 2\n",
+      },
+    );
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+      const url = String(input);
+      if (url === "https://registry.opendock.app/v1/docks/test/remote-prune/versions/1.0.0") {
+        return registryMetadataResponse("test/remote-prune", "1.0.0", firstArchive);
+      }
+      if (url === "https://registry.opendock.app/v1/docks/test/remote-prune/versions/latest") {
+        return registryMetadataResponse("test/remote-prune", "1.0.1", latestArchive);
+      }
+      if (
+        url === "https://registry.opendock.app/v1/docks/test/remote-prune/versions/1.0.0/download"
+      ) {
+        return new Response(firstArchive, { status: 200 });
+      }
+      if (
+        url === "https://registry.opendock.app/v1/docks/test/remote-prune/versions/1.0.1/download"
+      ) {
+        return new Response(latestArchive, { status: 200 });
+      }
+      return new Response("{}", { status: 404, statusText: "Not Found" });
+    }) as typeof fetch;
+
+    try {
+      await withCwd(project, () =>
+        runCliProgram(["node", "opendock", "install", "test/remote-prune@1.0.0"]),
+      );
+      expect(readFileSync(join(project, "project", "old.txt"), "utf8")).toBe("version 1\n");
+
+      await withCwd(project, () => runCliProgram(["node", "opendock", "update"]));
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(existsSync(join(project, "project", "old.txt"))).toBe(false);
+    expect(readFileSync(join(project, "project", "machine.md"), "utf8")).toBe("version 2\n");
+    expect(readProjectFile(project)?.files.map((file) => file.path)).toEqual([
+      "project/machine.md",
+    ]);
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      requested: "1.0.1",
+      version: "1.0.1",
+    });
+  });
+
+  it("stops CLI latest updates before touching user-edited managed files", async () => {
+    const project = await tempDir();
+    const archiveRoot = await tempDir();
+    const firstArchive = await createRemoteDirectoryDockArchive(
+      join(archiveRoot, "first"),
+      "test",
+      "remote-conflict",
+      {
+        "config.yml": "tool: old\n",
+      },
+    );
+    const latestArchive = await createRemoteDirectoryDockArchive(
+      join(archiveRoot, "latest"),
+      "test",
+      "remote-conflict",
+      {
+        "config.yml": "tool: latest\n",
+      },
+      { updateMarker: true },
+    );
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+      const url = String(input);
+      if (url === "https://registry.opendock.app/v1/docks/test/remote-conflict/versions/1.0.0") {
+        return registryMetadataResponse("test/remote-conflict", "1.0.0", firstArchive);
+      }
+      if (url === "https://registry.opendock.app/v1/docks/test/remote-conflict/versions/latest") {
+        return registryMetadataResponse("test/remote-conflict", "1.0.1", latestArchive);
+      }
+      if (
+        url ===
+        "https://registry.opendock.app/v1/docks/test/remote-conflict/versions/1.0.0/download"
+      ) {
+        return new Response(firstArchive, { status: 200 });
+      }
+      if (
+        url ===
+        "https://registry.opendock.app/v1/docks/test/remote-conflict/versions/1.0.1/download"
+      ) {
+        return new Response(latestArchive, { status: 200 });
+      }
+      return new Response("{}", { status: 404, statusText: "Not Found" });
+    }) as typeof fetch;
+
+    try {
+      await withCwd(project, () =>
+        runCliProgram(["node", "opendock", "install", "test/remote-conflict@1.0.0"]),
+      );
+      writeFileSync(join(project, "project", "config.yml"), "tool: user\n");
+
+      await expect(
+        withCwd(project, () => runCliProgram(["node", "opendock", "update"])),
+      ).rejects.toThrow("require review");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(readFileSync(join(project, "project", "config.yml"), "utf8")).toBe("tool: user\n");
+    expect(existsSync(join(project, ".updated"))).toBe(false);
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      requested: "1.0.0",
+      version: "1.0.0",
+    });
+  });
+
+  it("force-updates CLI latest releases over user-edited managed files", async () => {
+    const project = await tempDir();
+    const archiveRoot = await tempDir();
+    const firstArchive = await createRemoteDirectoryDockArchive(
+      join(archiveRoot, "first"),
+      "test",
+      "remote-force",
+      {
+        "config.yml": "tool: old\n",
+      },
+    );
+    const latestArchive = await createRemoteDirectoryDockArchive(
+      join(archiveRoot, "latest"),
+      "test",
+      "remote-force",
+      {
+        "config.yml": "tool: latest\n",
+      },
+      { updateMarker: true },
+    );
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+      const url = String(input);
+      if (url === "https://registry.opendock.app/v1/docks/test/remote-force/versions/1.0.0") {
+        return registryMetadataResponse("test/remote-force", "1.0.0", firstArchive);
+      }
+      if (url === "https://registry.opendock.app/v1/docks/test/remote-force/versions/latest") {
+        return registryMetadataResponse("test/remote-force", "1.0.1", latestArchive);
+      }
+      if (
+        url === "https://registry.opendock.app/v1/docks/test/remote-force/versions/1.0.0/download"
+      ) {
+        return new Response(firstArchive, { status: 200 });
+      }
+      if (
+        url === "https://registry.opendock.app/v1/docks/test/remote-force/versions/1.0.1/download"
+      ) {
+        return new Response(latestArchive, { status: 200 });
+      }
+      return new Response("{}", { status: 404, statusText: "Not Found" });
+    }) as typeof fetch;
+
+    try {
+      await withCwd(project, () =>
+        runCliProgram(["node", "opendock", "install", "test/remote-force@1.0.0"]),
+      );
+      writeFileSync(join(project, "project", "config.yml"), "tool: user\n");
+
+      await withCwd(project, () => runCliProgram(["node", "opendock", "update", "--force"]));
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(readFileSync(join(project, "project", "config.yml"), "utf8")).toBe("tool: latest\n");
+    expect(existsSync(join(project, ".updated"))).toBe(true);
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      requested: "1.0.1",
+      version: "1.0.1",
+    });
+  });
+
+  it("fails update in directories without OpenDock state even when update options are set", async () => {
+    const project = await tempDir();
+
+    const update = runCli(project, {}, ["update", "--force", "--platform", "windows"]);
+
+    expect(update.status).not.toBe(0);
+    expect(update.stderr).toContain(".opendock/dock.lock.yml");
+    expect(existsSync(join(project, ".opendock"))).toBe(false);
+  });
+
+  it("rejects invalid update platforms before requesting Registry metadata", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeTestDock(docks, "test", "invalid-platform", "1.0.0", "# Version One\n");
+    await install({
+      dockRef: DockRef.parse("test/invalid-platform@1.0.0"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      platform: "macos",
+      resolve: localResolver(docks),
+    });
+
+    const urls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0]) => {
+      urls.push(String(input));
+      return new Response("{}", { status: 500, statusText: "Unexpected" });
+    }) as typeof fetch;
+
+    try {
+      await expect(
+        withCwd(project, () =>
+          runCliProgram(["node", "opendock", "update", "--platform", "not-a-platform"]),
+        ),
+      ).rejects.toThrow("unsupported OpenDock platform");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(urls).toEqual([]);
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      platform: "macos",
+      requested: "1.0.0",
+      version: "1.0.0",
+    });
+  });
+
+  it("overrides the locked platform during CLI update and records the new platform", async () => {
+    const project = await tempDir();
+    const archiveRoot = await tempDir();
+    const firstArchive = await createRemotePlatformDockArchive(
+      join(archiveRoot, "first"),
+      "test",
+      "remote-platform",
+      {
+        "config.yml": "tool: old\n",
+      },
+    );
+    const latestArchive = await createRemotePlatformDockArchive(
+      join(archiveRoot, "latest"),
+      "test",
+      "remote-platform",
+      {
+        "config.yml": "tool: latest\n",
+      },
+    );
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = remoteDockFetch("test/remote-platform", {
+      "1.0.0": firstArchive,
+      "1.0.1": latestArchive,
+      latest: latestArchive,
+    });
+
+    try {
+      await withCwd(project, () =>
+        runCliProgram([
+          "node",
+          "opendock",
+          "install",
+          "test/remote-platform@1.0.0",
+          "--platform",
+          "macos",
+        ]),
+      );
+      expect(lockDocks(readLock(project))[0]?.platform).toBe("macos");
+
+      await withCwd(project, () =>
+        runCliProgram(["node", "opendock", "update", "--platform", "windows"]),
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(readFileSync(join(project, "project", "config.yml"), "utf8")).toBe("tool: latest\n");
+    expect(existsSync(join(project, ".windows-update"))).toBe(true);
+    expect(existsSync(join(project, ".macos-update"))).toBe(false);
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      platform: "windows",
+      requested: "1.0.1",
+      version: "1.0.1",
+    });
+  });
+
+  it("uses the locked platform by default during CLI update", async () => {
+    const project = await tempDir();
+    const archiveRoot = await tempDir();
+    const firstArchive = await createRemotePlatformDockArchive(
+      join(archiveRoot, "first"),
+      "test",
+      "remote-platform-default",
+      {
+        "config.yml": "tool: old\n",
+      },
+    );
+    const latestArchive = await createRemotePlatformDockArchive(
+      join(archiveRoot, "latest"),
+      "test",
+      "remote-platform-default",
+      {
+        "config.yml": "tool: latest\n",
+      },
+    );
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = remoteDockFetch("test/remote-platform-default", {
+      "1.0.0": firstArchive,
+      "1.0.1": latestArchive,
+      latest: latestArchive,
+    });
+
+    try {
+      await withCwd(project, () =>
+        runCliProgram([
+          "node",
+          "opendock",
+          "install",
+          "test/remote-platform-default@1.0.0",
+          "--platform",
+          "macos",
+        ]),
+      );
+
+      await withCwd(project, () => runCliProgram(["node", "opendock", "update"]));
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(readFileSync(join(project, "project", "config.yml"), "utf8")).toBe("tool: latest\n");
+    expect(existsSync(join(project, ".macos-update"))).toBe(true);
+    expect(existsSync(join(project, ".windows-update"))).toBe(false);
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      platform: "macos",
+      requested: "1.0.1",
+      version: "1.0.1",
+    });
+  });
+
+  it("keeps lock state unchanged when a platform-overridden update hits a review conflict", async () => {
+    const project = await tempDir();
+    const archiveRoot = await tempDir();
+    const firstArchive = await createRemotePlatformDockArchive(
+      join(archiveRoot, "first"),
+      "test",
+      "remote-platform-conflict",
+      {
+        "config.yml": "tool: old\n",
+      },
+    );
+    const latestArchive = await createRemotePlatformDockArchive(
+      join(archiveRoot, "latest"),
+      "test",
+      "remote-platform-conflict",
+      {
+        "config.yml": "tool: latest\n",
+      },
+    );
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = remoteDockFetch("test/remote-platform-conflict", {
+      "1.0.0": firstArchive,
+      "1.0.1": latestArchive,
+      latest: latestArchive,
+    });
+
+    try {
+      await withCwd(project, () =>
+        runCliProgram([
+          "node",
+          "opendock",
+          "install",
+          "test/remote-platform-conflict@1.0.0",
+          "--platform",
+          "macos",
+        ]),
+      );
+      writeFileSync(join(project, "project", "config.yml"), "tool: user\n");
+
+      await expect(
+        withCwd(project, () =>
+          runCliProgram(["node", "opendock", "update", "--platform", "windows"]),
+        ),
+      ).rejects.toThrow("require review");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(readFileSync(join(project, "project", "config.yml"), "utf8")).toBe("tool: user\n");
+    expect(existsSync(join(project, ".windows-update"))).toBe(false);
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      platform: "macos",
+      requested: "1.0.0",
+      version: "1.0.0",
+    });
+  });
+
+  it("force-updates platform-overridden review conflicts and records the override", async () => {
+    const project = await tempDir();
+    const archiveRoot = await tempDir();
+    const firstArchive = await createRemotePlatformDockArchive(
+      join(archiveRoot, "first"),
+      "test",
+      "remote-platform-force",
+      {
+        "config.yml": "tool: old\n",
+      },
+    );
+    const latestArchive = await createRemotePlatformDockArchive(
+      join(archiveRoot, "latest"),
+      "test",
+      "remote-platform-force",
+      {
+        "config.yml": "tool: latest\n",
+      },
+    );
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = remoteDockFetch("test/remote-platform-force", {
+      "1.0.0": firstArchive,
+      "1.0.1": latestArchive,
+      latest: latestArchive,
+    });
+
+    try {
+      await withCwd(project, () =>
+        runCliProgram([
+          "node",
+          "opendock",
+          "install",
+          "test/remote-platform-force@1.0.0",
+          "--platform",
+          "macos",
+        ]),
+      );
+      writeFileSync(join(project, "project", "config.yml"), "tool: user\n");
+
+      await withCwd(project, () =>
+        runCliProgram(["node", "opendock", "update", "--force", "--platform", "windows"]),
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(readFileSync(join(project, "project", "config.yml"), "utf8")).toBe("tool: latest\n");
+    expect(existsSync(join(project, ".windows-update"))).toBe(true);
+    expect(existsSync(join(project, ".macos-update"))).toBe(false);
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      platform: "windows",
+      requested: "1.0.1",
+      version: "1.0.1",
     });
   });
 
@@ -2001,7 +2779,7 @@ files:
     ).rejects.toThrow("resolved version 2.0.0 does not satisfy selector 1.5.2");
   });
 
-  it("keeps exact requested selectors pinned during updates", async () => {
+  it("updates exact installs to the latest resolved release", async () => {
     const project = await tempDir();
     const docks = await tempDir();
     writeTestDock(docks, "test", "pinned", "1.0.0", "# Version One\n");
@@ -2022,19 +2800,162 @@ files:
     expect(lockedDock.requested).toBe("1.0.0");
 
     writeTestDock(docks, "test", "pinned", "1.0.1", "# Version Two\n");
+    const latest = resolveLocalDockForTest(docks, DockRef.parse("test/pinned@1.0.1"));
+    const update = await install({
+      dockRef: DockRef.parse(`${lockedDock.id}@${latest.version}`),
+      projectDir: project,
+      runCommands: true,
+      operation: "update",
+      phase: "update",
+      resolve: () => latest,
+    });
 
+    expect(update.version).toBe("1.0.1");
+    expect(readFileSync(join(project, "README.md"), "utf8")).toContain("# Version Two");
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      requested: "1.0.1",
+      version: "1.0.1",
+    });
+  });
+
+  it("replaces managed blocks on update while preserving outside user text", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeTestDock(docks, "test", "block-update", "1.0.0", "# Version One\n");
+    writeFileSync(join(project, "README.md"), "# Existing Project README\n");
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/block-update@1.0.0"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+    const readmePath = join(project, "README.md");
+    writeFileSync(
+      readmePath,
+      readFileSync(readmePath, "utf8").replace("# Version One", "# User block edit") +
+        "\n# User Notes\n",
+    );
+
+    writeTestDock(docks, "test", "block-update", "1.0.1", "# Version Two\n");
+    await install({
+      dockRef: DockRef.parse("test/block-update@1.0.1"),
+      projectDir: project,
+      runCommands: false,
+      operation: "update",
+      phase: "update",
+      resolve: resolver,
+    });
+
+    const readme = readFileSync(readmePath, "utf8");
+    expect(readme).toContain("# Version Two");
+    expect(readme).toContain("# Existing Project README");
+    expect(readme).toContain("# User Notes");
+    expect(readme).not.toContain("# User block edit");
+    expect(readme.match(/OPENDOCK:START test\/block-update:README\.md/g)).toHaveLength(1);
+  });
+
+  it("stops before updating user-edited managed_block files without block markers", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeTestDock(docks, "test", "raw-block", "1.0.0", "# Version One\n");
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/raw-block@1.0.0"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+    expect(readFileSync(join(project, "README.md"), "utf8")).toBe("# Version One\n");
+    writeFileSync(join(project, "README.md"), "# User edit\n");
+
+    writeTestDock(docks, "test", "raw-block", "1.0.1", "# Version Two\n");
     await expect(
       install({
-        dockRef: DockRef.parse(`${lockedDock.id}@${lockedDock.requested}`),
+        dockRef: DockRef.parse("test/raw-block@1.0.1"),
         projectDir: project,
-        runCommands: true,
+        runCommands: false,
         operation: "update",
         phase: "update",
-        resolve: localResolver(docks),
+        resolve: resolver,
       }),
-    ).rejects.toThrow("resolved version 1.0.1 does not satisfy selector 1.0.0");
-    expect(readFileSync(join(project, "README.md"), "utf8")).toContain("# Version One");
-    expect(lockDocks(readLock(project))[0]?.version).toBe("1.0.0");
+    ).rejects.toThrow("require review");
+
+    expect(readFileSync(join(project, "README.md"), "utf8")).toBe("# User edit\n");
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      requested: "1.0.0",
+      version: "1.0.0",
+    });
+  });
+
+  it("force-replaces user-edited managed_block files without block markers", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeTestDock(docks, "test", "raw-block-force", "1.0.0", "# Version One\n");
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/raw-block-force@1.0.0"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+    writeFileSync(join(project, "README.md"), "# User edit\n");
+
+    writeTestDock(docks, "test", "raw-block-force", "1.0.1", "# Version Two\n");
+    const report = await install({
+      dockRef: DockRef.parse("test/raw-block-force@1.0.1"),
+      force: true,
+      projectDir: project,
+      runCommands: false,
+      operation: "update",
+      phase: "update",
+      resolve: resolver,
+    });
+
+    expect(report.filesUpdated).toBeGreaterThan(0);
+    expect(readFileSync(join(project, "README.md"), "utf8")).toBe("# Version Two\n");
+    expect(lockDocks(readLock(project))[0]).toMatchObject({
+      requested: "1.0.1",
+      version: "1.0.1",
+    });
+  });
+
+  it("keeps append_unique files additive across install and update", async () => {
+    const project = await tempDir();
+    const docks = await tempDir();
+    writeFileSync(join(project, ".gitignore"), "node_modules/\nlogs/\n");
+    writeAppendUniqueDock(docks, "1.0.0", "node_modules/\n.DS_Store\n");
+    const resolver = localResolver(docks);
+
+    await install({
+      dockRef: DockRef.parse("test/append-only@1.0.0"),
+      projectDir: project,
+      runCommands: false,
+      operation: "install",
+      resolve: resolver,
+    });
+
+    writeAppendUniqueDock(docks, "1.0.1", "node_modules/\n.DS_Store\ncoverage/\n");
+    await install({
+      dockRef: DockRef.parse("test/append-only@1.0.1"),
+      projectDir: project,
+      runCommands: false,
+      operation: "update",
+      phase: "update",
+      resolve: resolver,
+    });
+
+    const gitignore = readFileSync(join(project, ".gitignore"), "utf8");
+    expect(gitignore.match(/node_modules\//g)).toHaveLength(1);
+    expect(gitignore.match(/\.DS_Store/g)).toHaveLength(1);
+    expect(gitignore).toContain("logs/");
+    expect(gitignore).toContain("coverage/");
   });
 
   it("writes failure logs for rejected lifecycle commands", async () => {
@@ -2173,7 +3094,12 @@ function localDockVersionForTest(dockRoot: string, dockRef: DockRef): string {
   return dockRef.requested();
 }
 
-async function createRemoteDockArchive(root: string, owner: string, name: string): Promise<Buffer> {
+async function createRemoteDockArchive(
+  root: string,
+  owner: string,
+  name: string,
+  readme = "# Remote Dock\n",
+): Promise<Buffer> {
   const dockRoot = join(root, "remote-dock");
   mkdirSync(join(dockRoot, "files"), { recursive: true });
   writeFileSync(
@@ -2186,7 +3112,77 @@ files:
     update: manual_review
 `,
   );
-  writeFileSync(join(dockRoot, "files", "README.md"), "# Remote Dock\n");
+  writeFileSync(join(dockRoot, "files", "README.md"), readme);
+  const archivePath = join(root, "dock.tgz");
+  await createTar({ cwd: dockRoot, file: archivePath, gzip: true }, ["."]);
+  return readFileSync(archivePath);
+}
+
+async function createRemoteDirectoryDockArchive(
+  root: string,
+  owner: string,
+  name: string,
+  files: Record<string, string>,
+  options: { updateMarker?: boolean } = {},
+): Promise<Buffer> {
+  const dockRoot = join(root, "remote-directory-dock");
+  const sourceRoot = join(dockRoot, "files", "project");
+  mkdirSync(sourceRoot, { recursive: true });
+  writeFileSync(
+    join(dockRoot, "dock.yml"),
+    `opendock: 1
+id: ${owner}/${name}
+files:
+  - from: files/project
+    to: project
+    update: managed_file
+${options.updateMarker === true ? "lifecycle:\n  update:\n    - id: update-marker\n      run: mkdir .updated\n" : ""}
+`,
+  );
+  for (const [path, content] of Object.entries(files)) {
+    const target = join(sourceRoot, path);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, content);
+  }
+  const archivePath = join(root, "dock.tgz");
+  await createTar({ cwd: dockRoot, file: archivePath, gzip: true }, ["."]);
+  return readFileSync(archivePath);
+}
+
+async function createRemotePlatformDockArchive(
+  root: string,
+  owner: string,
+  name: string,
+  files: Record<string, string>,
+): Promise<Buffer> {
+  const dockRoot = join(root, "remote-platform-dock");
+  const sourceRoot = join(dockRoot, "files", "project");
+  mkdirSync(sourceRoot, { recursive: true });
+  writeFileSync(
+    join(dockRoot, "dock.yml"),
+    `opendock: 1
+id: ${owner}/${name}
+files:
+  - from: files/project
+    to: project
+    update: managed_file
+lifecycle:
+  update:
+    - id: update-platform
+      platforms:
+        linux:
+          run: mkdir .linux-update
+        macos:
+          run: mkdir .macos-update
+        windows:
+          run: mkdir .windows-update
+`,
+  );
+  for (const [path, content] of Object.entries(files)) {
+    const target = join(sourceRoot, path);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, content);
+  }
   const archivePath = join(root, "dock.tgz");
   await createTar({ cwd: dockRoot, file: archivePath, gzip: true }, ["."]);
   return readFileSync(archivePath);
@@ -2220,6 +3216,49 @@ function sha256Bytes(bytes: Buffer): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
+function registryMetadataResponse(id: string, version: string, archive: Buffer): Response {
+  return new Response(
+    JSON.stringify({
+      approved: true,
+      checksum: sha256Bytes(archive),
+      id,
+      signature: "registry-signature",
+      version,
+    }),
+    { headers: { "content-type": "application/json" }, status: 200 },
+  );
+}
+
+function remoteDockFetch(id: string, archives: Record<string, Buffer>): typeof globalThis.fetch {
+  const [owner, name] = id.split("/");
+  return (async (input: Parameters<typeof fetch>[0]) => {
+    const url = String(input);
+    for (const [version, archive] of Object.entries(archives)) {
+      if (url === `https://registry.opendock.app/v1/docks/${owner}/${name}/versions/${version}`) {
+        const resolvedVersion = version === "latest" ? latestArchiveVersion(archives) : version;
+        return registryMetadataResponse(id, resolvedVersion, archive);
+      }
+      if (
+        version !== "latest" &&
+        url ===
+          `https://registry.opendock.app/v1/docks/${owner}/${name}/versions/${version}/download`
+      ) {
+        return new Response(archive, { status: 200 });
+      }
+    }
+    return new Response("{}", { status: 404, statusText: "Not Found" });
+  }) as typeof fetch;
+}
+
+function latestArchiveVersion(archives: Record<string, Buffer>): string {
+  const versions = Object.keys(archives).filter((version) => version !== "latest");
+  const latest = versions.at(-1);
+  if (latest === undefined) {
+    throw new Error("remote mock requires at least one exact version");
+  }
+  return latest;
+}
+
 async function withEnv<T>(env: NodeJS.ProcessEnv, callback: () => Promise<T> | T): Promise<T> {
   const previous = new Map<string, string | undefined>();
   for (const key of Object.keys(env)) {
@@ -2241,6 +3280,16 @@ async function withEnv<T>(env: NodeJS.ProcessEnv, callback: () => Promise<T> | T
         process.env[key] = value;
       }
     }
+  }
+}
+
+async function withCwd<T>(cwd: string, callback: () => Promise<T> | T): Promise<T> {
+  const previous = process.cwd();
+  process.chdir(cwd);
+  try {
+    return await callback();
+  } finally {
+    process.chdir(previous);
   }
 }
 
@@ -2364,6 +3413,39 @@ ${options.updateMarker === true ? "lifecycle:\n  update:\n    - id: update-marke
   writeFileSync(join(dockRoot, ".opendock-version"), `${version}\n`);
 }
 
+function writePolicyDock(
+  root: string,
+  owner: string,
+  name: string,
+  version: string,
+  files: Array<{ content: string; path: string; update: FileUpdatePolicy }>,
+): void {
+  const dockRoot = join(root, owner, name);
+  rmSync(dockRoot, { force: true, recursive: true });
+  mkdirSync(join(dockRoot, "files"), { recursive: true });
+  const fileSpecs = files
+    .map(
+      (file) => `  - from: files/${file.path}
+    to: ${file.path}
+    update: ${file.update}`,
+    )
+    .join("\n");
+  const filesBlock = fileSpecs === "" ? "files: []" : `files:\n${fileSpecs}`;
+  writeFileSync(
+    join(dockRoot, "dock.yml"),
+    `opendock: 1
+id: ${owner}/${name}
+${filesBlock}
+`,
+  );
+  for (const file of files) {
+    const source = join(dockRoot, "files", file.path);
+    mkdirSync(dirname(source), { recursive: true });
+    writeFileSync(source, file.content);
+  }
+  writeFileSync(join(dockRoot, ".opendock-version"), `${version}\n`);
+}
+
 function writeModernDock(root: string): void {
   const dockRoot = join(root, "test", "modern");
   mkdirSync(join(dockRoot, "files"), { recursive: true });
@@ -2401,6 +3483,23 @@ lifecycle:
   writeFileSync(join(dockRoot, "files", ".gitignore"), "node_modules/\n.DS_Store\n");
   writeFileSync(join(dockRoot, "files", "DESIGN.md"), "# Design\n");
   writeFileSync(join(dockRoot, ".opendock-version"), "1.0.0\n");
+}
+
+function writeAppendUniqueDock(root: string, version: string, gitignore: string): void {
+  const dockRoot = join(root, "test", "append-only");
+  mkdirSync(join(dockRoot, "files"), { recursive: true });
+  writeFileSync(
+    join(dockRoot, "dock.yml"),
+    `opendock: 1
+id: test/append-only
+files:
+  - from: files/.gitignore
+    to: .gitignore
+    update: append_unique
+`,
+  );
+  writeFileSync(join(dockRoot, "files", ".gitignore"), gitignore);
+  writeFileSync(join(dockRoot, ".opendock-version"), `${version}\n`);
 }
 
 function writeVersionFailureDock(root: string): void {

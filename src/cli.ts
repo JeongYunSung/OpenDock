@@ -11,6 +11,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import { c as createTar } from "tar";
 import { TokenStore } from "./auth.js";
@@ -29,7 +30,7 @@ import {
   type SubmissionRequest,
   type SubmissionResponse,
 } from "./registry.js";
-import { resolveDock } from "./resolver.js";
+import { type ResolvedDock, resolveDock, resolveLatestDock } from "./resolver.js";
 import { runLifecycle } from "./runner.js";
 
 const maxDeployReadmeBytes = 64 * 1024;
@@ -40,7 +41,7 @@ export async function run(argv = process.argv): Promise<void> {
   const program = new Command();
   program
     .name("opendock")
-    .description("Install, update, diagnose, and deploy OpenDock docks.")
+    .description("Install, update, doctor, and deploy OpenDock docks.")
     .version(VERSION);
 
   program
@@ -71,10 +72,13 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--force", "Overwrite user-edited managed files")
     .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
     .action(async (options: { force?: boolean; platform?: string }) => {
+      const platformOverride =
+        options.platform === undefined ? undefined : resolveCliPlatform(options.platform);
       const lock = readLock(process.cwd());
       for (const dock of lockDocks(lock)) {
-        const dockRef = DockRef.parse(`${dock.id}@${lockedDockVersionSelector(dock)}`);
-        const platform = resolveCliPlatform(options.platform ?? dock.platform);
+        const latest = await resolveLatestDockRef(dock.id);
+        const dockRef = DockRef.parse(`${dock.id}@${latest.version}`);
+        const platform = platformOverride ?? resolveCliPlatform(dock.platform);
         const report = await install({
           dockRef,
           force: options.force === true,
@@ -83,10 +87,11 @@ export async function run(argv = process.argv): Promise<void> {
           operation: "update",
           phase: "update",
           platform,
+          resolve: () => latest,
         });
         if (dock.version === report.version) {
           console.log(
-            `Updated ${dock.id} at ${report.version} for ${report.platform} (${formatFileSummary(report)})`,
+            `Updated ${dock.id} at latest ${report.version} for ${report.platform} (${formatFileSummary(report)})`,
           );
         } else {
           console.log(
@@ -226,6 +231,14 @@ function parseInstallRef(value: string): DockRef {
     );
   }
   return DockRef.parse(value);
+}
+
+async function resolveLatestDockRef(dockId: string): Promise<ResolvedDock> {
+  const [owner, name, extra] = dockId.split("/");
+  if (!owner || !name || extra !== undefined) {
+    throw new Error(`invalid dock id in lock file: ${dockId}`);
+  }
+  return resolveLatestDock(owner, name);
 }
 
 function lockedDockVersionSelector(dock: { requested?: string; version: string }): string {
@@ -548,7 +561,21 @@ async function printDockDoctorChecks(
   }
 }
 
-run().catch((error: unknown) => {
-  console.error(`Error: ${(error as Error).message}`);
-  process.exitCode = 1;
-});
+if (isMainModule()) {
+  run().catch((error: unknown) => {
+    console.error(`Error: ${(error as Error).message}`);
+    process.exitCode = 1;
+  });
+}
+
+function isMainModule(): boolean {
+  const entrypoint = process.argv[1];
+  if (entrypoint === undefined) {
+    return false;
+  }
+  try {
+    return realpathSync(entrypoint) === fileURLToPath(import.meta.url);
+  } catch {
+    return false;
+  }
+}

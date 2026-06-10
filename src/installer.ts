@@ -191,19 +191,31 @@ function applyDockFiles(
     }
 
     if (file.update === "managed_block") {
-      if (
-        priorRecordMap.has(file.to) &&
-        isFile(target) &&
-        fileChecksum(target) === priorRecordMap.get(file.to) &&
-        !hasManagedBlock(target, dockId, file.to)
-      ) {
-        writeFileSync(target, content);
-        report.records.push(recordFor(file.to, textChecksum(content), file.update));
+      const currentChecksum = fileChecksum(target);
+      const incomingChecksum = textChecksum(content);
+      const hasPriorRecord = priorRecordMap.has(file.to);
+      const hasBlock = hasManagedBlock(target, dockId, file.to);
+
+      if (hasPriorRecord && isFile(target) && !hasBlock) {
+        if (
+          force ||
+          currentChecksum === priorRecordMap.get(file.to) ||
+          currentChecksum === incomingChecksum
+        ) {
+          writeFileSync(target, content);
+          report.updated += 1;
+          report.records.push(recordFor(file.to, incomingChecksum, file.update));
+        } else {
+          report.reviewRequired += 1;
+          if (priorRecord) {
+            report.records.push(priorRecord);
+          }
+        }
       } else {
         upsertManagedBlock(target, dockId, file.to, content);
+        report.updated += 1;
         report.records.push(recordFor(file.to, fileChecksum(target), file.update));
       }
-      report.updated += 1;
       continue;
     }
 
@@ -260,7 +272,7 @@ function collectFileReviewIssues(
   const desiredPaths = new Set(expandedFiles.map((file) => file.to));
 
   for (const file of expandedFiles) {
-    if (file.update !== "managed_file") {
+    if (file.update !== "managed_file" && file.update !== "managed_block") {
       continue;
     }
 
@@ -275,7 +287,21 @@ function collectFileReviewIssues(
     const currentChecksum = fileChecksum(target);
     const incomingChecksum = textChecksum(content);
     const priorRecord = priorRecordsByPath.get(file.to);
-    if (currentChecksum !== incomingChecksum && currentChecksum !== priorRecord?.checksum) {
+    if (
+      file.update === "managed_file" &&
+      currentChecksum !== incomingChecksum &&
+      currentChecksum !== priorRecord?.checksum
+    ) {
+      paths.push(file.to);
+    }
+
+    if (
+      file.update === "managed_block" &&
+      priorRecord !== undefined &&
+      currentChecksum !== incomingChecksum &&
+      currentChecksum !== priorRecord.checksum &&
+      !hasManagedBlock(target, dockId, file.to)
+    ) {
       paths.push(file.to);
     }
   }

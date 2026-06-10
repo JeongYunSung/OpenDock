@@ -15,7 +15,7 @@ import { x as extractTar } from "tar";
 import {
   assertVersionSatisfiesSelector,
   type DockManifest,
-  type DockRef,
+  DockRef,
   parseManifestFile,
   validateManifestFor,
 } from "./dock.js";
@@ -40,6 +40,12 @@ export async function resolveDock(dockRef: DockRef): Promise<ResolvedDock> {
   return resolveRemoteDock(dockRef);
 }
 
+export async function resolveLatestDock(owner: string, name: string): Promise<ResolvedDock> {
+  const client = new OpenDockRegistryClient();
+  const metadata = await client.resolveDockVersion(owner, name, "latest");
+  return resolveRemoteDockMetadata(owner, name, metadata, `${owner}/${name}@latest`);
+}
+
 async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
   const client = new OpenDockRegistryClient();
   const metadata = await client.resolveDockVersion(
@@ -48,27 +54,40 @@ async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
     dockRef.requested(),
   );
   assertVersionSatisfiesSelector(metadata.version, dockRef.requested());
-  assertSafeResolvedVersion(metadata.version);
+  return resolveRemoteDockMetadata(dockRef.owner, dockRef.name, metadata, dockRef.toString());
+}
 
-  if (metadata.id !== dockRef.id()) {
-    throw new Error(`registry returned dock id \`${metadata.id}\` for requested \`${dockRef}\``);
+async function resolveRemoteDockMetadata(
+  owner: string,
+  name: string,
+  metadata: Awaited<ReturnType<OpenDockRegistryClient["resolveDockVersion"]>>,
+  requestedLabel: string,
+): Promise<ResolvedDock> {
+  assertSafeResolvedVersion(metadata.version);
+  const exactDockRef = DockRef.parse(`${owner}/${name}@${metadata.version}`);
+
+  if (metadata.id !== exactDockRef.id()) {
+    throw new Error(
+      `registry returned dock id \`${metadata.id}\` for requested \`${requestedLabel}\``,
+    );
   }
   if (!metadata.approved) {
-    throw new Error(`dock \`${dockRef}\` is not approved by OpenDock Registry`);
+    throw new Error(`dock \`${requestedLabel}\` is not approved by OpenDock Registry`);
   }
   if (metadata.signature.trim() === "") {
-    throw new Error(`dock \`${dockRef}\` is missing an OpenDock Registry signature`);
+    throw new Error(`dock \`${requestedLabel}\` is missing an OpenDock Registry signature`);
   }
 
-  const archive = await client.downloadDock(dockRef.owner, dockRef.name, metadata.version);
+  const client = new OpenDockRegistryClient();
+  const archive = await client.downloadDock(owner, name, metadata.version);
   const actualChecksum = sha256Bytes(archive);
   if (actualChecksum !== metadata.checksum) {
     throw new Error(
-      `checksum mismatch for \`${dockRef}\`: expected ${metadata.checksum}, got ${actualChecksum}`,
+      `checksum mismatch for \`${requestedLabel}\`: expected ${metadata.checksum}, got ${actualChecksum}`,
     );
   }
 
-  const root = join(cacheRoot(), dockRef.owner, dockRef.name, metadata.version);
+  const root = join(cacheRoot(), owner, name, metadata.version);
   rmSync(root, { recursive: true, force: true });
   mkdirSync(root, { recursive: true });
 
@@ -97,11 +116,11 @@ async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
 
   const dockRoot = findManifestRoot(root);
   if (!dockRoot) {
-    throw new Error(`downloaded dock \`${dockRef}\` did not contain dock.yml`);
+    throw new Error(`downloaded dock \`${requestedLabel}\` did not contain dock.yml`);
   }
 
   const manifest = parseManifestFile(join(dockRoot, "dock.yml"));
-  validateManifestFor(manifest, dockRef);
+  validateManifestFor(manifest, exactDockRef);
 
   return {
     manifest,
