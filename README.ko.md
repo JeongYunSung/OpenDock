@@ -250,25 +250,6 @@ lifecycle:
 `.opendock/dock.lock.yml`에 저장되고 `opendock update`, `opendock doctor`에서
 재사용됩니다.
 
-대화형 lifecycle step은 사용자가 직접 조작하게 하거나, macOS `expect` PTY를 통해
-승인된 작은 key sequence를 보낼 수 있습니다.
-
-```yaml
-lifecycle:
-  install:
-    - id: user-driven-tui
-      run: codex
-      interactive: user
-
-    - id: scripted-tui
-      run: codex
-      interactive:
-        mode: scripted
-        inputs:
-          - key: tab
-          - key: enter
-```
-
 ## 저장소 구조
 
 ```text

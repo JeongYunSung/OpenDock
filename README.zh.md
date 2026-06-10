@@ -229,24 +229,6 @@ lifecycle:
 没有 `platforms` 的 step 会在所有平台运行。选中的平台会保存到
 `.opendock/dock.lock.yml`，并由 `opendock update` 和 `opendock doctor` 复用。
 
-交互式 lifecycle step 可以把控制权交给用户，也可以通过 macOS `expect` PTY 发送少量已批准的按键序列：
-
-```yaml
-lifecycle:
-  install:
-    - id: user-driven-tui
-      run: codex
-      interactive: user
-
-    - id: scripted-tui
-      run: codex
-      interactive:
-        mode: scripted
-        inputs:
-          - key: tab
-          - key: enter
-```
-
 ## 仓库结构
 
 ```text

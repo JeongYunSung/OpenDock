@@ -356,7 +356,6 @@ OpenDock은 먼저 review-required 파일을 검사합니다. 수정된 `managed
 | `run` | 선택 | `install` 또는 `update`에서 실행할 명령입니다. |
 | `version` | 선택 | `check` 출력에서 읽은 semver가 만족해야 하는 범위입니다. |
 | `timeout_ms` | 선택 | 명령 timeout입니다. doctor 기본값은 30000ms입니다. |
-| `interactive` | 선택 | TUI나 질문형 명령을 처리하는 방식입니다. |
 | `platforms` | 선택 | 같은 step `id`를 유지하면서 `macos`, `windows`, `linux`별 필드를 override합니다. |
 | `repair` | 선택 | 현재는 파싱만 됩니다. doctor가 자동 실행하지 않습니다. |
 | `copy` | 선택 | 현재는 step을 Ready로만 표시합니다. 파일 복사는 `files`를 사용하세요. |
@@ -541,81 +540,6 @@ $(
 
 명령은 shell expansion을 기대하지 않는 방식으로 써야 합니다. `~`, `$HOME`, glob, redirect, pipe가 필요한 복잡한 작업은 현재 MVP에서 직접 지원하지 않습니다. 그런 작업이 필요하면 dock 자체의 파일 적용이나 allowlist에 있는 도구의 단일 명령으로 표현할 수 있는지 먼저 확인하세요.
 
-## interactive 작성법
-
-대화형 명령은 두 가지 방식으로 지원합니다.
-
-### 사용자가 직접 조작하는 방식
-
-```yaml
-lifecycle:
-  install:
-    - id: open-codex-login
-      interactive: user
-      run: codex
-      timeout_ms: 600000
-```
-
-`interactive: user`는 실제 터미널 TTY가 필요합니다. CI나 비대화형 프로세스에서 실행하면 실패합니다. `codex`처럼 사용자가 화면을 보고 직접 로그인하거나 선택해야 하는 TUI에 적합합니다.
-
-### 승인된 키 입력을 자동 전달하는 방식
-
-```yaml
-lifecycle:
-  install:
-    - id: scripted-codex-open
-      run: codex
-      interactive:
-        mode: scripted
-        cols: 100
-        rows: 30
-        inputs:
-          - key: tab
-          - key: enter
-      timeout_ms: 600000
-```
-
-`interactive: scripted`는 macOS의 `expect`를 사용해 pseudo-terminal에서 키 입력을 보냅니다. 승인된 OpenDock Registry dock에서만 신중하게 쓰는 것이 좋습니다.
-
-지원하는 key 값은 다음과 같습니다.
-
-```text
-backspace
-down
-enter
-escape
-left
-right
-space
-tab
-up
-```
-
-반복 입력은 `repeat`으로 표현합니다.
-
-```yaml
-inputs:
-  - key: tab
-    repeat: 3
-  - key: enter
-```
-
-텍스트 입력도 가능합니다.
-
-```yaml
-inputs:
-  - text: my-project-name
-  - key: enter
-```
-
-문자열을 바로 넣으면 그대로 입력됩니다.
-
-```yaml
-inputs:
-  - "hello"
-  - key: enter
-```
-
 ## install과 update를 다르게 설계하기
 
 `install`은 최초 적용입니다. 없는 도구를 설치하고 프로젝트에 dock을 적용하는 데 집중하세요.
@@ -704,13 +628,12 @@ OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 �
 9. 버전이 중요한 도구에는 lifecycle step의 `version` 범위를 넣었는가?
 10. `update`는 최초 설치가 아니라 유지보수 관점으로 작성했는가?
 11. `doctor`는 상태 점검만 하도록 구성했는가?
-12. 대화형 명령은 `interactive: user` 또는 승인된 `interactive: scripted`로 명시했는가?
-13. shell operator, pipe, redirect, command substitution을 쓰지 않았는가?
-14. 한 step에 여러 명령을 묶지 않고 단계별로 나눴는가?
-15. 오래 걸리는 명령에는 `timeout_ms`를 넣었는가?
-16. macOS/Windows 명령이 다르면 같은 `id` 아래 `platforms`로 묶었는가?
-17. 공통 step에 `brew`, `winget`처럼 특정 OS 전용 package manager를 넣지 않았는가?
-18. `repair`, `messages`, `copy`, `needs`에 자동 동작을 기대하지 않았는가?
+12. shell operator, pipe, redirect, command substitution을 쓰지 않았는가?
+13. 한 step에 여러 명령을 묶지 않고 단계별로 나눴는가?
+14. 오래 걸리는 명령에는 `timeout_ms`를 넣었는가?
+15. macOS/Windows 명령이 다르면 같은 `id` 아래 `platforms`로 묶었는가?
+16. 공통 step에 `brew`, `winget`처럼 특정 OS 전용 package manager를 넣지 않았는가?
+17. `repair`, `messages`, `copy`, `needs`에 자동 동작을 기대하지 않았는가?
 
 ## 추천 작성 순서
 

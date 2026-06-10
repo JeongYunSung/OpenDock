@@ -257,25 +257,6 @@ Les steps sans `platforms` s'exécutent sur toutes les platforms. La platform
 sélectionnée est stockée dans `.opendock/dock.lock.yml`, puis réutilisée par
 `opendock update` et `opendock doctor`.
 
-Les lifecycle steps interactifs peuvent soit donner le contrôle à l'utilisateur,
-soit envoyer une petite séquence de touches approuvée via un PTY macOS `expect` :
-
-```yaml
-lifecycle:
-  install:
-    - id: user-driven-tui
-      run: codex
-      interactive: user
-
-    - id: scripted-tui
-      run: codex
-      interactive:
-        mode: scripted
-        inputs:
-          - key: tab
-          - key: enter
-```
-
 ## Structure Du Dépôt
 
 ```text
