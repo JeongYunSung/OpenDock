@@ -5,7 +5,7 @@
   "type": "module",
   "license": "MIT",
   "bin": {
-    "opendock": "./bin/opendock.js"
+    "opendock": "bin/opendock.js"
   },
   "files": [
     "bin",
@@ -16,6 +16,7 @@
   "scripts": {
     "dev": "bun run src/cli.ts",
     "build": "bun build src/cli.ts --outfile bin/opendock.js --target bun && chmod +x bin/opendock.js",
+    "prepare:github-package": "bun run scripts/prepare-github-package.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",

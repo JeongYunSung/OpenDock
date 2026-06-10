@@ -1,0 +1,59 @@
+import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
+const rootDir = process.cwd();
+const outputDir = join(rootDir, "dist", "publish", "github");
+const packageName = process.env.OPENDOCK_GITHUB_PACKAGE ?? "@opendock/cli";
+const repositoryOwner =
+  process.env.OPENDOCK_GITHUB_REPOSITORY ??
+  process.env.GITHUB_REPOSITORY ??
+  "JeongYunSung/OpenDock";
+const repositoryUrl = `https://github.com/${repositoryOwner}.git`;
+const rootPackage = JSON.parse(readFileSync(join(rootDir, "package.json"), "utf8")) as {
+  description?: string;
+  engines?: Record<string, string>;
+  license?: string;
+  packageManager?: string;
+  version?: string;
+};
+
+if (!rootPackage.version) {
+  throw new Error("package.json must define a version before preparing a GitHub package");
+}
+
+rmSync(outputDir, { force: true, recursive: true });
+mkdirSync(join(outputDir, "bin"), { recursive: true });
+
+cpSync(join(rootDir, "bin", "opendock.js"), join(outputDir, "bin", "opendock.js"));
+cpSync(join(rootDir, "examples"), join(outputDir, "examples"), { recursive: true });
+
+for (const file of readdirSync(rootDir)) {
+  if (file === "README.md" || /^README\.[a-z]{2}\.md$/.test(file)) {
+    cpSync(join(rootDir, file), join(outputDir, file));
+  }
+}
+
+const publishPackage = {
+  name: packageName,
+  version: rootPackage.version,
+  description: rootPackage.description ?? "OpenDock Bun CLI private beta.",
+  type: "module",
+  license: rootPackage.license ?? "MIT",
+  bin: {
+    opendock: "./bin/opendock.js",
+  },
+  files: ["bin", "examples", "README.md", "README.*.md"],
+  engines: rootPackage.engines,
+  packageManager: rootPackage.packageManager,
+  repository: {
+    type: "git",
+    url: repositoryUrl,
+  },
+  publishConfig: {
+    registry: "https://npm.pkg.github.com",
+  },
+};
+
+writeFileSync(join(outputDir, "package.json"), `${JSON.stringify(publishPackage, null, 2)}\n`);
+
+console.log(`Prepared ${packageName}@${rootPackage.version} in ${outputDir}`);

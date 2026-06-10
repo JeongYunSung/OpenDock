@@ -4,8 +4,10 @@
     "includes": [
       "src/**/*.ts",
       "tests/**/*.ts",
+      "scripts/**/*.ts",
       "*.json",
       "*.md",
+      ".github/**/*.yml",
       "examples/**/*.yml",
       "examples/**/*.md"
     ]
