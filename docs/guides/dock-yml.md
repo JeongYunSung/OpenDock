@@ -644,7 +644,7 @@ OpenDock은 프로젝트 설정을 실행하는 도구이므로 dock source를 �
 3. `doctor`에 필요한 도구 버전 점검을 먼저 쓴다.
 4. `install`에 doctor 실패를 고칠 수 있는 설치 step을 추가한다.
 5. `update`에 유지보수 step을 추가한다.
-6. 대화형 step은 마지막에 추가하고 timeout을 넉넉히 둔다.
+6. 오래 걸리는 setup/update step에는 timeout을 넉넉히 둔다.
 7. dock 제출 전에 사용자 파일이 보존되는지, 재실행해도 중복 block이 생기지 않는지 확인한다.
 
 ## 자주 쓰는 패턴
