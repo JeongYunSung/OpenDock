@@ -52,7 +52,7 @@ OpenDock はそれをレビュー済みの dock に変えます。
   metadata から取得される必要があります。
 - **既存ファイルに安全**: 各ファイルは managed block、manual review、
   unique-line append などの update policy を宣言します。
-- **小さなコマンド面**: install、update、diagnose、log 確認、auth、deploy に
+- **小さなコマンド面**: install、update、doctor、log 確認、auth、deploy に
   絞ります。
 - **自動化対応**: lifecycle step は shell pipeline を許可せず、`git`,
   `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `oma`, `omx`
@@ -75,7 +75,7 @@ repo=$PWD
 project=$(mktemp -d)
 cd "$project"
 
-"$repo/bin/opendock.js" install opendock/codex
+"$repo/bin/opendock.js" install opendock/codex@1.0.0
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -100,7 +100,7 @@ README.md
 | `opendock install opendock/codex@designer-build` | exact version identifier を使ってインストールします。 |
 | `opendock install opendock/codex@1.0.0 --platform windows` | host の自動検出ではなく明示した target platform でインストールします。 |
 | `opendock install opendock/codex@1.0.0 --force` | install 中に OpenDock managed changes を強制適用します。 |
-| `opendock update` | インストール済み dock を再 resolve し、lock 済み platform で安全に新しい version を適用します。 |
+| `opendock update` | lock された platform で、インストール済み dock を Registry の最新 approved release に resolve して適用します。 |
 | `opendock update --force` | 編集済み managed file があっても OpenDock managed changes を強制適用します。 |
 | `opendock doctor` | 現在のディレクトリの OpenDock state を lock 済み platform で表示します。 |
 | `opendock log` | 現在のプロジェクトの最近の OpenDock 実行を出力します。 |
@@ -127,18 +127,26 @@ owner/name@designer-build   -> exact approved version identifier
 Install と deploy はどちらも exact release identifier が必要です。例:
 `opendock install owner/name@1.0.0`、`opendock deploy owner/name@1.0.0`。
 
+`opendock install owner/name`、`opendock install owner/name@latest`、
+`opendock deploy owner/name`、`opendock deploy owner/name@latest` は拒否されます。
+
 OpenDock は、要求された version identifier と resolve された exact version の両方を
-`.opendock/dock.lock.yml` に保存します。`opendock update` は要求された
-version identifier を再利用するため、`@1.5.2` でインストールした dock は固定され、
-別の release に移動するには `opendock install owner/name@new-version` を実行します。
+`.opendock/dock.lock.yml` に保存します。`opendock update` はインストール済みの各
+dock について OpenDock Registry に最新 approved release を問い合わせ、その exact
+release を適用して lock file を更新します。最新 approved release ではなく特定の
+release に移動するには `opendock install owner/name@new-version` を実行します。
 
 ## Dock Format
 
 dock は `dock.yml` ファイルと、`files[].from` で参照される source ファイルまたは
 ディレクトリを含むディレクトリです。任意の `readme` と `logo` パスは
 OpenDock Registry の catalog metadata として提出され、`files` にも宣言しない限り
-インストールされません。詳細は [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
-の韓国語 authoring guide を参照してください。
+インストールされません。release version は `dock.yml` には宣言しません。version は
+`opendock deploy owner/name@version` の deploy reference から来ます。Deploy は
+`dock.yml` と `files[].from`、lifecycle `copy.from` の install payloads だけを
+review 用の `.tgz` submission archive にまとめます。`readme` と `logo` は、install
+payloads としても listed されていない限り catalog metadata としてのみ提出されます。
+詳細は [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) の韓国語 authoring guide を参照してください。
 
 ```yaml
 opendock: 1

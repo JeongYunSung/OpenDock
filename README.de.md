@@ -53,7 +53,7 @@ daraus ein geprüftes Dock:
   genehmigter metadata stammen.
 - **Sicher mit bestehenden Dateien**: Jede Datei deklariert ihre eigene
   update policy, etwa managed blocks, manual review oder unique-line append.
-- **Kleine Befehlsoberfläche**: install, update, diagnose, Logs prüfen, auth und
+- **Kleine Befehlsoberfläche**: install, update, doctor, Logs prüfen, auth und
   deploy.
 - **Automatisierungsbereit**: lifecycle steps können erlaubte Befehle wie
   `git`, `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `oma`
@@ -77,7 +77,7 @@ repo=$PWD
 project=$(mktemp -d)
 cd "$project"
 
-"$repo/bin/opendock.js" install opendock/codex
+"$repo/bin/opendock.js" install opendock/codex@1.0.0
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -102,7 +102,7 @@ README.md
 | `opendock install opendock/codex@designer-build` | Installiert mit einem exakten version identifier. |
 | `opendock install opendock/codex@1.0.0 --platform windows` | Installiert mit einer expliziten target platform statt host auto-detection. |
 | `opendock install opendock/codex@1.0.0 --force` | Erzwingt OpenDock-managed file changes während install. |
-| `opendock update` | Löst installierte Docks erneut auf und wendet neue Versionen sicher mit der gelockten platform an. |
+| `opendock update` | Löst installierte Docks auf die neueste approved Registry release mit der gelockten platform auf. |
 | `opendock update --force` | Erzwingt OpenDock-managed file changes, auch wenn bearbeitete managed files erkannt werden. |
 | `opendock doctor` | Zeigt den OpenDock state des aktuellen Verzeichnisses mit der gelockten platform. |
 | `opendock log` | Gibt die letzten OpenDock runs für das aktuelle Projekt aus. |
@@ -129,10 +129,15 @@ owner/name@designer-build   -> exact approved version identifier
 Install und deploy erfordern beide einen exakten release identifier, z. B.
 `opendock install owner/name@1.0.0` und `opendock deploy owner/name@1.0.0`.
 
+`opendock install owner/name`, `opendock install owner/name@latest`,
+`opendock deploy owner/name` und `opendock deploy owner/name@latest` werden
+abgelehnt.
+
 OpenDock speichert sowohl den angeforderten version identifier als auch die
-aufgelöste exact version in `.opendock/dock.lock.yml`. `opendock update`
-verwendet den angeforderten version identifier erneut, sodass eine Installation
-mit `@1.5.2` fixiert bleibt. Um auf eine andere release zu wechseln, führe
+aufgelöste exact version in `.opendock/dock.lock.yml`. `opendock update` fragt
+OpenDock Registry nach der neuesten approved release jedes installierten Docks,
+wendet diese exact release an und aktualisiert die lock file. Um statt der
+neuesten approved release auf eine bestimmte release zu wechseln, führe
 `opendock install owner/name@new-version` aus.
 
 ## Dock-Format
@@ -141,6 +146,12 @@ Ein Dock ist ein Verzeichnis mit einer `dock.yml` Datei und allen Quelldateien
 oder Verzeichnissen, die von `files[].from` referenziert werden. Optionale
 `readme` und `logo` Pfade werden als Catalog-Metadata an OpenDock Registry
 übermittelt; sie werden nur installiert, wenn sie auch in `files` gelistet sind.
+Release versions werden nicht in `dock.yml` deklariert; die Version kommt aus
+der deploy reference `opendock deploy owner/name@version`. Deploy packt
+`dock.yml` und install payloads aus `files[].from` und lifecycle `copy.from` in
+ein `.tgz` submission archive zur review. `readme` und `logo` werden nur als
+catalog metadata übermittelt, sofern sie nicht auch als install payloads
+gelistet sind.
 Siehe [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) für den detaillierten
 koreanischen Authoring Guide.
 

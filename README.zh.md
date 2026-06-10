@@ -42,7 +42,7 @@ AI 工作区设置通常会变成一堆一次性 shell 命令、复制来的 pro
 - **项目级作用域**：安装到当前目录，并写入本地 `.opendock/` state。
 - **默认走审核**：远程 dock 必须来自 OpenDock Registry 已批准的 metadata。
 - **保护已有文件**：每个文件声明自己的 update policy，例如 managed block、manual review 或 unique-line append。
-- **小命令面**：只保留 install、update、diagnose、查看 log、auth 和 deploy。
+- **小命令面**：只保留 install、update、doctor、查看 log、auth 和 deploy。
 - **适合自动化**：lifecycle step 可以运行 `git`、`brew`、`winget`、`npm`、`bun`、`pip`、`uv`、`codex`、`claude`、`oma`、`omx` 等允许的命令，但不允许 shell pipeline。
 
 ## 快速开始
@@ -62,7 +62,7 @@ repo=$PWD
 project=$(mktemp -d)
 cd "$project"
 
-"$repo/bin/opendock.js" install opendock/codex
+"$repo/bin/opendock.js" install opendock/codex@1.0.0
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -87,7 +87,7 @@ README.md
 | `opendock install opendock/codex@designer-build` | 使用精确 version identifier 安装。 |
 | `opendock install opendock/codex@1.0.0 --platform windows` | 使用显式 target platform，而不是自动检测 host。 |
 | `opendock install opendock/codex@1.0.0 --force` | 在 install 时强制应用 OpenDock 管理的变更。 |
-| `opendock update` | 重新解析已安装 dock，并使用 lock 中的平台安全应用新版本。 |
+| `opendock update` | 使用 lock 中的平台，将已安装 dock 解析并应用到 Registry 最新已批准 release。 |
 | `opendock update --force` | 即使检测到已编辑的 managed file，也强制应用 OpenDock 管理的变更。 |
 | `opendock doctor` | 使用 lock 中的平台显示当前目录的 OpenDock state。 |
 | `opendock log` | 输出当前项目最近的 OpenDock 运行记录。 |
@@ -114,16 +114,23 @@ owner/name@designer-build   -> exact approved version identifier
 Install 和 deploy 都需要精确 release identifier，例如
 `opendock install owner/name@1.0.0` 和 `opendock deploy owner/name@1.0.0`。
 
+`opendock install owner/name`、`opendock install owner/name@latest`、
+`opendock deploy owner/name` 和 `opendock deploy owner/name@latest` 会被拒绝。
+
 OpenDock 会把用户请求的 version identifier 和解析出的 exact version 都写入
-`.opendock/dock.lock.yml`。`opendock update` 会复用请求的 version identifier，
-因此用 `@1.5.2` 安装的 dock 会保持固定。要切换到其他 release，请运行
-`opendock install owner/name@new-version`。
+`.opendock/dock.lock.yml`。`opendock update` 会向 OpenDock Registry 查询每个已安装
+dock 的最新已批准 release，应用该 exact release，并更新 lock file。若要切换到指定
+release 而不是最新已批准 release，请运行 `opendock install owner/name@new-version`。
 
 ## Dock 格式
 
 dock 是一个目录，包含 `dock.yml` 文件，以及 `files[].from` 引用的 source 文件或目录。
 可选的 `readme` 和 `logo` 路径会作为 OpenDock Registry catalog metadata 提交；
-除非也列在 `files` 中，否则不会安装到项目里。详见 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
+除非也列在 `files` 中，否则不会安装到项目里。release version 不写在 `dock.yml`
+里；版本来自 `opendock deploy owner/name@version` 这个 deploy reference。Deploy 会把
+`dock.yml` 以及 `files[].from`、lifecycle `copy.from` 的 install payloads 打包成用于
+review 的 `.tgz` submission archive。`readme` 和 `logo` 只作为 catalog metadata 提交，
+除非它们也被列为 install payloads。详见 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)
 中的韩语编写指南。
 
 ```yaml

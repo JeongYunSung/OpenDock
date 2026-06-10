@@ -54,7 +54,7 @@ that into a reviewed dock:
   OpenDock Registry.
 - **Safe with existing files**: each file declares its own update policy, such
   as managed blocks, manual review, or unique-line append.
-- **Small command surface**: install, update, diagnose, inspect logs, auth, and
+- **Small command surface**: install, update, doctor, inspect logs, auth, and
   deploy.
 - **Automation-ready**: lifecycle steps can run allowed commands such as `git`,
   `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `oma`, and `omx`
@@ -77,7 +77,7 @@ repo=$PWD
 project=$(mktemp -d)
 cd "$project"
 
-"$repo/bin/opendock.js" install opendock/codex
+"$repo/bin/opendock.js" install opendock/codex@1.0.0
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -102,7 +102,7 @@ README.md
 | `opendock install opendock/codex@designer-build` | Install using an exact version identifier. |
 | `opendock install opendock/codex@1.0.0 --platform windows` | Install using an explicit target platform instead of auto-detecting the host. |
 | `opendock install opendock/codex@1.0.0 --force` | Force OpenDock-managed file changes during install. |
-| `opendock update` | Re-resolve installed docks and apply newer versions safely using the locked platform. |
+| `opendock update` | Resolve installed docks to the latest approved Registry release using the locked platform. |
 | `opendock update --force` | Force OpenDock-managed file changes even when edited managed files are detected. |
 | `opendock doctor` | Show whether the current directory has valid OpenDock state using the locked platform. |
 | `opendock log` | Print recent OpenDock runs for the current project. |
@@ -139,10 +139,10 @@ opendock deploy owner/name@1.0.0
 rejected.
 
 OpenDock stores both the requested version identifier and the resolved exact
-version in `.opendock/dock.lock.yml`. `opendock update` reuses the requested
-version identifier, so an install pinned to an exact identifier stays pinned.
-To move a project to a different dock release, run
-`opendock install owner/name@new-version`.
+version in `.opendock/dock.lock.yml`. `opendock update` asks OpenDock Registry
+for the latest approved release of each installed dock, applies that exact
+release, and records it in the lock file. To move to a specific release instead
+of the latest approved release, run `opendock install owner/name@new-version`.
 
 ## Dock Format
 

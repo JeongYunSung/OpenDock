@@ -212,7 +212,7 @@ opendock install opendock/codex@1.5.2
 opendock install opendock/codex@designer-build
 ```
 
-version이 없거나 `@latest`를 쓰면 실패합니다. `1.5.2`나 `designer-build`는 exact version identifier 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 version identifier와 Registry가 돌려준 exact version을 함께 기록합니다.
+install에서 version이 없거나 `@latest`를 쓰면 실패합니다. `1.5.2`나 `designer-build`는 exact version identifier 요청입니다. OpenDock은 `.opendock/dock.lock.yml`에 사용자가 요청한 version identifier와 Registry가 돌려준 exact version을 함께 기록합니다.
 
 ```yaml
 docks:
@@ -221,7 +221,7 @@ docks:
     version: 1.5.2
 ```
 
-`opendock update`는 lock의 `requested` version identifier를 다시 사용합니다. 따라서 설치한 exact version은 update에서도 고정됩니다. 다른 release로 이동하려면 `opendock install opendock/codex@new-version`처럼 새 exact version을 명시해 다시 적용합니다.
+`opendock update`는 lock의 dock id를 기준으로 Registry의 최신 승인 release를 조회합니다. 최신 release가 `1.6.0`이면 내부적으로 `opendock/codex@1.6.0` 같은 exact release를 적용하고, 적용 후 `requested`와 `version`을 새 exact version으로 갱신합니다. 최신 승인 release가 아니라 특정 release로 이동하려면 `opendock install opendock/codex@new-version`처럼 새 exact version을 명시해 다시 적용합니다.
 
 ### release version과 deploy
 
@@ -341,7 +341,7 @@ lifecycle:
 | phase | 실행 시점 | 목적 |
 |---|---|---|
 | `install` | `opendock install owner/name@1.0.0` | 최초 설치, 도구 설치, 프로젝트 적용 |
-| `update` | `opendock update` | 이미 설치된 exact dock release의 파일과 lifecycle 유지보수 |
+| `update` | `opendock update` | Registry의 최신 승인 release로 파일과 lifecycle 최신화 |
 | `doctor` | `opendock doctor` | 현재 프로젝트 상태 점검 |
 
 OpenDock은 먼저 review-required 파일을 검사합니다. 수정된 `managed_file`처럼 자동 반영이 위험한 항목이 있으면 기본적으로 파일 적용과 `install`/`update` lifecycle 실행 전에 중단합니다. `--force`를 쓰거나 review-required가 없으면 파일 적용이 lifecycle 실행보다 먼저 일어납니다. lifecycle이 실패하면 실패 로그가 남고, `.opendock` 상태 기록은 완료되지 않습니다.

@@ -50,7 +50,7 @@ AI 작업공간 설정은 보통 일회성 shell 명령, 복사된 prompt 파일
   와야 합니다.
 - **기존 파일 보호**: 각 파일은 managed block, manual review, unique-line append
   같은 update 정책을 직접 선언합니다.
-- **작은 명령 표면**: install, update, diagnose, log 확인, auth, deploy만 둡니다.
+- **작은 명령 표면**: install, update, doctor, log 확인, auth, deploy만 둡니다.
 - **자동화 준비**: lifecycle step은 shell pipeline 없이 `git`, `brew`,
   `winget`, `npm`, `bun`, `pip`, `uv`, `codex`, `claude`, `oma`, `omx` 같은 허용된
   명령을 실행할 수 있습니다.
@@ -72,7 +72,7 @@ repo=$PWD
 project=$(mktemp -d)
 cd "$project"
 
-"$repo/bin/opendock.js" install opendock/codex
+"$repo/bin/opendock.js" install opendock/codex@1.0.0
 "$repo/bin/opendock.js" doctor
 "$repo/bin/opendock.js" log
 ```
@@ -97,7 +97,7 @@ README.md
 | `opendock install opendock/codex@designer-build` | 정확한 version identifier로 설치합니다. |
 | `opendock install opendock/codex@1.0.0 --platform windows` | host 자동 감지 대신 명시한 target platform으로 설치합니다. |
 | `opendock install opendock/codex@1.0.0 --force` | install 중 OpenDock 관리 파일 변경을 강제로 반영합니다. |
-| `opendock update` | 설치된 dock을 다시 resolve하고 lock에 기록된 platform 기준으로 안전하게 새 버전을 적용합니다. |
+| `opendock update` | lock된 platform 기준으로 설치된 dock을 Registry의 최신 승인 release로 적용합니다. |
 | `opendock update --force` | 수정된 managed file이 있어도 OpenDock 관리 변경을 강제로 반영합니다. |
 | `opendock doctor` | 현재 디렉터리의 OpenDock 상태를 lock에 기록된 platform 기준으로 표시합니다. |
 | `opendock log` | 현재 프로젝트의 최근 OpenDock 실행 기록을 출력합니다. |
@@ -133,10 +133,10 @@ opendock deploy owner/name@1.0.0
 `opendock deploy owner/name`, `opendock deploy owner/name@latest`는 거부됩니다.
 
 OpenDock은 요청한 version identifier와 resolve된 exact version을 모두
-`.opendock/dock.lock.yml`에 저장합니다. `opendock update`는 요청한 version
-identifier를 재사용하므로 정확한 identifier로 설치한 dock은 고정됩니다. 다른
-dock release로 이동하려면 `opendock install owner/name@new-version`을 다시
-실행합니다.
+`.opendock/dock.lock.yml`에 저장합니다. `opendock update`는 설치된 각 dock의
+최신 승인 release를 OpenDock Registry에 묻고, 그 exact release를 적용한 뒤 lock을
+갱신합니다. 최신 승인 release가 아니라 특정 release로 이동하려면
+`opendock install owner/name@new-version`을 실행합니다.
 
 ## Dock 형식
 
