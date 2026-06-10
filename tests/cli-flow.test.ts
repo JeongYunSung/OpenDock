@@ -834,11 +834,11 @@ files:
 
     try {
       await withCwd(project, () =>
-        runCliProgram(["node", "opendock", "install", "test/remote-update@1.0.0"]),
+        runCliProgram(["bun", "opendock", "install", "test/remote-update@1.0.0"]),
       );
       expect(readFileSync(join(project, "README.md"), "utf8")).toContain("# Version One");
 
-      await withCwd(project, () => runCliProgram(["node", "opendock", "update"]));
+      await withCwd(project, () => runCliProgram(["bun", "opendock", "update"]));
       expect(readFileSync(join(project, "README.md"), "utf8")).toContain("# Version Two");
       expect(lockDocks(readLock(project))[0]).toMatchObject({
         requested: "1.0.1",
@@ -899,11 +899,11 @@ files:
 
     try {
       await withCwd(project, () =>
-        runCliProgram(["node", "opendock", "install", "test/remote-prune@1.0.0"]),
+        runCliProgram(["bun", "opendock", "install", "test/remote-prune@1.0.0"]),
       );
       expect(readFileSync(join(project, "project", "old.txt"), "utf8")).toBe("version 1\n");
 
-      await withCwd(project, () => runCliProgram(["node", "opendock", "update"]));
+      await withCwd(project, () => runCliProgram(["bun", "opendock", "update"]));
     } finally {
       globalThis.fetch = originalFetch;
     }
@@ -965,12 +965,12 @@ files:
 
     try {
       await withCwd(project, () =>
-        runCliProgram(["node", "opendock", "install", "test/remote-conflict@1.0.0"]),
+        runCliProgram(["bun", "opendock", "install", "test/remote-conflict@1.0.0"]),
       );
       writeFileSync(join(project, "project", "config.yml"), "tool: user\n");
 
       await expect(
-        withCwd(project, () => runCliProgram(["node", "opendock", "update"])),
+        withCwd(project, () => runCliProgram(["bun", "opendock", "update"])),
       ).rejects.toThrow("require review");
     } finally {
       globalThis.fetch = originalFetch;
@@ -1028,11 +1028,11 @@ files:
 
     try {
       await withCwd(project, () =>
-        runCliProgram(["node", "opendock", "install", "test/remote-force@1.0.0"]),
+        runCliProgram(["bun", "opendock", "install", "test/remote-force@1.0.0"]),
       );
       writeFileSync(join(project, "project", "config.yml"), "tool: user\n");
 
-      await withCwd(project, () => runCliProgram(["node", "opendock", "update", "--force"]));
+      await withCwd(project, () => runCliProgram(["bun", "opendock", "update", "--force"]));
     } finally {
       globalThis.fetch = originalFetch;
     }
@@ -1078,7 +1078,7 @@ files:
     try {
       await expect(
         withCwd(project, () =>
-          runCliProgram(["node", "opendock", "update", "--platform", "not-a-platform"]),
+          runCliProgram(["bun", "opendock", "update", "--platform", "not-a-platform"]),
         ),
       ).rejects.toThrow("unsupported OpenDock platform");
     } finally {
@@ -1122,7 +1122,7 @@ files:
     try {
       await withCwd(project, () =>
         runCliProgram([
-          "node",
+          "bun",
           "opendock",
           "install",
           "test/remote-platform@1.0.0",
@@ -1133,7 +1133,7 @@ files:
       expect(lockDocks(readLock(project))[0]?.platform).toBe("macos");
 
       await withCwd(project, () =>
-        runCliProgram(["node", "opendock", "update", "--platform", "windows"]),
+        runCliProgram(["bun", "opendock", "update", "--platform", "windows"]),
       );
     } finally {
       globalThis.fetch = originalFetch;
@@ -1178,7 +1178,7 @@ files:
     try {
       await withCwd(project, () =>
         runCliProgram([
-          "node",
+          "bun",
           "opendock",
           "install",
           "test/remote-platform-default@1.0.0",
@@ -1187,7 +1187,7 @@ files:
         ]),
       );
 
-      await withCwd(project, () => runCliProgram(["node", "opendock", "update"]));
+      await withCwd(project, () => runCliProgram(["bun", "opendock", "update"]));
     } finally {
       globalThis.fetch = originalFetch;
     }
@@ -1231,7 +1231,7 @@ files:
     try {
       await withCwd(project, () =>
         runCliProgram([
-          "node",
+          "bun",
           "opendock",
           "install",
           "test/remote-platform-conflict@1.0.0",
@@ -1243,7 +1243,7 @@ files:
 
       await expect(
         withCwd(project, () =>
-          runCliProgram(["node", "opendock", "update", "--platform", "windows"]),
+          runCliProgram(["bun", "opendock", "update", "--platform", "windows"]),
         ),
       ).rejects.toThrow("require review");
     } finally {
@@ -1288,7 +1288,7 @@ files:
     try {
       await withCwd(project, () =>
         runCliProgram([
-          "node",
+          "bun",
           "opendock",
           "install",
           "test/remote-platform-force@1.0.0",
@@ -1299,7 +1299,7 @@ files:
       writeFileSync(join(project, "project", "config.yml"), "tool: user\n");
 
       await withCwd(project, () =>
-        runCliProgram(["node", "opendock", "update", "--force", "--platform", "windows"]),
+        runCliProgram(["bun", "opendock", "update", "--force", "--platform", "windows"]),
       );
     } finally {
       globalThis.fetch = originalFetch;
@@ -1501,7 +1501,7 @@ globalThis.fetch = async (input, init = {}) => {
       project,
       {
         HOME: home,
-        NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ""} --import ${mockFetchPath}`.trim(),
+        BUN_OPTIONS: `${process.env.BUN_OPTIONS ?? ""} --import ${mockFetchPath}`.trim(),
         OPENDOCK_CAPTURE_BODY: bodyPath,
       },
       ["deploy", "test/catalog-metadata@1.0.0"],
@@ -3257,7 +3257,7 @@ async function waitFor(predicate: () => boolean, timeoutMs = 1_000): Promise<voi
 }
 
 function runCli(cwd: string, env: NodeJS.ProcessEnv, args: string[]) {
-  return spawnSync(process.execPath, [builtCli, ...args], {
+  return spawnSync(builtCli, args, {
     cwd,
     env: { ...process.env, ...env },
     encoding: "utf8",
