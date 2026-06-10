@@ -3,12 +3,13 @@ import { join } from "node:path";
 
 const rootDir = process.cwd();
 const outputDir = join(rootDir, "dist", "publish", "github");
-const packageName = process.env.OPENDOCK_GITHUB_PACKAGE ?? "@opendock/cli";
-const repositoryOwner =
+const githubRepository =
   process.env.OPENDOCK_GITHUB_REPOSITORY ??
   process.env.GITHUB_REPOSITORY ??
   "JeongYunSung/OpenDock";
-const repositoryUrl = `https://github.com/${repositoryOwner}.git`;
+const packageOwner = githubRepository.split("/")[0]?.toLowerCase() ?? "opendock";
+const packageName = process.env.OPENDOCK_GITHUB_PACKAGE ?? `@${packageOwner}/cli`;
+const repositoryUrl = `https://github.com/${githubRepository}.git`;
 const rootPackage = JSON.parse(readFileSync(join(rootDir, "package.json"), "utf8")) as {
   description?: string;
   engines?: Record<string, string>;
@@ -19,6 +20,10 @@ const rootPackage = JSON.parse(readFileSync(join(rootDir, "package.json"), "utf8
 
 if (!rootPackage.version) {
   throw new Error("package.json must define a version before preparing a GitHub package");
+}
+
+if (packageName !== packageName.toLowerCase()) {
+  throw new Error(`GitHub Packages npm package name must be lowercase: ${packageName}`);
 }
 
 rmSync(outputDir, { force: true, recursive: true });
@@ -36,11 +41,11 @@ for (const file of readdirSync(rootDir)) {
 const publishPackage = {
   name: packageName,
   version: rootPackage.version,
-  description: rootPackage.description ?? "OpenDock Bun CLI private beta.",
+  description: rootPackage.description ?? "Approved docks for AI workspaces.",
   type: "module",
   license: rootPackage.license ?? "MIT",
   bin: {
-    opendock: "./bin/opendock.js",
+    opendock: "bin/opendock.js",
   },
   files: ["bin", "examples", "README.md", "README.*.md"],
   engines: rootPackage.engines,

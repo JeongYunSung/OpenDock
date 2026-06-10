@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OPENDOCK_GITHUB_PACKAGE: "@opendock/cli"
+      OPENDOCK_GITHUB_REPOSITORY: ${{ github.repository }}
 
     steps:
       - name: Checkout
@@ -35,15 +36,28 @@ jobs:
       - name: Build CLI
         run: bun run build
 
+      - name: Validate GitHub Packages token
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+        run: |
+          if [ -z "$GH_PACKAGES_TOKEN" ]; then
+            echo "::error::Set GH_PACKAGES_TOKEN to a classic PAT with write:packages permission for @opendock packages. GITHUB_TOKEN can only publish packages associated with $GITHUB_REPOSITORY."
+            exit 1
+          fi
+
       - name: Prepare GitHub package
         run: bun run prepare:github-package
 
       - name: Configure GitHub Packages auth
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN || github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
         run: |
-          printf '@opendock:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n' "$NODE_AUTH_TOKEN" > dist/publish/github/.npmrc
+          printf '@opendock:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\nalways-auth=true\n' "$NODE_AUTH_TOKEN" > dist/publish/github/.npmrc
+
+      - name: Verify GitHub Packages auth
+        working-directory: dist/publish/github
+        run: npm whoami --registry=https://npm.pkg.github.com
 
       - name: Publish
         working-directory: dist/publish/github
-        run: bun publish --registry https://npm.pkg.github.com
+        run: npm publish --registry=https://npm.pkg.github.com
