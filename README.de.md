@@ -66,7 +66,7 @@ Für lokale Entwicklung baust du OpenDock aus dem Quellcode:
 ```bash
 bun install
 bun run build
-bin/opendock.js version
+bin/opendock version
 ```
 
 Teste das geprüfte `opendock/codex` Dock in einem temporären Projekt:
@@ -76,9 +76,9 @@ repo=$PWD
 project=$(mktemp -d)
 cd "$project"
 
-"$repo/bin/opendock.js" install opendock/codex@1.0.0
-"$repo/bin/opendock.js" doctor
-"$repo/bin/opendock.js" log
+"$repo/bin/opendock" install opendock/codex@1.0.0
+"$repo/bin/opendock" doctor
+"$repo/bin/opendock" log
 ```
 
 Nach der Installation enthält das Projekt:

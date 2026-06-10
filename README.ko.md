@@ -62,7 +62,7 @@ AI 작업공간 설정은 보통 일회성 shell 명령, 복사된 prompt 파일
 ```bash
 bun install
 bun run build
-bin/opendock.js version
+bin/opendock version
 ```
 
 승인된 `opendock/codex` dock을 임시 프로젝트에서 실행해 보세요.
@@ -72,9 +72,9 @@ repo=$PWD
 project=$(mktemp -d)
 cd "$project"
 
-"$repo/bin/opendock.js" install opendock/codex@1.0.0
-"$repo/bin/opendock.js" doctor
-"$repo/bin/opendock.js" log
+"$repo/bin/opendock" install opendock/codex@1.0.0
+"$repo/bin/opendock" doctor
+"$repo/bin/opendock" log
 ```
 
 설치 후 프로젝트에는 다음 항목이 생깁니다.

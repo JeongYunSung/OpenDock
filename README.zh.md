@@ -52,7 +52,7 @@ AI 工作区设置通常会变成一堆一次性 shell 命令、复制来的 pro
 ```bash
 bun install
 bun run build
-bin/opendock.js version
+bin/opendock version
 ```
 
 在临时项目中试用已审核的 `opendock/codex` dock：
@@ -62,9 +62,9 @@ repo=$PWD
 project=$(mktemp -d)
 cd "$project"
 
-"$repo/bin/opendock.js" install opendock/codex@1.0.0
-"$repo/bin/opendock.js" doctor
-"$repo/bin/opendock.js" log
+"$repo/bin/opendock" install opendock/codex@1.0.0
+"$repo/bin/opendock" doctor
+"$repo/bin/opendock" log
 ```
 
 安装后，项目会包含：

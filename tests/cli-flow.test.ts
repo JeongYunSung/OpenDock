@@ -3257,7 +3257,7 @@ async function waitFor(predicate: () => boolean, timeoutMs = 1_000): Promise<voi
 }
 
 function runCli(cwd: string, env: NodeJS.ProcessEnv, args: string[]) {
-  return spawnSync(builtCli, args, {
+  return spawnSync("bun", [builtCli, ...args], {
     cwd,
     env: { ...process.env, ...env },
     encoding: "utf8",

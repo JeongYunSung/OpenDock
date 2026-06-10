@@ -30,8 +30,14 @@ if (packageName !== packageName.toLowerCase()) {
 
 rmSync(outputDir, { force: true, recursive: true });
 mkdirSync(join(outputDir, "bin"), { recursive: true });
+mkdirSync(join(outputDir, "assets"), { recursive: true });
 
 cpSync(join(rootDir, "bin", "opendock.js"), join(outputDir, "bin", "opendock.js"));
+cpSync(
+  join(rootDir, "assets", "opendock-logo-96.png"),
+  join(outputDir, "assets", "opendock-logo-96.png"),
+);
+cpSync(join(rootDir, "bin", "opendock"), join(outputDir, "bin", "opendock"));
 cpSync(join(rootDir, "examples"), join(outputDir, "examples"), { recursive: true });
 
 for (const file of readdirSync(rootDir)) {
@@ -47,9 +53,9 @@ const publishPackage = {
   type: "module",
   license: rootPackage.license ?? "MIT",
   bin: {
-    opendock: "bin/opendock.js",
+    opendock: "bin/opendock",
   },
-  files: ["bin", "examples", "README.md", "README.*.md"],
+  files: ["bin", "assets/opendock-logo-96.png", "examples", "README.md", "README.*.md"],
   engines: rootPackage.engines,
   packageManager: rootPackage.packageManager,
   repository: {

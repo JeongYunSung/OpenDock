@@ -65,7 +65,7 @@ OpenDock はそれをレビュー済みの dock に変えます。
 ```bash
 bun install
 bun run build
-bin/opendock.js version
+bin/opendock version
 ```
 
 承認済みの `opendock/codex` dock を一時プロジェクトで試します。
@@ -75,9 +75,9 @@ repo=$PWD
 project=$(mktemp -d)
 cd "$project"
 
-"$repo/bin/opendock.js" install opendock/codex@1.0.0
-"$repo/bin/opendock.js" doctor
-"$repo/bin/opendock.js" log
+"$repo/bin/opendock" install opendock/codex@1.0.0
+"$repo/bin/opendock" doctor
+"$repo/bin/opendock" log
 ```
 
 インストール後、プロジェクトには次の項目が含まれます。
