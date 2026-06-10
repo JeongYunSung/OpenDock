@@ -12,10 +12,10 @@ permissions:
 
 jobs:
   publish:
-    name: Publish @opendock/cli
+    name: Publish @jeongyunsung/opendock
     runs-on: ubuntu-latest
     env:
-      OPENDOCK_GITHUB_PACKAGE: "@opendock/cli"
+      OPENDOCK_GITHUB_PACKAGE: "@jeongyunsung/opendock"
       OPENDOCK_GITHUB_REPOSITORY: ${{ github.repository }}
 
     steps:
@@ -41,7 +41,7 @@ jobs:
           GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
         run: |
           if [ -z "$GH_PACKAGES_TOKEN" ]; then
-            echo "::error::Set GH_PACKAGES_TOKEN to a classic PAT with write:packages permission for @opendock packages. GITHUB_TOKEN can only publish packages associated with $GITHUB_REPOSITORY."
+            echo "::error::Set GH_PACKAGES_TOKEN to a classic PAT with write:packages permission for @jeongyunsung packages. GITHUB_TOKEN can only publish packages associated with $GITHUB_REPOSITORY."
             exit 1
           fi
 
@@ -52,7 +52,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
         run: |
-          printf '@opendock:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\nalways-auth=true\n' "$NODE_AUTH_TOKEN" > dist/publish/github/.npmrc
+          printf '@jeongyunsung:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\nalways-auth=true\n' "$NODE_AUTH_TOKEN" > dist/publish/github/.npmrc
 
       - name: Verify GitHub Packages auth
         working-directory: dist/publish/github

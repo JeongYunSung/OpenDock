@@ -8,15 +8,17 @@ const githubRepository =
   process.env.GITHUB_REPOSITORY ??
   "JeongYunSung/OpenDock";
 const packageOwner = githubRepository.split("/")[0]?.toLowerCase() ?? "opendock";
-const packageName = process.env.OPENDOCK_GITHUB_PACKAGE ?? `@${packageOwner}/cli`;
 const repositoryUrl = `https://github.com/${githubRepository}.git`;
 const rootPackage = JSON.parse(readFileSync(join(rootDir, "package.json"), "utf8")) as {
   description?: string;
   engines?: Record<string, string>;
   license?: string;
+  name?: string;
   packageManager?: string;
   version?: string;
 };
+const rootPackageName = rootPackage.name?.toLowerCase() ?? "opendock";
+const packageName = process.env.OPENDOCK_GITHUB_PACKAGE ?? `@${packageOwner}/${rootPackageName}`;
 
 if (!rootPackage.version) {
   throw new Error("package.json must define a version before preparing a GitHub package");
