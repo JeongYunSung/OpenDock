@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/opendock-logo-512.png" alt="OpenDock logo" width="112">
+<img src="./assets/opendock-logo-96.png" alt="OpenDock logo" width="96">
 
 # OpenDock
 

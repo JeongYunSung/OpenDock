@@ -9,6 +9,7 @@
   },
   "files": [
     "bin",
+    "assets/opendock-logo-96.png",
     "examples",
     "README.md",
     "README.*.md"
