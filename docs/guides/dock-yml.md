@@ -90,7 +90,7 @@ lifecycle:
 
     - id: install-node
       check: node --version
-      version: ">=22.0.0 <25.0.0"
+      version: ">=22.0.0"
       platforms:
         macos:
           run: brew install node
@@ -120,7 +120,7 @@ lifecycle:
       check: git --version
 
     - id: node
-      version: ">=22.0.0 <25.0.0"
+      version: ">=22.0.0"
       check: node --version
 
     - id: npm
@@ -410,7 +410,7 @@ lifecycle:
   doctor:
     - id: node
       check: node --version
-      version: ">=22.0.0 <25.0.0"
+      version: ">=22.0.0"
 
     - id: codex
       check: codex --version
@@ -428,7 +428,7 @@ lifecycle:
   install:
     - id: install-node
       check: node --version
-      version: ">=22.0.0 <25.0.0"
+      version: ">=22.0.0"
       platforms:
         macos:
           run: brew install node
@@ -457,7 +457,7 @@ lifecycle:
 `version`은 공백으로 구분된 조건을 모두 만족해야 합니다.
 
 ```yaml
-version: ">=22.0.0 <25.0.0"
+version: ">=22.0.0"
 ```
 
 지원 연산자는 `>=`, `>`, `<=`, `<`, `=`입니다. `check` 출력에서 첫 번째 `x.y.z` 형태의 버전을 읽습니다.
@@ -549,7 +549,7 @@ lifecycle:
   install:
     - id: install-node
       check: node --version
-      version: ">=22.0.0 <25.0.0"
+      version: ">=22.0.0"
       platforms:
         macos:
           run: brew install node
@@ -668,7 +668,7 @@ lifecycle:
   install:
     - id: install-node
       check: node --version
-      version: ">=22.0.0 <25.0.0"
+      version: ">=22.0.0"
       platforms:
         macos:
           run: brew install node

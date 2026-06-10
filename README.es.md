@@ -186,7 +186,7 @@ lifecycle:
 
     - id: install-node
       check: node --version
-      version: ">=22.0.0 <25.0.0"
+      version: ">=22.0.0"
       platforms:
         macos:
           run: brew install node
@@ -212,7 +212,7 @@ lifecycle:
 
   doctor:
     - id: node
-      version: ">=22.0.0 <25.0.0"
+      version: ">=22.0.0"
       check: node --version
 
     - id: npm

@@ -3577,7 +3577,7 @@ esac
     join(bin, "node"),
     `#!/bin/sh
 if [ "$1" = "--version" ]; then
-  echo "v22.18.0"
+  echo "v26.3.0"
 else
   echo "node $*"
 fi
