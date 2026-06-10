@@ -1,6 +1,6 @@
 opendock: 1
 id: opendock/oma
-summary: Oh My Agent setup with interactive project bootstrap.
+summary: Oh My Agent setup with default full project install.
 readme: DOCK.md
 logo: logo.png
 
@@ -22,8 +22,7 @@ lifecycle:
 
     - id: apply-oma-project
       check: test -f .agents/oma-config.yaml
-      interactive: user
-      run: oma
+      run: oma -y install
       timeout_ms: 600000
 
     - id: verify-oma
@@ -35,8 +34,7 @@ lifecycle:
       run: bun install --global oh-my-agent@latest
 
     - id: update-oma-project
-      interactive: user
-      run: oma
+      run: oma -y update
       timeout_ms: 600000
 
     - id: verify-oma

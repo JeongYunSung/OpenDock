@@ -86,45 +86,9 @@ const fileSpecSchema = z.object({
   update: fileUpdatePolicySchema,
 });
 
-const interactiveKeySchema = z.enum([
-  "backspace",
-  "down",
-  "enter",
-  "escape",
-  "left",
-  "right",
-  "space",
-  "tab",
-  "up",
-]);
-
-const interactiveInputSchema = z.union([
-  z.string(),
-  z.object({
-    key: interactiveKeySchema,
-    repeat: z.number().int().positive().default(1),
-  }),
-  z.object({
-    text: z.string(),
-    repeat: z.number().int().positive().default(1),
-  }),
-]);
-
-const interactiveSchema = z.union([
-  z.literal("user"),
-  z.literal("scripted"),
-  z.object({
-    mode: z.literal("scripted"),
-    inputs: z.array(interactiveInputSchema).default([]),
-    cols: z.number().int().positive().optional(),
-    rows: z.number().int().positive().optional(),
-  }),
-]);
-
 const lifecycleStepFieldsSchema = z.object({
   name: z.string().optional(),
   check: z.string().optional(),
-  interactive: interactiveSchema.optional(),
   run: z.string().optional(),
   repair: z.string().optional(),
   version: z.string().optional(),

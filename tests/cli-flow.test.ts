@@ -1861,10 +1861,10 @@ lifecycle:
     ]);
     expect(
       resolved.manifest.lifecycle.install.find((step) => step.id === "apply-oma-project"),
-    ).toMatchObject({ run: "oma" });
+    ).toMatchObject({ run: "oma -y install" });
     expect(
       resolved.manifest.lifecycle.update.find((step) => step.id === "update-oma-project"),
-    ).toMatchObject({ run: "oma" });
+    ).toMatchObject({ run: "oma -y update" });
     expect(existsSync(join(resolved.root, "files"))).toBe(false);
   });
 
@@ -1876,6 +1876,7 @@ lifecycle:
     const refs = [
       "opendock/git",
       "opendock/codex",
+      "opendock/oma",
       "opendock/claude-code",
       "opendock/oh-my-codex",
       "opendock/oh-my-openagent",
@@ -2300,67 +2301,6 @@ files: []
     expect(existsSync(join(project, "project", "safe.md"))).toBe(false);
   });
 
-  it("supports user and scripted interactive lifecycle steps", async () => {
-    const project = await tempDir();
-    const docks = await tempDir();
-    const bin = await tempDir();
-    writeInteractiveOma(bin);
-    writeInteractiveDock(docks);
-    const resolver = localResolver(docks);
-
-    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
-      await expect(
-        install({
-          dockRef: DockRef.parse("test/interactive-user@1.0.0"),
-          projectDir: project,
-          runCommands: true,
-          operation: "install",
-          phase: "install",
-          resolve: resolver,
-        }),
-      ).rejects.toThrow("interactive step requires a TTY");
-
-      const userScript = join(project, "run-user-interactive.ts");
-      const userManifest = testManifest({
-        id: "test/interactive-user",
-        lifecycle: {
-          install: [
-            {
-              id: "interactive-user",
-              interactive: "user",
-              run: "oma",
-              timeout_ms: 5000,
-            },
-          ],
-        },
-      });
-      writeFileSync(
-        userScript,
-        `import { runLifecycle } from ${JSON.stringify(join(repoRoot, "src", "runner.ts"))};
-await runLifecycle(${JSON.stringify(userManifest)}, "install", process.cwd());
-`,
-      );
-      const userInstall = runCliInPty(project, ["bun", userScript], {
-        inputAfter: "USER_TTY",
-        input: "u\r",
-      });
-      expect(userInstall.exitCode).toBe(0);
-      expect(userInstall.output).toContain("USER_TTY");
-      expect(readFileSync(join(project, "user-input.txt"), "utf8")).toMatch(/^75(?:0a|0d)$/);
-
-      const scriptedInstall = await install({
-        dockRef: DockRef.parse("test/interactive-scripted@1.0.0"),
-        projectDir: project,
-        runCommands: true,
-        operation: "install",
-        phase: "install",
-        resolve: resolver,
-      });
-      expect(scriptedInstall.dockId).toBe("test/interactive-scripted");
-      expect(readFileSync(join(project, "scripted-input.txt"), "utf8")).toBe("090a");
-    });
-  });
-
   it("times out hanging doctor checks", async () => {
     const project = await tempDir();
     const docks = await tempDir();
@@ -2386,7 +2326,7 @@ await runLifecycle(${JSON.stringify(userManifest)}, "install", process.cwd());
     expect(doctor.find((report) => report.id === "slow")?.message).toBe("timed out after 50ms");
   });
 
-  it("allows documented AI CLI doctor commands", async () => {
+  it("allows documented AI CLI doctor commands and OMA project commands", async () => {
     const project = await tempDir();
     const bin = await tempDir();
     for (const command of ["claude", "codex", "oma", "omx"]) {
@@ -2402,6 +2342,8 @@ echo "${command} 1.2.3"
       opendock: 1,
       id: "test/ai-tools",
       lifecycle: {
+        install: [{ id: "oma-install", run: "oma -y install" }],
+        update: [{ id: "oma-update", run: "oma -y update" }],
         doctor: [
           { id: "claude", check: "claude --version", version: ">=1.0.0" },
           { id: "codex", check: "codex --version", version: ">=1.0.0" },
@@ -2415,6 +2357,16 @@ echo "${command} 1.2.3"
       runLifecycle(manifest, "doctor", project),
     );
     expect(reports.map((report) => report.status)).toEqual(["Ready", "Ready", "Ready", "Ready"]);
+
+    const installReports = await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      runLifecycle(manifest, "install", project),
+    );
+    expect(installReports).toMatchObject([{ id: "oma-install", status: "Ran" }]);
+
+    const updateReports = await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      runLifecycle(manifest, "update", project),
+    );
+    expect(updateReports).toMatchObject([{ id: "oma-update", status: "Ran" }]);
   });
 
   it("rejects invalid dock references", () => {
@@ -3312,41 +3264,6 @@ function runCli(cwd: string, env: NodeJS.ProcessEnv, args: string[]) {
   });
 }
 
-function runCliInPty(
-  cwd: string,
-  command: string[],
-  options: { input: string; inputAfter: string },
-): { exitCode: number; output: string } {
-  const script = [
-    "set timeout 10",
-    `spawn ${command.map(tclWord).join(" ")}`,
-    `expect ${tclWord(options.inputAfter)}`,
-    `send -- [binary format H* ${Buffer.from(options.input, "utf8").toString("hex")}]`,
-    "expect eof",
-    "catch wait result",
-    "if {[llength $result] >= 4} { exit [lindex $result 3] }",
-    "exit 1",
-  ].join("\n");
-  const result = spawnSync("expect", ["-c", script], {
-    cwd,
-    encoding: "utf8",
-    env: process.env,
-    timeout: 12_000,
-  });
-
-  if (result.error) {
-    throw result.error;
-  }
-  return {
-    exitCode: result.status ?? 1,
-    output: `${result.stdout ?? ""}${result.stderr ?? ""}`,
-  };
-}
-
-function tclWord(value: string): string {
-  return `{${value.replace(/\\/g, "\\\\").replace(/}/g, "\\}")}}`;
-}
-
 function writeTestDock(
   root: string,
   owner: string,
@@ -3575,91 +3492,6 @@ lifecycle:
   writeFileSync(join(dockRoot, ".opendock-version"), "1.0.0\n");
 }
 
-function writeInteractiveDock(root: string): void {
-  writeInteractiveDockVariant(root, "interactive-user", "user", "");
-  writeInteractiveDockVariant(
-    root,
-    "interactive-scripted",
-    `interactive:
-        mode: scripted
-        inputs:
-          - key: tab
-          - key: enter`,
-    "",
-  );
-}
-
-function writeInteractiveDockVariant(
-  root: string,
-  name: string,
-  interactive: string,
-  extraRun: string,
-): void {
-  const dockRoot = join(root, "test", name);
-  mkdirSync(join(dockRoot, "files"), { recursive: true });
-  const scriptName =
-    name === "interactive-user" ? "user-interactive.js" : "scripted-interactive.js";
-  const outputName = name === "interactive-user" ? "user-input.txt" : "scripted-input.txt";
-  const label = name === "interactive-user" ? "USER_TTY" : "SCRIPTED_TTY";
-  const interactiveYaml = interactive.includes("\n") ? interactive : `interactive: ${interactive}`;
-  writeFileSync(
-    join(dockRoot, "dock.yml"),
-    `opendock: 1
-id: test/${name}
-files:
-  - from: files/${scriptName}
-    to: ${scriptName}
-    update: manual_review
-lifecycle:
-  install:
-    - id: interactive
-      run: oma
-      ${interactiveYaml}
-      timeout_ms: 5000
-${extraRun}`,
-  );
-  writeFileSync(join(dockRoot, ".opendock-version"), "1.0.0\n");
-  writeFileSync(
-    join(dockRoot, "files", scriptName),
-    `const fs = require("node:fs");
-console.log(process.stdin.isTTY ? "${label}" : "NO_TTY");
-process.stdin.setRawMode(true);
-process.stdin.resume();
-const bytes = [];
-process.stdin.on("data", function(data) {
-  for (const byte of data) bytes.push(byte);
-  if (bytes.length >= 2) {
-    fs.writeFileSync("${outputName}", Buffer.from(bytes.slice(0, 2)).toString("hex"));
-    process.exit(0);
-  }
-});
-`,
-  );
-}
-
-function writeInteractiveOma(bin: string): void {
-  writeExecutable(
-    join(bin, "oma"),
-    `#!/usr/bin/env node
-const fs = require("node:fs");
-const scripted = fs.existsSync("user-input.txt");
-const label = scripted ? "SCRIPTED_TTY" : "USER_TTY";
-const outputName = scripted ? "scripted-input.txt" : "user-input.txt";
-console.log(process.stdin.isTTY ? label : "NO_TTY");
-process.stdin.setRawMode(true);
-process.stdin.resume();
-const bytes = [];
-process.stdin.on("data", function(data) {
-  for (const byte of data) bytes.push(byte);
-  if (bytes.length >= 2) {
-    fs.writeFileSync(outputName, Buffer.from(bytes.slice(0, 2)).toString("hex"));
-    process.exit(0);
-  }
-});
-`,
-  );
-}
-
 function writeTimeoutOma(bin: string): void {
   writeExecutable(
     join(bin, "oma"),
@@ -3765,6 +3597,29 @@ fi
     join(bin, "npx"),
     `#!/bin/sh
 echo "npx $*"
+`,
+  );
+  writeExecutable(
+    join(bin, "oma"),
+    `#!/bin/sh
+case "$*" in
+  "--version")
+    echo "oma 8.43.0"
+    ;;
+  "doctor")
+    test -f .agents/oma-config.yaml
+    ;;
+  "-y install"|"--yes install")
+    mkdir -p .agents
+    echo "language: ko" > .agents/oma-config.yaml
+    ;;
+  "-y update"|"--yes update"|"update -y"|"update --yes")
+    test -f .agents/oma-config.yaml
+    ;;
+  *)
+    echo "oma $*"
+    ;;
+esac
 `,
   );
   writeExecutable(

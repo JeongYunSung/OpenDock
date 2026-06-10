@@ -17,7 +17,6 @@ interface CommandResult {
 }
 
 interface CommandOptions {
-  interactive?: LifecycleStep["interactive"];
   live?: boolean;
   missingAsFailure?: boolean;
   platform?: OpenDockPlatform;
@@ -30,8 +29,6 @@ interface CheckResult {
 }
 
 const defaultDoctorTimeoutMs = 30_000;
-const defaultInteractiveColumns = 100;
-const defaultInteractiveRows = 30;
 const safePackagePattern =
   /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+(?:@[A-Za-z0-9][A-Za-z0-9._+-]*)?$/;
 const safeIdentifierPattern = /^[A-Za-z0-9._:@/=-]+$/;
@@ -120,9 +117,6 @@ async function runSetupSteps(
     if (step.run) {
       console.log(`→ ${step.id}: ${step.run}`);
       const runOptions: CommandOptions = { live: true, platform };
-      if (step.interactive) {
-        runOptions.interactive = step.interactive;
-      }
       if (step.timeout_ms !== undefined) {
         runOptions.timeoutMs = step.timeout_ms;
       }
@@ -243,13 +237,6 @@ async function runCommand(
   const platform = options.platform ?? detectPlatform();
   ensureAllowed(program, rest, platform);
 
-  if (options.interactive === "user") {
-    return runUserInteractiveCommand(program, rest, cwd, options);
-  }
-  if (isScriptedInteractive(options.interactive)) {
-    return runScriptedInteractiveCommand(program, rest, cwd, options);
-  }
-
   const output = spawnSync(program, rest, {
     cwd,
     encoding: "utf8",
@@ -279,181 +266,6 @@ async function runCommand(
     stdout: output.stdout ?? "",
     stderr: output.stderr ?? "",
   };
-}
-
-function runUserInteractiveCommand(
-  program: string,
-  args: string[],
-  cwd: string,
-  options: CommandOptions,
-): CommandResult {
-  if (!process.stdin.isTTY || !process.stdout.isTTY) {
-    return {
-      success: false,
-      stdout: "",
-      stderr: "interactive step requires a TTY; re-run this command from a terminal",
-    };
-  }
-
-  const output = spawnSync(program, args, {
-    cwd,
-    env: commandEnvironment(program),
-    killSignal: "SIGTERM",
-    stdio: "inherit",
-    timeout: options.timeoutMs,
-  });
-
-  if (output.error) {
-    const code = (output.error as NodeJS.ErrnoException).code;
-    if (code === "ETIMEDOUT") {
-      return {
-        success: false,
-        stdout: "",
-        stderr: `timed out after ${options.timeoutMs}ms`,
-      };
-    }
-    return { success: false, stdout: "", stderr: output.error.message };
-  }
-
-  return { success: output.status === 0, stdout: "", stderr: "" };
-}
-
-async function runScriptedInteractiveCommand(
-  program: string,
-  args: string[],
-  cwd: string,
-  options: CommandOptions,
-): Promise<CommandResult> {
-  const interactive = normalizeScriptedInteractive(options.interactive);
-  const input = renderInteractiveInputs(interactive.inputs);
-  const expectOptions: { cols: number; rows: number; timeoutMs?: number } = {
-    cols: interactive.cols ?? defaultInteractiveColumns,
-    rows: interactive.rows ?? defaultInteractiveRows,
-  };
-  if (options.timeoutMs !== undefined) {
-    expectOptions.timeoutMs = options.timeoutMs;
-  }
-  const script = buildExpectScript(program, args, input, expectOptions);
-
-  const output = spawnSync("expect", ["-c", script], {
-    cwd,
-    encoding: "utf8",
-    env: commandEnvironment(program),
-    killSignal: "SIGTERM",
-    stdio: options.live ? ["ignore", "inherit", "inherit"] : "pipe",
-    timeout: options.timeoutMs,
-  });
-
-  if (output.error) {
-    const code = (output.error as NodeJS.ErrnoException).code;
-    if (code === "ETIMEDOUT") {
-      return {
-        success: false,
-        stdout: output.stdout ?? "",
-        stderr: `timed out after ${options.timeoutMs}ms`,
-      };
-    }
-    if (code === "ENOENT") {
-      return {
-        success: false,
-        stdout: "",
-        stderr: "scripted interactive step requires `expect` on PATH",
-      };
-    }
-    throw output.error;
-  }
-
-  return {
-    success: output.status === 0,
-    stdout: output.stdout ?? "",
-    stderr:
-      output.status === 124 && options.timeoutMs
-        ? `timed out after ${options.timeoutMs}ms`
-        : (output.stderr ?? ""),
-  };
-}
-
-function buildExpectScript(
-  program: string,
-  args: string[],
-  input: string,
-  options: { cols: number; rows: number; timeoutMs?: number },
-): string {
-  const timeoutSeconds =
-    options.timeoutMs === undefined ? -1 : Math.max(1, Math.ceil(options.timeoutMs / 1000));
-  const command = [program, ...args].map(tclWord).join(" ");
-  const inputHex = Buffer.from(input, "utf8").toString("hex");
-  return [
-    `set timeout ${timeoutSeconds}`,
-    `spawn ${command}`,
-    `stty rows ${options.rows} columns ${options.cols}`,
-    inputHex === "" ? "" : `after 50`,
-    inputHex === "" ? "" : `send -- [binary format H* ${inputHex}]`,
-    `expect {`,
-    `  eof {}`,
-    `  timeout {`,
-    `    catch {close}`,
-    `    catch wait`,
-    `    exit 124`,
-    `  }`,
-    `}`,
-    `catch wait result`,
-    `if {[llength $result] >= 4} { exit [lindex $result 3] }`,
-    `exit 1`,
-  ]
-    .filter((line) => line !== "")
-    .join("\n");
-}
-
-function tclWord(value: string): string {
-  return `{${value.replace(/\\/g, "\\\\").replace(/}/g, "\\}")}}`;
-}
-
-function isScriptedInteractive(interactive: LifecycleStep["interactive"] | undefined): boolean {
-  return (
-    interactive === "scripted" ||
-    (typeof interactive === "object" && interactive.mode === "scripted")
-  );
-}
-
-function normalizeScriptedInteractive(
-  interactive: LifecycleStep["interactive"] | undefined,
-): Extract<LifecycleStep["interactive"], { mode: "scripted" }> {
-  if (typeof interactive === "object" && interactive.mode === "scripted") {
-    return interactive;
-  }
-  return { mode: "scripted", inputs: [] };
-}
-
-function renderInteractiveInputs(
-  inputs: Extract<LifecycleStep["interactive"], { mode: "scripted" }>["inputs"],
-): string {
-  return inputs.map(renderInteractiveInput).join("");
-}
-
-function renderInteractiveInput(
-  input: Extract<LifecycleStep["interactive"], { mode: "scripted" }>["inputs"][number],
-): string {
-  if (typeof input === "string") {
-    return input;
-  }
-  if ("text" in input) {
-    return input.text.repeat(input.repeat);
-  }
-  return keySequence(input.key).repeat(input.repeat);
-}
-
-function keySequence(key: string): string {
-  if (key === "backspace") return "\x7f";
-  if (key === "down") return "\x1b[B";
-  if (key === "enter") return "\r";
-  if (key === "escape") return "\x1b";
-  if (key === "left") return "\x1b[D";
-  if (key === "right") return "\x1b[C";
-  if (key === "space") return " ";
-  if (key === "tab") return "\t";
-  if (key === "up") return "\x1b[A";
-  throw new Error(`unsupported interactive key: ${key}`);
 }
 
 function combinedOutput(output: { stdout: string; stderr: string }): string {
@@ -713,13 +525,21 @@ function isSafeOmaCommand(args: string[]): boolean {
   if (args.length === 0) {
     return true;
   }
-  if (isExact(args, ["--version"]) || isExact(args, ["doctor"]) || isExact(args, ["install"])) {
+  if (
+    isExact(args, ["--version"]) ||
+    isExact(args, ["doctor"]) ||
+    isExact(args, ["install"]) ||
+    isExact(args, ["-y", "install"]) ||
+    isExact(args, ["--yes", "install"]) ||
+    isExact(args, ["-y", "update"]) ||
+    isExact(args, ["--yes", "update"])
+  ) {
     return true;
   }
   if (args[0] !== "update") {
     return false;
   }
-  const allowed = new Set(["update", "-y"]);
+  const allowed = new Set(["update", "-y", "--yes"]);
   return args.every((arg) => allowed.has(arg));
 }
 
