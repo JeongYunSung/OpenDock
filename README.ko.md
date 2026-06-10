@@ -57,7 +57,7 @@ AI 작업공간 설정은 보통 일회성 shell 명령, 복사된 prompt 파일
 
 ## 빠른 시작
 
-OpenDock은 아직 패키지 매니저로 배포되지 않았습니다. 소스에서 빌드하세요.
+로컬 개발에서는 소스에서 OpenDock을 빌드합니다.
 
 ```bash
 bun install
@@ -283,7 +283,6 @@ bun run check
 
 Integration test는 임시 디렉터리와 생성된 로컬 dock fixture를 사용합니다.
 `examples/`의 dock은 실제 작성 예시입니다.
-
 
 ## 생태계
 

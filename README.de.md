@@ -61,8 +61,7 @@ daraus ein geprüftes Dock:
 
 ## Schnellstart
 
-OpenDock ist noch nicht über einen package manager veröffentlicht. Baue es aus
-dem Quellcode:
+Für lokale Entwicklung baust du OpenDock aus dem Quellcode:
 
 ```bash
 bun install
@@ -290,7 +289,6 @@ bun run check
 
 Die integration tests verwenden temporäre Verzeichnisse und generierte lokale
 Dock-Fixtures. Die Docks in `examples/` sind echte Authoring-Beispiele.
-
 
 ## Ökosystem
 

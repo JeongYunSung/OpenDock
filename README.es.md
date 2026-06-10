@@ -62,8 +62,7 @@ revisado:
 
 ## Inicio Rápido
 
-OpenDock aún no está publicado mediante un package manager. Compílalo desde el
-código fuente:
+Para desarrollo local, compila OpenDock desde el código fuente:
 
 ```bash
 bun install
@@ -289,7 +288,6 @@ bun run check
 
 Las pruebas de integración usan directorios temporales y fixtures de dock local
 generados. Los docks de `examples/` son ejemplos reales de autoría.
-
 
 ## Ecosistema
 

@@ -60,7 +60,7 @@ OpenDock はそれをレビュー済みの dock に変えます。
 
 ## クイックスタート
 
-OpenDock はまだ package manager では公開されていません。ソースからビルドしてください。
+ローカル開発では、ソースから OpenDock をビルドします。
 
 ```bash
 bun install
@@ -281,7 +281,6 @@ bun run check
 
 integration test は一時ディレクトリと生成された local dock fixture を使います。
 `examples/` の dock は実際の authoring examples です。
-
 
 ## エコシステム
 

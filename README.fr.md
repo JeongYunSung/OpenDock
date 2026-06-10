@@ -62,8 +62,7 @@ révisé :
 
 ## Démarrage Rapide
 
-OpenDock n'est pas encore publié via un package manager. Construisez-le depuis
-les sources :
+Pour le développement local, construisez OpenDock depuis les sources :
 
 ```bash
 bun install
@@ -290,7 +289,6 @@ bun run check
 
 Les tests d'intégration utilisent des répertoires temporaires et des fixtures de
 dock local générées. Les docks dans `examples/` sont de vrais exemples de rédaction.
-
 
 ## Écosystème
 

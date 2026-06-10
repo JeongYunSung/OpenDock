@@ -47,7 +47,7 @@ AI 工作区设置通常会变成一堆一次性 shell 命令、复制来的 pro
 
 ## 快速开始
 
-OpenDock 还没有通过 package manager 发布。请从源码构建：
+本地开发时，请从源码构建 OpenDock：
 
 ```bash
 bun install
@@ -261,7 +261,6 @@ bun run check
 ```
 
 integration test 使用临时目录和生成的本地 dock fixture。`examples/` 下的 dock 是真实的编写示例。
-
 
 ## 生态
 

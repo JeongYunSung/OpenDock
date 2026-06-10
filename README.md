@@ -62,7 +62,7 @@ that into a reviewed dock:
 
 ## Quick Start
 
-OpenDock is not published through a package manager yet. Build it from source:
+For local development, build OpenDock from source:
 
 ```bash
 bun install
@@ -291,7 +291,6 @@ bun run check
 
 The integration tests use temporary directories and generated local dock
 fixtures. The `examples/` docks are real authoring examples.
-
 
 ## Ecosystem
 
