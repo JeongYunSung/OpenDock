@@ -38,6 +38,7 @@ cpSync(
 );
 cpSync(join(rootDir, "bin", "opendock"), join(outputDir, "bin", "opendock"));
 cpSync(join(rootDir, "examples"), join(outputDir, "examples"), { recursive: true });
+cpSync(join(rootDir, "CHANGELOG.md"), join(outputDir, "CHANGELOG.md"));
 
 for (const file of readdirSync(rootDir)) {
   if (file === "README.md" || /^README\.[a-z]{2}\.md$/.test(file)) {
@@ -54,7 +55,14 @@ const publishPackage = {
   bin: {
     opendock: "bin/opendock",
   },
-  files: ["bin", "assets/opendock-logo-96.png", "examples", "README.md", "README.*.md"],
+  files: [
+    "bin",
+    "assets/opendock-logo-96.png",
+    "examples",
+    "CHANGELOG.md",
+    "README.md",
+    "README.*.md",
+  ],
   engines: rootPackage.engines,
   packageManager: rootPackage.packageManager,
   repository: {

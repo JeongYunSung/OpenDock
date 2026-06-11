@@ -30,9 +30,11 @@ describe("OpenDock version metadata", () => {
 
     expect(packageJson.bin).toEqual({ opendock: "bin/opendock" });
     expect(packageJson.files).toContain("bin");
+    expect(packageJson.files).toContain("CHANGELOG.md");
     expect(buildScript).toContain('const bundlePath = join(binDir, "opendock")');
     expect(buildScript).not.toContain("wrapperPath");
     expect(prepareScript).toContain('join(rootDir, "bin", "opendock")');
+    expect(prepareScript).toContain('join(rootDir, "CHANGELOG.md")');
     expect(prepareScript).not.toContain("opendock.js");
   });
 });
