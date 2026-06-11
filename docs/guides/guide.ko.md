@@ -523,6 +523,9 @@ opendock deploy owner/name@1.0.0 --platform linux --file dock.linux.yml
 
 platform과 무관한 dock은 `--platform`을 생략하면 `any` artifact로 제출됩니다.
 
+이 repository의 example dock은 배포용 파일명을 명확히 하기 위해
+`dock.macos.yml`과 `dock.windows.yml`을 함께 둡니다.
+
 설치는 그대로 단순합니다.
 
 ```bash
@@ -709,6 +712,7 @@ release version은 `dock.yml`에 쓰지 않습니다. deploy command에서 정�
 ```bash
 opendock deploy owner/name@1.0.0
 opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
+opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 ```
 
 deploy가 제출하는 것:
@@ -737,6 +741,8 @@ deploy는 Registry login이 필요합니다.
 opendock auth login
 opendock auth status
 opendock deploy owner/name@1.0.0
+opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
+opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 ```
 
 ## 예제 dock 목록
@@ -751,9 +757,9 @@ Tool dock은 특정 CLI나 외부 setup engine을 준비합니다. project paylo
 
 | 예제 | 용도 |
 |---|---|
-| `examples/codex/dock.yml` | Codex CLI 설치 |
-| `examples/claude-code/dock.yml` | Claude Code 설치 |
-| `examples/oma/dock.yml` | Oh My Agent 실행 결과를 OpenDock export로 적용 |
+| `examples/codex/dock.{macos,windows}.yml` | Codex CLI 설치 |
+| `examples/claude-code/dock.{macos,windows}.yml` | Claude Code 설치 |
+| `examples/oma/dock.{macos,windows}.yml` | Oh My Agent 실행 결과를 OpenDock export로 적용 |
 
 ### Outcome docks
 
@@ -763,12 +769,20 @@ Outcome dock은 특정 직군이나 작업 결과를 위한 AI-ready workspace �
 
 | 예제 | 용도 |
 |---|---|
-| `examples/designer-ai/dock.yml` | UI/UX/product design workspace |
-| `examples/product-manager/dock.yml` | PRD, user story, roadmap, release workspace |
-| `examples/frontend-ai/dock.yml` | React/Next.js frontend engineering workspace |
-| `examples/startup-founder/dock.yml` | founder strategy workspace |
-| `examples/ai-automation/dock.yml` | internal automation and workflow design workspace |
-| `examples/ui-case-study/dock.yml` | UI/UX portfolio case study workspace |
+| `examples/designer-ai/dock.{macos,windows}.yml` | UI/UX/product design workspace |
+| `examples/product-manager/dock.{macos,windows}.yml` | PRD, user story, roadmap, release workspace |
+| `examples/frontend-ai/dock.{macos,windows}.yml` | React/Next.js frontend engineering workspace |
+| `examples/backend-ai/dock.{macos,windows}.yml` | backend API, database, security workspace |
+| `examples/mobile-ai/dock.{macos,windows}.yml` | mobile app architecture and release workspace |
+| `examples/qa-engineer/dock.{macos,windows}.yml` | QA, regression, accessibility, bug report workspace |
+| `examples/docs-ai/dock.{macos,windows}.yml` | README, API docs, changelog workspace |
+| `examples/data-analyst/dock.{macos,windows}.yml` | metrics, SQL, dashboard, experiment workspace |
+| `examples/startup-founder/dock.{macos,windows}.yml` | founder strategy workspace |
+| `examples/marketer-ai/dock.{macos,windows}.yml` | campaign, content, SEO workspace |
+| `examples/customer-support/dock.{macos,windows}.yml` | support FAQ, triage, escalation workspace |
+| `examples/recruiter-ai/dock.{macos,windows}.yml` | recruiting, interview, scorecard workspace |
+| `examples/ai-automation/dock.{macos,windows}.yml` | internal automation and workflow design workspace |
+| `examples/ui-case-study/dock.{macos,windows}.yml` | UI/UX portfolio case study workspace |
 
 ### Utility docks
 
@@ -776,11 +790,13 @@ Utility dock은 여러 outcome dock과 같이 섞어 쓰는 보조 harness입니
 
 | 예제 | 용도 |
 |---|---|
-| `examples/agent-ready/dock.yml` | 여러 AI coding agent용 공통 instruction |
-| `examples/agent-safety/dock.yml` | AI-generated change review와 security safety rails |
-| `examples/repo-context/dock.yml` | repository context packaging과 analysis prompts |
-| `examples/mcp-safe/dock.yml` | security-first MCP reference |
-| `examples/dev-env/dock.yml` | project-local tool versions와 validation task reference |
+| `examples/agent-ready/dock.{macos,windows}.yml` | 여러 AI coding agent용 공통 instruction |
+| `examples/agent-safety/dock.{macos,windows}.yml` | AI-generated change review와 security safety rails |
+| `examples/repo-context/dock.{macos,windows}.yml` | repository context packaging과 analysis prompts |
+| `examples/mcp-safe/dock.{macos,windows}.yml` | security-first MCP reference |
+| `examples/dev-env/dock.{macos,windows}.yml` | project-local tool versions와 validation task reference |
+| `examples/devops-ai/dock.{macos,windows}.yml` | CI/CD, deployment, incident runbook workspace |
+| `examples/monorepo-ai/dock.{macos,windows}.yml` | package boundary and change impact workspace |
 
 조합 예시는 다음과 같습니다.
 

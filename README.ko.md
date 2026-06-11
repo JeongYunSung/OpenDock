@@ -153,6 +153,7 @@ bin/opendock version
 | `opendock auth logout` | 로컬 Registry 로그인 정보를 지웁니다. |
 | `opendock deploy owner/name@1.0.0` | local dock release를 Registry review로 제출합니다. |
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | platform별 release artifact를 제출합니다. |
+| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | platform별 release artifact를 제출합니다. |
 
 dock reference에는 exact version identifier가 필요합니다.
 
@@ -283,8 +284,8 @@ root에 들어온 최종 파일을 OpenDock이 추적할 수 있게 해줍니다
 | 그룹 | 예제 | 역할 |
 |---|---|---|
 | Tool docks | `codex`, `claude-code`, `oma` | 특정 AI 도구를 설치하거나 실행합니다. |
-| Outcome docks | `designer-ai`, `product-manager`, `frontend-ai`, `startup-founder`, `ai-automation`, `ui-case-study` | 직군/작업 결과별 AI-ready workspace 파일을 추가합니다. |
-| Utility docks | `agent-ready`, `agent-safety`, `repo-context`, `mcp-safe`, `dev-env` | context, safety, MCP, validation harness를 추가합니다. |
+| Outcome docks | `designer-ai`, `product-manager`, `frontend-ai`, `backend-ai`, `mobile-ai`, `qa-engineer`, `docs-ai`, `data-analyst`, `startup-founder`, `marketer-ai`, `customer-support`, `recruiter-ai`, `ai-automation`, `ui-case-study` | 직군/작업 결과별 AI-ready workspace 파일을 추가합니다. |
+| Utility docks | `agent-ready`, `agent-safety`, `repo-context`, `mcp-safe`, `dev-env`, `devops-ai`, `monorepo-ai` | context, safety, MCP, validation, 운영, monorepo harness를 추가합니다. |
 
 조합 예시:
 
@@ -311,6 +312,7 @@ install은 public이지만, remote install 가능한 dock은 OpenDock Registry �
 opendock auth login
 opendock deploy owner/name@1.0.0
 opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
+opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 ```
 
 deploy는 다음을 업로드합니다.
@@ -342,7 +344,8 @@ src/
 tests/
   cli-flow.test.ts          # Integration-style temp-dir tests
 examples/
-  */dock.yml                # Example docks
+  */dock.macos.yml          # macOS example release manifests
+  */dock.windows.yml        # Windows example release manifests
 docs/
   guides/guide*.md          # Manifest authoring guides
 ```

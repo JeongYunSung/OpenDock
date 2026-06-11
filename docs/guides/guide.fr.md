@@ -120,6 +120,7 @@ export:
 opendock auth login
 opendock deploy owner/name@1.0.0
 opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
+opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 ```
 
 Deploy envoie `dock.yml`, une archive construite depuis `files[].from`, les

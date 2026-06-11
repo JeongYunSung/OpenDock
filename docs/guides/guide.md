@@ -234,6 +234,10 @@ opendock deploy owner/name@1.0.0 --platform linux --file dock.linux.yml
 Platform-neutral docks can omit `--platform`, which submits the artifact as
 `any`.
 
+Example docks in this repository use explicit `dock.macos.yml` and
+`dock.windows.yml` files so they can be deployed directly as platform-specific
+artifacts.
+
 Install stays simple:
 
 ```bash
@@ -252,6 +256,7 @@ Deploy requires login and an exact version in the command.
 opendock auth login
 opendock deploy owner/name@1.0.0
 opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
+opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 ```
 
 Deploy submits:

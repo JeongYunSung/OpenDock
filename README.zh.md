@@ -92,6 +92,7 @@ opendock bootstrap mac
 | `opendock auth logout` | 清除本地 Registry login. |
 | `opendock deploy owner/name@1.0.0` | 提交 local dock release 供 Registry review. |
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | 提交特定平台的 release artifact。 |
+| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | 提交特定平台的 release artifact。 |
 
 dock reference 必须包含 exact version identifier。
 

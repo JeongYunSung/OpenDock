@@ -115,6 +115,7 @@ export:
 opendock auth login
 opendock deploy owner/name@1.0.0
 opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
+opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 ```
 
 Deploy 会提交 `dock.yml`、基于 `files[].from` 生成的 archive、release platform

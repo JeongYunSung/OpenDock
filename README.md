@@ -153,6 +153,7 @@ bin/opendock version
 | `opendock auth logout` | Clear local Registry login. |
 | `opendock deploy owner/name@1.0.0` | Submit a local dock release for Registry review. |
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Submit a platform-specific release artifact. |
+| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Submit a platform-specific release artifact. |
 
 Dock references require an exact version identifier.
 
@@ -284,8 +285,8 @@ The examples are intentionally composable.
 | Group | Examples | Role |
 |---|---|---|
 | Tool docks | `codex`, `claude-code`, `oma` | Install or run an AI tool without forcing a role workflow. |
-| Outcome docks | `designer-ai`, `product-manager`, `frontend-ai`, `startup-founder`, `ai-automation`, `ui-case-study` | Add role-specific AI-ready workspace files. |
-| Utility docks | `agent-ready`, `agent-safety`, `repo-context`, `mcp-safe`, `dev-env` | Add reusable context, safety, MCP, or validation harnesses. |
+| Outcome docks | `designer-ai`, `product-manager`, `frontend-ai`, `backend-ai`, `mobile-ai`, `qa-engineer`, `docs-ai`, `data-analyst`, `startup-founder`, `marketer-ai`, `customer-support`, `recruiter-ai`, `ai-automation`, `ui-case-study` | Add role-specific AI-ready workspace files. |
+| Utility docks | `agent-ready`, `agent-safety`, `repo-context`, `mcp-safe`, `dev-env`, `devops-ai`, `monorepo-ai` | Add reusable context, safety, MCP, validation, operations, or repository harnesses. |
 
 Example combination:
 
@@ -312,6 +313,7 @@ Registry. Deploy requires login.
 opendock auth login
 opendock deploy owner/name@1.0.0
 opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
+opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 ```
 
 Deploy uploads:
@@ -343,7 +345,8 @@ src/
 tests/
   cli-flow.test.ts          # Integration-style temp-dir tests
 examples/
-  */dock.yml                # Example docks
+  */dock.macos.yml          # macOS example release manifests
+  */dock.windows.yml        # Windows example release manifests
 docs/
   guides/guide*.md          # Manifest authoring guides
 ```

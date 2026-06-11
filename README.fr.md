@@ -95,6 +95,7 @@ opendock bootstrap mac
 | `opendock auth logout` | Efface le login Registry local. |
 | `opendock deploy owner/name@1.0.0` | Soumet un local dock release à Registry review. |
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Soumet un artifact de release propre à la plateforme. |
+| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Soumet un artifact de release propre à la plateforme. |
 
 Les références dock exigent un exact version identifier.
 

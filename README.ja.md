@@ -94,6 +94,7 @@ opendock bootstrap mac
 | `opendock auth logout` | local Registry login を削除. |
 | `opendock deploy owner/name@1.0.0` | local dock release を Registry review に提出. |
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | platform 別の release artifact を提出. |
+| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | platform 別の release artifact を提出. |
 
 dock reference には exact version identifier が必要です。
 
