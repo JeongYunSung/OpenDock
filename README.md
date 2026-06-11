@@ -44,7 +44,7 @@ opendock uninstall opendock/codex
 - [Command Reference](#command-reference)
 - [Dock Format](#dock-format)
 - [File Ownership](#file-ownership)
-- [Commands And Export](#commands-and-export)
+- [Tasks And Export](#tasks-and-export)
 - [Example Docks](#example-docks)
 - [Registry And Deploy](#registry-and-deploy)
 - [Repository Layout](#repository-layout)
@@ -106,7 +106,7 @@ OpenDock separates responsibilities into explicit scopes.
 | **Project scope** | Current workspace | Installed dock list, lock state, logs, and project-level OpenDock metadata. |
 | **Dock scope** | One installed dock | Version, checksum, managed file records, and private workdir. |
 | **Root output scope** | OpenDock file engine | Files applied into the project root after preflight checks. |
-| **System/tool scope** | Host package managers | Tools prepared by `requires` or allowed setup commands, such as Homebrew, npm, Bun, pip, or winget. |
+| **System/tool scope** | Host package managers | Tools prepared by `requires` or allowed setup tasks, such as Homebrew, npm, Bun, pip, or winget. |
 
 The practical rule is simple: OpenDock can fully track project files it applies,
 but it cannot claim ownership of the whole machine. Global tool installers may
@@ -126,6 +126,14 @@ already available.
 
 ```bash
 opendock bootstrap mac
+```
+
+For Windows docks that use WinGet, bootstrap the host once if WinGet is not
+available. OpenDock verifies `winget` and can open Microsoft App Installer when
+it is missing.
+
+```bash
+opendock bootstrap windows
 ```
 
 For local development:
@@ -148,6 +156,7 @@ bin/opendock version
 | `opendock log` | Show recent OpenDock runs for the current project. |
 | `opendock version` | Print CLI, schema, and Registry information. |
 | `opendock bootstrap mac` | Verify or install Homebrew on macOS. |
+| `opendock bootstrap windows` | Verify WinGet or open Microsoft App Installer on Windows. |
 | `opendock auth login` | Log in to OpenDock Registry for deploy. |
 | `opendock auth status` | Show the current Registry login. |
 | `opendock auth logout` | Clear local Registry login. |
@@ -248,9 +257,9 @@ Files that cannot safely contain marker comments are managed as whole files by
 checksum. If a user edits a managed file, update and uninstall stop by default.
 Use `--force` only when the dock version should win.
 
-## Commands And Export
+## Tasks And Export
 
-Steps can run in the project root or in a dock-private workdir.
+Tasks can run in the project root or in a dock-private workdir.
 Use `requires` for runtime and package prerequisites; use top-level `install`,
 `update`, and `doctor` for project actions and generated outputs.
 

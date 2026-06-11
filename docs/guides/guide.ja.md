@@ -1,7 +1,7 @@
 # OpenDock ガイド
 
 `dock.yml` は、dock がプロジェクトに追加する内容を説明する manifest です。
-追加するファイル、必要なツール、install/update/doctor で実行する command、
+追加するファイル、必要なツール、install/update/doctor task、
 外部ツールが生成した output のうち project root に取り込むものを宣言します。
 
 OpenDock は AI setup を選び、1 つの workspace に組み合わせ、dock ごとに update
@@ -60,8 +60,8 @@ files:
 | `logo` | Catalog logo image. |
 | `requires` | Runtime and package requirements. |
 | `files` | Files or directories applied to the project root. |
-| `install` | Commands for first install and initial generation. |
-| `update` | Commands for refresh and maintenance. |
+| `install` | Tasks for first install and initial generation. |
+| `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
 
 ## Version
@@ -81,7 +81,16 @@ Text files such as `AGENTS.md` are applied as managed blocks. Config and binary
 files are tracked by checksum. If a user edits OpenDock-managed content, update
 stops before writing root files. `--force` explicitly chooses the dock version.
 
-## Commands
+## Host Bootstrap
+
+```bash
+opendock bootstrap mac
+opendock bootstrap windows
+```
+
+macOS では Homebrew、Windows では WinGet を dock 実行前に確認できます。
+
+## Tasks
 
 ```yaml
 install:

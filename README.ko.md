@@ -44,7 +44,7 @@ opendock uninstall opendock/codex
 - [명령어](#명령어)
 - [Dock Format](#dock-format)
 - [파일 소유권](#파일-소유권)
-- [Commands And Export](#commands-and-export)
+- [Tasks And Export](#tasks-and-export)
 - [Example Docks](#example-docks)
 - [Registry And Deploy](#registry-and-deploy)
 - [Repository Layout](#repository-layout)
@@ -106,7 +106,7 @@ OpenDock은 책임 범위를 명확히 나눕니다.
 | **Project scope** | 현재 workspace | 설치된 dock 목록, lock, log, project-level metadata. |
 | **Dock scope** | 설치된 dock 하나 | version, checksum, managed file record, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 이후 project root에 적용되는 파일. |
-| **System/tool scope** | host package manager | `requires` 또는 허용된 install, update, and doctor command가 준비하는 Homebrew, npm, Bun, pip, winget 같은 host tool. |
+| **System/tool scope** | host package manager | `requires` 또는 허용된 install, update, doctor task가 준비하는 Homebrew, npm, Bun, pip, winget 같은 host tool. |
 
 핵심 규칙은 단순합니다. OpenDock은 프로젝트에 적용한 파일은 추적할 수 있지만,
 전체 머신을 소유한다고 가정하지 않습니다. global tool installer는 host에 영향을
@@ -126,6 +126,14 @@ Homebrew를 사용하는 macOS dock을 실행하려면, Homebrew가 없을 때 h
 
 ```bash
 opendock bootstrap mac
+```
+
+WinGet을 사용하는 Windows dock을 실행하려면, WinGet이 없을 때 host bootstrap을
+먼저 실행합니다. OpenDock은 `winget`을 확인하고, 없으면 Microsoft App Installer를
+열 수 있게 안내합니다.
+
+```bash
+opendock bootstrap windows
 ```
 
 로컬 개발:
@@ -148,6 +156,7 @@ bin/opendock version
 | `opendock log` | 현재 프로젝트의 최근 OpenDock 실행 기록을 보여줍니다. |
 | `opendock version` | CLI, schema, Registry 정보를 출력합니다. |
 | `opendock bootstrap mac` | macOS에서 Homebrew를 확인하거나 설치합니다. |
+| `opendock bootstrap windows` | Windows에서 WinGet을 확인하거나 Microsoft App Installer를 엽니다. |
 | `opendock auth login` | deploy를 위해 OpenDock Registry에 로그인합니다. |
 | `opendock auth status` | 현재 Registry 로그인 상태를 보여줍니다. |
 | `opendock auth logout` | 로컬 Registry 로그인 정보를 지웁니다. |
@@ -247,9 +256,9 @@ marker comment를 넣기 어려운 파일은 파일 전체를 checksum으로 관
 managed file을 수정하면 update와 uninstall은 기본적으로 중단됩니다. dock 버전을
 우선하려면 `--force`를 사용합니다.
 
-## Commands And Export
+## Tasks And Export
 
-Step은 프로젝트 root 또는 dock-private workdir에서 실행할 수 있습니다.
+Task는 프로젝트 root 또는 dock-private workdir에서 실행할 수 있습니다.
 runtime과 package 준비는 `requires`에 두고, 프로젝트 작업과 generated output
 적용은 top-level `install`, `update`, `doctor`에 둡니다.
 

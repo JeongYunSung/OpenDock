@@ -18,7 +18,7 @@ import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import { c as createTar } from "tar";
 import { TokenStore } from "./auth.js";
-import { bootstrapMac } from "./bootstrap.js";
+import { bootstrapMac, bootstrapWindows } from "./bootstrap.js";
 import { performBrowserLogin } from "./browser-auth.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
 import { DockInstaller, type InstallReport } from "./core/app/dock-installer.js";
@@ -179,6 +179,14 @@ export async function run(argv = process.argv): Promise<void> {
     .action(async (options: { yes?: boolean }) => {
       await bootstrapMac({ assumeYes: options.yes === true });
     });
+  bootstrap
+    .command("windows")
+    .alias("win")
+    .description("Verify WinGet or open Microsoft App Installer for Windows docks.")
+    .option("-y, --yes", "Open Microsoft App Installer without OpenDock confirmation")
+    .action(async (options: { yes?: boolean }) => {
+      await bootstrapWindows({ assumeYes: options.yes === true });
+    });
 
   const auth = program.command("auth").description("Authenticate with OpenDock Registry.");
   auth
@@ -229,12 +237,12 @@ export async function run(argv = process.argv): Promise<void> {
     .command("deploy")
     .description("Submit a dock to OpenDock Registry for review.")
     .argument("<dock>", "Dock release reference: owner/name@version")
-    .option("--platform <platform>", "Release platform: any, macos, windows, or linux", "any")
+    .option("--platform <platform>", "Release platform: any, macos, windows, or linux")
     .option("--file <path>", "Manifest file to submit as dock.yml", "dock.yml")
-    .action(async (dockName: string, options: { platform: string; file: string }) => {
+    .action(async (dockName: string, options: { platform?: string; file: string }) => {
       const dockRef = parseDeployRef(dockName);
-      const releasePlatform = resolveDeployPlatform(options.platform);
       const manifestPath = resolveDeployManifest(process.cwd(), options.file);
+      const releasePlatform = resolveDeployPlatform(options.platform, manifestPath);
       const deployRoot = dirname(manifestPath);
       const manifest = readFileSync(manifestPath, "utf8");
       const parsedManifest = parseManifestFile(manifestPath);
@@ -546,8 +554,32 @@ function resolveCliPlatform(value: string | undefined): OpenDockPlatform {
   return value === undefined ? detectPlatform() : parsePlatform(value);
 }
 
-function resolveDeployPlatform(value: string): OpenDockReleasePlatform {
-  return parseReleasePlatform(value);
+function resolveDeployPlatform(
+  value: string | undefined,
+  manifestPath: string | undefined,
+): OpenDockReleasePlatform {
+  return value === undefined
+    ? inferDeployPlatformFromManifestPath(manifestPath)
+    : parseReleasePlatform(value);
+}
+
+function inferDeployPlatformFromManifestPath(
+  manifestPath: string | undefined,
+): OpenDockReleasePlatform {
+  if (manifestPath === undefined) {
+    return "any";
+  }
+  const tokens = new Set(basename(manifestPath).toLowerCase().split("."));
+  if (tokens.has("macos") || tokens.has("mac") || tokens.has("darwin")) {
+    return "macos";
+  }
+  if (tokens.has("windows") || tokens.has("win") || tokens.has("win32")) {
+    return "windows";
+  }
+  if (tokens.has("linux")) {
+    return "linux";
+  }
+  return "any";
 }
 
 function resolveDeployManifest(projectDir: string, relativePathValue: string): string {

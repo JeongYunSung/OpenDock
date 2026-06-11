@@ -430,6 +430,63 @@ describe("opendock TypeScript CLI", () => {
     expect(existsSync(join(extractRoot, "macos", "dock.macos.yml"))).toBe(false);
   });
 
+  it("infers deploy platform from the manifest filename", async () => {
+    const dockRoot = tempDir();
+    const home = tempDir();
+    const dataDir = join(home, "Library", "Application Support", "OpenDock");
+    mkdirSync(dataDir, { recursive: true });
+    writeFileSync(join(dataDir, "auth-token"), "test-token");
+    mkdirSync(join(dockRoot, "windows", "files"), { recursive: true });
+    writeFileSync(join(dockRoot, "windows", "files", "AGENTS.md"), "# Windows Agent\n");
+    writeFileSync(
+      join(dockRoot, "windows", "dock.windows.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/platform-dock",
+        summary: "Windows artifact",
+        files: [{ from: "files/AGENTS.md", to: "AGENTS.md" }],
+      }),
+    );
+
+    const previousFetch = globalThis.fetch;
+    let body:
+      | {
+          archive: { filename: string };
+          platform: string;
+        }
+      | undefined;
+    globalThis.fetch = (async (_input: string | URL | Request, init?: RequestInit) => {
+      body = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ id: "submission-1", status: "pending" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    try {
+      await withEnv({ HOME: home }, () =>
+        withCwd(dockRoot, () =>
+          runCli([
+            "bun",
+            "opendock",
+            "deploy",
+            "test/platform-dock@1.0.0",
+            "--file",
+            "windows/dock.windows.yml",
+          ]),
+        ),
+      );
+    } finally {
+      globalThis.fetch = previousFetch;
+    }
+
+    if (!body) {
+      throw new Error("expected deploy request body");
+    }
+    expect(body.platform).toBe("windows");
+    expect(body.archive.filename).toBe("test-platform-dock-1.0.0-windows.tgz");
+  });
+
   it("submits platform-neutral deploys as any artifacts by default", async () => {
     const dockRoot = tempDir();
     const home = tempDir();

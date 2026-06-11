@@ -63,7 +63,7 @@ OpenDock は terminal replacement でも汎用 script runner でもありませ�
 | **Project scope** | 現在の workspace | installed dock list, lock, log, project metadata. |
 | **Dock scope** | 1つの installed dock | version, checksum, managed file record, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 後に project root へ適用される file. |
-| **System/tool scope** | host package manager | `requires` または許可された install, update, and doctor command が準備する Homebrew, npm, Bun, pip, winget などの host tool. |
+| **System/tool scope** | host package manager | `requires` または許可された install, update, doctor task が準備する Homebrew, npm, Bun, pip, winget などの host tool. |
 
 ## Install
 
@@ -78,6 +78,12 @@ macOS dock が Homebrew を使う場合、Homebrew がなければ先に bootstr
 opendock bootstrap mac
 ```
 
+Windows dock が WinGet を使う場合、WinGet がなければ先に bootstrap します。
+
+```bash
+opendock bootstrap windows
+```
+
 ## Commands
 
 | Command | Purpose |
@@ -89,6 +95,8 @@ opendock bootstrap mac
 | `opendock doctor` | project state と dock doctor steps を確認. |
 | `opendock log` | current project の最近の OpenDock run を表示. |
 | `opendock version` | CLI, schema, Registry information を表示. |
+| `opendock bootstrap mac` | macOS で Homebrew を確認またはインストール. |
+| `opendock bootstrap windows` | Windows で WinGet を確認または Microsoft App Installer を開く. |
 | `opendock auth login` | deploy のため Registry に login. |
 | `opendock auth status` | 現在の Registry login を表示. |
 | `opendock auth logout` | local Registry login を削除. |

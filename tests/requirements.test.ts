@@ -51,13 +51,13 @@ describe("requires regression coverage", () => {
     });
   });
 
-  it("parses top-level commands from dock.yml", () => {
+  it("parses top-level tasks from dock.yml", () => {
     const root = tempDir();
     writeFileSync(
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/commands",
+        id: "test/tasks",
         install: [{ id: "install-step", run: "mkdir -p .opendock" }],
         update: [{ id: "update-step", run: "mkdir -p .opendock" }],
         doctor: [{ id: "doctor-step", check: "test -f AGENTS.md" }],
@@ -71,13 +71,13 @@ describe("requires regression coverage", () => {
     expect(manifest.lifecycle.doctor.map((step) => step.id)).toEqual(["doctor-step"]);
   });
 
-  it("rejects mixed top-level commands and legacy lifecycle", () => {
+  it("rejects mixed top-level tasks and legacy lifecycle", () => {
     const root = tempDir();
     writeFileSync(
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/commands",
+        id: "test/tasks",
         install: [{ id: "install-step", run: "mkdir -p .opendock" }],
         lifecycle: {
           install: [{ id: "legacy-step", run: "mkdir -p .opendock" }],

@@ -1,7 +1,7 @@
 # OpenDock 가이드
 
 `dock.yml`은 하나의 dock이 프로젝트에 무엇을 더하는지 설명하는 manifest입니다.
-어떤 파일을 넣을지, 어떤 도구를 준비할지, 설치와 업데이트 때 어떤 command를
+어떤 파일을 넣을지, 어떤 도구를 준비할지, 설치/업데이트/점검 task에서 무엇을
 실행할지, 외부 도구가 만든 결과물 중 무엇을 프로젝트 root로 가져올지 선언합니다.
 
 OpenDock은 필요한 AI setup을 고르고, 한 workspace에 섞어 쓰고, 나중에 update와
@@ -26,7 +26,7 @@ uninstall까지 추적할 수 있게 만드는 작은 packaging layer입니다. 
 | manifest parsing | `src/core/domain/manifest.ts` |
 | install/update/uninstall orchestration | `src/core/app/dock-installer.ts` |
 | managed block/checksum file engine | `src/core/files/` |
-| install, update, and doctor command runner | `src/core/runtime/` |
+| install, update, doctor task runner | `src/core/runtime/` |
 | registry resolve/deploy boundary | `src/resolver.ts`, `src/cli.ts` |
 
 ## 목차
@@ -41,11 +41,11 @@ uninstall까지 추적할 수 있게 만드는 작은 packaging layer입니다. 
 - [requires](#requires)
 - [files](#files)
 - [파일 소유권](#파일-소유권)
-- [commands](#commands)
+- [tasks](#tasks)
 - [workdir와 export](#workdir와-export)
 - [platform artifact](#platform-artifact)
 - [version 범위](#version-범위)
-- [허용 명령](#허용-명령)
+- [허용 프로그램](#허용-프로그램)
 - [install, update, uninstall 의미](#install-update-uninstall-의미)
 - [충돌 처리](#충돌-처리)
 - [deploy와 archive](#deploy와-archive)
@@ -58,7 +58,7 @@ dock을 작성하기 전에 네 가지를 먼저 정하세요.
 
 1. **대상 결과**: 단순 도구 설치인지, 특정 직군/워크플로우용 AI-ready workspace인지 정합니다.
 2. **root에 남길 파일**: `AGENTS.md`, `.agents/`, `.codex/`, `DESIGN.md`처럼 프로젝트가 실제로 읽을 파일을 정합니다.
-3. **명령 실행 위치**: 프로젝트 root에서 실행할지, dock 전용 workdir에서 실행한 뒤 export할지 정합니다.
+3. **task 실행 위치**: 프로젝트 root에서 실행할지, dock 전용 workdir에서 실행한 뒤 export할지 정합니다.
 4. **필요한 도구**: Node, Bun, npm, OMA 같은 runtime/package requirement를 정합니다.
 5. **유지보수 방식**: update 때 최신 package를 다시 설치할지, doctor로 상태만 확인할지 정합니다.
 
@@ -169,9 +169,9 @@ doctor:
 | `logo` | 선택 | Registry catalog 대표 이미지로 제출할 이미지 경로입니다. |
 | `requires` | 선택 | dock 실행 전에 준비할 runtime과 package requirement입니다. |
 | `files` | 선택 | 프로젝트 root로 적용할 파일 또는 디렉터리 mapping입니다. |
-| `install` | 선택 | 최초 install과 초기 생성 작업 command입니다. |
-| `update` | 선택 | refresh와 유지보수 작업 command입니다. |
-| `doctor` | 선택 | 프로젝트를 수정하지 않는 상태 점검 command입니다. |
+| `install` | 선택 | 최초 install과 초기 생성 작업 task입니다. |
+| `update` | 선택 | refresh와 유지보수 작업 task입니다. |
+| `doctor` | 선택 | 프로젝트를 수정하지 않는 상태 점검 task입니다. |
 
 ## id와 version
 
@@ -312,7 +312,7 @@ requires:
 - raw shell, pipe, redirect는 `requires`에서도 허용되지 않습니다.
 - package key는 OpenDock report/lock에서 쓰는 이름입니다.
 - `name`은 package manager가 설치하고 version을 확인할 실제 package 이름입니다.
-- 설치된 CLI를 실행해야 한다면 `requires`가 아니라 `install`, `update`, `doctor`에 command를 작성합니다.
+- 설치된 CLI를 실행해야 한다면 `requires`가 아니라 `install`, `update`, `doctor` task에 `run`을 작성합니다.
 
 ## files
 
@@ -403,9 +403,9 @@ checksum으로 관리합니다.
 OpenDock은 git merge 도구가 아닙니다. 자동 병합 대신 “소유한 영역만 안전하게
 갱신하고, 사용자가 바꾼 영역은 멈춘다”를 기본 원칙으로 둡니다.
 
-## commands
+## tasks
 
-`dock.yml`에는 세 command가 있습니다.
+`dock.yml`에는 세 task가 있습니다.
 
 ```yaml
 install: []
@@ -413,7 +413,7 @@ update: []
 doctor: []
 ```
 
-| command | 실행 명령 | 목적 |
+| task | 실행되는 OpenDock 명령 | 목적 |
 |---|---|---|
 | `install` | `opendock install owner/name@version` | 최초 적용과 초기 생성 작업 |
 | `update` | `opendock update` | 최신 approved release로 이동하며 유지보수 작업 실행 |
@@ -425,10 +425,10 @@ doctor: []
 |---|---:|---|
 | `id` | 필수 | step identifier입니다. 로그와 doctor 출력에 사용됩니다. |
 | `name` | 선택 | 사람이 읽는 step 이름입니다. 없으면 `id`를 사용합니다. |
-| `check` | 선택 | 현재 상태를 확인하는 command입니다. |
-| `run` | 선택 | install/update에서 실행할 command입니다. |
+| `check` | 선택 | 현재 상태를 확인하는 명령입니다. |
+| `run` | 선택 | install/update에서 실행할 명령입니다. |
 | `version` | 선택 | `check` 출력에서 추출한 semver가 만족해야 하는 범위입니다. |
-| `timeout_ms` | 선택 | command timeout입니다. doctor 기본값은 30000ms입니다. |
+| `timeout_ms` | 선택 | step timeout입니다. doctor 기본값은 30000ms입니다. |
 | `workdir` | 선택 | `root` 또는 `dock`입니다. 기본값은 `root`입니다. |
 | `export` | 선택 | `workdir: dock` 결과물 중 root로 적용할 glob입니다. |
 
@@ -454,7 +454,7 @@ install:
     run: git init -b main
 ```
 
-`check` 없이 `run`만 쓰면 해당 command마다 항상 실행됩니다.
+`check` 없이 `run`만 쓰면 해당 step마다 항상 실행됩니다.
 
 ### doctor 실행 규칙
 
@@ -474,11 +474,11 @@ doctor:
 
 ## workdir와 export
 
-OpenDock의 command 실행 위치는 두 가지입니다.
+OpenDock의 task 실행 위치는 두 가지입니다.
 
 | workdir | 위치 | 용도 |
 |---|---|---|
-| `root` | 프로젝트 root | `git init`, root 상태 확인, project-level command |
+| `root` | 프로젝트 root | `git init`, root 상태 확인, project-level 작업 |
 | `dock` | `.opendock/workdirs/<dock>/` | 외부 generator를 격리 실행한 뒤 결과물 export |
 
 `workdir: dock`은 외부 도구가 여러 파일을 만들어내는 경우에 유용합니다.
@@ -501,7 +501,7 @@ install:
 
 동작:
 
-1. command는 dock 전용 workdir에서 실행됩니다.
+1. step은 dock 전용 workdir에서 실행됩니다.
 2. OpenDock은 `export.include`에 맞는 파일만 후보로 수집합니다.
 3. `export.exclude`에 맞는 파일은 제외합니다.
 4. 후보 파일은 root로 즉시 복사되지 않습니다.
@@ -566,15 +566,15 @@ codex --version   -> codex 0.128.0
 ```
 
 patch가 없는 `1.3` 같은 출력은 추출에 실패할 수 있습니다. 가능하면 세 자리
-semver를 출력하는 command를 `check`로 사용하세요.
+semver를 출력하는 명령을 `check`로 사용하세요.
 
-## 허용 명령
+## 허용 프로그램
 
-OpenDock은 `requires`와 command에 shell script를 그대로 넘기지
-않습니다. command string을 분리한 뒤 allowlist와 command shape 검사를 통과한
+OpenDock은 `requires`와 task에 shell script를 그대로 넘기지
+않습니다. `run`/`check` 문자열을 분리한 뒤 allowlist와 shape 검사를 통과한
 프로그램만 실행합니다.
 
-현재 공통 허용 command:
+현재 공통 허용 프로그램:
 
 ```text
 bun
@@ -598,9 +598,9 @@ test
 uv
 ```
 
-host OS별 추가 허용 command:
+host OS별 추가 허용 프로그램:
 
-| platform | 추가 command |
+| platform | 추가 프로그램 |
 |---|---|
 | `macos` | `brew` |
 | `windows` | `winget` |
@@ -634,7 +634,7 @@ $(
   run: git status
 ```
 
-전체 allowlist와 command shape는 `src/core/runtime/command-runner.ts`가 기준입니다.
+전체 allowlist와 shape 검사는 `src/core/runtime/command-runner.ts`가 기준입니다.
 
 ### Homebrew bootstrap
 
@@ -646,6 +646,19 @@ opendock bootstrap mac
 
 `dock.yml` 안에서 Homebrew 설치용 `curl | sh`를 직접 실행하는 방식은 허용하지
 않습니다.
+
+### WinGet bootstrap
+
+Windows에서 WinGet이 없으면 dock 실행 전에 first-party bootstrap을 먼저 실행합니다.
+
+```bash
+opendock bootstrap windows
+```
+
+OpenDock은 `winget`이 이미 있으면 ready로 처리합니다. 없으면 Microsoft App
+Installer 설치/업데이트 안내를 보여주고, 사용자가 동의하면 App Installer 페이지를
+엽니다. `dock.yml` 안에서 WinGet 또는 App Installer 설치용 PowerShell script를
+직접 실행하는 방식은 권장하지 않습니다.
 
 ## install, update, uninstall 의미
 
@@ -703,11 +716,11 @@ OpenDock은 root 파일을 쓰기 전에 preflight를 수행합니다.
 - source 또는 target path가 안전하지 않음.
 
 `--force`를 쓰면 OpenDock 소유였던 파일/블록의 변경은 dock 내용으로 되돌립니다.
-하지만 `--force`는 임의 shell command를 허용하거나 path safety를 우회하지 않습니다.
+하지만 `--force`는 임의 shell 명령을 허용하거나 path safety를 우회하지 않습니다.
 
 ## deploy와 archive
 
-release version은 `dock.yml`에 쓰지 않습니다. deploy command에서 정합니다.
+release version은 `dock.yml`에 쓰지 않습니다. deploy 명령에서 정합니다.
 
 ```bash
 opendock deploy owner/name@1.0.0
@@ -819,7 +832,7 @@ manifest:
 
 1. `opendock: 1`을 선언했는가?
 2. `id`가 `owner/name` 형식인가?
-3. release version을 `dock.yml`이 아니라 deploy command에서 정했는가?
+3. release version을 `dock.yml`이 아니라 deploy 명령에서 정했는가?
 4. `readme`와 `logo`가 dock root 안의 실제 파일인가?
 
 requires:
@@ -836,12 +849,12 @@ files:
 3. Markdown/agent instruction은 managed block으로 적용되는지 확인했는가?
 4. 설정 파일이나 binary는 checksum managed file로 충돌 감지되는지 확인했는가?
 
-commands:
+tasks:
 
 1. 재실행 가능한 step에는 `check`를 붙였는가?
 2. 버전이 중요한 도구에는 `version` 범위를 넣었는가?
-3. 오래 걸리는 command에는 `timeout_ms`를 넣었는가?
-4. shell operator나 redirect 없이 단일 command로 썼는가?
+3. 오래 걸리는 step에는 `timeout_ms`를 넣었는가?
+4. shell operator나 redirect 없이 단일 실행 명령으로 썼는가?
 5. 외부 generator는 `workdir: dock`과 `export`로 root 출력물을 추적하게 했는가?
 
 release:

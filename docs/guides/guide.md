@@ -1,7 +1,7 @@
 # OpenDock Guide
 
 `dock.yml` describes what a dock adds to a project: files, required tools,
-install, update, and doctor commands, generated outputs, and health checks.
+install/update/doctor tasks, generated outputs, and health checks.
 
 OpenDock is a small packaging layer for AI workspace setup. Pick the docks you
 need, combine them in one project, and keep each dock independently tracked for
@@ -22,7 +22,7 @@ Decide these first:
 
 1. **Outcome**: a tool-only dock, or a ready-to-use AI workspace for a role or workflow.
 2. **Root files**: files the project should actually read, such as `AGENTS.md`, `.codex/`, `.agents/`, `DESIGN.md`, or `README.md`.
-3. **Command location**: run commands in the project root, or in a private dock workdir and export selected outputs.
+3. **Task location**: run tasks in the project root, or in a private dock workdir and export selected outputs.
 4. **Required tools**: runtime and package requirements such as Git, Node, Bun, npm, or OMA.
 5. **Maintenance**: what should happen during update, doctor, and uninstall.
 
@@ -88,10 +88,10 @@ can stay outside the OpenDock block.
 | `summary` | no | Short Registry catalog summary. |
 | `readme` | no | Markdown file submitted as catalog detail content. |
 | `logo` | no | Catalog logo image path. |
-| `requires` | no | Runtime and package requirements prepared before commands run. |
+| `requires` | no | Runtime and package requirements prepared before tasks run. |
 | `files` | no | File or directory mappings applied to the project root. |
-| `install` | no | Commands for first install and initial generation. |
-| `update` | no | Commands for refresh and maintenance. |
+| `install` | no | Tasks for first install and initial generation. |
+| `update` | no | Tasks for refresh and maintenance. |
 | `doctor` | no | Health checks that do not modify the project. |
 
 ## Id And Version
@@ -102,7 +102,7 @@ Do not put a release version in `dock.yml`.
 id: opendock/codex
 ```
 
-Use exact versions in commands:
+Use exact versions when running OpenDock:
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -143,7 +143,7 @@ Rules:
 
 ## Requires
 
-`requires` prepares host tools before `install`, `update`, and `doctor` run.
+`requires` prepares host tools before `install`, `update`, and `doctor` tasks run.
 
 ```yaml
 requires:
@@ -164,6 +164,23 @@ Behavior:
 3. `update` reruns package installers so the dock can refresh tool packages.
 4. `doctor` checks state only. It does not install or modify tools.
 
+## Host Bootstrap
+
+Some platform package managers have to exist before a dock can use them.
+OpenDock keeps those first-party host bootstrap actions explicit.
+
+```bash
+opendock bootstrap mac
+opendock bootstrap windows
+```
+
+- `opendock bootstrap mac` verifies Homebrew or runs the official Homebrew installer.
+- `opendock bootstrap windows` verifies WinGet or opens Microsoft App Installer when WinGet is missing.
+
+Do not hide Homebrew or WinGet installation inside a dock task unless the dock has
+a very specific reason. The bootstrap command makes the host prerequisite clear
+before normal dock install/update runs.
+
 ## Files
 
 ```yaml
@@ -176,7 +193,7 @@ Text files are usually applied as managed blocks. Binary files and structured
 config files are tracked by checksum. If a user edits OpenDock-managed content,
 OpenDock stops before writing root files. `--force` means the dock version wins.
 
-## Commands
+## Tasks
 
 ```yaml
 install:
@@ -192,13 +209,13 @@ doctor:
     version: ">=2.40.0"
 ```
 
-Steps run top to bottom. `check` makes a step idempotent. `doctor` should report
+Tasks run top to bottom. `check` makes a step idempotent. `doctor` should report
 state and avoid changing the project.
 
 ## Workdir And Export
 
 Use `workdir: dock` when an external tool generates files. OpenDock runs the
-command in the private dock workdir and exports only declared outputs.
+task command in the private dock workdir and exports only declared outputs.
 
 ```yaml
 install:
@@ -290,11 +307,11 @@ Files:
 3. Text files behave as managed blocks.
 4. Config or binary files are protected by checksum conflicts.
 
-Commands:
+Tasks:
 
 1. Repeatable steps have `check`.
 2. Important tool checks include `version`.
-3. Long-running commands use `timeout_ms`.
+3. Long-running tasks use `timeout_ms`.
 4. External generators use `workdir: dock` and `export`.
 
 Release:

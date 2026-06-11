@@ -64,7 +64,7 @@ C'est un petit outil pour installer et gérer un setup IA répétable.
 | **Project scope** | Workspace courant | Installed dock list, lock, logs et metadata projet. |
 | **Dock scope** | Un dock installé | Version, checksum, managed file records et private workdir. |
 | **Root output scope** | OpenDock file engine | Fichiers appliqués au project root après preflight. |
-| **System/tool scope** | Host package managers | Outils préparés par `requires` ou par des install, update, and doctor commands autorisées, comme Homebrew, npm, Bun, pip ou winget. |
+| **System/tool scope** | Host package managers | Outils préparés par `requires` ou par des install, update, doctor tasks autorisées, comme Homebrew, npm, Bun, pip ou winget. |
 
 ## Install
 
@@ -79,6 +79,12 @@ Si un dock macOS utilise Homebrew et qu'il n'est pas disponible, lancez :
 opendock bootstrap mac
 ```
 
+Si un dock Windows utilise WinGet et qu'il n'est pas disponible, lancez :
+
+```bash
+opendock bootstrap windows
+```
+
 ## Commands
 
 | Command | Purpose |
@@ -90,6 +96,8 @@ opendock bootstrap mac
 | `opendock doctor` | Vérifie project state et doctor steps de chaque dock. |
 | `opendock log` | Affiche les runs OpenDock récents du projet courant. |
 | `opendock version` | Affiche CLI, schema et Registry information. |
+| `opendock bootstrap mac` | Vérifie ou installe Homebrew sur macOS. |
+| `opendock bootstrap windows` | Vérifie WinGet ou ouvre Microsoft App Installer sur Windows. |
 | `opendock auth login` | Connexion Registry pour deploy. |
 | `opendock auth status` | Affiche le login Registry courant. |
 | `opendock auth logout` | Efface le login Registry local. |

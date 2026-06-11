@@ -1,7 +1,7 @@
 # Guía De OpenDock
 
 `dock.yml` describe qué agrega un dock a un proyecto: archivos, herramientas
-requeridas, commands de install/update/doctor y outputs generados por herramientas
+requeridas, tasks de install/update/doctor y outputs generados por herramientas
 externas que deben exportarse al project root.
 
 OpenDock es una pequeña capa de packaging para AI workspace setup. Puedes elegir
@@ -62,8 +62,8 @@ files:
 | `logo` | Imagen de logo del catalog. |
 | `requires` | Requisitos de runtime y package. |
 | `files` | Archivos o directorios aplicados al project root. |
-| `install` | Commands for first install and initial generation. |
-| `update` | Commands for refresh and maintenance. |
+| `install` | Tasks for first install and initial generation. |
+| `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
 
 ## Version
@@ -84,7 +84,17 @@ binary files se protegen con checksum. Si una persona modifica contenido
 gestionado por OpenDock, update se detiene antes de escribir en root. `--force`
 elige explícitamente la versión del dock.
 
-## Commands
+## Host Bootstrap
+
+```bash
+opendock bootstrap mac
+opendock bootstrap windows
+```
+
+En macOS puedes preparar Homebrew; en Windows puedes preparar WinGet antes de
+ejecutar un dock.
+
+## Tasks
 
 ```yaml
 install:

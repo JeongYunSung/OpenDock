@@ -1,7 +1,7 @@
 # OpenDock 指南
 
 `dock.yml` 描述一个 dock 会给项目添加什么：文件、所需工具、install/update/doctor
-阶段要执行的 command，以及外部工具生成后需要导出到 project root 的文件。
+tasks，以及外部工具生成后需要导出到 project root 的文件。
 
 OpenDock 是一个面向 AI workspace setup 的小型 packaging layer。你可以选择多个
 dock，把它们组合到同一个 workspace，并分别追踪 update 和 uninstall。
@@ -59,8 +59,8 @@ files:
 | `logo` | Catalog logo image. |
 | `requires` | Runtime 和 package requirement. |
 | `files` | 应用到 project root 的文件或目录. |
-| `install` | Commands for first install and initial generation. |
-| `update` | Commands for refresh and maintenance. |
+| `install` | Tasks for first install and initial generation. |
+| `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
 
 ## Version
@@ -80,7 +80,16 @@ opendock deploy opendock/codex@1.0.0
 checksum 追踪。如果用户修改了 OpenDock 管理的内容，update 会在写入 root 文件前停止。
 `--force` 表示明确选择 dock 版本覆盖。
 
-## Commands
+## Host Bootstrap
+
+```bash
+opendock bootstrap mac
+opendock bootstrap windows
+```
+
+macOS 可先检查 Homebrew，Windows 可先检查 WinGet，再执行 dock。
+
+## Tasks
 
 ```yaml
 install:
