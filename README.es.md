@@ -1,11 +1,13 @@
 <div align="center">
 
+<img src="./assets/opendock-logo-96.png" alt="OpenDock logo" width="96">
+
 # OpenDock
 
-**Configuración de IA simple para cualquier espacio de trabajo.**
+**Simple AI setup for every workspace.**
 
-Instala paquetes de configuración de IA revisados con un solo comando. Mantén el
-setup fácil, repetible y seguro para desarrolladores y no desarrolladores.
+Elige los docks que necesitas, combínalos a tu manera y mantén cada proyecto
+AI-ready.
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -18,141 +20,105 @@ setup fácil, repetible y seguro para desarrolladores y no desarrolladores.
 
 ---
 
-OpenDock es una CLI Bun-first en TypeScript para instalar paquetes de
-configuración de IA revisados en el directorio actual del proyecto.
+OpenDock es una CLI Bun-first en TypeScript para elegir y combinar paquetes de
+configuración de IA aprobados, llamados **docks**, dentro del workspace actual.
 
-El primer dock es `opendock/codex`: un dock mínimo de setup para Codex que verifica
-Node, instala la CLI de Codex y mantiene la configuración registrada en el
-estado de OpenDock.
-
-OpenDock no pretende reemplazar la terminal. Es el binario pequeño que ejecutas
-cuando un proyecto necesita una configuración de IA simple y confiable.
+Un dock puede añadir agent instructions, prompt libraries, project harnesses,
+comandos lifecycle seguros y salidas generadas por herramientas externas.
+OpenDock registra lo que aplica para que después puedas actualizar, diagnosticar
+o desinstalar.
 
 ```bash
 opendock install opendock/codex@1.0.0
 opendock update
 opendock doctor
-opendock log
+opendock uninstall opendock/codex
+```
+
+## Qué Resuelve OpenDock
+
+El setup de IA suele terminar repartido entre herramientas globales, prompts
+copiados, config ocultas, snippets de README, comandos shell y carpetas de
+agentes específicas de cada proveedor.
+
+OpenDock convierte ese setup en una unidad versionada que puedes elegir,
+combinar, actualizar y eliminar.
+
+- **Outcome-first docks**: instala un workspace útil, no solo una herramienta.
+- **Composable setup**: instala varios docks en un proyecto y rastrea cada uno por separado.
+- **Reviewed distribution**: las instalaciones remotas se resuelven mediante OpenDock Registry.
+- **Project-local tracking**: cada workspace conserva su estado en `.opendock/`.
+- **Independent updates**: cada dock mantiene su versión, archivos, checksums y workdir privado.
+- **Safe root writes**: OpenDock comprueba conflictos antes de escribir en el project root.
+- **Controlled commands**: los lifecycle commands usan allowlist, no raw shell.
+
+OpenDock no reemplaza la terminal ni es un script runner genérico. Es una capa
+ligera de packaging para setup de workspaces de IA componible y repetible.
+
+## Scopes
+
+| Scope | Owner | Purpose |
+|---|---|---|
+| **Registry scope** | OpenDock Registry | Metadata y archives de releases aprobadas. |
+| **Project scope** | Workspace actual | Installed dock list, lock, logs y metadata del proyecto. |
+| **Dock scope** | Un dock instalado | Version, checksum, managed file records y private workdir. |
+| **Root output scope** | OpenDock file engine | Archivos aplicados al project root tras preflight. |
+| **System/tool scope** | Host package managers | Homebrew, npm, Bun, pip, winget y otros host tools. |
+
+## Install
+
+```bash
+bun install -g opendock
 opendock version
-opendock auth login
-opendock auth status
-opendock auth logout
-opendock deploy opendock/codex@1.0.0
 ```
 
-## Por Qué OpenDock
-
-La configuración de IA de un proyecto suele convertirse en una pila de comandos
-shell puntuales, archivos prompt copiados, drift de versiones y convenciones de
-proyecto medio recordadas. OpenDock lo convierte en un setup pack revisado:
-
-- **Con alcance de proyecto**: instala en el directorio actual y escribe estado
-  local en `.opendock/`.
-- **Aprobado por diseño**: los docks remotos deben venir de metadata aprobada
-  por OpenDock Registry.
-- **Seguro con archivos existentes**: cada archivo declara su propia política de
-  actualización, como managed blocks, manual review o unique-line append.
-- **Superficie de comandos pequeña**: install, update, doctor,
-  inspeccionar logs, auth y deploy.
-- **Listo para automatización**: los lifecycle steps pueden ejecutar comandos
-  permitidos como `git`, `brew`, `winget`, `npm`, `bun`, `pip`, `uv`, `codex`,
-  `claude`, `oma` y `omx` sin permitir pipelines de shell.
-
-## Inicio Rápido
-
-Para desarrollo local, compila OpenDock desde el código fuente:
+Si un dock de macOS usa Homebrew y todavía no está disponible, ejecuta:
 
 ```bash
-bun install
-bun run build
-bin/opendock version
+opendock bootstrap mac
 ```
 
-Prueba el dock aprobado `opendock/codex` en un proyecto temporal:
+## Commands
 
-```bash
-repo=$PWD
-project=$(mktemp -d)
-cd "$project"
-
-"$repo/bin/opendock" install opendock/codex@1.0.0
-"$repo/bin/opendock" doctor
-"$repo/bin/opendock" log
-```
-
-Después de la instalación, el proyecto contiene:
-
-```text
-.opendock/
-  dock.lock.yml
-  project.yml
-```
-
-## Comandos
-
-| Comando | Propósito |
+| Command | Purpose |
 |---|---|
-| `opendock install opendock/codex@1.0.0` | Instala un dock aprobado en el directorio actual. |
-| `opendock install opendock/codex@designer-build` | Instala usando un identificador de versión exacto. |
-| `opendock install opendock/codex@1.0.0 --platform windows` | Instala con una target platform explícita en lugar de detectar el host. |
-| `opendock install opendock/codex@1.0.0 --force` | Fuerza los cambios managed por OpenDock durante install. |
-| `opendock update` | Resuelve los docks instalados a la última release aprobada del Registry usando la platform bloqueada. |
-| `opendock update --force` | Fuerza los cambios managed por OpenDock aunque se detecten managed files editados. |
-| `opendock doctor` | Muestra el estado OpenDock del directorio actual usando la platform bloqueada. |
-| `opendock log` | Imprime las ejecuciones recientes de OpenDock para el proyecto actual. |
-| `opendock version` | Imprime la versión de la CLI, la versión del schema y el Registry por defecto. |
-| `opendock bootstrap mac` | Verifica o instala Homebrew para docks de macOS. |
-| `opendock auth login` | Inicia sesión en OpenDock Registry. |
-| `opendock auth status` | Muestra la sesión actual de OpenDock Registry. |
-| `opendock auth logout` | Cierra la sesión de OpenDock Registry en esta máquina. |
-| `opendock deploy opendock/codex@1.0.0` | Envía un dock local `dock.yml` para revisión en OpenDock Registry. |
+| `opendock install owner/name@1.0.0` | Instala un approved dock release en el directorio actual. |
+| `opendock update` | Mueve los installed docks a las últimas approved Registry releases. |
+| `opendock update --force` | Prioriza la versión del dock aunque haya cambios locales gestionados. |
+| `opendock uninstall owner/name` | Elimina un dock y sus managed project files. |
+| `opendock doctor` | Comprueba project state y doctor steps de cada dock. |
+| `opendock log` | Muestra runs recientes de OpenDock para el proyecto actual. |
+| `opendock version` | Muestra CLI, schema y Registry information. |
+| `opendock auth login` | Inicia sesión en Registry para deploy. |
+| `opendock auth status` | Muestra el login actual de Registry. |
+| `opendock auth logout` | Borra el login local de Registry. |
+| `opendock deploy owner/name@1.0.0` | Envía un local dock release a Registry review. |
 
-`install` es público. `deploy` usa la sesión de OpenDock Registry.
-Usa `opendock auth status` o `opendock auth logout` para verla o cerrarla.
-Ejecuta `opendock bootstrap mac` primero si falta Homebrew.
-
-Las referencias dock requieren un identificador de versión exacto:
+Las referencias dock requieren un exact version identifier.
 
 ```text
-owner/name                  -> rejected
-owner/name@latest           -> rejected
-owner/name@1.2.0            -> exact approved version identifier
-owner/name@designer-build   -> exact approved version identifier
+owner/name                  rejected
+owner/name@latest           rejected
+owner/name@1.2.0            accepted
+owner/name@designer-build   accepted
 ```
 
-Install y deploy requieren un identificador exacto de release, por ejemplo
-`opendock install owner/name@1.0.0` y `opendock deploy owner/name@1.0.0`.
-
-`opendock install owner/name`, `opendock install owner/name@latest`,
-`opendock deploy owner/name` y `opendock deploy owner/name@latest` son
-rechazados.
-
-OpenDock guarda tanto el version identifier solicitado como la versión exacta
-resuelta en `.opendock/dock.lock.yml`. `opendock update` pide a OpenDock
-Registry la última release aprobada de cada dock instalado, aplica esa exact
-release y actualiza el lock file. Para cambiar a una release específica en vez
-de la última aprobada, ejecuta `opendock install owner/name@new-version`.
-
-## Formato Del Dock
-
-Un dock es un directorio con un archivo `dock.yml` y cualquier archivo o
-directorio fuente referenciado por `files[].from`. Las rutas opcionales
-`readme` y `logo` se envían a OpenDock Registry como metadata de catálogo; no se
-instalan salvo que también estén listadas en `files`.
-Las release versions no se declaran en `dock.yml`; la versión viene de la deploy
-reference `opendock deploy owner/name@version`. Deploy empaqueta `dock.yml` y
-los install payloads de `files[].from` y lifecycle `copy.from` en un `.tgz`
-submission archive para revisión. `readme` y `logo` se envían solo como catalog
-metadata, salvo que también estén listados como install payloads.
-Consulta [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) para la guía
-detallada de autoría en coreano.
+## Dock Format
 
 ```yaml
 opendock: 1
-id: opendock/codex
-summary: Codex CLI setup without project file payloads.
+id: owner/name
+summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
+
+requires:
+  runtimes:
+    git: ">=2.40.0"
+
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
 
 lifecycle:
   install:
@@ -160,134 +126,23 @@ lifecycle:
       check: git status
       run: git init -b main
 
-    - id: install-node
-      check: node --version
-      version: ">=22.0.0"
-      platforms:
-        macos:
-          run: brew install node
-        windows:
-          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
-
-    - id: install-codex-cli
-      check: codex --version
-      version: ">=0.0.0"
-      run: npm install --global @openai/codex@latest
-
-    - id: verify-codex-cli
-      run: codex --version
-      timeout_ms: 60000
-
-  update:
-    - id: update-codex-cli
-      run: npm install --global @openai/codex@latest
-
-    - id: verify-codex-cli
-      run: codex --version
-      timeout_ms: 60000
+  update: []
 
   doctor:
-    - id: node
-      version: ">=22.0.0"
-      check: node --version
-
-    - id: npm
-      version: ">=10.0.0"
-      check: npm --version
-
-    - id: codex
-      version: ">=0.0.0"
-      check: codex --version
-      timeout_ms: 60000
+    - id: git
+      check: git --version
+      version: ">=2.40.0"
 ```
 
-Las rutas `from` son relativas a la raíz del dock. `files/` es solo el nombre de
-carpeta recomendado en el ejemplo; OpenDock no requiere un directorio especial
-de payload.
+`readme` y `logo` son metadata para Registry catalog. Para instalarlos en el
+proyecto, decláralos también en `files`.
 
-Los directorios source se expanden recursivamente. `managed_file` reemplaza o
-elimina un archivo solo cuando su hash actual coincide con el último hash
-aplicado por OpenDock. Los managed files editados detienen install/update antes
-de cambios de archivos o comandos lifecycle. `--force` sobrescribe o elimina
-esos managed files.
+Consulta la referencia completa en [docs/guides/dock-yml.md](./docs/guides/dock-yml.md).
 
-Los comandos lifecycle específicos por platform permanecen dentro del orden
-normal top-to-bottom de `install`, `update` y `doctor`. Un step con `platforms`
-mantiene un `id` lógico y OpenDock fusiona el override correspondiente:
-
-```yaml
-lifecycle:
-  install:
-    - id: install-bun
-      check: bun --version
-      version: ">=1.3.0"
-      platforms:
-        macos:
-          run: brew install bun
-        windows:
-          run: npm install --global bun
-```
-
-Los steps sin `platforms` se ejecutan en todas las plataformas. La plataforma
-seleccionada se guarda en `.opendock/dock.lock.yml` y se reutiliza con
-`opendock update` y `opendock doctor`.
-
-## Estructura Del Repositorio
-
-```text
-src/
-  cli.ts              # commander CLI entrypoint
-  installer.ts        # install/update dock file application
-  resolver.ts         # local and OpenDock Registry dock resolution
-  runner.ts           # lifecycle command runner
-  registry.ts         # OpenDock Registry API client boundary
-tests/
-  cli-flow.test.ts    # temp-dir CLI integration tests
-examples/
-  git/                # Git install/init example
-  codex/              # Codex CLI-only example
-  oma/                # Oh My Agent dock.yml-only example
-  claude-code/        # Claude Code example
-  oh-my-codex/        # Oh My Codex example
-  oh-my-openagent/    # Oh My OpenAgent Codex Light example
-  designer-ai/        # AI workspace for product designers
-  product-manager/    # AI workspace for PM artifacts
-  frontend-ai/        # AI workspace for frontend engineering
-  startup-founder/    # AI workspace for founder strategy
-  ai-automation/      # AI workspace for automation planning
-  ui-case-study/      # AI workspace for UI portfolio case studies
-  agent-ready/        # shared AI agent instruction files
-  ai-context/         # repository context packaging setup
-  mcp-local/          # project-local MCP config examples
-  agent-safety/       # PR/security safety rails
-  agent-docs/         # AI-readable docs harness
-  agent-rules/        # path-scoped AI agent rules
-  repo-context/       # repository context prompts and packaging
-  mcp-safe/           # security-first MCP references
-  dev-env/            # tool versions and validation tasks
-  codex-skills/       # repository-local Codex skills
-  devcontainer-ai/    # AI-friendly Dev Container setup
-docs/guides/
-  dock-yml.md         # detailed Korean dock.yml authoring guide
-```
-
-## Desarrollo
+## Development
 
 ```bash
-bun run typecheck
-bun run test
-bun run lint
+bun install
 bun run check
+bun run build
 ```
-
-Las pruebas de integración usan directorios temporales y fixtures de dock local
-generados. Los docks de `examples/` son ejemplos reales de autoría.
-
-## Ecosistema
-
-OpenDock está diseñado para encajar de forma natural junto a proyectos como
-[Open Design](https://github.com/nexu-io/open-design),
-[OpenCode](https://github.com/anomalyco/opencode) y
-[oh-my-agent](https://github.com/first-fluke/oh-my-agent): herramientas
-agent-native que hacen que los workflows locales de proyecto sean más
-portátiles, inspeccionables y repetibles.
