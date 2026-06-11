@@ -54,7 +54,7 @@ export class FileCandidateCollector {
     exclude: string[],
     markerPrefix: string,
   ): FileCandidate[] {
-    return listRegularFiles(workdir)
+    return listRegularFiles(workdir, "", { symlinks: "follow-internal" })
       .filter((path) => matchesAny(path, include))
       .filter((path) => !matchesAny(path, exclude))
       .map((path) => this.candidateFromFile(workdir, path, path, "export", markerPrefix));

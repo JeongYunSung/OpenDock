@@ -5,6 +5,21 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.6 - 2026-06-12
+
+### Fixed
+
+- Materialize internal symlinks generated inside dock workdirs during `export`
+  collection instead of copying symlinks into the project root.
+- Keep manifest `files` symlink rejection unchanged.
+- Reject exported symlinks that resolve outside the dock workdir.
+
+### Tests
+
+- Added OMA export coverage for `.claude/skills` symlinked files and
+  directories.
+- Added regression coverage for blocking external symlink targets during export.
+
 ## 0.1.5 - 2026-06-12
 
 ### Changed

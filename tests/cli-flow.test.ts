@@ -203,6 +203,45 @@ describe("opendock TypeScript CLI", () => {
     expect(existsSync(join(project, ".opendock", "workdirs", "test__oma", "AGENTS.md"))).toBe(true);
   });
 
+  it("rejects exported symlinks that point outside the dock workdir", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const bin = tempDir();
+    const outside = tempDir();
+    const outsideFile = join(outside, "architecture.md");
+    writeFileSync(outsideFile, "# Outside\n");
+    writeFakeOmaWithExternalSymlink(bin, outsideFile);
+    writeDock(docks, "test", "oma", "1.0.0", {
+      tasks: {
+        install: [
+          {
+            id: "apply-oma",
+            run: "oma -y install",
+            workdir: "dock",
+            export: {
+              include: [".claude/**"],
+              exclude: [],
+            },
+          },
+        ],
+      },
+    });
+
+    await expect(
+      withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+        install({
+          dockRef: DockRef.parse("test/oma@1.0.0"),
+          projectDir: project,
+          operation: "install",
+          phase: "install",
+          runTasks: true,
+          resolve: localResolver(docks),
+        }),
+      ),
+    ).rejects.toThrow("source symlink target must stay inside");
+    expect(existsSync(join(project, ".claude"))).toBe(false);
+  });
+
   it("blocks user-edited managed blocks and allows force restore", async () => {
     const docks = tempDir();
     const project = tempDir();
@@ -693,6 +732,24 @@ case "$mode" in
   doctor)
     test -f AGENTS.md
     test -f CLAUDE.md
+    ;;
+esac
+`,
+  );
+  chmod(path);
+}
+
+function writeFakeOmaWithExternalSymlink(bin: string, outsideFile: string): void {
+  const path = join(bin, "oma");
+  writeFileSync(
+    path,
+    `#!/usr/bin/env bash
+set -euo pipefail
+mode="\${*: -1}"
+case "$mode" in
+  install)
+    mkdir -p .claude/skills/architecture
+    ln -s "${outsideFile}" .claude/skills/architecture/SKILL.md
     ;;
 esac
 `,

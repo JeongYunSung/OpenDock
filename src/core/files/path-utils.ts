@@ -1,4 +1,12 @@
-import { existsSync, lstatSync, mkdirSync, readdirSync, rmdirSync } from "node:fs";
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+  realpathSync,
+  rmdirSync,
+  statSync,
+} from "node:fs";
 import { isAbsolute, join, posix, relative, resolve, sep } from "node:path";
 
 export function normalizeRelativePath(value: string): string {
@@ -82,13 +90,39 @@ export function assertRegularOrMissing(path: string, relativePath: string): void
   }
 }
 
-export function listRegularFiles(root: string, relativeRoot = ""): string[] {
+export function listRegularFiles(
+  root: string,
+  relativeRoot = "",
+  options: { symlinks?: "reject" | "follow-internal" } = {},
+): string[] {
   if (!existsSync(root)) {
     return [];
   }
+  return listRegularFilesInternal(root, relativeRoot, realpathSync(root), options, new Set());
+}
+
+function listRegularFilesInternal(
+  root: string,
+  relativeRoot: string,
+  baseRoot: string,
+  options: { symlinks?: "reject" | "follow-internal" },
+  directoryStack: Set<string>,
+): string[] {
   const stat = lstatSync(root);
   if (stat.isSymbolicLink()) {
-    throw new Error(`source cannot be a symlink: ${relativeRoot || root}`);
+    if (options.symlinks !== "follow-internal") {
+      throw new Error(`source cannot be a symlink: ${relativeRoot || root}`);
+    }
+    const realTarget = realpathSync(root);
+    assertInsideRoot(baseRoot, realTarget, "source symlink target");
+    const realTargetStat = statSync(realTarget);
+    if (realTargetStat.isFile()) {
+      return [normalizeRelativePath(relativeRoot)];
+    }
+    if (!realTargetStat.isDirectory()) {
+      throw new Error(`source symlink target must be a regular file or directory: ${relativeRoot}`);
+    }
+    return listRegularFilesInternal(realTarget, relativeRoot, baseRoot, options, directoryStack);
   }
   if (stat.isFile()) {
     return [normalizeRelativePath(relativeRoot)];
@@ -98,6 +132,11 @@ export function listRegularFiles(root: string, relativeRoot = ""): string[] {
   }
 
   const files: string[] = [];
+  const realDirectory = realpathSync(root);
+  if (directoryStack.has(realDirectory)) {
+    return files;
+  }
+  directoryStack.add(realDirectory);
   const entries = readdirSync(root, { withFileTypes: true }).sort((a, b) =>
     a.name.localeCompare(b.name),
   );
@@ -105,10 +144,14 @@ export function listRegularFiles(root: string, relativeRoot = ""): string[] {
     const rel = normalizeRelativePath(relativeRoot ? `${relativeRoot}/${entry.name}` : entry.name);
     const abs = join(root, entry.name);
     if (entry.isSymbolicLink()) {
-      throw new Error(`source cannot be a symlink: ${rel}`);
+      if (options.symlinks !== "follow-internal") {
+        throw new Error(`source cannot be a symlink: ${rel}`);
+      }
+      files.push(...listRegularFilesInternal(abs, rel, baseRoot, options, directoryStack));
+      continue;
     }
     if (entry.isDirectory()) {
-      files.push(...listRegularFiles(abs, rel));
+      files.push(...listRegularFilesInternal(abs, rel, baseRoot, options, directoryStack));
       continue;
     }
     if (!entry.isFile()) {
@@ -116,6 +159,7 @@ export function listRegularFiles(root: string, relativeRoot = ""): string[] {
     }
     files.push(rel);
   }
+  directoryStack.delete(realDirectory);
   return files;
 }
 
