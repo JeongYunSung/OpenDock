@@ -250,7 +250,7 @@ Use `--force` only when the dock version should win.
 
 ## Commands And Export
 
-Command steps can run in the project root or in a dock-private workdir.
+Steps can run in the project root or in a dock-private workdir.
 Use `requires` for runtime and package prerequisites; use top-level `install`,
 `update`, and `doctor` for project actions and generated outputs.
 

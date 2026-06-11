@@ -51,7 +51,7 @@ describe("requires regression coverage", () => {
     });
   });
 
-  it("parses top-level command phases from dock.yml", () => {
+  it("parses top-level commands from dock.yml", () => {
     const root = tempDir();
     writeFileSync(
       join(root, "dock.yml"),
@@ -71,7 +71,7 @@ describe("requires regression coverage", () => {
     expect(manifest.lifecycle.doctor.map((step) => step.id)).toEqual(["doctor-step"]);
   });
 
-  it("rejects mixed top-level command phases and legacy lifecycle", () => {
+  it("rejects mixed top-level commands and legacy lifecycle", () => {
     const root = tempDir();
     writeFileSync(
       join(root, "dock.yml"),

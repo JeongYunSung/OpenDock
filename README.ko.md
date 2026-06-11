@@ -249,7 +249,7 @@ managed file을 수정하면 update와 uninstall은 기본적으로 중단됩니
 
 ## Commands And Export
 
-Command step은 프로젝트 root 또는 dock-private workdir에서 실행할 수 있습니다.
+Step은 프로젝트 root 또는 dock-private workdir에서 실행할 수 있습니다.
 runtime과 package 준비는 `requires`에 두고, 프로젝트 작업과 generated output
 적용은 top-level `install`, `update`, `doctor`에 둡니다.
 

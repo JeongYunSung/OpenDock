@@ -308,7 +308,7 @@ requires:
 주의할 점:
 
 - `requires`는 OpenDock이 host tool을 준비하는 영역입니다.
-- root에 적용할 파일은 `files` 또는 command step의 `export`로 선언해야 합니다.
+- root에 적용할 파일은 `files` 또는 step의 `export`로 선언해야 합니다.
 - raw shell, pipe, redirect는 `requires`에서도 허용되지 않습니다.
 - package key는 OpenDock report/lock에서 쓰는 이름입니다.
 - `name`은 package manager가 설치하고 version을 확인할 실제 package 이름입니다.
@@ -405,7 +405,7 @@ OpenDock은 git merge 도구가 아닙니다. 자동 병합 대신 “소유한 
 
 ## commands
 
-manifest에는 세 command phase가 있습니다.
+`dock.yml`에는 세 command가 있습니다.
 
 ```yaml
 install: []
@@ -413,13 +413,13 @@ update: []
 doctor: []
 ```
 
-| phase | 실행 명령 | 목적 |
+| command | 실행 명령 | 목적 |
 |---|---|---|
 | `install` | `opendock install owner/name@version` | 최초 적용과 초기 생성 작업 |
 | `update` | `opendock update` | 최신 approved release로 이동하며 유지보수 작업 실행 |
 | `doctor` | `opendock doctor` | 현재 프로젝트와 도구 상태 점검 |
 
-### command step 필드
+### step 필드
 
 | 필드 | 필수 | 설명 |
 |---|---:|---|
@@ -445,7 +445,7 @@ doctor: []
 `doctor`는 프로젝트 root에서 실행해야 하는 작업이나 dock workdir에서 generator를
 돌린 뒤 export하는 작업에 집중하는 것이 좋습니다.
 
-재실행 가능한 command step에는 `check`, `version`, `run`을 같이 쓸 수 있습니다.
+재실행 가능한 step에는 `check`, `version`, `run`을 같이 쓸 수 있습니다.
 
 ```yaml
 install:
@@ -454,7 +454,7 @@ install:
     run: git init -b main
 ```
 
-`check` 없이 `run`만 쓰면 해당 phase마다 항상 실행됩니다.
+`check` 없이 `run`만 쓰면 해당 command마다 항상 실행됩니다.
 
 ### doctor 실행 규칙
 
@@ -570,7 +570,7 @@ semver를 출력하는 command를 `check`로 사용하세요.
 
 ## 허용 명령
 
-OpenDock은 `requires`와 command phase에 shell script를 그대로 넘기지
+OpenDock은 `requires`와 command에 shell script를 그대로 넘기지
 않습니다. command string을 분리한 뒤 allowlist와 command shape 검사를 통과한
 프로그램만 실행합니다.
 
