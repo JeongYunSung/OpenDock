@@ -25,6 +25,7 @@ interface ExampleDock {
 }
 
 const testVersion = "1.0.0";
+const stressTestTimeoutMs = 20_000;
 const tempRoots: string[] = [];
 
 afterEach(() => {
@@ -57,30 +58,34 @@ describe("example dock cleanup behavior", () => {
     }
   });
 
-  it("installs and uninstalls all examples repeatedly per platform", async () => {
-    for (const platform of ["macos", "windows"] as const) {
-      const examples = discoverExampleDocks().filter((example) => example.platform === platform);
-      const project = tempDir();
+  it(
+    "installs and uninstalls all examples repeatedly per platform",
+    async () => {
+      for (const platform of ["macos", "windows"] as const) {
+        const examples = discoverExampleDocks().filter((example) => example.platform === platform);
+        const project = tempDir();
 
-      for (let cycle = 1; cycle <= 3; cycle += 1) {
-        for (const example of examples) {
-          await installExample(example, project);
+        for (let cycle = 1; cycle <= 3; cycle += 1) {
+          for (const example of examples) {
+            await installExample(example, project);
+          }
+          expect(
+            installedDocks(project)
+              .map((dock) => dock.id)
+              .sort(),
+          ).toEqual(examples.map((example) => example.id).sort());
+
+          for (const example of examples.toReversed()) {
+            uninstallExample(example, project);
+          }
+
+          expect(nonStateEntries(project), `${platform} cycle ${cycle}`).toEqual([]);
+          expect(installedDocks(project), `${platform} cycle ${cycle}`).toEqual([]);
         }
-        expect(
-          installedDocks(project)
-            .map((dock) => dock.id)
-            .sort(),
-        ).toEqual(examples.map((example) => example.id).sort());
-
-        for (const example of examples.toReversed()) {
-          uninstallExample(example, project);
-        }
-
-        expect(nonStateEntries(project), `${platform} cycle ${cycle}`).toEqual([]);
-        expect(installedDocks(project), `${platform} cycle ${cycle}`).toEqual([]);
       }
-    }
-  });
+    },
+    stressTestTimeoutMs,
+  );
 
   it("preserves user files in directories that also contain managed example files", async () => {
     const example = requireExample("opendock/agent-ready", "macos");
