@@ -9,6 +9,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { x as extractTar } from "tar";
 import { afterEach, describe, expect, it } from "vitest";
 import YAML from "yaml";
 import { run as runCli } from "../src/cli.js";
@@ -333,7 +334,7 @@ describe("opendock TypeScript CLI", () => {
     });
   });
 
-  it("rejects unsafe lifecycle commands", () => {
+  it("rejects unsafe commands", () => {
     const project = tempDir();
     const manifest: DockManifest = {
       opendock: 1,
@@ -349,6 +350,132 @@ describe("opendock TypeScript CLI", () => {
     };
 
     expect(() => runLifecycle(manifest, "install", project)).toThrow("not allowed");
+  });
+
+  it("submits platform-specific deploy manifests as dock.yml archives", async () => {
+    const dockRoot = tempDir();
+    const extractRoot = tempDir();
+    const home = tempDir();
+    const dataDir = join(home, "Library", "Application Support", "OpenDock");
+    mkdirSync(dataDir, { recursive: true });
+    writeFileSync(join(dataDir, "auth-token"), "test-token");
+    mkdirSync(join(dockRoot, "macos", "files"), { recursive: true });
+    writeFileSync(join(dockRoot, "macos", "files", "AGENTS.md"), "# macOS Agent\n");
+    writeFileSync(join(dockRoot, "macos", "DOCK.md"), "# macOS Dock\n");
+    writeFileSync(
+      join(dockRoot, "macos", "logo.png"),
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    );
+    writeFileSync(
+      join(dockRoot, "macos", "dock.macos.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/platform-dock",
+        summary: "macOS artifact",
+        readme: "DOCK.md",
+        logo: "logo.png",
+        files: [{ from: "files/AGENTS.md", to: "AGENTS.md" }],
+      }),
+    );
+
+    const previousFetch = globalThis.fetch;
+    let body:
+      | {
+          archive: { data_base64: string; filename: string };
+          manifest: string;
+          platform: string;
+        }
+      | undefined;
+    globalThis.fetch = (async (_input: string | URL | Request, init?: RequestInit) => {
+      body = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ id: "submission-1", status: "pending" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    try {
+      await withEnv({ HOME: home }, () =>
+        withCwd(dockRoot, () =>
+          runCli([
+            "bun",
+            "opendock",
+            "deploy",
+            "test/platform-dock@1.0.0",
+            "--platform",
+            "macos",
+            "--file",
+            "macos/dock.macos.yml",
+          ]),
+        ),
+      );
+    } finally {
+      globalThis.fetch = previousFetch;
+    }
+
+    if (!body) {
+      throw new Error("expected deploy request body");
+    }
+    expect(body.platform).toBe("macos");
+    expect(body.archive.filename).toBe("test-platform-dock-1.0.0-macos.tgz");
+    expect(body.manifest).toContain("summary: macOS artifact");
+
+    const archivePath = join(extractRoot, "dock.tgz");
+    writeFileSync(archivePath, Buffer.from(body.archive.data_base64, "base64"));
+    await extractTar({ file: archivePath, cwd: extractRoot });
+    expect(readFileSync(join(extractRoot, "dock.yml"), "utf8")).toContain(
+      "summary: macOS artifact",
+    );
+    expect(readFileSync(join(extractRoot, "files", "AGENTS.md"), "utf8")).toBe("# macOS Agent\n");
+    expect(existsSync(join(extractRoot, "macos", "dock.macos.yml"))).toBe(false);
+  });
+
+  it("submits platform-neutral deploys as any artifacts by default", async () => {
+    const dockRoot = tempDir();
+    const home = tempDir();
+    const dataDir = join(home, "Library", "Application Support", "OpenDock");
+    mkdirSync(dataDir, { recursive: true });
+    writeFileSync(join(dataDir, "auth-token"), "test-token");
+    mkdirSync(join(dockRoot, "files"), { recursive: true });
+    writeFileSync(join(dockRoot, "files", "AGENTS.md"), "# Any Agent\n");
+    writeFileSync(
+      join(dockRoot, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/any-dock",
+        summary: "platform-neutral artifact",
+        files: [{ from: "files/AGENTS.md", to: "AGENTS.md" }],
+      }),
+    );
+
+    const previousFetch = globalThis.fetch;
+    let body:
+      | {
+          archive: { filename: string };
+          platform: string;
+        }
+      | undefined;
+    globalThis.fetch = (async (_input: string | URL | Request, init?: RequestInit) => {
+      body = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ id: "submission-1", status: "pending" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    try {
+      await withEnv({ HOME: home }, () =>
+        withCwd(dockRoot, () => runCli(["bun", "opendock", "deploy", "test/any-dock@1.0.0"])),
+      );
+    } finally {
+      globalThis.fetch = previousFetch;
+    }
+
+    if (!body) {
+      throw new Error("expected deploy request body");
+    }
+    expect(body.platform).toBe("any");
+    expect(body.archive.filename).toBe("test-any-dock-1.0.0-any.tgz");
   });
 });
 
@@ -390,11 +517,9 @@ function writeDock(
       from: `files/${file.path}`,
       to: file.path,
     })),
-    lifecycle: {
-      install: options.lifecycle?.install ?? [],
-      update: options.lifecycle?.update ?? [],
-      doctor: options.lifecycle?.doctor ?? [],
-    },
+    install: options.lifecycle?.install ?? [],
+    update: options.lifecycle?.update ?? [],
+    doctor: options.lifecycle?.doctor ?? [],
   };
   writeFileSync(join(dockRoot, "dock.yml"), YAML.stringify(manifest));
   writeFileSync(join(dockRoot, "DOCK.md"), `# ${owner}/${name}\n`);
@@ -405,11 +530,12 @@ function writeDock(
 }
 
 function localResolver(root: string) {
-  return (dockRef: DockRef): ResolvedDock => {
+  return (dockRef: DockRef, platform: OpenDockPlatform): ResolvedDock => {
     const dockRoot = join(root, `${dockRef.owner}-${dockRef.name}-${dockRef.requested()}`);
     return {
       manifest: parseManifestFile(join(dockRoot, "dock.yml")),
       version: dockRef.requested(),
+      platform,
       root: dockRoot,
       checksum: `${dockRef.id()}-${dockRef.requested()}-checksum`,
       signature: "test-signature",

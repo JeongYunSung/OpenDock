@@ -51,6 +51,45 @@ describe("requires regression coverage", () => {
     });
   });
 
+  it("parses top-level command phases from dock.yml", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/commands",
+        install: [{ id: "install-step", run: "mkdir -p .opendock" }],
+        update: [{ id: "update-step", run: "mkdir -p .opendock" }],
+        doctor: [{ id: "doctor-step", check: "test -f AGENTS.md" }],
+      }),
+    );
+
+    const manifest = parseManifestFile(join(root, "dock.yml"));
+
+    expect(manifest.lifecycle.install.map((step) => step.id)).toEqual(["install-step"]);
+    expect(manifest.lifecycle.update.map((step) => step.id)).toEqual(["update-step"]);
+    expect(manifest.lifecycle.doctor.map((step) => step.id)).toEqual(["doctor-step"]);
+  });
+
+  it("rejects mixed top-level command phases and legacy lifecycle", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/commands",
+        install: [{ id: "install-step", run: "mkdir -p .opendock" }],
+        lifecycle: {
+          install: [{ id: "legacy-step", run: "mkdir -p .opendock" }],
+        },
+      }),
+    );
+
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
+      "use top-level `install`, `update`, and `doctor`",
+    );
+  });
+
   it("rejects unsafe package requirement names", () => {
     const root = tempDir();
     writeFileSync(

@@ -153,13 +153,13 @@ const lifecycleStepSchema = lifecycleStepFieldsSchema.extend({
   platforms: lifecyclePlatformsSchema,
 });
 
-const lifecycleSchema = z
-  .object({
-    install: z.array(lifecycleStepSchema).default([]),
-    update: z.array(lifecycleStepSchema).default([]),
-    doctor: z.array(lifecycleStepSchema).default([]),
-  })
-  .default({ install: [], update: [], doctor: [] });
+const phaseStepsSchema = z.array(lifecycleStepSchema).default([]);
+
+const lifecycleSchema = z.object({
+  install: phaseStepsSchema,
+  update: phaseStepsSchema,
+  doctor: phaseStepsSchema,
+});
 
 const manifestSchema = z
   .object({
@@ -171,9 +171,35 @@ const manifestSchema = z
     logo: z.string().optional(),
     requires: requiresSchema,
     files: z.array(fileSpecSchema).default([]),
-    lifecycle: lifecycleSchema,
+    install: phaseStepsSchema.optional(),
+    update: phaseStepsSchema.optional(),
+    doctor: phaseStepsSchema.optional(),
+    lifecycle: lifecycleSchema.optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((manifest, context) => {
+    if (
+      manifest.lifecycle !== undefined &&
+      (manifest.install !== undefined ||
+        manifest.update !== undefined ||
+        manifest.doctor !== undefined)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message:
+          "use top-level `install`, `update`, and `doctor` instead of mixing them with `lifecycle`",
+        path: ["lifecycle"],
+      });
+    }
+  })
+  .transform(({ install, update, doctor, lifecycle, ...manifest }) => ({
+    ...manifest,
+    lifecycle: {
+      install: install ?? lifecycle?.install ?? [],
+      update: update ?? lifecycle?.update ?? [],
+      doctor: doctor ?? lifecycle?.doctor ?? [],
+    },
+  }));
 
 export type DockManifest = z.infer<typeof manifestSchema>;
 export type FileSpec = z.infer<typeof fileSpecSchema>;

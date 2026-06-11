@@ -18,7 +18,10 @@ import {
 } from "../files/file-candidate.js";
 import { LifecycleRunner, type StepReport } from "../runtime/lifecycle-runner.js";
 
-type DockResolver = (dockRef: DockRef) => Promise<ResolvedDock> | ResolvedDock;
+type DockResolver = (
+  dockRef: DockRef,
+  platform: OpenDockPlatform,
+) => Promise<ResolvedDock> | ResolvedDock;
 
 export interface InstallOptions {
   dockRef: DockRef;
@@ -61,9 +64,9 @@ export class DockInstaller {
   ) {}
 
   async install(options: InstallOptions): Promise<InstallReport> {
-    const resolved = await (options.resolve ?? resolveDock)(options.dockRef);
-    assertVersionSatisfiesSelector(resolved.version, options.dockRef.requested());
     const platform = options.platform ?? detectPlatform();
+    const resolved = await (options.resolve ?? resolveDock)(options.dockRef, platform);
+    assertVersionSatisfiesSelector(resolved.version, options.dockRef.requested());
     const store = new OpenDockStateStore(options.projectDir);
     const priorDock = store.findDock(resolved.manifest.id);
     const force = options.force === true;

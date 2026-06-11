@@ -11,6 +11,7 @@ import {
   validateManifestFor,
 } from "./core/domain/manifest.js";
 import { cacheRoot } from "./paths.js";
+import type { OpenDockPlatform } from "./platform.js";
 import { OpenDockRegistryClient } from "./registry.js";
 
 const safeResolvedVersionPattern = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,79}$/;
@@ -22,30 +23,48 @@ const maxExtractedFiles = 2_000;
 export interface ResolvedDock {
   manifest: DockManifest;
   version: string;
+  platform: OpenDockPlatform;
   root: string;
   checksum: string;
   signature: string;
 }
 
-export async function resolveDock(dockRef: DockRef): Promise<ResolvedDock> {
-  return resolveRemoteDock(dockRef);
+export async function resolveDock(
+  dockRef: DockRef,
+  platform: OpenDockPlatform,
+): Promise<ResolvedDock> {
+  return resolveRemoteDock(dockRef, platform);
 }
 
-export async function resolveLatestDock(owner: string, name: string): Promise<ResolvedDock> {
+export async function resolveLatestDock(
+  owner: string,
+  name: string,
+  platform: OpenDockPlatform,
+): Promise<ResolvedDock> {
   const client = new OpenDockRegistryClient();
-  const metadata = await client.resolveDockVersion(owner, name, "latest");
-  return resolveRemoteDockMetadata(owner, name, metadata, `${owner}/${name}@latest`);
+  const metadata = await client.resolveDockVersion(owner, name, "latest", platform);
+  return resolveRemoteDockMetadata(owner, name, metadata, `${owner}/${name}@latest`, platform);
 }
 
-async function resolveRemoteDock(dockRef: DockRef): Promise<ResolvedDock> {
+async function resolveRemoteDock(
+  dockRef: DockRef,
+  platform: OpenDockPlatform,
+): Promise<ResolvedDock> {
   const client = new OpenDockRegistryClient();
   const metadata = await client.resolveDockVersion(
     dockRef.owner,
     dockRef.name,
     dockRef.requested(),
+    platform,
   );
   assertVersionSatisfiesSelector(metadata.version, dockRef.requested());
-  return resolveRemoteDockMetadata(dockRef.owner, dockRef.name, metadata, dockRef.toString());
+  return resolveRemoteDockMetadata(
+    dockRef.owner,
+    dockRef.name,
+    metadata,
+    dockRef.toString(),
+    platform,
+  );
 }
 
 async function resolveRemoteDockMetadata(
@@ -53,6 +72,7 @@ async function resolveRemoteDockMetadata(
   name: string,
   metadata: Awaited<ReturnType<OpenDockRegistryClient["resolveDockVersion"]>>,
   requestedLabel: string,
+  platform: OpenDockPlatform,
 ): Promise<ResolvedDock> {
   assertSafeResolvedVersion(metadata.version);
   const exactDockRef = DockRef.parse(`${owner}/${name}@${metadata.version}`);
@@ -65,12 +85,21 @@ async function resolveRemoteDockMetadata(
   if (!metadata.approved) {
     throw new Error(`dock \`${requestedLabel}\` is not approved by OpenDock Registry`);
   }
+  if (
+    metadata.platform !== undefined &&
+    metadata.platform !== "any" &&
+    metadata.platform !== platform
+  ) {
+    throw new Error(
+      `registry returned ${metadata.platform} artifact for requested platform \`${platform}\``,
+    );
+  }
   if (metadata.signature.trim() === "") {
     throw new Error(`dock \`${requestedLabel}\` is missing an OpenDock Registry signature`);
   }
 
   const client = new OpenDockRegistryClient();
-  const archive = await client.downloadDock(owner, name, metadata.version);
+  const archive = await client.downloadDock(owner, name, metadata.version, platform);
   const actualChecksum = sha256Bytes(archive);
   if (actualChecksum !== metadata.checksum) {
     throw new Error(
@@ -78,7 +107,7 @@ async function resolveRemoteDockMetadata(
     );
   }
 
-  const root = join(cacheRoot(), owner, name, metadata.version);
+  const root = join(cacheRoot(), owner, name, metadata.version, platform);
   rmSync(root, { recursive: true, force: true });
   mkdirSync(root, { recursive: true });
 
@@ -116,6 +145,7 @@ async function resolveRemoteDockMetadata(
   return {
     manifest,
     version: metadata.version,
+    platform,
     root: dockRoot,
     checksum: actualChecksum,
     signature: metadata.signature,

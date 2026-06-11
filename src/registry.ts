@@ -1,4 +1,5 @@
 import { API_PREFIX, DEFAULT_REGISTRY_URL } from "./constants.js";
+import type { OpenDockPlatform, OpenDockReleasePlatform } from "./platform.js";
 
 const requestTimeoutMs = 30_000;
 const maxDockArchiveBytes = 50 * 1024 * 1024;
@@ -6,6 +7,7 @@ const maxDockArchiveBytes = 50 * 1024 * 1024;
 export interface DockVersionResponse {
   id: string;
   version: string;
+  platform?: OpenDockReleasePlatform;
   approved: boolean;
   checksum: string;
   signature: string;
@@ -33,6 +35,7 @@ export interface AuthUserResponse {
 export interface SubmissionRequest {
   dock_name: string;
   version: string;
+  platform: OpenDockReleasePlatform;
   manifest: string;
   archive: SubmissionArchiveRequest;
   readme_markdown?: string;
@@ -73,13 +76,19 @@ export class OpenDockRegistryClient {
     owner: string,
     name: string,
     selector: string,
+    platform: OpenDockPlatform,
   ): Promise<DockVersionResponse> {
-    const url = `${this.apiBase()}/docks/${owner}/${name}/versions/${encodeURIComponent(selector)}`;
+    const url = `${this.apiBase()}/docks/${owner}/${name}/versions/${encodeURIComponent(selector)}?${new URLSearchParams({ platform })}`;
     return this.requestJson<DockVersionResponse>(url);
   }
 
-  async downloadDock(owner: string, name: string, version: string): Promise<Buffer> {
-    const url = `${this.apiBase()}/docks/${owner}/${name}/versions/${encodeURIComponent(version)}/download`;
+  async downloadDock(
+    owner: string,
+    name: string,
+    version: string,
+    platform: OpenDockPlatform,
+  ): Promise<Buffer> {
+    const url = `${this.apiBase()}/docks/${owner}/${name}/versions/${encodeURIComponent(version)}/download?${new URLSearchParams({ platform })}`;
     return this.requestBytes(url, maxDockArchiveBytes);
   }
 

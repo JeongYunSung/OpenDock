@@ -16,8 +16,10 @@ import { type DockManifest, DockRef, parseManifestFile } from "../src/core/domai
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
 import { CommandRunner } from "../src/core/runtime/command-runner.js";
 import { LifecycleRunner } from "../src/core/runtime/lifecycle-runner.js";
-import { detectPlatform, parsePlatform } from "../src/platform.js";
+import { detectPlatform, parsePlatform, parseReleasePlatform } from "../src/platform.js";
+import { OpenDockRegistryClient } from "../src/registry.js";
 import type { ResolvedDock } from "../src/resolver.js";
+import { resolveDock } from "../src/resolver.js";
 
 const tempRoots: string[] = [];
 
@@ -38,9 +40,79 @@ describe("platform regression coverage", () => {
     expect(parsePlatform("win")).toBe("windows");
     expect(parsePlatform("win32")).toBe("windows");
     expect(parsePlatform("linux")).toBe("linux");
+    expect(parseReleasePlatform("any")).toBe("any");
+    expect(parseReleasePlatform("all")).toBe("any");
+    expect(parseReleasePlatform("neutral")).toBe("any");
+    expect(parseReleasePlatform("darwin")).toBe("macos");
 
     expect(() => detectPlatform("freebsd" as NodeJS.Platform)).toThrow("unsupported host platform");
     expect(() => parsePlatform("freebsd")).toThrow("unsupported OpenDock platform");
+    expect(() => parseReleasePlatform("freebsd")).toThrow("unsupported OpenDock platform");
+  });
+
+  it("passes platform selectors to Registry resolve and download requests", async () => {
+    const requestedUrls: string[] = [];
+    const previousFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: string | URL | Request) => {
+      const url = String(input);
+      requestedUrls.push(url);
+      if (url.endsWith("/download?platform=windows")) {
+        return new Response("archive", { status: 200 });
+      }
+      return new Response(
+        JSON.stringify({
+          id: "opendock/codex",
+          version: "1.0.0",
+          platform: "windows",
+          approved: true,
+          checksum: "checksum",
+          signature: "signature",
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as typeof fetch;
+
+    try {
+      const client = new OpenDockRegistryClient("https://registry.test");
+      await client.resolveDockVersion("opendock", "codex", "1.0.0", "windows");
+      await client.downloadDock("opendock", "codex", "1.0.0", "windows");
+    } finally {
+      globalThis.fetch = previousFetch;
+    }
+
+    expect(requestedUrls).toEqual([
+      "https://registry.test/v1/docks/opendock/codex/versions/1.0.0?platform=windows",
+      "https://registry.test/v1/docks/opendock/codex/versions/1.0.0/download?platform=windows",
+    ]);
+  });
+
+  it("rejects Registry artifacts for a different concrete platform", async () => {
+    const previousFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url.includes("/download")) {
+        throw new Error("download should not run for mismatched platform metadata");
+      }
+      return new Response(
+        JSON.stringify({
+          id: "opendock/codex",
+          version: "1.0.0",
+          platform: "macos",
+          approved: true,
+          checksum: "checksum",
+          signature: "signature",
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as typeof fetch;
+
+    try {
+      await expect(resolveDock(DockRef.parse("opendock/codex@1.0.0"), "windows")).rejects.toThrow(
+        "registry returned macos artifact for requested platform `windows`",
+      );
+    } finally {
+      globalThis.fetch = previousFetch;
+    }
   });
 
   it("rejects unsupported platform keys in dock.yml", () => {
@@ -397,11 +469,9 @@ function writeDock(
         from: `files/${file.path}`,
         to: file.path,
       })),
-      lifecycle: {
-        install: options.lifecycle?.install ?? [],
-        update: options.lifecycle?.update ?? [],
-        doctor: options.lifecycle?.doctor ?? [],
-      },
+      install: options.lifecycle?.install ?? [],
+      update: options.lifecycle?.update ?? [],
+      doctor: options.lifecycle?.doctor ?? [],
     }),
   );
   writeFileSync(join(dockRoot, "DOCK.md"), `# ${owner}/${name}\n`);
@@ -412,11 +482,12 @@ function writeDock(
 }
 
 function localResolver(root: string) {
-  return (dockRef: DockRef): ResolvedDock => {
+  return (dockRef: DockRef, platform: ReturnType<typeof parsePlatform>): ResolvedDock => {
     const dockRoot = join(root, `${dockRef.owner}-${dockRef.name}-${dockRef.requested()}`);
     return {
       manifest: parseManifestFile(join(dockRoot, "dock.yml")),
       version: dockRef.requested(),
+      platform,
       root: dockRoot,
       checksum: `${dockRef.id()}-${dockRef.requested()}-checksum`,
       signature: "test-signature",

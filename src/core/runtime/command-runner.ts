@@ -258,19 +258,19 @@ function withoutVoltaNodeImageBin(pathValue: string | undefined): string | undef
 function rejectShellMetacharacters(command: string): void {
   const blocked = ["|", "&&", "||", ";", "`", "$(", ">", "<"];
   if (blocked.some((token) => command.includes(token))) {
-    throw new Error(`shell operators are not allowed in lifecycle commands: ${command}`);
+    throw new Error(`shell operators are not allowed in OpenDock commands: ${command}`);
   }
 }
 
 function ensureAllowed(program: string, args: string[], platform: OpenDockPlatform): void {
   if (!commonAllowedCommands.has(program) && !platformAllowedCommands[platform].has(program)) {
     throw new Error(
-      `command \`${program}\` is not allowed for OpenDock platform \`${platform}\` lifecycle`,
+      `command \`${program}\` is not allowed for OpenDock platform \`${platform}\` commands`,
     );
   }
   if (!isAllowedCommandShape(program, args)) {
     const rendered = [program, ...args].join(" ");
-    throw new Error(`command \`${rendered}\` is not allowed for OpenDock lifecycle`);
+    throw new Error(`command \`${rendered}\` is not allowed for OpenDock commands`);
   }
 }
 

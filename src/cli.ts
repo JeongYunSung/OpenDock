@@ -1,16 +1,19 @@
 #!/usr/bin/env bun
 import { createHash } from "node:crypto";
 import {
+  copyFileSync,
   lstatSync,
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
   realpathSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
+import { basename, dirname, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import { c as createTar } from "tar";
@@ -28,7 +31,13 @@ import {
 import { OpenDockStateStore } from "./core/domain/state-store.js";
 import { LifecycleRunner } from "./core/runtime/lifecycle-runner.js";
 import { readProjectLogs } from "./logging.js";
-import { detectPlatform, type OpenDockPlatform, parsePlatform } from "./platform.js";
+import {
+  detectPlatform,
+  type OpenDockPlatform,
+  type OpenDockReleasePlatform,
+  parsePlatform,
+  parseReleasePlatform,
+} from "./platform.js";
 import {
   OpenDockRegistryClient,
   RegistryRequestError,
@@ -40,6 +49,7 @@ import { type ResolvedDock, resolveDock, resolveLatestDock } from "./resolver.js
 
 const maxDeployReadmeBytes = 64 * 1024;
 const maxDeployLogoBytes = 512 * 1024;
+const maxDeployManifestBytes = 64 * 1024;
 const maxDeployArchiveBytes = 50 * 1024 * 1024;
 
 export async function run(argv = process.argv): Promise<void> {
@@ -89,9 +99,9 @@ export async function run(argv = process.argv): Promise<void> {
         throw new Error("no OpenDock docks are installed in this project");
       }
       for (const dock of installedDocks) {
-        const latest = await resolveLatestDockRef(dock.id);
-        const dockRef = DockRef.parse(`${dock.id}@${latest.version}`);
         const platform = platformOverride ?? resolveCliPlatform(dock.platform);
+        const latest = await resolveLatestDockRef(dock.id, platform);
+        const dockRef = DockRef.parse(`${dock.id}@${latest.version}`);
         const report = await installer.install({
           dockRef,
           force: options.force === true,
@@ -219,25 +229,39 @@ export async function run(argv = process.argv): Promise<void> {
     .command("deploy")
     .description("Submit a dock to OpenDock Registry for review.")
     .argument("<dock>", "Dock release reference: owner/name@version")
-    .action(async (dockName: string) => {
+    .option("--platform <platform>", "Release platform: any, macos, windows, or linux", "any")
+    .option("--file <path>", "Manifest file to submit as dock.yml", "dock.yml")
+    .action(async (dockName: string, options: { platform: string; file: string }) => {
       const dockRef = parseDeployRef(dockName);
-      const manifest = readFileSync("dock.yml", "utf8");
-      const parsedManifest = parseManifestFile(join(process.cwd(), "dock.yml"));
+      const releasePlatform = resolveDeployPlatform(options.platform);
+      const manifestPath = resolveDeployManifest(process.cwd(), options.file);
+      const deployRoot = dirname(manifestPath);
+      const manifest = readFileSync(manifestPath, "utf8");
+      const parsedManifest = parseManifestFile(manifestPath);
       validateManifestFor(parsedManifest, dockRef);
-      const readmeMarkdown = readDeployReadme(process.cwd(), parsedManifest);
-      const logo = readDeployLogo(process.cwd(), parsedManifest);
-      const archive = await createDeployArchive(process.cwd(), parsedManifest, dockRef.requested());
+      const readmeMarkdown = readDeployReadme(deployRoot, parsedManifest);
+      const logo = readDeployLogo(deployRoot, parsedManifest);
+      const archive = await createDeployArchive(
+        deployRoot,
+        parsedManifest,
+        dockRef.requested(),
+        releasePlatform,
+        manifest,
+      );
       const client = new OpenDockRegistryClient();
       const request = {
         dock_name: dockRef.id(),
         version: dockRef.requested(),
+        platform: releasePlatform,
         manifest,
         archive,
         ...(readmeMarkdown === undefined ? {} : { readme_markdown: readmeMarkdown }),
         ...(logo === undefined ? {} : { logo }),
       };
       const response = await submitDockWithLogin(client, new TokenStore(), request);
-      console.log(`Submitted ${dockRef} for review: ${response.id} (${response.status})`);
+      console.log(
+        `Submitted ${dockRef} [${releasePlatform}] for review: ${response.id} (${response.status})`,
+      );
     });
 
   await program.parseAsync(argv);
@@ -270,12 +294,15 @@ function parseInstalledDockId(value: string): string {
   return `${parts[0]}/${parts[1]}`;
 }
 
-async function resolveLatestDockRef(dockId: string): Promise<ResolvedDock> {
+async function resolveLatestDockRef(
+  dockId: string,
+  platform: OpenDockPlatform,
+): Promise<ResolvedDock> {
   const [owner, name, extra] = dockId.split("/");
   if (!owner || !name || extra !== undefined) {
     throw new Error(`invalid dock id in lock file: ${dockId}`);
   }
-  return resolveLatestDock(owner, name);
+  return resolveLatestDock(owner, name, platform);
 }
 
 function lockedDockVersionSelector(dock: { requested?: string; version: string }): string {
@@ -318,7 +345,7 @@ function readDeployLogo(
 function resolveDeployFile(
   projectDir: string,
   relativePathValue: string,
-  manifestField: "logo" | "readme",
+  manifestField: "logo" | "manifest" | "readme",
   maxBytes: number,
 ): string {
   const relativePath = relativePathValue.trim();
@@ -407,14 +434,25 @@ async function createDeployArchive(
   projectDir: string,
   manifest: DockManifest,
   version: string,
+  platform: OpenDockReleasePlatform,
+  manifestText: string,
 ): Promise<SubmissionRequest["archive"]> {
   const entries = collectDeployArchiveEntries(projectDir, manifest);
   const temp = mkdtempSync(join(tmpdir(), "opendock-deploy-"));
+  const stage = join(temp, "stage");
   const archivePath = join(temp, "dock.tgz");
   try {
+    mkdirSync(stage, { recursive: true });
+    writeFileSync(join(stage, "dock.yml"), manifestText);
+    for (const entry of entries.filter((entry) => entry !== "dock.yml")) {
+      const source = join(projectDir, entry);
+      const target = join(stage, entry);
+      mkdirSync(dirname(target), { recursive: true });
+      copyFileSync(source, target);
+    }
     await createTar(
       {
-        cwd: projectDir,
+        cwd: stage,
         file: archivePath,
         gzip: true,
         noMtime: true,
@@ -429,7 +467,7 @@ async function createDeployArchive(
     }
     const bytes = readFileSync(archivePath);
     return {
-      filename: `${manifest.id.replace("/", "-")}-${version}.tgz`,
+      filename: `${manifest.id.replace("/", "-")}-${version}-${platform}.tgz`,
       content_type: "application/gzip",
       data_base64: bytes.toString("base64"),
       checksum: createHash("sha256").update(bytes).digest("hex"),
@@ -440,12 +478,12 @@ async function createDeployArchive(
 }
 
 function collectDeployArchiveEntries(projectDir: string, manifest: DockManifest): string[] {
-  const roots = new Set<string>(["dock.yml"]);
+  const roots = new Set<string>();
   for (const file of manifest.files) {
     roots.add(file.from);
   }
 
-  const entries = new Set<string>();
+  const entries = new Set<string>(["dock.yml"]);
   for (const root of roots) {
     for (const entry of expandDeployArchiveRoot(projectDir, root)) {
       entries.add(entry);
@@ -506,6 +544,14 @@ function resolveDeployFileOrDirectory(projectDir: string, relativePathValue: str
 
 function resolveCliPlatform(value: string | undefined): OpenDockPlatform {
   return value === undefined ? detectPlatform() : parsePlatform(value);
+}
+
+function resolveDeployPlatform(value: string): OpenDockReleasePlatform {
+  return parseReleasePlatform(value);
+}
+
+function resolveDeployManifest(projectDir: string, relativePathValue: string): string {
+  return resolveDeployFile(projectDir, relativePathValue, "manifest", maxDeployManifestBytes);
 }
 
 function formatFileSummary(report: InstallReport): string {
@@ -575,7 +621,7 @@ async function printDockDoctorChecks(
   platform: OpenDockPlatform,
 ): Promise<void> {
   try {
-    const resolved = await resolveDock(dockRef);
+    const resolved = await resolveDock(dockRef, platform);
     const reports = new LifecycleRunner().run(resolved.manifest, {
       projectDir: cwd,
       dockId: resolved.manifest.id,
