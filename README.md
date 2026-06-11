@@ -254,11 +254,23 @@ examples/
   claude-code/        # Claude Code example
   oh-my-codex/        # Oh My Codex example
   oh-my-openagent/    # Oh My OpenAgent Codex Light example
+  designer-ai/        # AI workspace for product designers
+  product-manager/    # AI workspace for PM artifacts
+  frontend-ai/        # AI workspace for frontend engineering
+  startup-founder/    # AI workspace for founder strategy
+  ai-automation/      # AI workspace for automation planning
+  ui-case-study/      # AI workspace for UI portfolio case studies
   agent-ready/        # shared AI agent instruction files
   ai-context/         # repository context packaging setup
   mcp-local/          # project-local MCP config examples
   agent-safety/       # PR/security safety rails
   agent-docs/         # AI-readable docs harness
+  agent-rules/        # path-scoped AI agent rules
+  repo-context/       # repository context prompts and packaging
+  mcp-safe/           # security-first MCP references
+  dev-env/            # tool versions and validation tasks
+  codex-skills/       # repository-local Codex skills
+  devcontainer-ai/    # AI-friendly Dev Container setup
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide
 ```

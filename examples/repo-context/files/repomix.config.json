@@ -1,0 +1,23 @@
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "output": {
+    "filePath": ".opendock/context/repository-context.xml",
+    "style": "xml",
+    "compress": true,
+    "removeComments": false,
+    "showLineNumbers": true
+  },
+  "ignore": {
+    "useGitignore": true,
+    "customPatterns": [
+      ".opendock/context/**",
+      ".opendock/tmp/**",
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      ".git/**",
+      "*.lock"
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+opendock: 1
+id: opendock/frontend-ai
+summary: AI workspace for React and Next.js frontend engineering.
+readme: DOCK.md
+logo: logo.png
+
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+    update: managed_block
+
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+    update: managed_block
+
+  - from: files/DESIGN.md
+    to: DESIGN.md
+    update: managed_block
+
+  - from: files/COMPONENT_GUIDE.md
+    to: COMPONENT_GUIDE.md
+    update: manual_review
+
+  - from: files/CODE_STYLE.md
+    to: CODE_STYLE.md
+    update: manual_review
+
+  - from: files/REVIEW_CHECKLIST.md
+    to: REVIEW_CHECKLIST.md
+    update: manual_review
+
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+    update: managed_block
+
+  - from: files/README.md
+    to: README.md
+    update: manual_review
+
+lifecycle:
+  install:
+    - id: install-git
+      check: git --version
+      version: ">=2.40.0"
+      platforms:
+        macos:
+          run: brew install git
+        windows:
+          run: winget install --id Git.Git --exact --accept-package-agreements --accept-source-agreements
+
+    - id: install-node
+      check: node --version
+      version: ">=22.0.0"
+      platforms:
+        macos:
+          run: brew install node
+        windows:
+          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
+
+    - id: install-codex-cli
+      check: codex --version
+      version: ">=0.0.0"
+      run: npm install --global @openai/codex@latest
+
+  update:
+    - id: update-codex-cli
+      run: npm install --global @openai/codex@latest
+
+  doctor:
+    - id: git
+      check: git --version
+      version: ">=2.40.0"
+
+    - id: node
+      check: node --version
+      version: ">=22.0.0"
+
+    - id: npm
+      check: npm --version
+      version: ">=10.0.0"
+
+    - id: codex
+      check: codex --version
+      version: ">=0.0.0"
+
+    - id: agents-md
+      check: test -f AGENTS.md
+
+    - id: claude-md
+      check: test -f CLAUDE.md
+
+    - id: design-md
+      check: test -f DESIGN.md
+
+    - id: component-guide
+      check: test -f COMPONENT_GUIDE.md

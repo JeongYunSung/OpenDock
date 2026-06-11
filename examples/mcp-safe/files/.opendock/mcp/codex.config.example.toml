@@ -1,0 +1,5 @@
+# Copy reviewed MCP servers into your active Codex config only after approval.
+
+[mcp_servers.filesystem-local]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "."]

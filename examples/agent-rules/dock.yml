@@ -1,0 +1,48 @@
+opendock: 1
+id: opendock/agent-rules
+summary: Path-scoped AI coding rules for multi-tool repositories.
+readme: DOCK.md
+logo: logo.png
+
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+    update: managed_block
+
+  - from: files/.github/instructions/typescript.instructions.md
+    to: .github/instructions/typescript.instructions.md
+    update: managed_file
+
+  - from: files/.github/instructions/testing.instructions.md
+    to: .github/instructions/testing.instructions.md
+    update: managed_file
+
+  - from: files/.cursor/rules/architecture.mdc
+    to: .cursor/rules/architecture.mdc
+    update: managed_file
+
+  - from: files/.cursor/rules/testing.mdc
+    to: .cursor/rules/testing.mdc
+    update: managed_file
+
+  - from: files/.claude/rules/architecture.md
+    to: .claude/rules/architecture.md
+    update: managed_file
+
+  - from: files/.opendock/agent-rules.md
+    to: .opendock/agent-rules.md
+    update: managed_file
+
+lifecycle:
+  doctor:
+    - id: agents-md
+      check: test -f AGENTS.md
+
+    - id: github-typescript-rules
+      check: test -f .github/instructions/typescript.instructions.md
+
+    - id: cursor-architecture-rules
+      check: test -f .cursor/rules/architecture.mdc
+
+    - id: agent-rules-guide
+      check: test -f .opendock/agent-rules.md

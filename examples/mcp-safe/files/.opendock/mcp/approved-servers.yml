@@ -1,0 +1,12 @@
+approved_servers:
+  - id: filesystem-local
+    status: review_required
+    command: npx
+    package: "@modelcontextprotocol/server-filesystem"
+    scope: project directory only
+    notes: "Review allowed roots before copying this into an active client config."
+
+  - id: github-copilot
+    status: review_required
+    transport: http
+    notes: "Use organization policy and token scopes before enabling."

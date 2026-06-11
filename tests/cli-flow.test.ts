@@ -1828,11 +1828,23 @@ lifecycle:
       "opendock/claude-code",
       "opendock/oh-my-codex",
       "opendock/oh-my-openagent",
+      "opendock/designer-ai",
+      "opendock/product-manager",
+      "opendock/frontend-ai",
+      "opendock/startup-founder",
+      "opendock/ai-automation",
+      "opendock/ui-case-study",
       "opendock/agent-ready",
       "opendock/ai-context",
       "opendock/mcp-local",
       "opendock/agent-safety",
       "opendock/agent-docs",
+      "opendock/agent-rules",
+      "opendock/repo-context",
+      "opendock/mcp-safe",
+      "opendock/dev-env",
+      "opendock/codex-skills",
+      "opendock/devcontainer-ai",
     ];
     for (const ref of refs) {
       const resolved = resolveLocalDockForTest(
@@ -1873,6 +1885,160 @@ lifecycle:
     expect(existsSync(join(resolved.root, "files"))).toBe(false);
   });
 
+  it("installs bundled outcome examples as complete AI workspaces", async () => {
+    const examplesRoot = join(repoRoot, "examples");
+    const bin = await tempDir();
+    writeFakeToolchain(bin);
+
+    const cases = [
+      {
+        ref: "opendock/designer-ai",
+        files: [
+          "AGENTS.md",
+          "CLAUDE.md",
+          "DESIGN.md",
+          "DESIGN_SYSTEM.md",
+          "UX_REVIEW.md",
+          "FIGMA_WORKFLOW.md",
+          "PROMPTS.md",
+          "README.md",
+        ],
+        marker: "senior product design partner",
+      },
+      {
+        ref: "opendock/product-manager",
+        files: [
+          "AGENTS.md",
+          "CLAUDE.md",
+          "PRD.md",
+          "USER_STORY.md",
+          "ROADMAP.md",
+          "RELEASE_NOTES.md",
+          "PROMPTS.md",
+          "README.md",
+        ],
+        marker: "pragmatic product manager",
+      },
+      {
+        ref: "opendock/frontend-ai",
+        files: [
+          "AGENTS.md",
+          "CLAUDE.md",
+          "DESIGN.md",
+          "COMPONENT_GUIDE.md",
+          "CODE_STYLE.md",
+          "REVIEW_CHECKLIST.md",
+          "PROMPTS.md",
+          "README.md",
+        ],
+        marker: "senior frontend engineer",
+      },
+      {
+        ref: "opendock/startup-founder",
+        files: [
+          "AGENTS.md",
+          "CLAUDE.md",
+          "BUSINESS_MODEL.md",
+          "GTM.md",
+          "ICP.md",
+          "PRICING.md",
+          "PROMPTS.md",
+          "README.md",
+        ],
+        marker: "startup operating partner",
+      },
+      {
+        ref: "opendock/ai-automation",
+        files: [
+          "AGENTS.md",
+          "CLAUDE.md",
+          "AUTOMATION_MAP.md",
+          "WORKFLOW_LIBRARY.md",
+          "MCP_GUIDE.md",
+          "PROMPTS.md",
+          "README.md",
+        ],
+        marker: "automation architect",
+      },
+      {
+        ref: "opendock/ui-case-study",
+        files: [
+          "AGENTS.md",
+          "CLAUDE.md",
+          "CASE_STUDY_TEMPLATE.md",
+          "PROBLEM_DEFINITION.md",
+          "IMPACT_MEASUREMENT.md",
+          "PROMPTS.md",
+          "README.md",
+        ],
+        marker: "portfolio editor",
+      },
+    ];
+
+    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
+      for (const item of cases) {
+        const project = await tempDir();
+        const dockRef = DockRef.parse(`${item.ref}@local-dev`);
+
+        const report = await install({
+          dockRef,
+          projectDir: project,
+          runCommands: true,
+          operation: "install",
+          phase: "install",
+          platform: "macos",
+          resolve: localResolver(examplesRoot),
+        });
+
+        expect(report.dockId).toBe(item.ref);
+        expect(report.filesCreated).toBe(item.files.length);
+        for (const file of item.files) {
+          expect(existsSync(join(project, file))).toBe(true);
+        }
+        expect(readFileSync(join(project, "AGENTS.md"), "utf8")).toContain(item.marker);
+        expect(readFileSync(join(project, "CLAUDE.md"), "utf8")).toContain("Claude Code");
+        expect(readFileSync(join(project, "PROMPTS.md"), "utf8")).toContain("Prompts");
+
+        const resolved = resolveLocalDockForTest(examplesRoot, dockRef);
+        const doctor = await runLifecycle(resolved.manifest, "doctor", project, {
+          platform: "macos",
+        });
+        expect(doctor.map((step) => step.status)).toEqual(doctor.map(() => "Ready" as const));
+      }
+    });
+  }, 15_000);
+
+  it("preserves existing outcome guidance files with managed blocks", async () => {
+    const examplesRoot = join(repoRoot, "examples");
+    const bin = await tempDir();
+    writeFakeToolchain(bin);
+
+    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
+      const project = await tempDir();
+      writeFileSync(join(project, "AGENTS.md"), "# Existing Agent Notes\n\nKeep this line.\n");
+      writeFileSync(join(project, "CLAUDE.md"), "# Existing Claude Notes\n\nKeep this line.\n");
+      writeFileSync(join(project, "DESIGN.md"), "# Existing Design Notes\n\nKeep this line.\n");
+
+      await install({
+        dockRef: DockRef.parse("opendock/designer-ai@local-dev"),
+        projectDir: project,
+        runCommands: true,
+        operation: "install",
+        phase: "install",
+        platform: "macos",
+        resolve: localResolver(examplesRoot),
+      });
+
+      for (const file of ["AGENTS.md", "CLAUDE.md", "DESIGN.md"]) {
+        const content = readFileSync(join(project, file), "utf8");
+        expect(content).toContain("Keep this line.");
+        expect(content).toContain(`OPENDOCK:START opendock/designer-ai:${file}`);
+        expect(content).toContain(`OPENDOCK:END opendock/designer-ai:${file}`);
+      }
+      expect(readFileSync(join(project, "DESIGN.md"), "utf8")).toContain("Interface Principles");
+    });
+  });
+
   it("runs bundled macos and windows examples with a fake toolchain", async () => {
     const examplesRoot = join(repoRoot, "examples");
     const bin = await tempDir();
@@ -1885,11 +2051,23 @@ lifecycle:
       "opendock/claude-code",
       "opendock/oh-my-codex",
       "opendock/oh-my-openagent",
+      "opendock/designer-ai",
+      "opendock/product-manager",
+      "opendock/frontend-ai",
+      "opendock/startup-founder",
+      "opendock/ai-automation",
+      "opendock/ui-case-study",
       "opendock/agent-ready",
       "opendock/ai-context",
       "opendock/mcp-local",
       "opendock/agent-safety",
       "opendock/agent-docs",
+      "opendock/agent-rules",
+      "opendock/repo-context",
+      "opendock/mcp-safe",
+      "opendock/dev-env",
+      "opendock/codex-skills",
+      "opendock/devcontainer-ai",
     ];
 
     for (const platform of ["macos", "windows"] as const) {

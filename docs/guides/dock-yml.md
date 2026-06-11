@@ -14,11 +14,23 @@ OpenDock의 모토는 **Simple AI setup for every workspace**입니다. `dock.ym
 | `examples/claude-code/dock.yml` | Claude Code를 설치하는 dock |
 | `examples/oh-my-codex/dock.yml` | Oh My Codex를 설치하고 `omx setup`을 실행하는 dock |
 | `examples/oh-my-openagent/dock.yml` | Oh My OpenAgent Codex Light를 설치하는 dock |
+| `examples/designer-ai/dock.yml` | 디자이너용 AI workspace와 UX/design system 문서를 설치하는 dock |
+| `examples/product-manager/dock.yml` | PM용 PRD, user story, roadmap, release note workspace를 설치하는 dock |
+| `examples/frontend-ai/dock.yml` | frontend engineering용 AI instruction과 review checklist를 설치하는 dock |
+| `examples/startup-founder/dock.yml` | founder strategy, ICP, GTM, pricing workspace를 설치하는 dock |
+| `examples/ai-automation/dock.yml` | internal automation map, workflow library, MCP guide를 설치하는 dock |
+| `examples/ui-case-study/dock.yml` | UI/UX portfolio case study workspace를 설치하는 dock |
 | `examples/agent-ready/dock.yml` | 여러 AI coding agent용 instruction 파일을 설치하는 dock |
 | `examples/ai-context/dock.yml` | AI-friendly repository context export 설정을 설치하는 dock |
 | `examples/mcp-local/dock.yml` | project-local MCP 설정 예시를 설치하는 dock |
 | `examples/agent-safety/dock.yml` | AI-generated changes를 위한 PR/security safety rails를 설치하는 dock |
 | `examples/agent-docs/dock.yml` | AI가 읽기 쉬운 운영 문서 하네스를 설치하는 dock |
+| `examples/agent-rules/dock.yml` | path-scoped AI agent rule을 설치하는 dock |
+| `examples/repo-context/dock.yml` | repository context packaging과 분석 prompt를 설치하는 dock |
+| `examples/mcp-safe/dock.yml` | MCP 보안 검토와 승인 서버 reference를 설치하는 dock |
+| `examples/dev-env/dock.yml` | mise 기반 tool version과 검증 task baseline을 설치하는 dock |
+| `examples/codex-skills/dock.yml` | repository-local Codex skill pack을 설치하는 dock |
+| `examples/devcontainer-ai/dock.yml` | AI-friendly Dev Container reference를 설치하는 dock |
 
 ## 기본 구조
 

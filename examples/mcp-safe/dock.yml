@@ -1,0 +1,44 @@
+opendock: 1
+id: opendock/mcp-safe
+summary: Security-first MCP configuration references.
+readme: DOCK.md
+logo: logo.png
+
+files:
+  - from: files/MCP.md
+    to: MCP.md
+    update: managed_block
+
+  - from: files/.opendock/mcp/approved-servers.yml
+    to: .opendock/mcp/approved-servers.yml
+    update: managed_file
+
+  - from: files/.opendock/mcp/security-checklist.md
+    to: .opendock/mcp/security-checklist.md
+    update: managed_file
+
+  - from: files/.opendock/mcp/cursor.mcp.json
+    to: .opendock/mcp/cursor.mcp.json
+    update: managed_file
+
+  - from: files/.opendock/mcp/claude.mcp.json
+    to: .opendock/mcp/claude.mcp.json
+    update: managed_file
+
+  - from: files/.opendock/mcp/codex.config.example.toml
+    to: .opendock/mcp/codex.config.example.toml
+    update: managed_file
+
+lifecycle:
+  doctor:
+    - id: mcp-guide
+      check: test -f MCP.md
+
+    - id: approved-servers
+      check: test -f .opendock/mcp/approved-servers.yml
+
+    - id: security-checklist
+      check: test -f .opendock/mcp/security-checklist.md
+
+    - id: codex-template
+      check: test -f .opendock/mcp/codex.config.example.toml

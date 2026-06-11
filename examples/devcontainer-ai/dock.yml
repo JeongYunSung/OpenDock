@@ -1,0 +1,29 @@
+opendock: 1
+id: opendock/devcontainer-ai
+summary: AI-friendly Dev Container reference setup.
+readme: DOCK.md
+logo: logo.png
+
+files:
+  - from: files/.devcontainer/devcontainer.json
+    to: .devcontainer/devcontainer.json
+    update: managed_file
+
+  - from: files/.devcontainer/README.md
+    to: .devcontainer/README.md
+    update: managed_file
+
+  - from: files/.opendock/devcontainer-ai.md
+    to: .opendock/devcontainer-ai.md
+    update: managed_file
+
+lifecycle:
+  doctor:
+    - id: devcontainer-json
+      check: test -f .devcontainer/devcontainer.json
+
+    - id: devcontainer-readme
+      check: test -f .devcontainer/README.md
+
+    - id: opendock-guide
+      check: test -f .opendock/devcontainer-ai.md
