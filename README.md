@@ -44,7 +44,7 @@ opendock uninstall opendock/codex
 - [Command Reference](#command-reference)
 - [Dock Format](#dock-format)
 - [File Ownership](#file-ownership)
-- [Tasks And Export](#tasks-and-export)
+- [Workdir Files And Export](#workdir-files-and-export)
 - [Example Docks](#example-docks)
 - [Registry And Deploy](#registry-and-deploy)
 - [Repository Layout](#repository-layout)
@@ -257,24 +257,26 @@ Files that cannot safely contain marker comments are managed as whole files by
 checksum. If a user edits a managed file, update and uninstall stop by default.
 Use `--force` only when the dock version should win.
 
-## Tasks And Export
+## Workdir Files And Export
 
 Tasks can run in the project root or in a dock-private workdir.
 Use `requires` for runtime prerequisites; use top-level `install`, `update`, and
 `doctor` for package installs, project actions, and generated outputs.
+Use `workdir.files` when a generator needs input files before a task runs.
 
 ```yaml
+workdir:
+  files:
+    - from: workdir/oma-config.yaml
+      to: .agents/oma-config.yaml
+
 install:
   - id: apply-oma
     run: oma -y install
     workdir: dock
-  - id: link-oma-vendors
-    run: oma link claude codex
-    workdir: dock
     export:
       include:
         - AGENTS.md
-        - CLAUDE.md
         - .agents/**
         - .codex/**
       exclude:
@@ -284,6 +286,8 @@ install:
 
 - `workdir: root` runs in the project root.
 - `workdir: dock` runs in `.opendock/workdirs/<dock>/`.
+- `workdir.files` copies dock archive files into the private dock workdir before
+  tasks run.
 - `export.include/exclude` selects generated files from the dock workdir.
 - Exported files are applied through the same managed block/checksum engine.
 
@@ -331,7 +335,7 @@ opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 Deploy uploads:
 
 - `dock.yml`
-- the archive built from `dock.yml` and `files[].from`
+- the archive built from `dock.yml`, `files[].from`, and `workdir.files[].from`
 - release platform metadata: `any`, `macos`, `windows`, or `linux`
 - optional `readme` markdown for the catalog
 - optional `logo` image for the catalog

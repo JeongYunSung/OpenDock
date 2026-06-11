@@ -106,18 +106,29 @@ doctor:
 
 Steps run top to bottom. `doctor` should check state and avoid changing the project.
 
-## Workdir And Export
+## Workdir Files And Export
 
-Use `workdir: dock` when an external tool generates files. Export only the files
-that should be managed in the project root.
+Use `workdir.files` when a generator needs input files before it runs. Then use
+`workdir: dock` and export only the files that should be managed in the project
+root.
 
 ```yaml
-export:
-  include:
-    - AGENTS.md
-    - .codex/**
-  exclude:
-    - "**/*.log"
+workdir:
+  files:
+    - from: workdir/oma-config.yaml
+      to: .agents/oma-config.yaml
+
+install:
+  - id: apply-oma
+    run: oma -y install
+    workdir: dock
+    export:
+      include:
+        - AGENTS.md
+        - .agents/**
+        - .codex/**
+      exclude:
+        - "**/*.log"
 ```
 
 ## Deploy
@@ -129,5 +140,6 @@ opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
 opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 ```
 
-Deploy は `dock.yml`、`files[].from` から作る archive、release platform
-metadata、任意の `readme_markdown`、任意の `logo` を送信します。
+Deploy は `dock.yml`、`files[].from` と `workdir.files[].from` から作る
+archive、release platform metadata、任意の `readme_markdown`、任意の `logo`
+を送信します。

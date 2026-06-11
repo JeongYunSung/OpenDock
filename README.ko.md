@@ -44,7 +44,7 @@ opendock uninstall opendock/codex
 - [명령어](#명령어)
 - [Dock Format](#dock-format)
 - [파일 소유권](#파일-소유권)
-- [Tasks And Export](#tasks-and-export)
+- [Workdir Files And Export](#workdir-files-and-export)
 - [Example Docks](#example-docks)
 - [Registry And Deploy](#registry-and-deploy)
 - [Repository Layout](#repository-layout)
@@ -256,13 +256,20 @@ marker comment를 넣기 어려운 파일은 파일 전체를 checksum으로 관
 managed file을 수정하면 update와 uninstall은 기본적으로 중단됩니다. dock 버전을
 우선하려면 `--force`를 사용합니다.
 
-## Tasks And Export
+## Workdir Files And Export
 
 Task는 프로젝트 root 또는 dock-private workdir에서 실행할 수 있습니다.
 runtime 준비는 `requires`에 두고, package 설치와 generated output 적용은
 top-level `install`, `update`, `doctor`에 둡니다.
+외부 generator가 실행 전에 설정 파일을 필요로 하면 `workdir.files`로 dock 전용
+workdir에 먼저 넣을 수 있습니다.
 
 ```yaml
+workdir:
+  files:
+    - from: workdir/oma-config.yaml
+      to: .agents/oma-config.yaml
+
 install:
   - id: apply-oma
     run: oma -y install
@@ -270,7 +277,6 @@ install:
     export:
       include:
         - AGENTS.md
-        - CLAUDE.md
         - .agents/**
         - .codex/**
       exclude:
@@ -280,6 +286,7 @@ install:
 
 - `workdir: root`는 프로젝트 root에서 실행합니다.
 - `workdir: dock`은 `.opendock/workdirs/<dock>/`에서 실행합니다.
+- `workdir.files`는 task 실행 전에 archive 파일을 dock 전용 workdir로 복사합니다.
 - `export.include/exclude`는 dock workdir에서 root로 적용할 파일을 고릅니다.
 - export된 파일도 managed block/checksum engine을 거쳐 적용됩니다.
 
@@ -327,7 +334,7 @@ opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 deploy는 다음을 업로드합니다.
 
 - `dock.yml`
-- `dock.yml`과 `files[].from`으로 만든 archive
+- `dock.yml`, `files[].from`, `workdir.files[].from`으로 만든 archive
 - release platform metadata: `any`, `macos`, `windows`, `linux`
 - 선택 사항인 catalog용 `readme` markdown
 - 선택 사항인 catalog용 `logo` image

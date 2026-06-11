@@ -148,6 +148,10 @@ doctor:
 `readme` und `logo` sind Registry catalog metadata. Wenn sie ins Projekt
 installiert werden sollen, müssen sie auch in `files` stehen.
 
+Nutze `workdir.files`, wenn ein task im dock-private workdir vor der Ausführung
+Input-Dateien braucht. Nutze `files` für Dateien, die in den project root
+geschrieben werden sollen.
+
 Die vollständige Manifest-Referenz steht in [docs/guides/guide.de.md](./docs/guides/guide.de.md).
 
 ## Development

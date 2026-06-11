@@ -1,0 +1,5 @@
+language: en
+model_preset: codex
+date_format: ISO
+timezone: UTC
+auto_update_cli: false

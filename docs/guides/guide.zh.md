@@ -105,17 +105,28 @@ doctor:
 
 步骤按顺序执行。`doctor` 应该只检查状态，不修改项目。
 
-## Workdir And Export
+## Workdir Files And Export
 
-外部工具会生成文件时，使用 `workdir: dock`，然后只 export 需要 OpenDock 管理的文件。
+如果生成器运行前需要输入文件，使用 `workdir.files`。然后使用
+`workdir: dock`，只 export 需要 OpenDock 在项目中管理的文件。
 
 ```yaml
-export:
-  include:
-    - AGENTS.md
-    - .codex/**
-  exclude:
-    - "**/*.log"
+workdir:
+  files:
+    - from: workdir/oma-config.yaml
+      to: .agents/oma-config.yaml
+
+install:
+  - id: apply-oma
+    run: oma -y install
+    workdir: dock
+    export:
+      include:
+        - AGENTS.md
+        - .agents/**
+        - .codex/**
+      exclude:
+        - "**/*.log"
 ```
 
 ## Deploy
@@ -127,5 +138,5 @@ opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
 opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 ```
 
-Deploy 会提交 `dock.yml`、基于 `files[].from` 生成的 archive、release platform
-metadata、可选 `readme_markdown` 和可选 `logo`。
+Deploy 会提交 `dock.yml`、基于 `files[].from` 和 `workdir.files[].from` 生成的
+archive、release platform metadata、可选 `readme_markdown` 和可选 `logo`。

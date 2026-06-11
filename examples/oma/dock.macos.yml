@@ -6,6 +6,10 @@ logo: logo.png
 requires:
   runtimes:
     bun: ">=1.3.0"
+workdir:
+  files:
+    - from: workdir/oma-config.yaml
+      to: .agents/oma-config.yaml
 files:
   - from: files/AGENTS.md
     to: AGENTS.md
@@ -16,12 +20,8 @@ install:
     run: bun install --global oh-my-agent@latest
     timeout_ms: 600000
   - id: apply-oma
-    check: test -f .agents/oma-config.yaml
+    check: test -f .codex/skills/oma-brainstorm/SKILL.md
     run: oma -y install
-    workdir: dock
-    timeout_ms: 600000
-  - id: link-oma-vendors
-    run: oma link claude codex
     workdir: dock
     export:
       include:
@@ -47,11 +47,7 @@ update:
     run: bun install --global oh-my-agent@latest
     timeout_ms: 600000
   - id: update-oma
-    run: oma -y update
-    workdir: dock
-    timeout_ms: 600000
-  - id: relink-oma-vendors
-    run: oma link claude codex
+    run: oma -y install
     workdir: dock
     export:
       include:

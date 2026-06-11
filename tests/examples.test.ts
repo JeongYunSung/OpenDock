@@ -34,6 +34,11 @@ describe("example dock manifests", () => {
             true,
           );
         }
+        for (const mapping of manifest.workdir?.files ?? []) {
+          expect(existsSync(join(root, mapping.from)), `${example}/${file} ${mapping.from}`).toBe(
+            true,
+          );
+        }
       }
     }
   });

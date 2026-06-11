@@ -111,18 +111,29 @@ doctor:
 Steps laufen von oben nach unten. `doctor` sollte nur prüfen und das Projekt
 nicht verändern.
 
-## Workdir And Export
+## Workdir Files And Export
 
-Nutze `workdir: dock`, wenn ein externes Tool Dateien erzeugt. Exportiere nur die
-Dateien, die OpenDock verwalten soll.
+Nutze `workdir.files`, wenn ein Generator vor dem Start Eingabedateien braucht.
+Nutze danach `workdir: dock` und exportiere nur die Dateien, die OpenDock im
+Projekt verwalten soll.
 
 ```yaml
-export:
-  include:
-    - AGENTS.md
-    - .codex/**
-  exclude:
-    - "**/*.log"
+workdir:
+  files:
+    - from: workdir/oma-config.yaml
+      to: .agents/oma-config.yaml
+
+install:
+  - id: apply-oma
+    run: oma -y install
+    workdir: dock
+    export:
+      include:
+        - AGENTS.md
+        - .agents/**
+        - .codex/**
+      exclude:
+        - "**/*.log"
 ```
 
 ## Deploy
@@ -134,5 +145,6 @@ opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
 opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 ```
 
-Deploy sendet `dock.yml`, ein aus `files[].from` gebautes Archiv, release
-platform metadata, optionales `readme_markdown` und optionales `logo`.
+Deploy sendet `dock.yml`, ein aus `files[].from` und `workdir.files[].from`
+gebautes Archiv, release platform metadata, optionales `readme_markdown` und
+optionales `logo`.

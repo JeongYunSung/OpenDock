@@ -144,6 +144,9 @@ doctor:
 `readme` 和 `logo` 是 Registry catalog metadata。如果要安装到项目中，需要同时
 写入 `files`。
 
+如果 dock-private workdir 中运行的 task 需要先读取输入文件，请使用
+`workdir.files`。需要写入 project root 的文件使用 `files`。
+
 完整 manifest reference 见 [docs/guides/guide.zh.md](./docs/guides/guide.zh.md)。
 
 ## Development

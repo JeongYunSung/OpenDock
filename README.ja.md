@@ -146,6 +146,9 @@ doctor:
 `readme` と `logo` は Registry catalog metadata です。project に install するには
 `files` にも別途宣言します。
 
+dock-private workdir で実行する task が事前に input file を必要とする場合は
+`workdir.files` を使います。project root に書き込む file には `files` を使います。
+
 詳しい manifest reference は [docs/guides/guide.ja.md](./docs/guides/guide.ja.md) を参照してください。
 
 ## Development

@@ -42,7 +42,7 @@ uninstall까지 추적할 수 있게 만드는 작은 packaging layer입니다. 
 - [files](#files)
 - [파일 소유권](#파일-소유권)
 - [tasks](#tasks)
-- [workdir와 export](#workdir와-export)
+- [workdir.files와 export](#workdirfiles와-export)
 - [platform artifact](#platform-artifact)
 - [version 범위](#version-범위)
 - [허용 프로그램](#허용-프로그램)
@@ -456,7 +456,7 @@ doctor:
     version: ">=22.0.0"
 ```
 
-## workdir와 export
+## workdir.files와 export
 
 OpenDock의 task 실행 위치는 두 가지입니다.
 
@@ -466,19 +466,22 @@ OpenDock의 task 실행 위치는 두 가지입니다.
 | `dock` | `.opendock/workdirs/<dock>/` | 외부 generator를 격리 실행한 뒤 결과물 export |
 
 `workdir: dock`은 외부 도구가 여러 파일을 만들어내는 경우에 유용합니다.
+외부 도구가 실행 전에 설정 파일을 필요로 한다면 `workdir.files`로 dock 전용
+workdir에 먼저 넣을 수 있습니다.
 
 ```yaml
+workdir:
+  files:
+    - from: workdir/oma-config.yaml
+      to: .agents/oma-config.yaml
+
 install:
   - id: apply-oma
     run: oma -y install
     workdir: dock
-  - id: link-oma-vendors
-    run: oma link claude codex
-    workdir: dock
     export:
       include:
         - AGENTS.md
-        - CLAUDE.md
         - .agents/**
         - .codex/**
       exclude:
@@ -488,11 +491,18 @@ install:
 
 동작:
 
-1. step은 dock 전용 workdir에서 실행됩니다.
-2. OpenDock은 `export.include`에 맞는 파일만 후보로 수집합니다.
-3. `export.exclude`에 맞는 파일은 제외합니다.
-4. 후보 파일은 root로 즉시 복사되지 않습니다.
-5. 모든 `files`와 `export` 후보를 합쳐 preflight를 통과한 뒤 root에 적용합니다.
+1. `workdir.files`가 있으면 archive의 파일을 dock 전용 workdir에 먼저 복사합니다.
+2. step은 dock 전용 workdir에서 실행됩니다.
+3. OpenDock은 `export.include`에 맞는 파일만 후보로 수집합니다.
+4. `export.exclude`에 맞는 파일은 제외합니다.
+5. 후보 파일은 root로 즉시 복사되지 않습니다.
+6. 모든 `files`와 `export` 후보를 합쳐 preflight를 통과한 뒤 root에 적용합니다.
+
+| 필드 | 대상 | 시점 |
+|---|---|---|
+| `files` | 프로젝트 root | task export까지 preflight를 통과한 뒤 적용 |
+| `workdir.files` | `.opendock/workdirs/<dock>/` | install/update task 실행 전 복사 |
+| `export` | 프로젝트 root | `workdir: dock` task 실행 후 수집 |
 
 이 구조 덕분에 `oma`, `omx`, `npx ... install` 같은 외부 generator와 협력하면서도
 프로젝트 root에 들어온 최종 파일은 OpenDock이 추적할 수 있습니다.
@@ -718,7 +728,7 @@ opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 deploy가 제출하는 것:
 
 1. `dock.yml` 원문.
-2. `dock.yml`과 `files[].from`으로 만든 `.tgz` archive.
+2. `dock.yml`, `files[].from`, `workdir.files[].from`으로 만든 `.tgz` archive.
 3. release platform metadata: `any`, `macos`, `windows`, `linux`.
 4. 선택 사항인 `readme_markdown`.
 5. 선택 사항인 `logo`.
@@ -726,7 +736,7 @@ deploy가 제출하는 것:
 archive에는 기본적으로 다음이 들어갑니다.
 
 - `dock.yml`
-- `files[].from`에 명시된 파일과 디렉터리의 regular files
+- `files[].from`과 `workdir.files[].from`에 명시된 파일과 디렉터리의 regular files
 
 `readme`와 `logo`는 catalog metadata로 별도 제출되므로 archive에는 기본 포함되지
 않습니다. 설치 프로젝트에 들어가야 하는 파일이라면 `files`에 명시하세요.
@@ -830,7 +840,7 @@ requires:
 
 files:
 
-1. 모든 `files[].from`이 존재하는가?
+1. 모든 `files[].from`과 `workdir.files[].from`이 존재하는가?
 2. `files[].to`가 프로젝트 root 기준 안전한 상대 경로인가?
 3. Markdown/agent instruction은 managed block으로 적용되는지 확인했는가?
 4. 설정 파일이나 binary는 checksum managed file로 충돌 감지되는지 확인했는가?

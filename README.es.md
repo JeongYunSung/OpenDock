@@ -147,6 +147,10 @@ doctor:
 `readme` y `logo` son metadata para Registry catalog. Para instalarlos en el
 proyecto, decláralos también en `files`.
 
+Usa `workdir.files` cuando un task en el dock-private workdir necesita archivos
+de entrada antes de ejecutarse. Usa `files` para archivos que deben escribirse
+en el project root.
+
 Consulta la referencia completa en [docs/guides/guide.es.md](./docs/guides/guide.es.md).
 
 ## Development

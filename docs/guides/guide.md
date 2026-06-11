@@ -89,6 +89,7 @@ can stay outside the OpenDock block.
 | `readme` | no | Markdown file submitted as catalog detail content. |
 | `logo` | no | Catalog logo image path. |
 | `requires` | no | Runtime requirements prepared before tasks run. |
+| `workdir` | no | Files that prepare the private dock workdir before tasks run. |
 | `files` | no | File or directory mappings applied to the project root. |
 | `install` | no | Tasks for first install and initial generation. |
 | `update` | no | Tasks for refresh and maintenance. |
@@ -212,23 +213,25 @@ doctor:
 Tasks run top to bottom. `check` makes a step idempotent. `doctor` should report
 state and avoid changing the project.
 
-## Workdir And Export
+## Workdir Files And Export
 
 Use `workdir: dock` when an external tool generates files. OpenDock runs the
-step in the private dock workdir and exports only declared outputs.
+step in the private dock workdir and exports only declared outputs. Use
+`workdir.files` when that tool needs input files before it runs.
 
 ```yaml
+workdir:
+  files:
+    - from: workdir/oma-config.yaml
+      to: .agents/oma-config.yaml
+
 install:
   - id: apply-oma
     run: oma -y install
     workdir: dock
-  - id: link-oma-vendors
-    run: oma link claude codex
-    workdir: dock
     export:
       include:
         - AGENTS.md
-        - CLAUDE.md
         - .agents/**
         - .codex/**
       exclude:
@@ -238,6 +241,14 @@ install:
 
 This lets OpenDock track generated files for update and uninstall instead of
 leaving unmanaged files in the project root.
+
+`files` and `workdir.files` have different targets:
+
+| Field | Target | Timing |
+|---|---|---|
+| `files` | Project root | Applied after task exports pass preflight. |
+| `workdir.files` | `.opendock/workdirs/<dock>/` | Copied before install/update tasks run. |
+| `export` | Project root | Collected after a dock workdir task runs. |
 
 ## Platforms
 
@@ -282,7 +293,8 @@ opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 Deploy submits:
 
 1. `dock.yml`.
-2. A `.tgz` archive built from `dock.yml` and `files[].from`.
+2. A `.tgz` archive built from `dock.yml`, `files[].from`, and
+   `workdir.files[].from`.
 3. The target platform: `any`, `macos`, `windows`, or `linux`.
 4. Optional `readme_markdown`.
 5. Optional `logo`.
@@ -305,7 +317,7 @@ Manifest:
 
 Files:
 
-1. Every `files[].from` exists.
+1. Every `files[].from` and `workdir.files[].from` exists.
 2. Every `files[].to` is a safe relative path.
 3. Text files behave as managed blocks.
 4. Config or binary files are protected by checksum conflicts.
