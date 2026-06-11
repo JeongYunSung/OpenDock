@@ -209,6 +209,7 @@ function minimalEnvironment(): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   for (const key of [
     "PATH",
+    "BUN_INSTALL",
     "HOME",
     "USER",
     "LOGNAME",
