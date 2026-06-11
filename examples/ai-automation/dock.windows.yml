@@ -1,0 +1,20 @@
+opendock: 1
+id: opendock/ai-automation
+summary: Composable AI workspace for internal automation and workflow design.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/AUTOMATION_MAP.md
+    to: AUTOMATION_MAP.md
+  - from: files/WORKFLOW_LIBRARY.md
+    to: WORKFLOW_LIBRARY.md
+  - from: files/MCP_GUIDE.md
+    to: MCP_GUIDE.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md

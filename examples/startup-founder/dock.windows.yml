@@ -1,0 +1,22 @@
+opendock: 1
+id: opendock/startup-founder
+summary: Composable AI workspace for founders and early startup teams.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/BUSINESS_MODEL.md
+    to: BUSINESS_MODEL.md
+  - from: files/GTM.md
+    to: GTM.md
+  - from: files/ICP.md
+    to: ICP.md
+  - from: files/PRICING.md
+    to: PRICING.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md

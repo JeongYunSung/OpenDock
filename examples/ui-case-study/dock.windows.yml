@@ -1,0 +1,20 @@
+opendock: 1
+id: opendock/ui-case-study
+summary: Composable AI workspace for portfolio-ready UI and UX case studies.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/CASE_STUDY_TEMPLATE.md
+    to: CASE_STUDY_TEMPLATE.md
+  - from: files/PROBLEM_DEFINITION.md
+    to: PROBLEM_DEFINITION.md
+  - from: files/IMPACT_MEASUREMENT.md
+    to: IMPACT_MEASUREMENT.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md

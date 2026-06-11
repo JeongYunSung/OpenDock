@@ -1,0 +1,14 @@
+opendock: 1
+id: opendock/codex
+summary: Tool dock for installing the Codex CLI without project payloads.
+readme: DOCK.md
+logo: logo.png
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+  packages:
+    codex:
+      manager: npm
+      name: "@openai/codex"
+      version: ">=0.0.0"

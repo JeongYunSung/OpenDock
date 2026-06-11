@@ -1,0 +1,22 @@
+opendock: 1
+id: opendock/frontend-ai
+summary: Composable AI workspace for React and Next.js frontend engineering.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/DESIGN.md
+    to: DESIGN.md
+  - from: files/COMPONENT_GUIDE.md
+    to: COMPONENT_GUIDE.md
+  - from: files/CODE_STYLE.md
+    to: CODE_STYLE.md
+  - from: files/REVIEW_CHECKLIST.md
+    to: REVIEW_CHECKLIST.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md

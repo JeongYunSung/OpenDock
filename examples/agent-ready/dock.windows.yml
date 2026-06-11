@@ -1,0 +1,30 @@
+opendock: 1
+id: opendock/agent-ready
+summary: Composable baseline instructions for common AI coding agents.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/CONVENTIONS.md
+    to: CONVENTIONS.md
+  - from: files/.github/copilot-instructions.md
+    to: .github/copilot-instructions.md
+  - from: files/.github/instructions/agent.instructions.md
+    to: .github/instructions/agent.instructions.md
+  - from: files/.github/prompts/review.prompt.md
+    to: .github/prompts/review.prompt.md
+  - from: files/.cursor/rules/project.mdc
+    to: .cursor/rules/project.mdc
+  - from: files/.claude/rules/project.md
+    to: .claude/rules/project.md
+  - from: files/.windsurf/rules/project.md
+    to: .windsurf/rules/project.md
+  - from: files/.clinerules/project.md
+    to: .clinerules/project.md
+  - from: files/.roo/rules/project.md
+    to: .roo/rules/project.md

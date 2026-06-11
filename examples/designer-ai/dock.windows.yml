@@ -1,0 +1,22 @@
+opendock: 1
+id: opendock/designer-ai
+summary: Composable AI workspace for UI, UX, and product design.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/DESIGN.md
+    to: DESIGN.md
+  - from: files/DESIGN_SYSTEM.md
+    to: DESIGN_SYSTEM.md
+  - from: files/UX_REVIEW.md
+    to: UX_REVIEW.md
+  - from: files/FIGMA_WORKFLOW.md
+    to: FIGMA_WORKFLOW.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md

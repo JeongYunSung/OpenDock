@@ -1,0 +1,22 @@
+opendock: 1
+id: opendock/product-manager
+summary: Composable AI workspace for PRDs, user stories, roadmaps, and releases.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/PRD.md
+    to: PRD.md
+  - from: files/USER_STORY.md
+    to: USER_STORY.md
+  - from: files/ROADMAP.md
+    to: ROADMAP.md
+  - from: files/RELEASE_NOTES.md
+    to: RELEASE_NOTES.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md

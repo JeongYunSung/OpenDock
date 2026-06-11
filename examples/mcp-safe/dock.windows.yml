@@ -1,0 +1,18 @@
+opendock: 1
+id: opendock/mcp-safe
+summary: Composable security-first MCP configuration references.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/MCP.md
+    to: MCP.md
+  - from: files/.opendock/mcp/approved-servers.yml
+    to: .opendock/mcp/approved-servers.yml
+  - from: files/.opendock/mcp/security-checklist.md
+    to: .opendock/mcp/security-checklist.md
+  - from: files/.opendock/mcp/cursor.mcp.json
+    to: .opendock/mcp/cursor.mcp.json
+  - from: files/.opendock/mcp/claude.mcp.json
+    to: .opendock/mcp/claude.mcp.json
+  - from: files/.opendock/mcp/codex.config.example.toml
+    to: .opendock/mcp/codex.config.example.toml

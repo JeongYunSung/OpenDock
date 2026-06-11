@@ -1,0 +1,10 @@
+opendock: 1
+id: opendock/dev-env
+summary: Composable project-local tool versions and validation tasks.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/mise.toml
+    to: mise.toml
+  - from: files/.opendock/dev-env.md
+    to: .opendock/dev-env.md

@@ -1,0 +1,20 @@
+opendock: 1
+id: opendock/agent-safety
+summary: Composable safety rails for AI-generated changes.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/.github/pull_request_template.md
+    to: .github/pull_request_template.md
+  - from: files/.github/ISSUE_TEMPLATE/bug_report.md
+    to: .github/ISSUE_TEMPLATE/bug_report.md
+  - from: files/.github/ISSUE_TEMPLATE/feature_request.md
+    to: .github/ISSUE_TEMPLATE/feature_request.md
+  - from: files/.gitleaks.toml
+    to: .gitleaks.toml
+  - from: files/lefthook.yml
+    to: lefthook.yml
+  - from: files/.opendock/checklists/agent-pr-review.md
+    to: .opendock/checklists/agent-pr-review.md
+  - from: files/.opendock/checklists/security-review.md
+    to: .opendock/checklists/security-review.md
