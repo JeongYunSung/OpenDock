@@ -10,8 +10,6 @@ files:
     to: .github/ISSUE_TEMPLATE/bug_report.md
   - from: files/.github/ISSUE_TEMPLATE/feature_request.md
     to: .github/ISSUE_TEMPLATE/feature_request.md
-  - from: files/.github/CODEOWNERS
-    to: .github/CODEOWNERS
   - from: files/.gitleaks.toml
     to: .gitleaks.toml
   - from: files/lefthook.yml

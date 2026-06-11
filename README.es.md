@@ -63,7 +63,7 @@ ligera de packaging para setup de workspaces de IA componible y repetible.
 | **Project scope** | Workspace actual | Installed dock list, lock, logs y metadata del proyecto. |
 | **Dock scope** | Un dock instalado | Version, checksum, managed file records y private workdir. |
 | **Root output scope** | OpenDock file engine | Archivos aplicados al project root tras preflight. |
-| **System/tool scope** | Host package managers | Homebrew, npm, Bun, pip, winget y otros host tools. |
+| **System/tool scope** | Host package managers | Herramientas preparadas por `requires` o lifecycle commands permitidos, como Homebrew, npm, Bun, pip o winget. |
 
 ## Install
 

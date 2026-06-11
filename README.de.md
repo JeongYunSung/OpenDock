@@ -62,7 +62,7 @@ kleine Packaging-Schicht für kombinierbares, wiederholbares KI-workspace setup.
 | **Project scope** | Aktueller workspace | Installed dock list, lock, logs und project metadata. |
 | **Dock scope** | Ein installierter dock | Version, checksum, managed file records und private workdir. |
 | **Root output scope** | OpenDock file engine | Dateien, die nach preflight in den project root geschrieben werden. |
-| **System/tool scope** | Host package managers | Homebrew, npm, Bun, pip, winget und andere host tools. |
+| **System/tool scope** | Host package managers | Tools, die über `requires` oder erlaubte lifecycle commands vorbereitet werden, z. B. Homebrew, npm, Bun, pip oder winget. |
 
 ## Install
 

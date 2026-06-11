@@ -59,7 +59,7 @@ OpenDock 不是 terminal replacement，也不是通用 script runner。它是用
 | **Project scope** | 当前 workspace | installed dock list, lock, logs, project metadata. |
 | **Dock scope** | 单个 installed dock | version, checksum, managed file records, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 后应用到 project root 的文件. |
-| **System/tool scope** | host package managers | Homebrew, npm, Bun, pip, winget 等 host tools. |
+| **System/tool scope** | host package managers | 由 `requires` 或允许的 lifecycle commands 准备的 Homebrew、npm、Bun、pip、winget 等 host tools. |
 
 ## Install
 
