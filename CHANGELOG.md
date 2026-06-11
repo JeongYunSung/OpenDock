@@ -9,7 +9,7 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ### Changed
 
-- Removed package metadata/version verification from `requires`.
+- Removed CLI package entries from `requires`.
 - `requires` now handles host runtimes only.
 - Package installs such as `bun install --global ...` and
   `npm install --global ...` are now explicit `install`/`update` task steps.
@@ -18,7 +18,7 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ### Tests
 
-- Replaced package verification regressions with task-based package install
+- Replaced removed `requires` package coverage with task-based package install
   coverage.
 - Kept example install/uninstall cleanup coverage aligned with the updated OMA
   example.

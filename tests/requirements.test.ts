@@ -39,7 +39,7 @@ describe("requires regression coverage", () => {
     });
   });
 
-  it("rejects package requirements because package installs are task steps", () => {
+  it("rejects unknown requires fields", () => {
     const root = tempDir();
     writeFileSync(
       join(root, "dock.yml"),
@@ -47,12 +47,8 @@ describe("requires regression coverage", () => {
         opendock: 1,
         id: "test/requires",
         requires: {
-          packages: {
-            oma: {
-              manager: "bun",
-              name: "oh-my-agent",
-              version: ">=8.43.0",
-            },
+          tools: {
+            oma: ">=8.43.0",
           },
         },
       }),
