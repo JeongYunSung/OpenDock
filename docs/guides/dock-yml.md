@@ -238,7 +238,6 @@ package를 선언합니다. 프로젝트에 복사되는 파일이 아니라 sys
 ```yaml
 requires:
   runtimes:
-    node: ">=22.0.0 <25.0.0"
     bun: ">=1.3.0"
 
   packages:
@@ -254,8 +253,7 @@ requires:
 2. `runtimes`는 `node --version`, `bun --version` 같은 runtime check를 수행합니다.
 3. install/update에서 runtime이 없거나 version을 만족하지 않으면 OpenDock이 아는
    platform별 installer를 실행합니다.
-4. `packages`는 package key를 CLI binary 이름으로 보고 `<binary> --version`을
-   확인합니다.
+4. `packages`는 package manager의 설치 metadata로 package version을 확인합니다.
 5. install에서 package가 이미 version을 만족하면 건너뜁니다.
 6. update에서는 package installer를 다시 실행해 최신 package를 반영한 뒤 version을
    재확인합니다.
@@ -305,16 +303,9 @@ requires:
 - `requires`는 OpenDock이 host tool을 준비하는 영역입니다.
 - root에 적용할 파일은 `files` 또는 `lifecycle[].export`로 선언해야 합니다.
 - raw shell, pipe, redirect는 `requires`에서도 허용되지 않습니다.
-- package key가 실제 CLI binary와 다르면 `binary`를 명시할 수 있습니다.
-
-```yaml
-packages:
-  my-cli:
-    manager: npm
-    name: "@acme/workspace-tools"
-    binary: acme
-    version: ">=1.0.0"
-```
+- package key는 OpenDock report/lock에서 쓰는 이름입니다.
+- `name`은 package manager가 설치하고 version을 확인할 실제 package 이름입니다.
+- 설치된 CLI를 실행해야 한다면 `requires`가 아니라 `lifecycle`에 command를 작성합니다.
 
 ## files
 
@@ -820,7 +811,7 @@ requires:
 
 1. 필요한 runtime을 `requires.runtimes`에 선언했는가?
 2. 필요한 CLI package를 `requires.packages`에 선언했는가?
-3. package key가 실제 binary 이름과 다르면 `binary`를 명시했는가?
+3. package key와 실제 package name의 역할을 혼동하지 않았는가?
 4. runtime/package version 범위가 실제 installer 결과와 충돌하지 않는가?
 
 files:

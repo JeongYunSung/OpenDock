@@ -6,7 +6,6 @@ logo: logo.png
 
 requires:
   runtimes:
-    node: ">=22.0.0 <25.0.0"
     bun: ">=1.3.0"
   packages:
     oma:

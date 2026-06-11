@@ -90,20 +90,18 @@ const runtimeRequirementsSchema = z
     }
   });
 
-const packageRequirementSchema = z.object({
-  manager: z.enum(["bun", "npm", "pnpm", "pip", "pip3", "pipx", "uv"]),
-  name: z
-    .string()
-    .regex(
-      /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+$/,
-      "package name must be a safe package identifier",
-    ),
-  version: z.string(),
-  binary: z
-    .string()
-    .regex(/^[A-Za-z0-9._-]+$/, "package binary must be a safe identifier")
-    .optional(),
-});
+const packageRequirementSchema = z
+  .object({
+    manager: z.enum(["bun", "npm", "pnpm", "pip", "pip3", "pipx", "uv"]),
+    name: z
+      .string()
+      .regex(
+        /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+$/,
+        "package name must be a safe package identifier",
+      ),
+    version: z.string(),
+  })
+  .strict();
 
 const packageRequirementsSchema = z
   .record(

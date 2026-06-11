@@ -332,6 +332,9 @@ function isSafePackageManagerCommand(program: string, args: string[]): boolean {
   if (isExact(args, ["--version"])) {
     return true;
   }
+  if ((program === "npm" || program === "pnpm") && args[0] === "list") {
+    return isSafeGlobalPackageListCommand(args);
+  }
   if (program === "pnpm" && args[0] === "add") {
     return hasGlobalFlag(args) && packageArgs(args.slice(1)).every(isSafePackageName);
   }
@@ -345,6 +348,9 @@ function isSafePipCommand(args: string[]): boolean {
   if (isExact(args, ["--version"]) || isExact(args, ["-V"])) {
     return true;
   }
+  if (args[0] === "show") {
+    return args.length === 2 && isSafePackageName(args[1] ?? "");
+  }
   if (args[0] !== "install") {
     return false;
   }
@@ -357,6 +363,9 @@ function isSafePipxCommand(args: string[]): boolean {
   if (isExact(args, ["--version"])) {
     return true;
   }
+  if (isExact(args, ["list", "--json"])) {
+    return true;
+  }
   return (
     ["install", "upgrade"].includes(args[0] ?? "") &&
     args.length >= 2 &&
@@ -366,6 +375,9 @@ function isSafePipxCommand(args: string[]): boolean {
 
 function isSafeUvCommand(args: string[]): boolean {
   if (isExact(args, ["--version"])) {
+    return true;
+  }
+  if (isExact(args, ["tool", "list"])) {
     return true;
   }
   return (
@@ -453,6 +465,19 @@ function hasGlobalFlag(args: string[]): boolean {
 
 function packageArgs(args: string[]): string[] {
   return args.filter((arg) => arg !== "--global" && arg !== "-g");
+}
+
+function isSafeGlobalPackageListCommand(args: string[]): boolean {
+  const packageNames = args.filter(
+    (arg) => !["list", "--global", "-g", "--json", "--depth=0"].includes(arg),
+  );
+  return (
+    args.includes("--global") &&
+    args.includes("--json") &&
+    args.includes("--depth=0") &&
+    packageNames.length === 1 &&
+    packageNames.every(isSafePackageName)
+  );
 }
 
 function isExact(args: string[], expected: string[]): boolean {
