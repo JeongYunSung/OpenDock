@@ -137,7 +137,7 @@ lifecycle:
 `readme` と `logo` は Registry catalog metadata です。project に install するには
 `files` にも別途宣言します。
 
-詳しい manifest reference は [docs/guides/dock-yml.md](./docs/guides/dock-yml.md) を参照してください。
+詳しい manifest reference は [docs/guides/guide.ja.md](./docs/guides/guide.ja.md) を参照してください。
 
 ## Development
 

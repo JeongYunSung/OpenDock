@@ -1,15 +1,22 @@
-# dock.yml 작성 가이드
+# OpenDock 가이드
 
-OpenDock의 핵심 문구는 다음과 같습니다.
+`dock.yml`은 하나의 dock이 프로젝트에 무엇을 더하는지 설명하는 manifest입니다.
+어떤 파일을 넣을지, 어떤 도구를 준비할지, 설치와 업데이트 때 어떤 command를
+실행할지, 외부 도구가 만든 결과물 중 무엇을 프로젝트 root로 가져올지 선언합니다.
 
-> **Simple AI setup for every workspace.**
->
-> Choose the docks you need, combine them your way, and keep every project AI-ready.
+OpenDock은 필요한 AI setup을 고르고, 한 workspace에 섞어 쓰고, 나중에 update와
+uninstall까지 추적할 수 있게 만드는 작은 packaging layer입니다. 단순한 설치
+스크립트가 아니라, 프로젝트마다 반복 가능한 AI workspace 구성을 만드는 데 초점을
+둡니다.
 
-`dock.yml`은 이 문구를 실제 프로젝트에 적용하는 manifest입니다. 어떤 dock을
-선택하고 조합할 수 있게 만들지, 어떤 파일을 프로젝트에 넣을지, 어떤 명령을
-설치와 업데이트 때 실행할지, 외부 도구가 만든 결과물 중 무엇을 root로 export할지,
-doctor가 어떤 상태를 점검할지를 선언합니다.
+다른 언어:
+
+- [English](./guide.md)
+- [日本語](./guide.ja.md)
+- [中文](./guide.zh.md)
+- [Español](./guide.es.md)
+- [Français](./guide.fr.md)
+- [Deutsch](./guide.de.md)
 
 이 문서는 현재 TypeScript CLI 구현 기준입니다. 핵심 구현은 `src/core/` 아래에
 있습니다.

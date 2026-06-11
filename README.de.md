@@ -139,7 +139,7 @@ lifecycle:
 `readme` und `logo` sind Registry catalog metadata. Wenn sie ins Projekt
 installiert werden sollen, müssen sie auch in `files` stehen.
 
-Die vollständige Manifest-Referenz steht in [docs/guides/dock-yml.md](./docs/guides/dock-yml.md).
+Die vollständige Manifest-Referenz steht in [docs/guides/guide.de.md](./docs/guides/guide.de.md).
 
 ## Development
 

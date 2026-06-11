@@ -221,8 +221,7 @@ Release versions are not declared in `dock.yml`; the version comes from deploy:
 opendock deploy owner/name@1.0.0
 ```
 
-For the full manifest reference, see
-[docs/guides/dock-yml.md](./docs/guides/dock-yml.md).
+For the full manifest reference, see [docs/guides/guide.md](./docs/guides/guide.md).
 
 ## File Ownership
 
@@ -343,7 +342,7 @@ tests/
 examples/
   */dock.yml                # Example docks
 docs/
-  guides/dock-yml.md        # Manifest authoring guide
+  guides/guide*.md          # Manifest authoring guides
 ```
 
 ## Development

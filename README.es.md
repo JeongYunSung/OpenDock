@@ -138,7 +138,7 @@ lifecycle:
 `readme` y `logo` son metadata para Registry catalog. Para instalarlos en el
 proyecto, decláralos también en `files`.
 
-Consulta la referencia completa en [docs/guides/dock-yml.md](./docs/guides/dock-yml.md).
+Consulta la referencia completa en [docs/guides/guide.es.md](./docs/guides/guide.es.md).
 
 ## Development
 

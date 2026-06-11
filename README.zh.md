@@ -135,7 +135,7 @@ lifecycle:
 `readme` 和 `logo` 是 Registry catalog metadata。如果要安装到项目中，需要同时
 写入 `files`。
 
-完整 manifest reference 见 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)。
+完整 manifest reference 见 [docs/guides/guide.zh.md](./docs/guides/guide.zh.md)。
 
 ## Development
 

@@ -219,7 +219,7 @@ release version은 `dock.yml`에 쓰지 않고 deploy command에서 정합니다
 opendock deploy owner/name@1.0.0
 ```
 
-전체 manifest reference는 [docs/guides/dock-yml.md](./docs/guides/dock-yml.md)를
+전체 manifest reference는 [docs/guides/guide.ko.md](./docs/guides/guide.ko.md)를
 참고하세요.
 
 ## 파일 소유권
@@ -341,7 +341,7 @@ tests/
 examples/
   */dock.yml                # Example docks
 docs/
-  guides/dock-yml.md        # Manifest authoring guide
+  guides/guide*.md          # Manifest authoring guides
 ```
 
 ## Development
