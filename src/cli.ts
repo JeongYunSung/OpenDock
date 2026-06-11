@@ -18,11 +18,17 @@ import { TokenStore } from "./auth.js";
 import { bootstrapMac } from "./bootstrap.js";
 import { performBrowserLogin } from "./browser-auth.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
-import { type DockManifest, DockRef, parseManifestFile, validateManifestFor } from "./dock.js";
-import { type InstallReport, install } from "./installer.js";
+import { DockInstaller, type InstallReport } from "./core/app/dock-installer.js";
+import {
+  type DockManifest,
+  DockRef,
+  parseManifestFile,
+  validateManifestFor,
+} from "./core/domain/manifest.js";
+import { OpenDockStateStore } from "./core/domain/state-store.js";
+import { LifecycleRunner } from "./core/runtime/lifecycle-runner.js";
 import { readProjectLogs } from "./logging.js";
 import { detectPlatform, type OpenDockPlatform, parsePlatform } from "./platform.js";
-import { hasProjectState, lockDocks, readLock } from "./project.js";
 import {
   OpenDockRegistryClient,
   RegistryRequestError,
@@ -31,7 +37,6 @@ import {
   type SubmissionResponse,
 } from "./registry.js";
 import { type ResolvedDock, resolveDock, resolveLatestDock } from "./resolver.js";
-import { runLifecycle } from "./runner.js";
 
 const maxDeployReadmeBytes = 64 * 1024;
 const maxDeployLogoBytes = 512 * 1024;
@@ -39,6 +44,7 @@ const maxDeployArchiveBytes = 50 * 1024 * 1024;
 
 export async function run(argv = process.argv): Promise<void> {
   const program = new Command();
+  const installer = new DockInstaller();
   program
     .name("opendock")
     .description("Install, update, doctor, and deploy OpenDock docks.")
@@ -52,7 +58,7 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--platform <platform>", "Target platform: macos, windows, or linux")
     .action(async (dock: string, options: { force?: boolean; platform?: string }) => {
       const platform = resolveCliPlatform(options.platform);
-      const report = await install({
+      const report = await installer.install({
         dockRef: parseInstallRef(dock),
         force: options.force === true,
         projectDir: process.cwd(),
@@ -74,12 +80,19 @@ export async function run(argv = process.argv): Promise<void> {
     .action(async (options: { force?: boolean; platform?: string }) => {
       const platformOverride =
         options.platform === undefined ? undefined : resolveCliPlatform(options.platform);
-      const lock = readLock(process.cwd());
-      for (const dock of lockDocks(lock)) {
+      const store = new OpenDockStateStore(process.cwd());
+      if (!store.hasState()) {
+        throw new Error(".opendock/dock.lock.yml missing");
+      }
+      const installedDocks = store.readLock().docks;
+      if (installedDocks.length === 0) {
+        throw new Error("no OpenDock docks are installed in this project");
+      }
+      for (const dock of installedDocks) {
         const latest = await resolveLatestDockRef(dock.id);
         const dockRef = DockRef.parse(`${dock.id}@${latest.version}`);
         const platform = platformOverride ?? resolveCliPlatform(dock.platform);
-        const report = await install({
+        const report = await installer.install({
           dockRef,
           force: options.force === true,
           projectDir: process.cwd(),
@@ -99,6 +112,22 @@ export async function run(argv = process.argv): Promise<void> {
           );
         }
       }
+    });
+
+  program
+    .command("uninstall")
+    .description("Remove an installed dock from the current directory.")
+    .argument("<dock>", "Installed dock id: owner/name")
+    .option("--force", "Remove OpenDock-managed files even when edited managed files are detected")
+    .action((dock: string, options: { force?: boolean }) => {
+      const report = installer.uninstall({
+        dockId: parseInstalledDockId(dock),
+        force: options.force === true,
+        projectDir: process.cwd(),
+      });
+      console.log(
+        `Uninstalled ${report.dockId} (${report.filesDeleted} files deleted, ${report.filesUpdated} files updated)`,
+      );
     });
 
   program
@@ -231,6 +260,14 @@ function parseInstallRef(value: string): DockRef {
     );
   }
   return DockRef.parse(value);
+}
+
+function parseInstalledDockId(value: string): string {
+  const parts = value.trim().split("/");
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+    throw new Error("dock id must be in owner/name form");
+  }
+  return `${parts[0]}/${parts[1]}`;
 }
 
 async function resolveLatestDockRef(dockId: string): Promise<ResolvedDock> {
@@ -407,18 +444,6 @@ function collectDeployArchiveEntries(projectDir: string, manifest: DockManifest)
   for (const file of manifest.files) {
     roots.add(file.from);
   }
-  for (const phase of Object.values(manifest.lifecycle)) {
-    for (const step of phase) {
-      if (step.copy?.from !== undefined) {
-        roots.add(step.copy.from);
-      }
-      for (const platformStep of Object.values(step.platforms)) {
-        if (platformStep.copy?.from !== undefined) {
-          roots.add(platformStep.copy.from);
-        }
-      }
-    }
-  }
 
   const entries = new Set<string>();
   for (const root of roots) {
@@ -520,13 +545,14 @@ async function printDoctor(cwd: string, platformOverride?: string): Promise<void
   console.log("OpenDock Doctor");
   console.log(`Project: ${cwd}`);
 
-  if (hasProjectState(cwd)) {
+  const store = new OpenDockStateStore(cwd);
+  if (store.hasState()) {
     console.log("Status: Ready");
     console.log("Checks:");
     console.log("✓ .opendock/project.yml");
     console.log("✓ .opendock/dock.lock.yml");
-    const lock = readLock(cwd);
-    for (const dock of lockDocks(lock)) {
+    const lock = store.readLock();
+    for (const dock of lock.docks) {
       const platform = resolveCliPlatform(platformOverride ?? dock.platform);
       console.log(`✓ ${dock.id}@${dock.version} [${platform}]`);
       await printDockDoctorChecks(
@@ -550,7 +576,12 @@ async function printDockDoctorChecks(
 ): Promise<void> {
   try {
     const resolved = await resolveDock(dockRef);
-    const reports = await runLifecycle(resolved.manifest, "doctor", cwd, { platform });
+    const reports = new LifecycleRunner().run(resolved.manifest, {
+      projectDir: cwd,
+      dockId: resolved.manifest.id,
+      phase: "doctor",
+      platform,
+    }).reports;
     for (const report of reports) {
       const symbol = report.status === "Failed" ? "!" : "✓";
       const suffix = report.message ? ` (${report.message})` : "";

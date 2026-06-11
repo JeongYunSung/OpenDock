@@ -1,14 +1,5 @@
 import { createHash } from "node:crypto";
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, sep } from "node:path";
 import { x as extractTar } from "tar";
@@ -18,7 +9,7 @@ import {
   DockRef,
   parseManifestFile,
   validateManifestFor,
-} from "./dock.js";
+} from "./core/domain/manifest.js";
 import { cacheRoot } from "./paths.js";
 import { OpenDockRegistryClient } from "./registry.js";
 
@@ -206,20 +197,4 @@ function isSafeArchiveEntry(
   }
 
   return true;
-}
-
-export function fileChecksum(path: string): string {
-  return createHash("sha256").update(readFileSync(path, "utf8")).digest("hex");
-}
-
-export function textChecksum(text: string): string {
-  return createHash("sha256").update(text).digest("hex");
-}
-
-export function isFile(path: string): boolean {
-  try {
-    return statSync(path).isFile();
-  } catch {
-    return false;
-  }
 }

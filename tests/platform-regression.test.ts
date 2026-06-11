@@ -1,0 +1,452 @@
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
+import YAML from "yaml";
+import { DockInstaller } from "../src/core/app/dock-installer.js";
+import { type DockManifest, DockRef, parseManifestFile } from "../src/core/domain/manifest.js";
+import { OpenDockStateStore } from "../src/core/domain/state-store.js";
+import { CommandRunner } from "../src/core/runtime/command-runner.js";
+import { LifecycleRunner } from "../src/core/runtime/lifecycle-runner.js";
+import { detectPlatform, parsePlatform } from "../src/platform.js";
+import type { ResolvedDock } from "../src/resolver.js";
+
+const tempRoots: string[] = [];
+
+afterEach(() => {
+  for (const root of tempRoots.splice(0)) {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+describe("platform regression coverage", () => {
+  it("detects and parses supported platform names and aliases", () => {
+    expect(detectPlatform("darwin")).toBe("macos");
+    expect(detectPlatform("win32")).toBe("windows");
+    expect(detectPlatform("linux")).toBe("linux");
+
+    expect(parsePlatform("mac")).toBe("macos");
+    expect(parsePlatform("darwin")).toBe("macos");
+    expect(parsePlatform("win")).toBe("windows");
+    expect(parsePlatform("win32")).toBe("windows");
+    expect(parsePlatform("linux")).toBe("linux");
+
+    expect(() => detectPlatform("freebsd" as NodeJS.Platform)).toThrow("unsupported host platform");
+    expect(() => parsePlatform("freebsd")).toThrow("unsupported OpenDock platform");
+  });
+
+  it("rejects unsupported platform keys in dock.yml", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/platform",
+        lifecycle: {
+          install: [
+            {
+              id: "install-runtime",
+              platforms: {
+                freebsd: {
+                  run: "pkg install node",
+                },
+              },
+            },
+          ],
+        },
+      }),
+    );
+
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
+      "unsupported platform `freebsd`",
+    );
+  });
+
+  it("keeps lifecycle order while selecting the macOS platform override", async () => {
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakePlatformCommand(bin, "brew", log);
+    writeFakePlatformCommand(bin, "winget", log);
+
+    const reports = await withEnv(
+      { PATH: `${bin}:${process.env.PATH ?? ""}` },
+      async () =>
+        new LifecycleRunner().run(platformManifest(), {
+          projectDir: project,
+          dockId: "test/platform",
+          phase: "install",
+          platform: "macos",
+          live: false,
+        }).reports,
+    );
+
+    expect(reports.map((report) => `${report.id}:${report.status}`)).toEqual([
+      "before:Ran",
+      "install-runtime:Ran",
+      "after:Ready",
+    ]);
+    expect(readFileSync(log, "utf8")).toBe("brew:install node\n");
+    expect(existsSync(join(project, "runtime-ready"))).toBe(true);
+    expect(existsSync(join(project, "winget-ran"))).toBe(false);
+  });
+
+  it("selects the Windows platform override and blocks unsupported Linux installs", async () => {
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakePlatformCommand(bin, "brew", log);
+    writeFakePlatformCommand(bin, "winget", log);
+
+    const reports = await withEnv(
+      { PATH: `${bin}:${process.env.PATH ?? ""}` },
+      async () =>
+        new LifecycleRunner().run(platformManifest(), {
+          projectDir: project,
+          dockId: "test/platform",
+          phase: "install",
+          platform: "windows",
+          live: false,
+        }).reports,
+    );
+
+    expect(reports.map((report) => `${report.id}:${report.status}`)).toEqual([
+      "before:Ran",
+      "install-runtime:Ran",
+      "after:Ready",
+    ]);
+    expect(readFileSync(log, "utf8")).toBe(
+      "winget:install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements\n",
+    );
+    expect(existsSync(join(project, "runtime-ready"))).toBe(true);
+    expect(existsSync(join(project, "brew-ran"))).toBe(false);
+
+    expect(() =>
+      new LifecycleRunner().run(platformManifest(), {
+        projectDir: tempDir(),
+        dockId: "test/platform",
+        phase: "install",
+        platform: "linux",
+        live: false,
+      }),
+    ).toThrow("does not support platform `linux`");
+  });
+
+  it("treats steps without platform overrides as platform-neutral", () => {
+    const project = tempDir();
+    const manifest: DockManifest = {
+      opendock: 1,
+      id: "test/common",
+      summary: "",
+      requires: { runtimes: {}, packages: {} },
+      files: [],
+      lifecycle: {
+        install: [{ id: "common", run: "mkdir -p common-output", platforms: {} }],
+        update: [],
+        doctor: [],
+      },
+    };
+
+    const reports = new LifecycleRunner().run(manifest, {
+      projectDir: project,
+      dockId: "test/common",
+      phase: "install",
+      platform: "linux",
+      live: false,
+    }).reports;
+
+    expect(reports).toMatchObject([{ id: "common", status: "Ran" }]);
+    expect(existsSync(join(project, "common-output"))).toBe(true);
+  });
+
+  it("selects platform overrides for doctor checks", async () => {
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakePlatformCommand(bin, "brew", log);
+    writeFakePlatformCommand(bin, "winget", log);
+    const manifest: DockManifest = {
+      opendock: 1,
+      id: "test/doctor",
+      summary: "",
+      requires: { runtimes: {}, packages: {} },
+      files: [],
+      lifecycle: {
+        install: [],
+        update: [],
+        doctor: [
+          {
+            id: "runtime-doctor",
+            platforms: {
+              macos: {
+                run: "brew --version",
+              },
+              windows: {
+                run: "winget --version",
+              },
+            },
+          },
+        ],
+      },
+    };
+
+    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
+      expect(
+        new LifecycleRunner().run(manifest, {
+          projectDir: project,
+          dockId: "test/doctor",
+          phase: "doctor",
+          platform: "windows",
+        }).reports,
+      ).toMatchObject([{ id: "runtime-doctor", status: "Ready" }]);
+
+      expect(
+        new LifecycleRunner().run(manifest, {
+          projectDir: project,
+          dockId: "test/doctor",
+          phase: "doctor",
+          platform: "macos",
+        }).reports,
+      ).toMatchObject([{ id: "runtime-doctor", status: "Ready" }]);
+    });
+
+    expect(readFileSync(log, "utf8")).toBe("winget:--version\nbrew:--version\n");
+  });
+
+  it("enforces platform-specific command allowlists", async () => {
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakePlatformCommand(bin, "brew", log);
+    writeFakePlatformCommand(bin, "winget", log);
+    const runner = new CommandRunner();
+
+    expect(() => runner.run("brew --version", { cwd: project, platform: "windows" })).toThrow(
+      "not allowed for OpenDock platform `windows`",
+    );
+    expect(() => runner.run("winget --version", { cwd: project, platform: "macos" })).toThrow(
+      "not allowed for OpenDock platform `macos`",
+    );
+
+    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
+      expect(runner.run("brew --version", { cwd: project, platform: "macos" }).success).toBe(true);
+      expect(runner.run("winget --version", { cwd: project, platform: "windows" }).success).toBe(
+        true,
+      );
+    });
+
+    expect(readFileSync(log, "utf8")).toBe("brew:--version\nwinget:--version\n");
+  });
+
+  it("records the selected platform in lock state and can reuse it for an update", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakePlatformCommand(bin, "brew", log);
+    writeFakePlatformCommand(bin, "winget", log);
+    writeDock(docks, "test", "tool", "1.0.0", {
+      lifecycle: {
+        install: [platformRuntimeStep("install-runtime")],
+      },
+    });
+    writeDock(docks, "test", "tool", "1.0.1", {
+      lifecycle: {
+        update: [platformRuntimeStep("update-runtime")],
+      },
+    });
+
+    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
+      await new DockInstaller().install({
+        dockRef: DockRef.parse("test/tool@1.0.0"),
+        operation: "install",
+        phase: "install",
+        platform: "windows",
+        projectDir: project,
+        runCommands: true,
+        resolve: localResolver(docks),
+      });
+
+      const lockedDock = installedDocks(project)[0];
+      expect(lockedDock?.platform).toBe("windows");
+      if (!lockedDock) {
+        throw new Error("expected installed dock to be locked");
+      }
+
+      rmSync(join(project, "runtime-ready"), { force: true });
+      await new DockInstaller().install({
+        dockRef: DockRef.parse("test/tool@1.0.1"),
+        operation: "update",
+        phase: "update",
+        platform: lockedDock.platform,
+        projectDir: project,
+        runCommands: true,
+        resolve: localResolver(docks),
+      });
+    });
+
+    expect(readFileSync(log, "utf8")).toBe(
+      [
+        "winget:install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements",
+        "winget:install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements",
+        "",
+      ].join("\n"),
+    );
+    expect(installedDocks(project)[0]).toMatchObject({
+      id: "test/tool",
+      platform: "windows",
+      version: "1.0.1",
+    });
+  });
+});
+
+function platformManifest(): DockManifest {
+  return {
+    opendock: 1,
+    id: "test/platform",
+    summary: "",
+    requires: { runtimes: {}, packages: {} },
+    files: [],
+    lifecycle: {
+      install: [
+        { id: "before", run: "mkdir -p before", platforms: {} },
+        platformRuntimeStep("install-runtime"),
+        { id: "after", check: "test -d before", platforms: {} },
+      ],
+      update: [],
+      doctor: [],
+    },
+  };
+}
+
+function platformRuntimeStep(id: string) {
+  return {
+    id,
+    check: "test -f runtime-ready",
+    platforms: {
+      macos: {
+        run: "brew install node",
+      },
+      windows: {
+        run: "winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements",
+      },
+    },
+  };
+}
+
+function tempDir(): string {
+  const dir = mkdtempSync(join(tmpdir(), "opendock-platform-test-"));
+  tempRoots.push(dir);
+  return dir;
+}
+
+function writeFakePlatformCommand(bin: string, name: string, log: string): void {
+  const path = join(bin, name);
+  writeFileSync(
+    path,
+    `#!/bin/sh
+set -eu
+program="\${0##*/}"
+printf '%s:%s\\n' "$program" "$*" >> "${log}"
+touch "$program-ran"
+touch runtime-ready
+`,
+  );
+  chmodSync(path, 0o755);
+}
+
+function writeDock(
+  root: string,
+  owner: string,
+  name: string,
+  version: string,
+  options: {
+    files?: Array<{ path: string; content: string }>;
+    lifecycle?: {
+      install?: unknown[];
+      update?: unknown[];
+      doctor?: unknown[];
+    };
+  },
+): void {
+  const dockRoot = join(root, `${owner}-${name}-${version}`);
+  mkdirSync(join(dockRoot, "files"), { recursive: true });
+  for (const file of options.files ?? []) {
+    const filePath = join(dockRoot, "files", file.path);
+    mkdirSync(dirname(filePath), { recursive: true });
+    writeFileSync(filePath, file.content);
+  }
+
+  writeFileSync(
+    join(dockRoot, "dock.yml"),
+    YAML.stringify({
+      opendock: 1,
+      id: `${owner}/${name}`,
+      summary: "",
+      readme: "DOCK.md",
+      logo: "logo.png",
+      files: (options.files ?? []).map((file) => ({
+        from: `files/${file.path}`,
+        to: file.path,
+      })),
+      lifecycle: {
+        install: options.lifecycle?.install ?? [],
+        update: options.lifecycle?.update ?? [],
+        doctor: options.lifecycle?.doctor ?? [],
+      },
+    }),
+  );
+  writeFileSync(join(dockRoot, "DOCK.md"), `# ${owner}/${name}\n`);
+  writeFileSync(
+    join(dockRoot, "logo.png"),
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+  );
+}
+
+function localResolver(root: string) {
+  return (dockRef: DockRef): ResolvedDock => {
+    const dockRoot = join(root, `${dockRef.owner}-${dockRef.name}-${dockRef.requested()}`);
+    return {
+      manifest: parseManifestFile(join(dockRoot, "dock.yml")),
+      version: dockRef.requested(),
+      root: dockRoot,
+      checksum: `${dockRef.id()}-${dockRef.requested()}-checksum`,
+      signature: "test-signature",
+    };
+  };
+}
+
+function installedDocks(projectDir: string) {
+  return new OpenDockStateStore(projectDir).readLock().docks;
+}
+
+async function withEnv<T>(env: NodeJS.ProcessEnv, fn: () => Promise<T>): Promise<T> {
+  const previous = new Map<string, string | undefined>();
+  for (const [key, value] of Object.entries(env)) {
+    previous.set(key, process.env[key]);
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
+  try {
+    return await fn();
+  } finally {
+    for (const [key, value] of previous) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  }
+}

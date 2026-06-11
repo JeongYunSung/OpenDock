@@ -1,0 +1,128 @@
+import { existsSync, lstatSync, mkdirSync, readdirSync } from "node:fs";
+import { isAbsolute, join, relative, resolve, sep } from "node:path";
+
+export function normalizeRelativePath(value: string): string {
+  return value.trim().replaceAll("\\", "/").replaceAll(/\/+/g, "/");
+}
+
+export function assertSafeRelativePath(value: string, label = "path"): string {
+  const normalized = normalizeRelativePath(value);
+  if (
+    normalized === "" ||
+    normalized === "." ||
+    normalized === ".." ||
+    isAbsolute(normalized) ||
+    normalized.startsWith("../") ||
+    normalized.includes("/../")
+  ) {
+    throw new Error(`unsafe ${label}: ${value}`);
+  }
+  return normalized;
+}
+
+export function assertInsideRoot(root: string, candidate: string, label = "path"): void {
+  const rootReal = resolve(root);
+  const candidateReal = resolve(candidate);
+  const rel = relative(rootReal, candidateReal);
+  if (
+    isAbsolute(rel) ||
+    rel === ".." ||
+    rel.startsWith(`..${"/"}`) ||
+    rel.startsWith(`..${"\\"}`)
+  ) {
+    throw new Error(`${label} must stay inside ${root}`);
+  }
+}
+
+export function safeJoin(root: string, relativePath: string, label = "path"): string {
+  const normalized = assertSafeRelativePath(relativePath, label);
+  const target = resolve(root, normalized);
+  assertInsideRoot(root, target, label);
+  return target;
+}
+
+export function ensureSafeParent(root: string, relativePath: string): void {
+  const normalized = assertSafeRelativePath(relativePath);
+  const parts = normalized.split("/");
+  let current = root;
+  for (const part of parts.slice(0, -1)) {
+    current = join(current, part);
+    if (!existsSync(current)) {
+      continue;
+    }
+    const stat = lstatSync(current);
+    if (stat.isSymbolicLink()) {
+      throw new Error(`target parent cannot be a symlink: ${relativePath}`);
+    }
+    if (!stat.isDirectory()) {
+      throw new Error(`target parent must be a directory: ${relativePath}`);
+    }
+  }
+}
+
+export function ensureParentDirectory(root: string, relativePath: string): void {
+  ensureSafeParent(root, relativePath);
+  const normalized = assertSafeRelativePath(relativePath);
+  const parts = normalized.split("/");
+  if (parts.length > 1) {
+    mkdirSync(join(root, ...parts.slice(0, -1)), { recursive: true });
+  }
+}
+
+export function assertRegularOrMissing(path: string, relativePath: string): void {
+  if (!existsSync(path)) {
+    return;
+  }
+  const stat = lstatSync(path);
+  if (stat.isSymbolicLink()) {
+    throw new Error(`target cannot be a symlink: ${relativePath}`);
+  }
+  if (!stat.isFile()) {
+    throw new Error(`target must be a regular file: ${relativePath}`);
+  }
+}
+
+export function listRegularFiles(root: string, relativeRoot = ""): string[] {
+  if (!existsSync(root)) {
+    return [];
+  }
+  const stat = lstatSync(root);
+  if (stat.isSymbolicLink()) {
+    throw new Error(`source cannot be a symlink: ${relativeRoot || root}`);
+  }
+  if (stat.isFile()) {
+    return [normalizeRelativePath(relativeRoot)];
+  }
+  if (!stat.isDirectory()) {
+    throw new Error(`source must be a regular file or directory: ${relativeRoot || root}`);
+  }
+
+  const files: string[] = [];
+  const entries = readdirSync(root, { withFileTypes: true }).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+  for (const entry of entries) {
+    const rel = normalizeRelativePath(relativeRoot ? `${relativeRoot}/${entry.name}` : entry.name);
+    const abs = join(root, entry.name);
+    if (entry.isSymbolicLink()) {
+      throw new Error(`source cannot be a symlink: ${rel}`);
+    }
+    if (entry.isDirectory()) {
+      files.push(...listRegularFiles(abs, rel));
+      continue;
+    }
+    if (!entry.isFile()) {
+      throw new Error(`source must be a regular file: ${rel}`);
+    }
+    files.push(rel);
+  }
+  return files;
+}
+
+export function toPosixPath(value: string): string {
+  return value.split(sep).join("/");
+}
+
+export function safeDockDirectoryName(dockId: string): string {
+  return dockId.replaceAll(/[^A-Za-z0-9._-]/g, "__");
+}
