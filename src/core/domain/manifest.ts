@@ -72,6 +72,13 @@ const fileSpecSchema = z.object({
   to: z.string(),
 });
 
+const workdirSpecSchema = z
+  .object({
+    files: z.array(fileSpecSchema).default([]),
+  })
+  .strict()
+  .default({ files: [] });
+
 const runtimeRequirementsSchema = z
   .record(
     z.string().regex(/^[A-Za-z0-9._-]+$/, "runtime name must be a safe identifier"),
@@ -150,6 +157,7 @@ const manifestSchema = z
     readme: z.string().optional(),
     logo: z.string().optional(),
     requires: requiresSchema,
+    workdir: workdirSpecSchema,
     files: z.array(fileSpecSchema).default([]),
     install: phaseTasksSchema.optional(),
     update: phaseTasksSchema.optional(),
@@ -165,13 +173,15 @@ const manifestSchema = z
     },
   }));
 
-export type DockManifest = z.infer<typeof manifestSchema>;
 export type FileSpec = z.infer<typeof fileSpecSchema>;
 export type Requires = z.infer<typeof requiresSchema>;
+export type WorkdirSpec = z.infer<typeof workdirSpecSchema>;
 export type Tasks = z.infer<typeof tasksSchema>;
 export type TaskPhase = keyof Tasks;
 export type TaskStep = z.infer<typeof taskStepSchema>;
 export type ExportSpec = z.infer<typeof exportSpecSchema>;
+type ParsedDockManifest = z.infer<typeof manifestSchema>;
+export type DockManifest = Omit<ParsedDockManifest, "workdir"> & { workdir?: WorkdirSpec };
 
 export class ManifestReader {
   read(path: string): DockManifest {

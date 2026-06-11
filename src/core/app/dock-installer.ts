@@ -17,6 +17,7 @@ import {
   FilePlan,
 } from "../files/file-candidate.js";
 import { pruneEmptyDirectoryChain } from "../files/path-utils.js";
+import { WorkdirSeeder } from "../files/workdir-seeder.js";
 import { type StepReport, TaskRunner } from "../runtime/task-runner.js";
 
 type DockResolver = (
@@ -62,6 +63,7 @@ export class DockInstaller {
   constructor(
     private readonly taskRunner = new TaskRunner(),
     private readonly collector = new FileCandidateCollector(),
+    private readonly workdirSeeder = new WorkdirSeeder(),
   ) {}
 
   async install(options: InstallOptions): Promise<InstallReport> {
@@ -84,6 +86,7 @@ export class DockInstaller {
       }
 
       const fileCandidates = this.collectManifestFiles(resolved);
+      this.seedWorkdir(options.projectDir, resolved);
       const taskResult = options.runTasks
         ? this.taskRunner.run(resolved.manifest, {
             projectDir: options.projectDir,
@@ -175,6 +178,17 @@ export class DockInstaller {
         to: file.to,
         source: "files" as const,
         markerPrefix: "files",
+      })),
+    );
+  }
+
+  private seedWorkdir(projectDir: string, resolved: ResolvedDock): void {
+    this.workdirSeeder.seed(
+      this.taskRunner.dockWorkdir(projectDir, resolved.manifest.id),
+      (resolved.manifest.workdir?.files ?? []).map((file) => ({
+        sourceRoot: resolved.root,
+        from: file.from,
+        to: file.to,
       })),
     );
   }

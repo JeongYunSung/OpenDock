@@ -203,6 +203,59 @@ describe("opendock TypeScript CLI", () => {
     expect(existsSync(join(project, ".opendock", "workdirs", "test__oma", "AGENTS.md"))).toBe(true);
   });
 
+  it("seeds dock workdir files before running external commands", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const bin = tempDir();
+    writeFakeOmaRequiresSeed(bin);
+    writeDock(docks, "test", "oma", "1.0.0", {
+      workdirFiles: [
+        {
+          path: "workdir/oma-config.yaml",
+          to: ".agents/oma-config.yaml",
+          content: "language: en\nmodel_preset: codex\nauto_update_cli: false\n",
+        },
+      ],
+      tasks: {
+        install: [
+          {
+            id: "apply-oma",
+            run: "oma -y install",
+            workdir: "dock",
+            export: {
+              include: [".agents/**", ".codex/**"],
+              exclude: [],
+            },
+          },
+        ],
+      },
+    });
+
+    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      install({
+        dockRef: DockRef.parse("test/oma@1.0.0"),
+        projectDir: project,
+        operation: "install",
+        phase: "install",
+        runTasks: true,
+        resolve: localResolver(docks),
+      }),
+    );
+
+    expect(
+      readFileSync(
+        join(project, ".opendock", "workdirs", "test__oma", ".agents", "oma-config.yaml"),
+        "utf8",
+      ),
+    ).toContain("model_preset: codex");
+    expect(readFileSync(join(project, ".agents", "oma-config.yaml"), "utf8")).toContain(
+      "model_preset: codex",
+    );
+    expect(
+      readFileSync(join(project, ".codex", "skills", "oma-brainstorm", "SKILL.md"), "utf8"),
+    ).toContain("Codex Skill");
+  });
+
   it("rejects exported symlinks that point outside the dock workdir", async () => {
     const docks = tempDir();
     const project = tempDir();
@@ -491,7 +544,12 @@ describe("opendock TypeScript CLI", () => {
     mkdirSync(dataDir, { recursive: true });
     writeFileSync(join(dataDir, "auth-token"), "test-token");
     mkdirSync(join(dockRoot, "macos", "files"), { recursive: true });
+    mkdirSync(join(dockRoot, "macos", "inputs"), { recursive: true });
     writeFileSync(join(dockRoot, "macos", "files", "AGENTS.md"), "# macOS Agent\n");
+    writeFileSync(
+      join(dockRoot, "macos", "inputs", "oma-config.yaml"),
+      "language: en\nmodel_preset: codex\n",
+    );
     writeFileSync(join(dockRoot, "macos", "DOCK.md"), "# macOS Dock\n");
     writeFileSync(
       join(dockRoot, "macos", "logo.png"),
@@ -505,6 +563,9 @@ describe("opendock TypeScript CLI", () => {
         summary: "macOS artifact",
         readme: "DOCK.md",
         logo: "logo.png",
+        workdir: {
+          files: [{ from: "inputs/oma-config.yaml", to: ".agents/oma-config.yaml" }],
+        },
         files: [{ from: "files/AGENTS.md", to: "AGENTS.md" }],
       }),
     );
@@ -558,6 +619,9 @@ describe("opendock TypeScript CLI", () => {
       "summary: macOS artifact",
     );
     expect(readFileSync(join(extractRoot, "files", "AGENTS.md"), "utf8")).toBe("# macOS Agent\n");
+    expect(readFileSync(join(extractRoot, "inputs", "oma-config.yaml"), "utf8")).toContain(
+      "model_preset: codex",
+    );
     expect(existsSync(join(extractRoot, "macos", "dock.macos.yml"))).toBe(false);
   });
 
@@ -680,6 +744,7 @@ function writeDock(
   version: string,
   options: {
     files?: Array<{ path: string; content: string }>;
+    workdirFiles?: Array<{ path: string; to: string; content: string }>;
     tasks?: {
       install?: unknown[];
       update?: unknown[];
@@ -694,6 +759,11 @@ function writeDock(
     mkdirSync(dirname(filePath), { recursive: true });
     writeFileSync(filePath, file.content);
   }
+  for (const file of options.workdirFiles ?? []) {
+    const filePath = join(dockRoot, file.path);
+    mkdirSync(dirname(filePath), { recursive: true });
+    writeFileSync(filePath, file.content);
+  }
 
   const manifest = {
     opendock: 1,
@@ -705,6 +775,12 @@ function writeDock(
       from: `files/${file.path}`,
       to: file.path,
     })),
+    workdir: {
+      files: (options.workdirFiles ?? []).map((file) => ({
+        from: file.path,
+        to: file.to,
+      })),
+    },
     install: options.tasks?.install ?? [],
     update: options.tasks?.update ?? [],
     doctor: options.tasks?.doctor ?? [],
@@ -752,6 +828,25 @@ case "$mode" in
     test -f CLAUDE.md
     ;;
 esac
+`,
+  );
+  chmod(path);
+}
+
+function writeFakeOmaRequiresSeed(bin: string): void {
+  const path = join(bin, "oma");
+  writeFileSync(
+    path,
+    `#!/usr/bin/env bash
+set -euo pipefail
+if [ "$*" = "-y install" ]; then
+  test -f .agents/oma-config.yaml
+  grep -q 'model_preset: codex' .agents/oma-config.yaml
+  mkdir -p .codex/skills/oma-brainstorm
+  printf '# Codex Skill\\n' > .codex/skills/oma-brainstorm/SKILL.md
+  exit 0
+fi
+exit 1
 `,
   );
   chmod(path);

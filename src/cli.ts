@@ -490,6 +490,9 @@ function collectDeployArchiveEntries(projectDir: string, manifest: DockManifest)
   for (const file of manifest.files) {
     roots.add(file.from);
   }
+  for (const file of manifest.workdir?.files ?? []) {
+    roots.add(file.from);
+  }
 
   const entries = new Set<string>(["dock.yml"]);
   for (const root of roots) {
