@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import YAML from "yaml";
 import { type DockManifest, parseManifestFile } from "../src/core/domain/manifest.js";
-import { LifecycleRunner } from "../src/core/runtime/lifecycle-runner.js";
+import { TaskRunner } from "../src/core/runtime/task-runner.js";
 
 const tempRoots: string[] = [];
 
@@ -66,28 +66,25 @@ describe("requires regression coverage", () => {
 
     const manifest = parseManifestFile(join(root, "dock.yml"));
 
-    expect(manifest.lifecycle.install.map((step) => step.id)).toEqual(["install-step"]);
-    expect(manifest.lifecycle.update.map((step) => step.id)).toEqual(["update-step"]);
-    expect(manifest.lifecycle.doctor.map((step) => step.id)).toEqual(["doctor-step"]);
+    expect(manifest.tasks.install.map((step) => step.id)).toEqual(["install-step"]);
+    expect(manifest.tasks.update.map((step) => step.id)).toEqual(["update-step"]);
+    expect(manifest.tasks.doctor.map((step) => step.id)).toEqual(["doctor-step"]);
   });
 
-  it("rejects mixed top-level tasks and legacy lifecycle", () => {
+  it("rejects legacy lifecycle field from dock.yml", () => {
     const root = tempDir();
     writeFileSync(
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
         id: "test/tasks",
-        install: [{ id: "install-step", run: "mkdir -p .opendock" }],
         lifecycle: {
           install: [{ id: "legacy-step", run: "mkdir -p .opendock" }],
         },
       }),
     );
 
-    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
-      "use top-level `install`, `update`, and `doctor`",
-    );
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow("Unrecognized key");
   });
 
   it("rejects unsafe package requirement names", () => {
@@ -134,7 +131,7 @@ describe("requires regression coverage", () => {
     );
   });
 
-  it("installs missing required packages before lifecycle steps run", async () => {
+  it("installs missing required packages before task steps run", async () => {
     const project = tempDir();
     const bin = tempDir();
     const home = tempDir();
@@ -158,7 +155,7 @@ describe("requires regression coverage", () => {
     const result = await withEnv(
       { BUN_INSTALL: join(home, ".bun"), HOME: home, PATH: bin },
       async () =>
-        new LifecycleRunner().run(manifest, {
+        new TaskRunner().run(manifest, {
           projectDir: project,
           dockId: "test/oma",
           phase: "install",
@@ -191,7 +188,7 @@ describe("requires regression coverage", () => {
     const result = await withEnv(
       { BUN_INSTALL: join(home, ".bun"), HOME: home, PATH: bin },
       async () =>
-        new LifecycleRunner().run(omaManifest(), {
+        new TaskRunner().run(omaManifest(), {
           projectDir: project,
           dockId: "test/oma",
           phase: "update",
@@ -215,7 +212,7 @@ describe("requires regression coverage", () => {
     writeFakeBun(bin, home, log);
 
     const result = withEnvSync({ BUN_INSTALL: join(home, ".bun"), HOME: home, PATH: bin }, () =>
-      new LifecycleRunner().run(omaManifest(), {
+      new TaskRunner().run(omaManifest(), {
         projectDir: project,
         dockId: "test/oma",
         phase: "doctor",
@@ -238,7 +235,7 @@ describe("requires regression coverage", () => {
     writeFakeNpm(bin, log);
 
     const result = await withEnv({ PATH: bin }, async () =>
-      new LifecycleRunner().run(customPackageKeyManifest(), {
+      new TaskRunner().run(customPackageKeyManifest(), {
         projectDir: project,
         dockId: "test/custom-package-key",
         phase: "install",
@@ -283,7 +280,7 @@ describe("requires regression coverage", () => {
   });
 });
 
-function omaManifest(lifecycle: Partial<DockManifest["lifecycle"]> = {}): DockManifest {
+function omaManifest(tasks: Partial<DockManifest["tasks"]> = {}): DockManifest {
   return {
     opendock: 1,
     id: "test/oma",
@@ -301,10 +298,10 @@ function omaManifest(lifecycle: Partial<DockManifest["lifecycle"]> = {}): DockMa
       },
     },
     files: [],
-    lifecycle: {
-      install: lifecycle.install ?? [],
-      update: lifecycle.update ?? [],
-      doctor: lifecycle.doctor ?? [],
+    tasks: {
+      install: tasks.install ?? [],
+      update: tasks.update ?? [],
+      doctor: tasks.doctor ?? [],
     },
   };
 }
@@ -325,7 +322,7 @@ function customPackageKeyManifest(): DockManifest {
       },
     },
     files: [],
-    lifecycle: {
+    tasks: {
       install: [],
       update: [],
       doctor: [],

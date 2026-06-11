@@ -122,7 +122,7 @@ const exportSpecSchema = z.object({
   exclude: z.array(z.string()).default([]),
 });
 
-const lifecycleStepFieldsSchema = z.object({
+const taskStepFieldsSchema = z.object({
   id: z.string().optional(),
   name: z.string().optional(),
   check: z.string().optional(),
@@ -133,8 +133,8 @@ const lifecycleStepFieldsSchema = z.object({
   export: exportSpecSchema.optional(),
 });
 
-const lifecyclePlatformsSchema = z
-  .record(z.string(), lifecycleStepFieldsSchema)
+const taskPlatformsSchema = z
+  .record(z.string(), taskStepFieldsSchema)
   .default({})
   .superRefine((platforms, context) => {
     for (const platform of Object.keys(platforms)) {
@@ -148,17 +148,17 @@ const lifecyclePlatformsSchema = z
     }
   });
 
-const lifecycleStepSchema = lifecycleStepFieldsSchema.extend({
+const taskStepSchema = taskStepFieldsSchema.extend({
   id: z.string(),
-  platforms: lifecyclePlatformsSchema,
+  platforms: taskPlatformsSchema,
 });
 
-const phaseStepsSchema = z.array(lifecycleStepSchema).default([]);
+const phaseTasksSchema = z.array(taskStepSchema).default([]);
 
-const lifecycleSchema = z.object({
-  install: phaseStepsSchema,
-  update: phaseStepsSchema,
-  doctor: phaseStepsSchema,
+const tasksSchema = z.object({
+  install: phaseTasksSchema,
+  update: phaseTasksSchema,
+  doctor: phaseTasksSchema,
 });
 
 const manifestSchema = z
@@ -171,33 +171,17 @@ const manifestSchema = z
     logo: z.string().optional(),
     requires: requiresSchema,
     files: z.array(fileSpecSchema).default([]),
-    install: phaseStepsSchema.optional(),
-    update: phaseStepsSchema.optional(),
-    doctor: phaseStepsSchema.optional(),
-    lifecycle: lifecycleSchema.optional(),
+    install: phaseTasksSchema.optional(),
+    update: phaseTasksSchema.optional(),
+    doctor: phaseTasksSchema.optional(),
   })
   .strict()
-  .superRefine((manifest, context) => {
-    if (
-      manifest.lifecycle !== undefined &&
-      (manifest.install !== undefined ||
-        manifest.update !== undefined ||
-        manifest.doctor !== undefined)
-    ) {
-      context.addIssue({
-        code: "custom",
-        message:
-          "use top-level `install`, `update`, and `doctor` instead of mixing them with `lifecycle`",
-        path: ["lifecycle"],
-      });
-    }
-  })
-  .transform(({ install, update, doctor, lifecycle, ...manifest }) => ({
+  .transform(({ install, update, doctor, ...manifest }) => ({
     ...manifest,
-    lifecycle: {
-      install: install ?? lifecycle?.install ?? [],
-      update: update ?? lifecycle?.update ?? [],
-      doctor: doctor ?? lifecycle?.doctor ?? [],
+    tasks: {
+      install: install ?? [],
+      update: update ?? [],
+      doctor: doctor ?? [],
     },
   }));
 
@@ -205,9 +189,9 @@ export type DockManifest = z.infer<typeof manifestSchema>;
 export type FileSpec = z.infer<typeof fileSpecSchema>;
 export type PackageRequirement = z.infer<typeof packageRequirementSchema>;
 export type Requires = z.infer<typeof requiresSchema>;
-export type Lifecycle = z.infer<typeof lifecycleSchema>;
-export type LifecyclePhase = keyof Lifecycle;
-export type LifecycleStep = z.infer<typeof lifecycleStepSchema>;
+export type Tasks = z.infer<typeof tasksSchema>;
+export type TaskPhase = keyof Tasks;
+export type TaskStep = z.infer<typeof taskStepSchema>;
 export type ExportSpec = z.infer<typeof exportSpecSchema>;
 
 export class ManifestReader {

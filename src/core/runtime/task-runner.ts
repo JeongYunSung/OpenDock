@@ -1,7 +1,7 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
-import type { DockManifest, LifecyclePhase, LifecycleStep } from "../domain/manifest.js";
+import type { DockManifest, TaskPhase, TaskStep } from "../domain/manifest.js";
 import { type FileCandidate, FileCandidateCollector } from "../files/file-candidate.js";
 import { safeDockDirectoryName } from "../files/path-utils.js";
 import {
@@ -20,29 +20,29 @@ export interface StepReport {
   message?: string;
 }
 
-export interface LifecycleRunResult {
+export interface TaskRunResult {
   reports: StepReport[];
   exports: FileCandidate[];
 }
 
-export interface LifecycleContext {
+export interface TaskContext {
   projectDir: string;
   dockId: string;
-  phase: LifecyclePhase;
+  phase: TaskPhase;
   platform?: OpenDockPlatform;
   live?: boolean;
 }
 
 const defaultDoctorTimeoutMs = 30_000;
 
-export class LifecycleRunner {
+export class TaskRunner {
   constructor(
     private readonly commandRunner = new CommandRunner(),
     private readonly collector = new FileCandidateCollector(),
     private readonly requirementRunner = new RequirementRunner(commandRunner),
   ) {}
 
-  run(manifest: DockManifest, context: LifecycleContext): LifecycleRunResult {
+  run(manifest: DockManifest, context: TaskContext): TaskRunResult {
     const platform = context.platform ?? detectPlatform();
     assertManifestSupportsPlatform(manifest, platform);
     const requirementReports = this.requirementRunner.run(manifest, {
@@ -51,7 +51,7 @@ export class LifecycleRunner {
       projectDir: context.projectDir,
       ...(context.live === undefined ? {} : { live: context.live }),
     });
-    const steps = selectLifecycleSteps(manifest.lifecycle[context.phase] ?? [], platform);
+    const steps = selectTaskSteps(manifest.tasks[context.phase] ?? [], platform);
     if (context.phase === "doctor") {
       const result = this.runDoctorSteps(steps, context, platform);
       return { reports: [...requirementReports, ...result.reports], exports: result.exports };
@@ -65,10 +65,10 @@ export class LifecycleRunner {
   }
 
   private runSetupSteps(
-    steps: LifecycleStep[],
-    context: LifecycleContext,
+    steps: TaskStep[],
+    context: TaskContext,
     platform: OpenDockPlatform,
-  ): LifecycleRunResult {
+  ): TaskRunResult {
     const reports: StepReport[] = [];
     const exports: FileCandidate[] = [];
     for (const step of steps) {
@@ -119,10 +119,10 @@ export class LifecycleRunner {
   }
 
   private runDoctorSteps(
-    steps: LifecycleStep[],
-    context: LifecycleContext,
+    steps: TaskStep[],
+    context: TaskContext,
     platform: OpenDockPlatform,
-  ): LifecycleRunResult {
+  ): TaskRunResult {
     const reports: StepReport[] = [];
     for (const step of steps) {
       const command = step.run ?? step.check;
@@ -167,7 +167,7 @@ export class LifecycleRunner {
     return { reports, exports: [] };
   }
 
-  private resolveWorkdir(step: LifecycleStep, projectDir: string, dockId: string): string {
+  private resolveWorkdir(step: TaskStep, projectDir: string, dockId: string): string {
     const workdir = step.workdir ?? "root";
     if (workdir === "root") {
       return projectDir;
@@ -177,11 +177,11 @@ export class LifecycleRunner {
       mkdirSync(path, { recursive: true });
       return path;
     }
-    throw new Error(`unsupported lifecycle workdir \`${workdir}\`; use root or dock`);
+    throw new Error(`unsupported task workdir \`${workdir}\`; use root or dock`);
   }
 
   private evaluateStepCheck(
-    step: LifecycleStep,
+    step: TaskStep,
     cwd: string,
     platform: OpenDockPlatform,
   ): { passed: boolean; message?: string } {
@@ -210,7 +210,7 @@ export class LifecycleRunner {
     return { passed: true };
   }
 
-  private collectStepExports(step: LifecycleStep, cwd: string): FileCandidate[] {
+  private collectStepExports(step: TaskStep, cwd: string): FileCandidate[] {
     if (!step.export) {
       return [];
     }
@@ -236,9 +236,9 @@ export function assertManifestSupportsPlatform(
 
 function collectManifestPlatforms(manifest: DockManifest): Set<string> {
   const platforms = new Set<string>();
-  const phases: LifecyclePhase[] = ["install", "update", "doctor"];
+  const phases: TaskPhase[] = ["install", "update", "doctor"];
   for (const phase of phases) {
-    for (const step of manifest.lifecycle[phase] ?? []) {
+    for (const step of manifest.tasks[phase] ?? []) {
       for (const platform of Object.keys(step.platforms ?? {})) {
         platforms.add(platform);
       }
@@ -247,7 +247,7 @@ function collectManifestPlatforms(manifest: DockManifest): Set<string> {
   return platforms;
 }
 
-function selectLifecycleSteps(steps: LifecycleStep[], platform: OpenDockPlatform): LifecycleStep[] {
+function selectTaskSteps(steps: TaskStep[], platform: OpenDockPlatform): TaskStep[] {
   return steps.flatMap((step) => {
     const platformKeys = Object.keys(step.platforms ?? {});
     if (platformKeys.length === 0) {
@@ -268,6 +268,6 @@ function selectLifecycleSteps(steps: LifecycleStep[], platform: OpenDockPlatform
   });
 }
 
-function stepName(step: LifecycleStep): string {
+function stepName(step: TaskStep): string {
   return step.name ?? step.id;
 }

@@ -223,7 +223,7 @@ doctor:
 `readme`와 `logo`는 Registry catalog metadata입니다. 프로젝트에 설치하려면
 `files`에도 별도로 선언해야 합니다.
 
-release version은 `dock.yml`에 쓰지 않고 deploy command에서 정합니다.
+release version은 `dock.yml`에 쓰지 않고 deploy 명령에서 정합니다.
 
 ```bash
 opendock deploy owner/name@1.0.0
@@ -349,7 +349,7 @@ src/
     app/                    # Install, update, uninstall orchestration
     domain/                 # Manifest and project state models
     files/                  # Managed blocks, checksums, path safety, file plans
-    runtime/                # Command runner and allowlist
+    runtime/                # Task runner, command runner, allowlist
 tests/
   cli-flow.test.ts          # Integration-style temp-dir tests
 examples/

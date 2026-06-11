@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
-import type { DockManifest, LifecyclePhase, PackageRequirement } from "../domain/manifest.js";
+import type { DockManifest, PackageRequirement, TaskPhase } from "../domain/manifest.js";
 import {
   CommandRunner,
   combinedOutput,
@@ -10,11 +10,11 @@ import {
   failureMessage,
   satisfiesVersion,
 } from "./command-runner.js";
-import type { StepReport } from "./lifecycle-runner.js";
+import type { StepReport } from "./task-runner.js";
 
 interface RequirementContext {
   live?: boolean;
-  phase: LifecyclePhase;
+  phase: TaskPhase;
   platform?: OpenDockPlatform;
   projectDir: string;
 }
@@ -438,7 +438,7 @@ function parseJson(value: string): { ok: true; value: unknown } | { ok: false } 
   }
 }
 
-function packageInstallCommand(requirement: PackageRequirement, phase: LifecyclePhase): string {
+function packageInstallCommand(requirement: PackageRequirement, phase: TaskPhase): string {
   const name = versionedPackageName(requirement.name);
   if (requirement.manager === "bun") {
     return `bun install --global ${name}`;

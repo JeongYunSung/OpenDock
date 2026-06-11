@@ -8,7 +8,7 @@ import {
   assertVersionSatisfiesSelector,
   type DockManifest,
   type DockRef,
-  type LifecyclePhase,
+  type TaskPhase,
 } from "../domain/manifest.js";
 import { type InstalledDockRecord, OpenDockStateStore } from "../domain/state-store.js";
 import {
@@ -16,7 +16,7 @@ import {
   FileCandidateCollector,
   FilePlan,
 } from "../files/file-candidate.js";
-import { LifecycleRunner, type StepReport } from "../runtime/lifecycle-runner.js";
+import { type StepReport, TaskRunner } from "../runtime/task-runner.js";
 
 type DockResolver = (
   dockRef: DockRef,
@@ -27,9 +27,9 @@ export interface InstallOptions {
   dockRef: DockRef;
   force?: boolean;
   projectDir: string;
-  runCommands: boolean;
+  runTasks: boolean;
   operation: string;
-  phase?: LifecyclePhase;
+  phase?: TaskPhase;
   platform?: OpenDockPlatform;
   resolve?: DockResolver;
 }
@@ -59,7 +59,7 @@ export interface UninstallReport {
 
 export class DockInstaller {
   constructor(
-    private readonly lifecycleRunner = new LifecycleRunner(),
+    private readonly taskRunner = new TaskRunner(),
     private readonly collector = new FileCandidateCollector(),
   ) {}
 
@@ -83,15 +83,15 @@ export class DockInstaller {
       }
 
       const fileCandidates = this.collectManifestFiles(resolved);
-      const lifecycleResult = options.runCommands
-        ? this.lifecycleRunner.run(resolved.manifest, {
+      const taskResult = options.runTasks
+        ? this.taskRunner.run(resolved.manifest, {
             projectDir: options.projectDir,
             dockId: resolved.manifest.id,
             phase: options.phase ?? "install",
             platform,
           })
         : { reports: [], exports: [] };
-      const candidates = [...fileCandidates, ...lifecycleResult.exports];
+      const candidates = [...fileCandidates, ...taskResult.exports];
 
       filePlan.preflight(candidates);
       const fileSummary = filePlan.apply(candidates);
@@ -114,7 +114,7 @@ export class DockInstaller {
         resolved.version,
         platform,
         fileSummary,
-        lifecycleResult.reports,
+        taskResult.reports,
       );
       appendRunLog(
         options.projectDir,
@@ -145,7 +145,7 @@ export class DockInstaller {
     const filePlan = new FilePlan(options.projectDir, dock.id, dock.files, options.force === true);
     filePlan.verifyPriorState();
     const summary = filePlan.apply([]);
-    rmSync(this.lifecycleRunner.dockWorkdir(options.projectDir, dock.id), {
+    rmSync(this.taskRunner.dockWorkdir(options.projectDir, dock.id), {
       recursive: true,
       force: true,
     });
@@ -186,7 +186,7 @@ export class DockInstaller {
     platform: OpenDockPlatform,
     fileSummary: FileApplySummary,
   ): InstalledDockRecord {
-    const workdir = this.lifecycleRunner.dockWorkdir(projectDir, manifest.id);
+    const workdir = this.taskRunner.dockWorkdir(projectDir, manifest.id);
     return {
       id: manifest.id,
       name: manifest.name ?? manifest.id,

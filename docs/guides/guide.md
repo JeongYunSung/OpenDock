@@ -178,7 +178,7 @@ opendock bootstrap windows
 - `opendock bootstrap windows` verifies WinGet or opens Microsoft App Installer when WinGet is missing.
 
 Do not hide Homebrew or WinGet installation inside a dock task unless the dock has
-a very specific reason. The bootstrap command makes the host prerequisite clear
+a very specific reason. The bootstrap step makes the host prerequisite clear
 before normal dock install/update runs.
 
 ## Files
@@ -215,7 +215,7 @@ state and avoid changing the project.
 ## Workdir And Export
 
 Use `workdir: dock` when an external tool generates files. OpenDock runs the
-task command in the private dock workdir and exports only declared outputs.
+step in the private dock workdir and exports only declared outputs.
 
 ```yaml
 install:
@@ -267,7 +267,7 @@ matching artifact. With `--platform`, OpenDock asks for that specific platform.
 
 ## Deploy
 
-Deploy requires login and an exact version in the command.
+Deploy requires login and an exact version when running `opendock deploy`.
 
 ```bash
 opendock auth login
@@ -297,7 +297,7 @@ Manifest:
 
 1. `opendock: 1` is present.
 2. `id` is in `owner/name` form.
-3. The release version is in the command, not in `dock.yml`.
+3. The release version is in `opendock deploy`, not in `dock.yml`.
 4. `readme` and `logo` point to real files inside the dock directory.
 
 Files:

@@ -42,9 +42,9 @@ describe("example dock manifests", () => {
     for (const example of exampleNames()) {
       const manifest = parseManifestFile(join(examplesRoot, example, "dock.windows.yml"));
       const commands = [
-        ...commandsFor(manifest.lifecycle.install),
-        ...commandsFor(manifest.lifecycle.update),
-        ...commandsFor(manifest.lifecycle.doctor),
+        ...commandsFor(manifest.tasks.install),
+        ...commandsFor(manifest.tasks.update),
+        ...commandsFor(manifest.tasks.doctor),
       ];
 
       expect(

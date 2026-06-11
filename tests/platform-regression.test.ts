@@ -15,7 +15,7 @@ import { DockInstaller } from "../src/core/app/dock-installer.js";
 import { type DockManifest, DockRef, parseManifestFile } from "../src/core/domain/manifest.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
 import { CommandRunner } from "../src/core/runtime/command-runner.js";
-import { LifecycleRunner } from "../src/core/runtime/lifecycle-runner.js";
+import { TaskRunner } from "../src/core/runtime/task-runner.js";
 import { detectPlatform, parsePlatform, parseReleasePlatform } from "../src/platform.js";
 import { OpenDockRegistryClient } from "../src/registry.js";
 import type { ResolvedDock } from "../src/resolver.js";
@@ -122,18 +122,16 @@ describe("platform regression coverage", () => {
       YAML.stringify({
         opendock: 1,
         id: "test/platform",
-        lifecycle: {
-          install: [
-            {
-              id: "install-runtime",
-              platforms: {
-                freebsd: {
-                  run: "pkg install node",
-                },
+        install: [
+          {
+            id: "install-runtime",
+            platforms: {
+              freebsd: {
+                run: "pkg install node",
               },
             },
-          ],
-        },
+          },
+        ],
       }),
     );
 
@@ -142,7 +140,7 @@ describe("platform regression coverage", () => {
     );
   });
 
-  it("keeps lifecycle order while selecting the macOS platform override", async () => {
+  it("keeps task order while selecting the macOS platform override", async () => {
     const project = tempDir();
     const bin = tempDir();
     const log = join(project, "commands.log");
@@ -152,7 +150,7 @@ describe("platform regression coverage", () => {
     const reports = await withEnv(
       { PATH: `${bin}:${process.env.PATH ?? ""}` },
       async () =>
-        new LifecycleRunner().run(platformManifest(), {
+        new TaskRunner().run(platformManifest(), {
           projectDir: project,
           dockId: "test/platform",
           phase: "install",
@@ -181,7 +179,7 @@ describe("platform regression coverage", () => {
     const reports = await withEnv(
       { PATH: `${bin}:${process.env.PATH ?? ""}` },
       async () =>
-        new LifecycleRunner().run(platformManifest(), {
+        new TaskRunner().run(platformManifest(), {
           projectDir: project,
           dockId: "test/platform",
           phase: "install",
@@ -202,7 +200,7 @@ describe("platform regression coverage", () => {
     expect(existsSync(join(project, "brew-ran"))).toBe(false);
 
     expect(() =>
-      new LifecycleRunner().run(platformManifest(), {
+      new TaskRunner().run(platformManifest(), {
         projectDir: tempDir(),
         dockId: "test/platform",
         phase: "install",
@@ -220,14 +218,14 @@ describe("platform regression coverage", () => {
       summary: "",
       requires: { runtimes: {}, packages: {} },
       files: [],
-      lifecycle: {
+      tasks: {
         install: [{ id: "common", run: "mkdir -p common-output", platforms: {} }],
         update: [],
         doctor: [],
       },
     };
 
-    const reports = new LifecycleRunner().run(manifest, {
+    const reports = new TaskRunner().run(manifest, {
       projectDir: project,
       dockId: "test/common",
       phase: "install",
@@ -251,7 +249,7 @@ describe("platform regression coverage", () => {
       summary: "",
       requires: { runtimes: {}, packages: {} },
       files: [],
-      lifecycle: {
+      tasks: {
         install: [],
         update: [],
         doctor: [
@@ -272,7 +270,7 @@ describe("platform regression coverage", () => {
 
     await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
       expect(
-        new LifecycleRunner().run(manifest, {
+        new TaskRunner().run(manifest, {
           projectDir: project,
           dockId: "test/doctor",
           phase: "doctor",
@@ -281,7 +279,7 @@ describe("platform regression coverage", () => {
       ).toMatchObject([{ id: "runtime-doctor", status: "Ready" }]);
 
       expect(
-        new LifecycleRunner().run(manifest, {
+        new TaskRunner().run(manifest, {
           projectDir: project,
           dockId: "test/doctor",
           phase: "doctor",
@@ -326,12 +324,12 @@ describe("platform regression coverage", () => {
     writeFakePlatformCommand(bin, "brew", log);
     writeFakePlatformCommand(bin, "winget", log);
     writeDock(docks, "test", "tool", "1.0.0", {
-      lifecycle: {
+      tasks: {
         install: [platformRuntimeStep("install-runtime")],
       },
     });
     writeDock(docks, "test", "tool", "1.0.1", {
-      lifecycle: {
+      tasks: {
         update: [platformRuntimeStep("update-runtime")],
       },
     });
@@ -343,7 +341,7 @@ describe("platform regression coverage", () => {
         phase: "install",
         platform: "windows",
         projectDir: project,
-        runCommands: true,
+        runTasks: true,
         resolve: localResolver(docks),
       });
 
@@ -360,7 +358,7 @@ describe("platform regression coverage", () => {
         phase: "update",
         platform: lockedDock.platform,
         projectDir: project,
-        runCommands: true,
+        runTasks: true,
         resolve: localResolver(docks),
       });
     });
@@ -387,7 +385,7 @@ function platformManifest(): DockManifest {
     summary: "",
     requires: { runtimes: {}, packages: {} },
     files: [],
-    lifecycle: {
+    tasks: {
       install: [
         { id: "before", run: "mkdir -p before", platforms: {} },
         platformRuntimeStep("install-runtime"),
@@ -442,7 +440,7 @@ function writeDock(
   version: string,
   options: {
     files?: Array<{ path: string; content: string }>;
-    lifecycle?: {
+    tasks?: {
       install?: unknown[];
       update?: unknown[];
       doctor?: unknown[];
@@ -469,9 +467,9 @@ function writeDock(
         from: `files/${file.path}`,
         to: file.path,
       })),
-      install: options.lifecycle?.install ?? [],
-      update: options.lifecycle?.update ?? [],
-      doctor: options.lifecycle?.doctor ?? [],
+      install: options.tasks?.install ?? [],
+      update: options.tasks?.update ?? [],
+      doctor: options.tasks?.doctor ?? [],
     }),
   );
   writeFileSync(join(dockRoot, "DOCK.md"), `# ${owner}/${name}\n`);

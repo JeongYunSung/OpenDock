@@ -29,7 +29,7 @@ import {
   validateManifestFor,
 } from "./core/domain/manifest.js";
 import { OpenDockStateStore } from "./core/domain/state-store.js";
-import { LifecycleRunner } from "./core/runtime/lifecycle-runner.js";
+import { TaskRunner } from "./core/runtime/task-runner.js";
 import { readProjectLogs } from "./logging.js";
 import {
   detectPlatform,
@@ -72,7 +72,7 @@ export async function run(argv = process.argv): Promise<void> {
         dockRef: parseInstallRef(dock),
         force: options.force === true,
         projectDir: process.cwd(),
-        runCommands: true,
+        runTasks: true,
         operation: "install",
         phase: "install",
         platform,
@@ -106,7 +106,7 @@ export async function run(argv = process.argv): Promise<void> {
           dockRef,
           force: options.force === true,
           projectDir: process.cwd(),
-          runCommands: true,
+          runTasks: true,
           operation: "update",
           phase: "update",
           platform,
@@ -654,7 +654,7 @@ async function printDockDoctorChecks(
 ): Promise<void> {
   try {
     const resolved = await resolveDock(dockRef, platform);
-    const reports = new LifecycleRunner().run(resolved.manifest, {
+    const reports = new TaskRunner().run(resolved.manifest, {
       projectDir: cwd,
       dockId: resolved.manifest.id,
       phase: "doctor",

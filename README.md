@@ -350,7 +350,7 @@ src/
     app/                    # Install, update, uninstall orchestration
     domain/                 # Manifest and project state models
     files/                  # Managed blocks, checksums, path safety, file plans
-    runtime/                # Command runner and allowlist
+    runtime/                # Task runner, command runner, and allowlist
 tests/
   cli-flow.test.ts          # Integration-style temp-dir tests
 examples/

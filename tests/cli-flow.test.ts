@@ -17,7 +17,7 @@ import { DockInstaller } from "../src/core/app/dock-installer.js";
 import { type DockManifest, DockRef, parseManifestFile } from "../src/core/domain/manifest.js";
 import type { InstalledDockRecord } from "../src/core/domain/state-store.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
-import { LifecycleRunner } from "../src/core/runtime/lifecycle-runner.js";
+import { TaskRunner } from "../src/core/runtime/task-runner.js";
 import type { OpenDockPlatform } from "../src/platform.js";
 import type { ResolvedDock } from "../src/resolver.js";
 
@@ -41,13 +41,13 @@ function installedDocks(projectDir: string): InstalledDockRecord[] {
   return new OpenDockStateStore(projectDir).readLock().docks;
 }
 
-function runLifecycle(
+function runTasks(
   manifest: DockManifest,
-  phase: keyof DockManifest["lifecycle"],
+  phase: keyof DockManifest["tasks"],
   projectDir: string,
   options: { platform?: OpenDockPlatform } = {},
 ) {
-  return new LifecycleRunner().run(manifest, {
+  return new TaskRunner().run(manifest, {
     projectDir,
     dockId: manifest.id,
     phase,
@@ -69,7 +69,7 @@ describe("opendock TypeScript CLI", () => {
       projectDir: project,
       operation: "install",
       phase: "install",
-      runCommands: true,
+      runTasks: true,
       resolve: localResolver(docks),
     });
 
@@ -97,7 +97,7 @@ describe("opendock TypeScript CLI", () => {
       projectDir: project,
       operation: "install",
       phase: "install",
-      runCommands: true,
+      runTasks: true,
       resolve: localResolver(docks),
     });
     await install({
@@ -105,7 +105,7 @@ describe("opendock TypeScript CLI", () => {
       projectDir: project,
       operation: "update",
       phase: "update",
-      runCommands: true,
+      runTasks: true,
       resolve: localResolver(docks),
     });
 
@@ -137,7 +137,7 @@ describe("opendock TypeScript CLI", () => {
         projectDir: project,
         operation: "install",
         phase: "install",
-        runCommands: true,
+        runTasks: true,
         resolve: localResolver(docks),
       }),
     ).rejects.toThrow("target already exists and is not OpenDock-owned");
@@ -153,7 +153,7 @@ describe("opendock TypeScript CLI", () => {
       projectDir: project,
       operation: "install",
       phase: "install",
-      runCommands: true,
+      runTasks: true,
       resolve: localResolver(docks),
     });
     expect(readFileSync(join(project, ".codex", "agents", "reviewer.toml"), "utf8")).toContain(
@@ -168,7 +168,7 @@ describe("opendock TypeScript CLI", () => {
     writeFakeOma(bin);
     writeDock(docks, "test", "oma", "1.0.0", {
       files: [{ path: "PROMPTS.md", content: "# Prompts\n" }],
-      lifecycle: {
+      tasks: {
         install: [
           {
             id: "apply-oma",
@@ -190,7 +190,7 @@ describe("opendock TypeScript CLI", () => {
         projectDir: project,
         operation: "install",
         phase: "install",
-        runCommands: true,
+        runTasks: true,
         resolve: localResolver(docks),
       }),
     );
@@ -217,7 +217,7 @@ describe("opendock TypeScript CLI", () => {
       projectDir: project,
       operation: "install",
       phase: "install",
-      runCommands: true,
+      runTasks: true,
       resolve: localResolver(docks),
     });
     const agentsPath = join(project, "AGENTS.md");
@@ -232,7 +232,7 @@ describe("opendock TypeScript CLI", () => {
         projectDir: project,
         operation: "update",
         phase: "update",
-        runCommands: true,
+        runTasks: true,
         resolve: localResolver(docks),
       }),
     ).rejects.toThrow("checksum mismatch for managed block");
@@ -243,7 +243,7 @@ describe("opendock TypeScript CLI", () => {
       projectDir: project,
       operation: "update",
       phase: "update",
-      runCommands: true,
+      runTasks: true,
       resolve: localResolver(docks),
     });
     expect(readFileSync(agentsPath, "utf8")).toContain("# Version Two");
@@ -267,7 +267,7 @@ describe("opendock TypeScript CLI", () => {
       projectDir: project,
       operation: "install",
       phase: "install",
-      runCommands: true,
+      runTasks: true,
       resolve: localResolver(docks),
     });
     await install({
@@ -275,7 +275,7 @@ describe("opendock TypeScript CLI", () => {
       projectDir: project,
       operation: "update",
       phase: "update",
-      runCommands: true,
+      runTasks: true,
       resolve: localResolver(docks),
     });
 
@@ -301,7 +301,7 @@ describe("opendock TypeScript CLI", () => {
       projectDir: project,
       operation: "install",
       phase: "install",
-      runCommands: true,
+      runTasks: true,
       resolve: localResolver(docks),
     });
     await install({
@@ -309,7 +309,7 @@ describe("opendock TypeScript CLI", () => {
       projectDir: project,
       operation: "install",
       phase: "install",
-      runCommands: true,
+      runTasks: true,
       resolve: localResolver(docks),
     });
 
@@ -342,14 +342,14 @@ describe("opendock TypeScript CLI", () => {
       summary: "",
       requires: { runtimes: {}, packages: {} },
       files: [],
-      lifecycle: {
+      tasks: {
         install: [{ id: "inline", run: 'node -e "console.log(1)"', platforms: {} }],
         update: [],
         doctor: [],
       },
     };
 
-    expect(() => runLifecycle(manifest, "install", project)).toThrow("not allowed");
+    expect(() => runTasks(manifest, "install", project)).toThrow("not allowed");
   });
 
   it("submits platform-specific deploy manifests as dock.yml archives", async () => {
@@ -549,7 +549,7 @@ function writeDock(
   version: string,
   options: {
     files?: Array<{ path: string; content: string }>;
-    lifecycle?: {
+    tasks?: {
       install?: unknown[];
       update?: unknown[];
       doctor?: unknown[];
@@ -574,9 +574,9 @@ function writeDock(
       from: `files/${file.path}`,
       to: file.path,
     })),
-    install: options.lifecycle?.install ?? [],
-    update: options.lifecycle?.update ?? [],
-    doctor: options.lifecycle?.doctor ?? [],
+    install: options.tasks?.install ?? [],
+    update: options.tasks?.update ?? [],
+    doctor: options.tasks?.doctor ?? [],
   };
   writeFileSync(join(dockRoot, "dock.yml"), YAML.stringify(manifest));
   writeFileSync(join(dockRoot, "DOCK.md"), `# ${owner}/${name}\n`);
