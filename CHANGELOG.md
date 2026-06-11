@@ -5,6 +5,19 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.7 - 2026-06-12
+
+### Changed
+
+- Allow safe `oma link <vendor...>` task commands.
+- Update the `opendock/oma` example to run `oma link claude codex` after OMA
+  install/update so Claude and Codex vendor files are generated explicitly.
+
+### Tests
+
+- Added command allowlist coverage for unsafe OMA link vendor arguments.
+- Added OMA task coverage for Codex files generated during the link step.
+
 ## 0.1.6 - 2026-06-12
 
 ### Fixed

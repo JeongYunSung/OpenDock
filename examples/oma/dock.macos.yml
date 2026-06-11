@@ -19,6 +19,10 @@ install:
     check: test -f .agents/oma-config.yaml
     run: oma -y install
     workdir: dock
+    timeout_ms: 600000
+  - id: link-oma-vendors
+    run: oma link claude codex
+    workdir: dock
     export:
       include:
         - AGENTS.md
@@ -44,6 +48,10 @@ update:
     timeout_ms: 600000
   - id: update-oma
     run: oma -y update
+    workdir: dock
+    timeout_ms: 600000
+  - id: relink-oma-vendors
+    run: oma link claude codex
     workdir: dock
     export:
       include:

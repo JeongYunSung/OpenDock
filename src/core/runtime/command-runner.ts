@@ -400,11 +400,18 @@ function isSafeOmaCommand(args: string[]): boolean {
   ) {
     return true;
   }
+  if (args[0] === "link") {
+    return args.length >= 2 && args.slice(1).every(isSafeOmaVendor);
+  }
   if (args[0] !== "update") {
     return false;
   }
   const allowed = new Set(["update", "-y", "--yes"]);
   return args.every((arg) => allowed.has(arg));
+}
+
+function isSafeOmaVendor(arg: string): boolean {
+  return /^[A-Za-z0-9._-]+$/.test(arg);
 }
 
 function isSafeOmxCommand(args: string[]): boolean {

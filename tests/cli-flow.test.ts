@@ -465,6 +465,24 @@ describe("opendock TypeScript CLI", () => {
     expect(() => runTasks(manifest, "install", project)).toThrow("not allowed");
   });
 
+  it("rejects unsafe OMA link vendor arguments", () => {
+    const project = tempDir();
+    const manifest: DockManifest = {
+      opendock: 1,
+      id: "test/unsafe-oma-link",
+      summary: "",
+      requires: { runtimes: {} },
+      files: [],
+      tasks: {
+        install: [{ id: "link", run: "oma link ../codex", platforms: {} }],
+        update: [],
+        doctor: [],
+      },
+    };
+
+    expect(() => runTasks(manifest, "install", project)).toThrow("not allowed");
+  });
+
   it("submits platform-specific deploy manifests as dock.yml archives", async () => {
     const dockRoot = tempDir();
     const extractRoot = tempDir();
