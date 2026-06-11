@@ -1,26 +1,16 @@
 opendock: 1
 id: opendock/dev-env
-summary: Project-local tool versions and validation tasks.
+summary: Composable project-local tool versions and validation tasks.
 readme: DOCK.md
 logo: logo.png
-
 files:
   - from: files/mise.toml
     to: mise.toml
-    update: managed_file
-
   - from: files/.opendock/dev-env.md
     to: .opendock/dev-env.md
-    update: managed_file
-
-  - from: files/.gitignore
-    to: .gitignore
-    update: append_unique
-
 lifecycle:
   doctor:
     - id: mise-config
       check: test -f mise.toml
-
     - id: dev-env-guide
       check: test -f .opendock/dev-env.md

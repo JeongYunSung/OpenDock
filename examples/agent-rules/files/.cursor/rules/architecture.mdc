@@ -1,9 +1,0 @@
----
-description: Architecture boundaries for AI coding agents
-alwaysApply: true
----
-
-- Locate the existing owner module before adding new files.
-- Prefer existing service, repository, and component boundaries.
-- Do not introduce cross-layer imports without a documented reason.
-- Keep generated helpers close to their only caller until reuse is real.

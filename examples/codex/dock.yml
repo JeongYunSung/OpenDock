@@ -1,42 +1,14 @@
 opendock: 1
 id: opendock/codex
-summary: Codex CLI setup without project file payloads.
+summary: Tool dock for installing the Codex CLI without project payloads.
 readme: DOCK.md
 logo: logo.png
-
-lifecycle:
-  install:
-    - id: install-node
-      check: node --version
-      version: ">=22.0.0"
-      platforms:
-        macos:
-          run: brew install node
-        windows:
-          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
-
-    - id: install-codex-cli
-      check: codex --version
-      version: ">=0.0.0"
-      run: npm install --global @openai/codex@latest
-
-  update:
-    - id: update-codex-cli
-      run: npm install --global @openai/codex@latest
-
-    - id: verify-codex-cli
-      run: codex --version
-      timeout_ms: 60000
-
-  doctor:
-    - id: node
-      check: node --version
-      version: ">=22.0.0"
-
-    - id: npm
-      check: npm --version
-      version: ">=10.0.0"
-
-    - id: codex
-      check: codex --version
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+  packages:
+    codex:
+      manager: npm
+      name: "@openai/codex"
       version: ">=0.0.0"

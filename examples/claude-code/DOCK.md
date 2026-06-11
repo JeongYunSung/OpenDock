@@ -1,9 +1,8 @@
 # Claude Code
 
-Install and verify the Claude Code CLI for project workspaces.
+Install Claude Code as a tool dock.
 
-This dock checks for a supported Node.js runtime, installs Claude Code through
-npm, and exposes doctor checks for Node, npm, and Claude Code.
+This dock declares Node, npm, and Claude Code in `requires`. It does not create
+project instruction files.
 
-Use it when a project should be ready for Anthropic Claude Code workflows
-without adding project files.
+Combine it with `opendock/agent-ready`, `opendock/product-manager`, or `opendock/agent-safety` when a project needs Claude Code plus shared workspace rules.

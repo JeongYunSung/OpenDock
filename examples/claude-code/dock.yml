@@ -1,42 +1,14 @@
 opendock: 1
 id: opendock/claude-code
-summary: Claude Code CLI setup for project workspaces.
+summary: Tool dock for installing Claude Code without project payloads.
 readme: DOCK.md
 logo: logo.png
-
-lifecycle:
-  install:
-    - id: install-node
-      check: node --version
-      version: ">=22.0.0"
-      platforms:
-        macos:
-          run: brew install node
-        windows:
-          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
-
-    - id: install-claude-code
-      check: claude --version
-      version: ">=0.0.0"
-      run: npm install --global @anthropic-ai/claude-code@latest
-
-  update:
-    - id: update-claude-code
-      run: npm install --global @anthropic-ai/claude-code@latest
-
-    - id: verify-claude-code
-      run: claude --version
-      timeout_ms: 60000
-
-  doctor:
-    - id: node
-      check: node --version
-      version: ">=22.0.0"
-
-    - id: npm
-      check: npm --version
-      version: ">=10.0.0"
-
-    - id: claude-code
-      check: claude --version
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+  packages:
+    claude:
+      manager: npm
+      name: "@anthropic-ai/claude-code"
       version: ">=0.0.0"

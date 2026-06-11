@@ -1,74 +1,44 @@
 opendock: 1
 id: opendock/agent-ready
-summary: Shared instruction files for AI coding agents.
+summary: Composable baseline instructions for common AI coding agents.
 readme: DOCK.md
 logo: logo.png
-
 files:
   - from: files/AGENTS.md
     to: AGENTS.md
-    update: managed_block
-
   - from: files/CLAUDE.md
     to: CLAUDE.md
-    update: managed_block
-
   - from: files/GEMINI.md
     to: GEMINI.md
-    update: managed_block
-
   - from: files/CONVENTIONS.md
     to: CONVENTIONS.md
-    update: managed_block
-
   - from: files/.github/copilot-instructions.md
     to: .github/copilot-instructions.md
-    update: managed_file
-
   - from: files/.github/instructions/agent.instructions.md
     to: .github/instructions/agent.instructions.md
-    update: managed_file
-
   - from: files/.github/prompts/review.prompt.md
     to: .github/prompts/review.prompt.md
-    update: managed_file
-
   - from: files/.cursor/rules/project.mdc
     to: .cursor/rules/project.mdc
-    update: managed_file
-
   - from: files/.claude/rules/project.md
     to: .claude/rules/project.md
-    update: managed_file
-
   - from: files/.windsurf/rules/project.md
     to: .windsurf/rules/project.md
-    update: managed_file
-
   - from: files/.clinerules/project.md
     to: .clinerules/project.md
-    update: managed_file
-
   - from: files/.roo/rules/project.md
     to: .roo/rules/project.md
-    update: managed_file
-
 lifecycle:
   doctor:
     - id: agents-md
       check: test -f AGENTS.md
-
     - id: claude-md
       check: test -f CLAUDE.md
-
     - id: gemini-md
       check: test -f GEMINI.md
-
     - id: copilot-instructions
       check: test -f .github/copilot-instructions.md
-
     - id: cursor-rules
       check: test -f .cursor/rules/project.mdc
-
     - id: claude-rules
       check: test -f .claude/rules/project.md

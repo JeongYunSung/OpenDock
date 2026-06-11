@@ -1,5 +1,0 @@
-# Copy reviewed entries into your Codex config after checking scopes.
-
-[mcp_servers.filesystem_readonly]
-command = "npx"
-args = ["-y", "@modelcontextprotocol/server-filesystem", "."]

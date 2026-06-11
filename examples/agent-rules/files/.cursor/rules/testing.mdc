@@ -1,9 +1,0 @@
----
-description: Test-writing rules for AI coding agents
-globs: ["**/*.{test,spec}.{ts,tsx,js,jsx}"]
----
-
-- Name tests by user-visible behavior.
-- Keep one primary behavior per test.
-- Prefer deterministic data and clocks.
-- Do not delete failing tests unless the product requirement changed.

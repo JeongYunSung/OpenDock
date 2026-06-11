@@ -1,59 +1,78 @@
 opendock: 1
 id: opendock/oma
-summary: Oh My Agent setup with default full project install.
+summary: Oh My Agent setup with OpenDock-managed install, update, and uninstall.
 readme: DOCK.md
 logo: logo.png
 
+requires:
+  runtimes:
+    node: ">=22.0.0 <25.0.0"
+    bun: ">=1.3.0"
+  packages:
+    oma:
+      manager: bun
+      name: oh-my-agent
+      version: ">=8.43.0"
+
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+
 lifecycle:
   install:
-    - id: install-bun
-      check: bun --version
-      version: ">=1.3.0"
-      platforms:
-        macos:
-          run: brew install bun
-        windows:
-          run: npm install --global bun
-
-    - id: install-oma-cli
-      check: oma --version
-      version: ">=8.43.0"
-      run: bun install --global oh-my-agent@latest
-
-    - id: apply-oma-project
+    - id: apply-oma
       check: test -f .agents/oma-config.yaml
       run: oma -y install
+      workdir: dock
+      export:
+        include:
+          - AGENTS.md
+          - CLAUDE.md
+          - GEMINI.md
+          - QWEN.md
+          - .agents/**
+          - .codex/**
+          - .claude/**
+          - .cursor/**
+          - .github/copilot-instructions.md
+          - .github/instructions/**
+          - .kiro/**
+          - .qwen/**
+        exclude:
+          - "**/*.log"
+          - "**/cache/**"
+          - "**/.DS_Store"
       timeout_ms: 600000
-
-    - id: verify-oma
-      run: oma doctor
-      timeout_ms: 60000
-
   update:
-    - id: update-oma-cli
-      run: bun install --global oh-my-agent@latest
-
-    - id: update-oma-project
+    - id: update-oma
       run: oma -y update
+      workdir: dock
+      export:
+        include:
+          - AGENTS.md
+          - CLAUDE.md
+          - GEMINI.md
+          - QWEN.md
+          - .agents/**
+          - .codex/**
+          - .claude/**
+          - .cursor/**
+          - .github/copilot-instructions.md
+          - .github/instructions/**
+          - .kiro/**
+          - .qwen/**
+        exclude:
+          - "**/*.log"
+          - "**/cache/**"
+          - "**/.DS_Store"
       timeout_ms: 600000
-
-    - id: verify-oma
-      run: oma doctor
-      timeout_ms: 60000
-
   doctor:
-    - id: bun
-      check: bun --version
-      version: ">=1.3.0"
-
-    - id: oma
-      check: oma --version
-      version: ">=8.43.0"
-      repair: bun install --global oh-my-agent@latest
-
-    - id: oma-project
-      check: test -f .agents/oma-config.yaml
-
-    - id: oma-doctor
-      check: oma doctor
+    - id: check-oma
+      run: oma doctor
+      workdir: root
       timeout_ms: 60000
+    - id: check-agents
+      run: test -f AGENTS.md
+      workdir: root

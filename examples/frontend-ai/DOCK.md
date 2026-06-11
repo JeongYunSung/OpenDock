@@ -1,8 +1,5 @@
 # Frontend AI
 
-Set up an AI-ready workspace for React and Next.js frontend work.
+Add a composable AI-ready workspace for React and Next.js frontend engineering.
 
-This dock adds frontend engineering instructions, component guidance,
-TypeScript and accessibility rules, review checklists, and reusable prompts.
-Use it when AI agents should produce frontend changes that match a professional
-component system instead of generic page scaffolds.
+This dock adds frontend engineering instructions, component guidance, TypeScript and accessibility rules, review checklists, design notes, and reusable prompts. It is intentionally tool-agnostic so it can work with Codex, Claude Code, or other agent runtimes.

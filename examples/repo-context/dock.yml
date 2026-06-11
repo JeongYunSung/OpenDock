@@ -1,44 +1,26 @@
 opendock: 1
 id: opendock/repo-context
-summary: Repository context packaging and AI analysis prompts.
+summary: Composable repository context packaging and AI analysis prompts.
 readme: DOCK.md
 logo: logo.png
-
 files:
   - from: files/repomix.config.json
     to: repomix.config.json
-    update: managed_file
-
-  - from: files/.gitignore
-    to: .gitignore
-    update: append_unique
-
   - from: files/.opendock/context/README.md
     to: .opendock/context/README.md
-    update: managed_file
-
   - from: files/.opendock/prompts/repository-summary.md
     to: .opendock/prompts/repository-summary.md
-    update: managed_file
-
   - from: files/.opendock/prompts/architecture-map.md
     to: .opendock/prompts/architecture-map.md
-    update: managed_file
-
   - from: files/.opendock/prompts/change-risk-review.md
     to: .opendock/prompts/change-risk-review.md
-    update: managed_file
-
 lifecycle:
   doctor:
     - id: repomix-config
       check: test -f repomix.config.json
-
     - id: context-readme
       check: test -f .opendock/context/README.md
-
     - id: summary-prompt
       check: test -f .opendock/prompts/repository-summary.md
-
     - id: risk-prompt
       check: test -f .opendock/prompts/change-risk-review.md

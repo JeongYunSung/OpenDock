@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "filesystem-local": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
-    }
-  }
-}
