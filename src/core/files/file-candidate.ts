@@ -10,6 +10,7 @@ import {
   ensureSafeParent,
   listRegularFiles,
   normalizeRelativePath,
+  pruneEmptyParentDirectories,
   safeJoin,
   toPosixPath,
 } from "./path-utils.js";
@@ -25,6 +26,7 @@ export interface FileCandidate {
 export interface FileApplySummary {
   created: number;
   deleted: number;
+  directoriesPruned: number;
   updated: number;
   reviewRequired: number;
   records: AppliedFileRecord[];
@@ -138,15 +140,20 @@ export class FilePlan {
     const summary: FileApplySummary = {
       created: 0,
       deleted: 0,
+      directoriesPruned: 0,
       updated: 0,
       reviewRequired: 0,
       records: [],
     };
     const candidateKeys = new Set(candidates.map(candidateKey));
+    const deletedPaths: string[] = [];
     for (const record of this.priorRecords) {
       if (!candidateKeys.has(recordKey(record))) {
         const result = this.removeRecord(record);
-        if (result === "deleted") summary.deleted += 1;
+        if (result === "deleted") {
+          summary.deleted += 1;
+          deletedPaths.push(record.path);
+        }
         if (result === "updated") summary.updated += 1;
       }
     }
@@ -160,6 +167,10 @@ export class FilePlan {
         summary.created += 1;
       }
       summary.records.push(recordFromCandidate(candidate));
+    }
+
+    for (const path of deletedPaths) {
+      summary.directoriesPruned += pruneEmptyParentDirectories(this.projectDir, path);
     }
 
     return summary;

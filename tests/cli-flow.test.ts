@@ -256,6 +256,10 @@ describe("opendock TypeScript CLI", () => {
       files: [
         { path: "AGENTS.md", content: "# Agent\n" },
         { path: "PROMPTS.md", content: "# Prompts\n" },
+        {
+          path: ".github/instructions/legacy.instructions.md",
+          content: "# Legacy Instructions\n",
+        },
       ],
     });
     writeDock(docks, "test", "designer", "1.0.1", {
@@ -280,6 +284,8 @@ describe("opendock TypeScript CLI", () => {
     });
 
     expect(existsSync(join(project, "PROMPTS.md"))).toBe(false);
+    expect(existsSync(join(project, ".github", "instructions"))).toBe(false);
+    expect(existsSync(join(project, ".github"))).toBe(false);
     expect(installedDocks(project)[0]?.files?.map((file) => file.path)).toEqual(["AGENTS.md"]);
   });
 
@@ -323,6 +329,74 @@ describe("opendock TypeScript CLI", () => {
     expect(agents).not.toContain("dock=test/designer");
     expect(existsSync(join(project, "DESIGN.md"))).toBe(false);
     expect(installedDocks(project).map((dock) => dock.id)).toEqual(["test/oma"]);
+  });
+
+  it("prunes empty parent directories after uninstalling managed files", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "agent-ready", "1.0.0", {
+      files: [
+        {
+          path: ".github/instructions/agent.instructions.md",
+          content: "# Agent Instructions\n",
+        },
+        { path: ".codex/agents/reviewer.toml", content: 'name = "reviewer"\n' },
+      ],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/agent-ready@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    uninstall({ dockId: "test/agent-ready", projectDir: project });
+
+    expect(existsSync(join(project, ".github", "instructions", "agent.instructions.md"))).toBe(
+      false,
+    );
+    expect(existsSync(join(project, ".github", "instructions"))).toBe(false);
+    expect(existsSync(join(project, ".github"))).toBe(false);
+    expect(existsSync(join(project, ".codex", "agents", "reviewer.toml"))).toBe(false);
+    expect(existsSync(join(project, ".codex", "agents"))).toBe(false);
+    expect(existsSync(join(project, ".codex"))).toBe(false);
+  });
+
+  it("does not prune directories that still contain user files", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "agent-ready", "1.0.0", {
+      files: [
+        {
+          path: ".github/instructions/agent.instructions.md",
+          content: "# Agent Instructions\n",
+        },
+        { path: ".cursor/rules/opendock.mdc", content: "# Cursor Rules\n" },
+      ],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/agent-ready@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+    writeFileSync(join(project, ".github", "keep.md"), "# User file\n");
+    writeFileSync(join(project, ".cursor", "rules", "user.mdc"), "# User rule\n");
+
+    uninstall({ dockId: "test/agent-ready", projectDir: project });
+
+    expect(existsSync(join(project, ".github", "instructions"))).toBe(false);
+    expect(existsSync(join(project, ".github", "keep.md"))).toBe(true);
+    expect(existsSync(join(project, ".github"))).toBe(true);
+    expect(existsSync(join(project, ".cursor", "rules", "opendock.mdc"))).toBe(false);
+    expect(existsSync(join(project, ".cursor", "rules", "user.mdc"))).toBe(true);
+    expect(existsSync(join(project, ".cursor", "rules"))).toBe(true);
   });
 
   it("fails CLI update when the current directory has no OpenDock state", async () => {

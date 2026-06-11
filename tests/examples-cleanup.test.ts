@@ -1,0 +1,332 @@
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
+import { DockInstaller } from "../src/core/app/dock-installer.js";
+import { DockRef, parseManifestFile } from "../src/core/domain/manifest.js";
+import { OpenDockStateStore } from "../src/core/domain/state-store.js";
+import type { OpenDockPlatform } from "../src/platform.js";
+import type { ResolvedDock } from "../src/resolver.js";
+
+interface ExampleDock {
+  id: string;
+  manifestFile: string;
+  platform: "macos" | "windows";
+  root: string;
+}
+
+const testVersion = "1.0.0";
+const tempRoots: string[] = [];
+
+afterEach(() => {
+  for (const root of tempRoots.splice(0)) {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+describe("example dock cleanup behavior", () => {
+  it("installs and uninstalls every platform example without leaving managed folders behind", async () => {
+    for (const example of discoverExampleDocks()) {
+      const project = tempDir();
+      await installExample(example, project);
+      const records = installedRecords(project, example.id);
+      expect(
+        installedDocks(project).map((dock) => dock.id),
+        exampleLabel(example),
+      ).toContain(example.id);
+
+      uninstallExample(example, project);
+
+      for (const record of records) {
+        expect(
+          existsSync(join(project, record.path)),
+          `${exampleLabel(example)}:${record.path}`,
+        ).toBe(false);
+      }
+      expect(nonStateEntries(project), exampleLabel(example)).toEqual([]);
+      expect(installedDocks(project), exampleLabel(example)).toEqual([]);
+    }
+  });
+
+  it("installs and uninstalls all examples repeatedly per platform", async () => {
+    for (const platform of ["macos", "windows"] as const) {
+      const examples = discoverExampleDocks().filter((example) => example.platform === platform);
+      const project = tempDir();
+
+      for (let cycle = 1; cycle <= 3; cycle += 1) {
+        for (const example of examples) {
+          await installExample(example, project);
+        }
+        expect(
+          installedDocks(project)
+            .map((dock) => dock.id)
+            .sort(),
+        ).toEqual(examples.map((example) => example.id).sort());
+
+        for (const example of examples.toReversed()) {
+          uninstallExample(example, project);
+        }
+
+        expect(nonStateEntries(project), `${platform} cycle ${cycle}`).toEqual([]);
+        expect(installedDocks(project), `${platform} cycle ${cycle}`).toEqual([]);
+      }
+    }
+  });
+
+  it("preserves user files in directories that also contain managed example files", async () => {
+    const example = requireExample("opendock/agent-ready", "macos");
+    const project = tempDir();
+    mkdirSync(join(project, ".github", "instructions"), { recursive: true });
+    mkdirSync(join(project, ".cursor", "rules"), { recursive: true });
+    writeFileSync(join(project, "AGENTS.md"), "# Existing project agent note\n");
+    writeFileSync(join(project, ".github", "keep.md"), "# User GitHub note\n");
+    writeFileSync(join(project, ".cursor", "rules", "user.mdc"), "# User Cursor rule\n");
+
+    await installExample(example, project);
+    uninstallExample(example, project);
+
+    expect(readFileSync(join(project, "AGENTS.md"), "utf8")).toBe(
+      "# Existing project agent note\n",
+    );
+    expect(existsSync(join(project, ".github", "instructions"))).toBe(false);
+    expect(readFileSync(join(project, ".github", "keep.md"), "utf8")).toBe("# User GitHub note\n");
+    expect(existsSync(join(project, ".cursor", "rules"))).toBe(true);
+    expect(readFileSync(join(project, ".cursor", "rules", "user.mdc"), "utf8")).toBe(
+      "# User Cursor rule\n",
+    );
+    expect(installedDocks(project)).toEqual([]);
+  });
+
+  it("cleans exported task outputs from the oma example", async () => {
+    const example = requireExample("opendock/oma", "macos");
+    const project = tempDir();
+    const bin = tempDir();
+    const bunInstall = tempDir();
+    writeFakeOma(bin);
+    writeFakeBunGlobalPackage(bunInstall, "oh-my-agent", "8.43.0");
+
+    await withEnv(
+      {
+        BUN_INSTALL: bunInstall,
+        PATH: `${bin}:${process.env.PATH ?? ""}`,
+      },
+      () => installExample(example, project, { runTasks: true }),
+    );
+
+    expect(existsSync(join(project, ".agents", "skills", "oma-brainstorm", "SKILL.md"))).toBe(true);
+    expect(existsSync(join(project, ".codex", "agents", "reviewer.toml"))).toBe(true);
+    expect(existsSync(join(project, ".github", "instructions", "oma.instructions.md"))).toBe(true);
+    expect(existsSync(join(project, ".agents", "cache", "ignored.log"))).toBe(false);
+    expect(existsSync(join(project, ".opendock", "workdirs", "opendock__oma"))).toBe(true);
+
+    uninstallExample(example, project);
+
+    expect(existsSync(join(project, ".opendock", "workdirs", "opendock__oma"))).toBe(false);
+    expect(nonStateEntries(project)).toEqual([]);
+    expect(installedDocks(project)).toEqual([]);
+  });
+
+  it("rejects unmanaged file conflicts before writing any example files", async () => {
+    const example = requireExample("opendock/agent-safety", "macos");
+    const project = tempDir();
+    writeFileSync(join(project, ".gitleaks.toml"), "# user-owned gitleaks config\n");
+    writeFileSync(join(project, "KEEP.txt"), "do not touch\n");
+
+    await expect(installExample(example, project)).rejects.toThrow(
+      "target already exists and is not OpenDock-owned",
+    );
+
+    expect(readFileSync(join(project, ".gitleaks.toml"), "utf8")).toBe(
+      "# user-owned gitleaks config\n",
+    );
+    expect(readFileSync(join(project, "KEEP.txt"), "utf8")).toBe("do not touch\n");
+    expect(existsSync(join(project, ".github"))).toBe(false);
+    expect(installedDocks(project)).toEqual([]);
+  });
+});
+
+async function installExample(
+  example: ExampleDock,
+  projectDir: string,
+  options: { runTasks?: boolean } = {},
+): Promise<void> {
+  await new DockInstaller().install({
+    dockRef: DockRef.parse(`${example.id}@${testVersion}`),
+    projectDir,
+    operation: "install",
+    phase: "install",
+    platform: example.platform,
+    runTasks: options.runTasks ?? false,
+    resolve: localExampleResolver(example),
+  });
+}
+
+function uninstallExample(example: ExampleDock, projectDir: string): void {
+  new DockInstaller().uninstall({
+    dockId: example.id,
+    projectDir,
+  });
+}
+
+function localExampleResolver(example: ExampleDock) {
+  return (dockRef: DockRef, platform: OpenDockPlatform): ResolvedDock => {
+    expect(dockRef.id()).toBe(example.id);
+    expect(platform).toBe(example.platform);
+    return {
+      manifest: parseManifestFile(example.manifestFile),
+      version: testVersion,
+      platform,
+      root: example.root,
+      checksum: `${example.id}-${example.platform}-${testVersion}-checksum`,
+      signature: "test-signature",
+    };
+  };
+}
+
+function discoverExampleDocks(): ExampleDock[] {
+  const examplesRoot = join(process.cwd(), "examples");
+  return readdirSync(examplesRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .flatMap((entry) => {
+      const root = join(examplesRoot, entry.name);
+      return (["macos", "windows"] as const)
+        .map((platform) => ({
+          manifestFile: join(root, `dock.${platform}.yml`),
+          platform,
+          root,
+        }))
+        .filter((candidate) => existsSync(candidate.manifestFile))
+        .map((candidate) => ({
+          ...candidate,
+          id: parseManifestFile(candidate.manifestFile).id,
+        }));
+    })
+    .sort((a, b) => exampleLabel(a).localeCompare(exampleLabel(b)));
+}
+
+function requireExample(id: string, platform: "macos" | "windows"): ExampleDock {
+  const example = discoverExampleDocks().find(
+    (candidate) => candidate.id === id && candidate.platform === platform,
+  );
+  if (!example) {
+    throw new Error(`missing example ${id} for ${platform}`);
+  }
+  return example;
+}
+
+function installedDocks(projectDir: string) {
+  return new OpenDockStateStore(projectDir).readLock().docks;
+}
+
+function installedRecords(projectDir: string, dockId: string) {
+  return installedDocks(projectDir).find((dock) => dock.id === dockId)?.files ?? [];
+}
+
+function nonStateEntries(projectDir: string): string[] {
+  const allowedStateEntries = new Set([
+    ".opendock/",
+    ".opendock/dock.lock.yml",
+    ".opendock/project.yml",
+  ]);
+  return listEntries(projectDir).filter((entry) => !allowedStateEntries.has(entry));
+}
+
+function listEntries(root: string): string[] {
+  const entries: string[] = [];
+  function visit(current: string, relativePath: string): void {
+    for (const entry of readdirSync(current, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    )) {
+      const nextRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        entries.push(`${nextRelativePath}/`);
+        visit(join(current, entry.name), nextRelativePath);
+      } else {
+        entries.push(nextRelativePath);
+      }
+    }
+  }
+  visit(root, "");
+  return entries;
+}
+
+function tempDir(): string {
+  const dir = mkdtempSync(join(tmpdir(), "opendock-examples-test-"));
+  tempRoots.push(dir);
+  return dir;
+}
+
+function exampleLabel(example: ExampleDock): string {
+  return `${example.id} [${example.platform}]`;
+}
+
+function writeFakeOma(bin: string): void {
+  const omaPath = join(bin, "oma");
+  writeFileSync(
+    omaPath,
+    `#!/usr/bin/env bash
+set -euo pipefail
+case "$*" in
+  *install*)
+    mkdir -p .agents/skills/oma-brainstorm .agents/cache .codex/agents .github/instructions
+    printf 'language: ko\\n' > .agents/oma-config.yaml
+    printf '# OMA Agent\\n\\nGenerated by fake OMA.\\n' > AGENTS.md
+    printf '# Claude\\n' > CLAUDE.md
+    printf '# Gemini\\n' > GEMINI.md
+    printf '# Skill\\n' > .agents/skills/oma-brainstorm/SKILL.md
+    printf 'name = "reviewer"\\n' > .codex/agents/reviewer.toml
+    printf '# OMA Instructions\\n' > .github/instructions/oma.instructions.md
+    printf 'ignore me\\n' > .agents/cache/ignored.log
+    ;;
+  *doctor*)
+    test -f AGENTS.md
+    ;;
+esac
+`,
+  );
+  chmodSync(omaPath, 0o755);
+}
+
+function writeFakeBunGlobalPackage(bunInstall: string, packageName: string, version: string): void {
+  const packageDir = join(
+    bunInstall,
+    "install",
+    "global",
+    "node_modules",
+    ...packageName.split("/"),
+  );
+  mkdirSync(packageDir, { recursive: true });
+  writeFileSync(join(packageDir, "package.json"), JSON.stringify({ name: packageName, version }));
+}
+
+async function withEnv<T>(env: NodeJS.ProcessEnv, fn: () => Promise<T>): Promise<T> {
+  const previous = new Map<string, string | undefined>();
+  for (const [key, value] of Object.entries(env)) {
+    previous.set(key, process.env[key]);
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
+  try {
+    return await fn();
+  } finally {
+    for (const [key, value] of previous) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  }
+}

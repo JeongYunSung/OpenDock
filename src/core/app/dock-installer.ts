@@ -16,6 +16,7 @@ import {
   FileCandidateCollector,
   FilePlan,
 } from "../files/file-candidate.js";
+import { pruneEmptyDirectoryChain } from "../files/path-utils.js";
 import { type StepReport, TaskRunner } from "../runtime/task-runner.js";
 
 type DockResolver = (
@@ -145,10 +146,12 @@ export class DockInstaller {
     const filePlan = new FilePlan(options.projectDir, dock.id, dock.files, options.force === true);
     filePlan.verifyPriorState();
     const summary = filePlan.apply([]);
-    rmSync(this.taskRunner.dockWorkdir(options.projectDir, dock.id), {
+    const workdir = this.taskRunner.dockWorkdir(options.projectDir, dock.id);
+    rmSync(workdir, {
       recursive: true,
       force: true,
     });
+    pruneEmptyDirectoryChain(options.projectDir, relative(options.projectDir, workdir));
     store.removeDock(dock.id);
     appendRunLog(
       options.projectDir,

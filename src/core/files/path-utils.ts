@@ -1,5 +1,5 @@
-import { existsSync, lstatSync, mkdirSync, readdirSync } from "node:fs";
-import { isAbsolute, join, relative, resolve, sep } from "node:path";
+import { existsSync, lstatSync, mkdirSync, readdirSync, rmdirSync } from "node:fs";
+import { isAbsolute, join, posix, relative, resolve, sep } from "node:path";
 
 export function normalizeRelativePath(value: string): string {
   return value.trim().replaceAll("\\", "/").replaceAll(/\/+/g, "/");
@@ -117,6 +117,43 @@ export function listRegularFiles(root: string, relativeRoot = ""): string[] {
     files.push(rel);
   }
   return files;
+}
+
+export function pruneEmptyParentDirectories(root: string, relativeFilePath: string): number {
+  const normalized = assertSafeRelativePath(relativeFilePath, "directory prune path");
+  const parent = posix.dirname(normalized);
+  return parent === "." || parent === "/" ? 0 : pruneEmptyDirectoryChain(root, parent);
+}
+
+export function pruneEmptyDirectoryChain(root: string, relativeDirectoryPath: string): number {
+  const normalized = normalizeRelativePath(relativeDirectoryPath);
+  if (normalized === "." || normalized === "/") {
+    return 0;
+  }
+  let currentRelative = assertSafeRelativePath(normalized, "directory prune path");
+  let pruned = 0;
+
+  while (currentRelative !== "." && currentRelative !== "/") {
+    const current = safeJoin(root, currentRelative, "directory prune path");
+    if (!existsSync(current)) {
+      currentRelative = posix.dirname(currentRelative);
+      continue;
+    }
+
+    const stat = lstatSync(current);
+    if (stat.isSymbolicLink() || !stat.isDirectory()) {
+      break;
+    }
+    if (readdirSync(current).length > 0) {
+      break;
+    }
+
+    rmdirSync(current);
+    pruned += 1;
+    currentRelative = posix.dirname(currentRelative);
+  }
+
+  return pruned;
 }
 
 export function toPosixPath(value: string): string {
