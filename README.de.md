@@ -2,11 +2,10 @@
 
 # OpenDock
 
-**Geprüfte Docks für KI-Arbeitsbereiche.**
+**Einfaches KI-Setup für jeden Arbeitsbereich.**
 
-Installiere die Projektkonfiguration, der du vertraust, mit einem einzigen
-Befehl. Halte die Befehlsoberfläche klein, die Einrichtung wiederholbar und jede
-generierte Datei auditierbar.
+Installiere geprüfte KI-Setup-Packs mit einem einzigen Befehl. Halte das Setup
+einfach, wiederholbar und sicher für Entwickler und Nicht-Entwickler.
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -19,15 +18,15 @@ generierte Datei auditierbar.
 
 ---
 
-OpenDock ist eine Bun-first TypeScript-CLI zum Installieren geprüfter Docks in
-das aktuelle Projektverzeichnis.
+OpenDock ist eine Bun-first TypeScript-CLI zum Installieren geprüfter
+KI-Setup-Packs in das aktuelle Projektverzeichnis.
 
 Das erste Dock ist `opendock/codex`: ein minimaler Codex-Starter, der Node
 prüft, die Codex CLI installiert und die Einrichtung über OpenDock state
 nachverfolgbar macht.
 
 OpenDock ist bewusst kein Terminal-Ersatz. Es ist das kleine Binary, das du
-ausführst, wenn ein Projekt eine verlässliche KI-Konfiguration braucht.
+ausführst, wenn ein Projekt ein einfaches und verlässliches KI-Setup braucht.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -43,9 +42,9 @@ opendock deploy opendock/codex@1.0.0
 
 ## Warum OpenDock
 
-KI-Workspace-Setup besteht oft aus einmaligen shell commands, kopierten Prompt-
-Dateien, version drift und halb erinnerten Projektkonventionen. OpenDock macht
-daraus ein geprüftes Dock:
+KI-Setup in einem Projekt besteht oft aus einmaligen shell commands, kopierten
+Prompt-Dateien, version drift und halb erinnerten Projektkonventionen. OpenDock
+macht daraus ein geprüftes Setup-Pack:
 
 - **Projektbezogen**: installiert in das aktuelle Verzeichnis und schreibt
   lokalen `.opendock/` state.

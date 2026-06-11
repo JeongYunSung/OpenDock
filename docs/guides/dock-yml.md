@@ -1,6 +1,6 @@
 # dock.yml 작성 가이드
 
-`dock.yml`은 OpenDock dock의 진입점입니다. 어떤 파일을 프로젝트에 넣을지, 기존 파일을 어떻게 보존할지, 설치와 업데이트 때 어떤 명령을 실행할지, doctor에서 어떤 상태를 점검할지를 선언합니다.
+OpenDock의 모토는 **Simple AI setup for every workspace**입니다. `dock.yml`은 이 모토를 실제 프로젝트에 적용하는 진입점입니다. 검토된 AI 설정팩이 어떤 파일을 프로젝트에 넣을지, 기존 파일을 어떻게 보존할지, 설치와 업데이트 때 어떤 명령을 실행할지, doctor에서 어떤 상태를 점검할지를 선언합니다.
 
 이 문서는 현재 OpenDock CLI 구현 기준입니다. 미래에 추가될 수 있는 dock catalog UI나 OpenDock Registry 운영 정책이 아니라, 지금 `src/dock.ts`, `src/installer.ts`, `src/runner.ts`가 실제로 해석하는 형식을 설명합니다.
 

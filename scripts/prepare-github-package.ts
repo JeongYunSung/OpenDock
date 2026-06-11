@@ -49,7 +49,7 @@ for (const file of readdirSync(rootDir)) {
 const publishPackage = {
   name: packageName,
   version: rootPackage.version,
-  description: rootPackage.description ?? "Approved docks for AI workspaces.",
+  description: rootPackage.description ?? "Simple AI setup for every workspace.",
   type: "module",
   license: rootPackage.license ?? "MIT",
   bin: {

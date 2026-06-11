@@ -2,11 +2,11 @@
 
 # OpenDock
 
-**Des docks approuvés pour les espaces de travail IA.**
+**Une configuration IA simple pour chaque espace de travail.**
 
-Installez la configuration de projet que vous approuvez avec une seule commande.
-Gardez une surface de commande réduite, une configuration répétable et chaque
-fichier généré auditable.
+Installez des packs de configuration IA révisés avec une seule commande. Gardez
+le setup simple, répétable et sûr pour les développeurs comme pour les
+non-développeurs.
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -19,15 +19,16 @@ fichier généré auditable.
 
 ---
 
-OpenDock est une CLI TypeScript Bun-first pour installer des docks approuvés
-dans le répertoire courant du projet.
+OpenDock est une CLI TypeScript Bun-first pour installer des packs de
+configuration IA révisés dans le répertoire courant du projet.
 
 Le premier dock est `opendock/codex` : un dock minimal de setup Codex qui vérifie
 Node, installe la CLI Codex et garde la configuration suivie dans l'état
 OpenDock.
 
 OpenDock n'est volontairement pas un remplacement du terminal. C'est le petit
-binaire à exécuter lorsqu'un projet a besoin d'une configuration IA fiable.
+binaire à exécuter lorsqu'un projet a besoin d'une configuration IA simple et
+fiable.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -43,10 +44,9 @@ opendock deploy opendock/codex@1.0.0
 
 ## Pourquoi OpenDock
 
-La configuration d'un espace de travail IA devient souvent un empilement de
-commandes shell ponctuelles, de fichiers prompt copiés, de dérive de versions et
-de conventions de projet à moitié mémorisées. OpenDock transforme cela en dock
-révisé :
+La configuration IA d'un projet devient souvent un empilement de commandes shell
+ponctuelles, de fichiers prompt copiés, de dérive de versions et de conventions
+de projet à moitié mémorisées. OpenDock transforme cela en setup pack révisé :
 
 - **Portée projet** : installe dans le répertoire courant et écrit l'état local
   `.opendock/`.

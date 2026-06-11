@@ -2,11 +2,10 @@
 
 # OpenDock
 
-**Docks aprobados para espacios de trabajo con IA.**
+**Configuración de IA simple para cualquier espacio de trabajo.**
 
-Instala la configuración de proyecto en la que confías con un solo comando.
-Mantén una superficie de comandos pequeña, una configuración repetible y cada
-archivo generado auditable.
+Instala paquetes de configuración de IA revisados con un solo comando. Mantén el
+setup fácil, repetible y seguro para desarrolladores y no desarrolladores.
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -19,15 +18,15 @@ archivo generado auditable.
 
 ---
 
-OpenDock es una CLI Bun-first en TypeScript para instalar docks aprobados en el
-directorio actual del proyecto.
+OpenDock es una CLI Bun-first en TypeScript para instalar paquetes de
+configuración de IA revisados en el directorio actual del proyecto.
 
 El primer dock es `opendock/codex`: un dock mínimo de setup para Codex que verifica
 Node, instala la CLI de Codex y mantiene la configuración registrada en el
 estado de OpenDock.
 
 OpenDock no pretende reemplazar la terminal. Es el binario pequeño que ejecutas
-cuando un proyecto necesita una configuración de IA confiable.
+cuando un proyecto necesita una configuración de IA simple y confiable.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -43,10 +42,9 @@ opendock deploy opendock/codex@1.0.0
 
 ## Por Qué OpenDock
 
-La configuración de un espacio de trabajo con IA suele convertirse en una pila
-de comandos shell puntuales, archivos prompt copiados, drift de versiones y
-convenciones de proyecto medio recordadas. OpenDock lo convierte en un dock
-revisado:
+La configuración de IA de un proyecto suele convertirse en una pila de comandos
+shell puntuales, archivos prompt copiados, drift de versiones y convenciones de
+proyecto medio recordadas. OpenDock lo convierte en un setup pack revisado:
 
 - **Con alcance de proyecto**: instala en el directorio actual y escribe estado
   local en `.opendock/`.

@@ -2,10 +2,10 @@
 
 # OpenDock
 
-**AI ワークスペースのための承認済み dock。**
+**あらゆるワークスペースに、シンプルなAIセットアップを。**
 
-信頼できるプロジェクト設定を 1 つのコマンドでインストールします。コマンド面は小さく、
-設定は再現可能に、生成されたすべてのファイルは監査可能に保ちます。
+レビュー済みのAIセットアップパックを1つのコマンドでインストールします。
+開発者にも非開発者にも、セットアップを簡単、再現可能、安全に保ちます。
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -18,14 +18,14 @@
 
 ---
 
-OpenDock は、承認済み dock を現在のプロジェクトディレクトリへ
-インストールする Bun-first TypeScript CLI です。
+OpenDock は、レビュー済みのAIセットアップパックを現在のプロジェクト
+ディレクトリへインストールする Bun-first TypeScript CLI です。
 
 最初の dock は `opendock/codex` です。Node を確認し、Codex CLI を
 インストールし、その設定を OpenDock state で追跡します。
 
-OpenDock はターミナルの代替ではありません。プロジェクトに信頼できる AI
-設定が必要なときに実行する小さなバイナリです。
+OpenDock はターミナルの代替ではありません。プロジェクトにシンプルで
+信頼できるAI設定が必要なときに実行する小さなバイナリです。
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -41,9 +41,9 @@ opendock deploy opendock/codex@1.0.0
 
 ## OpenDock を使う理由
 
-AI ワークスペースの設定は、一度きりの shell コマンド、コピーされた prompt
+プロジェクトのAI設定は、一度きりの shell コマンド、コピーされた prompt
 ファイル、version drift、半分だけ覚えているプロジェクト規約の寄せ集めになりがちです。
-OpenDock はそれをレビュー済みの dock に変えます。
+OpenDock はそれをレビュー済みのAIセットアップパックに変えます。
 
 - **プロジェクト単位**: 現在のディレクトリにインストールし、ローカルの
   `.opendock/` state を書き込みます。

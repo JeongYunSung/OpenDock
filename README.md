@@ -4,10 +4,10 @@
 
 # OpenDock
 
-**Approved docks for AI workspaces.**
+**Simple AI setup for every workspace.**
 
-Install the project setup you trust with one command. Keep the command surface
-small, the setup repeatable, and every generated file auditable.
+Install reviewed AI setup packs with one command. Keep setup easy, repeatable,
+and safe for developers and non-developers.
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -20,14 +20,14 @@ small, the setup repeatable, and every generated file auditable.
 
 ---
 
-OpenDock is a Bun-first TypeScript CLI for installing approved docks into
-the current project directory.
+OpenDock is a Bun-first TypeScript CLI for installing reviewed AI setup packs
+into the current project directory.
 
 The first dock is `opendock/codex`: a minimal Codex setup dock that verifies Node,
 installs the Codex CLI, and keeps the setup tracked through OpenDock state.
 
 OpenDock is intentionally not a terminal replacement. It is the small binary you
-run when a project needs a known-good AI setup.
+run when a project needs simple, trusted AI setup.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -43,9 +43,9 @@ opendock deploy opendock/codex@1.0.0
 
 ## Why OpenDock
 
-AI workspace setup is usually a pile of one-off shell commands, copied prompt
-files, version drift, and half-remembered project conventions. OpenDock turns
-that into a reviewed dock:
+AI setup for a project is usually a pile of one-off shell commands, copied
+prompt files, version drift, and half-remembered project conventions. OpenDock
+turns that into a reviewed setup pack:
 
 - **Project-scoped**: installs into the current directory and writes local
   `.opendock/` state.

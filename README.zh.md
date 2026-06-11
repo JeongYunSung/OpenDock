@@ -2,9 +2,9 @@
 
 # OpenDock
 
-**面向 AI 工作区的已审核 dock。**
+**让每个工作区都能轻松完成 AI 设置。**
 
-用一条命令安装你信任的项目设置。保持命令面小、设置可重复，并让每个生成文件都可审计。
+用一条命令安装已审核的 AI 设置包。让开发者和非开发者都能获得简单、可重复、可靠的设置。
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -17,11 +17,11 @@
 
 ---
 
-OpenDock 是一个 Bun-first TypeScript CLI，用于把已审核的 dock 安装到当前项目目录。
+OpenDock 是一个 Bun-first TypeScript CLI，用于把已审核的 AI 设置包安装到当前项目目录。
 
 第一个 dock 是 `opendock/codex`：它会检查 Node，安装 Codex CLI，并通过 OpenDock state 追踪设置状态。
 
-OpenDock 有意不做终端替代品。它是一个小型 binary，在项目需要可靠的 AI 设置时运行。
+OpenDock 有意不做终端替代品。它是一个小型 binary，在项目需要简单且可靠的 AI 设置时运行。
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -37,7 +37,7 @@ opendock deploy opendock/codex@1.0.0
 
 ## 为什么需要 OpenDock
 
-AI 工作区设置通常会变成一堆一次性 shell 命令、复制来的 prompt 文件、版本漂移，以及记不清的项目约定。OpenDock 把这些变成一个经过审核的 dock：
+项目中的 AI 设置通常会变成一堆一次性 shell 命令、复制来的 prompt 文件、版本漂移，以及记不清的项目约定。OpenDock 把这些变成一个经过审核的 AI 设置包：
 
 - **项目级作用域**：安装到当前目录，并写入本地 `.opendock/` state。
 - **默认走审核**：远程 dock 必须来自 OpenDock Registry 已批准的 metadata。

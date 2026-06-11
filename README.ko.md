@@ -2,10 +2,10 @@
 
 # OpenDock
 
-**AI 작업공간을 위한 승인된 dock.**
+**누구나 쉽게 시작하는 AI 작업환경.**
 
-신뢰할 수 있는 프로젝트 설정을 한 명령으로 설치하세요. 명령 표면은 작게,
-설정은 반복 가능하게, 생성된 모든 파일은 검토 가능하게 유지합니다.
+검토된 AI 설정팩을 한 명령으로 설치하세요. 개발자와 비개발자 모두를 위해
+설정은 쉽고 반복 가능하며 안전하게 유지합니다.
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -18,14 +18,14 @@
 
 ---
 
-OpenDock은 현재 프로젝트 디렉터리에 승인된 dock을 설치하는 Bun-first
+OpenDock은 현재 프로젝트 디렉터리에 검토된 AI 설정팩을 설치하는 Bun-first
 TypeScript CLI입니다.
 
 첫 dock은 `opendock/codex`입니다. Node를 확인하고, Codex CLI를 설치하며,
 설정 상태를 OpenDock state로 추적합니다.
 
-OpenDock은 터미널 대체재가 아닙니다. 프로젝트에 검증된 AI 설정이 필요할 때
-실행하는 작은 바이너리입니다.
+OpenDock은 터미널 대체재가 아닙니다. 프로젝트에 간단하고 신뢰할 수 있는
+AI 설정이 필요할 때 실행하는 작은 바이너리입니다.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -41,9 +41,9 @@ opendock deploy opendock/codex@1.0.0
 
 ## OpenDock이 필요한 이유
 
-AI 작업공간 설정은 보통 일회성 shell 명령, 복사된 prompt 파일, 버전 drift,
+프로젝트의 AI 설정은 보통 일회성 shell 명령, 복사된 prompt 파일, 버전 drift,
 희미하게 기억나는 프로젝트 규칙의 묶음이 되기 쉽습니다. OpenDock은 이를
-검토된 dock으로 바꿉니다.
+검토된 AI 설정팩으로 바꿉니다.
 
 - **프로젝트 단위**: 현재 디렉터리에 설치하고 로컬 `.opendock/` 상태를 씁니다.
 - **승인 중심 설계**: 원격 dock은 OpenDock Registry가 승인한 metadata에서만
