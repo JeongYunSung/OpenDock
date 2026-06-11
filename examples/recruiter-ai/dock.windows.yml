@@ -1,0 +1,23 @@
+opendock: 1
+id: opendock/recruiter-ai
+summary: Composable recruiting workspace for job descriptions, interviews,
+  scorecards, and outreach.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/JOB_DESCRIPTION.md
+    to: JOB_DESCRIPTION.md
+  - from: files/INTERVIEW_GUIDE.md
+    to: INTERVIEW_GUIDE.md
+  - from: files/SCORECARD.md
+    to: SCORECARD.md
+  - from: files/CANDIDATE_OUTREACH.md
+    to: CANDIDATE_OUTREACH.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md

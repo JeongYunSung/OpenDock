@@ -1,0 +1,34 @@
+opendock: 1
+id: opendock/devops-ai
+summary: Composable DevOps workspace for CI/CD, deployment, incidents, and
+  secrets policy.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/CI_CD.md
+    to: CI_CD.md
+  - from: files/DEPLOYMENT_RUNBOOK.md
+    to: DEPLOYMENT_RUNBOOK.md
+  - from: files/INCIDENT_RUNBOOK.md
+    to: INCIDENT_RUNBOOK.md
+  - from: files/SECRETS_POLICY.md
+    to: SECRETS_POLICY.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
+doctor:
+  - id: agents-md
+    check: test -f AGENTS.md
+  - id: ci-cd-md
+    check: test -f CI_CD.md
+  - id: deployment-runbook-md
+    check: test -f DEPLOYMENT_RUNBOOK.md
+  - id: incident-runbook-md
+    check: test -f INCIDENT_RUNBOOK.md
+  - id: prompts-md
+    check: test -f PROMPTS.md

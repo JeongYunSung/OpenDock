@@ -1,0 +1,23 @@
+opendock: 1
+id: opendock/marketer-ai
+summary: Composable marketing workspace for campaigns, content planning, SEO,
+  and ad experiments.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/CAMPAIGN_BRIEF.md
+    to: CAMPAIGN_BRIEF.md
+  - from: files/CONTENT_CALENDAR.md
+    to: CONTENT_CALENDAR.md
+  - from: files/SEO_BRIEF.md
+    to: SEO_BRIEF.md
+  - from: files/AD_EXPERIMENTS.md
+    to: AD_EXPERIMENTS.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md

@@ -1,0 +1,23 @@
+opendock: 1
+id: opendock/data-analyst
+summary: Composable analytics workspace for metrics, SQL review, dashboards, and
+  experiments.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/METRICS_DICTIONARY.md
+    to: METRICS_DICTIONARY.md
+  - from: files/SQL_REVIEW.md
+    to: SQL_REVIEW.md
+  - from: files/DASHBOARD_BRIEF.md
+    to: DASHBOARD_BRIEF.md
+  - from: files/EXPERIMENT_ANALYSIS.md
+    to: EXPERIMENT_ANALYSIS.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md

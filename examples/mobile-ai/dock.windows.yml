@@ -1,0 +1,23 @@
+opendock: 1
+id: opendock/mobile-ai
+summary: Composable mobile workspace for app architecture, UI patterns,
+  releases, and testing.
+readme: DOCK.md
+logo: logo.png
+files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/MOBILE_ARCHITECTURE.md
+    to: MOBILE_ARCHITECTURE.md
+  - from: files/UI_PATTERNS.md
+    to: UI_PATTERNS.md
+  - from: files/RELEASE_CHECKLIST.md
+    to: RELEASE_CHECKLIST.md
+  - from: files/TESTING.md
+    to: TESTING.md
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
