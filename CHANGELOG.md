@@ -5,6 +5,27 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.8 - 2026-06-12
+
+### Added
+
+- Added `workdir.files` for seeding dock-private workdirs before install/update
+  task steps run.
+- Included `workdir.files[].from` entries in deploy archives.
+
+### Changed
+
+- Updated the `opendock/oma` example to seed `oma-config.yaml` and run
+  `oma -y install` as the single generator step for Codex-ready OMA outputs.
+- Updated README, guide, docs, and examples to explain `files`,
+  `workdir.files`, and `export` as separate paths.
+
+### Tests
+
+- Added regression coverage for workdir file seeding before external command
+  execution.
+- Added deploy archive coverage for `workdir.files` sources.
+
 ## 0.1.7 - 2026-06-12
 
 ### Changed
