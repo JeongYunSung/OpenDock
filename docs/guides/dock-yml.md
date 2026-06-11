@@ -9,11 +9,16 @@
 | 예제 | 용도 |
 |---|---|
 | `examples/git/dock.yml` | Git 설치와 프로젝트 초기화를 담당하는 기본 dock |
-| `examples/codex/dock.yml` | Codex CLI와 기본 프로젝트 파일을 적용하는 dock |
+| `examples/codex/dock.yml` | Codex CLI만 설치하는 dock |
 | `examples/oma/dock.yml` | 파일 payload 없이 Oh My Agent를 적용하는 dock |
 | `examples/claude-code/dock.yml` | Claude Code를 설치하는 dock |
 | `examples/oh-my-codex/dock.yml` | Oh My Codex를 설치하고 `omx setup`을 실행하는 dock |
 | `examples/oh-my-openagent/dock.yml` | Oh My OpenAgent Codex Light를 설치하는 dock |
+| `examples/agent-ready/dock.yml` | 여러 AI coding agent용 instruction 파일을 설치하는 dock |
+| `examples/ai-context/dock.yml` | AI-friendly repository context export 설정을 설치하는 dock |
+| `examples/mcp-local/dock.yml` | project-local MCP 설정 예시를 설치하는 dock |
+| `examples/agent-safety/dock.yml` | AI-generated changes를 위한 PR/security safety rails를 설치하는 dock |
+| `examples/agent-docs/dock.yml` | AI가 읽기 쉬운 운영 문서 하네스를 설치하는 dock |
 
 ## 기본 구조
 
@@ -35,14 +40,14 @@ my-dock/
 
 ```yaml
 opendock: 1
-id: opendock/codex
-summary: Codex CLI setup with managed workspace files.
+id: opendock/agent-ready
+summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
 
 files:
-  - from: files/README.md
-    to: README.md
+  - from: files/AGENTS.md
+    to: AGENTS.md
     update: managed_block
 ```
 
@@ -56,81 +61,31 @@ files:
 
 ```yaml
 opendock: 1
-id: opendock/codex
-summary: Codex CLI setup with managed workspace files.
+id: opendock/agent-ready
+summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
 
 files:
-  - from: files/.agents
-    to: .agents
-    update: managed_file
-
-  - from: files/DESIGN.md
-    to: DESIGN.md
-    update: managed_block
-
   - from: files/AGENTS.md
     to: AGENTS.md
     update: managed_block
 
-  - from: files/README.md
-    to: README.md
-    update: manual_review
+  - from: files/.cursor/rules/project.mdc
+    to: .cursor/rules/project.mdc
+    update: managed_file
 
-  - from: files/.gitignore
-    to: .gitignore
-    update: append_unique
+  - from: files/.github/copilot-instructions.md
+    to: .github/copilot-instructions.md
+    update: managed_file
 
 lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
-
-    - id: install-node
-      check: node --version
-      version: ">=22.0.0"
-      platforms:
-        macos:
-          run: brew install node
-        windows:
-          run: winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
-
-    - id: install-codex-cli
-      check: codex --version
-      version: ">=0.0.0"
-      run: npm install --global @openai/codex@latest
-
-    - id: verify-codex-cli
-      run: codex --version
-      timeout_ms: 60000
-
-  update:
-    - id: update-codex-cli
-      run: npm install --global @openai/codex@latest
-
-    - id: verify-codex-cli
-      run: codex --version
-      timeout_ms: 60000
-
   doctor:
-    - id: git
-      version: ">=2.40.0"
-      check: git --version
+    - id: agents-md
+      check: test -f AGENTS.md
 
-    - id: node
-      version: ">=22.0.0"
-      check: node --version
-
-    - id: npm
-      version: ">=10.0.0"
-      check: npm --version
-
-    - id: codex
-      version: ">=0.0.0"
-      check: codex --version
-      timeout_ms: 60000
+    - id: cursor-rules
+      check: test -f .cursor/rules/project.mdc
 ```
 
 ## Top-Level 필드
@@ -277,9 +232,9 @@ files:
 기존 `AGENTS.md`가 있으면 다음 형태의 블록이 추가됩니다.
 
 ```md
-<!-- OPENDOCK:START opendock/codex:AGENTS.md -->
+<!-- OPENDOCK:START opendock/agent-ready:AGENTS.md -->
 ...
-<!-- OPENDOCK:END opendock/codex:AGENTS.md -->
+<!-- OPENDOCK:END opendock/agent-ready:AGENTS.md -->
 ```
 
 다시 설치하거나 업데이트하면 같은 marker 안의 내용만 교체됩니다. 사용자가 블록 바깥에 쓴 내용은 유지됩니다. `DESIGN.md`, `AGENTS.md`, 규칙 문서처럼 OpenDock이 지속적으로 업데이트해야 하는 파일에 적합합니다.

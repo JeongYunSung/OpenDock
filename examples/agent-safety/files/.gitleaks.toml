@@ -1,0 +1,11 @@
+title = "OpenDock agent safety baseline"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Documentation placeholders"
+regexes = [
+  '''YOUR_[A-Z0-9_]+''',
+  '''REPLACE_ME'''
+]

@@ -1,25 +1,8 @@
 opendock: 1
 id: opendock/codex
-summary: Codex CLI setup with managed workspace files.
+summary: Codex CLI setup without project file payloads.
 readme: DOCK.md
 logo: logo.png
-
-files:
-  - from: files/DESIGN.md
-    to: DESIGN.md
-    update: managed_block
-
-  - from: files/AGENTS.md
-    to: AGENTS.md
-    update: managed_block
-
-  - from: files/README.md
-    to: README.md
-    update: manual_review
-
-  - from: files/.gitignore
-    to: .gitignore
-    update: append_unique
 
 lifecycle:
   install:

@@ -1,9 +1,9 @@
 # Codex
 
-Install the Codex CLI and apply reviewable workspace files.
+Install the Codex CLI only.
 
-This dock checks for a supported Node.js runtime, installs the OpenAI Codex CLI,
-and manages project files such as `AGENTS.md`, `DESIGN.md`, `README.md`, and
-`.gitignore` with explicit update policies.
+This dock checks for a supported Node.js runtime and installs the OpenAI Codex
+CLI through npm.
 
-Use it for a general Codex-ready project setup.
+Use it when a project only needs the Codex command available. It does not create
+or manage project instruction files.

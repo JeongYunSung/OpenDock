@@ -22,8 +22,7 @@ OpenDock は、承認済み dock を現在のプロジェクトディレクト�
 インストールする Bun-first TypeScript CLI です。
 
 最初の dock は `opendock/codex` です。Node を確認し、Codex CLI を
-インストールし、レビュー可能なプロジェクトファイルを適用し、その設定を
-OpenDock state で追跡します。
+インストールし、その設定を OpenDock state で追跡します。
 
 OpenDock はターミナルの代替ではありません。プロジェクトに信頼できる AI
 設定が必要なときに実行する小さなバイナリです。
@@ -86,10 +85,6 @@ cd "$project"
 .opendock/
   dock.lock.yml
   project.yml
-AGENTS.md
-DESIGN.md
-README.md
-.gitignore
 ```
 
 ## コマンド
@@ -151,26 +146,9 @@ payloads としても listed されていない限り catalog metadata として
 ```yaml
 opendock: 1
 id: opendock/codex
-summary: Codex CLI setup with managed workspace files.
+summary: Codex CLI setup without project file payloads.
 readme: DOCK.md
 logo: logo.png
-
-files:
-  - from: files/.agents
-    to: .agents
-    update: managed_file
-
-  - from: files/DESIGN.md
-    to: DESIGN.md
-    update: managed_block
-
-  - from: files/README.md
-    to: README.md
-    update: manual_review
-
-  - from: files/.gitignore
-    to: .gitignore
-    update: append_unique
 
 lifecycle:
   install:
@@ -261,11 +239,16 @@ tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
   git/                # Git install/init example
-  codex/              # Codex CLI + project files example
+  codex/              # Codex CLI-only example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
   oh-my-codex/        # Oh My Codex example
   oh-my-openagent/    # Oh My OpenAgent Codex Light example
+  agent-ready/        # shared AI agent instruction files
+  ai-context/         # repository context packaging setup
+  mcp-local/          # project-local MCP config examples
+  agent-safety/       # PR/security safety rails
+  agent-docs/         # AI-readable docs harness
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide
 ```

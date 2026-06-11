@@ -1,0 +1,33 @@
+opendock: 1
+id: opendock/ai-context
+summary: AI-friendly repository context packaging setup.
+readme: DOCK.md
+logo: logo.png
+
+files:
+  - from: files/repomix.config.json
+    to: repomix.config.json
+    update: managed_file
+
+  - from: files/.gitignore
+    to: .gitignore
+    update: append_unique
+
+  - from: files/.opendock/ai-context.md
+    to: .opendock/ai-context.md
+    update: managed_file
+
+  - from: files/.opendock/prompts/repository-summary.md
+    to: .opendock/prompts/repository-summary.md
+    update: managed_file
+
+lifecycle:
+  doctor:
+    - id: repomix-config
+      check: test -f repomix.config.json
+
+    - id: ai-context-guide
+      check: test -f .opendock/ai-context.md
+
+    - id: repository-summary-prompt
+      check: test -f .opendock/prompts/repository-summary.md

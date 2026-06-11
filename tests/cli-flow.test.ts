@@ -1828,6 +1828,11 @@ lifecycle:
       "opendock/claude-code",
       "opendock/oh-my-codex",
       "opendock/oh-my-openagent",
+      "opendock/agent-ready",
+      "opendock/ai-context",
+      "opendock/mcp-local",
+      "opendock/agent-safety",
+      "opendock/agent-docs",
     ];
     for (const ref of refs) {
       const resolved = resolveLocalDockForTest(
@@ -1880,6 +1885,11 @@ lifecycle:
       "opendock/claude-code",
       "opendock/oh-my-codex",
       "opendock/oh-my-openagent",
+      "opendock/agent-ready",
+      "opendock/ai-context",
+      "opendock/mcp-local",
+      "opendock/agent-safety",
+      "opendock/agent-docs",
     ];
 
     for (const platform of ["macos", "windows"] as const) {
@@ -1900,15 +1910,10 @@ lifecycle:
           });
           expect(installReport.dockId).toBe(ref);
           if (ref === "opendock/codex") {
-            expect(installReport.filesCreated).toBe(4);
-            expect(readFileSync(join(project, "README.md"), "utf8")).toContain("opendock/codex");
-            expect(readFileSync(join(project, "AGENTS.md"), "utf8")).toContain(
-              "AI-ready Codex workspace",
-            );
-            expect(readFileSync(join(project, "DESIGN.md"), "utf8")).toContain(
-              "track design principles",
-            );
-            expect(readFileSync(join(project, ".gitignore"), "utf8")).toContain("target/");
+            expect(installReport.filesCreated).toBe(0);
+            expect(existsSync(join(project, "AGENTS.md"))).toBe(false);
+            expect(existsSync(join(project, "DESIGN.md"))).toBe(false);
+            expect(existsSync(join(project, "README.md"))).toBe(false);
           }
 
           const updateReport = await install({

@@ -22,9 +22,9 @@ fichier généré auditable.
 OpenDock est une CLI TypeScript Bun-first pour installer des docks approuvés
 dans le répertoire courant du projet.
 
-Le premier dock est `opendock/codex` : un dock général de setup Codex qui vérifie
-Node, installe la CLI Codex, applique des fichiers de projet révisables et garde
-la configuration suivie dans l'état OpenDock.
+Le premier dock est `opendock/codex` : un dock minimal de setup Codex qui vérifie
+Node, installe la CLI Codex et garde la configuration suivie dans l'état
+OpenDock.
 
 OpenDock n'est volontairement pas un remplacement du terminal. C'est le petit
 binaire à exécuter lorsqu'un projet a besoin d'une configuration IA fiable.
@@ -88,10 +88,6 @@ Après l'installation, le projet contient :
 .opendock/
   dock.lock.yml
   project.yml
-AGENTS.md
-DESIGN.md
-README.md
-.gitignore
 ```
 
 ## Commandes
@@ -157,26 +153,9 @@ détaillé de rédaction en coréen.
 ```yaml
 opendock: 1
 id: opendock/codex
-summary: Codex CLI setup with managed workspace files.
+summary: Codex CLI setup without project file payloads.
 readme: DOCK.md
 logo: logo.png
-
-files:
-  - from: files/.agents
-    to: .agents
-    update: managed_file
-
-  - from: files/DESIGN.md
-    to: DESIGN.md
-    update: managed_block
-
-  - from: files/README.md
-    to: README.md
-    update: manual_review
-
-  - from: files/.gitignore
-    to: .gitignore
-    update: append_unique
 
 lifecycle:
   install:
@@ -269,11 +248,16 @@ tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
   git/                # Git install/init example
-  codex/              # Codex CLI + project files example
+  codex/              # Codex CLI-only example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
   oh-my-codex/        # Oh My Codex example
   oh-my-openagent/    # Oh My OpenAgent Codex Light example
+  agent-ready/        # shared AI agent instruction files
+  ai-context/         # repository context packaging setup
+  mcp-local/          # project-local MCP config examples
+  agent-safety/       # PR/security safety rails
+  agent-docs/         # AI-readable docs harness
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide
 ```

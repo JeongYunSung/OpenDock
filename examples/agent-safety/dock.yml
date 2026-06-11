@@ -1,0 +1,49 @@
+opendock: 1
+id: opendock/agent-safety
+summary: Safety rails for AI-generated changes.
+readme: DOCK.md
+logo: logo.png
+
+files:
+  - from: files/.github/pull_request_template.md
+    to: .github/pull_request_template.md
+    update: managed_file
+
+  - from: files/.github/ISSUE_TEMPLATE/bug_report.md
+    to: .github/ISSUE_TEMPLATE/bug_report.md
+    update: managed_file
+
+  - from: files/.github/ISSUE_TEMPLATE/feature_request.md
+    to: .github/ISSUE_TEMPLATE/feature_request.md
+    update: managed_file
+
+  - from: files/.github/CODEOWNERS
+    to: .github/CODEOWNERS
+    update: manual_review
+
+  - from: files/.gitleaks.toml
+    to: .gitleaks.toml
+    update: managed_file
+
+  - from: files/lefthook.yml
+    to: lefthook.yml
+    update: managed_file
+
+  - from: files/.opendock/checklists/agent-pr-review.md
+    to: .opendock/checklists/agent-pr-review.md
+    update: managed_file
+
+  - from: files/.opendock/checklists/security-review.md
+    to: .opendock/checklists/security-review.md
+    update: managed_file
+
+lifecycle:
+  doctor:
+    - id: pr-template
+      check: test -f .github/pull_request_template.md
+
+    - id: gitleaks-config
+      check: test -f .gitleaks.toml
+
+    - id: safety-checklist
+      check: test -f .opendock/checklists/agent-pr-review.md

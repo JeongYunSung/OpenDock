@@ -1,0 +1,9 @@
+---
+description: Project-wide AI coding rules
+alwaysApply: true
+---
+
+- Read nearby code before editing.
+- Use the repository's existing patterns.
+- Keep changes small and reversible.
+- Run tests or explain why they could not be run.

@@ -19,7 +19,7 @@
 
 OpenDock 是一个 Bun-first TypeScript CLI，用于把已审核的 dock 安装到当前项目目录。
 
-第一个 dock 是 `opendock/codex`：它会检查 Node，安装 Codex CLI，应用可审阅的项目文件，并通过 OpenDock state 追踪设置状态。
+第一个 dock 是 `opendock/codex`：它会检查 Node，安装 Codex CLI，并通过 OpenDock state 追踪设置状态。
 
 OpenDock 有意不做终端替代品。它是一个小型 binary，在项目需要可靠的 AI 设置时运行。
 
@@ -73,10 +73,6 @@ cd "$project"
 .opendock/
   dock.lock.yml
   project.yml
-AGENTS.md
-DESIGN.md
-README.md
-.gitignore
 ```
 
 ## 命令
@@ -136,26 +132,9 @@ review 的 `.tgz` submission archive。`readme` 和 `logo` 只作为 catalog met
 ```yaml
 opendock: 1
 id: opendock/codex
-summary: Codex CLI setup with managed workspace files.
+summary: Codex CLI setup without project file payloads.
 readme: DOCK.md
 logo: logo.png
-
-files:
-  - from: files/.agents
-    to: .agents
-    update: managed_file
-
-  - from: files/DESIGN.md
-    to: DESIGN.md
-    update: managed_block
-
-  - from: files/README.md
-    to: README.md
-    update: manual_review
-
-  - from: files/.gitignore
-    to: .gitignore
-    update: append_unique
 
 lifecycle:
   install:
@@ -242,11 +221,16 @@ tests/
   cli-flow.test.ts    # temp-dir CLI integration tests
 examples/
   git/                # Git install/init example
-  codex/              # Codex CLI + project files example
+  codex/              # Codex CLI-only example
   oma/                # Oh My Agent dock.yml-only example
   claude-code/        # Claude Code example
   oh-my-codex/        # Oh My Codex example
   oh-my-openagent/    # Oh My OpenAgent Codex Light example
+  agent-ready/        # shared AI agent instruction files
+  ai-context/         # repository context packaging setup
+  mcp-local/          # project-local MCP config examples
+  agent-safety/       # PR/security safety rails
+  agent-docs/         # AI-readable docs harness
 docs/guides/
   dock-yml.md         # detailed Korean dock.yml authoring guide
 ```

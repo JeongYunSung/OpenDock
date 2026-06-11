@@ -1,0 +1,45 @@
+opendock: 1
+id: opendock/agent-docs
+summary: Documentation harness for AI-readable repositories.
+readme: DOCK.md
+logo: logo.png
+
+files:
+  - from: files/docs/architecture.md
+    to: docs/architecture.md
+    update: managed_block
+
+  - from: files/docs/decisions/0001-record-architecture-decisions.md
+    to: docs/decisions/0001-record-architecture-decisions.md
+    update: managed_file
+
+  - from: files/docs/runbook.md
+    to: docs/runbook.md
+    update: managed_block
+
+  - from: files/docs/troubleshooting.md
+    to: docs/troubleshooting.md
+    update: managed_block
+
+  - from: files/docs/glossary.md
+    to: docs/glossary.md
+    update: managed_block
+
+  - from: files/docs/testing.md
+    to: docs/testing.md
+    update: managed_block
+
+  - from: files/docs/ai-workflow.md
+    to: docs/ai-workflow.md
+    update: managed_block
+
+lifecycle:
+  doctor:
+    - id: architecture-doc
+      check: test -f docs/architecture.md
+
+    - id: adr-template
+      check: test -f docs/decisions/0001-record-architecture-decisions.md
+
+    - id: ai-workflow-doc
+      check: test -f docs/ai-workflow.md
