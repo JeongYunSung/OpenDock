@@ -7,8 +7,14 @@ requires:
   runtimes:
     node: ">=22.0.0"
     npm: ">=10.0.0"
-  packages:
-    codex:
-      manager: npm
-      name: "@openai/codex"
-      version: ">=0.0.0"
+install:
+  - id: install-codex
+    run: npm install --global @openai/codex@latest
+    timeout_ms: 600000
+update:
+  - id: update-codex
+    run: npm install --global @openai/codex@latest
+    timeout_ms: 600000
+doctor:
+  - id: check-codex
+    run: codex --version

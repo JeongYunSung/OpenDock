@@ -64,7 +64,7 @@ C'est un petit outil pour installer et gérer un setup IA répétable.
 | **Project scope** | Workspace courant | Installed dock list, lock, logs et metadata projet. |
 | **Dock scope** | Un dock installé | Version, checksum, managed file records et private workdir. |
 | **Root output scope** | OpenDock file engine | Fichiers appliqués au project root après preflight. |
-| **System/tool scope** | Host package managers | Outils préparés par `requires` ou par des install, update, doctor tasks autorisées, comme Homebrew, npm, Bun, pip ou winget. |
+| **System/tool scope** | Host tools | Runtimes préparés par `requires` et outils installés par des install/update/doctor tasks autorisées, comme Homebrew, npm, Bun, pip ou winget. |
 
 ## Install
 

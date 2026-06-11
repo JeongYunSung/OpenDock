@@ -5,20 +5,34 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.5 - 2026-06-12
+
+### Changed
+
+- Removed package metadata/version verification from `requires`.
+- `requires` now handles host runtimes only.
+- Package installs such as `bun install --global ...` and
+  `npm install --global ...` are now explicit `install`/`update` task steps.
+- Updated example docks and documentation to match the task-based package
+  install model.
+
+### Tests
+
+- Replaced package verification regressions with task-based package install
+  coverage.
+- Kept example install/uninstall cleanup coverage aligned with the updated OMA
+  example.
+
 ## 0.1.4 - 2026-06-12
 
 ### Fixed
 
 - Preserve `BUN_INSTALL` when OpenDock runs allowed commands, so Bun global
-  package installers and package verification use the same global install
-  location.
-- Fixed `require-package-oma` failing after `bun install --global
-  oh-my-agent@latest` with `oh-my-agent is not installed` when users have a
-  custom Bun install path.
+  installs use the expected global install location.
 
 ### Tests
 
-- Added regression coverage for Bun package installation with a custom
+- Added regression coverage for Bun command execution with a custom
   `BUN_INSTALL` path.
 
 ## 0.1.3 - 2026-06-12

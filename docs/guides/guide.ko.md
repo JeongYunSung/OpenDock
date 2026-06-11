@@ -59,8 +59,8 @@ dock을 작성하기 전에 네 가지를 먼저 정하세요.
 1. **대상 결과**: 단순 도구 설치인지, 특정 직군/워크플로우용 AI-ready workspace인지 정합니다.
 2. **root에 남길 파일**: `AGENTS.md`, `.agents/`, `.codex/`, `DESIGN.md`처럼 프로젝트가 실제로 읽을 파일을 정합니다.
 3. **task 실행 위치**: 프로젝트 root에서 실행할지, dock 전용 workdir에서 실행한 뒤 export할지 정합니다.
-4. **필요한 도구**: Node, Bun, npm, OMA 같은 runtime/package requirement를 정합니다.
-5. **유지보수 방식**: update 때 최신 package를 다시 설치할지, doctor로 상태만 확인할지 정합니다.
+4. **필요한 runtime**: Node, Bun, npm, Python처럼 host에서 확인해야 하는 runtime을 정합니다.
+5. **유지보수 방식**: update 때 다시 실행할 설치 step, doctor로 확인할 상태를 정합니다.
 
 OpenDock은 outcome-first package를 권장합니다. `opendock/codex`처럼 도구 하나만
 설치하는 dock도 가능하지만, 더 좋은 dock은 다른 dock과 조합돼도 잘 동작하면서
@@ -167,7 +167,7 @@ doctor:
 | `summary` | 선택 | Registry catalog에 표시할 짧은 설명입니다. |
 | `readme` | 선택 | Registry catalog 상세 본문으로 제출할 Markdown 경로입니다. |
 | `logo` | 선택 | Registry catalog 대표 이미지로 제출할 이미지 경로입니다. |
-| `requires` | 선택 | dock 실행 전에 준비할 runtime과 package requirement입니다. |
+| `requires` | 선택 | dock 실행 전에 준비할 runtime requirement입니다. |
 | `files` | 선택 | 프로젝트 root로 적용할 파일 또는 디렉터리 mapping입니다. |
 | `install` | 선택 | 최초 install과 초기 생성 작업 task입니다. |
 | `update` | 선택 | refresh와 유지보수 작업 task입니다. |
@@ -238,20 +238,18 @@ logo: logo.png
 
 ## requires
 
-`requires`는 dock을 실행하기 전에 OpenDock이 준비해야 하는 host runtime과 CLI
-package를 선언합니다. 프로젝트에 복사되는 파일이 아니라 system/tool scope에 대한
-요구사항입니다.
+`requires`는 dock을 실행하기 전에 OpenDock이 확인하고 준비해야 하는 host runtime을
+선언합니다. 프로젝트에 복사되는 파일이 아니라 system/tool scope에 대한 요구사항입니다.
+CLI package 설치는 `install` 또는 `update` step에 명시합니다.
 
 ```yaml
 requires:
   runtimes:
     bun: ">=1.3.0"
 
-  packages:
-    oma:
-      manager: bun
-      name: oh-my-agent
-      version: ">=8.43.0"
+install:
+  - id: install-oma
+    run: bun install --global oh-my-agent@latest
 ```
 
 동작:
@@ -260,11 +258,9 @@ requires:
 2. `runtimes`는 `node --version`, `bun --version` 같은 runtime check를 수행합니다.
 3. install/update에서 runtime이 없거나 version을 만족하지 않으면 OpenDock이 아는
    host OS별 installer를 실행합니다.
-4. `packages`는 package manager의 설치 metadata로 package version을 확인합니다.
-5. install에서 package가 이미 version을 만족하면 건너뜁니다.
-6. update에서는 package installer를 다시 실행해 최신 package를 반영한 뒤 version을
-   재확인합니다.
-7. doctor에서는 설치나 수정 없이 상태만 확인합니다.
+4. `bun install --global ...`, `npm install --global ...` 같은 CLI package 설치는
+   일반 `install`/`update` step으로 실행합니다.
+5. doctor에서는 설치나 수정 없이 상태만 확인합니다.
 
 현재 지원 runtime key:
 
@@ -279,18 +275,6 @@ python
 python3
 ```
 
-현재 지원 package manager:
-
-```text
-bun
-npm
-pnpm
-pip
-pip3
-pipx
-uv
-```
-
 예시:
 
 ```yaml
@@ -298,20 +282,21 @@ requires:
   runtimes:
     node: ">=22.0.0"
     npm: ">=10.0.0"
-  packages:
-    codex:
-      manager: npm
-      name: "@openai/codex"
-      version: ">=0.0.0"
+
+install:
+  - id: install-codex
+    run: npm install --global @openai/codex@latest
+
+update:
+  - id: update-codex
+    run: npm install --global @openai/codex@latest
 ```
 
 주의할 점:
 
-- `requires`는 OpenDock이 host tool을 준비하는 영역입니다.
+- `requires`는 OpenDock이 host runtime을 준비하는 영역입니다.
 - root에 적용할 파일은 `files` 또는 step의 `export`로 선언해야 합니다.
 - raw shell, pipe, redirect는 `requires`에서도 허용되지 않습니다.
-- package key는 OpenDock report/lock에서 쓰는 이름입니다.
-- `name`은 package manager가 설치하고 version을 확인할 실제 package 이름입니다.
 - 설치된 CLI를 실행해야 한다면 `requires`가 아니라 `install`, `update`, `doctor` task에 `run`을 작성합니다.
 
 ## files
@@ -441,9 +426,8 @@ doctor: []
 5. post-check가 실패하면 install/update는 실패합니다.
 6. 성공한 step의 export가 있으면 export 후보를 수집합니다.
 
-도구와 CLI package 준비는 가능하면 `requires`에 선언하세요. `install`, `update`,
-`doctor`는 프로젝트 root에서 실행해야 하는 작업이나 dock workdir에서 generator를
-돌린 뒤 export하는 작업에 집중하는 것이 좋습니다.
+runtime 준비는 `requires`에 선언하세요. CLI package 설치나 외부 generator 실행은
+`install`, `update`, `doctor` step에 명시합니다.
 
 재실행 가능한 step에는 `check`, `version`, `run`을 같이 쓸 수 있습니다.
 
@@ -838,9 +822,8 @@ manifest:
 requires:
 
 1. 필요한 runtime을 `requires.runtimes`에 선언했는가?
-2. 필요한 CLI package를 `requires.packages`에 선언했는가?
-3. package key와 실제 package name의 역할을 혼동하지 않았는가?
-4. runtime/package version 범위가 실제 installer 결과와 충돌하지 않는가?
+2. runtime version 범위가 실제 installer 결과와 충돌하지 않는가?
+3. CLI package 설치는 `install`/`update` step으로 명시했는가?
 
 files:
 

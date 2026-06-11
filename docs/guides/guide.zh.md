@@ -57,7 +57,7 @@ files:
 | `summary` | Registry catalog 的简短说明. |
 | `readme` | Catalog detail 使用的 Markdown. |
 | `logo` | Catalog logo image. |
-| `requires` | Runtime 和 package requirement. |
+| `requires` | Runtime requirements. |
 | `files` | 应用到 project root 的文件或目录. |
 | `install` | Tasks for first install and initial generation. |
 | `update` | Tasks for refresh and maintenance. |

@@ -81,7 +81,7 @@ opendock install opendock/designer-ai@1.0.0
 OpenDock then:
 
 1. Downloads an approved dock from the Registry.
-2. Checks the tools or packages the dock needs.
+2. Checks the host runtimes the dock needs.
 3. Adds the dock's files to your project.
 4. Checks for conflicts before writing files.
 5. Records what was installed in `.opendock/`.
@@ -106,7 +106,7 @@ OpenDock separates responsibilities into explicit scopes.
 | **Project scope** | Current workspace | Installed dock list, lock state, logs, and project-level OpenDock metadata. |
 | **Dock scope** | One installed dock | Version, checksum, managed file records, and private workdir. |
 | **Root output scope** | OpenDock file engine | Files applied into the project root after preflight checks. |
-| **System/tool scope** | Host package managers | Tools prepared by `requires` or allowed setup tasks, such as Homebrew, npm, Bun, pip, or winget. |
+| **System/tool scope** | Host tools | Runtimes prepared by `requires` and tools installed by allowed setup tasks, such as Homebrew, npm, Bun, pip, or winget. |
 
 The practical rule is simple: OpenDock can fully track project files it applies,
 but it cannot claim ownership of the whole machine. Global tool installers may
@@ -260,8 +260,8 @@ Use `--force` only when the dock version should win.
 ## Tasks And Export
 
 Tasks can run in the project root or in a dock-private workdir.
-Use `requires` for runtime and package prerequisites; use top-level `install`,
-`update`, and `doctor` for project actions and generated outputs.
+Use `requires` for runtime prerequisites; use top-level `install`, `update`, and
+`doctor` for package installs, project actions, and generated outputs.
 
 ```yaml
 install:

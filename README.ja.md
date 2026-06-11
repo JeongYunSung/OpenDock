@@ -63,7 +63,7 @@ OpenDock は terminal replacement でも汎用 script runner でもありませ�
 | **Project scope** | 現在の workspace | installed dock list, lock, log, project metadata. |
 | **Dock scope** | 1つの installed dock | version, checksum, managed file record, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 後に project root へ適用される file. |
-| **System/tool scope** | host package manager | `requires` または許可された install, update, doctor task が準備する Homebrew, npm, Bun, pip, winget などの host tool. |
+| **System/tool scope** | host tool | `requires` が準備する runtime と、許可された install/update/doctor task がインストールする Homebrew, npm, Bun, pip, winget などの host tool. |
 
 ## Install
 

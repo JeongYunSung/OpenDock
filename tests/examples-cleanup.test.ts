@@ -115,13 +115,11 @@ describe("example dock cleanup behavior", () => {
     const example = requireExample("opendock/oma", "macos");
     const project = tempDir();
     const bin = tempDir();
-    const bunInstall = tempDir();
+    writeFakeBun(bin);
     writeFakeOma(bin);
-    writeFakeBunGlobalPackage(bunInstall, "oh-my-agent", "8.43.0");
 
     await withEnv(
       {
-        BUN_INSTALL: bunInstall,
         PATH: `${bin}:${process.env.PATH ?? ""}`,
       },
       () => installExample(example, project, { runTasks: true }),
@@ -301,16 +299,26 @@ esac
   chmodSync(omaPath, 0o755);
 }
 
-function writeFakeBunGlobalPackage(bunInstall: string, packageName: string, version: string): void {
-  const packageDir = join(
-    bunInstall,
-    "install",
-    "global",
-    "node_modules",
-    ...packageName.split("/"),
+function writeFakeBun(bin: string): void {
+  const bunPath = join(bin, "bun");
+  writeFileSync(
+    bunPath,
+    `#!/usr/bin/env bash
+set -euo pipefail
+case "$*" in
+  --version)
+    printf '1.3.11\\n'
+    ;;
+  install\\ --global\\ oh-my-agent@latest)
+    exit 0
+    ;;
+  *)
+    exit 1
+    ;;
+esac
+`,
   );
-  mkdirSync(packageDir, { recursive: true });
-  writeFileSync(join(packageDir, "package.json"), JSON.stringify({ name: packageName, version }));
+  chmodSync(bunPath, 0o755);
 }
 
 async function withEnv<T>(env: NodeJS.ProcessEnv, fn: () => Promise<T>): Promise<T> {

@@ -81,7 +81,7 @@ opendock install opendock/designer-ai@1.0.0
 그러면 OpenDock은 아래 순서로 동작합니다.
 
 1. Registry에서 승인된 dock을 가져옵니다.
-2. dock에 필요한 도구나 패키지를 확인합니다.
+2. dock에 필요한 host runtime을 확인합니다.
 3. dock의 파일을 프로젝트에 추가합니다.
 4. 파일을 쓰기 전에 충돌이 없는지 확인합니다.
 5. 설치한 내용을 `.opendock/`에 기록합니다.
@@ -106,7 +106,7 @@ OpenDock은 책임 범위를 명확히 나눕니다.
 | **Project scope** | 현재 workspace | 설치된 dock 목록, lock, log, project-level metadata. |
 | **Dock scope** | 설치된 dock 하나 | version, checksum, managed file record, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 이후 project root에 적용되는 파일. |
-| **System/tool scope** | host package manager | `requires` 또는 허용된 install, update, doctor task가 준비하는 Homebrew, npm, Bun, pip, winget 같은 host tool. |
+| **System/tool scope** | host tool | `requires`가 준비하는 runtime과 허용된 install/update/doctor task가 설치하는 Homebrew, npm, Bun, pip, winget 같은 host tool. |
 
 핵심 규칙은 단순합니다. OpenDock은 프로젝트에 적용한 파일은 추적할 수 있지만,
 전체 머신을 소유한다고 가정하지 않습니다. global tool installer는 host에 영향을
@@ -259,8 +259,8 @@ managed file을 수정하면 update와 uninstall은 기본적으로 중단됩니
 ## Tasks And Export
 
 Task는 프로젝트 root 또는 dock-private workdir에서 실행할 수 있습니다.
-runtime과 package 준비는 `requires`에 두고, 프로젝트 작업과 generated output
-적용은 top-level `install`, `update`, `doctor`에 둡니다.
+runtime 준비는 `requires`에 두고, package 설치와 generated output 적용은
+top-level `install`, `update`, `doctor`에 둡니다.
 
 ```yaml
 install:

@@ -414,7 +414,7 @@ describe("opendock TypeScript CLI", () => {
       opendock: 1,
       id: "test/unsafe",
       summary: "",
-      requires: { runtimes: {}, packages: {} },
+      requires: { runtimes: {} },
       files: [],
       tasks: {
         install: [{ id: "inline", run: 'node -e "console.log(1)"', platforms: {} }],

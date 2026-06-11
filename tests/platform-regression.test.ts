@@ -216,7 +216,7 @@ describe("platform regression coverage", () => {
       opendock: 1,
       id: "test/common",
       summary: "",
-      requires: { runtimes: {}, packages: {} },
+      requires: { runtimes: {} },
       files: [],
       tasks: {
         install: [{ id: "common", run: "mkdir -p common-output", platforms: {} }],
@@ -247,7 +247,7 @@ describe("platform regression coverage", () => {
       opendock: 1,
       id: "test/doctor",
       summary: "",
-      requires: { runtimes: {}, packages: {} },
+      requires: { runtimes: {} },
       files: [],
       tasks: {
         install: [],
@@ -383,7 +383,7 @@ function platformManifest(): DockManifest {
     opendock: 1,
     id: "test/platform",
     summary: "",
-    requires: { runtimes: {}, packages: {} },
+    requires: { runtimes: {} },
     files: [],
     tasks: {
       install: [

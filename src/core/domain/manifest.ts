@@ -90,32 +90,12 @@ const runtimeRequirementsSchema = z
     }
   });
 
-const packageRequirementSchema = z
-  .object({
-    manager: z.enum(["bun", "npm", "pnpm", "pip", "pip3", "pipx", "uv"]),
-    name: z
-      .string()
-      .regex(
-        /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+$/,
-        "package name must be a safe package identifier",
-      ),
-    version: z.string(),
-  })
-  .strict();
-
-const packageRequirementsSchema = z
-  .record(
-    z.string().regex(/^[A-Za-z0-9._-]+$/, "package key must be a safe identifier"),
-    packageRequirementSchema,
-  )
-  .default({});
-
 const requiresSchema = z
   .object({
     runtimes: runtimeRequirementsSchema,
-    packages: packageRequirementsSchema,
   })
-  .default({ runtimes: {}, packages: {} });
+  .strict()
+  .default({ runtimes: {} });
 
 const exportSpecSchema = z.object({
   include: z.array(z.string()).default([]),
@@ -187,7 +167,6 @@ const manifestSchema = z
 
 export type DockManifest = z.infer<typeof manifestSchema>;
 export type FileSpec = z.infer<typeof fileSpecSchema>;
-export type PackageRequirement = z.infer<typeof packageRequirementSchema>;
 export type Requires = z.infer<typeof requiresSchema>;
 export type Tasks = z.infer<typeof tasksSchema>;
 export type TaskPhase = keyof Tasks;

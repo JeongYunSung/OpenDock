@@ -60,7 +60,7 @@ files:
 | `summary` | Kurze Beschreibung für Registry catalog. |
 | `readme` | Markdown für die catalog detail page. |
 | `logo` | Logo image für den catalog. |
-| `requires` | Runtime und package requirements. |
+| `requires` | Runtime requirements. |
 | `files` | Dateien oder Ordner für den project root. |
 | `install` | Tasks for first install and initial generation. |
 | `update` | Tasks for refresh and maintenance. |

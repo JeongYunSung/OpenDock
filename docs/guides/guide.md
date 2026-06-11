@@ -23,7 +23,7 @@ Decide these first:
 1. **Outcome**: a tool-only dock, or a ready-to-use AI workspace for a role or workflow.
 2. **Root files**: files the project should actually read, such as `AGENTS.md`, `.codex/`, `.agents/`, `DESIGN.md`, or `README.md`.
 3. **Task location**: run tasks in the project root, or in a private dock workdir and export selected outputs.
-4. **Required tools**: runtime and package requirements such as Git, Node, Bun, npm, or OMA.
+4. **Required runtimes**: host runtimes such as Git, Node, Bun, npm, pip, or Python.
 5. **Maintenance**: what should happen during update, doctor, and uninstall.
 
 Good docks are outcome-first. A tool-only dock such as `opendock/codex` is valid,
@@ -88,7 +88,7 @@ can stay outside the OpenDock block.
 | `summary` | no | Short Registry catalog summary. |
 | `readme` | no | Markdown file submitted as catalog detail content. |
 | `logo` | no | Catalog logo image path. |
-| `requires` | no | Runtime and package requirements prepared before tasks run. |
+| `requires` | no | Runtime requirements prepared before tasks run. |
 | `files` | no | File or directory mappings applied to the project root. |
 | `install` | no | Tasks for first install and initial generation. |
 | `update` | no | Tasks for refresh and maintenance. |
@@ -143,25 +143,25 @@ Rules:
 
 ## Requires
 
-`requires` prepares host tools before `install`, `update`, and `doctor` tasks run.
+`requires` checks and prepares host runtimes before `install`, `update`, and
+`doctor` tasks run. Package installs belong in explicit task steps.
 
 ```yaml
 requires:
   runtimes:
     bun: ">=1.3.0"
 
-  packages:
-    oma:
-      manager: bun
-      name: oh-my-agent
-      version: ">=8.43.0"
+install:
+  - id: install-oma
+    run: bun install --global oh-my-agent@latest
 ```
 
 Behavior:
 
-1. Runtime and package checks run before `install`, `update`, and `doctor`.
-2. `install` prepares missing or outdated requirements when OpenDock knows how.
-3. `update` reruns package installers so the dock can refresh tool packages.
+1. Runtime checks run before `install`, `update`, and `doctor`.
+2. `install` prepares missing or outdated runtimes when OpenDock knows how.
+3. Package manager commands such as `bun install --global ...` or
+   `npm install --global ...` are normal `install`/`update` steps.
 4. `doctor` checks state only. It does not install or modify tools.
 
 ## Host Bootstrap

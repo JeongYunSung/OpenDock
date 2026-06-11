@@ -59,7 +59,7 @@ files:
 | `summary` | Résumé court pour Registry catalog. |
 | `readme` | Markdown pour la page de détail du catalog. |
 | `logo` | Image logo du catalog. |
-| `requires` | Runtime et package requirements. |
+| `requires` | Runtime requirements. |
 | `files` | Fichiers ou dossiers appliqués au project root. |
 | `install` | Tasks for first install and initial generation. |
 | `update` | Tasks for refresh and maintenance. |
