@@ -32,7 +32,6 @@ rmSync(outputDir, { force: true, recursive: true });
 mkdirSync(join(outputDir, "bin"), { recursive: true });
 mkdirSync(join(outputDir, "assets"), { recursive: true });
 
-cpSync(join(rootDir, "bin", "opendock.js"), join(outputDir, "bin", "opendock.js"));
 cpSync(
   join(rootDir, "assets", "opendock-logo-96.png"),
   join(outputDir, "assets", "opendock-logo-96.png"),
