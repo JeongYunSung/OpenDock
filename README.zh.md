@@ -61,7 +61,7 @@ OpenDock 不是 terminal replacement，也不是通用 script runner。它是用
 | **Project scope** | 当前 workspace | installed dock list, lock, logs, project metadata. |
 | **Dock scope** | 单个 installed dock | version, checksum, managed file records, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 后应用到 project root 的文件. |
-| **System/tool scope** | host package managers | 由 `requires` 或允许的 lifecycle commands 准备的 Homebrew、npm、Bun、pip、winget 等 host tools. |
+| **System/tool scope** | host package managers | 由 `requires` 或允许的 install, update, and doctor commands 准备的 Homebrew、npm、Bun、pip、winget 等 host tools. |
 
 ## Install
 
@@ -91,6 +91,7 @@ opendock bootstrap mac
 | `opendock auth status` | 显示当前 Registry login. |
 | `opendock auth logout` | 清除本地 Registry login. |
 | `opendock deploy owner/name@1.0.0` | 提交 local dock release 供 Registry review. |
+| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | 提交特定平台的 release artifact。 |
 
 dock reference 必须包含 exact version identifier。
 
@@ -118,18 +119,17 @@ files:
   - from: files/AGENTS.md
     to: AGENTS.md
 
-lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
+install:
+  - id: git-init
+    check: git status
+    run: git init -b main
 
-  update: []
+update: []
 
-  doctor:
-    - id: git
-      check: git --version
-      version: ">=2.40.0"
+doctor:
+  - id: git
+    check: git --version
+    version: ">=2.40.0"
 ```
 
 `readme` 和 `logo` 是 Registry catalog metadata。如果要安装到项目中，需要同时

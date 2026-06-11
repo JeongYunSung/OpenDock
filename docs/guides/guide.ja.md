@@ -60,7 +60,9 @@ files:
 | `logo` | Catalog logo image. |
 | `requires` | Runtime and package requirements. |
 | `files` | Files or directories applied to the project root. |
-| `lifecycle` | `install`, `update`, and `doctor` commands. |
+| `install` | Commands for first install and initial generation. |
+| `update` | Commands for refresh and maintenance. |
+| `doctor` | Health checks that do not modify the project. |
 
 ## Version
 
@@ -79,19 +81,18 @@ Text files such as `AGENTS.md` are applied as managed blocks. Config and binary
 files are tracked by checksum. If a user edits OpenDock-managed content, update
 stops before writing root files. `--force` explicitly chooses the dock version.
 
-## Lifecycle
+## Commands
 
 ```yaml
-lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
+install:
+  - id: git-init
+    check: git status
+    run: git init -b main
 
-  doctor:
-    - id: git
-      check: git --version
-      version: ">=2.40.0"
+doctor:
+  - id: git
+    check: git --version
+    version: ">=2.40.0"
 ```
 
 Steps run top to bottom. `doctor` should check state and avoid changing the project.
@@ -115,7 +116,8 @@ export:
 ```bash
 opendock auth login
 opendock deploy owner/name@1.0.0
+opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
 ```
 
-Deploy submits `dock.yml`, an archive built from `files[].from`, optional
-`readme_markdown`, and optional `logo`.
+Deploy は `dock.yml`、`files[].from` から作る archive、release platform
+metadata、任意の `readme_markdown`、任意の `logo` を送信します。

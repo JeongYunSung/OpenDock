@@ -26,7 +26,7 @@ uninstall까지 추적할 수 있게 만드는 작은 packaging layer입니다. 
 | manifest parsing | `src/core/domain/manifest.ts` |
 | install/update/uninstall orchestration | `src/core/app/dock-installer.ts` |
 | managed block/checksum file engine | `src/core/files/` |
-| lifecycle command runner | `src/core/runtime/` |
+| install, update, and doctor command runner | `src/core/runtime/` |
 | registry resolve/deploy boundary | `src/resolver.ts`, `src/cli.ts` |
 
 ## 목차
@@ -41,9 +41,9 @@ uninstall까지 추적할 수 있게 만드는 작은 packaging layer입니다. 
 - [requires](#requires)
 - [files](#files)
 - [파일 소유권](#파일-소유권)
-- [lifecycle](#lifecycle)
+- [commands](#commands)
 - [workdir와 export](#workdir와-export)
-- [platforms](#platforms)
+- [platform artifact](#platform-artifact)
 - [version 범위](#version-범위)
 - [허용 명령](#허용-명령)
 - [install, update, uninstall 의미](#install-update-uninstall-의미)
@@ -139,25 +139,23 @@ files:
   - from: files/.github/copilot-instructions.md
     to: .github/copilot-instructions.md
 
-lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
+install:
+  - id: git-init
+    check: git status
+    run: git init -b main
 
-  update: []
+update: []
 
-  doctor:
-    - id: agents-md
-      check: test -f AGENTS.md
+doctor:
+  - id: agents-md
+    check: test -f AGENTS.md
 
-    - id: git
-      check: git --version
-      version: ">=2.40.0"
+  - id: git
+    check: git --version
+    version: ">=2.40.0"
 ```
 
-실행 순서는 위에서 아래입니다. `platforms` override를 쓰더라도 step의 위치는
-바뀌지 않습니다.
+실행 순서는 위에서 아래입니다.
 
 ## Top-Level 필드
 
@@ -171,7 +169,9 @@ lifecycle:
 | `logo` | 선택 | Registry catalog 대표 이미지로 제출할 이미지 경로입니다. |
 | `requires` | 선택 | dock 실행 전에 준비할 runtime과 package requirement입니다. |
 | `files` | 선택 | 프로젝트 root로 적용할 파일 또는 디렉터리 mapping입니다. |
-| `lifecycle` | 선택 | `install`, `update`, `doctor` 단계별 command 목록입니다. |
+| `install` | 선택 | 최초 install과 초기 생성 작업 command입니다. |
+| `update` | 선택 | refresh와 유지보수 작업 command입니다. |
+| `doctor` | 선택 | 프로젝트를 수정하지 않는 상태 점검 command입니다. |
 
 ## id와 version
 
@@ -259,7 +259,7 @@ requires:
 1. install/update/doctor 전에 `requires`를 먼저 평가합니다.
 2. `runtimes`는 `node --version`, `bun --version` 같은 runtime check를 수행합니다.
 3. install/update에서 runtime이 없거나 version을 만족하지 않으면 OpenDock이 아는
-   platform별 installer를 실행합니다.
+   host OS별 installer를 실행합니다.
 4. `packages`는 package manager의 설치 metadata로 package version을 확인합니다.
 5. install에서 package가 이미 version을 만족하면 건너뜁니다.
 6. update에서는 package installer를 다시 실행해 최신 package를 반영한 뒤 version을
@@ -308,11 +308,11 @@ requires:
 주의할 점:
 
 - `requires`는 OpenDock이 host tool을 준비하는 영역입니다.
-- root에 적용할 파일은 `files` 또는 `lifecycle[].export`로 선언해야 합니다.
+- root에 적용할 파일은 `files` 또는 command step의 `export`로 선언해야 합니다.
 - raw shell, pipe, redirect는 `requires`에서도 허용되지 않습니다.
 - package key는 OpenDock report/lock에서 쓰는 이름입니다.
 - `name`은 package manager가 설치하고 version을 확인할 실제 package 이름입니다.
-- 설치된 CLI를 실행해야 한다면 `requires`가 아니라 `lifecycle`에 command를 작성합니다.
+- 설치된 CLI를 실행해야 한다면 `requires`가 아니라 `install`, `update`, `doctor`에 command를 작성합니다.
 
 ## files
 
@@ -403,15 +403,14 @@ checksum으로 관리합니다.
 OpenDock은 git merge 도구가 아닙니다. 자동 병합 대신 “소유한 영역만 안전하게
 갱신하고, 사용자가 바꾼 영역은 멈춘다”를 기본 원칙으로 둡니다.
 
-## lifecycle
+## commands
 
-`lifecycle`은 세 phase를 가집니다.
+manifest에는 세 command phase가 있습니다.
 
 ```yaml
-lifecycle:
-  install: []
-  update: []
-  doctor: []
+install: []
+update: []
+doctor: []
 ```
 
 | phase | 실행 명령 | 목적 |
@@ -420,7 +419,7 @@ lifecycle:
 | `update` | `opendock update` | 최신 approved release로 이동하며 유지보수 작업 실행 |
 | `doctor` | `opendock doctor` | 현재 프로젝트와 도구 상태 점검 |
 
-### lifecycle step 필드
+### command step 필드
 
 | 필드 | 필수 | 설명 |
 |---|---:|---|
@@ -432,31 +431,27 @@ lifecycle:
 | `timeout_ms` | 선택 | command timeout입니다. doctor 기본값은 30000ms입니다. |
 | `workdir` | 선택 | `root` 또는 `dock`입니다. 기본값은 `root`입니다. |
 | `export` | 선택 | `workdir: dock` 결과물 중 root로 적용할 glob입니다. |
-| `platforms` | 선택 | 같은 `id` 아래 platform별 field override입니다. |
 
 ### install/update 실행 규칙
 
-1. 현재 platform에 맞는 `platforms.<platform>` override를 병합합니다.
-2. `platforms`가 있는데 현재 platform 항목이 없으면 step을 건너뜁니다.
-3. `check`가 있으면 먼저 실행합니다.
-4. `check`가 성공하고 `version`도 만족하면 `run`을 건너뜁니다.
-5. `check`가 실패하면 `run`을 실행합니다.
-6. `run` 이후 `check`가 있으면 다시 실행합니다.
-7. post-check가 실패하면 install/update는 실패합니다.
-8. 성공한 step의 export가 있으면 export 후보를 수집합니다.
+1. `check`가 있으면 먼저 실행합니다.
+2. `check`가 성공하고 `version`도 만족하면 `run`을 건너뜁니다.
+3. `check`가 실패하면 `run`을 실행합니다.
+4. `run` 이후 `check`가 있으면 다시 실행합니다.
+5. post-check가 실패하면 install/update는 실패합니다.
+6. 성공한 step의 export가 있으면 export 후보를 수집합니다.
 
-도구와 CLI package 준비는 가능하면 `requires`에 선언하세요. `lifecycle`은 프로젝트
-root에서 실행해야 하는 작업이나 dock workdir에서 generator를 돌린 뒤 export하는
-작업에 집중하는 것이 좋습니다.
+도구와 CLI package 준비는 가능하면 `requires`에 선언하세요. `install`, `update`,
+`doctor`는 프로젝트 root에서 실행해야 하는 작업이나 dock workdir에서 generator를
+돌린 뒤 export하는 작업에 집중하는 것이 좋습니다.
 
-재실행 가능한 lifecycle step에는 `check`, `version`, `run`을 같이 쓸 수 있습니다.
+재실행 가능한 command step에는 `check`, `version`, `run`을 같이 쓸 수 있습니다.
 
 ```yaml
-lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
+install:
+  - id: git-init
+    check: git status
+    run: git init -b main
 ```
 
 `check` 없이 `run`만 쓰면 해당 phase마다 항상 실행됩니다.
@@ -471,11 +466,10 @@ doctor는 상태 점검용입니다.
 - 자동 수정이 필요하면 doctor가 아니라 `install` 또는 `update`에 `run`을 쓰세요.
 
 ```yaml
-lifecycle:
-  doctor:
-    - id: node
-      check: node --version
-      version: ">=22.0.0"
+doctor:
+  - id: node
+    check: node --version
+    version: ">=22.0.0"
 ```
 
 ## workdir와 export
@@ -490,20 +484,19 @@ OpenDock의 command 실행 위치는 두 가지입니다.
 `workdir: dock`은 외부 도구가 여러 파일을 만들어내는 경우에 유용합니다.
 
 ```yaml
-lifecycle:
-  install:
-    - id: apply-oma
-      run: oma -y install
-      workdir: dock
-      export:
-        include:
-          - AGENTS.md
-          - CLAUDE.md
-          - .agents/**
-          - .codex/**
-        exclude:
-          - "**/*.log"
-          - "**/cache/**"
+install:
+  - id: apply-oma
+    run: oma -y install
+    workdir: dock
+    export:
+      include:
+        - AGENTS.md
+        - CLAUDE.md
+        - .agents/**
+        - .codex/**
+      exclude:
+        - "**/*.log"
+        - "**/cache/**"
 ```
 
 동작:
@@ -517,40 +510,33 @@ lifecycle:
 이 구조 덕분에 `oma`, `omx`, `npx ... install` 같은 외부 generator와 협력하면서도
 프로젝트 root에 들어온 최종 파일은 OpenDock이 추적할 수 있습니다.
 
-## platforms
+## platform artifact
 
-OpenDock은 top-level `supports.platforms`를 쓰지 않습니다. 지원 platform은
-lifecycle step 안의 `platforms`에서 자동 추론합니다.
+OS별 동작이 다르면 한 `dock.yml` 안에서 분기하지 말고, 같은 `id/version` 아래
+platform별 artifact를 따로 배포하는 방식을 권장합니다.
 
-지원 값:
-
-- `macos`
-- `windows`
-- `linux`
-
-예시:
-
-```yaml
-lifecycle:
-  doctor:
-    - id: host-package-manager
-      platforms:
-        macos:
-          run: brew --version
-        windows:
-          run: winget --version
+```bash
+opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
+opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
+opendock deploy owner/name@1.0.0 --platform linux --file dock.linux.yml
 ```
 
-platform별 차이는 해당 step 안에서만 선택됩니다. 같은 작업을
-`host-package-manager-macos`, `host-package-manager-windows`처럼 여러 id로 나누지
-않는 것이 좋습니다.
+platform과 무관한 dock은 `--platform`을 생략하면 `any` artifact로 제출됩니다.
 
-platform 결정 순서:
+설치는 그대로 단순합니다.
 
-1. CLI의 `--platform` 옵션.
-2. host OS 자동 감지.
-3. install 후 lock에 기록된 platform.
-4. update/doctor는 lock의 platform을 기본으로 재사용.
+```bash
+opendock install owner/name@1.0.0
+opendock install owner/name@1.0.0 --platform windows
+```
+
+`--platform`을 생략하면 OpenDock이 host OS를 감지해서 Registry에 해당 platform
+artifact를 요청합니다. `--platform`을 주면 그 platform artifact를 명시적으로
+요청합니다.
+
+install 후 lock에는 선택된 platform이 기록됩니다. update와 doctor는 기본적으로
+lock의 platform을 재사용하고, 필요하면 CLI의 `--platform` 옵션으로 override할 수
+있습니다.
 
 ## version 범위
 
@@ -581,7 +567,7 @@ semver를 출력하는 command를 `check`로 사용하세요.
 
 ## 허용 명령
 
-OpenDock은 `requires`와 `lifecycle` command에 shell script를 그대로 넘기지
+OpenDock은 `requires`와 command phase에 shell script를 그대로 넘기지
 않습니다. command string을 분리한 뒤 allowlist와 command shape 검사를 통과한
 프로그램만 실행합니다.
 
@@ -609,7 +595,7 @@ test
 uv
 ```
 
-platform별 추가 command:
+host OS별 추가 허용 command:
 
 | platform | 추가 command |
 |---|---|
@@ -722,14 +708,16 @@ release version은 `dock.yml`에 쓰지 않습니다. deploy command에서 정�
 
 ```bash
 opendock deploy owner/name@1.0.0
+opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
 ```
 
 deploy가 제출하는 것:
 
 1. `dock.yml` 원문.
 2. `dock.yml`과 `files[].from`으로 만든 `.tgz` archive.
-3. optional `readme_markdown`.
-4. optional `logo`.
+3. release platform metadata: `any`, `macos`, `windows`, `linux`.
+4. 선택 사항인 `readme_markdown`.
+5. 선택 사항인 `logo`.
 
 archive에는 기본적으로 다음이 들어갑니다.
 
@@ -738,6 +726,10 @@ archive에는 기본적으로 다음이 들어갑니다.
 
 `readme`와 `logo`는 catalog metadata로 별도 제출되므로 archive에는 기본 포함되지
 않습니다. 설치 프로젝트에 들어가야 하는 파일이라면 `files`에 명시하세요.
+
+`--file dock.macos.yml`처럼 platform별 manifest를 지정해도 archive 안에는 항상
+`dock.yml` 이름으로 들어갑니다. install은 다운로드한 artifact에서 일반적인
+`dock.yml`을 읽습니다.
 
 deploy는 Registry login이 필요합니다.
 
@@ -828,14 +820,13 @@ files:
 3. Markdown/agent instruction은 managed block으로 적용되는지 확인했는가?
 4. 설정 파일이나 binary는 checksum managed file로 충돌 감지되는지 확인했는가?
 
-lifecycle:
+commands:
 
 1. 재실행 가능한 step에는 `check`를 붙였는가?
 2. 버전이 중요한 도구에는 `version` 범위를 넣었는가?
 3. 오래 걸리는 command에는 `timeout_ms`를 넣었는가?
-4. platform 차이는 같은 step `id`의 `platforms`로 묶었는가?
-5. shell operator나 redirect 없이 단일 command로 썼는가?
-6. 외부 generator는 `workdir: dock`과 `export`로 root 출력물을 추적하게 했는가?
+4. shell operator나 redirect 없이 단일 command로 썼는가?
+5. 외부 generator는 `workdir: dock`과 `export`로 root 출력물을 추적하게 했는가?
 
 release:
 
@@ -845,3 +836,4 @@ release:
 4. `--force`가 의도대로 복구하는가?
 5. `opendock doctor`가 필요한 상태를 보여주는가?
 6. `opendock deploy owner/name@version`으로 제출할 exact version을 정했는가?
+7. OS별 동작이 다르면 platform artifact를 각각 deploy/test했는가?

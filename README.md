@@ -44,7 +44,7 @@ opendock uninstall opendock/codex
 - [Command Reference](#command-reference)
 - [Dock Format](#dock-format)
 - [File Ownership](#file-ownership)
-- [Lifecycle And Export](#lifecycle-and-export)
+- [Commands And Export](#commands-and-export)
 - [Example Docks](#example-docks)
 - [Registry And Deploy](#registry-and-deploy)
 - [Repository Layout](#repository-layout)
@@ -106,7 +106,7 @@ OpenDock separates responsibilities into explicit scopes.
 | **Project scope** | Current workspace | Installed dock list, lock state, logs, and project-level OpenDock metadata. |
 | **Dock scope** | One installed dock | Version, checksum, managed file records, and private workdir. |
 | **Root output scope** | OpenDock file engine | Files applied into the project root after preflight checks. |
-| **System/tool scope** | Host package managers | Tools prepared by `requires` or allowed lifecycle commands, such as Homebrew, npm, Bun, pip, or winget. |
+| **System/tool scope** | Host package managers | Tools prepared by `requires` or allowed setup commands, such as Homebrew, npm, Bun, pip, or winget. |
 
 The practical rule is simple: OpenDock can fully track project files it applies,
 but it cannot claim ownership of the whole machine. Global tool installers may
@@ -152,6 +152,7 @@ bin/opendock version
 | `opendock auth status` | Show the current Registry login. |
 | `opendock auth logout` | Clear local Registry login. |
 | `opendock deploy owner/name@1.0.0` | Submit a local dock release for Registry review. |
+| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Submit a platform-specific release artifact. |
 
 Dock references require an exact version identifier.
 
@@ -198,18 +199,17 @@ requires:
   runtimes:
     git: ">=2.40.0"
 
-lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
+install:
+  - id: git-init
+    check: git status
+    run: git init -b main
 
-  update: []
+update: []
 
-  doctor:
-    - id: git
-      check: git --version
-      version: ">=2.40.0"
+doctor:
+  - id: git
+    check: git --version
+    version: ">=2.40.0"
 ```
 
 `readme` and `logo` are Registry catalog metadata. They are not installed into a
@@ -247,27 +247,26 @@ Files that cannot safely contain marker comments are managed as whole files by
 checksum. If a user edits a managed file, update and uninstall stop by default.
 Use `--force` only when the dock version should win.
 
-## Lifecycle And Export
+## Commands And Export
 
-Lifecycle steps can run in the project root or in a dock-private workdir.
-Use `requires` for runtime and package prerequisites; use `lifecycle` for
-project actions and generated outputs.
+Command steps can run in the project root or in a dock-private workdir.
+Use `requires` for runtime and package prerequisites; use top-level `install`,
+`update`, and `doctor` for project actions and generated outputs.
 
 ```yaml
-lifecycle:
-  install:
-    - id: apply-oma
-      run: oma -y install
-      workdir: dock
-      export:
-        include:
-          - AGENTS.md
-          - CLAUDE.md
-          - .agents/**
-          - .codex/**
-        exclude:
-          - "**/*.log"
-          - "**/cache/**"
+install:
+  - id: apply-oma
+    run: oma -y install
+    workdir: dock
+    export:
+      include:
+        - AGENTS.md
+        - CLAUDE.md
+        - .agents/**
+        - .codex/**
+      exclude:
+        - "**/*.log"
+        - "**/cache/**"
 ```
 
 - `workdir: root` runs in the project root.
@@ -312,16 +311,20 @@ Registry. Deploy requires login.
 ```bash
 opendock auth login
 opendock deploy owner/name@1.0.0
+opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
 ```
 
 Deploy uploads:
 
 - `dock.yml`
 - the archive built from `dock.yml` and `files[].from`
+- release platform metadata: `any`, `macos`, `windows`, or `linux`
 - optional `readme` markdown for the catalog
 - optional `logo` image for the catalog
 
 The catalog metadata is submitted separately from the install archive.
+When `--file` points to `dock.macos.yml`, OpenDock stores it inside the archive
+as `dock.yml` so install still reads the normal manifest name.
 
 ## Repository Layout
 
@@ -336,7 +339,7 @@ src/
     app/                    # Install, update, uninstall orchestration
     domain/                 # Manifest and project state models
     files/                  # Managed blocks, checksums, path safety, file plans
-    runtime/                # Lifecycle command runner and allowlist
+    runtime/                # Command runner and allowlist
 tests/
   cli-flow.test.ts          # Integration-style temp-dir tests
 examples/

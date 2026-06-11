@@ -1,7 +1,7 @@
 # OpenDock Guide
 
 `dock.yml` describes what a dock adds to a project: files, required tools,
-lifecycle commands, generated outputs, and health checks.
+install, update, and doctor commands, generated outputs, and health checks.
 
 OpenDock is a small packaging layer for AI workspace setup. Pick the docks you
 need, combine them in one project, and keep each dock independently tracked for
@@ -88,9 +88,11 @@ can stay outside the OpenDock block.
 | `summary` | no | Short Registry catalog summary. |
 | `readme` | no | Markdown file submitted as catalog detail content. |
 | `logo` | no | Catalog logo image path. |
-| `requires` | no | Runtime and package requirements prepared before lifecycle steps. |
+| `requires` | no | Runtime and package requirements prepared before commands run. |
 | `files` | no | File or directory mappings applied to the project root. |
-| `lifecycle` | no | `install`, `update`, and `doctor` commands. |
+| `install` | no | Commands for first install and initial generation. |
+| `update` | no | Commands for refresh and maintenance. |
+| `doctor` | no | Health checks that do not modify the project. |
 
 ## Id And Version
 
@@ -141,7 +143,7 @@ Rules:
 
 ## Requires
 
-`requires` prepares host tools before lifecycle commands run.
+`requires` prepares host tools before `install`, `update`, and `doctor` run.
 
 ```yaml
 requires:
@@ -174,21 +176,20 @@ Text files are usually applied as managed blocks. Binary files and structured
 config files are tracked by checksum. If a user edits OpenDock-managed content,
 OpenDock stops before writing root files. `--force` means the dock version wins.
 
-## Lifecycle
+## Commands
 
 ```yaml
-lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
+install:
+  - id: git-init
+    check: git status
+    run: git init -b main
 
-  update: []
+update: []
 
-  doctor:
-    - id: git
-      check: git --version
-      version: ">=2.40.0"
+doctor:
+  - id: git
+    check: git --version
+    version: ">=2.40.0"
 ```
 
 Steps run top to bottom. `check` makes a step idempotent. `doctor` should report
@@ -200,20 +201,19 @@ Use `workdir: dock` when an external tool generates files. OpenDock runs the
 command in the private dock workdir and exports only declared outputs.
 
 ```yaml
-lifecycle:
-  install:
-    - id: apply-oma
-      run: oma -y install
-      workdir: dock
-      export:
-        include:
-          - AGENTS.md
-          - CLAUDE.md
-          - .agents/**
-          - .codex/**
-        exclude:
-          - "**/*.log"
-          - "**/cache/**"
+install:
+  - id: apply-oma
+    run: oma -y install
+    workdir: dock
+    export:
+      include:
+        - AGENTS.md
+        - CLAUDE.md
+        - .agents/**
+        - .codex/**
+      exclude:
+        - "**/*.log"
+        - "**/cache/**"
 ```
 
 This lets OpenDock track generated files for update and uninstall instead of
@@ -221,21 +221,28 @@ leaving unmanaged files in the project root.
 
 ## Platforms
 
-Use `platforms` inside the same step id when commands differ by operating system.
-The step order stays where the step appears in the list.
+Prefer separate platform artifacts instead of putting platform branches inside
+one manifest. The dock id and version stay the same, while each release artifact
+targets one platform.
 
-```yaml
-lifecycle:
-  install:
-    - id: install-node
-      platforms:
-        macos:
-          run: brew install node@22
-        windows:
-          run: winget install --id OpenJS.NodeJS.LTS --exact
+```bash
+opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
+opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
+opendock deploy owner/name@1.0.0 --platform linux --file dock.linux.yml
 ```
 
-Supported platform keys are `macos`, `windows`, and `linux`.
+Platform-neutral docks can omit `--platform`, which submits the artifact as
+`any`.
+
+Install stays simple:
+
+```bash
+opendock install owner/name@1.0.0
+opendock install owner/name@1.0.0 --platform windows
+```
+
+Without `--platform`, OpenDock detects the host OS and asks the Registry for the
+matching artifact. With `--platform`, OpenDock asks for that specific platform.
 
 ## Deploy
 
@@ -244,17 +251,23 @@ Deploy requires login and an exact version in the command.
 ```bash
 opendock auth login
 opendock deploy owner/name@1.0.0
+opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
 ```
 
 Deploy submits:
 
 1. `dock.yml`.
 2. A `.tgz` archive built from `dock.yml` and `files[].from`.
-3. Optional `readme_markdown`.
-4. Optional `logo`.
+3. The target platform: `any`, `macos`, `windows`, or `linux`.
+4. Optional `readme_markdown`.
+5. Optional `logo`.
 
 `readme` and `logo` are catalog metadata, so they are not included in the install
 archive unless they are also listed in `files`.
+
+When `--file` points to a platform-specific manifest such as `dock.macos.yml`,
+OpenDock still stores it inside the archive as `dock.yml`. Install always reads a
+normal `dock.yml` from the downloaded artifact.
 
 ## Checklist
 
@@ -272,13 +285,12 @@ Files:
 3. Text files behave as managed blocks.
 4. Config or binary files are protected by checksum conflicts.
 
-Lifecycle:
+Commands:
 
 1. Repeatable steps have `check`.
 2. Important tool checks include `version`.
 3. Long-running commands use `timeout_ms`.
-4. Platform differences are grouped with `platforms`.
-5. External generators use `workdir: dock` and `export`.
+4. External generators use `workdir: dock` and `export`.
 
 Release:
 
@@ -288,3 +300,4 @@ Release:
 4. Test `--force`.
 5. Test uninstall.
 6. Run `opendock doctor`.
+7. If OS behavior differs, deploy and test each platform artifact separately.

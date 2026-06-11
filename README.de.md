@@ -65,7 +65,7 @@ kleines Tool, um wiederholbares KI-workspace setup zu installieren und zu verwal
 | **Project scope** | Aktueller workspace | Installed dock list, lock, logs und project metadata. |
 | **Dock scope** | Ein installierter dock | Version, checksum, managed file records und private workdir. |
 | **Root output scope** | OpenDock file engine | Dateien, die nach preflight in den project root geschrieben werden. |
-| **System/tool scope** | Host package managers | Tools, die über `requires` oder erlaubte lifecycle commands vorbereitet werden, z. B. Homebrew, npm, Bun, pip oder winget. |
+| **System/tool scope** | Host package managers | Tools, die über `requires` oder erlaubte install, update, and doctor commands vorbereitet werden, z. B. Homebrew, npm, Bun, pip oder winget. |
 
 ## Install
 
@@ -95,6 +95,7 @@ opendock bootstrap mac
 | `opendock auth status` | Zeigt den aktuellen Registry login. |
 | `opendock auth logout` | Entfernt den lokalen Registry login. |
 | `opendock deploy owner/name@1.0.0` | Reicht einen local dock release für Registry review ein. |
+| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Reicht ein plattformspezifisches release artifact ein. |
 
 dock references benötigen einen exact version identifier.
 
@@ -122,18 +123,17 @@ files:
   - from: files/AGENTS.md
     to: AGENTS.md
 
-lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
+install:
+  - id: git-init
+    check: git status
+    run: git init -b main
 
-  update: []
+update: []
 
-  doctor:
-    - id: git
-      check: git --version
-      version: ">=2.40.0"
+doctor:
+  - id: git
+    check: git --version
+    version: ">=2.40.0"
 ```
 
 `readme` und `logo` sind Registry catalog metadata. Wenn sie ins Projekt

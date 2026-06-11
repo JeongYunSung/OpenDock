@@ -59,7 +59,9 @@ files:
 | `logo` | Catalog logo image. |
 | `requires` | Runtime 和 package requirement. |
 | `files` | 应用到 project root 的文件或目录. |
-| `lifecycle` | `install`, `update`, `doctor` commands. |
+| `install` | Commands for first install and initial generation. |
+| `update` | Commands for refresh and maintenance. |
+| `doctor` | Health checks that do not modify the project. |
 
 ## Version
 
@@ -78,19 +80,18 @@ opendock deploy opendock/codex@1.0.0
 checksum 追踪。如果用户修改了 OpenDock 管理的内容，update 会在写入 root 文件前停止。
 `--force` 表示明确选择 dock 版本覆盖。
 
-## Lifecycle
+## Commands
 
 ```yaml
-lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
+install:
+  - id: git-init
+    check: git status
+    run: git init -b main
 
-  doctor:
-    - id: git
-      check: git --version
-      version: ">=2.40.0"
+doctor:
+  - id: git
+    check: git --version
+    version: ">=2.40.0"
 ```
 
 步骤按顺序执行。`doctor` 应该只检查状态，不修改项目。
@@ -113,7 +114,8 @@ export:
 ```bash
 opendock auth login
 opendock deploy owner/name@1.0.0
+opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
 ```
 
-Deploy 会提交 `dock.yml`、基于 `files[].from` 生成的 archive、可选
-`readme_markdown` 和可选 `logo`。
+Deploy 会提交 `dock.yml`、基于 `files[].from` 生成的 archive、release platform
+metadata、可选 `readme_markdown` 和可选 `logo`。

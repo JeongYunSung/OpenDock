@@ -18,11 +18,10 @@ files:
     to: .opendock/checklists/agent-pr-review.md
   - from: files/.opendock/checklists/security-review.md
     to: .opendock/checklists/security-review.md
-lifecycle:
-  doctor:
-    - id: pr-template
-      check: test -f .github/pull_request_template.md
-    - id: gitleaks-config
-      check: test -f .gitleaks.toml
-    - id: safety-checklist
-      check: test -f .opendock/checklists/agent-pr-review.md
+doctor:
+  - id: pr-template
+    check: test -f .github/pull_request_template.md
+  - id: gitleaks-config
+    check: test -f .gitleaks.toml
+  - id: safety-checklist
+    check: test -f .opendock/checklists/agent-pr-review.md

@@ -8,9 +8,8 @@ files:
     to: mise.toml
   - from: files/.opendock/dev-env.md
     to: .opendock/dev-env.md
-lifecycle:
-  doctor:
-    - id: mise-config
-      check: test -f mise.toml
-    - id: dev-env-guide
-      check: test -f .opendock/dev-env.md
+doctor:
+  - id: mise-config
+    check: test -f mise.toml
+  - id: dev-env-guide
+    check: test -f .opendock/dev-env.md

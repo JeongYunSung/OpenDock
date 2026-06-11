@@ -16,13 +16,12 @@ files:
     to: .opendock/mcp/claude.mcp.json
   - from: files/.opendock/mcp/codex.config.example.toml
     to: .opendock/mcp/codex.config.example.toml
-lifecycle:
-  doctor:
-    - id: mcp-guide
-      check: test -f MCP.md
-    - id: approved-servers
-      check: test -f .opendock/mcp/approved-servers.yml
-    - id: security-checklist
-      check: test -f .opendock/mcp/security-checklist.md
-    - id: codex-template
-      check: test -f .opendock/mcp/codex.config.example.toml
+doctor:
+  - id: mcp-guide
+    check: test -f MCP.md
+  - id: approved-servers
+    check: test -f .opendock/mcp/approved-servers.yml
+  - id: security-checklist
+    check: test -f .opendock/mcp/security-checklist.md
+  - id: codex-template
+    check: test -f .opendock/mcp/codex.config.example.toml

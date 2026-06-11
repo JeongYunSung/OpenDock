@@ -63,7 +63,7 @@ OpenDock は terminal replacement でも汎用 script runner でもありませ�
 | **Project scope** | 現在の workspace | installed dock list, lock, log, project metadata. |
 | **Dock scope** | 1つの installed dock | version, checksum, managed file record, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 後に project root へ適用される file. |
-| **System/tool scope** | host package manager | `requires` または許可された lifecycle command が準備する Homebrew, npm, Bun, pip, winget などの host tool. |
+| **System/tool scope** | host package manager | `requires` または許可された install, update, and doctor command が準備する Homebrew, npm, Bun, pip, winget などの host tool. |
 
 ## Install
 
@@ -93,6 +93,7 @@ opendock bootstrap mac
 | `opendock auth status` | 現在の Registry login を表示. |
 | `opendock auth logout` | local Registry login を削除. |
 | `opendock deploy owner/name@1.0.0` | local dock release を Registry review に提出. |
+| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | platform 別の release artifact を提出. |
 
 dock reference には exact version identifier が必要です。
 
@@ -120,18 +121,17 @@ files:
   - from: files/AGENTS.md
     to: AGENTS.md
 
-lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
+install:
+  - id: git-init
+    check: git status
+    run: git init -b main
 
-  update: []
+update: []
 
-  doctor:
-    - id: git
-      check: git --version
-      version: ">=2.40.0"
+doctor:
+  - id: git
+    check: git --version
+    version: ">=2.40.0"
 ```
 
 `readme` と `logo` は Registry catalog metadata です。project に install するには

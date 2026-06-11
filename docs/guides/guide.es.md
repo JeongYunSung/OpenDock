@@ -62,7 +62,9 @@ files:
 | `logo` | Imagen de logo del catalog. |
 | `requires` | Requisitos de runtime y package. |
 | `files` | Archivos o directorios aplicados al project root. |
-| `lifecycle` | Commands de `install`, `update` y `doctor`. |
+| `install` | Commands for first install and initial generation. |
+| `update` | Commands for refresh and maintenance. |
+| `doctor` | Health checks that do not modify the project. |
 
 ## Version
 
@@ -82,19 +84,18 @@ binary files se protegen con checksum. Si una persona modifica contenido
 gestionado por OpenDock, update se detiene antes de escribir en root. `--force`
 elige explícitamente la versión del dock.
 
-## Lifecycle
+## Commands
 
 ```yaml
-lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
+install:
+  - id: git-init
+    check: git status
+    run: git init -b main
 
-  doctor:
-    - id: git
-      check: git --version
-      version: ">=2.40.0"
+doctor:
+  - id: git
+    check: git --version
+    version: ">=2.40.0"
 ```
 
 Los steps corren de arriba hacia abajo. `doctor` debe revisar estado y evitar
@@ -119,7 +120,8 @@ export:
 ```bash
 opendock auth login
 opendock deploy owner/name@1.0.0
+opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
 ```
 
-Deploy envía `dock.yml`, un archive construido desde `files[].from`, optional
-`readme_markdown` y optional `logo`.
+Deploy envía `dock.yml`, un archive construido desde `files[].from`, metadata de
+release platform, `readme_markdown` opcional y `logo` opcional.

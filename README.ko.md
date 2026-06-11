@@ -44,7 +44,7 @@ opendock uninstall opendock/codex
 - [명령어](#명령어)
 - [Dock Format](#dock-format)
 - [파일 소유권](#파일-소유권)
-- [Lifecycle And Export](#lifecycle-and-export)
+- [Commands And Export](#commands-and-export)
 - [Example Docks](#example-docks)
 - [Registry And Deploy](#registry-and-deploy)
 - [Repository Layout](#repository-layout)
@@ -106,7 +106,7 @@ OpenDock은 책임 범위를 명확히 나눕니다.
 | **Project scope** | 현재 workspace | 설치된 dock 목록, lock, log, project-level metadata. |
 | **Dock scope** | 설치된 dock 하나 | version, checksum, managed file record, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 이후 project root에 적용되는 파일. |
-| **System/tool scope** | host package manager | `requires` 또는 허용된 lifecycle command가 준비하는 Homebrew, npm, Bun, pip, winget 같은 host tool. |
+| **System/tool scope** | host package manager | `requires` 또는 허용된 install, update, and doctor command가 준비하는 Homebrew, npm, Bun, pip, winget 같은 host tool. |
 
 핵심 규칙은 단순합니다. OpenDock은 프로젝트에 적용한 파일은 추적할 수 있지만,
 전체 머신을 소유한다고 가정하지 않습니다. global tool installer는 host에 영향을
@@ -152,6 +152,7 @@ bin/opendock version
 | `opendock auth status` | 현재 Registry 로그인 상태를 보여줍니다. |
 | `opendock auth logout` | 로컬 Registry 로그인 정보를 지웁니다. |
 | `opendock deploy owner/name@1.0.0` | local dock release를 Registry review로 제출합니다. |
+| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | platform별 release artifact를 제출합니다. |
 
 dock reference에는 exact version identifier가 필요합니다.
 
@@ -196,18 +197,17 @@ requires:
   runtimes:
     git: ">=2.40.0"
 
-lifecycle:
-  install:
-    - id: git-init
-      check: git status
-      run: git init -b main
+install:
+  - id: git-init
+    check: git status
+    run: git init -b main
 
-  update: []
+update: []
 
-  doctor:
-    - id: git
-      check: git --version
-      version: ">=2.40.0"
+doctor:
+  - id: git
+    check: git --version
+    version: ">=2.40.0"
 ```
 
 `readme`와 `logo`는 Registry catalog metadata입니다. 프로젝트에 설치하려면
@@ -246,27 +246,26 @@ marker comment를 넣기 어려운 파일은 파일 전체를 checksum으로 관
 managed file을 수정하면 update와 uninstall은 기본적으로 중단됩니다. dock 버전을
 우선하려면 `--force`를 사용합니다.
 
-## Lifecycle And Export
+## Commands And Export
 
-lifecycle step은 프로젝트 root 또는 dock-private workdir에서 실행할 수 있습니다.
-runtime과 package 준비는 `requires`에 두고, lifecycle은 프로젝트 작업과 generated
-output 적용에 사용합니다.
+Command step은 프로젝트 root 또는 dock-private workdir에서 실행할 수 있습니다.
+runtime과 package 준비는 `requires`에 두고, 프로젝트 작업과 generated output
+적용은 top-level `install`, `update`, `doctor`에 둡니다.
 
 ```yaml
-lifecycle:
-  install:
-    - id: apply-oma
-      run: oma -y install
-      workdir: dock
-      export:
-        include:
-          - AGENTS.md
-          - CLAUDE.md
-          - .agents/**
-          - .codex/**
-        exclude:
-          - "**/*.log"
-          - "**/cache/**"
+install:
+  - id: apply-oma
+    run: oma -y install
+    workdir: dock
+    export:
+      include:
+        - AGENTS.md
+        - CLAUDE.md
+        - .agents/**
+        - .codex/**
+      exclude:
+        - "**/*.log"
+        - "**/cache/**"
 ```
 
 - `workdir: root`는 프로젝트 root에서 실행합니다.
@@ -311,16 +310,20 @@ install은 public이지만, remote install 가능한 dock은 OpenDock Registry �
 ```bash
 opendock auth login
 opendock deploy owner/name@1.0.0
+opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
 ```
 
 deploy는 다음을 업로드합니다.
 
 - `dock.yml`
 - `dock.yml`과 `files[].from`으로 만든 archive
-- optional `readme` markdown
-- optional `logo` image
+- release platform metadata: `any`, `macos`, `windows`, `linux`
+- 선택 사항인 catalog용 `readme` markdown
+- 선택 사항인 catalog용 `logo` image
 
 catalog metadata는 install archive와 별도로 제출됩니다.
+`--file dock.macos.yml`처럼 지정해도 archive 안에는 `dock.yml` 이름으로 들어가므로
+install은 항상 일반 manifest 이름을 읽습니다.
 
 ## Repository Layout
 
@@ -335,7 +338,7 @@ src/
     app/                    # Install, update, uninstall orchestration
     domain/                 # Manifest and project state models
     files/                  # Managed blocks, checksums, path safety, file plans
-    runtime/                # Lifecycle command runner and allowlist
+    runtime/                # Command runner and allowlist
 tests/
   cli-flow.test.ts          # Integration-style temp-dir tests
 examples/

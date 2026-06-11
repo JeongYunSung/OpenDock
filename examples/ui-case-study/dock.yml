@@ -18,17 +18,16 @@ files:
     to: PROMPTS.md
   - from: files/README.md
     to: README.md
-lifecycle:
-  doctor:
-    - id: agents-md
-      check: test -f AGENTS.md
-    - id: claude-md
-      check: test -f CLAUDE.md
-    - id: case-study-template
-      check: test -f CASE_STUDY_TEMPLATE.md
-    - id: problem-definition
-      check: test -f PROBLEM_DEFINITION.md
-    - id: impact-measurement
-      check: test -f IMPACT_MEASUREMENT.md
-    - id: prompts
-      check: test -f PROMPTS.md
+doctor:
+  - id: agents-md
+    check: test -f AGENTS.md
+  - id: claude-md
+    check: test -f CLAUDE.md
+  - id: case-study-template
+    check: test -f CASE_STUDY_TEMPLATE.md
+  - id: problem-definition
+    check: test -f PROBLEM_DEFINITION.md
+  - id: impact-measurement
+    check: test -f IMPACT_MEASUREMENT.md
+  - id: prompts
+    check: test -f PROMPTS.md

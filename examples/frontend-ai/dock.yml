@@ -20,19 +20,18 @@ files:
     to: PROMPTS.md
   - from: files/README.md
     to: README.md
-lifecycle:
-  doctor:
-    - id: agents-md
-      check: test -f AGENTS.md
-    - id: claude-md
-      check: test -f CLAUDE.md
-    - id: design-md
-      check: test -f DESIGN.md
-    - id: component-guide
-      check: test -f COMPONENT_GUIDE.md
-    - id: code-style
-      check: test -f CODE_STYLE.md
-    - id: review-checklist
-      check: test -f REVIEW_CHECKLIST.md
-    - id: prompts
-      check: test -f PROMPTS.md
+doctor:
+  - id: agents-md
+    check: test -f AGENTS.md
+  - id: claude-md
+    check: test -f CLAUDE.md
+  - id: design-md
+    check: test -f DESIGN.md
+  - id: component-guide
+    check: test -f COMPONENT_GUIDE.md
+  - id: code-style
+    check: test -f CODE_STYLE.md
+  - id: review-checklist
+    check: test -f REVIEW_CHECKLIST.md
+  - id: prompts
+    check: test -f PROMPTS.md

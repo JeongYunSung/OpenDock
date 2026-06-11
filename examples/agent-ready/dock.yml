@@ -28,17 +28,16 @@ files:
     to: .clinerules/project.md
   - from: files/.roo/rules/project.md
     to: .roo/rules/project.md
-lifecycle:
-  doctor:
-    - id: agents-md
-      check: test -f AGENTS.md
-    - id: claude-md
-      check: test -f CLAUDE.md
-    - id: gemini-md
-      check: test -f GEMINI.md
-    - id: copilot-instructions
-      check: test -f .github/copilot-instructions.md
-    - id: cursor-rules
-      check: test -f .cursor/rules/project.mdc
-    - id: claude-rules
-      check: test -f .claude/rules/project.md
+doctor:
+  - id: agents-md
+    check: test -f AGENTS.md
+  - id: claude-md
+    check: test -f CLAUDE.md
+  - id: gemini-md
+    check: test -f GEMINI.md
+  - id: copilot-instructions
+    check: test -f .github/copilot-instructions.md
+  - id: cursor-rules
+    check: test -f .cursor/rules/project.mdc
+  - id: claude-rules
+    check: test -f .claude/rules/project.md
