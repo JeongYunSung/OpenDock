@@ -20,12 +20,13 @@ AI-ready.
 
 ---
 
-OpenDock is a Bun-first TypeScript CLI for choosing and combining approved AI
-setup packs, called **docks**, in the current workspace.
+OpenDock helps you set up AI-ready workspaces.
 
-A dock can add agent instructions, prompt libraries, project harnesses, safe
-lifecycle commands, and generated outputs from external tools. OpenDock tracks
-what it applied so a project can be updated, diagnosed, or cleaned up later.
+Instead of manually copying prompts, creating config files, installing tools,
+and repeating the same setup for every project, you install a **dock**.
+
+A dock is a ready-made AI workspace package. You can install one dock or combine
+several docks in the same project.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -51,58 +52,49 @@ opendock uninstall opendock/codex
 
 ## What OpenDock Solves
 
-AI setup usually starts simple and then spreads across global tools, copied
-prompts, hidden config files, README snippets, shell commands, and vendor-specific
-agent folders.
+AI setup is easy at first. You copy a few prompts, add a few files, install a
+tool, and move on.
 
-OpenDock makes that setup a versioned unit you can choose, combine, update, and
-remove:
+Over time, every project starts to look different. It becomes hard to remember
+which files were added, which tools were installed, and what needs to be updated.
 
-- **Outcome-first docks**: each dock should set up a useful workspace, not just
-  install a tool.
-- **Composable setup**: install several docks in one project and let OpenDock
-  track each one independently.
-- **Reviewed distribution**: remote installs resolve through OpenDock Registry.
-- **Project-local tracking**: each workspace owns its `.opendock/` state.
-- **Independent updates**: each dock keeps its own version, files, checksums, and
-  private workdir.
-- **Safe root writes**: OpenDock checks for conflicts before applying project
-  files.
-- **Controlled commands**: lifecycle commands use an allowlist instead of raw
-  shell execution.
+OpenDock turns that setup into a dock you can manage:
 
-OpenDock is not a terminal replacement. It is also not a generic script runner.
-It is a small packaging layer for composable, repeatable AI workspace setup.
+- Choose the AI workspace setup you need.
+- Combine multiple docks in one project.
+- Update installed docks later.
+- Remove docks you no longer need.
+- Keep track of what OpenDock added.
+- Avoid silently overwriting your own work.
+
+OpenDock is not a terminal replacement or a general script runner. It is a small
+tool for installing and managing repeatable AI workspace setup.
 
 ## How It Works
 
-```text
-registry.opendock.app
-  -> approved dock release
-  -> downloaded archive
-  -> dock.yml manifest
-  -> runtime/package requirements
-  -> lifecycle commands
-  -> file/export candidates
-  -> preflight conflict check
-  -> project root writes
-  -> .opendock lock update
+Install a dock into the project you are working on.
+
+```bash
+opendock install opendock/designer-ai@1.0.0
 ```
 
-Install and update follow the same safety model:
+OpenDock then:
 
-1. Resolve a dock release from the Registry.
-2. Read `dock.yml`.
-3. Ensure `requires` runtimes and packages.
-4. Run lifecycle steps for the requested phase.
-5. Collect files declared in `files`.
-6. Collect exported files from dock workdirs.
-7. Check all target files before touching the project root.
-8. Apply managed blocks or managed files.
-9. Write `.opendock/project.yml` and `.opendock/dock.lock.yml`.
+1. Downloads an approved dock from the Registry.
+2. Checks the tools or packages the dock needs.
+3. Adds the dock's files to your project.
+4. Checks for conflicts before writing files.
+5. Records what was installed in `.opendock/`.
 
-If a managed file was edited by the user, OpenDock stops before writing root
-files. `--force` tells OpenDock to choose the dock version.
+That record lets OpenDock update or remove the dock later.
+
+```bash
+opendock update
+opendock uninstall opendock/designer-ai
+```
+
+If you changed a file that OpenDock manages, OpenDock stops before overwriting
+it. Use `--force` only when you intentionally want the dock version to win.
 
 ## Scopes
 

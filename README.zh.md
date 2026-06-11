@@ -19,12 +19,13 @@
 
 ---
 
-OpenDock 是一个 Bun-first TypeScript CLI，用来在当前 workspace 中选择并组合
-已审核的 AI 设置包，也就是 **dock**。
+OpenDock 帮你快速准备 AI-ready workspace。
 
-dock 可以添加 agent instructions、prompt libraries、project harnesses、安全的
-lifecycle commands，以及外部工具生成的输出。OpenDock 会追踪它应用过的内容，
-因此之后可以 update、doctor 或 uninstall。
+不必在每个项目里手动复制 prompts、创建配置文件、安装工具并重复同样的步骤。
+你只需要安装一个 **dock**。
+
+dock 是一个可直接使用的 AI workspace package。你可以安装一个 dock，也可以在
+同一个项目里组合多个 dock。
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -35,21 +36,22 @@ opendock uninstall opendock/codex
 
 ## OpenDock 解决什么问题
 
-AI setup 很容易散落成 global tools、复制来的 prompts、隐藏 config、README
-片段、shell commands 和不同 vendor 的 agent folders。
+AI setup 一开始很简单：复制几个 prompts，添加几个文件，安装一个工具。
 
-OpenDock 把这些变成可以选择、组合、更新和移除的 versioned unit。
+但时间久了，每个项目的设置都会变得不一样。你会很难记住添加过哪些文件、安装过
+哪些工具，以及哪些内容需要更新。
 
-- **Outcome-first docks**：安装可直接工作的 workspace，而不只是安装工具。
-- **Composable setup**：一个项目可以安装多个 dock，并分别追踪。
-- **Reviewed distribution**：remote install 通过 OpenDock Registry resolve。
-- **Project-local tracking**：每个 workspace 拥有自己的 `.opendock/` state。
-- **Independent updates**：每个 dock 拥有独立的 version、files、checksum 和 private workdir。
-- **Safe root writes**：写入 project root 前先检查 conflict。
-- **Controlled commands**：执行 allowlist 中的 lifecycle command，而不是 raw shell。
+OpenDock 把这些 setup 变成可以管理的 dock。
 
-OpenDock 不是 terminal replacement，也不是通用 script runner。它是用于可组合、
-可重复 AI workspace setup 的轻量 packaging layer。
+- 选择你需要的 AI workspace setup。
+- 在一个项目中组合多个 dock。
+- 之后更新已安装的 dock。
+- 移除不再需要的 dock。
+- 追踪 OpenDock 添加过的内容。
+- 避免默默覆盖你自己的修改。
+
+OpenDock 不是 terminal replacement，也不是通用 script runner。它是用来安装和
+管理可重复 AI workspace setup 的小工具。
 
 ## Scopes
 

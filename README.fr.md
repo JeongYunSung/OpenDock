@@ -20,12 +20,13 @@ gardez chaque projet AI-ready.
 
 ---
 
-OpenDock est une CLI TypeScript Bun-first pour choisir et combiner des packs de
-configuration IA approuvés, appelés **docks**, dans le workspace courant.
+OpenDock aide à préparer des workspaces prêts pour l'IA.
 
-Un dock peut ajouter des agent instructions, prompt libraries, project harnesses,
-commandes lifecycle sûres et sorties générées par des outils externes. OpenDock
-trace ce qu'il applique pour pouvoir mettre à jour, diagnostiquer ou désinstaller.
+Au lieu de copier des prompts, créer des fichiers de configuration, installer des
+outils et répéter le même setup dans chaque projet, vous installez un **dock**.
+
+Un dock est un package de workspace IA prêt à l'emploi. Vous pouvez en installer
+un seul ou combiner plusieurs docks dans le même projet.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -36,23 +37,24 @@ opendock uninstall opendock/codex
 
 ## Ce Que Résout OpenDock
 
-Le setup IA finit souvent dispersé entre outils globaux, prompts copiés, config
-cachées, snippets README, commandes shell et dossiers d'agents propres à chaque
-fournisseur.
+Le setup IA commence simplement : quelques prompts, quelques fichiers, un outil
+à installer.
 
-OpenDock transforme ce setup en unité versionnée que vous pouvez choisir,
-combiner, mettre à jour et supprimer.
+Avec le temps, chaque projet finit avec une configuration différente. Il devient
+difficile de savoir quels fichiers ont été ajoutés, quels outils sont installés
+et quoi mettre à jour.
 
-- **Outcome-first docks** : installe un workspace utile, pas seulement un outil.
-- **Composable setup** : installe plusieurs docks dans un projet et trace chacun séparément.
-- **Reviewed distribution** : les installations distantes passent par OpenDock Registry.
-- **Project-local tracking** : chaque workspace garde son état dans `.opendock/`.
-- **Independent updates** : chaque dock garde sa version, ses fichiers, checksums et workdir privé.
-- **Safe root writes** : OpenDock vérifie les conflits avant d'écrire dans le project root.
-- **Controlled commands** : les lifecycle commands utilisent une allowlist, pas un raw shell.
+OpenDock transforme ce setup en docks que vous pouvez gérer.
+
+- Choisissez le setup de workspace IA dont vous avez besoin.
+- Combinez plusieurs docks dans un même projet.
+- Mettez à jour les docks installés plus tard.
+- Supprimez les docks devenus inutiles.
+- Gardez la trace de ce qu'OpenDock a ajouté.
+- Évitez d'écraser vos propres changements sans avertissement.
 
 OpenDock ne remplace pas le terminal et n'est pas un script runner générique.
-C'est une petite couche de packaging pour un setup IA composable et répétable.
+C'est un petit outil pour installer et gérer un setup IA répétable.
 
 ## Scopes
 

@@ -20,13 +20,14 @@ Projekt AI-ready.
 
 ---
 
-OpenDock ist eine Bun-first TypeScript-CLI, um geprüfte KI-Setup-Packs, genannt
-**docks**, im aktuellen workspace auszuwählen und zu kombinieren.
+OpenDock hilft dir, AI-ready workspaces schnell vorzubereiten.
 
-Ein dock kann agent instructions, prompt libraries, project harnesses, sichere
-lifecycle commands und von externen Tools erzeugte Ausgaben hinzufügen. OpenDock
-verfolgt, was angewendet wurde, damit du später aktualisieren, diagnostizieren
-oder deinstallieren kannst.
+Statt Prompts zu kopieren, Config-Dateien anzulegen, Tools zu installieren und
+das gleiche Setup in jedem Projekt zu wiederholen, installierst du einen
+**dock**.
+
+Ein dock ist ein sofort nutzbares AI-workspace package. Du kannst einen dock
+installieren oder mehrere docks im selben Projekt kombinieren.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -37,22 +38,24 @@ opendock uninstall opendock/codex
 
 ## Was OpenDock Löst
 
-KI-Setup verteilt sich schnell über globale Tools, kopierte Prompts, versteckte
-Config, README-Snippets, shell commands und vendor-spezifische agent folders.
+KI-Setup beginnt einfach: ein paar Prompts kopieren, Dateien hinzufügen und ein
+Tool installieren.
 
-OpenDock macht daraus eine versionierte Einheit, die du auswählen, kombinieren,
-aktualisieren und entfernen kannst.
+Mit der Zeit sieht jedes Projekt anders aus. Es wird schwer zu erkennen, welche
+Dateien hinzugefügt wurden, welche Tools installiert sind und was aktualisiert
+werden muss.
 
-- **Outcome-first docks**: richtet einen nützlichen workspace ein, nicht nur ein Tool.
-- **Composable setup**: installiere mehrere docks in einem Projekt und verfolge sie separat.
-- **Reviewed distribution**: remote installs werden über OpenDock Registry aufgelöst.
-- **Project-local tracking**: jeder workspace hält seinen Zustand in `.opendock/`.
-- **Independent updates**: jeder dock behält version, files, checksums und private workdir.
-- **Safe root writes**: OpenDock prüft Konflikte, bevor es in den project root schreibt.
-- **Controlled commands**: lifecycle commands nutzen eine allowlist statt raw shell.
+OpenDock macht daraus docks, die du verwalten kannst.
 
-OpenDock ist kein Terminal-Ersatz und kein generischer script runner. Es ist eine
-kleine Packaging-Schicht für kombinierbares, wiederholbares KI-workspace setup.
+- Wähle das AI-workspace setup, das du brauchst.
+- Kombiniere mehrere docks in einem Projekt.
+- Aktualisiere installierte docks später.
+- Entferne docks, die du nicht mehr brauchst.
+- Behalte im Blick, was OpenDock hinzugefügt hat.
+- Verhindere stilles Überschreiben deiner eigenen Änderungen.
+
+OpenDock ist kein Terminal-Ersatz und kein generischer script runner. Es ist ein
+kleines Tool, um wiederholbares KI-workspace setup zu installieren und zu verwalten.
 
 ## Scopes
 

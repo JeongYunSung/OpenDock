@@ -20,12 +20,13 @@ AI-ready な workspace に保ちます。
 
 ---
 
-OpenDock は、承認済みの AI setup pack である **dock** を現在の workspace で
-選び、組み合わせるための Bun-first TypeScript CLI です。
+OpenDock は、AI-ready workspace をすばやく準備するためのツールです。
 
-dock は agent instruction、prompt library、project harness、安全な lifecycle
-command、外部ツールが生成した出力をプロジェクトに適用できます。OpenDock は
-適用した内容を追跡するため、後から update、doctor、uninstall ができます。
+プロジェクトごとに prompts をコピーし、設定ファイルを作り、必要なツールを
+インストールする作業を繰り返す代わりに、**dock** をインストールします。
+
+dock はすぐ使える AI workspace package です。1つだけ入れることも、同じ
+プロジェクトに複数の dock を組み合わせることもできます。
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -36,22 +37,23 @@ opendock uninstall opendock/codex
 
 ## OpenDock が解決すること
 
-AI setup は、global tool、コピーした prompt、隠れた config、README snippet、
-shell command、vendor ごとの agent folder に散らばりがちです。
+AI setup は最初は簡単です。prompt をいくつかコピーし、ファイルを追加し、
+ツールをインストールすれば始められます。
 
-OpenDock はそれを、選び、組み合わせ、更新し、削除できる versioned unit に
-変えます。
+しかし時間が経つと、プロジェクトごとに設定が違ってきます。どのファイルを追加
+したのか、どのツールを入れたのか、何を更新すべきかが分かりにくくなります。
 
-- **Outcome-first docks**: 単なる tool ではなく、すぐ使える workspace をセットアップします。
-- **Composable setup**: 1つのプロジェクトに複数の dock を入れ、それぞれを独立して追跡します。
-- **Reviewed distribution**: remote install は OpenDock Registry から解決されます。
-- **Project-local tracking**: 各 workspace が自分の `.opendock/` state を持ちます。
-- **Independent updates**: 各 dock は version、files、checksum、private workdir を個別に持ちます。
-- **Safe root writes**: project root を書き込む前に conflict を検査します。
-- **Controlled commands**: raw shell ではなく allowlist された lifecycle command を実行します。
+OpenDock はその setup を管理できる dock にまとめます。
 
-OpenDock は terminal replacement ではありません。汎用 script runner でもありません。
-組み合わせ可能で再現可能な AI workspace setup のための小さな packaging layer です。
+- 必要な AI workspace setup を選べます。
+- 1つのプロジェクトに複数の dock を組み合わせられます。
+- インストール済み dock を後から更新できます。
+- 不要になった dock を削除できます。
+- OpenDock が追加した内容を追跡します。
+- 自分の変更を黙って上書きしません。
+
+OpenDock は terminal replacement でも汎用 script runner でもありません。
+再現可能な AI workspace setup をインストールして管理するための小さなツールです。
 
 ## Scopes
 

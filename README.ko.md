@@ -20,12 +20,13 @@
 
 ---
 
-OpenDock은 검토된 AI 설정팩인 **dock**을 현재 workspace에 고르고 조합할 수 있게
-해주는 Bun-first TypeScript CLI입니다.
+OpenDock은 프로젝트를 AI-ready workspace로 빠르게 세팅해주는 도구입니다.
 
-dock은 agent instruction, prompt library, project harness, 안전한 lifecycle
-command, 외부 도구가 만든 결과물을 프로젝트에 적용할 수 있습니다. OpenDock은
-적용한 내용을 추적하므로 이후 update, doctor, uninstall이 가능합니다.
+프로젝트마다 prompt를 복사하고, 설정 파일을 만들고, 필요한 도구를 설치하는 일을
+반복하는 대신 **dock**을 설치합니다.
+
+dock은 바로 쓸 수 있는 AI 작업공간 패키지입니다. 하나만 설치할 수도 있고, 한
+프로젝트에 여러 dock을 함께 설치할 수도 있습니다.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -51,52 +52,49 @@ opendock uninstall opendock/codex
 
 ## OpenDock이 해결하는 문제
 
-AI setup은 처음에는 단순하지만 곧 global tool, 복사한 prompt, 숨겨진 config,
-README snippet, shell command, vendor별 agent 폴더로 흩어집니다.
+AI 도구 세팅은 처음에는 간단합니다. prompt 몇 개를 복사하고, 설정 파일을 만들고,
+필요한 도구를 설치하면 됩니다.
 
-OpenDock은 이 setup을 고르고, 조합하고, 업데이트하고, 제거할 수 있는 versioned
-unit으로 만듭니다.
+그런데 시간이 지나면 프로젝트마다 세팅이 달라집니다. 어떤 파일을 어디에 넣었는지,
+어떤 도구를 설치했는지, 무엇을 업데이트해야 하는지 헷갈리기 시작합니다.
 
-- **Outcome-first docks**: 단순 도구 설치가 아니라 바로 쓸 수 있는 workspace를 설치합니다.
-- **Composable setup**: 한 프로젝트에 여러 dock을 설치하고 각 dock을 독립적으로 추적합니다.
-- **Reviewed distribution**: remote install은 OpenDock Registry를 통해 resolve됩니다.
-- **Project-local tracking**: 각 workspace가 자기 `.opendock/` 상태를 가집니다.
-- **Independent update**: 각 dock은 version, files, checksum, private workdir을 따로 가집니다.
-- **Safe root writes**: 프로젝트 파일을 쓰기 전에 conflict를 먼저 검사합니다.
-- **Controlled commands**: raw shell이 아니라 allowlist 기반 lifecycle command를 실행합니다.
+OpenDock은 이런 AI 작업 환경을 dock으로 묶어 관리합니다.
 
-OpenDock은 터미널 대체재가 아닙니다. 일반 script runner도 아닙니다. 조합 가능하고
-반복 가능한 AI workspace setup을 위한 작은 packaging layer입니다.
+- 필요한 AI 작업 환경을 고를 수 있습니다.
+- 여러 dock을 한 프로젝트에 함께 설치할 수 있습니다.
+- 설치한 dock을 나중에 업데이트할 수 있습니다.
+- 더 이상 필요 없는 dock은 제거할 수 있습니다.
+- OpenDock이 추가한 내용을 추적합니다.
+- 사용자가 직접 바꾼 파일을 조용히 덮어쓰지 않습니다.
+
+OpenDock은 터미널 대체재가 아닙니다. 일반 script runner도 아닙니다. 프로젝트마다
+필요한 AI 작업 환경을 쉽고 안전하게 설치하고 관리하기 위한 도구입니다.
 
 ## 동작 흐름
 
-```text
-registry.opendock.app
-  -> approved dock release
-  -> downloaded archive
-  -> dock.yml manifest
-  -> runtime/package requirements
-  -> lifecycle commands
-  -> file/export candidates
-  -> preflight conflict check
-  -> project root writes
-  -> .opendock lock update
+작업 중인 프로젝트에서 원하는 dock을 설치합니다.
+
+```bash
+opendock install opendock/designer-ai@1.0.0
 ```
 
-install과 update는 같은 안전 모델을 사용합니다.
+그러면 OpenDock은 아래 순서로 동작합니다.
 
-1. Registry에서 dock release를 resolve합니다.
-2. `dock.yml`을 읽습니다.
-3. `requires`에 선언된 runtime과 package를 준비합니다.
-4. 요청한 phase의 lifecycle step을 실행합니다.
-5. `files`에 선언된 파일을 수집합니다.
-6. dock workdir에서 export할 파일을 수집합니다.
-7. 프로젝트 root를 쓰기 전에 모든 target을 검사합니다.
-8. managed block 또는 managed file로 적용합니다.
-9. `.opendock/project.yml`과 `.opendock/dock.lock.yml`을 기록합니다.
+1. Registry에서 승인된 dock을 가져옵니다.
+2. dock에 필요한 도구나 패키지를 확인합니다.
+3. dock의 파일을 프로젝트에 추가합니다.
+4. 파일을 쓰기 전에 충돌이 없는지 확인합니다.
+5. 설치한 내용을 `.opendock/`에 기록합니다.
 
-사용자가 OpenDock이 관리하던 파일을 수정했다면 root 파일을 쓰기 전에 중단합니다.
-`--force`는 dock 버전을 우선하겠다는 명시적 선택입니다.
+이 기록 덕분에 나중에 업데이트하거나 제거할 수 있습니다.
+
+```bash
+opendock update
+opendock uninstall opendock/designer-ai
+```
+
+사용자가 직접 수정한 파일이 있으면 OpenDock은 바로 덮어쓰지 않습니다. 먼저 멈추고
+충돌을 알려줍니다. dock 버전을 우선하고 싶을 때만 `--force`를 사용합니다.
 
 ## Scopes
 
