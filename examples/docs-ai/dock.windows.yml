@@ -35,3 +35,24 @@ files:
     to: CHANGELOG_TEMPLATE.md
   - from: files/RELEASE_NOTES.md
     to: RELEASE_NOTES.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-docs-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-docs-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-docs-ai.mdc) { exit 0 } else { exit 1 }"
+  - id: docs-style-guide-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath DOCS_STYLE_GUIDE.md) { exit 0 } else { exit 1 }"
+  - id: api-doc-template-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath API_DOC_TEMPLATE.md) { exit 0 } else { exit 1 }"
+  - id: changelog-template-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CHANGELOG_TEMPLATE.md) { exit 0 } else { exit 1 }"
+  - id: prompts-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

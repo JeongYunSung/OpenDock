@@ -33,3 +33,24 @@ files:
     to: WORKFLOW_LIBRARY.md
   - from: files/MCP_GUIDE.md
     to: MCP_GUIDE.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-ai-automation/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-ai-automation/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-ai-automation.mdc) { exit 0 } else { exit 1 }"
+  - id: automation-map
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AUTOMATION_MAP.md) { exit 0 } else { exit 1 }"
+  - id: workflow-library
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath WORKFLOW_LIBRARY.md) { exit 0 } else { exit 1 }"
+  - id: mcp-guide
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath MCP_GUIDE.md) { exit 0 } else { exit 1 }"
+  - id: prompts
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

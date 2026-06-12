@@ -37,3 +37,24 @@ files:
     to: .opendock/mcp/claude.mcp.json
   - from: files/.opendock/mcp/codex.config.example.toml
     to: .opendock/mcp/codex.config.example.toml
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-mcp-safe/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-mcp-safe/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-mcp-safe.mdc) { exit 0 } else { exit 1 }"
+  - id: mcp-guide
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath MCP.md) { exit 0 } else { exit 1 }"
+  - id: approved-servers
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .opendock/mcp/approved-servers.yml) { exit 0 } else { exit 1 }"
+  - id: security-checklist
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .opendock/mcp/security-checklist.md) { exit 0 } else { exit 1 }"
+  - id: codex-template
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .opendock/mcp/codex.config.example.toml) { exit 0 } else { exit 1 }"

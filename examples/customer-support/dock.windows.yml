@@ -35,3 +35,24 @@ files:
     to: TICKET_TRIAGE.md
   - from: files/ESCALATION.md
     to: ESCALATION.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-customer-support/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-customer-support/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-customer-support.mdc) { exit 0 } else { exit 1 }"
+  - id: support-playbook-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath SUPPORT_PLAYBOOK.md) { exit 0 } else { exit 1 }"
+  - id: faq-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath FAQ.md) { exit 0 } else { exit 1 }"
+  - id: ticket-triage-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath TICKET_TRIAGE.md) { exit 0 } else { exit 1 }"
+  - id: prompts-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

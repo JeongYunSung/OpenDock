@@ -35,3 +35,24 @@ files:
     to: .opendock/prompts/architecture-map.md
   - from: files/.opendock/prompts/change-risk-review.md
     to: .opendock/prompts/change-risk-review.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-repo-context/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-repo-context/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-repo-context.mdc) { exit 0 } else { exit 1 }"
+  - id: repomix-config
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath repomix.config.json) { exit 0 } else { exit 1 }"
+  - id: context-readme
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .opendock/context/README.md) { exit 0 } else { exit 1 }"
+  - id: summary-prompt
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .opendock/prompts/repository-summary.md) { exit 0 } else { exit 1 }"
+  - id: risk-prompt
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .opendock/prompts/change-risk-review.md) { exit 0 } else { exit 1 }"

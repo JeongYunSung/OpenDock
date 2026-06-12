@@ -19,6 +19,8 @@ export interface CommandRunOptions {
 const safePackagePattern =
   /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+(?:@[A-Za-z0-9][A-Za-z0-9._+-]*)?$/;
 const safeIdentifierPattern = /^[A-Za-z0-9._:@/=-]+$/;
+const powershellTestPathPattern =
+  /^if \(Test-Path -LiteralPath ([A-Za-z0-9._/@-]+)\) \{ exit 0 \} else \{ exit 1 \}$/;
 
 const commonAllowedCommands = new Set([
   "bun",
@@ -45,7 +47,7 @@ const commonAllowedCommands = new Set([
 const platformAllowedCommands: Record<OpenDockPlatform, Set<string>> = {
   linux: new Set([]),
   macos: new Set(["brew"]),
-  windows: new Set(["winget"]),
+  windows: new Set(["powershell", "winget"]),
 };
 
 export class CommandRunner {
@@ -302,6 +304,9 @@ function isAllowedCommandShape(program: string, args: string[]): boolean {
   if (program === "winget") {
     return isSafeWingetCommand(args);
   }
+  if (program === "powershell") {
+    return isSafePowershellCommand(args);
+  }
   if (program === "npm" || program === "pnpm" || program === "bun") {
     return isSafePackageManagerCommand(program, args);
   }
@@ -453,6 +458,19 @@ function isSafeWingetCommand(args: string[]): boolean {
     }
     return allowedFlags.has(arg);
   });
+}
+
+function isSafePowershellCommand(args: string[]): boolean {
+  if (
+    args.length !== 4 ||
+    args[0] !== "-NoProfile" ||
+    args[1] !== "-NonInteractive" ||
+    args[2] !== "-Command"
+  ) {
+    return false;
+  }
+  const match = args[3]?.match(powershellTestPathPattern);
+  return !!match && isSafeRelativeArg(match[1]);
 }
 
 function hasGlobalFlag(args: string[]): boolean {

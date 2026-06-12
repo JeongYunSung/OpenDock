@@ -37,3 +37,24 @@ files:
     to: ACCESSIBILITY_CHECKLIST.md
   - from: files/PERFORMANCE_CHECKLIST.md
     to: PERFORMANCE_CHECKLIST.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-qa-engineer/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-qa-engineer/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-qa-engineer.mdc) { exit 0 } else { exit 1 }"
+  - id: test-plan-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath TEST_PLAN.md) { exit 0 } else { exit 1 }"
+  - id: regression-checklist-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath REGRESSION_CHECKLIST.md) { exit 0 } else { exit 1 }"
+  - id: bug-report-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath BUG_REPORT.md) { exit 0 } else { exit 1 }"
+  - id: prompts-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

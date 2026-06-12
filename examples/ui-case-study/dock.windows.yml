@@ -33,3 +33,24 @@ files:
     to: PROBLEM_DEFINITION.md
   - from: files/IMPACT_MEASUREMENT.md
     to: IMPACT_MEASUREMENT.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-ui-case-study/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-ui-case-study/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-ui-case-study.mdc) { exit 0 } else { exit 1 }"
+  - id: case-study-template
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CASE_STUDY_TEMPLATE.md) { exit 0 } else { exit 1 }"
+  - id: problem-definition
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROBLEM_DEFINITION.md) { exit 0 } else { exit 1 }"
+  - id: impact-measurement
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath IMPACT_MEASUREMENT.md) { exit 0 } else { exit 1 }"
+  - id: prompts
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

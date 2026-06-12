@@ -35,3 +35,26 @@ files:
     to: CODE_STYLE.md
   - from: files/REVIEW_CHECKLIST.md
     to: REVIEW_CHECKLIST.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-frontend-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-frontend-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-frontend-ai.mdc) { exit 0 } else { exit 1 }"
+  - id: design-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath DESIGN.md) { exit 0 } else { exit 1 }"
+  - id: component-guide
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath COMPONENT_GUIDE.md) { exit 0 } else { exit 1 }"
+  - id: code-style
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CODE_STYLE.md) { exit 0 } else { exit 1 }"
+  - id: review-checklist
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath REVIEW_CHECKLIST.md) { exit 0 } else { exit 1 }"
+  - id: prompts
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

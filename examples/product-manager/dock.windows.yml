@@ -35,3 +35,26 @@ files:
     to: ROADMAP.md
   - from: files/RELEASE_NOTES.md
     to: RELEASE_NOTES.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-product-manager/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-product-manager/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-product-manager.mdc) { exit 0 } else { exit 1 }"
+  - id: prd-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PRD.md) { exit 0 } else { exit 1 }"
+  - id: user-story
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath USER_STORY.md) { exit 0 } else { exit 1 }"
+  - id: roadmap-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath ROADMAP.md) { exit 0 } else { exit 1 }"
+  - id: release-notes
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath RELEASE_NOTES.md) { exit 0 } else { exit 1 }"
+  - id: prompts
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

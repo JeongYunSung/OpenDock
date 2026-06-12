@@ -35,3 +35,24 @@ files:
     to: RELEASE_CHECKLIST.md
   - from: files/TESTING.md
     to: TESTING.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-mobile-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-mobile-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-mobile-ai.mdc) { exit 0 } else { exit 1 }"
+  - id: mobile-architecture-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath MOBILE_ARCHITECTURE.md) { exit 0 } else { exit 1 }"
+  - id: ui-patterns-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath UI_PATTERNS.md) { exit 0 } else { exit 1 }"
+  - id: release-checklist-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath RELEASE_CHECKLIST.md) { exit 0 } else { exit 1 }"
+  - id: prompts-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

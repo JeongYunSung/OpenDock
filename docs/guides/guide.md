@@ -310,6 +310,9 @@ Example docks in this repository use explicit `dock.macos.yml` and
 `dock.windows.yml` files so they can be deployed directly as platform-specific
 artifacts.
 
+Windows doctor checks should use the constrained PowerShell `Test-Path` shape
+instead of Unix `test -f`.
+
 Install stays simple:
 
 ```bash

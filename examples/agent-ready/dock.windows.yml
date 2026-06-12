@@ -43,3 +43,22 @@ files:
     to: .clinerules/project.md
   - from: files/.roo/rules/project.md
     to: .roo/rules/project.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-agent-ready/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-agent-ready/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-agent-ready.mdc) { exit 0 } else { exit 1 }"
+  - id: copilot-instructions
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .github/copilot-instructions.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rules
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/project.mdc) { exit 0 } else { exit 1 }"
+  - id: claude-rules
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/rules/project.md) { exit 0 } else { exit 1 }"

@@ -35,3 +35,26 @@ files:
     to: ICP.md
   - from: files/PRICING.md
     to: PRICING.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-startup-founder/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-startup-founder/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-startup-founder.mdc) { exit 0 } else { exit 1 }"
+  - id: business-model
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath BUSINESS_MODEL.md) { exit 0 } else { exit 1 }"
+  - id: gtm
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GTM.md) { exit 0 } else { exit 1 }"
+  - id: icp
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath ICP.md) { exit 0 } else { exit 1 }"
+  - id: pricing
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PRICING.md) { exit 0 } else { exit 1 }"
+  - id: prompts
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

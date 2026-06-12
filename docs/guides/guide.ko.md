@@ -626,8 +626,12 @@ host OS별 추가 허용 프로그램:
 | platform | 추가 프로그램 |
 |---|---|
 | `macos` | `brew` |
-| `windows` | `winget` |
+| `windows` | `powershell`, `winget` |
 | `linux` | 없음 |
+
+`powershell`은 Windows doctor에서 파일 존재 여부를 확인하는 제한된
+`Test-Path -LiteralPath <relative-path>` 형태만 허용합니다. 임의 PowerShell
+script 실행용으로는 사용할 수 없습니다.
 
 차단되는 shell operator:
 

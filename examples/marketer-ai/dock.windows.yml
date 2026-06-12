@@ -35,3 +35,24 @@ files:
     to: SEO_BRIEF.md
   - from: files/AD_EXPERIMENTS.md
     to: AD_EXPERIMENTS.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-marketer-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-marketer-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-marketer-ai.mdc) { exit 0 } else { exit 1 }"
+  - id: campaign-brief-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CAMPAIGN_BRIEF.md) { exit 0 } else { exit 1 }"
+  - id: content-calendar-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CONTENT_CALENDAR.md) { exit 0 } else { exit 1 }"
+  - id: seo-brief-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath SEO_BRIEF.md) { exit 0 } else { exit 1 }"
+  - id: prompts-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

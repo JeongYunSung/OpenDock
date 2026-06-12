@@ -39,3 +39,22 @@ files:
     to: .opendock/checklists/agent-pr-review.md
   - from: files/.opendock/checklists/security-review.md
     to: .opendock/checklists/security-review.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-agent-safety/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-agent-safety/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-agent-safety.mdc) { exit 0 } else { exit 1 }"
+  - id: pr-template
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .github/pull_request_template.md) { exit 0 } else { exit 1 }"
+  - id: gitleaks-config
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .gitleaks.toml) { exit 0 } else { exit 1 }"
+  - id: safety-checklist
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .opendock/checklists/agent-pr-review.md) { exit 0 } else { exit 1 }"

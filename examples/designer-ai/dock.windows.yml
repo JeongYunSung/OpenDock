@@ -35,3 +35,26 @@ files:
     to: UX_REVIEW.md
   - from: files/FIGMA_WORKFLOW.md
     to: FIGMA_WORKFLOW.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-designer-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-designer-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-designer-ai.mdc) { exit 0 } else { exit 1 }"
+  - id: design-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath DESIGN.md) { exit 0 } else { exit 1 }"
+  - id: design-system
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath DESIGN_SYSTEM.md) { exit 0 } else { exit 1 }"
+  - id: ux-review
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath UX_REVIEW.md) { exit 0 } else { exit 1 }"
+  - id: figma-workflow
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath FIGMA_WORKFLOW.md) { exit 0 } else { exit 1 }"
+  - id: prompts
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

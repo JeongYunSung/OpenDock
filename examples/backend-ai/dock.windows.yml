@@ -35,3 +35,26 @@ files:
     to: SECURITY_CHECKLIST.md
   - from: files/TESTING.md
     to: TESTING.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-backend-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-backend-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-backend-ai.mdc) { exit 0 } else { exit 1 }"
+  - id: api-design-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath API_DESIGN.md) { exit 0 } else { exit 1 }"
+  - id: database-guide-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath DATABASE_GUIDE.md) { exit 0 } else { exit 1 }"
+  - id: security-checklist-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath SECURITY_CHECKLIST.md) { exit 0 } else { exit 1 }"
+  - id: testing-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath TESTING.md) { exit 0 } else { exit 1 }"
+  - id: prompts-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

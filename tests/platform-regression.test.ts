@@ -298,24 +298,47 @@ describe("platform regression coverage", () => {
     const bin = tempDir();
     const log = join(project, "commands.log");
     writeFakePlatformCommand(bin, "brew", log);
+    writeFakePlatformCommand(bin, "powershell", log);
     writeFakePlatformCommand(bin, "winget", log);
     const runner = new CommandRunner();
+    const powershellFileCheck =
+      'powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"';
 
     expect(() => runner.run("brew --version", { cwd: project, platform: "windows" })).toThrow(
       "not allowed for OpenDock platform `windows`",
     );
+    expect(() => runner.run(powershellFileCheck, { cwd: project, platform: "macos" })).toThrow(
+      "not allowed for OpenDock platform `macos`",
+    );
     expect(() => runner.run("winget --version", { cwd: project, platform: "macos" })).toThrow(
       "not allowed for OpenDock platform `macos`",
     );
+    expect(() =>
+      runner.run('powershell -NoProfile -NonInteractive -Command "Get-Content AGENTS.md"', {
+        cwd: project,
+        platform: "windows",
+      }),
+    ).toThrow("not allowed for OpenDock commands");
+    expect(() =>
+      runner.run(
+        'powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath ../AGENTS.md) { exit 0 } else { exit 1 }"',
+        { cwd: project, platform: "windows" },
+      ),
+    ).toThrow("not allowed for OpenDock commands");
 
     await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
       expect(runner.run("brew --version", { cwd: project, platform: "macos" }).success).toBe(true);
       expect(runner.run("winget --version", { cwd: project, platform: "windows" }).success).toBe(
         true,
       );
+      expect(runner.run(powershellFileCheck, { cwd: project, platform: "windows" }).success).toBe(
+        true,
+      );
     });
 
-    expect(readFileSync(log, "utf8")).toBe("brew:--version\nwinget:--version\n");
+    expect(readFileSync(log, "utf8")).toBe(
+      "brew:--version\nwinget:--version\npowershell:-NoProfile -NonInteractive -Command if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }\n",
+    );
   });
 
   it("records the selected platform in lock state and can reuse it for an update", async () => {

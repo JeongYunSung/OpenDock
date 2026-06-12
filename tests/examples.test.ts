@@ -66,6 +66,30 @@ describe("example dock manifests", () => {
     }
   });
 
+  it("keeps Windows example doctor checks aligned with macOS", () => {
+    for (const example of exampleNames()) {
+      const mac = parseManifestFile(join(examplesRoot, example, "dock.macos.yml"));
+      const windows = parseManifestFile(join(examplesRoot, example, "dock.windows.yml"));
+
+      expect(windows.tasks.doctor.length, `${example} doctor count`).toBe(mac.tasks.doctor.length);
+
+      for (const [index, macStep] of mac.tasks.doctor.entries()) {
+        const windowsStep = windows.tasks.doctor[index];
+        expect(windowsStep?.id, `${example} doctor ${index} id`).toBe(macStep.id);
+
+        const macCommand = commandFor(macStep);
+        const windowsCommand = commandFor(windowsStep);
+        if (macCommand.startsWith("test -f ")) {
+          expect(windowsCommand, `${example} doctor ${macStep.id}`).toBe(
+            powershellTestPath(macCommand.slice("test -f ".length)),
+          );
+        } else {
+          expect(windowsCommand, `${example} doctor ${macStep.id}`).toBe(macCommand);
+        }
+      }
+    }
+  });
+
   it("keeps production-ready workspace examples provisionable for common agents", () => {
     for (const example of workspaceExampleNames()) {
       const root = join(examplesRoot, example);
@@ -147,4 +171,12 @@ function commandsFor(
   return steps.flatMap((step) =>
     [step.check, step.run].filter((value): value is string => !!value),
   );
+}
+
+function commandFor(step: { check?: string | undefined; run?: string | undefined } | undefined) {
+  return step?.check ?? step?.run ?? "";
+}
+
+function powershellTestPath(path: string): string {
+  return `powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath ${path}) { exit 0 } else { exit 1 }"`;
 }

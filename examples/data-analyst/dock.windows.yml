@@ -35,3 +35,24 @@ files:
     to: DASHBOARD_BRIEF.md
   - from: files/EXPERIMENT_ANALYSIS.md
     to: EXPERIMENT_ANALYSIS.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-data-analyst/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-data-analyst/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-data-analyst.mdc) { exit 0 } else { exit 1 }"
+  - id: metrics-dictionary-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath METRICS_DICTIONARY.md) { exit 0 } else { exit 1 }"
+  - id: sql-review-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath SQL_REVIEW.md) { exit 0 } else { exit 1 }"
+  - id: dashboard-brief-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath DASHBOARD_BRIEF.md) { exit 0 } else { exit 1 }"
+  - id: prompts-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

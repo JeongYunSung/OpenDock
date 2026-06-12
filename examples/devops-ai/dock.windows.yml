@@ -35,3 +35,24 @@ files:
     to: INCIDENT_RUNBOOK.md
   - from: files/SECRETS_POLICY.md
     to: SECRETS_POLICY.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-devops-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-devops-ai/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-devops-ai.mdc) { exit 0 } else { exit 1 }"
+  - id: ci-cd-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CI_CD.md) { exit 0 } else { exit 1 }"
+  - id: deployment-runbook-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath DEPLOYMENT_RUNBOOK.md) { exit 0 } else { exit 1 }"
+  - id: incident-runbook-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath INCIDENT_RUNBOOK.md) { exit 0 } else { exit 1 }"
+  - id: prompts-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath PROMPTS.md) { exit 0 } else { exit 1 }"

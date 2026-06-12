@@ -29,3 +29,20 @@ files:
     to: mise.toml
   - from: files/.opendock/dev-env.md
     to: .opendock/dev-env.md
+doctor:
+  - id: agents-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
+  - id: claude-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath CLAUDE.md) { exit 0 } else { exit 1 }"
+  - id: gemini-md
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath GEMINI.md) { exit 0 } else { exit 1 }"
+  - id: codex-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .codex/skills/opendock-dev-env/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: claude-skill
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .claude/skills/opendock-dev-env/SKILL.md) { exit 0 } else { exit 1 }"
+  - id: cursor-rule
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .cursor/rules/opendock-dev-env.mdc) { exit 0 } else { exit 1 }"
+  - id: mise-config
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath mise.toml) { exit 0 } else { exit 1 }"
+  - id: dev-env-guide
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath .opendock/dev-env.md) { exit 0 } else { exit 1 }"

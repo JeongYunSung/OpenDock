@@ -85,3 +85,6 @@ doctor:
     run: oma doctor
     workdir: root
     timeout_ms: 60000
+  - id: check-agents
+    workdir: root
+    check: powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"
