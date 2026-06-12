@@ -500,6 +500,62 @@ describe("opendock TypeScript CLI", () => {
     });
   });
 
+  it("lists installed docks in the current directory", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+    });
+    writeDock(docks, "test", "frontend", "1.2.0", {
+      files: [
+        { path: "AGENTS.md", content: "# Frontend Agent\n" },
+        { path: ".codex/agents/frontend.toml", content: 'name = "frontend"\n' },
+      ],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/designer@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+    await install({
+      dockRef: DockRef.parse("test/frontend@1.2.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    const logs = await withCwd(project, () =>
+      captureConsole(() => runCli(["bun", "opendock", "list"])),
+    );
+
+    expect(logs).toContain("OpenDock Docks");
+    expect(logs.some((line) => line.startsWith("Project: "))).toBe(true);
+    expect(logs).toContain("Installed:");
+    expect(logs).toContain(
+      "- test/designer@1.0.0 [macos] (1 file, workdir .opendock/workdirs/test__designer)",
+    );
+    expect(logs).toContain(
+      "- test/frontend@1.2.0 [macos] (2 files, workdir .opendock/workdirs/test__frontend)",
+    );
+  });
+
+  it("prints an empty list message when the current directory has no OpenDock state", async () => {
+    const project = tempDir();
+    const logs = await withCwd(project, () =>
+      captureConsole(() => runCli(["bun", "opendock", "list"])),
+    );
+
+    expect(logs).toEqual(["No OpenDock docks installed in this project."]);
+  });
+
   it("rejects unsafe commands", () => {
     const project = tempDir();
     const manifest: DockManifest = {
@@ -904,5 +960,19 @@ async function withCwd<T>(cwd: string, fn: () => Promise<T>): Promise<T> {
     return await fn();
   } finally {
     process.chdir(previous);
+  }
+}
+
+async function captureConsole(fn: () => Promise<void>): Promise<string[]> {
+  const previous = console.log;
+  const logs: string[] = [];
+  console.log = (...args: unknown[]) => {
+    logs.push(args.map((arg) => String(arg)).join(" "));
+  };
+  try {
+    await fn();
+    return logs;
+  } finally {
+    console.log = previous;
   }
 }

@@ -28,7 +28,7 @@ import {
   parseManifestFile,
   validateManifestFor,
 } from "./core/domain/manifest.js";
-import { OpenDockStateStore } from "./core/domain/state-store.js";
+import { type InstalledDockRecord, OpenDockStateStore } from "./core/domain/state-store.js";
 import { TaskRunner } from "./core/runtime/task-runner.js";
 import { readProjectLogs } from "./logging.js";
 import {
@@ -146,6 +146,13 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
     .action(async (options: { platform?: string }) => {
       await printDoctor(process.cwd(), options.platform);
+    });
+
+  program
+    .command("list")
+    .description("Show docks installed in the current directory.")
+    .action(() => {
+      printInstalledDocks(process.cwd());
     });
 
   program
@@ -319,6 +326,42 @@ function lockedDockVersionSelector(dock: { requested?: string; version: string }
     return requested;
   }
   return dock.version;
+}
+
+function printInstalledDocks(cwd: string): void {
+  const store = new OpenDockStateStore(cwd);
+  if (!store.hasState()) {
+    console.log("No OpenDock docks installed in this project.");
+    return;
+  }
+
+  const docks = store.readLock().docks;
+  if (docks.length === 0) {
+    console.log("No OpenDock docks installed in this project.");
+    return;
+  }
+
+  console.log("OpenDock Docks");
+  console.log(`Project: ${cwd}`);
+  console.log("Installed:");
+  for (const dock of docks) {
+    console.log(formatInstalledDockLine(dock));
+  }
+}
+
+function formatInstalledDockLine(dock: InstalledDockRecord): string {
+  const requested = dock.requested?.trim();
+  const requestedSuffix =
+    requested !== undefined && requested !== "" && requested !== dock.version
+      ? `, requested ${requested}`
+      : "";
+  return `- ${dock.id}@${dock.version} [${dock.platform}] (${formatManagedFileCount(
+    dock.files.length,
+  )}${requestedSuffix}, workdir ${dock.workdir})`;
+}
+
+function formatManagedFileCount(count: number): string {
+  return `${count} ${count === 1 ? "file" : "files"}`;
 }
 
 function readDeployReadme(projectDir: string, manifest: DockManifest): string | undefined {

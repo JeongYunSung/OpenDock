@@ -74,6 +74,8 @@ opendock deploy opendock/codex@1.0.0
 
 `owner/name` 和 `owner/name@latest` 会被拒绝。请使用明确版本。
 
+安装后，`opendock list` 会显示当前项目已经安装的 docks。
+
 ## Files And Ownership
 
 `AGENTS.md` 这类文本文件会以 managed block 的方式写入。配置文件和 binary 文件会通过

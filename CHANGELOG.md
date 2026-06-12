@@ -5,6 +5,23 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.10 - 2026-06-12
+
+### Added
+
+- Added `opendock list` to show docks installed in the current project from
+  `.opendock/dock.lock.yml`.
+
+### Changed
+
+- Updated README and guide documentation, including translated guide summaries,
+  to document the new project list command.
+
+### Tests
+
+- Added CLI coverage for listing multiple installed docks and for empty project
+  list output.
+
 ## 0.1.9 - 2026-06-12
 
 ### Fixed

@@ -46,7 +46,7 @@ uninstall까지 추적할 수 있게 만드는 작은 packaging layer입니다. 
 - [platform artifact](#platform-artifact)
 - [version 범위](#version-범위)
 - [허용 프로그램](#허용-프로그램)
-- [install, update, uninstall 의미](#install-update-uninstall-의미)
+- [install, list, update, uninstall 의미](#install-list-update-uninstall-의미)
 - [충돌 처리](#충돌-처리)
 - [deploy와 archive](#deploy와-archive)
 - [예제 dock 목록](#예제-dock-목록)
@@ -667,7 +667,7 @@ Installer 설치/업데이트 안내를 보여주고, 사용자가 동의하면 
 엽니다. `dock.yml` 안에서 WinGet 또는 App Installer 설치용 PowerShell script를
 직접 실행하는 방식은 권장하지 않습니다.
 
-## install, update, uninstall 의미
+## install, list, update, uninstall 의미
 
 ### install
 
@@ -680,6 +680,17 @@ opendock install owner/name@1.0.0
 이미 같은 dock이 설치되어 있다면 이전 lock의 checksum을 기준으로 기존 관리
 파일을 먼저 검증한 뒤 새 release를 적용합니다. 특정 release로 이동하고 싶을 때도
 `install owner/name@new-version`을 사용할 수 있습니다.
+
+### list
+
+`list`는 현재 프로젝트에 설치된 dock을 보여줍니다.
+
+```bash
+opendock list
+```
+
+Registry에 요청하지 않고 `.opendock/dock.lock.yml`만 읽습니다. 출력에는 dock id,
+version, platform, 관리 파일 수, private workdir이 포함됩니다.
 
 ### update
 

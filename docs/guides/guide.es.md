@@ -77,6 +77,9 @@ opendock deploy opendock/codex@1.0.0
 
 `owner/name` y `owner/name@latest` se rechazan. Usa una versión exacta.
 
+Después de instalar, `opendock list` muestra qué docks están instalados en el
+proyecto actual.
+
 ## Files And Ownership
 
 Archivos de texto como `AGENTS.md` se aplican como managed blocks. Configs y

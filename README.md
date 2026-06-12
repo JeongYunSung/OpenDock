@@ -30,6 +30,7 @@ several docks in the same project.
 
 ```bash
 opendock install opendock/codex@1.0.0
+opendock list
 opendock update
 opendock doctor
 opendock uninstall opendock/codex
@@ -89,6 +90,7 @@ OpenDock then:
 That record lets OpenDock update or remove the dock later.
 
 ```bash
+opendock list
 opendock update
 opendock uninstall opendock/designer-ai
 ```
@@ -149,6 +151,7 @@ bin/opendock version
 | Command | Purpose |
 |---|---|
 | `opendock install owner/name@1.0.0` | Install a reviewed dock release into the current directory. |
+| `opendock list` | Show docks installed in the current project. |
 | `opendock update` | Move installed docks to their latest approved Registry releases. |
 | `opendock update --force` | Update even when OpenDock-managed content was edited locally. |
 | `opendock uninstall owner/name` | Remove one installed dock and its managed project files. |
@@ -321,6 +324,7 @@ opendock install opendock/codex@1.0.0
 opendock install opendock/agent-ready@1.0.0
 opendock install opendock/frontend-ai@1.0.0
 opendock install opendock/repo-context@1.0.0
+opendock list
 ```
 
 ## Registry And Deploy

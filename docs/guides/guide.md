@@ -283,10 +283,15 @@ Install stays simple:
 ```bash
 opendock install owner/name@1.0.0
 opendock install owner/name@1.0.0 --platform windows
+opendock list
 ```
 
 Without `--platform`, OpenDock detects the host OS and asks the Registry for the
 matching artifact. With `--platform`, OpenDock asks for that specific platform.
+
+`opendock list` reads the current project's `.opendock/dock.lock.yml` and shows
+the installed docks, their versions, platforms, managed file counts, and private
+workdirs. It does not contact the Registry or modify files.
 
 ## Deploy
 
@@ -345,5 +350,6 @@ Release:
 3. Test update after user edits managed content.
 4. Test `--force`.
 5. Test uninstall.
-6. Run `opendock doctor`.
-7. If OS behavior differs, deploy and test each platform artifact separately.
+6. Run `opendock list`.
+7. Run `opendock doctor`.
+8. If OS behavior differs, deploy and test each platform artifact separately.
