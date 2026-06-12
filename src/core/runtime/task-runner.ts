@@ -1,6 +1,7 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
+import { formatStepSymbol, terminalStyle } from "../../terminal-style.js";
 import type { DockManifest, TaskPhase, TaskStep } from "../domain/manifest.js";
 import { type FileCandidate, FileCandidateCollector } from "../files/file-candidate.js";
 import { safeDockDirectoryName } from "../files/path-utils.js";
@@ -77,14 +78,18 @@ export class TaskRunner {
         ? this.evaluateStepCheck(step, cwd, platform)
         : { passed: false };
       if (checkResult.passed) {
-        console.log(`✓ ${step.id}: ready`);
+        console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(step.id)}: ready`);
         reports.push({ id: step.id, name: stepName(step), status: "Ready" });
         exports.push(...this.collectStepExports(step, cwd));
         continue;
       }
 
       if (step.run) {
-        console.log(`→ ${step.id}: ${step.run}`);
+        console.log(
+          `${formatStepSymbol("->")} ${terminalStyle.bold(step.id)}: ${terminalStyle.dim(
+            step.run,
+          )}`,
+        );
         const runOptions = {
           cwd,
           live: context.live ?? true,
@@ -110,7 +115,7 @@ export class TaskRunner {
             throw new Error(`step \`${step.id}\` did not satisfy its check after run${message}`);
           }
         }
-        console.log(`✓ ${step.id}: ran`);
+        console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(step.id)}: ran`);
         reports.push({ id: step.id, name: stepName(step), status: "Ran" });
         exports.push(...this.collectStepExports(step, cwd));
       }

@@ -1,4 +1,5 @@
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
+import { formatStepSymbol, terminalStyle } from "../../terminal-style.js";
 import type { DockManifest, TaskPhase } from "../domain/manifest.js";
 import {
   CommandRunner,
@@ -102,7 +103,7 @@ export class RequirementRunner {
         : failedReport(id, runtime, check.message);
     }
     if (check.passed) {
-      console.log(`✓ ${id}: ready`);
+      console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(id)}: ready`);
       return { id, name: runtime, status: "Ready" };
     }
 
@@ -112,7 +113,9 @@ export class RequirementRunner {
         `required runtime \`${runtime}\` is missing or does not satisfy ${version}, and OpenDock has no ${platform} installer for it`,
       );
     }
-    console.log(`→ ${id}: ${install}`);
+    console.log(
+      `${formatStepSymbol("->")} ${terminalStyle.bold(id)}: ${terminalStyle.dim(install)}`,
+    );
     this.runInstaller(id, install, context, platform);
     const verify = this.evaluate(definition.check, version, context.projectDir, platform);
     if (!verify.passed) {
@@ -120,7 +123,7 @@ export class RequirementRunner {
         `requirement \`${id}\` did not satisfy its check after install: ${verify.message}`,
       );
     }
-    console.log(`✓ ${id}: ran`);
+    console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(id)}: ran`);
     return { id, name: runtime, status: "Ran" };
   }
 

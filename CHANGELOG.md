@@ -5,6 +5,13 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.12 - 2026-06-12
+
+### Changed
+
+- Added TTY-aware colored CLI output for command status, file changes, list,
+  doctor, log, auth, and deploy messages.
+
 ## 0.1.11 - 2026-06-12
 
 ### Changed
