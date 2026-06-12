@@ -80,6 +80,7 @@ export async function run(argv = process.argv): Promise<void> {
       console.log(
         `Installed ${report.dockId}@${report.version} for ${report.platform} (${formatFileSummary(report)})`,
       );
+      printFileChanges(report);
     });
 
   program
@@ -121,6 +122,7 @@ export async function run(argv = process.argv): Promise<void> {
             `Updated ${dock.id}: ${dock.version} -> ${report.version} for ${report.platform} (${formatFileSummary(report)})`,
           );
         }
+        printFileChanges(report);
       }
     });
 
@@ -357,7 +359,7 @@ function formatInstalledDockLine(dock: InstalledDockRecord): string {
       : "";
   return `- ${dock.id}@${dock.version} [${dock.platform}] (${formatManagedFileCount(
     dock.files.length,
-  )}${requestedSuffix}, workdir ${dock.workdir})`;
+  )}${requestedSuffix})`;
 }
 
 function formatManagedFileCount(count: number): string {
@@ -634,6 +636,34 @@ function resolveDeployManifest(projectDir: string, relativePathValue: string): s
 
 function formatFileSummary(report: InstallReport): string {
   return `${report.filesCreated} files created, ${report.filesUpdated} files updated, ${report.filesDeleted} files deleted, ${report.filesReviewRequired} review required`;
+}
+
+function printFileChanges(report: InstallReport): void {
+  const groups = [
+    { label: "created", paths: report.fileChanges.created, symbol: "+" },
+    { label: "updated", paths: report.fileChanges.updated, symbol: "~" },
+    { label: "deleted", paths: report.fileChanges.deleted, symbol: "-" },
+    { label: "review required", paths: report.fileChanges.reviewRequired, symbol: "!" },
+  ];
+  if (groups.every((group) => group.paths.length === 0)) {
+    return;
+  }
+
+  console.log("Files:");
+  for (const group of groups) {
+    printFileChangeGroup(group.symbol, group.paths, group.label);
+  }
+}
+
+function printFileChangeGroup(symbol: string, paths: string[], label: string): void {
+  const maxVisiblePaths = 12;
+  for (const path of paths.slice(0, maxVisiblePaths)) {
+    console.log(`  ${symbol} ${path}`);
+  }
+  const hiddenCount = paths.length - maxVisiblePaths;
+  if (hiddenCount > 0) {
+    console.log(`  ${symbol} ... and ${hiddenCount} more ${label}`);
+  }
 }
 
 async function submitDockWithLogin(

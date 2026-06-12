@@ -76,6 +76,11 @@ describe("opendock TypeScript CLI", () => {
     const agents = readFileSync(join(project, "AGENTS.md"), "utf8");
     expect(report.filesCreated).toBe(0);
     expect(report.filesUpdated).toBe(1);
+    expect(report.fileChanges).toMatchObject({
+      created: [],
+      deleted: [],
+      updated: ["AGENTS.md"],
+    });
     expect(agents).toContain("Keep this line.");
     expect(agents).toContain("OPENDOCK:START id=files:AGENTS.md dock=test/designer");
     expect(agents).toContain("# Designer Agent");
@@ -116,6 +121,51 @@ describe("opendock TypeScript CLI", () => {
     expect(installedDocks(project)[0]).toMatchObject({
       id: "test/designer",
       version: "1.0.1",
+    });
+  });
+
+  it("reports created, updated, and deleted file paths on update", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "agent", "1.0.0", {
+      files: [
+        { path: ".codex/agents/old.toml", content: 'name = "old"\n' },
+        { path: ".codex/agents/shared.toml", content: 'name = "shared-v1"\n' },
+      ],
+    });
+    writeDock(docks, "test", "agent", "1.0.1", {
+      files: [
+        { path: ".codex/agents/new.toml", content: 'name = "new"\n' },
+        { path: ".codex/agents/shared.toml", content: 'name = "shared-v2"\n' },
+      ],
+    });
+
+    const installReport = await install({
+      dockRef: DockRef.parse("test/agent@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+    const updateReport = await install({
+      dockRef: DockRef.parse("test/agent@1.0.1"),
+      projectDir: project,
+      operation: "update",
+      phase: "update",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    expect(installReport.fileChanges).toMatchObject({
+      created: [".codex/agents/old.toml", ".codex/agents/shared.toml"],
+      deleted: [],
+      updated: [],
+    });
+    expect(updateReport.fileChanges).toMatchObject({
+      created: [".codex/agents/new.toml"],
+      deleted: [".codex/agents/old.toml"],
+      updated: [".codex/agents/shared.toml"],
     });
   });
 
@@ -539,12 +589,8 @@ describe("opendock TypeScript CLI", () => {
     expect(logs).toContain("OpenDock Docks");
     expect(logs.some((line) => line.startsWith("Project: "))).toBe(true);
     expect(logs).toContain("Installed:");
-    expect(logs).toContain(
-      "- test/designer@1.0.0 [macos] (1 file, workdir .opendock/workdirs/test__designer)",
-    );
-    expect(logs).toContain(
-      "- test/frontend@1.2.0 [macos] (2 files, workdir .opendock/workdirs/test__frontend)",
-    );
+    expect(logs).toContain("- test/designer@1.0.0 [macos] (1 file)");
+    expect(logs).toContain("- test/frontend@1.2.0 [macos] (2 files)");
   });
 
   it("prints an empty list message when the current directory has no OpenDock state", async () => {

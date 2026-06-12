@@ -690,7 +690,7 @@ opendock list
 ```
 
 Registry에 요청하지 않고 `.opendock/dock.lock.yml`만 읽습니다. 출력에는 dock id,
-version, platform, 관리 파일 수, private workdir이 포함됩니다.
+version, platform, 관리 파일 수가 포함됩니다.
 
 ### update
 

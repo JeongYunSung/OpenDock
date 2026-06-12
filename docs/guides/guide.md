@@ -290,8 +290,8 @@ Without `--platform`, OpenDock detects the host OS and asks the Registry for the
 matching artifact. With `--platform`, OpenDock asks for that specific platform.
 
 `opendock list` reads the current project's `.opendock/dock.lock.yml` and shows
-the installed docks, their versions, platforms, managed file counts, and private
-workdirs. It does not contact the Registry or modify files.
+the installed docks, their versions, platforms, and managed file counts. It does
+not contact the Registry or modify files.
 
 ## Deploy
 

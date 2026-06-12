@@ -34,10 +34,14 @@ export interface FileCandidate {
 
 export interface FileApplySummary {
   created: number;
+  createdPaths: string[];
   deleted: number;
+  deletedPaths: string[];
   directoriesPruned: number;
   updated: number;
+  updatedPaths: string[];
   reviewRequired: number;
+  reviewRequiredPaths: string[];
   records: AppliedFileRecord[];
 }
 
@@ -149,22 +153,28 @@ export class FilePlan {
   apply(candidates: FileCandidate[]): FileApplySummary {
     const summary: FileApplySummary = {
       created: 0,
+      createdPaths: [],
       deleted: 0,
+      deletedPaths: [],
       directoriesPruned: 0,
       updated: 0,
+      updatedPaths: [],
       reviewRequired: 0,
+      reviewRequiredPaths: [],
       records: [],
     };
     const candidateKeys = new Set(candidates.map(candidateKey));
-    const deletedPaths: string[] = [];
     for (const record of this.priorRecords) {
       if (!candidateKeys.has(recordKey(record))) {
         const result = this.removeRecord(record);
         if (result === "deleted") {
           summary.deleted += 1;
-          deletedPaths.push(record.path);
+          summary.deletedPaths.push(record.path);
         }
-        if (result === "updated") summary.updated += 1;
+        if (result === "updated") {
+          summary.updated += 1;
+          summary.updatedPaths.push(record.path);
+        }
       }
     }
 
@@ -173,13 +183,15 @@ export class FilePlan {
       this.applyCandidate(candidate);
       if (existed) {
         summary.updated += 1;
+        summary.updatedPaths.push(candidate.path);
       } else {
         summary.created += 1;
+        summary.createdPaths.push(candidate.path);
       }
       summary.records.push(recordFromCandidate(candidate));
     }
 
-    for (const path of deletedPaths) {
+    for (const path of summary.deletedPaths) {
       summary.directoriesPruned += pruneEmptyParentDirectories(this.projectDir, path);
     }
 

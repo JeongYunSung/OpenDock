@@ -38,6 +38,7 @@ export interface InstallOptions {
 
 export interface InstallReport {
   dockId: string;
+  fileChanges: FileChangeDetails;
   version: string;
   filesCreated: number;
   filesDeleted: number;
@@ -45,6 +46,13 @@ export interface InstallReport {
   filesUpdated: number;
   platform: OpenDockPlatform;
   steps: StepReport[];
+}
+
+export interface FileChangeDetails {
+  created: string[];
+  deleted: string[];
+  reviewRequired: string[];
+  updated: string[];
 }
 
 export interface UninstallOptions {
@@ -226,6 +234,12 @@ export class DockInstaller {
   ): InstallReport {
     return {
       dockId,
+      fileChanges: {
+        created: fileSummary.createdPaths,
+        deleted: fileSummary.deletedPaths,
+        reviewRequired: fileSummary.reviewRequiredPaths,
+        updated: fileSummary.updatedPaths,
+      },
       version,
       filesCreated: fileSummary.created,
       filesDeleted: fileSummary.deleted,

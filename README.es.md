@@ -90,6 +90,7 @@ opendock bootstrap windows
 | Command | Purpose |
 |---|---|
 | `opendock install owner/name@1.0.0` | Instala un approved dock release en el directorio actual. |
+| `opendock list` | Muestra los docks instalados en el proyecto actual. |
 | `opendock update` | Mueve los installed docks a las últimas approved Registry releases. |
 | `opendock update --force` | Prioriza la versión del dock aunque haya cambios locales gestionados. |
 | `opendock uninstall owner/name` | Elimina un dock y sus managed project files. |

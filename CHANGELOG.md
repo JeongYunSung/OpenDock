@@ -5,6 +5,13 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.11 - 2026-06-12
+
+### Changed
+
+- Print concise file-level changes after `opendock install` and `opendock update`.
+- Simplified `opendock list` output by hiding private workdir paths.
+
 ## 0.1.10 - 2026-06-12
 
 ### Added
