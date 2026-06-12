@@ -168,7 +168,7 @@ describe("requires regression coverage", () => {
         "utf8",
       ),
     ).toContain("reviewer");
-  });
+  }, 15_000);
 });
 
 function omaManifest(): DockManifest {

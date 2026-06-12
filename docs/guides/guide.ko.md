@@ -116,8 +116,8 @@ files:
 ```
 
 이 manifest는 `files/AGENTS.md`를 프로젝트의 `AGENTS.md`에 적용합니다. 대상이
-Markdown 파일이므로 OpenDock은 파일 전체를 덮어쓰지 않고 managed block을
-추가하거나 갱신합니다.
+root Markdown 파일이므로 OpenDock은 파일 전체를 덮어쓰지 않고 managed
+block을 추가하거나 갱신합니다.
 
 ## 전체 예제
 
@@ -344,7 +344,7 @@ OpenDock은 파일별 update 정책을 별도 선언하지 않습니다. 파일 
 
 ### text managed block
 
-Markdown, text, common agent instruction 파일은 managed block으로 적용됩니다.
+Markdown, text, common root instruction 파일은 managed block으로 적용됩니다.
 
 대상:
 
@@ -354,6 +354,11 @@ Markdown, text, common agent instruction 파일은 managed block으로 적용됩
 - `AGENTS.md`
 - `CLAUDE.md`
 - `GEMINI.md`
+
+`.codex/`, `.claude/`, `.agents/`, `.github/copilot-instructions.md`,
+`.github/instructions/` 아래의 agent runtime 파일은 block으로 감싸지 않습니다.
+skill frontmatter, hook script, 실행권한이 깨지지 않도록 checksum 기반 managed
+file로 그대로 관리합니다.
 
 예시:
 
@@ -479,11 +484,16 @@ install:
   - id: apply-oma
     run: oma -y install
     workdir: dock
+  - id: link-oma-vendors
+    run: oma link claude codex
+    workdir: dock
     export:
       include:
         - AGENTS.md
+        - CLAUDE.md
         - .agents/**
         - .codex/**
+        - .claude/**
       exclude:
         - "**/*.log"
         - "**/cache/**"
@@ -842,7 +852,7 @@ files:
 
 1. 모든 `files[].from`과 `workdir.files[].from`이 존재하는가?
 2. `files[].to`가 프로젝트 root 기준 안전한 상대 경로인가?
-3. Markdown/agent instruction은 managed block으로 적용되는지 확인했는가?
+3. root Markdown instruction은 managed block으로, agent runtime 파일은 exact file로 적용되는지 확인했는가?
 4. 설정 파일이나 binary는 checksum managed file로 충돌 감지되는지 확인했는가?
 
 tasks:

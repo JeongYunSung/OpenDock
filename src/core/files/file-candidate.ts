@@ -1,4 +1,12 @@
-import { existsSync, lstatSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  lstatSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { basename, extname, relative } from "node:path";
 import type { AppliedFileRecord, ManagedMode } from "../domain/state-store.js";
 import { fileChecksum, sha256Bytes, textChecksum } from "./checksum.js";
@@ -21,6 +29,7 @@ export interface FileCandidate {
   markerId?: string;
   source: "files" | "export";
   content: Buffer;
+  executable: boolean;
 }
 
 export interface FileApplySummary {
@@ -107,6 +116,7 @@ export class FileCandidateCollector {
       mode: isBlockablePath(path) ? "managed_block" : "managed_file",
       source,
       content,
+      executable: isExecutable(safeJoin(root, sourcePath, "file source")),
     };
     if (candidate.mode === "managed_block") {
       candidate.markerId = `${markerPrefix}:${path}`;
@@ -247,6 +257,7 @@ export class FilePlan {
       return;
     }
     writeFileSync(target, candidate.content);
+    chmodSync(target, candidate.executable ? 0o755 : 0o644);
   }
 
   private removeRecord(record: AppliedFileRecord): "deleted" | "missing" | "updated" {
@@ -294,11 +305,33 @@ function recordFromCandidate(candidate: FileCandidate): AppliedFileRecord {
         : sha256Bytes(candidate.content),
     ...(candidate.markerId === undefined ? {} : { markerId: candidate.markerId }),
     source: candidate.source,
+    ...(candidate.executable ? { executable: true } : {}),
   };
 }
 
 function isBlockablePath(path: string): boolean {
+  if (isAgentRuntimePath(path)) {
+    return false;
+  }
   return blockableExtensions.has(extname(path)) || blockableNames.has(basename(path));
+}
+
+function isAgentRuntimePath(path: string): boolean {
+  return (
+    path.startsWith(".agents/") ||
+    path.startsWith(".claude/") ||
+    path.startsWith(".codex/") ||
+    path.startsWith(".cursor/") ||
+    path.startsWith(".gemini/") ||
+    path === ".github/copilot-instructions.md" ||
+    path.startsWith(".github/instructions/") ||
+    path.startsWith(".kiro/") ||
+    path.startsWith(".qwen/")
+  );
+}
+
+function isExecutable(path: string): boolean {
+  return (statSync(path).mode & 0o111) !== 0;
 }
 
 function candidateKey(candidate: FileCandidate): string {

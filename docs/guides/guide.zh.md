@@ -79,6 +79,8 @@ opendock deploy opendock/codex@1.0.0
 `AGENTS.md` 这类文本文件会以 managed block 的方式写入。配置文件和 binary 文件会通过
 checksum 追踪。如果用户修改了 OpenDock 管理的内容，update 会在写入 root 文件前停止。
 `--force` 表示明确选择 dock 版本覆盖。
+`.codex/`, `.claude/`, `.agents/`, `.github/copilot-instructions.md`, `.github/instructions/` 下面的 agent runtime
+文件会保持原样，这样 frontmatter、hook 和 executable bits 都不会失效。
 
 ## Host Bootstrap
 
@@ -120,11 +122,16 @@ install:
   - id: apply-oma
     run: oma -y install
     workdir: dock
+  - id: link-oma-vendors
+    run: oma link claude codex
+    workdir: dock
     export:
       include:
         - AGENTS.md
+        - CLAUDE.md
         - .agents/**
         - .codex/**
+        - .claude/**
       exclude:
         - "**/*.log"
 ```

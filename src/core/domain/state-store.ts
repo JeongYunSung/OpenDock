@@ -12,6 +12,7 @@ export interface AppliedFileRecord {
   checksum: string;
   markerId?: string;
   source: "files" | "export";
+  executable?: boolean;
 }
 
 export interface InstalledDockRecord {

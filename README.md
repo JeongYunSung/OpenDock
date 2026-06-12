@@ -240,7 +240,7 @@ engine chooses the ownership mode from the target file type.
 
 ### Text Managed Blocks
 
-Markdown, text, and common agent instruction files are applied as marked blocks.
+Markdown, text, and common root instruction files are applied as marked blocks.
 
 ```md
 <!-- OPENDOCK:START id=files:AGENTS.md dock=owner/name path=AGENTS.md -->
@@ -250,6 +250,11 @@ Markdown, text, and common agent instruction files are applied as marked blocks.
 
 This lets an existing `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `README.md`, or
 `DESIGN.md` keep user-written content outside the OpenDock block.
+
+Agent runtime files under paths such as `.codex/`, `.claude/`, `.agents/`,
+`.github/copilot-instructions.md`, and `.github/instructions/` are not
+block-wrapped. They are managed as whole files so skill frontmatter, hook
+scripts, and executable permissions stay valid.
 
 ### Checksum Managed Files
 
@@ -274,11 +279,16 @@ install:
   - id: apply-oma
     run: oma -y install
     workdir: dock
+  - id: link-oma-vendors
+    run: oma link claude codex
+    workdir: dock
     export:
       include:
         - AGENTS.md
+        - CLAUDE.md
         - .agents/**
         - .codex/**
+        - .claude/**
       exclude:
         - "**/*.log"
         - "**/cache/**"

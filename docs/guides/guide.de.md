@@ -83,6 +83,9 @@ Textdateien wie `AGENTS.md` werden als managed blocks angewendet. Configs und
 binary files werden per checksum geschützt. Wenn jemand OpenDock-managed content
 ändert, stoppt update vor dem Schreiben in root files. `--force` wählt explizit
 die Dock-Version.
+Agent runtime files under `.codex/`, `.claude/`, `.agents/`, and
+`.github/copilot-instructions.md`, `.github/instructions/` stay exact so frontmatter, hooks, and executable bits
+remain valid.
 
 ## Host Bootstrap
 
@@ -127,11 +130,16 @@ install:
   - id: apply-oma
     run: oma -y install
     workdir: dock
+  - id: link-oma-vendors
+    run: oma link claude codex
+    workdir: dock
     export:
       include:
         - AGENTS.md
+        - CLAUDE.md
         - .agents/**
         - .codex/**
+        - .claude/**
       exclude:
         - "**/*.log"
 ```

@@ -74,9 +74,9 @@ files:
     to: AGENTS.md
 ```
 
-This applies `files/AGENTS.md` to `AGENTS.md` in the target project. Markdown and
-common instruction files are written as managed blocks, so existing user content
-can stay outside the OpenDock block.
+This applies `files/AGENTS.md` to `AGENTS.md` in the target project. Common root
+instruction files are written as managed blocks, so existing user content can
+stay outside the OpenDock block.
 
 ## Top-Level Fields
 
@@ -190,9 +190,13 @@ files:
     to: AGENTS.md
 ```
 
-Text files are usually applied as managed blocks. Binary files and structured
-config files are tracked by checksum. If a user edits OpenDock-managed content,
-OpenDock stops before writing root files. `--force` means the dock version wins.
+Text files are usually applied as managed blocks. Agent runtime files under
+paths such as `.codex/`, `.claude/`, `.agents/`,
+`.github/copilot-instructions.md`, and `.github/instructions/` are tracked as
+whole files so skill frontmatter, hook scripts, and executable permissions stay
+valid. Binary files and structured config files are also tracked by checksum. If
+a user edits OpenDock-managed content, OpenDock stops before writing root files.
+`--force` means the dock version wins.
 
 ## Tasks
 
@@ -229,11 +233,16 @@ install:
   - id: apply-oma
     run: oma -y install
     workdir: dock
+  - id: link-oma-vendors
+    run: oma link claude codex
+    workdir: dock
     export:
       include:
         - AGENTS.md
+        - CLAUDE.md
         - .agents/**
         - .codex/**
+        - .claude/**
       exclude:
         - "**/*.log"
         - "**/cache/**"
@@ -319,7 +328,7 @@ Files:
 
 1. Every `files[].from` and `workdir.files[].from` exists.
 2. Every `files[].to` is a safe relative path.
-3. Text files behave as managed blocks.
+3. Root text files behave as managed blocks, while agent runtime files stay exact.
 4. Config or binary files are protected by checksum conflicts.
 
 Tasks:

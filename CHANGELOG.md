@@ -5,6 +5,27 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.9 - 2026-06-12
+
+### Fixed
+
+- Preserve executable permissions for exported agent hook scripts.
+- Keep agent runtime files under `.codex/`, `.claude/`, `.agents/`, and related
+  instruction directories as exact checksum-managed files so skill frontmatter
+  and hook scripts stay valid.
+
+### Changed
+
+- Updated the `opendock/oma` example to run `oma link claude codex` after OMA
+  install/update and export the resulting Claude Code and Codex vendor files.
+- Updated README and guide documentation to clarify root managed blocks versus
+  exact agent runtime files.
+
+### Tests
+
+- Added isolated OMA export coverage for Codex skill frontmatter, Claude Code
+  settings, and executable hook scripts.
+
 ## 0.1.8 - 2026-06-12
 
 ### Added
