@@ -18,6 +18,8 @@ export interface CliLoginStartResponse {
   expiresAt: string;
 }
 
+export type AuthProvider = "google" | "github";
+
 export interface CliTokenResponse {
   token: string;
   expiresAt: string;
@@ -104,11 +106,14 @@ export class OpenDockRegistryClient {
     return readResponseBytes(response, maxBytes);
   }
 
-  async startCliLogin(redirectUri: string): Promise<CliLoginStartResponse> {
+  async startCliLogin(
+    redirectUri: string,
+    provider: AuthProvider = "google",
+  ): Promise<CliLoginStartResponse> {
     const url = `${this.apiBase()}/auth/cli/start`;
     return this.requestJson<CliLoginStartResponse>(url, {
       method: "POST",
-      body: JSON.stringify({ redirectUri }),
+      body: JSON.stringify({ redirectUri, provider }),
       headers: { "content-type": "application/json" },
     });
   }

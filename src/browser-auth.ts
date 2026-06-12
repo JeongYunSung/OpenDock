@@ -4,7 +4,7 @@ import { createServer, type Server } from "node:http";
 import { stdin as defaultInput, stdout as defaultOutput } from "node:process";
 import { createInterface } from "node:readline";
 import { TokenStore } from "./auth.js";
-import { type CliTokenResponse, OpenDockRegistryClient } from "./registry.js";
+import { type AuthProvider, type CliTokenResponse, OpenDockRegistryClient } from "./registry.js";
 
 const loginTimeoutMs = 5 * 60 * 1000;
 const callbackHost = "127.0.0.1";
@@ -17,10 +17,14 @@ export interface BrowserLoginOptions {
   write?: (message: string) => void;
   input?: NodeJS.ReadableStream;
   output?: NodeJS.WritableStream;
+  provider?: AuthProvider;
 }
 
 interface BrowserLoginClient {
-  startCliLogin(redirectUri: string): Promise<{ authUrl: string; expiresAt: string }>;
+  startCliLogin(
+    redirectUri: string,
+    provider?: AuthProvider,
+  ): Promise<{ authUrl: string; expiresAt: string }>;
   exchangeCliCode(code: string): Promise<CliTokenResponse>;
 }
 
@@ -31,6 +35,7 @@ export async function performBrowserLogin(
   const tokenStore = options.tokenStore ?? new TokenStore();
   const write = options.write ?? ((message: string) => console.log(message));
   const openBrowser = options.openBrowser ?? openSystemBrowser;
+  const provider = options.provider ?? "google";
   const { server, redirectUri, waitForCode, cleanup } = await startCallbackServer(
     options.timeoutMs,
   );
@@ -41,7 +46,7 @@ export async function performBrowserLogin(
   );
 
   try {
-    const login = await client.startCliLogin(redirectUri);
+    const login = await client.startCliLogin(redirectUri, provider);
     write("Opening browser for OpenDock login.");
     write(`Open this URL if the browser does not open: ${login.authUrl}`);
     write("Waiting for login... press Enter to check again.");

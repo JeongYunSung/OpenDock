@@ -39,6 +39,7 @@ import {
   parseReleasePlatform,
 } from "./platform.js";
 import {
+  type AuthProvider,
   OpenDockRegistryClient,
   RegistryRequestError,
   type SubmissionLogoRequest,
@@ -231,14 +232,16 @@ export async function run(argv = process.argv): Promise<void> {
     .command("login")
     .description("Log in to OpenDock Registry.")
     .option("--token <token>", "Existing CLI token to store without opening a browser")
-    .action(async (options: { token?: string }) => {
+    .option("--provider <provider>", "Browser login provider: google or github", "google")
+    .action(async (options: { token?: string; provider: string }) => {
       const tokenStore = new TokenStore();
       if (options.token) {
         await tokenStore.saveToken(options.token);
         console.log(terminalStyle.success("Logged in to OpenDock Registry."));
         return;
       }
-      await performBrowserLogin({ tokenStore });
+      const provider = parseAuthProvider(options.provider);
+      await performBrowserLogin({ tokenStore, provider });
     });
   auth
     .command("status")
@@ -342,6 +345,14 @@ function parseInstalledDockId(value: string): string {
     throw new Error("dock id must be in owner/name form");
   }
   return `${parts[0]}/${parts[1]}`;
+}
+
+function parseAuthProvider(value: string): AuthProvider {
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "google" || normalized === "github") {
+    return normalized;
+  }
+  throw new Error("auth provider must be google or github");
 }
 
 async function resolveLatestDockRef(
