@@ -3,6 +3,11 @@ id: opendock/qa-engineer
 summary: Test planning, regression, bug report, accessibility, and performance review templates.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - qa
+  - testing
+  - accessibility
+  - performance
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

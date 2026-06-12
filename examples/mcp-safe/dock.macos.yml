@@ -3,6 +3,11 @@ id: opendock/mcp-safe
 summary: Security-first MCP inventory, config examples, and review checklists.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - mcp
+  - security
+  - config
+  - review
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

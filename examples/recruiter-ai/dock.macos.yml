@@ -3,6 +3,11 @@ id: opendock/recruiter-ai
 summary: Job description, interview guide, scorecard, and candidate outreach workspace.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - recruiting
+  - hiring
+  - interview
+  - outreach
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

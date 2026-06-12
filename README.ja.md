@@ -122,6 +122,9 @@ id: owner/name
 summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - starter
+  - ai-agent
 
 requires:
   runtimes:
@@ -144,7 +147,8 @@ doctor:
     version: ">=2.40.0"
 ```
 
-`readme` と `logo` は Registry catalog metadata です。project に install するには
+`readme`、`logo`、`tags` は Registry catalog metadata です。Hub で dock を
+理解・filter するために使われます。実際に project に install する file は
 `files` にも別途宣言します。
 
 dock-private workdir で実行する task が事前に input file を必要とする場合は

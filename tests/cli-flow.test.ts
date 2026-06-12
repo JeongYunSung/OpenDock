@@ -608,6 +608,7 @@ describe("opendock TypeScript CLI", () => {
       opendock: 1,
       id: "test/unsafe",
       summary: "",
+      tags: [],
       requires: { runtimes: {} },
       files: [],
       tasks: {
@@ -626,6 +627,7 @@ describe("opendock TypeScript CLI", () => {
       opendock: 1,
       id: "test/unsafe-oma-link",
       summary: "",
+      tags: [],
       requires: { runtimes: {} },
       files: [],
       tasks: {
@@ -665,6 +667,7 @@ describe("opendock TypeScript CLI", () => {
         summary: "macOS artifact",
         readme: "DOCK.md",
         logo: "logo.png",
+        tags: ["testing", "ai-agent"],
         workdir: {
           files: [{ from: "inputs/oma-config.yaml", to: ".agents/oma-config.yaml" }],
         },
@@ -713,13 +716,16 @@ describe("opendock TypeScript CLI", () => {
     expect(body.platform).toBe("macos");
     expect(body.archive.filename).toBe("test-platform-dock-1.0.0-macos.tgz");
     expect(body.manifest).toContain("summary: macOS artifact");
+    expect(body.manifest).toContain("tags:");
+    expect(body.manifest).toContain("- testing");
 
     const archivePath = join(extractRoot, "dock.tgz");
     writeFileSync(archivePath, Buffer.from(body.archive.data_base64, "base64"));
     await extractTar({ file: archivePath, cwd: extractRoot });
-    expect(readFileSync(join(extractRoot, "dock.yml"), "utf8")).toContain(
-      "summary: macOS artifact",
-    );
+    const archivedManifest = readFileSync(join(extractRoot, "dock.yml"), "utf8");
+    expect(archivedManifest).toContain("summary: macOS artifact");
+    expect(archivedManifest).toContain("tags:");
+    expect(archivedManifest).toContain("- testing");
     expect(readFileSync(join(extractRoot, "files", "AGENTS.md"), "utf8")).toBe("# macOS Agent\n");
     expect(readFileSync(join(extractRoot, "inputs", "oma-config.yaml"), "utf8")).toContain(
       "model_preset: codex",

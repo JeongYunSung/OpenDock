@@ -3,6 +3,11 @@ id: opendock/startup-founder
 summary: Business model, ICP, GTM, pricing, and founder strategy workspace.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - founder
+  - gtm
+  - pricing
+  - business
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

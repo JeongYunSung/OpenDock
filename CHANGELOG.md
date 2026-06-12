@@ -5,6 +5,22 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.14 - 2026-06-12
+
+### Added
+
+- Added optional manifest `tags` as catalog metadata for Hub search and filtering.
+- Added tags to all bundled example dock manifests for macOS and Windows.
+
+### Changed
+
+- Updated README and guide documentation across languages to document catalog tags.
+
+### Tests
+
+- Added manifest validation coverage for tag parsing, duplicate tags, invalid tags,
+  and deploy archive preservation.
+
 ## 0.1.13 - 2026-06-12
 
 ### Changed

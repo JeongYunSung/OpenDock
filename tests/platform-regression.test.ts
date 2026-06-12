@@ -216,6 +216,7 @@ describe("platform regression coverage", () => {
       opendock: 1,
       id: "test/common",
       summary: "",
+      tags: [],
       requires: { runtimes: {} },
       files: [],
       tasks: {
@@ -247,6 +248,7 @@ describe("platform regression coverage", () => {
       opendock: 1,
       id: "test/doctor",
       summary: "",
+      tags: [],
       requires: { runtimes: {} },
       files: [],
       tasks: {
@@ -383,6 +385,7 @@ function platformManifest(): DockManifest {
     opendock: 1,
     id: "test/platform",
     summary: "",
+    tags: [],
     requires: { runtimes: {} },
     files: [],
     tasks: {

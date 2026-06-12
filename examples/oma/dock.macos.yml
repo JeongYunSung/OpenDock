@@ -3,6 +3,11 @@ id: opendock/oma
 summary: Oh My Agent setup with OpenDock-managed install, update, and uninstall.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - oma
+  - oh-my-agent
+  - ai-agent
+  - automation
 requires:
   runtimes:
     bun: ">=1.3.0"

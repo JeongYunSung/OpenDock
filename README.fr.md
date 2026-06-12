@@ -123,6 +123,9 @@ id: owner/name
 summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - starter
+  - ai-agent
 
 requires:
   runtimes:
@@ -145,8 +148,9 @@ doctor:
     version: ">=2.40.0"
 ```
 
-`readme` et `logo` sont des metadata pour Registry catalog. Pour les installer
-dans le projet, déclarez-les aussi dans `files`.
+`readme`, `logo` et `tags` sont des metadata pour Registry catalog. Ils servent à
+présenter et filtrer le dock dans Hub. Les fichiers à installer dans le projet
+doivent aussi être déclarés dans `files`.
 
 Utilisez `workdir.files` quand une task dans le dock-private workdir a besoin de
 fichiers d'entrée avant son exécution. Utilisez `files` pour les fichiers à

@@ -120,6 +120,9 @@ id: owner/name
 summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - starter
+  - ai-agent
 
 requires:
   runtimes:
@@ -142,8 +145,8 @@ doctor:
     version: ">=2.40.0"
 ```
 
-`readme` 和 `logo` 是 Registry catalog metadata。如果要安装到项目中，需要同时
-写入 `files`。
+`readme`、`logo` 和 `tags` 是 Registry catalog metadata，用于在 Hub 中说明和
+筛选 dock。真正要安装到项目中的文件仍需同时写入 `files`。
 
 如果 dock-private workdir 中运行的 task 需要先读取输入文件，请使用
 `workdir.files`。需要写入 project root 的文件使用 `files`。

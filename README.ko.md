@@ -199,6 +199,9 @@ id: owner/name
 summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - starter
+  - ai-agent
 
 files:
   - from: files/AGENTS.md
@@ -221,8 +224,9 @@ doctor:
     version: ">=2.40.0"
 ```
 
-`readme`와 `logo`는 Registry catalog metadata입니다. 프로젝트에 설치하려면
-`files`에도 별도로 선언해야 합니다.
+`readme`, `logo`, `tags`는 Registry catalog metadata입니다. Hub에서 dock을
+이해하고 필터링하는 데 쓰이며, 실제 파일은 `files`에도 별도로 선언해야 프로젝트에
+설치됩니다.
 
 release version은 `dock.yml`에 쓰지 않고 deploy 명령에서 정합니다.
 
@@ -351,6 +355,7 @@ deploy는 다음을 업로드합니다.
 - release platform metadata: `any`, `macos`, `windows`, `linux`
 - 선택 사항인 catalog용 `readme` markdown
 - 선택 사항인 catalog용 `logo` image
+- manifest의 선택 사항인 `tags`
 
 catalog metadata는 install archive와 별도로 제출됩니다.
 `--file dock.macos.yml`처럼 지정해도 archive 안에는 `dock.yml` 이름으로 들어가므로

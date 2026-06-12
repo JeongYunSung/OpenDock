@@ -3,6 +3,10 @@ id: opendock/claude-code
 summary: Tool dock for installing Claude Code without project payloads.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - claude-code
+  - tool
+  - ai-agent
 requires:
   runtimes:
     node: ">=22.0.0"

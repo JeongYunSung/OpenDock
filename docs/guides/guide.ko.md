@@ -37,7 +37,7 @@ uninstall까지 추적할 수 있게 만드는 작은 packaging layer입니다. 
 - [전체 예제](#전체-예제)
 - [Top-Level 필드](#top-level-필드)
 - [id와 version](#id와-version)
-- [readme와 logo](#readme와-logo)
+- [readme, logo, tags](#readme-logo-tags)
 - [requires](#requires)
 - [files](#files)
 - [파일 소유권](#파일-소유권)
@@ -94,8 +94,9 @@ files:
     to: AGENTS.md
 ```
 
-`readme`와 `logo`는 catalog metadata입니다. 설치 대상 프로젝트에 자동으로
-복사되지 않습니다. 프로젝트에도 설치하려면 `files`에 별도로 선언해야 합니다.
+`readme`, `logo`, `tags`는 catalog metadata입니다. `readme`와 `logo` 파일은 설치
+대상 프로젝트에 자동으로 복사되지 않습니다. 프로젝트에도 설치하려면 `files`에 별도로
+선언해야 합니다.
 
 ## 최소 예제
 
@@ -105,6 +106,9 @@ id: opendock/agent-ready
 summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - ai-agent
+  - starter
 
 requires:
   runtimes:
@@ -127,6 +131,9 @@ id: opendock/agent-ready
 summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - ai-agent
+  - starter
 
 requires:
   runtimes:
@@ -167,6 +174,7 @@ doctor:
 | `summary` | 선택 | Registry catalog에 표시할 짧은 설명입니다. |
 | `readme` | 선택 | Registry catalog 상세 본문으로 제출할 Markdown 경로입니다. |
 | `logo` | 선택 | Registry catalog 대표 이미지로 제출할 이미지 경로입니다. |
+| `tags` | 선택 | Hub 검색과 필터에 사용할 lowercase catalog label입니다. |
 | `requires` | 선택 | dock 실행 전에 준비할 runtime requirement입니다. |
 | `files` | 선택 | 프로젝트 root로 적용할 파일 또는 디렉터리 mapping입니다. |
 | `install` | 선택 | 최초 install과 초기 생성 작업 task입니다. |
@@ -217,13 +225,17 @@ owner/name@designer-build   accepted
 OpenDock은 version string을 semver로 정렬하지 않습니다. install/deploy reference에
 쓴 identifier와 Registry가 돌려준 release version을 정확히 비교합니다.
 
-## readme와 logo
+## readme, logo, tags
 
-`readme`와 `logo`는 사람이 보는 Registry catalog용 metadata입니다.
+`readme`, `logo`, `tags`는 사람이 보는 Registry catalog용 metadata입니다.
 
 ```yaml
 readme: DOCK.md
 logo: logo.png
+tags:
+  - design
+  - ux
+  - figma
 ```
 
 주의할 점:
@@ -235,6 +247,10 @@ logo: logo.png
 - `readme`는 Markdown 파일이며 최대 65536 bytes까지 제출됩니다.
 - `logo`는 PNG, JPEG, WebP만 허용하며 최대 524288 bytes까지 제출됩니다.
 - CLI는 logo 확장자와 실제 file signature가 맞는지 검사합니다.
+- `tags`는 `design`, `ai-agent` 같은 lowercase slug이며 dock 하나당 최대 12개까지
+  선언할 수 있습니다.
+- `tags`는 catalog label일 뿐입니다. install, update, uninstall, doctor 동작은
+  바꾸지 않습니다.
 
 ## requires
 
@@ -753,14 +769,16 @@ deploy가 제출하는 것:
 3. release platform metadata: `any`, `macos`, `windows`, `linux`.
 4. 선택 사항인 `readme_markdown`.
 5. 선택 사항인 `logo`.
+6. manifest의 선택 사항인 `tags`.
 
 archive에는 기본적으로 다음이 들어갑니다.
 
 - `dock.yml`
 - `files[].from`과 `workdir.files[].from`에 명시된 파일과 디렉터리의 regular files
 
-`readme`와 `logo`는 catalog metadata로 별도 제출되므로 archive에는 기본 포함되지
-않습니다. 설치 프로젝트에 들어가야 하는 파일이라면 `files`에 명시하세요.
+`readme`, `logo`, `tags`는 catalog metadata입니다. `readme`와 `logo` 파일은
+archive에는 기본 포함되지 않습니다. 설치 프로젝트에 들어가야 하는 파일이라면
+`files`에 명시하세요.
 
 `--file dock.macos.yml`처럼 platform별 manifest를 지정해도 archive 안에는 항상
 `dock.yml` 이름으로 들어갑니다. install은 다운로드한 artifact에서 일반적인

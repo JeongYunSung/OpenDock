@@ -3,6 +3,11 @@ id: opendock/docs-ai
 summary: Documentation standards, API doc templates, changelogs, and release notes.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - documentation
+  - release-notes
+  - api-docs
+  - writing
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

@@ -23,6 +23,13 @@ describe("example dock manifests", () => {
         const manifest = parseManifestFile(join(root, file));
 
         expect(manifest.id, `${example}/${file} id`).toBe(`opendock/${example}`);
+        expect(manifest.tags.length, `${example}/${file} tags`).toBeGreaterThan(0);
+        expect(new Set(manifest.tags).size, `${example}/${file} unique tags`).toBe(
+          manifest.tags.length,
+        );
+        for (const tag of manifest.tags) {
+          expect(tag, `${example}/${file} tag`).toMatch(/^[a-z0-9][a-z0-9-]*$/);
+        }
         if (manifest.readme) {
           expect(existsSync(join(root, manifest.readme)), `${example}/${file} readme`).toBe(true);
         }

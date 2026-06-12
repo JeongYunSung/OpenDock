@@ -39,6 +39,9 @@ id: opendock/agent-ready
 summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - ai-agent
+  - starter
 
 requires:
   runtimes:
@@ -59,6 +62,7 @@ files:
 | `summary` | Résumé court pour Registry catalog. |
 | `readme` | Markdown pour la page de détail du catalog. |
 | `logo` | Image logo du catalog. |
+| `tags` | Labels lowercase pour la recherche et les filtres Hub. |
 | `requires` | Runtime requirements. |
 | `files` | Fichiers ou dossiers appliqués au project root. |
 | `install` | Tasks for first install and initial generation. |
@@ -170,4 +174,4 @@ opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 
 Deploy envoie `dock.yml`, une archive construite depuis `files[].from` et
 `workdir.files[].from`, les metadata de release platform, `readme_markdown`
-optionnel et `logo` optionnel.
+optionnel, `logo` optionnel et les `tags` optionnels du manifest.

@@ -37,6 +37,7 @@ cpSync(
   join(outputDir, "assets", "opendock-logo-96.png"),
 );
 cpSync(join(rootDir, "bin", "opendock"), join(outputDir, "bin", "opendock"));
+cpSync(join(rootDir, "docs"), join(outputDir, "docs"), { recursive: true });
 cpSync(join(rootDir, "examples"), join(outputDir, "examples"), { recursive: true });
 cpSync(join(rootDir, "CHANGELOG.md"), join(outputDir, "CHANGELOG.md"));
 
@@ -58,6 +59,7 @@ const publishPackage = {
   files: [
     "bin",
     "assets/opendock-logo-96.png",
+    "docs",
     "examples",
     "CHANGELOG.md",
     "README.md",

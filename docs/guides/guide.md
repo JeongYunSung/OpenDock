@@ -53,8 +53,8 @@ files:
     to: AGENTS.md
 ```
 
-`readme` and `logo` are Registry catalog metadata. They are not installed into a
-project unless they are also listed in `files`.
+`readme`, `logo`, and `tags` are Registry catalog metadata. `readme` and `logo`
+files are not installed into a project unless they are also listed in `files`.
 
 ## Minimal Example
 
@@ -64,6 +64,9 @@ id: opendock/agent-ready
 summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - ai-agent
+  - starter
 
 requires:
   runtimes:
@@ -88,6 +91,7 @@ stay outside the OpenDock block.
 | `summary` | no | Short Registry catalog summary. |
 | `readme` | no | Markdown file submitted as catalog detail content. |
 | `logo` | no | Catalog logo image path. |
+| `tags` | no | Lowercase catalog labels for Hub search and filtering. |
 | `requires` | no | Runtime requirements prepared before tasks run. |
 | `workdir` | no | Files that prepare the private dock workdir before tasks run. |
 | `files` | no | File or directory mappings applied to the project root. |
@@ -132,6 +136,10 @@ name: Designer AI
 summary: AI workspace for UI, UX, and product design.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - design
+  - ux
+  - figma
 ```
 
 Rules:
@@ -141,6 +149,10 @@ Rules:
 - `readme` and `logo` are submitted separately from the install archive.
 - `readme` must be Markdown and is limited to 65536 bytes.
 - `logo` must be PNG, JPEG, or WebP and is limited to 524288 bytes.
+- `tags` are lowercase slugs such as `design` or `ai-agent`, up to 12 tags per
+  dock.
+- `tags` are catalog labels only. They do not change install, update, uninstall,
+  or doctor behavior.
 
 ## Requires
 
@@ -332,9 +344,10 @@ Deploy submits:
 3. The target platform: `any`, `macos`, `windows`, or `linux`.
 4. Optional `readme_markdown`.
 5. Optional `logo`.
+6. Optional manifest `tags` for catalog search and filtering.
 
-`readme` and `logo` are catalog metadata, so they are not included in the install
-archive unless they are also listed in `files`.
+`readme`, `logo`, and `tags` are catalog metadata. `readme` and `logo` files are
+not included in the install archive unless they are also listed in `files`.
 
 When `--file` points to a platform-specific manifest such as `dock.macos.yml`,
 OpenDock still stores it inside the archive as `dock.yml`. Install always reads a

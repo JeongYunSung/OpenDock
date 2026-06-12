@@ -3,6 +3,11 @@ id: opendock/backend-ai
 summary: Backend API, database, security, and testing guidance for AI-assisted engineering.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - backend
+  - api
+  - database
+  - testing
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

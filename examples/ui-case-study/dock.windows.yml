@@ -3,6 +3,11 @@ id: opendock/ui-case-study
 summary: Portfolio case study templates for problem, process, decision rationale, and impact.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - portfolio
+  - design
+  - case-study
+  - impact
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

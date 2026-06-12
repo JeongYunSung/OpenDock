@@ -3,6 +3,10 @@ id: opendock/codex
 summary: Tool dock for installing the Codex CLI without project payloads.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - codex
+  - tool
+  - ai-agent
 requires:
   runtimes:
     node: ">=22.0.0"

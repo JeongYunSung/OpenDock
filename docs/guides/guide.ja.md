@@ -38,6 +38,9 @@ id: opendock/agent-ready
 summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - ai-agent
+  - starter
 
 requires:
   runtimes:
@@ -58,6 +61,7 @@ files:
 | `summary` | Short Registry catalog summary. |
 | `readme` | Markdown content for the catalog detail page. |
 | `logo` | Catalog logo image. |
+| `tags` | Lowercase catalog labels for Hub search and filtering. |
 | `requires` | Runtime requirements. |
 | `files` | Files or directories applied to the project root. |
 | `install` | Tasks for first install and initial generation. |
@@ -165,5 +169,5 @@ opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 ```
 
 Deploy は `dock.yml`、`files[].from` と `workdir.files[].from` から作る
-archive、release platform metadata、任意の `readme_markdown`、任意の `logo`
-を送信します。
+archive、release platform metadata、任意の `readme_markdown`、任意の `logo`、
+manifest の任意の `tags` を送信します。

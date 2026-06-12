@@ -148,6 +148,31 @@ const tasksSchema = z.object({
   doctor: phaseTasksSchema,
 });
 
+const tagSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(32)
+  .regex(/^[a-z0-9][a-z0-9-]*$/, "tags must be lowercase slugs");
+
+const tagsSchema = z
+  .array(tagSchema)
+  .max(12)
+  .superRefine((tags, context) => {
+    const seen = new Set<string>();
+    for (const [index, tag] of tags.entries()) {
+      if (seen.has(tag)) {
+        context.addIssue({
+          code: "custom",
+          message: `duplicate tag \`${tag}\``,
+          path: [index],
+        });
+      }
+      seen.add(tag);
+    }
+  })
+  .default([]);
+
 const manifestSchema = z
   .object({
     opendock: z.number().optional(),
@@ -156,6 +181,7 @@ const manifestSchema = z
     summary: z.string().default(""),
     readme: z.string().optional(),
     logo: z.string().optional(),
+    tags: tagsSchema,
     requires: requiresSchema,
     workdir: workdirSpecSchema,
     files: z.array(fileSpecSchema).default([]),

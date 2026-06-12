@@ -3,6 +3,11 @@ id: opendock/product-manager
 summary: PRD, user story, roadmap, release note, and decision template workspace.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - product
+  - prd
+  - roadmap
+  - planning
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

@@ -203,6 +203,9 @@ id: owner/name
 summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - starter
+  - ai-agent
 
 files:
   - from: files/AGENTS.md
@@ -225,8 +228,9 @@ doctor:
     version: ">=2.40.0"
 ```
 
-`readme` and `logo` are Registry catalog metadata. They are not installed into a
-project unless also listed in `files`.
+`readme`, `logo`, and `tags` are Registry catalog metadata. They help people
+understand and filter a dock in Hub, but they are not installed into a project
+unless the referenced files are also listed in `files`.
 
 Release versions are not declared in `dock.yml`; the version comes from deploy:
 
@@ -365,6 +369,7 @@ Deploy uploads:
 - release platform metadata: `any`, `macos`, `windows`, or `linux`
 - optional `readme` markdown for the catalog
 - optional `logo` image for the catalog
+- optional `tags` from the manifest for catalog search and filtering
 
 The catalog metadata is submitted separately from the install archive.
 When `--file` points to `dock.macos.yml`, OpenDock stores it inside the archive

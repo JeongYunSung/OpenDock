@@ -3,6 +3,11 @@ id: opendock/ai-automation
 summary: A practical workspace for mapping and designing safe internal automations.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - automation
+  - operations
+  - mcp
+  - workflow
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

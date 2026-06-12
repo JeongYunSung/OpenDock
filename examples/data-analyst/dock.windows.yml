@@ -3,6 +3,11 @@ id: opendock/data-analyst
 summary: Metric definitions, SQL review, dashboard briefs, and experiment analysis templates.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - data
+  - analytics
+  - sql
+  - dashboard
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

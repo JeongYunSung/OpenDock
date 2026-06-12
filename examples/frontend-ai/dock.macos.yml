@@ -3,6 +3,11 @@ id: opendock/frontend-ai
 summary: React, Next.js, TypeScript, component, accessibility, and review guidance.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - frontend
+  - react
+  - accessibility
+  - typescript
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

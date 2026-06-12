@@ -3,6 +3,11 @@ id: opendock/designer-ai
 summary: UI, UX, product design, design system, Figma workflow, and review templates.
 readme: DOCK.md
 logo: logo.png
+tags:
+  - design
+  - ux
+  - figma
+  - product
 files:
   - from: files/AGENTS.md
     to: AGENTS.md

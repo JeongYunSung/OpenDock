@@ -39,6 +39,65 @@ describe("requires regression coverage", () => {
     });
   });
 
+  it("parses catalog tags from dock.yml", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/tags",
+        tags: ["frontend", "ai-agent", "workflow"],
+      }),
+    );
+
+    const manifest = parseManifestFile(join(root, "dock.yml"));
+
+    expect(manifest.tags).toEqual(["frontend", "ai-agent", "workflow"]);
+  });
+
+  it("defaults catalog tags to an empty list", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/tags",
+      }),
+    );
+
+    const manifest = parseManifestFile(join(root, "dock.yml"));
+
+    expect(manifest.tags).toEqual([]);
+  });
+
+  it("rejects invalid catalog tags", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/tags",
+        tags: ["Frontend"],
+      }),
+    );
+
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow("tags must be lowercase slugs");
+  });
+
+  it("rejects duplicate catalog tags", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/tags",
+        tags: ["frontend", "frontend"],
+      }),
+    );
+
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow("duplicate tag");
+  });
+
   it("rejects unknown requires fields", () => {
     const root = tempDir();
     writeFileSync(
@@ -176,6 +235,7 @@ function omaManifest(): DockManifest {
     opendock: 1,
     id: "test/oma",
     summary: "",
+    tags: [],
     requires: {
       runtimes: {
         bun: ">=1.3.0",
