@@ -59,6 +59,10 @@ Turn this Figma screen into engineering-ready acceptance criteria.
 - UX_REVIEW.md
 - FIGMA_WORKFLOW.md
 
+## Edition
+
+This is the simple edition of `opendock/designer-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
+
 ## Good Pairings
 
 - opendock/frontend-ai

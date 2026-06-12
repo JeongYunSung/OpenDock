@@ -28,3 +28,7 @@ After installation, open `README.md` in the target project and follow the first 
 - opendock/agent-ready
 - opendock/ai-automation
 - opendock/agent-safety
+
+## Edition
+
+This is the simple edition of `opendock/mcp-safe`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/mcp-safe-pro](https://hub.opendock.app/docks/opendock/mcp-safe-pro).

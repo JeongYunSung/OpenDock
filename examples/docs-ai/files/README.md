@@ -59,6 +59,10 @@ Write release notes that explain impact, not implementation trivia.
 - CHANGELOG_TEMPLATE.md
 - RELEASE_NOTES.md
 
+## Edition
+
+This is the simple edition of `opendock/docs-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/docs-ai-pro](https://hub.opendock.app/docks/opendock/docs-ai-pro).
+
 ## Good Pairings
 
 - opendock/repo-context

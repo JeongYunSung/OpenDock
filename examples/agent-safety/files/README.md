@@ -58,6 +58,10 @@ Create a merge-ready PR summary with validation and rollback notes.
 - .opendock/checklists/security-review.md
 - .github/pull_request_template.md
 
+## Edition
+
+This is the simple edition of `opendock/agent-safety`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/agent-safety-pro](https://hub.opendock.app/docks/opendock/agent-safety-pro).
+
 ## Good Pairings
 
 - opendock/agent-ready

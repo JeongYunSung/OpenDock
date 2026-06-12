@@ -59,6 +59,10 @@ Review this landing page copy for clarity, proof, and conversion friction.
 - SEO_BRIEF.md
 - AD_EXPERIMENTS.md
 
+## Edition
+
+This is the simple edition of `opendock/marketer-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/marketer-ai-pro](https://hub.opendock.app/docks/opendock/marketer-ai-pro).
+
 ## Good Pairings
 
 - opendock/startup-founder

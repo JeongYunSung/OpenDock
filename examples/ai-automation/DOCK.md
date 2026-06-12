@@ -28,3 +28,7 @@ After installation, open `README.md` in the target project and follow the first 
 - opendock/mcp-safe
 - opendock/agent-safety
 - opendock/repo-context
+
+## Edition
+
+This is the simple edition of `opendock/ai-automation`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/ai-automation-pro](https://hub.opendock.app/docks/opendock/ai-automation-pro).

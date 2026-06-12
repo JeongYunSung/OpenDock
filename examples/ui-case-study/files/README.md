@@ -58,6 +58,10 @@ Rewrite this impact section without exaggerating results.
 - CASE_STUDY_TEMPLATE.md
 - IMPACT_MEASUREMENT.md
 
+## Edition
+
+This is the simple edition of `opendock/ui-case-study`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/ui-case-study-pro](https://hub.opendock.app/docks/opendock/ui-case-study-pro).
+
 ## Good Pairings
 
 - opendock/designer-ai

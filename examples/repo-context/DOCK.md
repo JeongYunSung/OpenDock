@@ -28,3 +28,7 @@ After installation, open `README.md` in the target project and follow the first 
 - opendock/agent-ready
 - opendock/monorepo-ai
 - opendock/docs-ai
+
+## Edition
+
+This is the simple edition of `opendock/repo-context`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/repo-context-pro](https://hub.opendock.app/docks/opendock/repo-context-pro).

@@ -59,6 +59,10 @@ Summarize this incident with timeline, impact, root cause, and prevention.
 - INCIDENT_RUNBOOK.md
 - SECRETS_POLICY.md
 
+## Edition
+
+This is the simple edition of `opendock/devops-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/devops-ai-pro](https://hub.opendock.app/docks/opendock/devops-ai-pro).
+
 ## Good Pairings
 
 - opendock/agent-safety

@@ -795,6 +795,11 @@ tool dock을 제외한 workspace dock은 공통 root context와 provider별 runt
 tool dock입니다. outcome/utility dock은 설치 직후 agent가 읽을 수 있는 workspace
 context까지 제공합니다.
 
+pro addon dock은 `<dock>-pro` 이름을 사용합니다. 기본 dock은 간소형으로 유지하고,
+pro addon은 curated specialist skill, workflow playbook, Claude Code subagent,
+Claude Code command adapter, Codex custom agent, Cursor rule을 추가합니다. hub URL은 dock 이름 그대로 연결합니다:
+[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
+
 ### Tool docks
 
 Tool dock은 특정 CLI나 외부 setup engine을 준비합니다. project payload를 최소화하고
@@ -842,6 +847,13 @@ Utility dock은 여러 outcome dock과 같이 섞어 쓰는 보조 harness입니
 | `examples/dev-env/dock.{macos,windows}.yml` | project-local tool versions와 validation task reference |
 | `examples/devops-ai/dock.{macos,windows}.yml` | CI/CD, deployment, incident runbook workspace |
 | `examples/monorepo-ai/dock.{macos,windows}.yml` | package boundary and change impact workspace |
+
+### Pro addon docks
+
+각 workspace/utility dock에는 같은 이름의 pro addon이 있습니다. 예를 들어
+`opendock/designer-ai-pro`는 `opendock/designer-ai`의 전문가 팀 확장판입니다.
+pro addon은 기본 dock과 함께 설치하는 것을 전제로 하며, 여러 specialist skill,
+workflow playbook, Claude command adapter, Claude/Codex subagent를 추가합니다.
 
 조합 예시는 다음과 같습니다.
 

@@ -166,6 +166,11 @@ Les tool docks sont `codex`, `claude-code` et `oma`. Les outcome docks comme
 rôle. Les utility docks comme `agent-ready`, `agent-safety` et `repo-context`
 ajoutent des harnesses réutilisables.
 
+Les pro addon docks suivent le modèle `<dock>-pro`. Le dock simple reste léger ;
+le pro addon ajoute specialist skills, workflow playbooks, Claude Code subagents,
+Claude Code command adapters, Codex custom agents et Cursor rules. Exemple :
+[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
+
 Voir la référence complète dans [docs/guides/guide.fr.md](./docs/guides/guide.fr.md).
 
 ## Development

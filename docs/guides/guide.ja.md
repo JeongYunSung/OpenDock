@@ -150,6 +150,11 @@ tool dock 以外は `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、`README.md` と、
 配下の provider-specific files を一緒に入れます。AI agent が project context
 をすぐ読める状態を作るためです。
 
+Pro addon docks は `<dock>-pro` という名前です。Simple dock を軽く保ち、
+specialist skills、workflow playbooks、Claude Code subagents、Claude Code command
+adapters、Codex custom agents、Cursor rules を追加します。例:
+[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro)。
+
 ## Deploy
 
 ```bash

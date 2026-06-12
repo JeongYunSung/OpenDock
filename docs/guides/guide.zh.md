@@ -145,6 +145,10 @@ install:
 `.agents/skills/`、`.codex/skills/`、`.claude/skills/`、`.cursor/rules/`
 下的 provider-specific files，让 AI agent 能立刻读取项目 context。
 
+Pro addon docks 使用 `<dock>-pro` 命名。Simple dock 保持轻量，pro addon 添加
+specialist skills、workflow playbooks、Claude Code subagents、Claude Code command adapters、Codex custom agents 和 Cursor rules。
+例如：[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro)。
+
 ## Deploy
 
 ```bash

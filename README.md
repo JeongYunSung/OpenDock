@@ -322,6 +322,11 @@ soon as the dock is installed.
 | Tool docks | `codex`, `claude-code`, `oma` | Install or run an AI tool without forcing a role workflow. |
 | Outcome docks | `designer-ai`, `product-manager`, `frontend-ai`, `backend-ai`, `mobile-ai`, `qa-engineer`, `docs-ai`, `data-analyst`, `startup-founder`, `marketer-ai`, `customer-support`, `recruiter-ai`, `ai-automation`, `ui-case-study` | Add role-specific AI-ready workspace files. |
 | Utility docks | `agent-ready`, `agent-safety`, `repo-context`, `mcp-safe`, `dev-env`, `devops-ai`, `monorepo-ai` | Add reusable context, safety, MCP, validation, operations, or repository harnesses. |
+| Pro addon docks | `<dock>-pro`, for example `designer-ai-pro` or `frontend-ai-pro` | Add curated specialist skills, workflow playbooks, Claude Code subagents, Claude Code command adapters, Codex custom agents, and Cursor rules on top of the simple dock. |
+
+Simple docks stay lightweight. When you want a deeper specialist team, install
+the matching pro addon and open its hub page by dock name, for example
+[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
 
 Example combination:
 
@@ -329,6 +334,7 @@ Example combination:
 opendock install opendock/codex@1.0.0
 opendock install opendock/agent-ready@1.0.0
 opendock install opendock/frontend-ai@1.0.0
+opendock install opendock/frontend-ai-pro@1.0.0
 opendock install opendock/repo-context@1.0.0
 opendock list
 ```

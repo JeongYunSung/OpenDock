@@ -59,6 +59,10 @@ Create a targeted validation plan for this monorepo diff.
 - CHANGE_IMPACT.md
 - BUILD_CACHE.md
 
+## Edition
+
+This is the simple edition of `opendock/monorepo-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/monorepo-ai-pro](https://hub.opendock.app/docks/opendock/monorepo-ai-pro).
+
 ## Good Pairings
 
 - opendock/repo-context

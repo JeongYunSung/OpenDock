@@ -161,6 +161,10 @@ Tool docks 包括 `codex`、`claude-code`、`oma`。Outcome docks 包括
 `designer-ai`、`product-manager`、`frontend-ai` 等角色 workspace。Utility
 docks 包括 `agent-ready`、`agent-safety`、`repo-context` 等可组合 harness。
 
+Pro addon docks 使用 `<dock>-pro` 命名。Simple dock 保持轻量，pro addon 添加
+specialist skills、workflow playbooks、Claude Code subagents、Claude Code command adapters、Codex custom agents 和 Cursor rules。
+例如：[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro)。
+
 完整 manifest reference 见 [docs/guides/guide.zh.md](./docs/guides/guide.zh.md)。
 
 ## Development

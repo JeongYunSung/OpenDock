@@ -164,6 +164,11 @@ Tool docks は `codex`、`claude-code`、`oma` です。Outcome docks は
 追加します。Utility docks は `agent-ready`、`agent-safety`、`repo-context`
 などを組み合わせ用の harness として追加します。
 
+Pro addon docks は `<dock>-pro` という名前です。Simple dock は軽く保ち、pro
+addon で specialist skills、workflow playbooks、Claude Code subagents、Claude Code
+command adapters、Codex custom agents、Cursor rules を追加します。例:
+[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro)。
+
 詳しい manifest reference は [docs/guides/guide.ja.md](./docs/guides/guide.ja.md) を参照してください。
 
 ## Development

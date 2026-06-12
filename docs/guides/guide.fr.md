@@ -154,6 +154,11 @@ les tool docks, ils installent `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
 `.codex/skills/`, `.claude/skills/` et `.cursor/rules/`, afin que les agents IA
 puissent lire immédiatement le context projet.
 
+Les pro addon docks suivent le modèle `<dock>-pro`. Ils gardent le dock simple
+léger et ajoutent specialist skills, workflow playbooks, Claude Code subagents,
+Claude Code command adapters, Codex custom agents et Cursor rules. Exemple :
+[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
+
 ## Deploy
 
 ```bash

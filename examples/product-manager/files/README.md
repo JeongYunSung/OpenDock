@@ -59,6 +59,10 @@ Review this roadmap for scope risk and missing dependencies.
 - ROADMAP.md
 - RELEASE_NOTES.md
 
+## Edition
+
+This is the simple edition of `opendock/product-manager`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/product-manager-pro](https://hub.opendock.app/docks/opendock/product-manager-pro).
+
 ## Good Pairings
 
 - opendock/designer-ai

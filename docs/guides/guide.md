@@ -274,6 +274,11 @@ Use the tool docks (`opendock/codex`, `opendock/claude-code`, `opendock/oma`)
 when you only need an AI tool. Use outcome and utility docks when you want a
 ready workspace that an agent can read immediately.
 
+Pro addon docks use the `<dock>-pro` naming pattern. They keep the simple dock
+small while adding curated specialist skills, workflow playbooks, Claude Code
+subagents, Claude Code command adapters, Codex custom agents, and Cursor rules. Link to them by dock name on the hub, for
+example [opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
+
 ## Platforms
 
 Prefer separate platform artifacts instead of putting platform branches inside

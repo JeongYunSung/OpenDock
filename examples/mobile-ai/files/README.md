@@ -59,6 +59,10 @@ Prepare release notes and rollout risks for this app update.
 - RELEASE_CHECKLIST.md
 - TESTING.md
 
+## Edition
+
+This is the simple edition of `opendock/mobile-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/mobile-ai-pro](https://hub.opendock.app/docks/opendock/mobile-ai-pro).
+
 ## Good Pairings
 
 - opendock/qa-engineer

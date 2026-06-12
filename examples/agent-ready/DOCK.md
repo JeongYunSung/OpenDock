@@ -28,3 +28,7 @@ After installation, open `README.md` in the target project and follow the first 
 - opendock/codex
 - opendock/claude-code
 - opendock/agent-safety
+
+## Edition
+
+This is the simple edition of `opendock/agent-ready`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/agent-ready-pro](https://hub.opendock.app/docks/opendock/agent-ready-pro).

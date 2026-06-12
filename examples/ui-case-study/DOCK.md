@@ -28,3 +28,7 @@ After installation, open `README.md` in the target project and follow the first 
 - opendock/designer-ai
 - opendock/docs-ai
 - opendock/product-manager
+
+## Edition
+
+This is the simple edition of `opendock/ui-case-study`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/ui-case-study-pro](https://hub.opendock.app/docks/opendock/ui-case-study-pro).

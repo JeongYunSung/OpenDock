@@ -309,6 +309,11 @@ Code, Gemini 계열 agent, Cursor, OMA식 skill discovery가 같은 프로젝트
 | Tool docks | `codex`, `claude-code`, `oma` | 특정 AI 도구를 설치하거나 실행합니다. |
 | Outcome docks | `designer-ai`, `product-manager`, `frontend-ai`, `backend-ai`, `mobile-ai`, `qa-engineer`, `docs-ai`, `data-analyst`, `startup-founder`, `marketer-ai`, `customer-support`, `recruiter-ai`, `ai-automation`, `ui-case-study` | 직군/작업 결과별 AI-ready workspace 파일을 추가합니다. |
 | Utility docks | `agent-ready`, `agent-safety`, `repo-context`, `mcp-safe`, `dev-env`, `devops-ai`, `monorepo-ai` | context, safety, MCP, validation, 운영, monorepo harness를 추가합니다. |
+| Pro addon docks | `<dock>-pro`, 예: `designer-ai-pro`, `frontend-ai-pro` | 간소형 dock 위에 curated specialist skill, workflow playbook, Claude Code subagent, Claude Code command adapter, Codex custom agent, Cursor rule을 추가합니다. |
+
+기본 dock은 가볍게 유지합니다. 더 강한 전문가 팀이 필요하면 같은 이름의 pro addon을
+추가로 설치합니다. hub URL은 dock 이름 그대로 쓰면 됩니다:
+[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
 
 조합 예시:
 
@@ -316,6 +321,7 @@ Code, Gemini 계열 agent, Cursor, OMA식 skill discovery가 같은 프로젝트
 opendock install opendock/codex@1.0.0
 opendock install opendock/agent-ready@1.0.0
 opendock install opendock/frontend-ai@1.0.0
+opendock install opendock/frontend-ai-pro@1.0.0
 opendock install opendock/repo-context@1.0.0
 ```
 

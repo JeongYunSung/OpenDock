@@ -155,6 +155,11 @@ provider-specific bajo `.agents/skills/`, `.codex/skills/`, `.claude/skills/` y
 `.cursor/rules/`, para que los agentes de IA puedan leer el context del proyecto
 de inmediato.
 
+Los pro addon docks usan el patrón `<dock>-pro`. Mantienen ligero el dock simple
+y agregan specialist skills, workflow playbooks, Claude Code subagents,
+Claude Code command adapters, Codex custom agents y Cursor rules. Ejemplo:
+[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
+
 ## Deploy
 
 ```bash

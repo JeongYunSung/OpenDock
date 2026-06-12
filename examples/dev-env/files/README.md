@@ -57,6 +57,10 @@ Review these runtime versions for compatibility risk.
 - mise.toml
 - .opendock/dev-env.md
 
+## Edition
+
+This is the simple edition of `opendock/dev-env`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/dev-env-pro](https://hub.opendock.app/docks/opendock/dev-env-pro).
+
 ## Good Pairings
 
 - opendock/agent-ready

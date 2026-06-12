@@ -59,6 +59,10 @@ Find risky layout, responsive, and text-overflow issues in this screen.
 - CODE_STYLE.md
 - REVIEW_CHECKLIST.md
 
+## Edition
+
+This is the simple edition of `opendock/frontend-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/frontend-ai-pro](https://hub.opendock.app/docks/opendock/frontend-ai-pro).
+
 ## Good Pairings
 
 - opendock/designer-ai

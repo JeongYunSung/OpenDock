@@ -59,6 +59,10 @@ Draft a concise outreach message for this candidate profile.
 - SCORECARD.md
 - CANDIDATE_OUTREACH.md
 
+## Edition
+
+This is the simple edition of `opendock/recruiter-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/recruiter-ai-pro](https://hub.opendock.app/docks/opendock/recruiter-ai-pro).
+
 ## Good Pairings
 
 - opendock/docs-ai

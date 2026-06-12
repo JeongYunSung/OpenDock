@@ -58,6 +58,10 @@ Compare these MCP configs and flag differences in access scope.
 - .opendock/mcp/approved-servers.yml
 - .opendock/mcp/security-checklist.md
 
+## Edition
+
+This is the simple edition of `opendock/mcp-safe`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/mcp-safe-pro](https://hub.opendock.app/docks/opendock/mcp-safe-pro).
+
 ## Good Pairings
 
 - opendock/agent-ready

@@ -59,6 +59,10 @@ Review this pricing page for clarity, packaging, and willingness-to-pay signals.
 - GTM.md
 - PRICING.md
 
+## Edition
+
+This is the simple edition of `opendock/startup-founder`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/startup-founder-pro](https://hub.opendock.app/docks/opendock/startup-founder-pro).
+
 ## Good Pairings
 
 - opendock/marketer-ai
