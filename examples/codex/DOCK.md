@@ -1,8 +1,13 @@
 # Codex
 
-Install the Codex CLI as a tool dock.
+Installs the Codex CLI only. Pair it with outcome docks when a project needs reusable instructions, prompts, and skills.
 
-This dock declares Node, npm, and the OpenAI Codex CLI in `requires`. It does
-not create project instruction files.
+## Use
 
-Combine it with outcome docks such as `opendock/frontend-ai`, `opendock/designer-ai`, or `opendock/repo-context` when a project needs both the Codex command and workspace guidance.
+`opendock install opendock/codex@1.0.0`
+
+## Pair With
+
+- opendock/agent-ready
+- opendock/agent-safety
+- opendock/repo-context

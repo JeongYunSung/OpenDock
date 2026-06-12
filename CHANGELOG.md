@@ -5,6 +5,21 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.13 - 2026-06-12
+
+### Changed
+
+- Upgraded workspace example docks into production-ready agent payloads with
+  shared root context, Codex skills, Claude Code skills, OMA-style skills, and
+  Cursor rules.
+- Refreshed README and guide documentation to explain the example dock payload
+  structure across languages.
+
+### Tests
+
+- Added regression coverage that every workspace example provisions the expected
+  agent context files on macOS and Windows manifests.
+
 ## 0.1.12 - 2026-06-12
 
 ### Changed

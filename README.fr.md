@@ -152,6 +152,20 @@ Utilisez `workdir.files` quand une task dans le dock-private workdir a besoin de
 fichiers d'entrée avant son exécution. Utilisez `files` pour les fichiers à
 écrire dans le project root.
 
+## Example Docks
+
+Les workspace examples ne sont pas des exemples vides : ce sont des payloads
+prêts à l'emploi. Ils installent `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, un
+`README.md` local, ainsi que des fichiers provider-specific de skills/rules dans
+`.agents/skills/`, `.codex/skills/`, `.claude/skills/` et `.cursor/rules/`.
+Après installation, Codex, Claude Code, les agents de type Gemini, Cursor et la
+discovery OMA-style peuvent lire le même context projet.
+
+Les tool docks sont `codex`, `claude-code` et `oma`. Les outcome docks comme
+`designer-ai`, `product-manager` et `frontend-ai` ajoutent des workspaces par
+rôle. Les utility docks comme `agent-ready`, `agent-safety` et `repo-context`
+ajoutent des harnesses réutilisables.
+
 Voir la référence complète dans [docs/guides/guide.fr.md](./docs/guides/guide.fr.md).
 
 ## Development

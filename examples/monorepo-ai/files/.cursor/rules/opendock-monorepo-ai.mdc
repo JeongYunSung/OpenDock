@@ -1,0 +1,32 @@
+---
+description: Workspace maps, package boundaries, change impact review, and build cache notes.
+alwaysApply: false
+---
+
+# Monorepo AI Rule
+
+Use this rule when the task relates to: Teams maintaining multi-package repositories or platform monorepos.
+
+## Role
+
+Act as a monorepo maintainer. Protect package boundaries, dependency direction, change impact, and build reliability.
+
+## Read First
+
+- WORKSPACE_MAP.md
+- PACKAGE_BOUNDARIES.md
+- CHANGE_IMPACT.md
+- BUILD_CACHE.md
+- PROMPTS.md
+
+## Apply
+
+- Prefer local project conventions over generic recommendations.
+- Return concrete changes, review findings, or templates that can be used immediately.
+- Keep assumptions and validation steps visible.
+
+## Quality Checks
+
+- Dependency direction remains intentional.
+- Shared packages keep backwards compatibility or migration notes.
+- Validation scope matches changed packages and dependents.

@@ -1,7 +1,6 @@
 opendock: 1
 id: opendock/data-analyst
-summary: Composable analytics workspace for metrics, SQL review, dashboards, and
-  experiments.
+summary: Metric definitions, SQL review, dashboard briefs, and experiment analysis templates.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -9,6 +8,20 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-data-analyst/SKILL.md
+    to: .agents/skills/opendock-data-analyst/SKILL.md
+  - from: files/.codex/skills/opendock-data-analyst/SKILL.md
+    to: .codex/skills/opendock-data-analyst/SKILL.md
+  - from: files/.claude/skills/opendock-data-analyst/SKILL.md
+    to: .claude/skills/opendock-data-analyst/SKILL.md
+  - from: files/.cursor/rules/opendock-data-analyst.mdc
+    to: .cursor/rules/opendock-data-analyst.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/METRICS_DICTIONARY.md
     to: METRICS_DICTIONARY.md
   - from: files/SQL_REVIEW.md
@@ -17,13 +30,19 @@ files:
     to: DASHBOARD_BRIEF.md
   - from: files/EXPERIMENT_ANALYSIS.md
     to: EXPERIMENT_ANALYSIS.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md
 doctor:
   - id: agents-md
     check: test -f AGENTS.md
+  - id: claude-md
+    check: test -f CLAUDE.md
+  - id: gemini-md
+    check: test -f GEMINI.md
+  - id: codex-skill
+    check: test -f .codex/skills/opendock-data-analyst/SKILL.md
+  - id: claude-skill
+    check: test -f .claude/skills/opendock-data-analyst/SKILL.md
+  - id: cursor-rule
+    check: test -f .cursor/rules/opendock-data-analyst.mdc
   - id: metrics-dictionary-md
     check: test -f METRICS_DICTIONARY.md
   - id: sql-review-md

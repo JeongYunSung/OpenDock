@@ -1,7 +1,30 @@
 # MCP Safe
 
-Add security-first MCP configuration references.
+Security-first MCP inventory, config examples, and review checklists.
 
-This dock adds MCP configuration examples, an approved-server inventory, and a review checklist. It does not enable MCP servers automatically and does not store credentials.
+## Outcome
 
-Combine it with agent or workflow docks when a team wants MCP references with explicit scope and review points.
+MCP setup remains reviewable, least-privilege, and reversible before any server is enabled in a client.
+
+## Best For
+
+Teams connecting AI agents to local files, SaaS APIs, or internal tools through MCP.
+
+## What Gets Installed
+
+- Shared agent instructions: `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`
+- Reusable skills for OpenDock/OMA, Codex, and Claude Code
+- A Cursor project rule scoped to this dock
+- Role-specific reference files and prompt templates
+
+## First Run
+
+`opendock install opendock/mcp-safe@1.0.0`
+
+After installation, open `README.md` in the target project and follow the first three steps.
+
+## Pair With
+
+- opendock/agent-ready
+- opendock/ai-automation
+- opendock/agent-safety

@@ -1,0 +1,30 @@
+---
+description: Project-local runtime versions and validation task references for agents.
+alwaysApply: false
+---
+
+# Dev Env Rule
+
+Use this rule when the task relates to: Developers and teams that want AI agents to use the same local commands as humans.
+
+## Role
+
+Act as a development environment steward. Keep runtime assumptions explicit, prefer project-local tasks, and report missing tools clearly.
+
+## Read First
+
+- mise.toml
+- .opendock/dev-env.md
+- README.md when present
+
+## Apply
+
+- Prefer local project conventions over generic recommendations.
+- Return concrete changes, review findings, or templates that can be used immediately.
+- Keep assumptions and validation steps visible.
+
+## Quality Checks
+
+- Commands are project-local and reproducible.
+- Runtime versions are explicit enough for agents and humans.
+- Missing tools are reported instead of guessed.

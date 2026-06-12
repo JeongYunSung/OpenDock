@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parseManifestFile } from "../src/core/domain/manifest.js";
@@ -58,6 +58,48 @@ describe("example dock manifests", () => {
       ).toBe(false);
     }
   });
+
+  it("keeps production-ready workspace examples provisionable for common agents", () => {
+    for (const example of workspaceExampleNames()) {
+      const root = join(examplesRoot, example);
+      const skillName = `opendock-${example}`;
+      const requiredSources = [
+        "files/AGENTS.md",
+        "files/CLAUDE.md",
+        "files/GEMINI.md",
+        `files/.agents/skills/${skillName}/SKILL.md`,
+        `files/.codex/skills/${skillName}/SKILL.md`,
+        `files/.claude/skills/${skillName}/SKILL.md`,
+        `files/.cursor/rules/${skillName}.mdc`,
+        "files/README.md",
+      ];
+
+      for (const source of requiredSources) {
+        expect(existsSync(join(root, source)), `${example} ${source}`).toBe(true);
+      }
+
+      const readme = readFileSync(join(root, "files", "README.md"), "utf8");
+      for (const heading of [
+        "## Installed Agent Context",
+        "## Start Here",
+        "## Common Workflows",
+        "## Quality Checks",
+        "## Useful Prompts",
+      ]) {
+        expect(readme, `${example} README ${heading}`).toContain(heading);
+      }
+
+      for (const file of ["dock.macos.yml", "dock.windows.yml"]) {
+        const manifest = parseManifestFile(join(root, file));
+        for (const source of requiredSources) {
+          expect(
+            manifest.files.some((mapping) => mapping.from === source),
+            `${example}/${file} ${source}`,
+          ).toBe(true);
+        }
+      }
+    }
+  });
 });
 
 function exampleNames(): string[] {
@@ -65,6 +107,11 @@ function exampleNames(): string[] {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
+}
+
+function workspaceExampleNames(): string[] {
+  const toolOnly = new Set(["claude-code", "codex", "oma"]);
+  return exampleNames().filter((example) => !toolOnly.has(example));
 }
 
 function commandsFor(

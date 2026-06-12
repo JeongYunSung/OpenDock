@@ -1,5 +1,30 @@
 # UI Case Study
 
-Add a composable AI-ready workspace for portfolio-ready UI and UX case studies.
+Portfolio case study templates for problem, process, decision rationale, and impact.
 
-This dock adds a structured case study template, problem definition worksheet, impact measurement guide, agent instructions, and prompts. It is built for designers and portfolio creators who need a clear narrative, not just a gallery of screenshots.
+## Outcome
+
+A case study that explains the problem, choices, evidence, and impact instead of only showing screenshots.
+
+## Best For
+
+Product designers, UX designers, UI designers, and portfolio creators.
+
+## What Gets Installed
+
+- Shared agent instructions: `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`
+- Reusable skills for OpenDock/OMA, Codex, and Claude Code
+- A Cursor project rule scoped to this dock
+- Role-specific reference files and prompt templates
+
+## First Run
+
+`opendock install opendock/ui-case-study@1.0.0`
+
+After installation, open `README.md` in the target project and follow the first three steps.
+
+## Pair With
+
+- opendock/designer-ai
+- opendock/docs-ai
+- opendock/product-manager

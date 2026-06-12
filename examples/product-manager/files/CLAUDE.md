@@ -1,9 +1,25 @@
-# Claude Code Instructions
+# Product Manager Claude Code Guidance
 
-Use this workspace for product planning and scope review.
+Claude Code should use this dock as persistent project memory for: Product managers, product owners, founders, and service planners.
 
-- Read `PRD.md`, `USER_STORY.md`, and `ROADMAP.md` before drafting plans.
-- Keep requirements testable.
-- Do not turn assumptions into facts.
-- Flag ambiguous metrics and unresolved dependencies.
-- Keep release notes user-facing and concise.
+## Load Order
+
+1. Read AGENTS.md for the shared operating contract.
+2. Read this file for Claude-specific behavior.
+3. Use /opendock-product-manager when the task matches this dock and the skill is available.
+4. Read the dock reference files only when they are relevant to the current task.
+
+## Claude-Specific Rules
+
+- Keep CLAUDE.md concise; move repeatable procedures into .claude/skills/opendock-product-manager/SKILL.md.
+- Before editing, summarize which project files and dock files are relevant.
+- Do not treat this file as a hard safety gate. If an action must be blocked, ask the user to add an explicit hook or policy.
+- If instructions conflict, follow the user's latest request and then the nearest project instruction file.
+
+## Reference Files
+
+- PRD.md
+- USER_STORY.md
+- ROADMAP.md
+- RELEASE_NOTES.md
+- PROMPTS.md

@@ -259,6 +259,21 @@ leaving unmanaged files in the project root.
 | `workdir.files` | `.opendock/workdirs/<dock>/` | Copied before install/update tasks run. |
 | `export` | Project root | Collected after a dock workdir task runs. |
 
+## Production-Ready Example Payloads
+
+Workspace examples in `examples/` are meant to be installable docks, not toy
+fixtures. Each non-tool workspace dock installs:
+
+- shared root context: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `README.md`
+- OMA-style skill source: `.agents/skills/opendock-*/SKILL.md`
+- Codex skill source: `.codex/skills/opendock-*/SKILL.md`
+- Claude Code skill source: `.claude/skills/opendock-*/SKILL.md`
+- Cursor rule source: `.cursor/rules/opendock-*.mdc`
+
+Use the tool docks (`opendock/codex`, `opendock/claude-code`, `opendock/oma`)
+when you only need an AI tool. Use outcome and utility docks when you want a
+ready workspace that an agent can read immediately.
+
 ## Platforms
 
 Prefer separate platform artifacts instead of putting platform branches inside

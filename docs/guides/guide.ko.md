@@ -781,6 +781,20 @@ opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 예제는 `examples/` 아래에 있으며, “고르고 조합한다”는 제품 방향에 맞춰 세 그룹으로
 관리합니다.
 
+workspace 예제는 테스트 fixture가 아니라 실제 배포 가능한 dock으로 관리합니다.
+tool dock을 제외한 workspace dock은 공통 root context와 provider별 runtime 파일을
+함께 설치합니다.
+
+- 공통 root context: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `README.md`
+- OMA-style skill: `.agents/skills/opendock-*/SKILL.md`
+- Codex skill: `.codex/skills/opendock-*/SKILL.md`
+- Claude Code skill: `.claude/skills/opendock-*/SKILL.md`
+- Cursor rule: `.cursor/rules/opendock-*.mdc`
+
+`opendock/codex`, `opendock/claude-code`, `opendock/oma`는 도구만 준비하는
+tool dock입니다. outcome/utility dock은 설치 직후 agent가 읽을 수 있는 workspace
+context까지 제공합니다.
+
 ### Tool docks
 
 Tool dock은 특정 CLI나 외부 setup engine을 준비합니다. project payload를 최소화하고

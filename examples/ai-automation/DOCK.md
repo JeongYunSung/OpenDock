@@ -1,5 +1,30 @@
 # AI Automation
 
-Add a composable AI-ready workspace for internal process automation.
+A practical workspace for mapping and designing safe internal automations.
 
-This dock adds an automation map, workflow library, MCP guide, agent instructions, and prompts for operations, marketing, support, reporting, and internal tooling use cases. It helps teams identify repeatable workflows before they build brittle automation.
+## Outcome
+
+A repeatable process for moving from manual workflow to reviewed automation without hiding approvals or data access.
+
+## Best For
+
+Operations, marketing, support, and internal tooling teams.
+
+## What Gets Installed
+
+- Shared agent instructions: `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`
+- Reusable skills for OpenDock/OMA, Codex, and Claude Code
+- A Cursor project rule scoped to this dock
+- Role-specific reference files and prompt templates
+
+## First Run
+
+`opendock install opendock/ai-automation@1.0.0`
+
+After installation, open `README.md` in the target project and follow the first three steps.
+
+## Pair With
+
+- opendock/mcp-safe
+- opendock/agent-safety
+- opendock/repo-context

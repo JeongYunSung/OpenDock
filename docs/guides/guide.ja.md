@@ -139,8 +139,16 @@ install:
         - .codex/**
         - .claude/**
       exclude:
-        - "**/*.log"
+       - "**/*.log"
 ```
+
+## Example Docks
+
+`examples/` の workspace examples は install 可能な payload として扱います。
+tool dock 以外は `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、`README.md` と、
+`.agents/skills/`、`.codex/skills/`、`.claude/skills/`、`.cursor/rules/`
+配下の provider-specific files を一緒に入れます。AI agent が project context
+をすぐ読める状態を作るためです。
 
 ## Deploy
 

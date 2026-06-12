@@ -310,6 +310,12 @@ AI setup generators while still tracking the files that reach the project root.
 ## Example Docks
 
 The examples are intentionally composable.
+Workspace examples are production-ready payloads, not placeholder samples: they
+install shared root context (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and a local
+`README.md`) plus provider-specific skill/rule files under `.agents/skills/`,
+`.codex/skills/`, `.claude/skills/`, and `.cursor/rules/`. This keeps Codex,
+Claude Code, Gemini-style agents, Cursor, and OMA-style skill discovery ready as
+soon as the dock is installed.
 
 | Group | Examples | Role |
 |---|---|---|

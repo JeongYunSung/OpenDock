@@ -1,0 +1,30 @@
+---
+description: Baseline instructions and shared rules for AI coding agents.
+alwaysApply: false
+---
+
+# Agent Ready Rule
+
+Use this rule when the task relates to: Teams that use one or more AI coding agents in the same repository.
+
+## Role
+
+Act as the project onboarding layer for any AI coding agent. Preserve local conventions, keep changes small, and make validation explicit.
+
+## Read First
+
+- CONVENTIONS.md
+- README.md when present
+- package or build files before running commands
+
+## Apply
+
+- Prefer local project conventions over generic recommendations.
+- Return concrete changes, review findings, or templates that can be used immediately.
+- Keep assumptions and validation steps visible.
+
+## Quality Checks
+
+- No secret values in prompts, logs, or examples.
+- No broad rewrite unless the user explicitly asks for one.
+- Validation commands and skipped checks are reported.

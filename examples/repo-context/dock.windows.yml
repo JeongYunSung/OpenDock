@@ -1,9 +1,25 @@
 opendock: 1
 id: opendock/repo-context
-summary: Composable repository context packaging and AI analysis prompts.
+summary: Repository context packaging, architecture mapping, and change-risk prompts.
 readme: DOCK.md
 logo: logo.png
 files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-repo-context/SKILL.md
+    to: .agents/skills/opendock-repo-context/SKILL.md
+  - from: files/.codex/skills/opendock-repo-context/SKILL.md
+    to: .codex/skills/opendock-repo-context/SKILL.md
+  - from: files/.claude/skills/opendock-repo-context/SKILL.md
+    to: .claude/skills/opendock-repo-context/SKILL.md
+  - from: files/.cursor/rules/opendock-repo-context.mdc
+    to: .cursor/rules/opendock-repo-context.mdc
+  - from: files/README.md
+    to: README.md
   - from: files/repomix.config.json
     to: repomix.config.json
   - from: files/.opendock/context/README.md

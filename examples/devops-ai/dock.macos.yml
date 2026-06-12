@@ -1,7 +1,6 @@
 opendock: 1
 id: opendock/devops-ai
-summary: Composable DevOps workspace for CI/CD, deployment, incidents, and
-  secrets policy.
+summary: CI/CD, deployment, incident, and secrets policy guidance for AI-assisted operations.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -9,6 +8,20 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-devops-ai/SKILL.md
+    to: .agents/skills/opendock-devops-ai/SKILL.md
+  - from: files/.codex/skills/opendock-devops-ai/SKILL.md
+    to: .codex/skills/opendock-devops-ai/SKILL.md
+  - from: files/.claude/skills/opendock-devops-ai/SKILL.md
+    to: .claude/skills/opendock-devops-ai/SKILL.md
+  - from: files/.cursor/rules/opendock-devops-ai.mdc
+    to: .cursor/rules/opendock-devops-ai.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/CI_CD.md
     to: CI_CD.md
   - from: files/DEPLOYMENT_RUNBOOK.md
@@ -17,13 +30,19 @@ files:
     to: INCIDENT_RUNBOOK.md
   - from: files/SECRETS_POLICY.md
     to: SECRETS_POLICY.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md
 doctor:
   - id: agents-md
     check: test -f AGENTS.md
+  - id: claude-md
+    check: test -f CLAUDE.md
+  - id: gemini-md
+    check: test -f GEMINI.md
+  - id: codex-skill
+    check: test -f .codex/skills/opendock-devops-ai/SKILL.md
+  - id: claude-skill
+    check: test -f .claude/skills/opendock-devops-ai/SKILL.md
+  - id: cursor-rule
+    check: test -f .cursor/rules/opendock-devops-ai.mdc
   - id: ci-cd-md
     check: test -f CI_CD.md
   - id: deployment-runbook-md

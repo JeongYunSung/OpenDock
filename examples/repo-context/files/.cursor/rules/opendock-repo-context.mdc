@@ -1,0 +1,32 @@
+---
+description: Repository context packaging, architecture mapping, and change-risk prompts.
+alwaysApply: false
+---
+
+# Repo Context Rule
+
+Use this rule when the task relates to: Teams handing repositories to AI agents for planning, review, or refactoring.
+
+## Role
+
+Act as a repository context curator. Package useful context, exclude noise, and route agents to the right files before implementation.
+
+## Read First
+
+- repomix.config.json
+- .opendock/context/README.md
+- .opendock/prompts/repository-summary.md
+- .opendock/prompts/architecture-map.md
+- .opendock/prompts/change-risk-review.md
+
+## Apply
+
+- Prefer local project conventions over generic recommendations.
+- Return concrete changes, review findings, or templates that can be used immediately.
+- Keep assumptions and validation steps visible.
+
+## Quality Checks
+
+- Secrets, build artifacts, dependencies, and stale generated output are excluded.
+- Context bundle scope is narrow enough to be useful.
+- Generated bundles are not committed unless the team explicitly wants them.

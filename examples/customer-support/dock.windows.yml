@@ -1,7 +1,6 @@
 opendock: 1
 id: opendock/customer-support
-summary: Composable support workspace for FAQ, ticket triage, macros, and
-  escalation rules.
+summary: Support playbooks, FAQ structure, ticket triage, escalation, and reusable response prompts.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -9,6 +8,20 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-customer-support/SKILL.md
+    to: .agents/skills/opendock-customer-support/SKILL.md
+  - from: files/.codex/skills/opendock-customer-support/SKILL.md
+    to: .codex/skills/opendock-customer-support/SKILL.md
+  - from: files/.claude/skills/opendock-customer-support/SKILL.md
+    to: .claude/skills/opendock-customer-support/SKILL.md
+  - from: files/.cursor/rules/opendock-customer-support.mdc
+    to: .cursor/rules/opendock-customer-support.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/SUPPORT_PLAYBOOK.md
     to: SUPPORT_PLAYBOOK.md
   - from: files/FAQ.md
@@ -17,7 +30,3 @@ files:
     to: TICKET_TRIAGE.md
   - from: files/ESCALATION.md
     to: ESCALATION.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md

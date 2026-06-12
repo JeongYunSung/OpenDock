@@ -1,6 +1,6 @@
 opendock: 1
 id: opendock/backend-ai
-summary: Composable AI workspace for backend API, database, security, and testing work.
+summary: Backend API, database, security, and testing guidance for AI-assisted engineering.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -8,6 +8,20 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-backend-ai/SKILL.md
+    to: .agents/skills/opendock-backend-ai/SKILL.md
+  - from: files/.codex/skills/opendock-backend-ai/SKILL.md
+    to: .codex/skills/opendock-backend-ai/SKILL.md
+  - from: files/.claude/skills/opendock-backend-ai/SKILL.md
+    to: .claude/skills/opendock-backend-ai/SKILL.md
+  - from: files/.cursor/rules/opendock-backend-ai.mdc
+    to: .cursor/rules/opendock-backend-ai.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/API_DESIGN.md
     to: API_DESIGN.md
   - from: files/DATABASE_GUIDE.md
@@ -16,7 +30,3 @@ files:
     to: SECURITY_CHECKLIST.md
   - from: files/TESTING.md
     to: TESTING.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md

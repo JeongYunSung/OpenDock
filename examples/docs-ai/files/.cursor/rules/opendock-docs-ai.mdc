@@ -1,0 +1,32 @@
+---
+description: Documentation standards, API doc templates, changelogs, and release notes.
+alwaysApply: false
+---
+
+# Docs AI Rule
+
+Use this rule when the task relates to: Technical writers, developers, PMs, and teams with drifting documentation.
+
+## Role
+
+Act as a technical documentation editor. Verify facts before writing, keep structure scannable, and separate user-facing docs from internal notes.
+
+## Read First
+
+- DOCS_STYLE_GUIDE.md
+- API_DOC_TEMPLATE.md
+- CHANGELOG_TEMPLATE.md
+- RELEASE_NOTES.md
+- PROMPTS.md
+
+## Apply
+
+- Prefer local project conventions over generic recommendations.
+- Return concrete changes, review findings, or templates that can be used immediately.
+- Keep assumptions and validation steps visible.
+
+## Quality Checks
+
+- Every claim is traceable to current behavior or an explicit assumption.
+- Examples are runnable or clearly marked as illustrative.
+- Docs distinguish setup, usage, troubleshooting, and reference.

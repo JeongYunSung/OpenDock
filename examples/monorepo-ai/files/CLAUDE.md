@@ -1,11 +1,25 @@
-# Claude Code Instructions
+# Monorepo AI Claude Code Guidance
 
-Use this workspace as a monorepo ai workspace.
+Claude Code should use this dock as persistent project memory for: Teams maintaining multi-package repositories or platform monorepos.
 
-Read these files before making recommendations:
+## Load Order
 
-- `WORKSPACE_MAP.md`
-- `PACKAGE_BOUNDARIES.md`
-- `CHANGE_IMPACT.md`
+1. Read AGENTS.md for the shared operating contract.
+2. Read this file for Claude-specific behavior.
+3. Use /opendock-monorepo-ai when the task matches this dock and the skill is available.
+4. Read the dock reference files only when they are relevant to the current task.
 
-Keep output practical, structured, and easy for a teammate to reuse.
+## Claude-Specific Rules
+
+- Keep CLAUDE.md concise; move repeatable procedures into .claude/skills/opendock-monorepo-ai/SKILL.md.
+- Before editing, summarize which project files and dock files are relevant.
+- Do not treat this file as a hard safety gate. If an action must be blocked, ask the user to add an explicit hook or policy.
+- If instructions conflict, follow the user's latest request and then the nearest project instruction file.
+
+## Reference Files
+
+- WORKSPACE_MAP.md
+- PACKAGE_BOUNDARIES.md
+- CHANGE_IMPACT.md
+- BUILD_CACHE.md
+- PROMPTS.md

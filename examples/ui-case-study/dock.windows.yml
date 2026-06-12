@@ -1,6 +1,6 @@
 opendock: 1
 id: opendock/ui-case-study
-summary: Composable AI workspace for portfolio-ready UI and UX case studies.
+summary: Portfolio case study templates for problem, process, decision rationale, and impact.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -8,13 +8,23 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-ui-case-study/SKILL.md
+    to: .agents/skills/opendock-ui-case-study/SKILL.md
+  - from: files/.codex/skills/opendock-ui-case-study/SKILL.md
+    to: .codex/skills/opendock-ui-case-study/SKILL.md
+  - from: files/.claude/skills/opendock-ui-case-study/SKILL.md
+    to: .claude/skills/opendock-ui-case-study/SKILL.md
+  - from: files/.cursor/rules/opendock-ui-case-study.mdc
+    to: .cursor/rules/opendock-ui-case-study.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/CASE_STUDY_TEMPLATE.md
     to: CASE_STUDY_TEMPLATE.md
   - from: files/PROBLEM_DEFINITION.md
     to: PROBLEM_DEFINITION.md
   - from: files/IMPACT_MEASUREMENT.md
     to: IMPACT_MEASUREMENT.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md

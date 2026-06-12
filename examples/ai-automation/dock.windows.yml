@@ -1,6 +1,6 @@
 opendock: 1
 id: opendock/ai-automation
-summary: Composable AI workspace for internal automation and workflow design.
+summary: A practical workspace for mapping and designing safe internal automations.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -8,13 +8,23 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-ai-automation/SKILL.md
+    to: .agents/skills/opendock-ai-automation/SKILL.md
+  - from: files/.codex/skills/opendock-ai-automation/SKILL.md
+    to: .codex/skills/opendock-ai-automation/SKILL.md
+  - from: files/.claude/skills/opendock-ai-automation/SKILL.md
+    to: .claude/skills/opendock-ai-automation/SKILL.md
+  - from: files/.cursor/rules/opendock-ai-automation.mdc
+    to: .cursor/rules/opendock-ai-automation.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/AUTOMATION_MAP.md
     to: AUTOMATION_MAP.md
   - from: files/WORKFLOW_LIBRARY.md
     to: WORKFLOW_LIBRARY.md
   - from: files/MCP_GUIDE.md
     to: MCP_GUIDE.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md

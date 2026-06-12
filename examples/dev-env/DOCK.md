@@ -1,7 +1,30 @@
 # Dev Env
 
-Add project-local tool version and validation task references.
+Project-local runtime versions and validation task references for agents.
 
-This dock adds a `mise.toml` with common runtime pins and repeatable task names for install, lint, test, build, and doctor. It does not install mise automatically.
+## Outcome
 
-Combine it with tool docks and role docks when agents need an explicit validation surface before editing code.
+A visible environment contract that tells agents which runtimes and validation tasks to prefer.
+
+## Best For
+
+Developers and teams that want AI agents to use the same local commands as humans.
+
+## What Gets Installed
+
+- Shared agent instructions: `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`
+- Reusable skills for OpenDock/OMA, Codex, and Claude Code
+- A Cursor project rule scoped to this dock
+- Role-specific reference files and prompt templates
+
+## First Run
+
+`opendock install opendock/dev-env@1.0.0`
+
+After installation, open `README.md` in the target project and follow the first three steps.
+
+## Pair With
+
+- opendock/agent-ready
+- opendock/frontend-ai
+- opendock/backend-ai

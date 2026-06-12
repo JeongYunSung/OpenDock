@@ -1,7 +1,6 @@
 opendock: 1
 id: opendock/qa-engineer
-summary: Composable QA workspace for test planning, regression review,
-  accessibility, and bug reports.
+summary: Test planning, regression, bug report, accessibility, and performance review templates.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -9,6 +8,20 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-qa-engineer/SKILL.md
+    to: .agents/skills/opendock-qa-engineer/SKILL.md
+  - from: files/.codex/skills/opendock-qa-engineer/SKILL.md
+    to: .codex/skills/opendock-qa-engineer/SKILL.md
+  - from: files/.claude/skills/opendock-qa-engineer/SKILL.md
+    to: .claude/skills/opendock-qa-engineer/SKILL.md
+  - from: files/.cursor/rules/opendock-qa-engineer.mdc
+    to: .cursor/rules/opendock-qa-engineer.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/TEST_PLAN.md
     to: TEST_PLAN.md
   - from: files/REGRESSION_CHECKLIST.md
@@ -19,7 +32,3 @@ files:
     to: ACCESSIBILITY_CHECKLIST.md
   - from: files/PERFORMANCE_CHECKLIST.md
     to: PERFORMANCE_CHECKLIST.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md

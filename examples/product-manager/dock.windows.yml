@@ -1,6 +1,6 @@
 opendock: 1
 id: opendock/product-manager
-summary: Composable AI workspace for PRDs, user stories, roadmaps, and releases.
+summary: PRD, user story, roadmap, release note, and decision template workspace.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -8,6 +8,20 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-product-manager/SKILL.md
+    to: .agents/skills/opendock-product-manager/SKILL.md
+  - from: files/.codex/skills/opendock-product-manager/SKILL.md
+    to: .codex/skills/opendock-product-manager/SKILL.md
+  - from: files/.claude/skills/opendock-product-manager/SKILL.md
+    to: .claude/skills/opendock-product-manager/SKILL.md
+  - from: files/.cursor/rules/opendock-product-manager.mdc
+    to: .cursor/rules/opendock-product-manager.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/PRD.md
     to: PRD.md
   - from: files/USER_STORY.md
@@ -16,7 +30,3 @@ files:
     to: ROADMAP.md
   - from: files/RELEASE_NOTES.md
     to: RELEASE_NOTES.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md

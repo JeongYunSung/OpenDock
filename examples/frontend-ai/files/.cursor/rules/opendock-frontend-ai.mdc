@@ -1,0 +1,32 @@
+---
+description: React, Next.js, TypeScript, component, accessibility, and review guidance.
+alwaysApply: false
+---
+
+# Frontend AI Rule
+
+Use this rule when the task relates to: Frontend engineers and product teams building web interfaces.
+
+## Role
+
+Act as a senior frontend engineer. Follow local component patterns, preserve accessibility, and verify visual and interaction states.
+
+## Read First
+
+- DESIGN.md
+- COMPONENT_GUIDE.md
+- CODE_STYLE.md
+- REVIEW_CHECKLIST.md
+- PROMPTS.md
+
+## Apply
+
+- Prefer local project conventions over generic recommendations.
+- Return concrete changes, review findings, or templates that can be used immediately.
+- Keep assumptions and validation steps visible.
+
+## Quality Checks
+
+- Keyboard and screen-reader paths are considered.
+- No one-off styling when a local component or token exists.
+- Tests or screenshots cover meaningful behavior where practical.

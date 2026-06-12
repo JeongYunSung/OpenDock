@@ -1,7 +1,6 @@
 opendock: 1
 id: opendock/monorepo-ai
-summary: Composable monorepo workspace for package boundaries, workspace maps,
-  and change impact review.
+summary: Workspace maps, package boundaries, change impact review, and build cache notes.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -9,6 +8,20 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-monorepo-ai/SKILL.md
+    to: .agents/skills/opendock-monorepo-ai/SKILL.md
+  - from: files/.codex/skills/opendock-monorepo-ai/SKILL.md
+    to: .codex/skills/opendock-monorepo-ai/SKILL.md
+  - from: files/.claude/skills/opendock-monorepo-ai/SKILL.md
+    to: .claude/skills/opendock-monorepo-ai/SKILL.md
+  - from: files/.cursor/rules/opendock-monorepo-ai.mdc
+    to: .cursor/rules/opendock-monorepo-ai.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/WORKSPACE_MAP.md
     to: WORKSPACE_MAP.md
   - from: files/PACKAGE_BOUNDARIES.md
@@ -17,7 +30,3 @@ files:
     to: CHANGE_IMPACT.md
   - from: files/BUILD_CACHE.md
     to: BUILD_CACHE.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md

@@ -1,9 +1,25 @@
 opendock: 1
 id: opendock/mcp-safe
-summary: Composable security-first MCP configuration references.
+summary: Security-first MCP inventory, config examples, and review checklists.
 readme: DOCK.md
 logo: logo.png
 files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-mcp-safe/SKILL.md
+    to: .agents/skills/opendock-mcp-safe/SKILL.md
+  - from: files/.codex/skills/opendock-mcp-safe/SKILL.md
+    to: .codex/skills/opendock-mcp-safe/SKILL.md
+  - from: files/.claude/skills/opendock-mcp-safe/SKILL.md
+    to: .claude/skills/opendock-mcp-safe/SKILL.md
+  - from: files/.cursor/rules/opendock-mcp-safe.mdc
+    to: .cursor/rules/opendock-mcp-safe.mdc
+  - from: files/README.md
+    to: README.md
   - from: files/MCP.md
     to: MCP.md
   - from: files/.opendock/mcp/approved-servers.yml

@@ -1,7 +1,6 @@
 opendock: 1
 id: opendock/recruiter-ai
-summary: Composable recruiting workspace for job descriptions, interviews,
-  scorecards, and outreach.
+summary: Job description, interview guide, scorecard, and candidate outreach workspace.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -9,6 +8,20 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-recruiter-ai/SKILL.md
+    to: .agents/skills/opendock-recruiter-ai/SKILL.md
+  - from: files/.codex/skills/opendock-recruiter-ai/SKILL.md
+    to: .codex/skills/opendock-recruiter-ai/SKILL.md
+  - from: files/.claude/skills/opendock-recruiter-ai/SKILL.md
+    to: .claude/skills/opendock-recruiter-ai/SKILL.md
+  - from: files/.cursor/rules/opendock-recruiter-ai.mdc
+    to: .cursor/rules/opendock-recruiter-ai.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/JOB_DESCRIPTION.md
     to: JOB_DESCRIPTION.md
   - from: files/INTERVIEW_GUIDE.md
@@ -17,13 +30,19 @@ files:
     to: SCORECARD.md
   - from: files/CANDIDATE_OUTREACH.md
     to: CANDIDATE_OUTREACH.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md
 doctor:
   - id: agents-md
     check: test -f AGENTS.md
+  - id: claude-md
+    check: test -f CLAUDE.md
+  - id: gemini-md
+    check: test -f GEMINI.md
+  - id: codex-skill
+    check: test -f .codex/skills/opendock-recruiter-ai/SKILL.md
+  - id: claude-skill
+    check: test -f .claude/skills/opendock-recruiter-ai/SKILL.md
+  - id: cursor-rule
+    check: test -f .cursor/rules/opendock-recruiter-ai.mdc
   - id: job-description-md
     check: test -f JOB_DESCRIPTION.md
   - id: interview-guide-md

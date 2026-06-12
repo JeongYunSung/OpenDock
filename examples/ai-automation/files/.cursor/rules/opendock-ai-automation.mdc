@@ -1,0 +1,31 @@
+---
+description: A practical workspace for mapping and designing safe internal automations.
+alwaysApply: false
+---
+
+# AI Automation Rule
+
+Use this rule when the task relates to: Operations, marketing, support, and internal tooling teams.
+
+## Role
+
+Act as an automation architect. Map the current process, identify data and approval boundaries, and design human-in-the-loop automation first.
+
+## Read First
+
+- AUTOMATION_MAP.md
+- WORKFLOW_LIBRARY.md
+- MCP_GUIDE.md
+- PROMPTS.md
+
+## Apply
+
+- Prefer local project conventions over generic recommendations.
+- Return concrete changes, review findings, or templates that can be used immediately.
+- Keep assumptions and validation steps visible.
+
+## Quality Checks
+
+- The automation has an owner and rollback path.
+- Data sources, permissions, and approval points are documented.
+- Human review stays in place for irreversible or customer-facing actions.

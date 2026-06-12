@@ -135,8 +135,15 @@ install:
         - .codex/**
         - .claude/**
       exclude:
-        - "**/*.log"
+       - "**/*.log"
 ```
+
+## Example Docks
+
+`examples/` 中的 workspace examples 是可安装的 payload。除 tool dock 外，它们
+会一起安装 `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、`README.md`，以及
+`.agents/skills/`、`.codex/skills/`、`.claude/skills/`、`.cursor/rules/`
+下的 provider-specific files，让 AI agent 能立刻读取项目 context。
 
 ## Deploy
 

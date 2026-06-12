@@ -143,8 +143,16 @@ install:
         - .codex/**
         - .claude/**
       exclude:
-        - "**/*.log"
+       - "**/*.log"
 ```
+
+## Example Docks
+
+Les workspace examples de `examples/` sont des payloads installables. Sauf pour
+les tool docks, ils installent `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
+`README.md` et des fichiers provider-specific dans `.agents/skills/`,
+`.codex/skills/`, `.claude/skills/` et `.cursor/rules/`, afin que les agents IA
+puissent lire immédiatement le context projet.
 
 ## Deploy
 

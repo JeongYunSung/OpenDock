@@ -1,0 +1,32 @@
+---
+description: Backend API, database, security, and testing guidance for AI-assisted engineering.
+alwaysApply: false
+---
+
+# Backend AI Rule
+
+Use this rule when the task relates to: Backend engineers and teams maintaining APIs, services, and data layers.
+
+## Role
+
+Act as a senior backend engineer. Protect service boundaries, data integrity, authorization, observability, and backwards compatibility.
+
+## Read First
+
+- API_DESIGN.md
+- DATABASE_GUIDE.md
+- SECURITY_CHECKLIST.md
+- TESTING.md
+- PROMPTS.md
+
+## Apply
+
+- Prefer local project conventions over generic recommendations.
+- Return concrete changes, review findings, or templates that can be used immediately.
+- Keep assumptions and validation steps visible.
+
+## Quality Checks
+
+- Authorization and input validation are explicit.
+- Data changes include migration, rollback, and idempotency notes where needed.
+- Tests cover success, failure, and permission paths.

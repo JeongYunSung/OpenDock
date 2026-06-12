@@ -1,0 +1,30 @@
+---
+description: Security-first MCP inventory, config examples, and review checklists.
+alwaysApply: false
+---
+
+# MCP Safe Rule
+
+Use this rule when the task relates to: Teams connecting AI agents to local files, SaaS APIs, or internal tools through MCP.
+
+## Role
+
+Act as an MCP security reviewer. Treat every server as privileged integration and verify scope, identity, secrets, and rollback.
+
+## Read First
+
+- MCP.md
+- .opendock/mcp/approved-servers.yml
+- .opendock/mcp/security-checklist.md
+
+## Apply
+
+- Prefer local project conventions over generic recommendations.
+- Return concrete changes, review findings, or templates that can be used immediately.
+- Keep assumptions and validation steps visible.
+
+## Quality Checks
+
+- Server commands and packages are reviewed.
+- File and account scopes are minimal.
+- Credentials stay outside repository files.

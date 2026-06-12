@@ -1,6 +1,6 @@
 opendock: 1
 id: opendock/agent-ready
-summary: Composable baseline instructions for common AI coding agents.
+summary: Baseline instructions and shared rules for AI coding agents.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -10,6 +10,16 @@ files:
     to: CLAUDE.md
   - from: files/GEMINI.md
     to: GEMINI.md
+  - from: files/.agents/skills/opendock-agent-ready/SKILL.md
+    to: .agents/skills/opendock-agent-ready/SKILL.md
+  - from: files/.codex/skills/opendock-agent-ready/SKILL.md
+    to: .codex/skills/opendock-agent-ready/SKILL.md
+  - from: files/.claude/skills/opendock-agent-ready/SKILL.md
+    to: .claude/skills/opendock-agent-ready/SKILL.md
+  - from: files/.cursor/rules/opendock-agent-ready.mdc
+    to: .cursor/rules/opendock-agent-ready.mdc
+  - from: files/README.md
+    to: README.md
   - from: files/CONVENTIONS.md
     to: CONVENTIONS.md
   - from: files/.github/copilot-instructions.md
@@ -35,6 +45,12 @@ doctor:
     check: test -f CLAUDE.md
   - id: gemini-md
     check: test -f GEMINI.md
+  - id: codex-skill
+    check: test -f .codex/skills/opendock-agent-ready/SKILL.md
+  - id: claude-skill
+    check: test -f .claude/skills/opendock-agent-ready/SKILL.md
+  - id: cursor-rule
+    check: test -f .cursor/rules/opendock-agent-ready.mdc
   - id: copilot-instructions
     check: test -f .github/copilot-instructions.md
   - id: cursor-rules

@@ -1,14 +1,42 @@
 opendock: 1
 id: opendock/dev-env
-summary: Composable project-local tool versions and validation tasks.
+summary: Project-local runtime versions and validation task references for agents.
 readme: DOCK.md
 logo: logo.png
 files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-dev-env/SKILL.md
+    to: .agents/skills/opendock-dev-env/SKILL.md
+  - from: files/.codex/skills/opendock-dev-env/SKILL.md
+    to: .codex/skills/opendock-dev-env/SKILL.md
+  - from: files/.claude/skills/opendock-dev-env/SKILL.md
+    to: .claude/skills/opendock-dev-env/SKILL.md
+  - from: files/.cursor/rules/opendock-dev-env.mdc
+    to: .cursor/rules/opendock-dev-env.mdc
+  - from: files/README.md
+    to: README.md
   - from: files/mise.toml
     to: mise.toml
   - from: files/.opendock/dev-env.md
     to: .opendock/dev-env.md
 doctor:
+  - id: agents-md
+    check: test -f AGENTS.md
+  - id: claude-md
+    check: test -f CLAUDE.md
+  - id: gemini-md
+    check: test -f GEMINI.md
+  - id: codex-skill
+    check: test -f .codex/skills/opendock-dev-env/SKILL.md
+  - id: claude-skill
+    check: test -f .claude/skills/opendock-dev-env/SKILL.md
+  - id: cursor-rule
+    check: test -f .cursor/rules/opendock-dev-env.mdc
   - id: mise-config
     check: test -f mise.toml
   - id: dev-env-guide

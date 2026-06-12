@@ -150,6 +150,20 @@ doctor:
 dock-private workdir で実行する task が事前に input file を必要とする場合は
 `workdir.files` を使います。project root に書き込む file には `files` を使います。
 
+## Example Docks
+
+Workspace examples は空のサンプルではなく、そのまま使える payload です。
+`AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、local `README.md` に加えて、
+`.agents/skills/`、`.codex/skills/`、`.claude/skills/`、`.cursor/rules/`
+配下の provider-specific skill/rule files をインストールします。Codex、
+Claude Code、Gemini 系 agent、Cursor、OMA-style skill discovery が同じ
+project context をすぐ読める状態になります。
+
+Tool docks は `codex`、`claude-code`、`oma` です。Outcome docks は
+`designer-ai`、`product-manager`、`frontend-ai` などの役割別 workspace を
+追加します。Utility docks は `agent-ready`、`agent-safety`、`repo-context`
+などを組み合わせ用の harness として追加します。
+
 詳しい manifest reference は [docs/guides/guide.ja.md](./docs/guides/guide.ja.md) を参照してください。
 
 ## Development

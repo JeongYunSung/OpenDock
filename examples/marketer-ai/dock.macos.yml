@@ -1,7 +1,6 @@
 opendock: 1
 id: opendock/marketer-ai
-summary: Composable marketing workspace for campaigns, content planning, SEO,
-  and ad experiments.
+summary: Campaign briefs, content calendars, SEO briefs, and ad experiment planning.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -9,6 +8,20 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-marketer-ai/SKILL.md
+    to: .agents/skills/opendock-marketer-ai/SKILL.md
+  - from: files/.codex/skills/opendock-marketer-ai/SKILL.md
+    to: .codex/skills/opendock-marketer-ai/SKILL.md
+  - from: files/.claude/skills/opendock-marketer-ai/SKILL.md
+    to: .claude/skills/opendock-marketer-ai/SKILL.md
+  - from: files/.cursor/rules/opendock-marketer-ai.mdc
+    to: .cursor/rules/opendock-marketer-ai.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/CAMPAIGN_BRIEF.md
     to: CAMPAIGN_BRIEF.md
   - from: files/CONTENT_CALENDAR.md
@@ -17,13 +30,19 @@ files:
     to: SEO_BRIEF.md
   - from: files/AD_EXPERIMENTS.md
     to: AD_EXPERIMENTS.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md
 doctor:
   - id: agents-md
     check: test -f AGENTS.md
+  - id: claude-md
+    check: test -f CLAUDE.md
+  - id: gemini-md
+    check: test -f GEMINI.md
+  - id: codex-skill
+    check: test -f .codex/skills/opendock-marketer-ai/SKILL.md
+  - id: claude-skill
+    check: test -f .claude/skills/opendock-marketer-ai/SKILL.md
+  - id: cursor-rule
+    check: test -f .cursor/rules/opendock-marketer-ai.mdc
   - id: campaign-brief-md
     check: test -f CAMPAIGN_BRIEF.md
   - id: content-calendar-md

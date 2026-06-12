@@ -1,9 +1,25 @@
 opendock: 1
 id: opendock/agent-safety
-summary: Composable safety rails for AI-generated changes.
+summary: Review rails, PR structure, and secret-scan defaults for AI-generated changes.
 readme: DOCK.md
 logo: logo.png
 files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-agent-safety/SKILL.md
+    to: .agents/skills/opendock-agent-safety/SKILL.md
+  - from: files/.codex/skills/opendock-agent-safety/SKILL.md
+    to: .codex/skills/opendock-agent-safety/SKILL.md
+  - from: files/.claude/skills/opendock-agent-safety/SKILL.md
+    to: .claude/skills/opendock-agent-safety/SKILL.md
+  - from: files/.cursor/rules/opendock-agent-safety.mdc
+    to: .cursor/rules/opendock-agent-safety.mdc
+  - from: files/README.md
+    to: README.md
   - from: files/.github/pull_request_template.md
     to: .github/pull_request_template.md
   - from: files/.github/ISSUE_TEMPLATE/bug_report.md
@@ -19,6 +35,18 @@ files:
   - from: files/.opendock/checklists/security-review.md
     to: .opendock/checklists/security-review.md
 doctor:
+  - id: agents-md
+    check: test -f AGENTS.md
+  - id: claude-md
+    check: test -f CLAUDE.md
+  - id: gemini-md
+    check: test -f GEMINI.md
+  - id: codex-skill
+    check: test -f .codex/skills/opendock-agent-safety/SKILL.md
+  - id: claude-skill
+    check: test -f .claude/skills/opendock-agent-safety/SKILL.md
+  - id: cursor-rule
+    check: test -f .cursor/rules/opendock-agent-safety.mdc
   - id: pr-template
     check: test -f .github/pull_request_template.md
   - id: gitleaks-config

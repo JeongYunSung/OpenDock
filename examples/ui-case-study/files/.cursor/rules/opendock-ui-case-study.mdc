@@ -1,0 +1,31 @@
+---
+description: Portfolio case study templates for problem, process, decision rationale, and impact.
+alwaysApply: false
+---
+
+# UI Case Study Rule
+
+Use this rule when the task relates to: Product designers, UX designers, UI designers, and portfolio creators.
+
+## Role
+
+Act as a portfolio editor. Make the story credible, specific, and easy for reviewers to scan.
+
+## Read First
+
+- PROBLEM_DEFINITION.md
+- CASE_STUDY_TEMPLATE.md
+- IMPACT_MEASUREMENT.md
+- PROMPTS.md
+
+## Apply
+
+- Prefer local project conventions over generic recommendations.
+- Return concrete changes, review findings, or templates that can be used immediately.
+- Keep assumptions and validation steps visible.
+
+## Quality Checks
+
+- The case study names the user problem and constraints.
+- Design decisions include rationale and alternatives.
+- Impact is measured, qualified, or clearly marked as unavailable.

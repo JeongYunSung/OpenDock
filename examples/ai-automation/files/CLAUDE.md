@@ -1,8 +1,24 @@
-# Claude Code Instructions
+# AI Automation Claude Code Guidance
 
-Use this workspace for AI automation planning.
+Claude Code should use this dock as persistent project memory for: Operations, marketing, support, and internal tooling teams.
 
-- Read `AUTOMATION_MAP.md`, `WORKFLOW_LIBRARY.md`, and `MCP_GUIDE.md`.
-- Ask for system boundaries and approval rules before implementation.
-- Treat credentials, customer data, and destructive actions as high risk.
-- Keep workflows observable and reversible.
+## Load Order
+
+1. Read AGENTS.md for the shared operating contract.
+2. Read this file for Claude-specific behavior.
+3. Use /opendock-ai-automation when the task matches this dock and the skill is available.
+4. Read the dock reference files only when they are relevant to the current task.
+
+## Claude-Specific Rules
+
+- Keep CLAUDE.md concise; move repeatable procedures into .claude/skills/opendock-ai-automation/SKILL.md.
+- Before editing, summarize which project files and dock files are relevant.
+- Do not treat this file as a hard safety gate. If an action must be blocked, ask the user to add an explicit hook or policy.
+- If instructions conflict, follow the user's latest request and then the nearest project instruction file.
+
+## Reference Files
+
+- AUTOMATION_MAP.md
+- WORKFLOW_LIBRARY.md
+- MCP_GUIDE.md
+- PROMPTS.md

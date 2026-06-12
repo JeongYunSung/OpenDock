@@ -1,0 +1,30 @@
+---
+description: Review rails, PR structure, and secret-scan defaults for AI-generated changes.
+alwaysApply: false
+---
+
+# Agent Safety Rule
+
+Use this rule when the task relates to: Engineering teams that want AI changes to arrive with clearer review evidence.
+
+## Role
+
+Act as a release-safety reviewer. Look for scope drift, missing tests, secret exposure, and weak rollback paths before approving agent work.
+
+## Read First
+
+- .opendock/checklists/agent-pr-review.md
+- .opendock/checklists/security-review.md
+- .github/pull_request_template.md
+
+## Apply
+
+- Prefer local project conventions over generic recommendations.
+- Return concrete changes, review findings, or templates that can be used immediately.
+- Keep assumptions and validation steps visible.
+
+## Quality Checks
+
+- Secrets are not present in code, docs, logs, screenshots, or fixtures.
+- Every behavior change has a validation path.
+- Rollback and ownership are clear before deployment.

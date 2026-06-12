@@ -1,9 +1,25 @@
 opendock: 1
 id: opendock/agent-safety
-summary: Composable safety rails for AI-generated changes.
+summary: Review rails, PR structure, and secret-scan defaults for AI-generated changes.
 readme: DOCK.md
 logo: logo.png
 files:
+  - from: files/AGENTS.md
+    to: AGENTS.md
+  - from: files/CLAUDE.md
+    to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-agent-safety/SKILL.md
+    to: .agents/skills/opendock-agent-safety/SKILL.md
+  - from: files/.codex/skills/opendock-agent-safety/SKILL.md
+    to: .codex/skills/opendock-agent-safety/SKILL.md
+  - from: files/.claude/skills/opendock-agent-safety/SKILL.md
+    to: .claude/skills/opendock-agent-safety/SKILL.md
+  - from: files/.cursor/rules/opendock-agent-safety.mdc
+    to: .cursor/rules/opendock-agent-safety.mdc
+  - from: files/README.md
+    to: README.md
   - from: files/.github/pull_request_template.md
     to: .github/pull_request_template.md
   - from: files/.github/ISSUE_TEMPLATE/bug_report.md

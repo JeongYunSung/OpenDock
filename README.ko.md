@@ -297,6 +297,12 @@ root에 들어온 최종 파일을 OpenDock이 추적할 수 있게 해줍니다
 ## Example Docks
 
 예제 dock은 조합 가능성을 기준으로 정리합니다.
+workspace 예제는 빈 샘플이 아니라 바로 쓸 수 있는 payload입니다. 공통 root
+context인 `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, local `README.md`와 함께
+`.agents/skills/`, `.codex/skills/`, `.claude/skills/`, `.cursor/rules/` 아래의
+provider별 skill/rule 파일을 설치합니다. 그래서 dock 설치 직후 Codex, Claude
+Code, Gemini 계열 agent, Cursor, OMA식 skill discovery가 같은 프로젝트 context를
+읽을 수 있습니다.
 
 | 그룹 | 예제 | 역할 |
 |---|---|---|

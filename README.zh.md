@@ -148,6 +148,19 @@ doctor:
 如果 dock-private workdir 中运行的 task 需要先读取输入文件，请使用
 `workdir.files`。需要写入 project root 的文件使用 `files`。
 
+## Example Docks
+
+Workspace examples 不是空的示例，而是可以直接使用的 payload。它们会安装
+`AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、本地 `README.md`，以及
+`.agents/skills/`、`.codex/skills/`、`.claude/skills/`、`.cursor/rules/`
+下的 provider-specific skill/rule files。安装后，Codex、Claude Code、
+Gemini 类 agent、Cursor 和 OMA-style skill discovery 可以读取同一份项目
+context。
+
+Tool docks 包括 `codex`、`claude-code`、`oma`。Outcome docks 包括
+`designer-ai`、`product-manager`、`frontend-ai` 等角色 workspace。Utility
+docks 包括 `agent-ready`、`agent-safety`、`repo-context` 等可组合 harness。
+
 完整 manifest reference 见 [docs/guides/guide.zh.md](./docs/guides/guide.zh.md)。
 
 ## Development

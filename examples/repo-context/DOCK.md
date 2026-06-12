@@ -1,7 +1,30 @@
 # Repo Context
 
-Add repository context packaging and analysis prompts.
+Repository context packaging, architecture mapping, and change-risk prompts.
 
-This dock adds Repomix configuration, a context output guide, and prompts for repository summaries, architecture mapping, and change-risk review.
+## Outcome
 
-Combine it with coding or review docks when agents need repeatable project snapshots before planning, debugging, or large edits.
+Agents get repeatable repository snapshots and prompt flows instead of rediscovering the whole codebase every time.
+
+## Best For
+
+Teams handing repositories to AI agents for planning, review, or refactoring.
+
+## What Gets Installed
+
+- Shared agent instructions: `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`
+- Reusable skills for OpenDock/OMA, Codex, and Claude Code
+- A Cursor project rule scoped to this dock
+- Role-specific reference files and prompt templates
+
+## First Run
+
+`opendock install opendock/repo-context@1.0.0`
+
+After installation, open `README.md` in the target project and follow the first three steps.
+
+## Pair With
+
+- opendock/agent-ready
+- opendock/monorepo-ai
+- opendock/docs-ai

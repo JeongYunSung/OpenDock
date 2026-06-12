@@ -1,11 +1,13 @@
 # Oh My Agent
 
-Install Oh My Agent and export its generated project setup through OpenDock.
+Installs Oh My Agent, runs its project setup in the OpenDock workdir, and exports the generated agent files back to the project under OpenDock tracking.
 
-This dock declares Bun as a required runtime, installs `oh-my-agent` through an
-explicit task, seeds an OMA `model_preset: codex` config into the dock-private
-workdir, runs `oma -y install`, then runs `oma link claude codex` and exports
-generated Codex and Claude Code agent files, hooks, and skills back to the
-project through OpenDock-managed blocks and checksums.
+## Use
 
-Use it when a project should start from Oh My Agent while still letting OpenDock track the root files that were produced.
+`opendock install opendock/oma@1.0.0`
+
+## Pair With
+
+- opendock/agent-ready
+- opendock/agent-safety
+- opendock/repo-context

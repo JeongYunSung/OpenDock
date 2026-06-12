@@ -1,7 +1,6 @@
 opendock: 1
 id: opendock/docs-ai
-summary: Composable documentation workspace for README, API docs, changelogs,
-  and release notes.
+summary: Documentation standards, API doc templates, changelogs, and release notes.
 readme: DOCK.md
 logo: logo.png
 files:
@@ -9,6 +8,20 @@ files:
     to: AGENTS.md
   - from: files/CLAUDE.md
     to: CLAUDE.md
+  - from: files/GEMINI.md
+    to: GEMINI.md
+  - from: files/.agents/skills/opendock-docs-ai/SKILL.md
+    to: .agents/skills/opendock-docs-ai/SKILL.md
+  - from: files/.codex/skills/opendock-docs-ai/SKILL.md
+    to: .codex/skills/opendock-docs-ai/SKILL.md
+  - from: files/.claude/skills/opendock-docs-ai/SKILL.md
+    to: .claude/skills/opendock-docs-ai/SKILL.md
+  - from: files/.cursor/rules/opendock-docs-ai.mdc
+    to: .cursor/rules/opendock-docs-ai.mdc
+  - from: files/PROMPTS.md
+    to: PROMPTS.md
+  - from: files/README.md
+    to: README.md
   - from: files/DOCS_STYLE_GUIDE.md
     to: DOCS_STYLE_GUIDE.md
   - from: files/API_DOC_TEMPLATE.md
@@ -17,7 +30,3 @@ files:
     to: CHANGELOG_TEMPLATE.md
   - from: files/RELEASE_NOTES.md
     to: RELEASE_NOTES.md
-  - from: files/PROMPTS.md
-    to: PROMPTS.md
-  - from: files/README.md
-    to: README.md
