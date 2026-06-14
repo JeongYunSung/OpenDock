@@ -5,6 +5,18 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.17 - 2026-06-15
+
+### Changed
+
+- `opendock update --json` and `opendock uninstall --json` now return structured
+  failure payloads instead of throwing plain CLI errors.
+
+### Tests
+
+- Added JSON failure coverage for managed-file conflicts during update and
+  uninstall.
+
 ## 0.1.16 - 2026-06-15
 
 ### Added

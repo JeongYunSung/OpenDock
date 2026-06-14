@@ -126,78 +126,82 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
     .option("--json", "Print a machine-readable change report")
     .action(async (options: ChangeCommandOptions) => {
-      const platformOverride =
-        options.platform === undefined ? undefined : resolveCliPlatform(options.platform);
-      const store = new OpenDockStateStore(process.cwd());
-      if (!store.hasState()) {
-        throw new Error(".opendock/dock.lock.yml missing");
-      }
-      const installedDocks = store.readLock().docks;
-      if (installedDocks.length === 0) {
-        throw new Error("no OpenDock docks are installed in this project");
-      }
-      const updateChecks = await checkInstalledDockUpdates(installedDocks, platformOverride);
-      const updateTargets = updateChecks.filter((check) => check.updateAvailable);
-      if (updateTargets.length === 0) {
-        if (options.json === true) {
-          printJson(changeCommandResult("update", []));
-        } else {
-          console.log(terminalStyle.success("No OpenDock dock updates available."));
+      try {
+        const platformOverride =
+          options.platform === undefined ? undefined : resolveCliPlatform(options.platform);
+        const store = new OpenDockStateStore(process.cwd());
+        if (!store.hasState()) {
+          throw new Error(".opendock/dock.lock.yml missing");
         }
-        return;
-      }
-      const changeReports: JsonDockChangeReport[] = [];
-      for (const updateTarget of updateTargets) {
-        const dock = updateTarget.dock;
-        const dockRef = DockRef.parse(`${dock.id}@${updateTarget.latestVersion}`);
-        const resolved = await resolveDock(dockRef, updateTarget.platform);
-        const report = await runMaybeQuietAsync(options.json === true, () =>
-          installer.install({
-            dockRef,
-            force: options.force === true,
-            projectDir: process.cwd(),
-            runTasks: true,
-            operation: "update",
-            phase: "update",
-            platform: updateTarget.platform,
-            resolve: () => resolved,
-            live: options.json !== true,
-          }),
-        );
-        changeReports.push(
-          installChangeReport(report, {
-            fromVersion: dock.version,
-            operation: "update",
-            status:
-              dock.version === report.version && totalFileChanges(report.fileChanges) === 0
-                ? "unchanged"
-                : "updated",
-          }),
-        );
-        if (options.json === true) {
-          continue;
+        const installedDocks = store.readLock().docks;
+        if (installedDocks.length === 0) {
+          throw new Error("no OpenDock docks are installed in this project");
         }
-        if (dock.version === report.version) {
-          console.log(
-            `${terminalStyle.success("Updated")} ${terminalStyle.bold(
-              dock.id,
-            )} at latest ${terminalStyle.dim(report.version)} for ${formatPlatformName(
-              report.platform,
-            )} (${formatFileSummary(report)})`,
+        const updateChecks = await checkInstalledDockUpdates(installedDocks, platformOverride);
+        const updateTargets = updateChecks.filter((check) => check.updateAvailable);
+        if (updateTargets.length === 0) {
+          if (options.json === true) {
+            printJson(changeCommandResult("update", []));
+          } else {
+            console.log(terminalStyle.success("No OpenDock dock updates available."));
+          }
+          return;
+        }
+        const changeReports: JsonDockChangeReport[] = [];
+        for (const updateTarget of updateTargets) {
+          const dock = updateTarget.dock;
+          const dockRef = DockRef.parse(`${dock.id}@${updateTarget.latestVersion}`);
+          const resolved = await resolveDock(dockRef, updateTarget.platform);
+          const report = await runMaybeQuietAsync(options.json === true, () =>
+            installer.install({
+              dockRef,
+              force: options.force === true,
+              projectDir: process.cwd(),
+              runTasks: true,
+              operation: "update",
+              phase: "update",
+              platform: updateTarget.platform,
+              resolve: () => resolved,
+              live: options.json !== true,
+            }),
           );
-        } else {
-          console.log(
-            `${terminalStyle.success("Updated")} ${terminalStyle.bold(dock.id)}: ${terminalStyle.dim(
-              dock.version,
-            )} ${formatStepSymbol("->")} ${terminalStyle.dim(
-              report.version,
-            )} for ${formatPlatformName(report.platform)} (${formatFileSummary(report)})`,
+          changeReports.push(
+            installChangeReport(report, {
+              fromVersion: dock.version,
+              operation: "update",
+              status:
+                dock.version === report.version && totalFileChanges(report.fileChanges) === 0
+                  ? "unchanged"
+                  : "updated",
+            }),
           );
+          if (options.json === true) {
+            continue;
+          }
+          if (dock.version === report.version) {
+            console.log(
+              `${terminalStyle.success("Updated")} ${terminalStyle.bold(
+                dock.id,
+              )} at latest ${terminalStyle.dim(report.version)} for ${formatPlatformName(
+                report.platform,
+              )} (${formatFileSummary(report)})`,
+            );
+          } else {
+            console.log(
+              `${terminalStyle.success("Updated")} ${terminalStyle.bold(dock.id)}: ${terminalStyle.dim(
+                dock.version,
+              )} ${formatStepSymbol("->")} ${terminalStyle.dim(
+                report.version,
+              )} for ${formatPlatformName(report.platform)} (${formatFileSummary(report)})`,
+            );
+          }
+          printFileChanges(report);
         }
-        printFileChanges(report);
-      }
-      if (options.json === true) {
-        printJson(changeCommandResult("update", changeReports));
+        if (options.json === true) {
+          printJson(changeCommandResult("update", changeReports));
+        }
+      } catch (error) {
+        handleChangeCommandError("update", error, options.json === true);
       }
     });
 
@@ -208,30 +212,34 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--force", "Remove OpenDock-managed files even when edited managed files are detected")
     .option("--json", "Print a machine-readable change report")
     .action((dock: string, options: Pick<ChangeCommandOptions, "force" | "json">) => {
-      const report = runMaybeQuiet(options.json === true, () =>
-        installer.uninstall({
-          dockId: parseInstalledDockId(dock),
-          force: options.force === true,
-          projectDir: process.cwd(),
-        }),
-      );
-      if (options.json === true) {
-        printJson(
-          changeCommandResult("uninstall", [
-            uninstallChangeReport(report, { operation: "uninstall", status: "uninstalled" }),
-          ]),
+      try {
+        const report = runMaybeQuiet(options.json === true, () =>
+          installer.uninstall({
+            dockId: parseInstalledDockId(dock),
+            force: options.force === true,
+            projectDir: process.cwd(),
+          }),
         );
-        return;
+        if (options.json === true) {
+          printJson(
+            changeCommandResult("uninstall", [
+              uninstallChangeReport(report, { operation: "uninstall", status: "uninstalled" }),
+            ]),
+          );
+          return;
+        }
+        console.log(
+          `${terminalStyle.success("Uninstalled")} ${terminalStyle.bold(
+            report.dockId,
+          )} (${formatFileCount(report.filesDeleted, "files deleted", "deleted")}, ${formatFileCount(
+            report.filesUpdated,
+            "files updated",
+            "updated",
+          )})`,
+        );
+      } catch (error) {
+        handleChangeCommandError("uninstall", error, options.json === true);
       }
-      console.log(
-        `${terminalStyle.success("Uninstalled")} ${terminalStyle.bold(
-          report.dockId,
-        )} (${formatFileCount(report.filesDeleted, "files deleted", "deleted")}, ${formatFileCount(
-          report.filesUpdated,
-          "files updated",
-          "updated",
-        )})`,
-      );
     });
 
   program
@@ -858,6 +866,7 @@ function inferDeployPlatformFromManifestPath(
 
 type JsonChangeOperation = "install" | "uninstall" | "update";
 type JsonChangeStatus = "installed" | "unchanged" | "uninstalled" | "updated";
+type JsonCommandErrorCode = "command_failed" | "managed_file_modified";
 
 interface JsonDockUpdateCheckReport {
   currentVersion: string;
@@ -895,14 +904,26 @@ interface JsonDockChangeReport {
 interface JsonChangeCommandResult {
   operation: JsonChangeOperation;
   reports: JsonDockChangeReport[];
-  summary: {
-    created: string[];
-    deleted: string[];
-    reviewRequired: string[];
-    unchanged: string[];
-    updated: string[];
-  };
+  summary: JsonChangeSummary;
   success: true;
+}
+
+interface JsonChangeCommandFailureResult {
+  errorCode: JsonCommandErrorCode;
+  forceable: boolean;
+  message: string;
+  operation: JsonChangeOperation;
+  reports: JsonDockChangeReport[];
+  summary: JsonChangeSummary;
+  success: false;
+}
+
+interface JsonChangeSummary {
+  created: string[];
+  deleted: string[];
+  reviewRequired: string[];
+  unchanged: string[];
+  updated: string[];
 }
 
 function updateCheckCommandResult(
@@ -993,6 +1014,59 @@ function changeCommandResult(
     },
     success: true,
   };
+}
+
+function changeCommandFailureResult(
+  operation: JsonChangeOperation,
+  error: unknown,
+): JsonChangeCommandFailureResult {
+  const forceable = isForceableManagedFileError(error);
+  return {
+    errorCode: forceable ? "managed_file_modified" : "command_failed",
+    forceable,
+    message: errorMessage(error),
+    operation,
+    reports: [],
+    summary: emptyChangeSummary(),
+    success: false,
+  };
+}
+
+function emptyChangeSummary(): JsonChangeSummary {
+  return {
+    created: [],
+    deleted: [],
+    reviewRequired: [],
+    unchanged: [],
+    updated: [],
+  };
+}
+
+function handleChangeCommandError(
+  operation: JsonChangeOperation,
+  error: unknown,
+  json: boolean,
+): void {
+  if (!json) {
+    throw error;
+  }
+  printJson(changeCommandFailureResult(operation, error));
+  process.exitCode = 1;
+}
+
+function isForceableManagedFileError(error: unknown): boolean {
+  const message = errorMessage(error);
+  return [
+    "checksum mismatch for managed block",
+    "checksum mismatch for managed file",
+    "managed block file missing",
+    "managed block missing",
+    "managed file missing",
+  ].some((prefix) => message.startsWith(prefix));
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function totalFileChanges(fileChanges: FileChangeDetails): number {

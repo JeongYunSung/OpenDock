@@ -557,6 +557,106 @@ describe("opendock TypeScript CLI", () => {
     });
   });
 
+  it("prints JSON update failures without throwing", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Version One\n" }],
+    });
+    writeDock(docks, "test", "designer", "1.0.1", {
+      files: [{ path: "AGENTS.md", content: "# Version Two\n" }],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/designer@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+    const agentsPath = join(project, "AGENTS.md");
+    writeFileSync(
+      agentsPath,
+      readFileSync(agentsPath, "utf8").replace("# Version One", "# User Edit"),
+    );
+
+    const registry = mockRegistry([
+      {
+        archive: await createDockArchive(docks, "test", "designer", "1.0.1"),
+        id: "test/designer",
+        latest: true,
+        platform: "macos",
+        version: "1.0.1",
+      },
+    ]);
+    const previousExitCode = process.exitCode;
+
+    try {
+      const logs = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "update", "--json"])),
+      );
+      const output = JSON.parse(logs[0] ?? "{}");
+
+      expect(process.exitCode).toBe(1);
+      expect(output).toMatchObject({
+        errorCode: "managed_file_modified",
+        forceable: true,
+        operation: "update",
+        reports: [],
+        success: false,
+      });
+      expect(output.message).toContain("checksum mismatch for managed block");
+    } finally {
+      process.exitCode = previousExitCode;
+      registry.restore();
+    }
+  });
+
+  it("prints JSON uninstall failures without throwing", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Version One\n" }],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/designer@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+    const agentsPath = join(project, "AGENTS.md");
+    writeFileSync(
+      agentsPath,
+      readFileSync(agentsPath, "utf8").replace("# Version One", "# User Edit"),
+    );
+    const previousExitCode = process.exitCode;
+
+    try {
+      const logs = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "uninstall", "test/designer", "--json"])),
+      );
+      const output = JSON.parse(logs[0] ?? "{}");
+
+      expect(process.exitCode).toBe(1);
+      expect(output).toMatchObject({
+        errorCode: "managed_file_modified",
+        forceable: true,
+        operation: "uninstall",
+        reports: [],
+        success: false,
+      });
+      expect(output.message).toContain("checksum mismatch for managed block");
+    } finally {
+      process.exitCode = previousExitCode;
+    }
+  });
+
   it("lists installed docks in the current directory", async () => {
     const docks = tempDir();
     const project = tempDir();
