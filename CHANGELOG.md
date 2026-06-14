@@ -5,6 +5,24 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.16 - 2026-06-15
+
+### Added
+
+- Added `opendock outdated` to check installed docks against the latest approved
+  Registry releases.
+
+### Changed
+
+- `opendock update` now skips work when no installed dock has a newer approved
+  Registry release.
+- `opendock update` only applies docks that are actually outdated.
+
+### Tests
+
+- Added CLI coverage for update checks, no-op updates, and mixed current/outdated
+  installed docks.
+
 ## 0.1.15 - 2026-06-15
 
 ### Added

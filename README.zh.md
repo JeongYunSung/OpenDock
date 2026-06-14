@@ -88,6 +88,7 @@ opendock bootstrap windows
 |---|---|
 | `opendock install owner/name@1.0.0` | 将 approved dock release 安装到当前目录. |
 | `opendock list` | 显示当前项目已安装的 docks. |
+| `opendock outdated` | 检查已安装 docks 是否有更新的 approved release. |
 | `opendock update` | 将 installed docks 移动到最新 approved Registry release. |
 | `opendock update --force` | 即使 managed content 被本地修改，也以 dock version 为准. |
 | `opendock uninstall owner/name` | 移除一个 dock 及其 managed project files. |

@@ -1,15 +1,17 @@
+import { createHash } from "node:crypto";
 import {
   chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { x as extractTar } from "tar";
+import { c as createTar, x as extractTar } from "tar";
 import { afterEach, describe, expect, it } from "vitest";
 import YAML from "yaml";
 import { run as runCli } from "../src/cli.js";
@@ -607,6 +609,129 @@ describe("opendock TypeScript CLI", () => {
     expect(logs).toEqual(["No OpenDock docks installed in this project."]);
   });
 
+  it("checks installed docks for newer Registry releases", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+    });
+    writeDock(docks, "test", "designer", "1.0.1", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent v2\n" }],
+    });
+    writeDock(docks, "test", "frontend", "1.2.0", {
+      files: [{ path: "FRONTEND.md", content: "# Frontend\n" }],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/designer@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+    await install({
+      dockRef: DockRef.parse("test/frontend@1.2.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    const registry = mockRegistry([
+      {
+        archive: await createDockArchive(docks, "test", "designer", "1.0.1"),
+        id: "test/designer",
+        latest: true,
+        platform: "macos",
+        version: "1.0.1",
+      },
+      {
+        id: "test/frontend",
+        latest: true,
+        platform: "macos",
+        version: "1.2.0",
+      },
+    ]);
+
+    try {
+      const outdatedLogs = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "outdated"])),
+      );
+      expect(outdatedLogs).toContain("OpenDock Updates");
+      expect(outdatedLogs).toContain("Updates:");
+      expect(outdatedLogs).toContain("~ test/designer: 1.0.0 -> 1.0.1 [macos]");
+      expect(outdatedLogs).toContain("Current:");
+      expect(outdatedLogs).toContain("✓ test/frontend@1.2.0 [macos]");
+
+      const updateLogs = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "update"])),
+      );
+      expect(updateLogs.some((line) => line.includes("test/designer"))).toBe(true);
+      expect(updateLogs.some((line) => line.includes("test/frontend"))).toBe(false);
+    } finally {
+      registry.restore();
+    }
+
+    expect(installedDocks(project)).toMatchObject([
+      { id: "test/designer", version: "1.0.1" },
+      { id: "test/frontend", version: "1.2.0" },
+    ]);
+    expect(readFileSync(join(project, "AGENTS.md"), "utf8")).toContain("# Designer Agent v2");
+    expect(
+      registry.requestedUrls.some(
+        (url) => url.includes("test/frontend") && url.includes("download"),
+      ),
+    ).toBe(false);
+  });
+
+  it("skips update when no installed dock has a newer Registry release", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/designer@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    const registry = mockRegistry([
+      {
+        id: "test/designer",
+        latest: true,
+        platform: "macos",
+        version: "1.0.0",
+      },
+    ]);
+
+    try {
+      const outdatedLogs = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "outdated"])),
+      );
+      expect(outdatedLogs).toContain("No OpenDock dock updates available.");
+
+      const updateLogs = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "update"])),
+      );
+      expect(updateLogs).toEqual(["No OpenDock dock updates available."]);
+    } finally {
+      registry.restore();
+    }
+
+    expect(installedDocks(project)).toMatchObject([{ id: "test/designer", version: "1.0.0" }]);
+    expect(registry.requestedUrls.some((url) => url.includes("download"))).toBe(false);
+  });
+
   it("rejects unsafe commands", () => {
     const project = tempDir();
     const manifest: DockManifest = {
@@ -918,6 +1043,95 @@ function localResolver(root: string) {
       signature: "test-signature",
     };
   };
+}
+
+interface MockRegistryRelease {
+  archive?: Buffer;
+  id: string;
+  latest?: boolean;
+  platform: OpenDockPlatform;
+  version: string;
+}
+
+function mockRegistry(releases: MockRegistryRelease[]): {
+  requestedUrls: string[];
+  restore: () => void;
+} {
+  const previousFetch = globalThis.fetch;
+  const requestedUrls: string[] = [];
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+    requestedUrls.push(url.toString());
+    const match = url.pathname.match(
+      /^\/v1\/docks\/([^/]+)\/([^/]+)\/versions\/([^/]+)(\/download)?$/,
+    );
+    if (!match) {
+      return new Response("not found", { status: 404, statusText: "Not Found" });
+    }
+    const [, owner, name, rawSelector, download] = match;
+    const id = `${owner}/${name}`;
+    const selector = decodeURIComponent(rawSelector ?? "");
+    const platform = url.searchParams.get("platform");
+    const release = releases.find(
+      (candidate) =>
+        candidate.id === id &&
+        candidate.platform === platform &&
+        (selector === "latest" ? candidate.latest === true : candidate.version === selector),
+    );
+    if (!release) {
+      return new Response("not found", { status: 404, statusText: "Not Found" });
+    }
+    if (download) {
+      if (!release.archive) {
+        return new Response("archive missing", { status: 404, statusText: "Not Found" });
+      }
+      return new Response(release.archive, {
+        headers: { "content-length": String(release.archive.length) },
+        status: 200,
+      });
+    }
+    return new Response(
+      JSON.stringify({
+        approved: true,
+        checksum: release.archive === undefined ? "metadata-only" : sha256(release.archive),
+        id: release.id,
+        platform: release.platform,
+        signature: "test-signature",
+        version: release.version,
+      }),
+      { headers: { "content-type": "application/json" }, status: 200 },
+    );
+  }) as typeof fetch;
+
+  return {
+    requestedUrls,
+    restore: () => {
+      globalThis.fetch = previousFetch;
+    },
+  };
+}
+
+async function createDockArchive(
+  root: string,
+  owner: string,
+  name: string,
+  version: string,
+): Promise<Buffer> {
+  const dockRoot = join(root, `${owner}-${name}-${version}`);
+  const archivePath = join(tempDir(), "dock.tgz");
+  await createTar(
+    {
+      cwd: dockRoot,
+      file: archivePath,
+      gzip: true,
+    },
+    readdirSync(dockRoot),
+  );
+  return readFileSync(archivePath);
+}
+
+function sha256(bytes: Buffer): string {
+  return createHash("sha256").update(bytes).digest("hex");
 }
 
 function writeFakeOma(bin: string): void {

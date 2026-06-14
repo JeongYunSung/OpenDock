@@ -428,6 +428,10 @@ doctor: []
 `install`, `update`, `uninstall`은 자동화 도구가 변경 결과를 읽을 수 있도록
 `--json` 출력도 지원합니다.
 
+`opendock outdated`는 현재 설치된 dock을 Registry의 최신 approved release와
+비교합니다. `opendock update`는 이 조회 결과에서 업데이트 대상이 하나라도 있을
+때만 실제 update를 실행합니다.
+
 ### step 필드
 
 | 필드 | 필수 | 설명 |

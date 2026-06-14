@@ -90,6 +90,7 @@ opendock bootstrap windows
 |---|---|
 | `opendock install owner/name@1.0.0` | 承認済み dock release を現在の directory に install. |
 | `opendock list` | 現在の project に installed docks を表示. |
+| `opendock outdated` | installed docks に新しい approved release があるか確認. |
 | `opendock update` | installed docks を最新の approved Registry release へ移動. |
 | `opendock update --force` | OpenDock-managed content が編集されていても dock version を優先. |
 | `opendock uninstall owner/name` | 1つの dock とその managed project files を削除. |

@@ -45,13 +45,14 @@ import {
 } from "./platform.js";
 import {
   type AuthProvider,
+  type DockVersionResponse,
   OpenDockRegistryClient,
   RegistryRequestError,
   type SubmissionLogoRequest,
   type SubmissionRequest,
   type SubmissionResponse,
 } from "./registry.js";
-import { type ResolvedDock, resolveDock, resolveLatestDock } from "./resolver.js";
+import { resolveDock } from "./resolver.js";
 import {
   formatDockVersion,
   formatListPlatform,
@@ -135,11 +136,21 @@ export async function run(argv = process.argv): Promise<void> {
       if (installedDocks.length === 0) {
         throw new Error("no OpenDock docks are installed in this project");
       }
+      const updateChecks = await checkInstalledDockUpdates(installedDocks, platformOverride);
+      const updateTargets = updateChecks.filter((check) => check.updateAvailable);
+      if (updateTargets.length === 0) {
+        if (options.json === true) {
+          printJson(changeCommandResult("update", []));
+        } else {
+          console.log(terminalStyle.success("No OpenDock dock updates available."));
+        }
+        return;
+      }
       const changeReports: JsonDockChangeReport[] = [];
-      for (const dock of installedDocks) {
-        const platform = platformOverride ?? resolveCliPlatform(dock.platform);
-        const latest = await resolveLatestDockRef(dock.id, platform);
-        const dockRef = DockRef.parse(`${dock.id}@${latest.version}`);
+      for (const updateTarget of updateTargets) {
+        const dock = updateTarget.dock;
+        const dockRef = DockRef.parse(`${dock.id}@${updateTarget.latestVersion}`);
+        const resolved = await resolveDock(dockRef, updateTarget.platform);
         const report = await runMaybeQuietAsync(options.json === true, () =>
           installer.install({
             dockRef,
@@ -148,8 +159,8 @@ export async function run(argv = process.argv): Promise<void> {
             runTasks: true,
             operation: "update",
             phase: "update",
-            platform,
-            resolve: () => latest,
+            platform: updateTarget.platform,
+            resolve: () => resolved,
             live: options.json !== true,
           }),
         );
@@ -236,6 +247,31 @@ export async function run(argv = process.argv): Promise<void> {
     .description("Show docks installed in the current directory.")
     .action(() => {
       printInstalledDocks(process.cwd());
+    });
+
+  program
+    .command("outdated")
+    .description("Check installed docks for newer approved Registry releases.")
+    .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
+    .option("--json", "Print a machine-readable update check report")
+    .action(async (options: Pick<ChangeCommandOptions, "json" | "platform">) => {
+      const platformOverride =
+        options.platform === undefined ? undefined : resolveCliPlatform(options.platform);
+      const docks = readInstalledDocks(process.cwd());
+      if (docks === undefined || docks.length === 0) {
+        if (options.json === true) {
+          printJson(updateCheckCommandResult([]));
+        } else {
+          console.log(terminalStyle.dim("No OpenDock docks installed in this project."));
+        }
+        return;
+      }
+      const updateChecks = await checkInstalledDockUpdates(docks, platformOverride);
+      if (options.json === true) {
+        printJson(updateCheckCommandResult(updateChecks));
+        return;
+      }
+      printUpdateChecks(process.cwd(), updateChecks);
     });
 
   program
@@ -410,15 +446,36 @@ function parseAuthProvider(value: string): AuthProvider {
   throw new Error("auth provider must be google or github");
 }
 
-async function resolveLatestDockRef(
+async function resolveLatestDockVersion(
   dockId: string,
   platform: OpenDockPlatform,
-): Promise<ResolvedDock> {
+): Promise<DockVersionResponse> {
   const [owner, name, extra] = dockId.split("/");
   if (!owner || !name || extra !== undefined) {
     throw new Error(`invalid dock id in lock file: ${dockId}`);
   }
-  return resolveLatestDock(owner, name, platform);
+  const metadata = await new OpenDockRegistryClient().resolveDockVersion(
+    owner,
+    name,
+    "latest",
+    platform,
+  );
+  if (metadata.id !== dockId) {
+    throw new Error(`registry returned dock id \`${metadata.id}\` for installed \`${dockId}\``);
+  }
+  if (!metadata.approved) {
+    throw new Error(`dock \`${dockId}@latest\` is not approved by OpenDock Registry`);
+  }
+  if (
+    metadata.platform !== undefined &&
+    metadata.platform !== "any" &&
+    metadata.platform !== platform
+  ) {
+    throw new Error(
+      `registry returned ${metadata.platform} artifact for requested platform \`${platform}\``,
+    );
+  }
+  return metadata;
 }
 
 function lockedDockVersionSelector(dock: { requested?: string; version: string }): string {
@@ -429,14 +486,46 @@ function lockedDockVersionSelector(dock: { requested?: string; version: string }
   return dock.version;
 }
 
-function printInstalledDocks(cwd: string): void {
+interface InstalledDockUpdateCheck {
+  dock: InstalledDockRecord;
+  latestVersion: string;
+  platform: OpenDockPlatform;
+  updateAvailable: boolean;
+}
+
+async function checkInstalledDockUpdates(
+  docks: InstalledDockRecord[],
+  platformOverride: OpenDockPlatform | undefined,
+): Promise<InstalledDockUpdateCheck[]> {
+  return Promise.all(
+    docks.map(async (dock) => {
+      const platform = platformOverride ?? resolveCliPlatform(dock.platform);
+      const latest = await resolveLatestDockVersion(dock.id, platform);
+      return {
+        dock,
+        latestVersion: latest.version,
+        platform,
+        updateAvailable: latest.version !== dock.version,
+      };
+    }),
+  );
+}
+
+function readInstalledDocks(cwd: string): InstalledDockRecord[] | undefined {
   const store = new OpenDockStateStore(cwd);
   if (!store.hasState()) {
+    return undefined;
+  }
+  return store.readLock().docks;
+}
+
+function printInstalledDocks(cwd: string): void {
+  const docks = readInstalledDocks(cwd);
+  if (docks === undefined) {
     console.log(terminalStyle.dim("No OpenDock docks installed in this project."));
     return;
   }
 
-  const docks = store.readLock().docks;
   if (docks.length === 0) {
     console.log(terminalStyle.dim("No OpenDock docks installed in this project."));
     return;
@@ -459,6 +548,44 @@ function formatInstalledDockLine(dock: InstalledDockRecord): string {
   return `${terminalStyle.dim("-")} ${formatDockVersion(dock.id, dock.version)} ${formatListPlatform(
     dock.platform,
   )} (${terminalStyle.info(formatManagedFileCount(dock.files.length))}${requestedSuffix})`;
+}
+
+function printUpdateChecks(cwd: string, updateChecks: InstalledDockUpdateCheck[]): void {
+  const updates = updateChecks.filter((check) => check.updateAvailable);
+  console.log(terminalStyle.bold("OpenDock Updates"));
+  console.log(`${terminalStyle.dim("Project:")} ${cwd}`);
+  if (updates.length === 0) {
+    console.log(terminalStyle.success("No OpenDock dock updates available."));
+    return;
+  }
+
+  console.log(`${terminalStyle.bold("Updates")}:`);
+  for (const check of updates) {
+    console.log(formatUpdateCheckLine(check));
+  }
+
+  const current = updateChecks.filter((check) => !check.updateAvailable);
+  if (current.length > 0) {
+    console.log(`${terminalStyle.bold("Current")}:`);
+    for (const check of current) {
+      console.log(formatCurrentCheckLine(check));
+    }
+  }
+}
+
+function formatUpdateCheckLine(check: InstalledDockUpdateCheck): string {
+  return `${formatStepSymbol("~")} ${terminalStyle.bold(check.dock.id)}: ${terminalStyle.dim(
+    check.dock.version,
+  )} ${formatStepSymbol("->")} ${terminalStyle.dim(check.latestVersion)} ${formatListPlatform(
+    check.platform,
+  )}`;
+}
+
+function formatCurrentCheckLine(check: InstalledDockUpdateCheck): string {
+  return `${formatStepSymbol("✓")} ${formatDockVersion(
+    check.dock.id,
+    check.dock.version,
+  )} ${formatListPlatform(check.platform)}`;
 }
 
 function formatManagedFileCount(count: number): string {
@@ -732,6 +859,24 @@ function inferDeployPlatformFromManifestPath(
 type JsonChangeOperation = "install" | "uninstall" | "update";
 type JsonChangeStatus = "installed" | "unchanged" | "uninstalled" | "updated";
 
+interface JsonDockUpdateCheckReport {
+  currentVersion: string;
+  dockId: string;
+  latestVersion: string;
+  platform: OpenDockPlatform;
+  status: "current" | "outdated";
+}
+
+interface JsonUpdateCheckCommandResult {
+  reports: JsonDockUpdateCheckReport[];
+  success: true;
+  summary: {
+    current: string[];
+    outdated: string[];
+  };
+  updatesAvailable: boolean;
+}
+
 interface JsonDockChangeReport {
   dockId: string;
   fileChanges: FileChangeDetails;
@@ -758,6 +903,31 @@ interface JsonChangeCommandResult {
     updated: string[];
   };
   success: true;
+}
+
+function updateCheckCommandResult(
+  updateChecks: InstalledDockUpdateCheck[],
+): JsonUpdateCheckCommandResult {
+  const reports = updateChecks.map((check) => ({
+    currentVersion: check.dock.version,
+    dockId: check.dock.id,
+    latestVersion: check.latestVersion,
+    platform: check.platform,
+    status: check.updateAvailable ? ("outdated" as const) : ("current" as const),
+  }));
+  return {
+    reports,
+    success: true,
+    summary: {
+      current: reports
+        .filter((report) => report.status === "current")
+        .map((report) => report.dockId),
+      outdated: reports
+        .filter((report) => report.status === "outdated")
+        .map((report) => report.dockId),
+    },
+    updatesAvailable: reports.some((report) => report.status === "outdated"),
+  };
 }
 
 function installChangeReport(
