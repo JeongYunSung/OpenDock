@@ -465,8 +465,13 @@ describe("opendock TypeScript CLI", () => {
     expect(agents).toContain("dock=test/oma");
     expect(agents).toContain("dock=test/designer");
 
-    uninstall({ dockId: "test/designer", projectDir: project });
+    const uninstallReport = uninstall({ dockId: "test/designer", projectDir: project });
     agents = readFileSync(join(project, "AGENTS.md"), "utf8");
+    expect(uninstallReport.fileChanges).toMatchObject({
+      created: [],
+      deleted: ["DESIGN.md"],
+      updated: ["AGENTS.md"],
+    });
     expect(agents).toContain("dock=test/oma");
     expect(agents).not.toContain("dock=test/designer");
     expect(existsSync(join(project, "DESIGN.md"))).toBe(false);

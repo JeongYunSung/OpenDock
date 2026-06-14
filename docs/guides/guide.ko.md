@@ -425,6 +425,9 @@ doctor: []
 | `update` | `opendock update` | 최신 approved release로 이동하며 유지보수 작업 실행 |
 | `doctor` | `opendock doctor` | 현재 프로젝트와 도구 상태 점검 |
 
+`install`, `update`, `uninstall`은 자동화 도구가 변경 결과를 읽을 수 있도록
+`--json` 출력도 지원합니다.
+
 ### step 필드
 
 | 필드 | 필수 | 설명 |

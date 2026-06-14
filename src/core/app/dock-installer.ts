@@ -28,6 +28,7 @@ type DockResolver = (
 export interface InstallOptions {
   dockRef: DockRef;
   force?: boolean;
+  live?: boolean;
   projectDir: string;
   runTasks: boolean;
   operation: string;
@@ -62,9 +63,13 @@ export interface UninstallOptions {
 }
 
 export interface UninstallReport {
+  fileChanges: FileChangeDetails;
   dockId: string;
   filesDeleted: number;
+  filesReviewRequired: number;
   filesUpdated: number;
+  platform?: OpenDockPlatform;
+  version: string;
 }
 
 export class DockInstaller {
@@ -101,6 +106,7 @@ export class DockInstaller {
             dockId: resolved.manifest.id,
             phase: options.phase ?? "install",
             platform,
+            ...(options.live === undefined ? {} : { live: options.live }),
           })
         : { reports: [], exports: [] };
       const candidates = [...fileCandidates, ...taskResult.exports];
@@ -173,8 +179,17 @@ export class DockInstaller {
     );
     return {
       dockId: dock.id,
+      fileChanges: {
+        created: [],
+        deleted: summary.deletedPaths,
+        reviewRequired: summary.reviewRequiredPaths,
+        updated: summary.updatedPaths,
+      },
       filesDeleted: summary.deleted,
+      filesReviewRequired: summary.reviewRequired,
       filesUpdated: summary.updated,
+      platform: dock.platform,
+      version: dock.version,
     };
   }
 

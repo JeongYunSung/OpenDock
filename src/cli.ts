@@ -21,7 +21,12 @@ import { TokenStore } from "./auth.js";
 import { bootstrapMac, bootstrapWindows } from "./bootstrap.js";
 import { performBrowserLogin } from "./browser-auth.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
-import { DockInstaller, type InstallReport } from "./core/app/dock-installer.js";
+import {
+  DockInstaller,
+  type FileChangeDetails,
+  type InstallReport,
+  type UninstallReport,
+} from "./core/app/dock-installer.js";
 import {
   type DockManifest,
   DockRef,
@@ -61,6 +66,12 @@ const maxDeployLogoBytes = 512 * 1024;
 const maxDeployManifestBytes = 64 * 1024;
 const maxDeployArchiveBytes = 50 * 1024 * 1024;
 
+interface ChangeCommandOptions {
+  force?: boolean;
+  json?: boolean;
+  platform?: string;
+}
+
 export async function run(argv = process.argv): Promise<void> {
   const program = new Command();
   const installer = new DockInstaller();
@@ -75,17 +86,29 @@ export async function run(argv = process.argv): Promise<void> {
     .argument("<dock>", "Dock reference: owner/name@version")
     .option("--force", "Overwrite user-edited managed files")
     .option("--platform <platform>", "Target platform: macos, windows, or linux")
-    .action(async (dock: string, options: { force?: boolean; platform?: string }) => {
+    .option("--json", "Print a machine-readable change report")
+    .action(async (dock: string, options: ChangeCommandOptions) => {
       const platform = resolveCliPlatform(options.platform);
-      const report = await installer.install({
-        dockRef: parseInstallRef(dock),
-        force: options.force === true,
-        projectDir: process.cwd(),
-        runTasks: true,
-        operation: "install",
-        phase: "install",
-        platform,
-      });
+      const report = await runMaybeQuietAsync(options.json === true, () =>
+        installer.install({
+          dockRef: parseInstallRef(dock),
+          force: options.force === true,
+          projectDir: process.cwd(),
+          runTasks: true,
+          operation: "install",
+          phase: "install",
+          platform,
+          live: options.json !== true,
+        }),
+      );
+      if (options.json === true) {
+        printJson(
+          changeCommandResult("install", [
+            installChangeReport(report, { operation: "install", status: "installed" }),
+          ]),
+        );
+        return;
+      }
       console.log(
         `${terminalStyle.success("Installed")} ${formatDockVersion(
           report.dockId,
@@ -100,7 +123,8 @@ export async function run(argv = process.argv): Promise<void> {
     .description("Update the dock installed in the current directory.")
     .option("--force", "Overwrite user-edited managed files")
     .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
-    .action(async (options: { force?: boolean; platform?: string }) => {
+    .option("--json", "Print a machine-readable change report")
+    .action(async (options: ChangeCommandOptions) => {
       const platformOverride =
         options.platform === undefined ? undefined : resolveCliPlatform(options.platform);
       const store = new OpenDockStateStore(process.cwd());
@@ -111,20 +135,37 @@ export async function run(argv = process.argv): Promise<void> {
       if (installedDocks.length === 0) {
         throw new Error("no OpenDock docks are installed in this project");
       }
+      const changeReports: JsonDockChangeReport[] = [];
       for (const dock of installedDocks) {
         const platform = platformOverride ?? resolveCliPlatform(dock.platform);
         const latest = await resolveLatestDockRef(dock.id, platform);
         const dockRef = DockRef.parse(`${dock.id}@${latest.version}`);
-        const report = await installer.install({
-          dockRef,
-          force: options.force === true,
-          projectDir: process.cwd(),
-          runTasks: true,
-          operation: "update",
-          phase: "update",
-          platform,
-          resolve: () => latest,
-        });
+        const report = await runMaybeQuietAsync(options.json === true, () =>
+          installer.install({
+            dockRef,
+            force: options.force === true,
+            projectDir: process.cwd(),
+            runTasks: true,
+            operation: "update",
+            phase: "update",
+            platform,
+            resolve: () => latest,
+            live: options.json !== true,
+          }),
+        );
+        changeReports.push(
+          installChangeReport(report, {
+            fromVersion: dock.version,
+            operation: "update",
+            status:
+              dock.version === report.version && totalFileChanges(report.fileChanges) === 0
+                ? "unchanged"
+                : "updated",
+          }),
+        );
+        if (options.json === true) {
+          continue;
+        }
         if (dock.version === report.version) {
           console.log(
             `${terminalStyle.success("Updated")} ${terminalStyle.bold(
@@ -144,6 +185,9 @@ export async function run(argv = process.argv): Promise<void> {
         }
         printFileChanges(report);
       }
+      if (options.json === true) {
+        printJson(changeCommandResult("update", changeReports));
+      }
     });
 
   program
@@ -151,12 +195,23 @@ export async function run(argv = process.argv): Promise<void> {
     .description("Remove an installed dock from the current directory.")
     .argument("<dock>", "Installed dock id: owner/name")
     .option("--force", "Remove OpenDock-managed files even when edited managed files are detected")
-    .action((dock: string, options: { force?: boolean }) => {
-      const report = installer.uninstall({
-        dockId: parseInstalledDockId(dock),
-        force: options.force === true,
-        projectDir: process.cwd(),
-      });
+    .option("--json", "Print a machine-readable change report")
+    .action((dock: string, options: Pick<ChangeCommandOptions, "force" | "json">) => {
+      const report = runMaybeQuiet(options.json === true, () =>
+        installer.uninstall({
+          dockId: parseInstalledDockId(dock),
+          force: options.force === true,
+          projectDir: process.cwd(),
+        }),
+      );
+      if (options.json === true) {
+        printJson(
+          changeCommandResult("uninstall", [
+            uninstallChangeReport(report, { operation: "uninstall", status: "uninstalled" }),
+          ]),
+        );
+        return;
+      }
       console.log(
         `${terminalStyle.success("Uninstalled")} ${terminalStyle.bold(
           report.dockId,
@@ -672,6 +727,145 @@ function inferDeployPlatformFromManifestPath(
     return "linux";
   }
   return "any";
+}
+
+type JsonChangeOperation = "install" | "uninstall" | "update";
+type JsonChangeStatus = "installed" | "unchanged" | "uninstalled" | "updated";
+
+interface JsonDockChangeReport {
+  dockId: string;
+  fileChanges: FileChangeDetails;
+  filesCreated: number;
+  filesDeleted: number;
+  filesReviewRequired: number;
+  filesUpdated: number;
+  fromVersion?: string;
+  operation: JsonChangeOperation;
+  platform?: OpenDockPlatform;
+  status: JsonChangeStatus;
+  toVersion?: string;
+  version: string;
+}
+
+interface JsonChangeCommandResult {
+  operation: JsonChangeOperation;
+  reports: JsonDockChangeReport[];
+  summary: {
+    created: string[];
+    deleted: string[];
+    reviewRequired: string[];
+    unchanged: string[];
+    updated: string[];
+  };
+  success: true;
+}
+
+function installChangeReport(
+  report: InstallReport,
+  options: {
+    fromVersion?: string;
+    operation: JsonChangeOperation;
+    status: JsonChangeStatus;
+  },
+): JsonDockChangeReport {
+  return {
+    dockId: report.dockId,
+    fileChanges: report.fileChanges,
+    filesCreated: report.filesCreated,
+    filesDeleted: report.filesDeleted,
+    filesReviewRequired: report.filesReviewRequired,
+    filesUpdated: report.filesUpdated,
+    ...(options.fromVersion === undefined ? {} : { fromVersion: options.fromVersion }),
+    operation: options.operation,
+    platform: report.platform,
+    status: options.status,
+    toVersion: report.version,
+    version: report.version,
+  };
+}
+
+function uninstallChangeReport(
+  report: UninstallReport,
+  options: {
+    operation: JsonChangeOperation;
+    status: JsonChangeStatus;
+  },
+): JsonDockChangeReport {
+  return {
+    dockId: report.dockId,
+    fileChanges: report.fileChanges,
+    filesCreated: 0,
+    filesDeleted: report.filesDeleted,
+    filesReviewRequired: report.filesReviewRequired,
+    filesUpdated: report.filesUpdated,
+    operation: options.operation,
+    ...(report.platform === undefined ? {} : { platform: report.platform }),
+    status: options.status,
+    version: report.version,
+  };
+}
+
+function changeCommandResult(
+  operation: JsonChangeOperation,
+  reports: JsonDockChangeReport[],
+): JsonChangeCommandResult {
+  return {
+    operation,
+    reports,
+    summary: {
+      created: uniqueFlatMap(reports, (report) => report.fileChanges.created),
+      deleted: uniqueFlatMap(reports, (report) => report.fileChanges.deleted),
+      reviewRequired: uniqueFlatMap(reports, (report) => report.fileChanges.reviewRequired),
+      unchanged: reports
+        .filter((report) => report.status === "unchanged")
+        .map((report) => report.dockId),
+      updated: uniqueFlatMap(reports, (report) => report.fileChanges.updated),
+    },
+    success: true,
+  };
+}
+
+function totalFileChanges(fileChanges: FileChangeDetails): number {
+  return (
+    fileChanges.created.length +
+    fileChanges.deleted.length +
+    fileChanges.reviewRequired.length +
+    fileChanges.updated.length
+  );
+}
+
+function uniqueFlatMap<T>(items: T[], map: (item: T) => string[]): string[] {
+  return [...new Set(items.flatMap(map))];
+}
+
+async function runMaybeQuietAsync<T>(quiet: boolean, fn: () => Promise<T>): Promise<T> {
+  if (!quiet) {
+    return fn();
+  }
+  const previous = console.log;
+  console.log = () => {};
+  try {
+    return await fn();
+  } finally {
+    console.log = previous;
+  }
+}
+
+function runMaybeQuiet<T>(quiet: boolean, fn: () => T): T {
+  if (!quiet) {
+    return fn();
+  }
+  const previous = console.log;
+  console.log = () => {};
+  try {
+    return fn();
+  } finally {
+    console.log = previous;
+  }
+}
+
+function printJson(value: unknown): void {
+  console.log(JSON.stringify(value));
 }
 
 function resolveDeployManifest(projectDir: string, relativePathValue: string): string {

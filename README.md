@@ -155,6 +155,7 @@ bin/opendock version
 | `opendock update` | Move installed docks to their latest approved Registry releases. |
 | `opendock update --force` | Update even when OpenDock-managed content was edited locally. |
 | `opendock uninstall owner/name` | Remove one installed dock and its managed project files. |
+| `opendock install/update/uninstall --json` | Print a machine-readable change report. |
 | `opendock doctor` | Check project state and each installed dock's doctor steps. |
 | `opendock log` | Show recent OpenDock runs for the current project. |
 | `opendock version` | Print CLI, schema, and Registry information. |

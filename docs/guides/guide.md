@@ -114,6 +114,9 @@ opendock install opendock/codex@1.0.0
 opendock deploy opendock/codex@1.0.0
 ```
 
+`install`, `update`, and `uninstall` also accept `--json` when another tool
+needs a machine-readable change report.
+
 Accepted references:
 
 ```text

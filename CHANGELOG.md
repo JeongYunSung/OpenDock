@@ -5,6 +5,20 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.15 - 2026-06-15
+
+### Added
+
+- Added `--json` output for install, update, and uninstall change reports.
+
+### Changed
+
+- Extended uninstall reports with managed file change details, platform, and version metadata.
+
+### Tests
+
+- Added uninstall report coverage for deleted and updated managed files.
+
 ## 0.1.14 - 2026-06-12
 
 ### Added
