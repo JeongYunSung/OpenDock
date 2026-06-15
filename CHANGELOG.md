@@ -7,6 +7,20 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.25 - 2026-06-15
+
+### Desktop App
+
+- Add a Windows and Linux titlebar app menu with File, Edit, View, Project,
+  Dock, Window, and Help flyouts.
+- Keep the in-app menu hidden on macOS so the native menu bar remains the
+  primary menu surface.
+
+### Tests
+
+- Added native contract coverage for the in-app menu and non-macOS visibility
+  behavior.
+
 ## 0.1.24 - 2026-06-15
 
 ### Fixed

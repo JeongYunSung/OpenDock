@@ -31,6 +31,7 @@ import {
   Keyboard,
   LogOut,
   Maximize2,
+  Menu as MenuIcon,
   Minus,
   Moon,
   Pencil,
@@ -105,7 +106,9 @@ type WindowControlPlatform = "macos" | "windows";
 type CommandTaskKind = "install" | "update" | "delete" | "doctor";
 type CommandTaskStatus = "running" | "cancelling" | "success" | "error" | "cancelled";
 type VersionStatusClass = "approved" | "pending" | "rejected" | "revoked" | "hidden" | "suspended" | "unavailable";
-type OpenMenu = "" | "lang" | "account" | "sort";
+type OpenMenu = "" | "app" | "lang" | "account" | "sort";
+type AppMenuItem = { id: string; label: string; shortcut?: string } | { type: "separator" };
+type AppMenuGroup = { items: AppMenuItem[]; key: string; label: string };
 
 interface CommandForceRetry {
   dockId?: string;
@@ -248,6 +251,76 @@ function commandTaskLevel(status: CommandTaskStatus) {
   if (status === "error") return "ERR";
   if (status === "cancelled" || status === "cancelling") return "WARN";
   return "RUN";
+}
+
+function appMenuGroups(t: (typeof TEXT)[Lang]): AppMenuGroup[] {
+  return [
+    {
+      key: "file",
+      label: t.menuFile,
+      items: [
+        { id: "file:new-project", label: t.newProjectAction },
+        { id: "file:add-existing-project", label: t.existingProjectAction },
+      ],
+    },
+    {
+      key: "edit",
+      label: t.menuEdit,
+      items: [
+        { id: "edit:rename-project", label: t.renameProjectTitle },
+        { id: "edit:copy-project-path", label: t.menuCopyProjectPath, shortcut: "Ctrl+Shift+C" },
+        { id: "edit:import-shortcuts", label: t.importShortcuts },
+        { id: "edit:export-shortcuts", label: t.exportShortcuts },
+        { type: "separator" },
+        { id: "view:toggle-sidebar", label: t.menuToggleSidebar, shortcut: "Ctrl+B" },
+      ],
+    },
+    {
+      key: "view",
+      label: t.menuView,
+      items: [
+        { id: "view:explore", label: t.explore },
+        { id: "view:installed", label: t.installed },
+        { id: "view:logs", label: t.logs },
+      ],
+    },
+    {
+      key: "project",
+      label: t.menuProject,
+      items: [
+        { id: "project:run-doctor", label: t.menuRunDoctor, shortcut: "Ctrl+D" },
+        { id: "project:update-docks", label: t.updateAllAction },
+        { id: "project:open-folder", label: t.menuOpenProjectFolder },
+        { id: "project:reveal-folder", label: t.menuRevealProjectFolder },
+        { type: "separator" },
+        { id: "project:remove-from-opendock", label: t.menuRemoveProject },
+      ],
+    },
+    {
+      key: "dock",
+      label: t.menuDock,
+      items: [
+        { id: "dock:install", label: t.installAction },
+        { id: "dock:delete", label: t.deleteAction },
+        { id: "dock:refresh-registry", label: t.menuRefreshRegistry },
+        { id: "dock:open-detail", label: t.openDetail },
+      ],
+    },
+    {
+      key: "window",
+      label: t.menuWindow,
+      items: [{ id: "window:reload", label: t.menuReloadWindow, shortcut: "Ctrl+Shift+R" }],
+    },
+    {
+      key: "help",
+      label: t.menuHelp,
+      items: [
+        { id: "help:docs", label: t.menuDocs },
+        { id: "help:cli-commands", label: t.menuCliCommands },
+        { id: "help:troubleshooting", label: t.menuTroubleshooting },
+      ],
+    },
+  ];
 }
 
 function commandFailureMessage(result: OpenDockCommandResult, fallback: string) {
@@ -658,6 +731,11 @@ export function App() {
     setDetailVersion("");
     setSearchQuery("");
     setOpenMenu("");
+  }
+
+  async function runAppMenuCommand(id: string) {
+    setOpenMenu("");
+    await handleNativeMenu(id);
   }
 
   useEffect(() => {
@@ -1847,6 +1925,8 @@ export function App() {
         lang={lang}
         loggedIn={loggedIn}
         onAccount={() => setOpenMenu((current) => (current === "account" ? "" : "account"))}
+        onAppMenu={() => setOpenMenu((current) => (current === "app" ? "" : "app"))}
+        onAppMenuCommand={(id) => void runAppMenuCommand(id)}
         onClose={() => void handleWindow("close")}
         onLang={() => setOpenMenu((current) => (current === "lang" ? "" : "lang"))}
         onLogout={logout}
@@ -2016,6 +2096,8 @@ function Titlebar(props: {
   lang: Lang;
   loggedIn: boolean;
   onAccount: () => void;
+  onAppMenu: () => void;
+  onAppMenuCommand: (id: string) => void;
   onClose: () => void;
   onLang: () => void;
   onLogout: () => void;
@@ -2025,7 +2107,7 @@ function Titlebar(props: {
   onSetEnglish: () => void;
   onSetKorean: () => void;
   onTheme: () => void;
-  openMenu: "" | "lang" | "account" | "sort";
+  openMenu: OpenMenu;
   projectPathLabel: string;
   t: (typeof TEXT)[Lang];
   windowControlPlatform: WindowControlPlatform;
@@ -2046,6 +2128,15 @@ function Titlebar(props: {
           onMaximize={props.onMaximize}
           onMinimize={props.onMinimize}
           platform={props.windowControlPlatform}
+          t={props.t}
+        />
+      ) : null}
+      {!isMac ? (
+        <AppMenu
+          groups={appMenuGroups(props.t)}
+          onCommand={props.onAppMenuCommand}
+          onToggle={props.onAppMenu}
+          open={props.openMenu === "app"}
           t={props.t}
         />
       ) : null}
@@ -2113,8 +2204,65 @@ function isInteractiveTitlebarTarget(target: EventTarget | null) {
   const element = target instanceof HTMLElement ? target : null;
   return Boolean(
     element?.closest(
-      'button,a,input,textarea,select,[role="button"],[role="menu"],.dropdown-menu,.window-controls,.titlebar-actions'
+      'button,a,input,textarea,select,[role="button"],[role="menu"],.dropdown-menu,.app-menu-panel,.window-controls,.titlebar-actions'
     )
+  );
+}
+
+function AppMenu(props: {
+  groups: AppMenuGroup[];
+  onCommand: (id: string) => void;
+  onToggle: () => void;
+  open: boolean;
+  t: (typeof TEXT)[Lang];
+}) {
+  const runCommand = (id: string) => {
+    props.onCommand(id);
+  };
+
+  return (
+    <div className="app-menu-anchor">
+      <button
+        aria-expanded={props.open}
+        aria-haspopup="menu"
+        aria-label={props.t.appMenu}
+        className={`app-menu-button ${props.open ? "active" : ""}`}
+        onClick={props.onToggle}
+        title={props.t.appMenu}
+        type="button"
+      >
+        <MenuIcon size={18} />
+      </button>
+      {props.open ? (
+        <div aria-label={props.t.appMenu} className="app-menu-panel" role="menu">
+          {props.groups.map((group) => (
+            <div className="app-menu-group" key={group.key}>
+              <button className="app-menu-group-button" type="button">
+                <span>{group.label}</span>
+                <ChevronRight size={14} />
+              </button>
+              <div className="app-menu-flyout" role="menu">
+                {group.items.map((item, index) =>
+                  "type" in item ? (
+                    <div className="app-menu-separator" key={`${group.key}-separator-${index}`} role="separator" />
+                  ) : (
+                    <button
+                      className="app-menu-item"
+                      key={item.id}
+                      onClick={() => runCommand(item.id)}
+                      type="button"
+                    >
+                      <span>{item.label}</span>
+                      {item.shortcut ? <kbd>{item.shortcut}</kbd> : null}
+                    </button>
+                  )
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -2255,11 +2403,11 @@ function Workspace(props: {
   onSetView: (view: DockView) => void;
   onToggleSidebar: () => void;
   onUpdateDocks: () => void;
-  openMenu: "" | "lang" | "account" | "sort";
+  openMenu: OpenMenu;
   projects: Project[];
   projectSidebarCollapsed: boolean;
   searchQuery: string;
-  setOpenMenu: (menu: "" | "lang" | "account" | "sort") => void;
+  setOpenMenu: (menu: OpenMenu) => void;
   shortcutBindings: ShortcutBinding[];
   shortcutPlatform: ShortcutPlatform;
   shortcutStatus: string;
@@ -2443,12 +2591,12 @@ function DetailSidebar(props: { detail: Dock; detailTab: "readme" | "versions"; 
 }
 
 function ExplorePanel(props: {
-  openMenu: "" | "lang" | "account" | "sort";
+  openMenu: OpenMenu;
   onOpenDetail: (dockId: string) => void;
   onSetSearchQuery: (query: string) => void;
   onSetSortMode: (mode: SortMode) => void;
   searchQuery: string;
-  setOpenMenu: (menu: "" | "lang" | "account" | "sort") => void;
+  setOpenMenu: (menu: OpenMenu) => void;
   sortMode: SortMode;
   sortedDocks: Dock[];
   t: (typeof TEXT)[Lang];

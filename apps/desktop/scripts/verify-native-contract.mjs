@@ -115,6 +115,17 @@ const sidecarBuildsStandalone =
   prepareSidecars.includes('PATH: "/usr/bin:/bin:/usr/sbin:/sbin"');
 const compiledCliCanStart = cli.includes("(import.meta as ImportMeta & { main?: boolean }).main === true");
 const macosOpenUsesAbsolutePath = rust.includes('Command::new("/usr/bin/open")');
+const desktopAppMenuUsesNativeCommands =
+  app.includes('type OpenMenu = "" | "app" | "lang" | "account" | "sort"') &&
+  app.includes("function appMenuGroups") &&
+  app.includes("<AppMenu") &&
+  app.includes('props.openMenu === "app"') &&
+  app.includes("onAppMenuCommand") &&
+  app.includes("await handleNativeMenu(id)");
+const desktopAppMenuHiddenOnMac =
+  app.includes("const isMac = props.windowControlPlatform === \"macos\"") &&
+  app.includes("{!isMac ? (") &&
+  app.includes("<AppMenu");
 
 const failures = [
   ...unhandledMenuIds.map((id) => `menu id is not handled in App.tsx: ${id}`),
@@ -173,6 +184,12 @@ const failures = [
     : []),
   ...(!macosOpenUsesAbsolutePath
     ? ["macOS open calls must use /usr/bin/open for Finder-launched app environments"]
+    : []),
+  ...(!desktopAppMenuUsesNativeCommands
+    ? ["desktop app menu must expose existing native menu commands through the titlebar"]
+    : []),
+  ...(!desktopAppMenuHiddenOnMac
+    ? ["desktop app menu must be hidden on macOS and visible on non-macOS titlebars"]
     : []),
   ...(forbiddenTitlebarDragCss
     ? ["CSS app-region drag is forbidden; use data-tauri-drag-region on the dedicated drag target instead"]
