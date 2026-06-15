@@ -6,8 +6,8 @@ import { arch, platform } from "node:os";
 import { fileURLToPath } from "node:url";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const workspaceRoot = resolve(appRoot, "..");
-const localCliRoot = join(workspaceRoot, "opendock");
+const repoRoot = resolve(appRoot, "../..");
+const localCliRoot = join(repoRoot, "packages", "cli");
 const localCliSource = join(localCliRoot, "bin", "opendock");
 const target = targetTriple();
 const source = resolveSource();

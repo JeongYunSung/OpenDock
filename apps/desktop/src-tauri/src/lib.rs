@@ -1008,13 +1008,14 @@ fn sidecar_cli_candidates() -> Vec<PathBuf> {
 
 fn local_cli_candidates() -> Vec<PathBuf> {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let workspace = manifest_dir
+    let repo_root = manifest_dir
         .parent()
+        .and_then(Path::parent)
         .and_then(Path::parent)
         .map(Path::to_path_buf);
     let mut candidates = Vec::new();
-    if let Some(workspace) = workspace {
-        candidates.push(workspace.join("opendock").join("bin").join("opendock"));
+    if let Some(repo_root) = repo_root {
+        candidates.push(repo_root.join("packages").join("cli").join("bin").join("opendock"));
     }
     candidates
 }

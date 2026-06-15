@@ -1,9 +1,25 @@
 # Changelog
 
-All notable OpenDock CLI changes are recorded here.
+All notable OpenDock CLI and desktop app changes are recorded here.
 
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
+
+## Unreleased
+
+### Changed
+
+- Split the repository into a monorepo with the CLI in `packages/cli` and the
+  desktop app in `apps/desktop`.
+- Imported the OpenDock desktop app history into this repository under
+  `apps/desktop`.
+- Updated CLI packaging workflow paths for the new package layout.
+- Added a desktop app build workflow for macOS and Windows release bundles.
+
+### Desktop App
+
+- Bundles the OpenDock CLI from `packages/cli/bin/opendock` as the Tauri sidecar.
+- Enables Tauri bundling so desktop installers can be produced from this repo.
 
 ## 0.1.19 - 2026-06-15
 

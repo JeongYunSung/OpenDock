@@ -29,6 +29,12 @@ bun run check:cli
 bun run verify:desktop
 ```
 
+## Releases
+
+- CLI package publishing is handled by `.github/workflows/publish-github-package.yml`.
+- Desktop bundles are built by `.github/workflows/build-desktop.yml` for macOS
+  and Windows, then attached as workflow artifacts and release assets.
+
 CLI-only development:
 
 ```bash

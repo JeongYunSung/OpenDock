@@ -3,7 +3,8 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import YAML from "yaml";
 
-const workflowPath = join(process.cwd(), ".github", "workflows", "publish-github-package.yml");
+const repoRoot = join(process.cwd(), "../..");
+const workflowPath = join(repoRoot, ".github", "workflows", "publish-github-package.yml");
 
 interface WorkflowStep {
   id?: string;
