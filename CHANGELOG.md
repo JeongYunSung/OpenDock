@@ -7,6 +7,24 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.22 - 2026-06-15
+
+### Changed
+
+- Verify Registry release metadata before downloading remote dock archives.
+- Harden remote archive extraction limits and dock workdir naming.
+- Harden browser login callback handling and token writes.
+
+### Desktop App
+
+- Restrict Registry asset URLs to the configured Registry origin.
+- Refresh desktop build tooling versions used by the app package.
+
+### Tests
+
+- Added regression coverage for release verification, browser login state checks,
+  token storage permissions, archive entry limits, and dock workdir collisions.
+
 ## 0.1.21 - 2026-06-15
 
 ### Added
