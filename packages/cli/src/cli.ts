@@ -38,6 +38,7 @@ import {
 import { type InstalledDockRecord, OpenDockStateStore } from "./core/domain/state-store.js";
 import { fileChecksum } from "./core/files/checksum.js";
 import { assertRegularOrMissing, safeJoin } from "./core/files/path-utils.js";
+import type { RuntimeProgressEvent } from "./core/runtime/progress.js";
 import { TaskRunner } from "./core/runtime/task-runner.js";
 import { appendRunLog, type RunStatus, readProjectLogs } from "./logging.js";
 import {
@@ -104,27 +105,20 @@ export async function run(argv = process.argv): Promise<void> {
         const platform = resolveCliPlatform(options.platform);
         const dockRef = parseInstallRef(dock);
         dockId = dockRef.id();
-        events.progress("resolve", `Resolving ${dockRef.id()}@${dockRef.requested()}`, 24, {
-          dockId,
-          version: dockRef.requested(),
-        });
-        events.progress("apply", `Applying ${dockRef.id()}`, 62, {
-          dockId,
-          version: dockRef.requested(),
-        });
         const report = await runMaybeQuietAsync(outputMode.machine, () =>
           installer.install({
             dockRef,
             force: options.force === true,
+            live: !outputMode.machine,
             projectDir: process.cwd(),
+            progress: runtimeProgressReporter(events),
             runTasks: true,
             operation: "install",
             phase: "install",
             platform,
-            live: !outputMode.machine,
           }),
         );
-        events.progress("record", `Recording ${report.dockId}@${report.version}`, 92, {
+        events.progress("record", `Recording ${report.dockId}@${report.version}`, 96, {
           dockId: report.dockId,
           level: "OK",
           version: report.version,
@@ -219,21 +213,9 @@ export async function run(argv = process.argv): Promise<void> {
           const dockRef = DockRef.parse(`${dock.id}@${updateTarget.latestVersion}`);
           const current = index + 1;
           events.progress(
-            "resolve",
-            `Resolving ${dock.id}: ${dock.version} -> ${updateTarget.latestVersion}`,
-            updateProgressPercent(index, updateTargets.length, 0.15),
-            {
-              current,
-              dockId: dock.id,
-              total: updateTargets.length,
-              version: updateTarget.latestVersion,
-            },
-          );
-          const resolved = await resolveDock(dockRef, updateTarget.platform);
-          events.progress(
-            "apply",
+            "target-start",
             `Updating ${dock.id}: ${dock.version} -> ${updateTarget.latestVersion}`,
-            updateProgressPercent(index, updateTargets.length, 0.55),
+            updateProgressPercent(index, updateTargets.length, 0.15),
             {
               current,
               dockId: dock.id,
@@ -245,13 +227,15 @@ export async function run(argv = process.argv): Promise<void> {
             installer.install({
               dockRef,
               force: options.force === true,
+              live: !outputMode.machine,
               projectDir: process.cwd(),
+              progress: runtimeProgressReporter(events, (percent) =>
+                updateNestedProgressPercent(index, updateTargets.length, percent),
+              ),
               runTasks: true,
               operation: "update",
               phase: "update",
               platform: updateTarget.platform,
-              resolve: () => resolved,
-              live: !outputMode.machine,
             }),
           );
           changeReports.push(
@@ -267,7 +251,7 @@ export async function run(argv = process.argv): Promise<void> {
           events.progress(
             "updated",
             `Updated ${report.dockId}@${report.version}`,
-            updateProgressPercent(index, updateTargets.length, 0.9),
+            updateProgressPercent(index, updateTargets.length, 0.98),
             {
               current,
               dockId: report.dockId,
@@ -338,16 +322,15 @@ export async function run(argv = process.argv): Promise<void> {
         events.progress("prepare", "Preparing uninstall", 8, optionalDockEventDetails(dockId));
         const parsedDockId = parseInstalledDockId(dock);
         dockId = parsedDockId;
-        events.progress("check", `Checking ${parsedDockId}`, 30, { dockId: parsedDockId });
-        events.progress("apply", `Removing ${parsedDockId}`, 70, { dockId: parsedDockId });
         const report = runMaybeQuiet(outputMode.machine, () =>
           installer.uninstall({
             dockId: parsedDockId,
             force: options.force === true,
+            progress: runtimeProgressReporter(events),
             projectDir: process.cwd(),
           }),
         );
-        events.progress("record", `Recording uninstall ${report.dockId}@${report.version}`, 92, {
+        events.progress("record", `Recording uninstall ${report.dockId}@${report.version}`, 96, {
           dockId: report.dockId,
           level: "OK",
           version: report.version,
@@ -1324,6 +1307,7 @@ interface ChangeEventProgressDetails {
   current?: number;
   dockId?: string;
   level?: "INFO" | "OK" | "RUN" | "WARN" | "ERR";
+  stepId?: string;
   total?: number;
   version?: string;
 }
@@ -1529,6 +1513,7 @@ function createChangeEventReporter(
         level: details.level ?? "RUN",
         ...(details.current === undefined ? {} : { current: details.current }),
         ...(details.dockId === undefined ? {} : { dockId: details.dockId }),
+        ...(details.stepId === undefined ? {} : { stepId: details.stepId }),
         ...(details.total === undefined ? {} : { total: details.total }),
         ...(details.version === undefined ? {} : { version: details.version }),
       });
@@ -1552,10 +1537,40 @@ function clampProgressPercent(percent: number): number {
   return Math.max(0, Math.min(100, Math.round(percent)));
 }
 
+function runtimeProgressReporter(
+  events: ChangeEventReporter,
+  mapPercent: (percent: number) => number = (percent) => percent,
+): (event: RuntimeProgressEvent) => void {
+  return (event) => {
+    relayRuntimeProgress(events, event, mapPercent);
+  };
+}
+
+function relayRuntimeProgress(
+  events: ChangeEventReporter,
+  event: RuntimeProgressEvent,
+  mapPercent: (percent: number) => number,
+): void {
+  events.progress(event.phase, event.message, mapPercent(event.percent ?? 50), {
+    ...(event.current === undefined ? {} : { current: event.current }),
+    ...(event.dockId === undefined ? {} : { dockId: event.dockId }),
+    ...(event.level === undefined ? {} : { level: event.level }),
+    ...(event.stepId === undefined ? {} : { stepId: event.stepId }),
+    ...(event.total === undefined ? {} : { total: event.total }),
+    ...(event.version === undefined ? {} : { version: event.version }),
+  });
+}
+
 function updateProgressPercent(index: number, total: number, phaseOffset: number): number {
   const slotCount = Math.max(total, 1);
   const slotSize = 48 / slotCount;
   return Math.min(90, Math.round(40 + slotSize * index + slotSize * phaseOffset));
+}
+
+function updateNestedProgressPercent(index: number, total: number, innerPercent: number): number {
+  const slotCount = Math.max(total, 1);
+  const slotSize = 48 / slotCount;
+  return Math.min(90, Math.round(40 + slotSize * index + (slotSize * innerPercent) / 100));
 }
 
 function optionalDockEventDetails(dockId: string | undefined): ChangeEventProgressDetails {
@@ -1595,7 +1610,12 @@ async function runMaybeQuietAsync<T>(quiet: boolean, fn: () => Promise<T>): Prom
     return fn();
   }
   const previous = console.log;
-  console.log = () => {};
+  console.log = (...args: unknown[]) => {
+    const line = args.map((arg) => String(arg)).join(" ");
+    if (isOpenDockEventOutputLine(line)) {
+      previous(...args);
+    }
+  };
   try {
     return await fn();
   } finally {
@@ -1608,11 +1628,25 @@ function runMaybeQuiet<T>(quiet: boolean, fn: () => T): T {
     return fn();
   }
   const previous = console.log;
-  console.log = () => {};
+  console.log = (...args: unknown[]) => {
+    const line = args.map((arg) => String(arg)).join(" ");
+    if (isOpenDockEventOutputLine(line)) {
+      previous(...args);
+    }
+  };
   try {
     return fn();
   } finally {
     console.log = previous;
+  }
+}
+
+function isOpenDockEventOutputLine(line: string): boolean {
+  try {
+    const value = JSON.parse(line);
+    return value?.opendock === 1 && typeof value.type === "string";
+  } catch {
+    return false;
   }
 }
 

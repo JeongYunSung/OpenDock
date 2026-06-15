@@ -118,6 +118,12 @@ struct OpenDockListResult {
     docks: Vec<InstalledDock>,
 }
 
+#[derive(Serialize)]
+struct ShortcutFileResult {
+    path: String,
+    contents: String,
+}
+
 #[tauri::command]
 fn pick_project_folder() -> Option<ProjectFolder> {
     let path = rfd::FileDialog::new()
@@ -187,43 +193,52 @@ fn opendock_save_app_state(state: DesktopAppState) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn opendock_install(
+async fn opendock_install(
     app: tauri::AppHandle,
     project_dir: String,
     dock_ref: String,
     command_id: Option<String>,
 ) -> Result<OpenDockCommandResult, String> {
     validate_dock_ref(&dock_ref)?;
-    run_opendock_streaming(
-        &app,
-        Some(&project_dir),
-        &["install", &dock_ref, "--events"],
-        command_id.as_deref(),
+    run_opendock_streaming_blocking(
+        app,
+        Some(project_dir),
+        vec!["install".to_string(), dock_ref, "--events".to_string()],
+        command_id,
     )
+    .await
 }
 
 #[tauri::command]
-fn opendock_update(
+async fn opendock_update(
     app: tauri::AppHandle,
     project_dir: String,
     command_id: Option<String>,
     force: Option<bool>,
 ) -> Result<OpenDockCommandResult, String> {
     let args = if force.unwrap_or(false) {
-        vec!["update", "--events", "--force"]
+        vec![
+            "update".to_string(),
+            "--events".to_string(),
+            "--force".to_string(),
+        ]
     } else {
-        vec!["update", "--events"]
+        vec!["update".to_string(), "--events".to_string()]
     };
-    run_opendock_streaming(&app, Some(&project_dir), &args, command_id.as_deref())
+    run_opendock_streaming_blocking(app, Some(project_dir), args, command_id).await
 }
 
 #[tauri::command]
-fn opendock_outdated(project_dir: String) -> Result<OpenDockCommandResult, String> {
-    run_opendock(Some(&project_dir), &["outdated", "--json"])
+async fn opendock_outdated(project_dir: String) -> Result<OpenDockCommandResult, String> {
+    run_opendock_blocking(
+        Some(project_dir),
+        vec!["outdated".to_string(), "--json".to_string()],
+    )
+    .await
 }
 
 #[tauri::command]
-fn opendock_uninstall(
+async fn opendock_uninstall(
     app: tauri::AppHandle,
     project_dir: String,
     dock_id: String,
@@ -231,25 +246,31 @@ fn opendock_uninstall(
     force: Option<bool>,
 ) -> Result<OpenDockCommandResult, String> {
     validate_dock_id(&dock_id)?;
-    let mut args = vec!["uninstall", dock_id.as_str(), "--events"];
+    let mut args = vec!["uninstall".to_string(), dock_id, "--events".to_string()];
     if force.unwrap_or(false) {
-        args.push("--force");
+        args.push("--force".to_string());
     }
-    run_opendock_streaming(&app, Some(&project_dir), &args, command_id.as_deref())
+    run_opendock_streaming_blocking(app, Some(project_dir), args, command_id).await
 }
 
 #[tauri::command]
-fn opendock_doctor(
+async fn opendock_doctor(
     app: tauri::AppHandle,
     project_dir: String,
     command_id: Option<String>,
 ) -> Result<OpenDockCommandResult, String> {
-    run_opendock_streaming(&app, Some(&project_dir), &["doctor"], command_id.as_deref())
+    run_opendock_streaming_blocking(
+        app,
+        Some(project_dir),
+        vec!["doctor".to_string()],
+        command_id,
+    )
+    .await
 }
 
 #[tauri::command]
-fn opendock_log(project_dir: String) -> Result<OpenDockCommandResult, String> {
-    run_opendock(Some(&project_dir), &["log"])
+async fn opendock_log(project_dir: String) -> Result<OpenDockCommandResult, String> {
+    run_opendock_blocking(Some(project_dir), vec!["log".to_string()]).await
 }
 
 #[tauri::command]
@@ -270,23 +291,32 @@ fn opendock_cancel_command(
 }
 
 #[tauri::command]
-fn opendock_auth_login(provider: String) -> Result<OpenDockCommandResult, String> {
+async fn opendock_auth_login(provider: String) -> Result<OpenDockCommandResult, String> {
     let provider = match provider.as_str() {
         "gmail" | "google" => "google",
         "github" => "github",
         _ => return Err("auth provider must be google or github".to_string()),
     };
-    run_opendock(None, &["auth", "login", "--provider", provider])
+    run_opendock_blocking(
+        None,
+        vec![
+            "auth".to_string(),
+            "login".to_string(),
+            "--provider".to_string(),
+            provider.to_string(),
+        ],
+    )
+    .await
 }
 
 #[tauri::command]
-fn opendock_auth_status() -> Result<OpenDockCommandResult, String> {
-    run_opendock(None, &["auth", "status"])
+async fn opendock_auth_status() -> Result<OpenDockCommandResult, String> {
+    run_opendock_blocking(None, vec!["auth".to_string(), "status".to_string()]).await
 }
 
 #[tauri::command]
-fn opendock_auth_session() -> Result<AuthSession, String> {
-    let raw = run_opendock(None, &["auth", "status"])?;
+async fn opendock_auth_session() -> Result<AuthSession, String> {
+    let raw = run_opendock_blocking(None, vec!["auth".to_string(), "status".to_string()]).await?;
     let email = parse_auth_email(&raw.stdout);
     Ok(AuthSession {
         logged_in: raw.success && email.is_some(),
@@ -297,8 +327,8 @@ fn opendock_auth_session() -> Result<AuthSession, String> {
 }
 
 #[tauri::command]
-fn opendock_auth_logout() -> Result<OpenDockCommandResult, String> {
-    run_opendock(None, &["auth", "logout"])
+async fn opendock_auth_logout() -> Result<OpenDockCommandResult, String> {
+    run_opendock_blocking(None, vec!["auth".to_string(), "logout".to_string()]).await
 }
 
 #[tauri::command]
@@ -347,8 +377,12 @@ async fn opendock_dock_versions(dock_id: String) -> Result<Value, String> {
 }
 
 #[tauri::command]
-fn opendock_project_state(project_dir: String) -> Result<ProjectStateResult, String> {
-    let result = run_opendock(Some(&project_dir), &["list", "--json"])?;
+async fn opendock_project_state(project_dir: String) -> Result<ProjectStateResult, String> {
+    let result = run_opendock_blocking(
+        Some(project_dir),
+        vec!["list".to_string(), "--json".to_string()],
+    )
+    .await?;
     if !result.success {
         return Err(command_failure_message(&result));
     }
@@ -363,6 +397,50 @@ fn opendock_project_state(project_dir: String) -> Result<ProjectStateResult, Str
         lock_path: list.lock_path,
         docks: list.docks,
     })
+}
+
+#[tauri::command]
+fn opendock_import_shortcuts() -> Result<Option<ShortcutFileResult>, String> {
+    let Some(path) = rfd::FileDialog::new()
+        .set_title("Import OpenDock shortcuts")
+        .add_filter("JSON", &["json"])
+        .pick_file()
+    else {
+        return Ok(None);
+    };
+    let metadata = fs::metadata(&path)
+        .map_err(|error| format!("failed to read shortcut file metadata: {error}"))?;
+    if metadata.len() > 64 * 1024 {
+        return Err("shortcut file is too large".to_string());
+    }
+    let contents = fs::read_to_string(&path)
+        .map_err(|error| format!("failed to read shortcut file: {error}"))?;
+    serde_json::from_str::<Value>(&contents)
+        .map_err(|error| format!("shortcut file is not valid JSON: {error}"))?;
+    Ok(Some(ShortcutFileResult {
+        path: path.to_string_lossy().to_string(),
+        contents,
+    }))
+}
+
+#[tauri::command]
+fn opendock_export_shortcuts(contents: String) -> Result<Option<String>, String> {
+    if contents.len() > 64 * 1024 {
+        return Err("shortcut file is too large".to_string());
+    }
+    serde_json::from_str::<Value>(&contents)
+        .map_err(|error| format!("shortcut export is not valid JSON: {error}"))?;
+    let Some(path) = rfd::FileDialog::new()
+        .set_title("Export OpenDock shortcuts")
+        .set_file_name("opendock-shortcuts.json")
+        .add_filter("JSON", &["json"])
+        .save_file()
+    else {
+        return Ok(None);
+    };
+    fs::write(&path, contents)
+        .map_err(|error| format!("failed to write shortcut file: {error}"))?;
+    Ok(Some(path.to_string_lossy().to_string()))
 }
 
 #[tauri::command]
@@ -421,6 +499,8 @@ pub fn run() {
             opendock_dock_detail,
             opendock_dock_versions,
             opendock_project_state,
+            opendock_import_shortcuts,
+            opendock_export_shortcuts,
             open_project_folder,
             open_external_url
         ])
@@ -432,19 +512,14 @@ fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<R
     let quit = MenuItem::with_id(app, "app:quit", "Quit OpenDock", true, Some("CmdOrCtrl+Q"))?;
     let app_menu = Submenu::with_items(app, "OpenDock", true, &[&quit])?;
 
-    let new_project = MenuItem::with_id(
-        app,
-        "file:new-project",
-        "New Project",
-        true,
-        Some("CmdOrCtrl+N"),
-    )?;
+    let new_project =
+        MenuItem::with_id(app, "file:new-project", "New Project", true, None::<&str>)?;
     let add_existing = MenuItem::with_id(
         app,
         "file:add-existing-project",
         "Add Existing Project",
         true,
-        Some("CmdOrCtrl+O"),
+        None::<&str>,
     )?;
     let file_menu = Submenu::with_items(app, "File", true, &[&new_project, &add_existing])?;
 
@@ -462,30 +537,41 @@ fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<R
         true,
         Some("CmdOrCtrl+Shift+C"),
     )?;
+    let import_shortcuts = MenuItem::with_id(
+        app,
+        "edit:import-shortcuts",
+        "Import Shortcuts...",
+        true,
+        None::<&str>,
+    )?;
+    let export_shortcuts = MenuItem::with_id(
+        app,
+        "edit:export-shortcuts",
+        "Export Shortcuts...",
+        true,
+        None::<&str>,
+    )?;
     let edit_sep = PredefinedMenuItem::separator(app)?;
     let select_all = PredefinedMenuItem::select_all(app, None)?;
     let edit_menu = Submenu::with_items(
         app,
         "Edit",
         true,
-        &[&rename_project, &copy_project_path, &edit_sep, &select_all],
+        &[
+            &rename_project,
+            &copy_project_path,
+            &import_shortcuts,
+            &export_shortcuts,
+            &edit_sep,
+            &select_all,
+        ],
     )?;
 
-    let explore_docks = MenuItem::with_id(
-        app,
-        "view:explore",
-        "Explore Docks",
-        true,
-        Some("CmdOrCtrl+1"),
-    )?;
-    let installed_docks = MenuItem::with_id(
-        app,
-        "view:installed",
-        "Installed Docks",
-        true,
-        Some("CmdOrCtrl+2"),
-    )?;
-    let logs = MenuItem::with_id(app, "view:logs", "Logs", true, Some("CmdOrCtrl+3"))?;
+    let explore_docks =
+        MenuItem::with_id(app, "view:explore", "Explore Docks", true, None::<&str>)?;
+    let installed_docks =
+        MenuItem::with_id(app, "view:installed", "Installed Docks", true, None::<&str>)?;
+    let logs = MenuItem::with_id(app, "view:logs", "Logs", true, None::<&str>)?;
     let toggle_sidebar = MenuItem::with_id(
         app,
         "view:toggle-sidebar",
@@ -512,7 +598,7 @@ fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<R
         "project:update-docks",
         "Update Docks",
         true,
-        Some("CmdOrCtrl+U"),
+        None::<&str>,
     )?;
     let open_folder = MenuItem::with_id(
         app,
@@ -548,20 +634,14 @@ fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<R
         ],
     )?;
 
-    let install_dock = MenuItem::with_id(
-        app,
-        "dock:install",
-        "Install Dock",
-        true,
-        Some("CmdOrCtrl+Return"),
-    )?;
+    let install_dock = MenuItem::with_id(app, "dock:install", "Install Dock", true, None::<&str>)?;
     let delete_dock = MenuItem::with_id(app, "dock:delete", "Delete Dock", true, None::<&str>)?;
     let refresh_registry = MenuItem::with_id(
         app,
         "dock:refresh-registry",
         "Refresh Registry",
         true,
-        Some("CmdOrCtrl+R"),
+        None::<&str>,
     )?;
     let open_dock_detail = MenuItem::with_id(
         app,
@@ -728,6 +808,37 @@ fn parse_auth_email(stdout: &str) -> Option<String> {
         .find_map(|line| line.trim().strip_prefix("Logged in as "))
         .map(|value| value.trim().trim_end_matches('.').to_string())
         .filter(|value| value.contains('@'))
+}
+
+async fn run_opendock_blocking(
+    project_dir: Option<String>,
+    args: Vec<String>,
+) -> Result<OpenDockCommandResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let arg_refs = args.iter().map(String::as_str).collect::<Vec<_>>();
+        run_opendock(project_dir.as_deref(), &arg_refs)
+    })
+    .await
+    .map_err(|error| format!("opendock background task failed: {error}"))?
+}
+
+async fn run_opendock_streaming_blocking(
+    app: tauri::AppHandle,
+    project_dir: Option<String>,
+    args: Vec<String>,
+    command_id: Option<String>,
+) -> Result<OpenDockCommandResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let arg_refs = args.iter().map(String::as_str).collect::<Vec<_>>();
+        run_opendock_streaming(
+            &app,
+            project_dir.as_deref(),
+            &arg_refs,
+            command_id.as_deref(),
+        )
+    })
+    .await
+    .map_err(|error| format!("opendock background task failed: {error}"))?
 }
 
 fn run_opendock(project_dir: Option<&str>, args: &[&str]) -> Result<OpenDockCommandResult, String> {

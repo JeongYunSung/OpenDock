@@ -43,11 +43,12 @@ const blankProjectHasInFlightGuard =
   app.includes("blankProjectCreatingRef.current = false;");
 const logCommandBody = extractFunctionBody(rust, "fn opendock_log");
 const logCommandIsNonStreaming =
-  logCommandBody.includes('run_opendock(Some(&project_dir), &["log"])') &&
+  logCommandBody.includes("run_opendock_blocking") &&
+  logCommandBody.includes('"log".to_string()') &&
   !logCommandBody.includes("run_opendock_streaming");
 const appParsesHistoricalLogLines =
   app.includes("function parseOpenDockHistoryLine") &&
-  app.includes("setLogs(result.lines.map(commandLineLogEntry))");
+  app.includes("setLogs(result.lines.slice(-MAX_STORED_LOGS).map(commandLineLogEntry))");
 const registryRequestsBypassCache =
   rust.includes("reqwest::header::CACHE_CONTROL") &&
   rust.includes("reqwest::header::PRAGMA") &&
@@ -65,14 +66,36 @@ const installedViewPollsProjectState =
   app.includes("window.setInterval(refreshInstalledProjectState, 5000)") &&
   app.includes("await refreshProjectState(project, { silent: true })");
 const changeCommandsUseEvents =
-  rust.includes('&["install", &dock_ref, "--events"]') &&
-  rust.includes('vec!["update", "--events"') &&
-  rust.includes('vec!["uninstall", dock_id.as_str(), "--events"]');
+  rust.includes('"install".to_string(),') &&
+  rust.includes("dock_ref") &&
+  rust.includes('"update".to_string()') &&
+  rust.includes('"uninstall".to_string()') &&
+  (rust.match(/"--events"\.to_string\(\)/g) ?? []).length >= 3;
 const commandProgressBridge =
   rust.includes('app.emit("opendock-command-progress"') &&
   rust.includes("command_progress_from_event_line") &&
   app.includes('listen<OpenDockCommandProgress>("opendock-command-progress"') &&
   app.includes("applyCommandProgressToTask(progress)");
+const blockingCliCommandsUseBackgroundRuntime = [
+  "opendock_install",
+  "opendock_update",
+  "opendock_outdated",
+  "opendock_uninstall",
+  "opendock_doctor",
+  "opendock_log",
+  "opendock_auth_login",
+  "opendock_auth_status",
+  "opendock_auth_session",
+  "opendock_auth_logout",
+  "opendock_project_state",
+].every((signature) => {
+  const body = extractFunctionBody(rust, `fn ${signature}`);
+  return body.includes("run_opendock_blocking") || body.includes("run_opendock_streaming_blocking");
+});
+const logStorageIsCapped =
+  app.includes("const MAX_STORED_LOGS = 400") &&
+  app.includes("result.lines.slice(-MAX_STORED_LOGS)") &&
+  app.includes("current.length - (MAX_STORED_LOGS - 1)");
 
 const failures = [
   ...unhandledMenuIds.map((id) => `menu id is not handled in App.tsx: ${id}`),
@@ -113,6 +136,10 @@ const failures = [
   ...(!commandProgressBridge
     ? ["desktop app must bridge opendock progress events into the command progress dialog"]
     : []),
+  ...(!blockingCliCommandsUseBackgroundRuntime
+    ? ["blocking opendock CLI commands must run through the background runtime"]
+    : []),
+  ...(!logStorageIsCapped ? ["app logs must be capped before rendering and persisting"] : []),
   ...(forbiddenTitlebarDragCss
     ? ["CSS app-region drag is forbidden; use data-tauri-drag-region on the dedicated drag target instead"]
     : [])

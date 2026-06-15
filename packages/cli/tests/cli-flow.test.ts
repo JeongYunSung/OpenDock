@@ -671,8 +671,23 @@ describe("opendock TypeScript CLI", () => {
   it("prints JSONL install events with the final change result", async () => {
     const docks = tempDir();
     const project = tempDir();
+    const bin = tempDir();
+    writeFakeOma(bin);
     writeDock(docks, "test", "designer", "1.0.0", {
       files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+      tasks: {
+        install: [
+          {
+            export: {
+              exclude: [],
+              include: ["CLAUDE.md"],
+            },
+            id: "apply-oma",
+            run: "oma -y install",
+            workdir: "dock",
+          },
+        ],
+      },
     });
     const registry = mockRegistry([
       {
@@ -685,26 +700,34 @@ describe("opendock TypeScript CLI", () => {
     ]);
 
     try {
-      const logs = await withCwd(project, () =>
-        captureConsole(() =>
-          runCli([
-            "bun",
-            "opendock",
-            "install",
-            "test/designer@1.0.0",
-            "--platform",
-            "macos",
-            "--events",
-          ]),
+      const logs = await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+        withCwd(project, () =>
+          captureConsole(() =>
+            runCli([
+              "bun",
+              "opendock",
+              "install",
+              "test/designer@1.0.0",
+              "--platform",
+              "macos",
+              "--events",
+            ]),
+          ),
         ),
       );
       const events = parseJsonLines(logs);
       const result = events.at(-1);
 
       expect(events.every((event) => event.opendock === 1)).toBe(true);
-      expect(events.some((event) => event.type === "progress" && event.phase === "apply")).toBe(
+      expect(
+        events.some((event) => event.type === "progress" && event.phase === "resolve-start"),
+      ).toBe(true);
+      expect(events.some((event) => event.type === "progress" && event.phase === "task-run")).toBe(
         true,
       );
+      expect(
+        events.some((event) => event.type === "progress" && event.phase === "file-applied"),
+      ).toBe(true);
       expect(result).toMatchObject({
         operation: "install",
         success: true,
@@ -714,6 +737,64 @@ describe("opendock TypeScript CLI", () => {
         dockId: "test/designer",
         status: "installed",
         version: "1.0.0",
+      });
+    } finally {
+      registry.restore();
+    }
+  });
+
+  it("prints JSONL update events from internal update stages", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent v1\n" }],
+    });
+    writeDock(docks, "test", "designer", "1.0.1", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent v2\n" }],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/designer@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    const registry = mockRegistry([
+      {
+        archive: await createDockArchive(docks, "test", "designer", "1.0.1"),
+        id: "test/designer",
+        latest: true,
+        platform: "macos",
+        version: "1.0.1",
+      },
+    ]);
+
+    try {
+      const logs = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "update", "--events"])),
+      );
+      const events = parseJsonLines(logs);
+      const result = events.at(-1);
+
+      expect(
+        events.some((event) => event.type === "progress" && event.phase === "resolve-start"),
+      ).toBe(true);
+      expect(
+        events.some((event) => event.type === "progress" && event.phase === "file-applied"),
+      ).toBe(true);
+      expect(result).toMatchObject({
+        operation: "update",
+        success: true,
+        type: "result",
+      });
+      expect(result?.result?.reports?.[0]).toMatchObject({
+        dockId: "test/designer",
+        status: "updated",
+        version: "1.0.1",
       });
     } finally {
       registry.restore();
@@ -788,7 +869,9 @@ describe("opendock TypeScript CLI", () => {
     const events = parseJsonLines(logs);
     const result = events.at(-1);
 
-    expect(events.some((event) => event.type === "progress" && event.phase === "apply")).toBe(true);
+    expect(
+      events.some((event) => event.type === "progress" && event.phase === "file-applied"),
+    ).toBe(true);
     expect(result).toMatchObject({
       operation: "uninstall",
       success: true,

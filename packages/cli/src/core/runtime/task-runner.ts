@@ -12,6 +12,7 @@ import {
   failureMessage,
   satisfiesVersion,
 } from "./command-runner.js";
+import { type ProgressReporter, reportProgress } from "./progress.js";
 import { RequirementRunner } from "./requirement-runner.js";
 
 export interface StepReport {
@@ -32,6 +33,7 @@ export interface TaskContext {
   phase: TaskPhase;
   platform?: OpenDockPlatform;
   live?: boolean;
+  progress?: ProgressReporter;
 }
 
 const defaultDoctorTimeoutMs = 30_000;
@@ -47,12 +49,25 @@ export class TaskRunner {
     const platform = context.platform ?? detectPlatform();
     assertManifestSupportsPlatform(manifest, platform);
     const requirementReports = this.requirementRunner.run(manifest, {
+      dockId: context.dockId,
       phase: context.phase,
       platform,
       projectDir: context.projectDir,
       ...(context.live === undefined ? {} : { live: context.live }),
+      ...(context.progress === undefined ? {} : { progress: context.progress }),
     });
     const steps = selectTaskSteps(manifest.tasks[context.phase] ?? [], platform);
+    reportProgress(context.progress, {
+      level: "RUN",
+      message:
+        steps.length === 0
+          ? `No ${context.phase} task steps`
+          : `Planned ${steps.length} ${context.phase} task step(s)`,
+      percent: steps.length === 0 ? 100 : 5,
+      phase: "tasks-plan",
+      total: steps.length,
+      ...(context.dockId === undefined ? {} : { dockId: context.dockId }),
+    });
     if (context.phase === "doctor") {
       const result = this.runDoctorSteps(steps, context, platform);
       return { reports: [...requirementReports, ...result.reports], exports: result.exports };
@@ -72,14 +87,36 @@ export class TaskRunner {
   ): TaskRunResult {
     const reports: StepReport[] = [];
     const exports: FileCandidate[] = [];
-    for (const step of steps) {
+    for (const [index, step] of steps.entries()) {
+      const current = index + 1;
+      const total = steps.length;
       const cwd = this.resolveWorkdir(step, context.projectDir, context.dockId);
+      this.progress(context, step, "task-check", `Checking ${step.id}`, current, total, 0.12);
       const checkResult = step.check
         ? this.evaluateStepCheck(step, cwd, platform)
         : { passed: false };
       if (checkResult.passed) {
         console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(step.id)}: ready`);
+        this.progress(
+          context,
+          step,
+          "task-ready",
+          `${step.id} is ready`,
+          current,
+          total,
+          0.9,
+          "OK",
+        );
         reports.push({ id: step.id, name: stepName(step), status: "Ready" });
+        this.progress(
+          context,
+          step,
+          "task-export",
+          `Collecting exports for ${step.id}`,
+          current,
+          total,
+          0.95,
+        );
         exports.push(...this.collectStepExports(step, cwd));
         continue;
       }
@@ -90,6 +127,7 @@ export class TaskRunner {
             step.run,
           )}`,
         );
+        this.progress(context, step, "task-run", `Running ${step.id}`, current, total, 0.35);
         const runOptions = {
           cwd,
           live: context.live ?? true,
@@ -100,10 +138,21 @@ export class TaskRunner {
         if (!result.success) {
           reports.push({ id: step.id, name: stepName(step), status: "Failed" });
           const message = failureMessage(result);
+          this.progress(
+            context,
+            step,
+            "task-failed",
+            message ? `${step.id} failed: ${message}` : `${step.id} failed`,
+            current,
+            total,
+            0.65,
+            "ERR",
+          );
           const suffix = message ? `: ${message}` : "";
           throw new Error(`step \`${step.id}\` exited with non-zero status${suffix}`);
         }
         if (step.check) {
+          this.progress(context, step, "task-verify", `Verifying ${step.id}`, current, total, 0.75);
           const postRunCheck = this.evaluateStepCheck(step, cwd, platform);
           if (!postRunCheck.passed) {
             const report: StepReport = { id: step.id, name: stepName(step), status: "Failed" };
@@ -111,16 +160,60 @@ export class TaskRunner {
               report.message = postRunCheck.message;
             }
             reports.push(report);
+            this.progress(
+              context,
+              step,
+              "task-failed",
+              postRunCheck.message
+                ? `${step.id} verification failed: ${postRunCheck.message}`
+                : `${step.id} verification failed`,
+              current,
+              total,
+              0.8,
+              "ERR",
+            );
             const message = postRunCheck.message ? `: ${postRunCheck.message}` : "";
             throw new Error(`step \`${step.id}\` did not satisfy its check after run${message}`);
           }
         }
         console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(step.id)}: ran`);
+        this.progress(context, step, "task-ran", `${step.id} ran`, current, total, 0.9, "OK");
         reports.push({ id: step.id, name: stepName(step), status: "Ran" });
+        this.progress(
+          context,
+          step,
+          "task-export",
+          `Collecting exports for ${step.id}`,
+          current,
+          total,
+          0.95,
+        );
         exports.push(...this.collectStepExports(step, cwd));
       }
     }
     return { reports, exports };
+  }
+
+  private progress(
+    context: TaskContext,
+    step: TaskStep,
+    phase: string,
+    message: string,
+    current: number,
+    total: number,
+    offset: number,
+    level: "ERR" | "OK" | "RUN" = "RUN",
+  ): void {
+    reportProgress(context.progress, {
+      current,
+      level,
+      message,
+      percent: stepProgressPercent(current, total, offset),
+      phase,
+      stepId: step.id,
+      total,
+      ...(context.dockId === undefined ? {} : { dockId: context.dockId }),
+    });
   }
 
   private runDoctorSteps(
@@ -275,4 +368,10 @@ function selectTaskSteps(steps: TaskStep[], platform: OpenDockPlatform): TaskSte
 
 function stepName(step: TaskStep): string {
   return step.name ?? step.id;
+}
+
+function stepProgressPercent(current: number, total: number, offset: number): number {
+  const slotCount = Math.max(total, 1);
+  const slotSize = 100 / slotCount;
+  return Math.min(98, Math.round(slotSize * (current - 1 + offset)));
 }

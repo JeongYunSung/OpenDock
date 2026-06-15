@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "shortcuts": {
+    "command.palette": {
+      "label": {
+        "ko": "명령 팔레트",
+        "en": "Command Palette"
+      },
+      "description": {
+        "ko": "명령을 검색해 실행합니다.",
+        "en": "Search and run commands."
+      },
+      "mac": "Meta+K",
+      "windows": "Ctrl+K",
+      "editable": true
+    },
+    "project.new": {
+      "label": {
+        "ko": "새 프로젝트",
+        "en": "New Project"
+      },
+      "description": {
+        "ko": "빈 프로젝트를 만듭니다.",
+        "en": "Create an empty project."
+      },
+      "mac": "Meta+N",
+      "windows": "Ctrl+N",
+      "editable": true
+    },
+    "project.open": {
+      "label": {
+        "ko": "기존 프로젝트 추가",
+        "en": "Add Existing Project"
+      },
+      "description": {
+        "ko": "로컬 폴더를 프로젝트로 추가합니다.",
+        "en": "Add a local folder as a project."
+      },
+      "mac": "Meta+O",
+      "windows": "Ctrl+O",
+      "editable": true
+    },
+    "project.switch": {
+      "label": {
+        "ko": "프로젝트 전환",
+        "en": "Switch Project"
+      },
+      "description": {
+        "ko": "등록된 프로젝트 목록을 엽니다.",
+        "en": "Open the registered project switcher."
+      },
+      "mac": "Meta+Shift+O",
+      "windows": "Ctrl+Shift+O",
+      "editable": true
+    },
+    "nav.explore": {
+      "label": {
+        "ko": "탐색",
+        "en": "Explore"
+      },
+      "description": {
+        "ko": "도크 탐색 화면으로 이동합니다.",
+        "en": "Go to the dock Explore view."
+      },
+      "mac": "Meta+1",
+      "windows": "Ctrl+1",
+      "editable": true
+    },
+    "nav.installed": {
+      "label": {
+        "ko": "설치됨",
+        "en": "Installed"
+      },
+      "description": {
+        "ko": "설치된 도크 화면으로 이동합니다.",
+        "en": "Go to the Installed view."
+      },
+      "mac": "Meta+2",
+      "windows": "Ctrl+2",
+      "editable": true
+    },
+    "nav.logs": {
+      "label": {
+        "ko": "로그",
+        "en": "Logs"
+      },
+      "description": {
+        "ko": "프로젝트 로그 화면으로 이동합니다.",
+        "en": "Go to the project Logs view."
+      },
+      "mac": "Meta+3",
+      "windows": "Ctrl+3",
+      "editable": true
+    },
+    "project.updateAll": {
+      "label": {
+        "ko": "전체 업데이트",
+        "en": "Update All"
+      },
+      "description": {
+        "ko": "현재 프로젝트의 도크를 업데이트합니다.",
+        "en": "Update docks in the active project."
+      },
+      "mac": "Meta+U",
+      "windows": "Ctrl+U",
+      "editable": true
+    },
+    "dock.refresh": {
+      "label": {
+        "ko": "Registry 새로고침",
+        "en": "Refresh Registry"
+      },
+      "description": {
+        "ko": "도크 목록을 다시 가져옵니다.",
+        "en": "Refresh the dock catalog."
+      },
+      "mac": "Meta+R",
+      "windows": "Ctrl+R",
+      "editable": true
+    },
+    "dock.install": {
+      "label": {
+        "ko": "도크 설치",
+        "en": "Install Dock"
+      },
+      "description": {
+        "ko": "상세 화면의 도크를 설치합니다.",
+        "en": "Install the dock shown in detail."
+      },
+      "mac": "Meta+Enter",
+      "windows": "Ctrl+Enter",
+      "editable": true
+    }
+  }
+}

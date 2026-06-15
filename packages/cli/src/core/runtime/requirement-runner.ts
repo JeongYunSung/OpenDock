@@ -8,12 +8,15 @@ import {
   failureMessage,
   satisfiesVersion,
 } from "./command-runner.js";
+import { type ProgressReporter, reportProgress } from "./progress.js";
 import type { StepReport } from "./task-runner.js";
 
 interface RequirementContext {
+  dockId?: string;
   live?: boolean;
   phase: TaskPhase;
   platform?: OpenDockPlatform;
+  progress?: ProgressReporter;
   projectDir: string;
 }
 
@@ -79,8 +82,11 @@ export class RequirementRunner {
   run(manifest: DockManifest, context: RequirementContext): StepReport[] {
     const platform = context.platform ?? detectPlatform();
     const reports: StepReport[] = [];
-    for (const [runtime, version] of Object.entries(manifest.requires.runtimes)) {
-      reports.push(this.runRuntime(runtime, version, context, platform));
+    const runtimes = Object.entries(manifest.requires.runtimes);
+    for (const [index, [runtime, version]] of runtimes.entries()) {
+      reports.push(
+        this.runRuntime(runtime, version, context, platform, index + 1, runtimes.length),
+      );
     }
     return reports;
   }
@@ -90,12 +96,21 @@ export class RequirementRunner {
     version: string,
     context: RequirementContext,
     platform: OpenDockPlatform,
+    current: number,
+    total: number,
   ): StepReport {
     const definition = runtimeDefinitions[runtime];
     const id = `require-runtime-${runtime}`;
     if (!definition) {
       throw new Error(`unsupported required runtime \`${runtime}\``);
     }
+    this.progress(context, {
+      current,
+      id,
+      message: `Checking ${runtime} ${version}`,
+      phase: "requirement-check",
+      total,
+    });
     const check = this.evaluate(definition.check, version, context.projectDir, platform);
     if (context.phase === "doctor") {
       return check.passed
@@ -104,6 +119,14 @@ export class RequirementRunner {
     }
     if (check.passed) {
       console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(id)}: ready`);
+      this.progress(context, {
+        current,
+        id,
+        level: "OK",
+        message: `${runtime} is ready`,
+        phase: "requirement-ready",
+        total,
+      });
       return { id, name: runtime, status: "Ready" };
     }
 
@@ -116,15 +139,61 @@ export class RequirementRunner {
     console.log(
       `${formatStepSymbol("->")} ${terminalStyle.bold(id)}: ${terminalStyle.dim(install)}`,
     );
+    this.progress(context, {
+      current,
+      id,
+      message: `Installing ${runtime}`,
+      phase: "requirement-install",
+      total,
+    });
     this.runInstaller(id, install, context, platform);
     const verify = this.evaluate(definition.check, version, context.projectDir, platform);
     if (!verify.passed) {
+      this.progress(context, {
+        current,
+        id,
+        level: "ERR",
+        message: `${runtime} requirement failed`,
+        phase: "requirement-failed",
+        total,
+      });
       throw new Error(
         `requirement \`${id}\` did not satisfy its check after install: ${verify.message}`,
       );
     }
     console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(id)}: ran`);
+    this.progress(context, {
+      current,
+      id,
+      level: "OK",
+      message: `${runtime} installed`,
+      phase: "requirement-ran",
+      total,
+    });
     return { id, name: runtime, status: "Ran" };
+  }
+
+  private progress(
+    context: RequirementContext,
+    event: {
+      current: number;
+      id: string;
+      level?: "ERR" | "OK" | "RUN";
+      message: string;
+      phase: string;
+      total: number;
+    },
+  ): void {
+    reportProgress(context.progress, {
+      current: event.current,
+      level: event.level ?? "RUN",
+      message: event.message,
+      percent: stepProgressPercent(event.current, event.total, event.level === "OK" ? 0.9 : 0.2),
+      phase: event.phase,
+      stepId: event.id,
+      total: event.total,
+      ...(context.dockId === undefined ? {} : { dockId: context.dockId }),
+    });
   }
 
   private runInstaller(
@@ -177,4 +246,10 @@ function failedReport(id: string, name: string, message: string): StepReport {
     status: "Failed",
     message,
   };
+}
+
+function stepProgressPercent(current: number, total: number, offset: number): number {
+  const slotCount = Math.max(total, 1);
+  const slotSize = 100 / slotCount;
+  return Math.min(98, Math.round(slotSize * (current - 1 + offset)));
 }

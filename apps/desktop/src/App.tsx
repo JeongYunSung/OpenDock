@@ -1,7 +1,19 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { useEffect, useLayoutEffect, useRef, useState, type Dispatch, type FormEvent, type MouseEvent, type ReactNode, type SetStateAction } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import {
   ArrowLeft,
   Check,
@@ -10,11 +22,13 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Download,
   Eye,
   Folder,
   FolderOpen,
   Github,
   Globe2,
+  Keyboard,
   LogOut,
   Maximize2,
   Minus,
@@ -22,9 +36,11 @@ import {
   Pencil,
   Plus,
   RefreshCw,
+  RotateCcw,
   Search,
   Sun,
   Trash2,
+  Upload,
   UserRound,
   X,
   Zap
@@ -62,15 +78,34 @@ import {
   TEXT,
   type Theme
 } from "./data";
+import {
+  exportShortcutConfig,
+  findShortcutConflict,
+  formatShortcutForDisplay,
+  importShortcutConfig,
+  resetShortcutOverride,
+  setShortcutOverride,
+  shortcutBindingsForPlatform,
+  shortcutCommandForEvent,
+  shortcutCommandLabel,
+  type ShortcutBinding,
+  type ShortcutCommandId,
+  type ShortcutOverrides,
+  type ShortcutPlatform,
+  shortcutFromKeyboardEvent,
+  shortcutPlatformForWindow,
+} from "./shortcuts";
 
 const logoSrc = "/opendock-logo.png";
 const badgeSrc = "/official-badge.png";
 const REGISTRY_ORIGIN = "https://registry.opendock.app";
 const CATALOG_PAGE_LIMIT = 12;
+const MAX_STORED_LOGS = 400;
 type WindowControlPlatform = "macos" | "windows";
 type CommandTaskKind = "install" | "update" | "delete" | "doctor";
 type CommandTaskStatus = "running" | "cancelling" | "success" | "error" | "cancelled";
 type VersionStatusClass = "approved" | "pending" | "rejected" | "revoked" | "hidden" | "suspended" | "unavailable";
+type OpenMenu = "" | "lang" | "account" | "sort";
 
 interface CommandForceRetry {
   dockId?: string;
@@ -99,6 +134,11 @@ interface CommandTaskRow {
   level: string;
   color: string;
   message: string;
+}
+
+interface ShortcutFileResult {
+  contents: string;
+  path: string;
 }
 
 type InstalledDockRow = Dock & {
@@ -328,6 +368,56 @@ function installedAtLabel(lang: Lang) {
   return lang === "ko" ? "설치됨" : "Installed";
 }
 
+function shouldIgnoreGlobalShortcut(event: KeyboardEvent) {
+  if (event.defaultPrevented) return true;
+  const target = event.target instanceof HTMLElement ? event.target : null;
+  if (!target) return false;
+  const editable =
+    target.isContentEditable ||
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.tagName === "SELECT";
+  return editable && !event.metaKey && !event.ctrlKey;
+}
+
+function chooseShortcutFileFromBrowser(): Promise<string | null> {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json,.json";
+    input.addEventListener(
+      "change",
+      () => {
+        const file = input.files?.[0];
+        input.remove();
+        if (!file) {
+          resolve(null);
+          return;
+        }
+        const reader = new FileReader();
+        reader.addEventListener("load", () => resolve(String(reader.result ?? "")), { once: true });
+        reader.addEventListener("error", () => resolve(null), { once: true });
+        reader.readAsText(file);
+      },
+      { once: true }
+    );
+    input.style.display = "none";
+    document.body.appendChild(input);
+    input.click();
+  });
+}
+
+function downloadShortcutFile(contents: string) {
+  const url = URL.createObjectURL(new Blob([contents], { type: "application/json" }));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = "opendock-shortcuts.json";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
 function matchesDockSearch(dock: Dock, query: string) {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return true;
@@ -422,7 +512,9 @@ export function App() {
   const [renameProjectName, setRenameProjectName] = useState("");
   const [deleteProjectId, setDeleteProjectId] = useState("");
   const [deleteProjectName, setDeleteProjectName] = useState("");
-  const [openMenu, setOpenMenu] = useState<"" | "lang" | "account" | "sort">("");
+  const [openMenu, setOpenMenu] = useState<OpenMenu>("");
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [projectSwitcherOpen, setProjectSwitcherOpen] = useState(false);
   const [sortMode, setSortMode] = useStoredState<SortMode>("opendock.sortMode", "downloads");
   const [searchQuery, setSearchQuery] = useStoredState("opendock.searchQuery", "");
   const [dockView, setDockView] = useStoredState<DockView>("opendock.dockView", "list");
@@ -434,62 +526,104 @@ export function App() {
   const [projectStateLoaded, setProjectStateLoaded] = useState(false);
   const [catalogDocks, setCatalogDocks] = useState<Dock[]>([]);
   const [dockDetails, setDockDetails] = useState<Record<string, Dock>>({});
-  const [logs, setLogs] = useStoredState<AppLog[]>("opendock.logs", BASE_LOGS);
+  const [logs, setLogs] = useStoredState<AppLog[]>("opendock.logs", BASE_LOGS, {
+    defer: true,
+    normalize: (value) => (Array.isArray(value) ? value.slice(-MAX_STORED_LOGS) : BASE_LOGS),
+  });
+  const [shortcutOverrides, setShortcutOverrides] = useStoredState<ShortcutOverrides>("opendock.shortcutOverrides", {});
+  const [shortcutStatus, setShortcutStatus] = useState("");
   const [commandTask, setCommandTaskState] = useState<CommandTask | null>(null);
   const commandTaskRef = useRef<CommandTask | null>(null);
   const blankProjectCreatingRef = useRef(false);
   const handleNativeMenuRef = useRef<(id: string) => Promise<void> | void>(() => undefined);
+  const shortcutBindingsRef = useRef<ShortcutBinding[]>([]);
+  const shortcutSuspendedRef = useRef(false);
+  const runShortcutCommandRef = useRef<(commandId: ShortcutCommandId) => Promise<void> | void>(() => undefined);
   const [nickname, setNickname] = useStoredState("opendock.nickname", "opendock");
   const [accountEmail, setAccountEmail] = useStoredState("opendock.accountEmail", "kjyscom@gmail.com");
   const [appStateLoaded, setAppStateLoaded] = useState(!isTauriRuntime());
 
   const t = TEXT[lang];
-  const activeProject = projects.find((project) => project.id === activeProjectId) ?? projects[0];
+  const activeProject = useMemo(
+    () => projects.find((project) => project.id === activeProjectId) ?? projects[0],
+    [projects, activeProjectId]
+  );
   const projectPathLabel = activeProject ? activeProject.path : t.noProjectPath;
   const registryDocks = catalogDocks;
-  const visibleDocks = registryDocks.filter((dock) => matchesDockSearch(dock, searchQuery));
-  const installedFallbackDocks = installedRecords.map((record, index) => dockFromInstalledRecord(record, index));
-  const allKnownDocks = [
-    ...registryDocks,
-    ...installedFallbackDocks.filter((dock) => !findDockByKey(registryDocks, dockFullId(dock)))
-  ];
-  const baseDetail = findDockByKey(allKnownDocks, detailId) ?? allKnownDocks[0] ?? null;
+  const visibleDocks = useMemo(
+    () => registryDocks.filter((dock) => matchesDockSearch(dock, searchQuery)),
+    [registryDocks, searchQuery]
+  );
+  const installedFallbackDocks = useMemo(
+    () => installedRecords.map((record, index) => dockFromInstalledRecord(record, index)),
+    [installedRecords]
+  );
+  const allKnownDocks = useMemo(
+    () => [
+      ...registryDocks,
+      ...installedFallbackDocks.filter((dock) => !findDockByKey(registryDocks, dockFullId(dock)))
+    ],
+    [registryDocks, installedFallbackDocks]
+  );
+  const baseDetail = useMemo(
+    () => findDockByKey(allKnownDocks, detailId) ?? allKnownDocks[0] ?? null,
+    [allKnownDocks, detailId]
+  );
   const detailKey = baseDetail ? dockFullId(baseDetail) : "";
   const detail = baseDetail ? dockDetails[detailKey] ?? baseDetail : null;
-  const activeInstalledDocks = projectStateLoaded
-    ? Object.fromEntries(installedRecords.map((record) => [record.id, true]))
-    : installedDocks;
-  const sortedDocks = [...visibleDocks].sort((a, b) => {
-    if (sortMode === "name") return a.short.localeCompare(b.short);
-    if (sortMode === "recent") {
-      const byDate = new Date(b.updatedAt ?? "").getTime() - new Date(a.updatedAt ?? "").getTime();
-      return Number.isNaN(byDate) || byDate === 0 ? b.updatedRank - a.updatedRank : byDate;
-    }
-    return (b.downloads ?? Number(b.dl)) - (a.downloads ?? Number(a.dl));
-  });
-  const installedRows: InstalledDockRow[] =
-    projectStateLoaded
-      ? installedRecords.map((record, index) => ({
-          ...(findDockByKey(allKnownDocks, record.id) ?? dockFromInstalledRecord(record, index)),
-          version: record.version,
-          checksum: record.checksum ?? findDockByKey(registryDocks, record.id)?.checksum ?? "-",
-          installedAt: installedAtLabel(lang),
-          latestVersion: outdatedReportsById[record.id]?.latestVersion,
-          updateAvailable: outdatedReportsById[record.id]?.status === "outdated",
-          updatePlatform: outdatedReportsById[record.id]?.platform
-        }))
-      : registryDocks
-          .filter((dock) => activeInstalledDocks[dockFullId(dock)] || activeInstalledDocks[dock.id])
-          .map((dock) => ({
-            ...dock,
+  const activeInstalledDocks = useMemo(
+    () =>
+      projectStateLoaded
+        ? Object.fromEntries(installedRecords.map((record) => [record.id, true]))
+        : installedDocks,
+    [projectStateLoaded, installedRecords, installedDocks]
+  );
+  const sortedDocks = useMemo(
+    () =>
+      [...visibleDocks].sort((a, b) => {
+        if (sortMode === "name") return a.short.localeCompare(b.short);
+        if (sortMode === "recent") {
+          const byDate = new Date(b.updatedAt ?? "").getTime() - new Date(a.updatedAt ?? "").getTime();
+          return Number.isNaN(byDate) || byDate === 0 ? b.updatedRank - a.updatedRank : byDate;
+        }
+        return (b.downloads ?? Number(b.dl)) - (a.downloads ?? Number(a.dl));
+      }),
+    [visibleDocks, sortMode]
+  );
+  const installedRows: InstalledDockRow[] = useMemo(
+    () =>
+      projectStateLoaded
+        ? installedRecords.map((record, index) => ({
+            ...(findDockByKey(allKnownDocks, record.id) ?? dockFromInstalledRecord(record, index)),
+            version: record.version,
+            checksum: record.checksum ?? findDockByKey(registryDocks, record.id)?.checksum ?? "-",
             installedAt: installedAtLabel(lang),
-            updateAvailable: false
-          }));
-  const updateAvailableCount = installedRows.filter((row) => row.updateAvailable).length;
+            latestVersion: outdatedReportsById[record.id]?.latestVersion,
+            updateAvailable: outdatedReportsById[record.id]?.status === "outdated",
+            updatePlatform: outdatedReportsById[record.id]?.platform
+          }))
+        : registryDocks
+            .filter((dock) => activeInstalledDocks[dockFullId(dock)] || activeInstalledDocks[dock.id])
+            .map((dock) => ({
+              ...dock,
+              installedAt: installedAtLabel(lang),
+              updateAvailable: false
+            })),
+    [projectStateLoaded, installedRecords, allKnownDocks, registryDocks, lang, outdatedReportsById, activeInstalledDocks]
+  );
+  const updateAvailableCount = useMemo(
+    () => installedRows.filter((row) => row.updateAvailable).length,
+    [installedRows]
+  );
   const overlayOpen = openMenu !== "";
   const accountMenuName = authProvider === "github" ? t.githubAccount : accountEmail;
   const showAppLoading = isTauriRuntime() && !appStateLoaded;
   const windowControlPlatform = detectWindowControlPlatform();
+  const shortcutPlatform = shortcutPlatformForWindow(windowControlPlatform);
+  const shortcutBindings = useMemo(
+    () => shortcutBindingsForPlatform(shortcutOverrides, shortcutPlatform),
+    [shortcutOverrides, shortcutPlatform]
+  );
 
   function resetDockWorkspaceView() {
     setDockView("list");
@@ -631,6 +765,15 @@ export function App() {
 
   useLayoutEffect(() => {
     handleNativeMenuRef.current = handleNativeMenu;
+    shortcutBindingsRef.current = shortcutBindings;
+    shortcutSuspendedRef.current =
+      projectAddOpen ||
+      projectRenameOpen ||
+      projectDeleteOpen ||
+      commandPaletteOpen ||
+      projectSwitcherOpen ||
+      Boolean(commandTask && isTaskActive(commandTask));
+    runShortcutCommandRef.current = runShortcutCommand;
   });
 
   useEffect(() => {
@@ -650,6 +793,20 @@ export function App() {
       disposed = true;
       unlisten?.();
     };
+  }, []);
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if (shouldIgnoreGlobalShortcut(event)) return;
+      const commandId = shortcutCommandForEvent(event, shortcutBindingsRef.current);
+      if (!commandId) return;
+      if (shortcutSuspendedRef.current && commandId !== "command.palette") return;
+      event.preventDefault();
+      event.stopPropagation();
+      void runShortcutCommandRef.current(commandId);
+    };
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
   }, []);
 
   useEffect(() => {
@@ -889,7 +1046,109 @@ export function App() {
     setDockView(view);
     setDetailTab("readme");
     setOpenMenu("");
+    setCommandPaletteOpen(false);
+    setProjectSwitcherOpen(false);
     if (view === "logs") void refreshProjectLogs(activeProject);
+  }
+
+  function selectProject(projectId: string) {
+    setActiveProjectId(projectId);
+    setProjectSwitcherOpen(false);
+    setCommandPaletteOpen(false);
+    resetDockWorkspaceView();
+  }
+
+  async function runShortcutCommand(commandId: ShortcutCommandId) {
+    switch (commandId) {
+      case "command.palette":
+        setCommandPaletteOpen((current) => !current);
+        setProjectSwitcherOpen(false);
+        break;
+      case "project.new":
+        await createBlankProject();
+        break;
+      case "project.open":
+        await addExistingProjectFromFolder();
+        break;
+      case "project.switch":
+        if (projects.length > 0) {
+          setProjectSwitcherOpen(true);
+          setCommandPaletteOpen(false);
+        }
+        break;
+      case "nav.explore":
+        if (activeProject) setMainView("list");
+        break;
+      case "nav.installed":
+        if (activeProject) setMainView("installed");
+        break;
+      case "nav.logs":
+        if (activeProject) setMainView("logs");
+        break;
+      case "project.updateAll":
+        await updateDocks(activeProject, { showLogs: false });
+        break;
+      case "dock.refresh":
+        await refreshCatalogFromRegistry();
+        break;
+      case "dock.install":
+        if (detail && dockView === "detail") await installDock(detail);
+        break;
+      default:
+        break;
+    }
+  }
+
+  function updateShortcut(commandId: ShortcutCommandId, shortcut: string | null) {
+    const conflict = findShortcutConflict(shortcutBindings, commandId, shortcut);
+    if (conflict) {
+      setShortcutStatus(
+        t.shortcutConflict.replace("{command}", shortcutCommandLabel(conflict, lang))
+      );
+      return false;
+    }
+    setShortcutOverrides((current) => setShortcutOverride(current, commandId, shortcutPlatform, shortcut));
+    setShortcutStatus(shortcut ? t.shortcutSaved : t.shortcutRemoved);
+    return true;
+  }
+
+  function resetShortcut(commandId: ShortcutCommandId) {
+    setShortcutOverrides((current) => resetShortcutOverride(current, commandId, shortcutPlatform));
+    setShortcutStatus(t.shortcutResetDone);
+  }
+
+  function resetAllShortcuts() {
+    setShortcutOverrides({});
+    setShortcutStatus(t.shortcutResetAllDone);
+  }
+
+  async function importShortcuts() {
+    try {
+      const raw = isTauriRuntime()
+        ? (await invoke<ShortcutFileResult | null>("opendock_import_shortcuts"))?.contents ?? null
+        : await chooseShortcutFileFromBrowser();
+      if (!raw) return;
+      const next = importShortcutConfig(raw);
+      setShortcutOverrides(next);
+      setShortcutStatus(t.shortcutImportDone);
+    } catch (error) {
+      setShortcutStatus(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  async function exportShortcuts() {
+    try {
+      const contents = exportShortcutConfig(shortcutOverrides);
+      if (isTauriRuntime()) {
+        const path = await invoke<string | null>("opendock_export_shortcuts", { contents });
+        if (!path) return;
+      } else {
+        downloadShortcutFile(contents);
+      }
+      setShortcutStatus(t.shortcutExportDone);
+    } catch (error) {
+      setShortcutStatus(error instanceof Error ? error.message : String(error));
+    }
   }
 
   function saveNickname(nextNickname: string) {
@@ -911,6 +1170,12 @@ export function App() {
         break;
       case "edit:copy-project-path":
         await copyProjectPath(activeProject);
+        break;
+      case "edit:import-shortcuts":
+        await importShortcuts();
+        break;
+      case "edit:export-shortcuts":
+        await exportShortcuts();
         break;
       case "view:explore":
         setMainView("list");
@@ -967,7 +1232,10 @@ export function App() {
   }
 
   function appendLog(level: string, color: string, message: string) {
-    setLogs((current) => [...current, { time: nowTime(), level, color, message }]);
+    setLogs((current) => [
+      ...current.slice(Math.max(0, current.length - (MAX_STORED_LOGS - 1))),
+      { time: nowTime(), level, color, message },
+    ]);
   }
 
   function setCommandTask(next: CommandTask | null | ((current: CommandTask | null) => CommandTask | null)) {
@@ -1275,7 +1543,7 @@ export function App() {
     if (!project || !isTauriRuntime()) return;
     try {
       const result = await invoke<OpenDockCommandResult>("opendock_log", { projectDir: project.path });
-      setLogs(result.lines.map(commandLineLogEntry));
+      setLogs(result.lines.slice(-MAX_STORED_LOGS).map(commandLineLogEntry));
     } catch (error) {
       appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
     }
@@ -1596,10 +1864,7 @@ export function App() {
             onRemove={openDeleteProject}
             onRename={openRenameProject}
             onSaveNickname={saveNickname}
-            onSelectProject={(projectId) => {
-              setActiveProjectId(projectId);
-              resetDockWorkspaceView();
-            }}
+            onSelectProject={selectProject}
             onSetDetailTab={setDetailTab}
             onSetSearchQuery={setSearchQuery}
             onSetSortMode={(mode) => {
@@ -1614,10 +1879,18 @@ export function App() {
             projectSidebarCollapsed={projectSidebarCollapsed}
             searchQuery={searchQuery}
             setOpenMenu={setOpenMenu}
+            shortcutBindings={shortcutBindings}
+            shortcutPlatform={shortcutPlatform}
+            shortcutStatus={shortcutStatus}
             sortMode={sortMode}
             sortedDocks={sortedDocks}
             t={t}
             updateAvailableCount={updateAvailableCount}
+            onExportShortcuts={() => void exportShortcuts()}
+            onImportShortcuts={() => void importShortcuts()}
+            onResetAllShortcuts={resetAllShortcuts}
+            onResetShortcut={resetShortcut}
+            onSetShortcut={updateShortcut}
           />
         )}
       </main>
@@ -1656,6 +1929,30 @@ export function App() {
           onCancelCommand={() => void cancelCommandTask()}
           onClose={closeCommandProgress}
           onForceRetryCommand={() => void forceRetryCommand()}
+          t={t}
+        />
+      ) : null}
+
+      {commandPaletteOpen ? (
+        <CommandPaletteDialog
+          bindings={shortcutBindings}
+          lang={lang}
+          onClose={() => setCommandPaletteOpen(false)}
+          onRun={(commandId) => {
+            setCommandPaletteOpen(false);
+            void runShortcutCommand(commandId);
+          }}
+          platform={shortcutPlatform}
+          t={t}
+        />
+      ) : null}
+
+      {projectSwitcherOpen ? (
+        <ProjectSwitcherDialog
+          activeProjectId={activeProjectId}
+          onClose={() => setProjectSwitcherOpen(false)}
+          onSelect={selectProject}
+          projects={projects}
           t={t}
         />
       ) : null}
@@ -1893,10 +2190,18 @@ function Workspace(props: {
   projectSidebarCollapsed: boolean;
   searchQuery: string;
   setOpenMenu: (menu: "" | "lang" | "account" | "sort") => void;
+  shortcutBindings: ShortcutBinding[];
+  shortcutPlatform: ShortcutPlatform;
+  shortcutStatus: string;
   sortMode: SortMode;
   sortedDocks: Dock[];
   t: (typeof TEXT)[Lang];
   updateAvailableCount: number;
+  onExportShortcuts: () => void;
+  onImportShortcuts: () => void;
+  onResetAllShortcuts: () => void;
+  onResetShortcut: (commandId: ShortcutCommandId) => void;
+  onSetShortcut: (commandId: ShortcutCommandId, shortcut: string | null) => boolean;
 }) {
   const showTabs = props.dockView !== "account";
   return (
@@ -1939,7 +2244,24 @@ function Workspace(props: {
         ) : null}
         {props.dockView === "installed" ? <InstalledPanel {...props} /> : null}
         {props.dockView === "logs" ? <LogsPanel activeProject={props.activeProject} logs={props.logs} t={props.t} /> : null}
-        {props.dockView === "account" ? <AccountPanel accountEmail={props.accountEmail} nickname={props.nickname} onBack={props.onBack} onSaveNickname={props.onSaveNickname} t={props.t} /> : null}
+        {props.dockView === "account" ? (
+          <AccountPanel
+            accountEmail={props.accountEmail}
+            lang={props.lang}
+            nickname={props.nickname}
+            onBack={props.onBack}
+            onExportShortcuts={props.onExportShortcuts}
+            onImportShortcuts={props.onImportShortcuts}
+            onResetAllShortcuts={props.onResetAllShortcuts}
+            onResetShortcut={props.onResetShortcut}
+            onSaveNickname={props.onSaveNickname}
+            onSetShortcut={props.onSetShortcut}
+            shortcutBindings={props.shortcutBindings}
+            shortcutPlatform={props.shortcutPlatform}
+            shortcutStatus={props.shortcutStatus}
+            t={props.t}
+          />
+        ) : null}
       </div>
     </section>
   );
@@ -1971,38 +2293,40 @@ function ProjectSidebar(props: {
 
   return (
     <aside className="project-sidebar">
-      <div className="project-sidebar-head">
-        <div>
-          <IconButton label={props.t.collapseProjects} onClick={props.onToggle}>
-            <ChevronLeft size={13} />
+      <div className="project-sidebar-top">
+        <div className="project-sidebar-head">
+          <div>
+            <IconButton label={props.t.collapseProjects} onClick={props.onToggle}>
+              <ChevronLeft size={13} />
+            </IconButton>
+            <span>{props.t.projects}</span>
+          </div>
+          <IconButton label={props.t.addProjectTitle} onClick={props.onOpenAdd}>
+            <Plus size={13} />
           </IconButton>
-          <span>{props.t.projects}</span>
         </div>
-        <IconButton label={props.t.addProjectTitle} onClick={props.onOpenAdd}>
-          <Plus size={13} />
-        </IconButton>
-      </div>
-      <div className="project-list">
-        {props.projects.map((project) => {
-          const active = project.id === props.activeProject.id;
-          return (
-            <div className={`project-row ${active ? "active" : ""}`} key={project.id}>
-              <button onClick={() => props.onSelect(project.id)} type="button">
-                <Folder size={16} />
-                <span>
-                  <strong>{project.name}</strong>
-                  <small>{project.folderName}</small>
-                </span>
-              </button>
-              <IconButton label={props.t.renameProjectTitle} onClick={() => props.onRename(project)}>
-                <Pencil size={13} />
-              </IconButton>
-              <IconButton className="danger" label={props.t.deleteProjectTitle} onClick={() => props.onRemove(project)}>
-                <X size={13} />
-              </IconButton>
-            </div>
-          );
-        })}
+        <div className="project-list">
+          {props.projects.map((project) => {
+            const active = project.id === props.activeProject.id;
+            return (
+              <div className={`project-row ${active ? "active" : ""}`} key={project.id}>
+                <button onClick={() => props.onSelect(project.id)} type="button">
+                  <Folder size={16} />
+                  <span>
+                    <strong>{project.name}</strong>
+                    <small>{project.folderName}</small>
+                  </span>
+                </button>
+                <IconButton label={props.t.renameProjectTitle} onClick={() => props.onRename(project)}>
+                  <Pencil size={13} />
+                </IconButton>
+                <IconButton className="danger" label={props.t.deleteProjectTitle} onClick={() => props.onRemove(project)}>
+                  <X size={13} />
+                </IconButton>
+              </div>
+            );
+          })}
+        </div>
       </div>
       {props.detailView && props.detail ? <DetailSidebar detail={props.detail} detailTab={props.detailTab} t={props.t} /> : null}
     </aside>
@@ -2591,11 +2915,117 @@ function statusLabel(status: CommandTaskStatus, t: (typeof TEXT)[Lang]) {
   return t.taskWorking;
 }
 
+function CommandPaletteDialog(props: {
+  bindings: ShortcutBinding[];
+  lang: Lang;
+  onClose: () => void;
+  onRun: (commandId: ShortcutCommandId) => void;
+  platform: ShortcutPlatform;
+  t: (typeof TEXT)[Lang];
+}) {
+  const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const visibleBindings = props.bindings.filter((binding) => {
+    if (!normalizedQuery) return true;
+    return [
+      binding.id,
+      shortcutCommandLabel(binding, props.lang),
+      binding.description[props.lang] ?? binding.description.en,
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(normalizedQuery);
+  });
+
+  return (
+    <div className="modal-layer command-palette-layer">
+      <div aria-labelledby="command-palette-title" aria-modal="true" className="command-palette" role="dialog">
+        <div className="command-palette-search">
+          <Search size={16} />
+          <input
+            aria-label={props.t.commandPaletteSearch}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") props.onClose();
+              if (event.key === "Enter" && visibleBindings[0]) props.onRun(visibleBindings[0].id);
+            }}
+            placeholder={props.t.commandPaletteSearch}
+            ref={inputRef}
+            value={query}
+          />
+        </div>
+        <div className="command-palette-list">
+          {visibleBindings.map((binding) => (
+            <button key={binding.id} onClick={() => props.onRun(binding.id)} type="button">
+              <span>
+                <strong>{shortcutCommandLabel(binding, props.lang)}</strong>
+                <small>{binding.description[props.lang] ?? binding.description.en}</small>
+              </span>
+              <kbd>{binding.accelerator ? formatShortcutForDisplay(binding.accelerator, props.platform) : props.t.shortcutUnset}</kbd>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProjectSwitcherDialog(props: {
+  activeProjectId: string;
+  onClose: () => void;
+  onSelect: (projectId: string) => void;
+  projects: Project[];
+  t: (typeof TEXT)[Lang];
+}) {
+  return (
+    <div className="modal-layer">
+      <div aria-labelledby="project-switcher-title" aria-modal="true" className="modal project-switcher" role="dialog">
+        <div className="modal-head">
+          <div>
+            <h2 id="project-switcher-title">{props.t.switchProjectTitle}</h2>
+            <p>{props.t.switchProjectSub}</p>
+          </div>
+          <IconButton label={props.t.close} onClick={props.onClose}>
+            <X size={15} />
+          </IconButton>
+        </div>
+        <div className="project-switcher-list">
+          {props.projects.map((project) => (
+            <button className={project.id === props.activeProjectId ? "active" : ""} key={project.id} onClick={() => props.onSelect(project.id)} type="button">
+              <Folder size={16} />
+              <span>
+                <strong>{project.name}</strong>
+                <small>{project.path}</small>
+              </span>
+              {project.id === props.activeProjectId ? <Check size={15} /> : null}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AccountPanel(props: {
   accountEmail: string;
+  lang: Lang;
   nickname: string;
   onBack: () => void;
+  onExportShortcuts: () => void;
+  onImportShortcuts: () => void;
+  onResetAllShortcuts: () => void;
+  onResetShortcut: (commandId: ShortcutCommandId) => void;
   onSaveNickname: (nickname: string) => void;
+  onSetShortcut: (commandId: ShortcutCommandId, shortcut: string | null) => boolean;
+  shortcutBindings: ShortcutBinding[];
+  shortcutPlatform: ShortcutPlatform;
+  shortcutStatus: string;
   t: (typeof TEXT)[Lang];
 }) {
   const [draftNickname, setDraftNickname] = useState(props.nickname);
@@ -2634,7 +3064,106 @@ function AccountPanel(props: {
           <button onClick={() => props.onSaveNickname(draftNickname)} type="button">{props.t.saveChanges}</button>
         </div>
       </div>
+      <ShortcutSettings
+        bindings={props.shortcutBindings}
+        lang={props.lang}
+        onExport={props.onExportShortcuts}
+        onImport={props.onImportShortcuts}
+        onReset={props.onResetShortcut}
+        onResetAll={props.onResetAllShortcuts}
+        onSetShortcut={props.onSetShortcut}
+        platform={props.shortcutPlatform}
+        status={props.shortcutStatus}
+        t={props.t}
+      />
     </div>
+  );
+}
+
+function ShortcutSettings(props: {
+  bindings: ShortcutBinding[];
+  lang: Lang;
+  onExport: () => void;
+  onImport: () => void;
+  onReset: (commandId: ShortcutCommandId) => void;
+  onResetAll: () => void;
+  onSetShortcut: (commandId: ShortcutCommandId, shortcut: string | null) => boolean;
+  platform: ShortcutPlatform;
+  status: string;
+  t: (typeof TEXT)[Lang];
+}) {
+  const [capturingId, setCapturingId] = useState<ShortcutCommandId | null>(null);
+
+  function captureShortcut(commandId: ShortcutCommandId, event: ReactKeyboardEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.key === "Escape") {
+      setCapturingId(null);
+      return;
+    }
+    if (event.key === "Backspace" || event.key === "Delete") {
+      props.onSetShortcut(commandId, null);
+      setCapturingId(null);
+      return;
+    }
+    const shortcut = shortcutFromKeyboardEvent(event);
+    if (!shortcut) return;
+    if (props.onSetShortcut(commandId, shortcut)) {
+      setCapturingId(null);
+    }
+  }
+
+  return (
+    <section className="shortcut-settings">
+      <div className="shortcut-settings-head">
+        <div>
+          <div className="profile-tab">{props.t.shortcuts}</div>
+          <p>{props.t.shortcutsSub}</p>
+        </div>
+        <div className="shortcut-actions">
+          <button onClick={props.onImport} type="button">
+            <Upload size={14} /> {props.t.importShortcuts}
+          </button>
+          <button onClick={props.onExport} type="button">
+            <Download size={14} /> {props.t.exportShortcuts}
+          </button>
+          <button onClick={props.onResetAll} type="button">
+            <RotateCcw size={14} /> {props.t.resetShortcuts}
+          </button>
+        </div>
+      </div>
+      <div className="shortcut-list">
+        {props.bindings.map((binding) => (
+          <div className="shortcut-row" key={binding.id}>
+            <div>
+              <Keyboard size={15} />
+              <span>
+                <strong>{shortcutCommandLabel(binding, props.lang)}</strong>
+                <small>{binding.description[props.lang] ?? binding.description.en}</small>
+              </span>
+            </div>
+            <div>
+              <button
+                className={capturingId === binding.id ? "capturing" : ""}
+                onClick={() => setCapturingId(binding.id)}
+                onKeyDown={(event) => captureShortcut(binding.id, event)}
+                type="button"
+              >
+                {capturingId === binding.id
+                  ? props.t.pressShortcut
+                  : binding.accelerator
+                    ? formatShortcutForDisplay(binding.accelerator, props.platform)
+                    : props.t.shortcutUnset}
+              </button>
+              <IconButton label={props.t.resetShortcut} onClick={() => props.onReset(binding.id)}>
+                <RotateCcw size={13} />
+              </IconButton>
+            </div>
+          </div>
+        ))}
+      </div>
+      {props.status ? <p className="shortcut-status">{props.status}</p> : null}
+    </section>
   );
 }
 
@@ -2766,18 +3295,31 @@ function GoogleMark() {
   );
 }
 
-function useStoredState<T>(key: string, initialValue: T): [T, Dispatch<SetStateAction<T>>] {
+function useStoredState<T>(
+  key: string,
+  initialValue: T,
+  options: { defer?: boolean; normalize?: (value: T) => T } = {},
+): [T, Dispatch<SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => {
     try {
       const stored = localStorage.getItem(key);
-      return stored ? (JSON.parse(stored) as T) : initialValue;
+      const parsed = stored ? (JSON.parse(stored) as T) : initialValue;
+      return options.normalize ? options.normalize(parsed) : parsed;
     } catch {
       return initialValue;
     }
   });
 
   useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
+    const serialized = JSON.stringify(value);
+    if (!options.defer) {
+      localStorage.setItem(key, serialized);
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      localStorage.setItem(key, serialized);
+    }, 120);
+    return () => window.clearTimeout(timeout);
   }, [key, value]);
 
   return [value, setValue];
