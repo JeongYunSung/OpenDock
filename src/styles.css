@@ -1488,6 +1488,8 @@ input:focus-visible,
 }
 
 .installed-table {
+  --installed-table-columns: minmax(240px, 1fr) minmax(132px, 0.48fr) 72px 96px;
+
   display: flex;
   min-height: 0;
   flex: 1;
@@ -1498,8 +1500,6 @@ input:focus-visible,
 .installed-table-scroll {
   min-height: 0;
   overflow: auto;
-  padding-right: 16px;
-  scrollbar-gutter: stable;
 }
 
 .log-shell {
@@ -1526,14 +1526,17 @@ input:focus-visible,
 .installed-head,
 .installed-row {
   display: grid;
-  grid-template-columns: minmax(220px, 1.4fr) minmax(132px, 0.62fr) 40px 76px;
-  gap: 14px;
+  grid-template-columns: var(--installed-table-columns);
+  column-gap: 18px;
   align-items: center;
+  padding-right: 18px;
+  padding-left: 18px;
 }
 
 .installed-head {
   flex: none;
-  padding: 11px 16px;
+  padding-top: 11px;
+  padding-bottom: 11px;
   border-bottom: 1px solid var(--border);
   color: var(--text-3);
   background: var(--surface-2);
@@ -1548,7 +1551,8 @@ input:focus-visible,
 
 .installed-row {
   border-bottom: 1px solid var(--border);
-  padding: 15px 24px 15px 16px;
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
 .installed-row:hover {
@@ -1605,6 +1609,7 @@ input:focus-visible,
   justify-content: center;
   place-self: center;
   gap: 6px;
+  width: 62px;
   min-width: 0;
   height: 28px;
 }
@@ -2268,8 +2273,9 @@ input:focus-visible,
 
   .installed-head,
   .installed-row {
-    grid-template-columns: minmax(170px, 1fr) 112px 34px 70px;
-    gap: 10px;
+    --installed-table-columns: minmax(170px, 1fr) 112px 58px 84px;
+
+    column-gap: 12px;
   }
 
   .installed-actions {

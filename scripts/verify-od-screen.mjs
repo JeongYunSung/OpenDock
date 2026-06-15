@@ -140,6 +140,32 @@ async function runViewportFlow(viewport) {
     if (actionAlignment.alignItems !== "center" || actionAlignment.justifyContent !== "center" || actionAlignment.justifySelf !== "center") {
       throw new Error(`installed row actions should align to the table centerline, got ${JSON.stringify(actionAlignment)}`);
     }
+    const installedColumnAlignment = await page.evaluate(() => {
+      const centerX = (element) => {
+        const rect = element.getBoundingClientRect();
+        return rect.left + rect.width / 2;
+      };
+      const statusHead = document.querySelector(".installed-head span:nth-child(3)");
+      const actionHead = document.querySelector(".installed-head span:nth-child(4)");
+      const statusDot = document.querySelector(".installed-row .ready-chip, .installed-row .update-chip");
+      const actions = document.querySelector(".installed-row .installed-actions");
+      if (!statusHead || !actionHead || !statusDot || !actions) return null;
+      const statusHeadCenter = centerX(statusHead);
+      const statusDotCenter = centerX(statusDot);
+      const actionHeadCenter = centerX(actionHead);
+      const actionCenter = centerX(actions);
+      return {
+        actionDelta: Math.abs(actionHeadCenter - actionCenter),
+        columnDistance: Math.abs(actionCenter - statusDotCenter),
+        statusDelta: Math.abs(statusHeadCenter - statusDotCenter)
+      };
+    });
+    if (!installedColumnAlignment) {
+      throw new Error("installed table alignment targets are missing");
+    }
+    if (installedColumnAlignment.statusDelta > 1 || installedColumnAlignment.actionDelta > 1 || installedColumnAlignment.columnDistance < 64) {
+      throw new Error(`installed status/action columns are misaligned: ${JSON.stringify(installedColumnAlignment)}`);
+    }
     await assertVisible(page.getByRole("button", { name: /전체 업데이트/ }), "update all button on installed screen");
     await page.getByRole("button", { name: /전체 업데이트/ }).click();
     await assertVisible(page.locator(".installed-panel"), "installed screen stays visible after update all");
