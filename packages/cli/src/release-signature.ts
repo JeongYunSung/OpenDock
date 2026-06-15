@@ -4,6 +4,7 @@ import type { ReleaseSignatureResponse } from "./registry.js";
 
 const defaultTrustedPublicKeys: Record<string, string> = {
   "opendock-root-2026-01": "MCowBQYDK2VwAyEAXNVc5LvpQBcibQinZSVRcgyq0xZEVuNKwZpuX8Ty8r4=",
+  "opendock-root-2026-02": "MCowBQYDK2VwAyEAI1dULjXnP6hY070UjhKf/WNMGQDA500i+f2WC3gwp7g=",
 };
 
 export interface ReleaseSignatureSubject {
