@@ -1396,20 +1396,40 @@ input:focus-visible,
   border-bottom: 1px solid var(--border);
 }
 
-.versions-list > div {
+.versions-list > button {
   display: grid;
   grid-template-columns: 86px minmax(0, 1fr) 90px;
   gap: 18px;
   align-items: center;
+  width: 100%;
+  border: 0;
   padding: 18px;
   border-bottom: 1px solid var(--border);
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
 }
 
-.versions-list > div.latest.version-approved {
+.versions-list > button:hover,
+.versions-list > button.selected {
+  background: var(--surface-2);
+}
+
+.versions-list > button.latest.version-approved {
   background: var(--accent-soft);
 }
 
-.versions-list > div > div {
+.versions-list > button.latest.version-approved:hover,
+.versions-list > button.latest.version-approved.selected {
+  background: var(--surface-2);
+}
+
+.versions-list > button:last-child {
+  border-bottom: 0;
+}
+
+.versions-list > button > div {
   display: flex;
   align-items: center;
   gap: 14px;

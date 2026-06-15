@@ -520,6 +520,7 @@ export function App() {
   const [dockView, setDockView] = useStoredState<DockView>("opendock.dockView", "list");
   const [detailId, setDetailId] = useStoredState("opendock.detailId", "creative-gen-ultrawork");
   const [detailTab, setDetailTab] = useStoredState<"readme" | "versions">("opendock.detailTab", "readme");
+  const [detailVersion, setDetailVersion] = useStoredState("opendock.detailVersion", "");
   const [installedDocks, setInstalledDocks] = useStoredState<Record<string, boolean>>("opendock.installedDocks", {});
   const [installedRecords, setInstalledRecords] = useState<InstalledDockRecord[]>([]);
   const [outdatedReportsById, setOutdatedReportsById] = useState<Record<string, OpenDockOutdatedReport>>({});
@@ -571,6 +572,10 @@ export function App() {
   );
   const detailKey = baseDetail ? dockFullId(baseDetail) : "";
   const detail = baseDetail ? dockDetails[detailKey] ?? baseDetail : null;
+  const selectedDetailVersion = useMemo(
+    () => detail?.versions?.find((version) => version.version === detailVersion) ?? detail?.versions?.[0] ?? null,
+    [detail, detailVersion]
+  );
   const activeInstalledDocks = useMemo(
     () =>
       projectStateLoaded
@@ -628,6 +633,7 @@ export function App() {
   function resetDockWorkspaceView() {
     setDockView("list");
     setDetailTab("readme");
+    setDetailVersion("");
     setSearchQuery("");
     setOpenMenu("");
   }
@@ -762,6 +768,10 @@ export function App() {
       cancelled = true;
     };
   }, [detailKey, dockView]);
+
+  useEffect(() => {
+    setDetailVersion("");
+  }, [detailKey]);
 
   useLayoutEffect(() => {
     handleNativeMenuRef.current = handleNativeMenu;
@@ -1839,6 +1849,7 @@ export function App() {
             activeProject={activeProject}
             detail={detail}
             detailTab={detailTab}
+            detailVersion={selectedDetailVersion}
             dockView={dockView}
             installedDocks={activeInstalledDocks}
             installedRows={installedRows}
@@ -1866,6 +1877,7 @@ export function App() {
             onSaveNickname={saveNickname}
             onSelectProject={selectProject}
             onSetDetailTab={setDetailTab}
+            onSetDetailVersion={(version) => setDetailVersion(version.version)}
             onSetSearchQuery={setSearchQuery}
             onSetSortMode={(mode) => {
               setSortMode(mode);
@@ -2160,6 +2172,7 @@ function Workspace(props: {
   commandTask: CommandTask | null;
   detail: Dock | null;
   detailTab: "readme" | "versions";
+  detailVersion: DockVersion | null;
   dockView: DockView;
   installedDocks: Record<string, boolean>;
   installedRows: InstalledDockRow[];
@@ -2180,6 +2193,7 @@ function Workspace(props: {
   onSaveNickname: (nickname: string) => void;
   onSelectProject: (projectId: string) => void;
   onSetDetailTab: (tab: "readme" | "versions") => void;
+  onSetDetailVersion: (version: DockVersion) => void;
   onSetSearchQuery: (query: string) => void;
   onSetSortMode: (mode: SortMode) => void;
   onSetView: (view: DockView) => void;
@@ -2212,6 +2226,7 @@ function Workspace(props: {
           collapsed={props.projectSidebarCollapsed}
           detail={props.detail}
           detailTab={props.detailTab}
+          detailVersion={props.detailVersion}
           detailView={props.dockView === "detail"}
           onOpenAdd={props.onOpenAdd}
           onRemove={props.onRemove}
@@ -2272,6 +2287,7 @@ function ProjectSidebar(props: {
   collapsed: boolean;
   detail: Dock | null;
   detailTab: "readme" | "versions";
+  detailVersion: DockVersion | null;
   detailView: boolean;
   onOpenAdd: () => void;
   onRemove: (project: Project) => void;
@@ -2328,12 +2344,15 @@ function ProjectSidebar(props: {
           })}
         </div>
       </div>
-      {props.detailView && props.detail ? <DetailSidebar detail={props.detail} detailTab={props.detailTab} t={props.t} /> : null}
+      {props.detailView && props.detail ? (
+        <DetailSidebar detail={props.detail} detailTab={props.detailTab} detailVersion={props.detailVersion} t={props.t} />
+      ) : null}
     </aside>
   );
 }
 
-function DetailSidebar(props: { detail: Dock; detailTab: "readme" | "versions"; t: (typeof TEXT)[Lang] }) {
+function DetailSidebar(props: { detail: Dock; detailTab: "readme" | "versions"; detailVersion: DockVersion | null; t: (typeof TEXT)[Lang] }) {
+  const version = props.detailVersion;
   return (
     <div className="detail-sidebar">
       {props.detailTab === "readme" ? (
@@ -2355,13 +2374,12 @@ function DetailSidebar(props: { detail: Dock; detailTab: "readme" | "versions"; 
       ) : (
         <>
           <h4>{props.t.versions}</h4>
-          <Meta label="Archive" value={props.detail.size} />
-          <Meta label="Platform" value={(props.detail.platforms?.length ? props.detail.platforms : ["macos", "windows"]).map(platformLabel).join(" · ")} />
-          <Meta label="Checksum" value={props.detail.checksum} />
-          <Meta label="Submitted" value="-" />
-          <Meta label="Installable" value="Yes" />
-          <Meta label="Storage" value="local_volume" />
-          <Meta label="Content type" value="application/gzip" />
+          <Meta label={props.t.version} value={version?.version ?? props.detail.version} />
+          <Meta label="Archive" value={version?.size ?? props.detail.size} />
+          <Meta label="Checksum" value={version?.checksum ?? props.detail.checksum} />
+          <Meta label={props.t.status} value={versionStatusLabel(version?.status)} />
+          <Meta label={props.t.downloads} value={version?.downloadCount == null ? props.detail.dl : String(version.downloadCount)} />
+          <Meta label={props.t.updated} value={formatDateLabel(version?.publishedAt ?? props.detail.updatedAt)} />
         </>
       )}
     </div>
@@ -2479,12 +2497,14 @@ function DetailPanel(props: {
   commandTask: CommandTask | null;
   detail: Dock;
   detailTab: "readme" | "versions";
+  detailVersion: DockVersion | null;
   installedDocks: Record<string, boolean>;
   onBack: () => void;
   onCancelCommand: () => void;
   onDeleteDock: (dock: Dock) => void;
   onInstallDock: (dock: Dock) => void;
   onSetDetailTab: (tab: "readme" | "versions") => void;
+  onSetDetailVersion: (version: DockVersion) => void;
   t: (typeof TEXT)[Lang];
 }) {
   const fullId = dockFullId(props.detail);
@@ -2531,7 +2551,11 @@ function DetailPanel(props: {
           {props.t.versions}
         </button>
       </div>
-      {props.detailTab === "readme" ? <ReadmePanel detail={props.detail} t={props.t} /> : <VersionsPanel detail={props.detail} t={props.t} />}
+      {props.detailTab === "readme" ? (
+        <ReadmePanel detail={props.detail} t={props.t} />
+      ) : (
+        <VersionsPanel detail={props.detail} selectedVersion={props.detailVersion} onSelectVersion={props.onSetDetailVersion} t={props.t} />
+      )}
     </div>
   );
 }
@@ -2562,7 +2586,7 @@ function ReadmePanel(props: { detail: Dock; t: (typeof TEXT)[Lang] }) {
   );
 }
 
-function VersionsPanel(props: { detail: Dock; t: (typeof TEXT)[Lang] }) {
+function VersionsPanel(props: { detail: Dock; selectedVersion: DockVersion | null; onSelectVersion: (version: DockVersion) => void; t: (typeof TEXT)[Lang] }) {
   const versions: DockVersion[] = props.detail.versions ?? [];
   return (
     <div className="versions-panel">
@@ -2573,15 +2597,21 @@ function VersionsPanel(props: { detail: Dock; t: (typeof TEXT)[Lang] }) {
             {versions.map((version, index) => {
               const statusClass = versionStatusClass(version.status);
               const statusLabel = versionStatusLabel(version.status);
+              const selected = version.version === props.selectedVersion?.version;
               return (
-                <div className={`${index === 0 ? "latest " : ""}version-${statusClass}`} key={version.version}>
+                <button
+                  className={`${index === 0 ? "latest " : ""}version-${statusClass}${selected ? " selected" : ""}`}
+                  key={version.version}
+                  onClick={() => props.onSelectVersion(version)}
+                  type="button"
+                >
                   <div>
                     <span aria-label={statusLabel} className={`version-status-dot ${statusClass}`} role="img" title={statusLabel} />
                     <code>{version.version}</code>
                   </div>
                   <p>{version.summary ?? props.detail.desc}</p>
-                  <small>{[version.size, version.platform].filter(Boolean).join(" · ")}</small>
-                </div>
+                  <small>{version.size ?? ""}</small>
+                </button>
               );
             })}
           </div>
