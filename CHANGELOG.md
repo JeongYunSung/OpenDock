@@ -7,6 +7,21 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.26 - 2026-06-16
+
+### Desktop App
+
+- Prevent Windows release builds from opening an extra console window.
+- Hide console windows for OpenDock sidecar commands and browser launch helpers.
+- Configure Windows installer and uninstaller icons explicitly.
+- Control Windows app menu flyouts from React state so only one flyout is open
+  at a time.
+
+### Tests
+
+- Added desktop contract coverage for Windows console hiding, installer icons,
+  and app menu flyout behavior.
+
 ## 0.1.25 - 2026-06-15
 
 ### Desktop App
