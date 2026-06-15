@@ -1,0 +1,1284 @@
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::collections::HashMap;
+use std::env;
+use std::fs;
+use std::io::{BufRead, BufReader, Read};
+use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
+use std::sync::{Arc, Mutex};
+use std::thread;
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
+use tauri::{Emitter, Manager, Runtime};
+
+const DEFAULT_REGISTRY_URL: &str = "https://registry.opendock.app";
+const CATALOG_PAGE_LIMIT: &str = "12";
+
+#[derive(Default)]
+struct RunningCommands(Mutex<HashMap<String, u32>>);
+
+#[derive(Serialize)]
+struct ProjectFolder {
+    name: String,
+    folder_name: String,
+    path: String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+struct AppProject {
+    id: String,
+    name: String,
+    folder_name: String,
+    path: String,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopAppState {
+    projects: Vec<AppProject>,
+    active_project_id: String,
+}
+
+#[derive(Serialize)]
+struct OpenDockCommandResult {
+    success: bool,
+    code: Option<i32>,
+    stdout: String,
+    stderr: String,
+    lines: Vec<OpenDockCommandLine>,
+    json: Option<Value>,
+}
+
+#[derive(Clone, Serialize)]
+struct OpenDockCommandLine {
+    level: String,
+    message: String,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AuthSession {
+    logged_in: bool,
+    email: Option<String>,
+    provider: Option<String>,
+    raw: OpenDockCommandResult,
+}
+
+#[derive(Serialize)]
+struct ProjectStateResult {
+    has_state: bool,
+    project_path: String,
+    lock_path: String,
+    docks: Vec<InstalledDock>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct InstalledDock {
+    id: String,
+    name: Option<String>,
+    requested: Option<String>,
+    version: String,
+    checksum: Option<String>,
+    signature: Option<String>,
+    platform: Option<String>,
+    workdir: Option<String>,
+    files: Option<Vec<AppliedFile>>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct AppliedFile {
+    path: String,
+    mode: Option<String>,
+    checksum: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct OpenDockListResult {
+    success: bool,
+    has_state: bool,
+    project_path: String,
+    lock_path: String,
+    docks: Vec<InstalledDock>,
+}
+
+#[tauri::command]
+fn pick_project_folder() -> Option<ProjectFolder> {
+    let path = rfd::FileDialog::new()
+        .set_title("Choose OpenDock project")
+        .pick_folder()?;
+    let folder_name = path.file_name()?.to_string_lossy().to_string();
+    Some(ProjectFolder {
+        name: folder_name.clone(),
+        folder_name,
+        path: path.to_string_lossy().to_string(),
+    })
+}
+
+#[tauri::command]
+fn create_blank_project(index: u32) -> Result<ProjectFolder, String> {
+    let home = home_dir().ok_or_else(|| "home directory not found".to_string())?;
+    let base = home.join("OpenDock Projects");
+    fs::create_dir_all(&base).map_err(|error| format!("failed to create project root: {error}"))?;
+
+    let preferred = format!("빈 프로젝트{}", index.max(1));
+    let path = unique_project_path(&base, &preferred);
+    fs::create_dir_all(&path)
+        .map_err(|error| format!("failed to create project folder: {error}"))?;
+    let folder_name = file_name(&path)?;
+    Ok(ProjectFolder {
+        name: folder_name.clone(),
+        folder_name,
+        path: path.to_string_lossy().to_string(),
+    })
+}
+
+#[tauri::command]
+fn opendock_load_app_state() -> Result<DesktopAppState, String> {
+    let path = app_state_path()?;
+    if !path.exists() {
+        return Ok(DesktopAppState {
+            projects: Vec::new(),
+            active_project_id: String::new(),
+        });
+    }
+    let raw =
+        fs::read_to_string(&path).map_err(|error| format!("failed to read app state: {error}"))?;
+    let state = serde_json::from_str::<DesktopAppState>(&raw)
+        .map_err(|error| format!("failed to parse app state: {error}"))?;
+    let projects = sanitize_projects(state.projects);
+    Ok(DesktopAppState {
+        active_project_id: resolve_active_project_id(&projects, &state.active_project_id),
+        projects,
+    })
+}
+
+#[tauri::command]
+fn opendock_save_app_state(state: DesktopAppState) -> Result<(), String> {
+    let path = app_state_path()?;
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|error| format!("failed to create app state dir: {error}"))?;
+    }
+    let projects = sanitize_projects(state.projects);
+    let sanitized = DesktopAppState {
+        active_project_id: resolve_active_project_id(&projects, &state.active_project_id),
+        projects,
+    };
+    let raw = serde_json::to_string_pretty(&sanitized)
+        .map_err(|error| format!("failed to encode app state: {error}"))?;
+    fs::write(&path, raw).map_err(|error| format!("failed to write app state: {error}"))
+}
+
+#[tauri::command]
+fn opendock_install(
+    app: tauri::AppHandle,
+    project_dir: String,
+    dock_ref: String,
+    command_id: Option<String>,
+) -> Result<OpenDockCommandResult, String> {
+    validate_dock_ref(&dock_ref)?;
+    run_opendock_streaming(
+        &app,
+        Some(&project_dir),
+        &["install", &dock_ref, "--json"],
+        command_id.as_deref(),
+    )
+}
+
+#[tauri::command]
+fn opendock_update(
+    app: tauri::AppHandle,
+    project_dir: String,
+    command_id: Option<String>,
+    force: Option<bool>,
+) -> Result<OpenDockCommandResult, String> {
+    let args = if force.unwrap_or(false) {
+        vec!["update", "--json", "--force"]
+    } else {
+        vec!["update", "--json"]
+    };
+    run_opendock_streaming(
+        &app,
+        Some(&project_dir),
+        &args,
+        command_id.as_deref(),
+    )
+}
+
+#[tauri::command]
+fn opendock_outdated(project_dir: String) -> Result<OpenDockCommandResult, String> {
+    run_opendock(Some(&project_dir), &["outdated", "--json"])
+}
+
+#[tauri::command]
+fn opendock_uninstall(
+    app: tauri::AppHandle,
+    project_dir: String,
+    dock_id: String,
+    command_id: Option<String>,
+    force: Option<bool>,
+) -> Result<OpenDockCommandResult, String> {
+    validate_dock_id(&dock_id)?;
+    let mut args = vec!["uninstall", dock_id.as_str(), "--json"];
+    if force.unwrap_or(false) {
+        args.push("--force");
+    }
+    run_opendock_streaming(
+        &app,
+        Some(&project_dir),
+        &args,
+        command_id.as_deref(),
+    )
+}
+
+#[tauri::command]
+fn opendock_doctor(
+    app: tauri::AppHandle,
+    project_dir: String,
+    command_id: Option<String>,
+) -> Result<OpenDockCommandResult, String> {
+    run_opendock_streaming(&app, Some(&project_dir), &["doctor"], command_id.as_deref())
+}
+
+#[tauri::command]
+fn opendock_log(project_dir: String) -> Result<OpenDockCommandResult, String> {
+    run_opendock(Some(&project_dir), &["log"])
+}
+
+#[tauri::command]
+fn opendock_cancel_command(
+    state: tauri::State<'_, RunningCommands>,
+    command_id: String,
+) -> Result<(), String> {
+    let pid = {
+        let mut commands = state
+            .0
+            .lock()
+            .map_err(|_| "failed to lock running commands".to_string())?;
+        commands
+            .remove(&command_id)
+            .ok_or_else(|| "running command was not found".to_string())?
+    };
+    terminate_process(pid)
+}
+
+#[tauri::command]
+fn opendock_auth_login(provider: String) -> Result<OpenDockCommandResult, String> {
+    let provider = match provider.as_str() {
+        "gmail" | "google" => "google",
+        "github" => "github",
+        _ => return Err("auth provider must be google or github".to_string()),
+    };
+    run_opendock(None, &["auth", "login", "--provider", provider])
+}
+
+#[tauri::command]
+fn opendock_auth_status() -> Result<OpenDockCommandResult, String> {
+    run_opendock(None, &["auth", "status"])
+}
+
+#[tauri::command]
+fn opendock_auth_session() -> Result<AuthSession, String> {
+    let raw = run_opendock(None, &["auth", "status"])?;
+    let email = parse_auth_email(&raw.stdout);
+    Ok(AuthSession {
+        logged_in: raw.success && email.is_some(),
+        email,
+        provider: None,
+        raw,
+    })
+}
+
+#[tauri::command]
+fn opendock_auth_logout() -> Result<OpenDockCommandResult, String> {
+    run_opendock(None, &["auth", "logout"])
+}
+
+#[tauri::command]
+async fn opendock_catalog(sort: Option<String>, query: Option<String>) -> Result<Value, String> {
+    let sort = match sort.as_deref().unwrap_or("downloads") {
+        "downloads" | "updated" | "name" => sort.unwrap_or_else(|| "downloads".to_string()),
+        "recent" => "updated".to_string(),
+        _ => return Err("catalog sort must be downloads, updated, recent, or name".to_string()),
+    };
+    let mut url = reqwest::Url::parse(&format!("{}/v1/docks", registry_base()))
+        .map_err(|error| format!("invalid registry URL: {error}"))?;
+    {
+        let mut pairs = url.query_pairs_mut();
+        pairs.append_pair("sort", &sort);
+        pairs.append_pair("page", "1");
+        pairs.append_pair("limit", CATALOG_PAGE_LIMIT);
+        if let Some(query) = query
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+        {
+            pairs.append_pair("query", query);
+        }
+    }
+    request_registry_json(url).await
+}
+
+#[tauri::command]
+async fn opendock_dock_detail(dock_id: String) -> Result<Value, String> {
+    validate_dock_id(&dock_id)?;
+    let url = reqwest::Url::parse(&format!("{}/v1/docks/{}", registry_base(), dock_id))
+        .map_err(|error| format!("invalid registry URL: {error}"))?;
+    request_registry_json(url).await
+}
+
+#[tauri::command]
+async fn opendock_dock_versions(dock_id: String) -> Result<Value, String> {
+    validate_dock_id(&dock_id)?;
+    let url = reqwest::Url::parse(&format!(
+        "{}/v1/docks/{}/versions",
+        registry_base(),
+        dock_id
+    ))
+    .map_err(|error| format!("invalid registry URL: {error}"))?;
+    request_registry_json(url).await
+}
+
+#[tauri::command]
+fn opendock_project_state(project_dir: String) -> Result<ProjectStateResult, String> {
+    let result = run_opendock(Some(&project_dir), &["list", "--json"])?;
+    if !result.success {
+        return Err(command_failure_message(&result));
+    }
+    let json = result
+        .json
+        .ok_or_else(|| "opendock list did not return JSON".to_string())?;
+    let list = serde_json::from_value::<OpenDockListResult>(json)
+        .map_err(|error| format!("failed to parse opendock list JSON: {error}"))?;
+    Ok(ProjectStateResult {
+        has_state: list.has_state && list.success,
+        project_path: list.project_path,
+        lock_path: list.lock_path,
+        docks: list.docks,
+    })
+}
+
+#[tauri::command]
+fn open_project_folder(project_dir: String) -> Result<(), String> {
+    let project_dir = canonical_project_dir(&project_dir)?;
+    open_path(&project_dir)
+}
+
+#[tauri::command]
+fn open_external_url(url: String) -> Result<(), String> {
+    let trimmed = url.trim();
+    let allowed = [
+        "https://opendock.app",
+        "https://hub.opendock.app",
+        "https://registry.opendock.app",
+    ];
+    if !allowed
+        .iter()
+        .any(|prefix| trimmed == *prefix || trimmed.starts_with(&format!("{prefix}/")))
+    {
+        return Err("external URL is not an OpenDock URL".to_string());
+    }
+    open_value(trimmed)
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tauri::Builder::default()
+        .manage(RunningCommands::default())
+        .menu(build_app_menu)
+        .on_menu_event(|app, event| {
+            let id = event.id().as_ref();
+            if id == "app:quit" {
+                app.exit(0);
+                return;
+            }
+            let _ = app.emit("opendock-menu", id);
+        })
+        .invoke_handler(tauri::generate_handler![
+            pick_project_folder,
+            create_blank_project,
+            opendock_load_app_state,
+            opendock_save_app_state,
+            opendock_install,
+            opendock_update,
+            opendock_outdated,
+            opendock_uninstall,
+            opendock_doctor,
+            opendock_log,
+            opendock_cancel_command,
+            opendock_auth_login,
+            opendock_auth_status,
+            opendock_auth_session,
+            opendock_auth_logout,
+            opendock_catalog,
+            opendock_dock_detail,
+            opendock_dock_versions,
+            opendock_project_state,
+            open_project_folder,
+            open_external_url
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running OpenDock");
+}
+
+fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<R>> {
+    let quit = MenuItem::with_id(app, "app:quit", "Quit OpenDock", true, Some("CmdOrCtrl+Q"))?;
+    let app_menu = Submenu::with_items(app, "OpenDock", true, &[&quit])?;
+
+    let new_project = MenuItem::with_id(
+        app,
+        "file:new-project",
+        "New Project",
+        true,
+        Some("CmdOrCtrl+N"),
+    )?;
+    let add_existing = MenuItem::with_id(
+        app,
+        "file:add-existing-project",
+        "Add Existing Project",
+        true,
+        Some("CmdOrCtrl+O"),
+    )?;
+    let file_menu = Submenu::with_items(app, "File", true, &[&new_project, &add_existing])?;
+
+    let rename_project = MenuItem::with_id(
+        app,
+        "edit:rename-project",
+        "Rename Project",
+        true,
+        None::<&str>,
+    )?;
+    let copy_project_path = MenuItem::with_id(
+        app,
+        "edit:copy-project-path",
+        "Copy Project Path",
+        true,
+        Some("CmdOrCtrl+Shift+C"),
+    )?;
+    let edit_sep = PredefinedMenuItem::separator(app)?;
+    let select_all = PredefinedMenuItem::select_all(app, None)?;
+    let edit_menu = Submenu::with_items(
+        app,
+        "Edit",
+        true,
+        &[&rename_project, &copy_project_path, &edit_sep, &select_all],
+    )?;
+
+    let explore_docks = MenuItem::with_id(
+        app,
+        "view:explore",
+        "Explore Docks",
+        true,
+        Some("CmdOrCtrl+1"),
+    )?;
+    let installed_docks = MenuItem::with_id(
+        app,
+        "view:installed",
+        "Installed Docks",
+        true,
+        Some("CmdOrCtrl+2"),
+    )?;
+    let logs = MenuItem::with_id(app, "view:logs", "Logs", true, Some("CmdOrCtrl+3"))?;
+    let toggle_sidebar = MenuItem::with_id(
+        app,
+        "view:toggle-sidebar",
+        "Toggle Sidebar",
+        true,
+        Some("CmdOrCtrl+B"),
+    )?;
+    let view_menu = Submenu::with_items(
+        app,
+        "View",
+        true,
+        &[&explore_docks, &installed_docks, &logs, &toggle_sidebar],
+    )?;
+
+    let run_doctor = MenuItem::with_id(
+        app,
+        "project:run-doctor",
+        "Run Doctor",
+        true,
+        Some("CmdOrCtrl+D"),
+    )?;
+    let update_docks = MenuItem::with_id(
+        app,
+        "project:update-docks",
+        "Update Docks",
+        true,
+        Some("CmdOrCtrl+U"),
+    )?;
+    let open_folder = MenuItem::with_id(
+        app,
+        "project:open-folder",
+        "Open Project Folder",
+        true,
+        None::<&str>,
+    )?;
+    let reveal_folder = MenuItem::with_id(
+        app,
+        "project:reveal-folder",
+        "Reveal in Finder / Explorer",
+        true,
+        None::<&str>,
+    )?;
+    let remove_project = MenuItem::with_id(
+        app,
+        "project:remove-from-opendock",
+        "Remove from OpenDock",
+        true,
+        None::<&str>,
+    )?;
+    let project_menu = Submenu::with_items(
+        app,
+        "Project",
+        true,
+        &[
+            &run_doctor,
+            &update_docks,
+            &open_folder,
+            &reveal_folder,
+            &remove_project,
+        ],
+    )?;
+
+    let install_dock = MenuItem::with_id(
+        app,
+        "dock:install",
+        "Install Dock",
+        true,
+        Some("CmdOrCtrl+Return"),
+    )?;
+    let delete_dock = MenuItem::with_id(app, "dock:delete", "Delete Dock", true, None::<&str>)?;
+    let refresh_registry = MenuItem::with_id(
+        app,
+        "dock:refresh-registry",
+        "Refresh Registry",
+        true,
+        Some("CmdOrCtrl+R"),
+    )?;
+    let open_dock_detail = MenuItem::with_id(
+        app,
+        "dock:open-detail",
+        "Open Dock Detail",
+        true,
+        None::<&str>,
+    )?;
+    let dock_menu = Submenu::with_items(
+        app,
+        "Dock",
+        true,
+        &[
+            &install_dock,
+            &delete_dock,
+            &refresh_registry,
+            &open_dock_detail,
+        ],
+    )?;
+
+    let minimize = PredefinedMenuItem::minimize(app, None)?;
+    let zoom = PredefinedMenuItem::maximize(app, None)?;
+    let reload_window = MenuItem::with_id(
+        app,
+        "window:reload",
+        "Reload Window",
+        true,
+        Some("CmdOrCtrl+Shift+R"),
+    )?;
+    let window_menu =
+        Submenu::with_items(app, "Window", true, &[&minimize, &zoom, &reload_window])?;
+
+    let docs = MenuItem::with_id(app, "help:docs", "OpenDock Docs", true, None::<&str>)?;
+    let cli_commands = MenuItem::with_id(
+        app,
+        "help:cli-commands",
+        "View CLI Commands",
+        true,
+        None::<&str>,
+    )?;
+    let troubleshooting = MenuItem::with_id(
+        app,
+        "help:troubleshooting",
+        "Troubleshooting",
+        true,
+        None::<&str>,
+    )?;
+    let help_menu =
+        Submenu::with_items(app, "Help", true, &[&docs, &cli_commands, &troubleshooting])?;
+
+    Menu::with_items(
+        app,
+        &[
+            &app_menu,
+            &file_menu,
+            &edit_menu,
+            &view_menu,
+            &project_menu,
+            &dock_menu,
+            &window_menu,
+            &help_menu,
+        ],
+    )
+}
+
+async fn request_registry_json(url: reqwest::Url) -> Result<Value, String> {
+    let response = reqwest::Client::new()
+        .get(url.clone())
+        .header(reqwest::header::ACCEPT, "application/json")
+        .header(reqwest::header::CACHE_CONTROL, "no-cache, no-store")
+        .header(reqwest::header::PRAGMA, "no-cache")
+        .send()
+        .await
+        .map_err(|error| format!("failed to request registry: {error}"))?;
+    let status = response.status();
+    if !status.is_success() {
+        let text = response.text().await.unwrap_or_default();
+        let detail = text.trim();
+        if detail.is_empty() {
+            return Err(format!("registry returned {status} for {url}"));
+        }
+        return Err(format!("registry returned {status} for {url}: {detail}"));
+    }
+    response
+        .json::<Value>()
+        .await
+        .map_err(|error| format!("failed to parse registry response: {error}"))
+}
+
+fn registry_base() -> String {
+    env::var("OPENDOCK_REGISTRY_URL")
+        .ok()
+        .map(|value| value.trim().trim_end_matches('/').to_string())
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| DEFAULT_REGISTRY_URL.to_string())
+}
+
+fn app_state_path() -> Result<PathBuf, String> {
+    let data_dir = app_data_dir()?;
+    Ok(data_dir.join("state.json"))
+}
+
+fn app_data_dir() -> Result<PathBuf, String> {
+    if let Ok(path) = env::var("OPENDOCK_APP_DATA_DIR") {
+        let trimmed = path.trim();
+        if !trimmed.is_empty() {
+            return Ok(PathBuf::from(trimmed));
+        }
+    }
+
+    if cfg!(target_os = "windows") {
+        if let Some(appdata) = env::var_os("APPDATA") {
+            return Ok(PathBuf::from(appdata).join("OpenDock"));
+        }
+    }
+
+    let home = home_dir().ok_or_else(|| "home directory not found".to_string())?;
+    if cfg!(target_os = "macos") {
+        Ok(home
+            .join("Library")
+            .join("Application Support")
+            .join("OpenDock"))
+    } else {
+        Ok(home.join(".local").join("share").join("OpenDock"))
+    }
+}
+
+fn sanitize_projects(projects: Vec<AppProject>) -> Vec<AppProject> {
+    let mut sanitized = Vec::new();
+    for project in projects {
+        if project.id.trim().is_empty()
+            || project.name.trim().is_empty()
+            || project.path.trim().is_empty()
+        {
+            continue;
+        }
+        if sanitized
+            .iter()
+            .any(|existing: &AppProject| existing.id == project.id || existing.path == project.path)
+        {
+            continue;
+        }
+        sanitized.push(project);
+    }
+    sanitized
+}
+
+fn resolve_active_project_id(projects: &[AppProject], active_project_id: &str) -> String {
+    if projects
+        .iter()
+        .any(|project| project.id == active_project_id)
+    {
+        return active_project_id.to_string();
+    }
+    projects
+        .first()
+        .map(|project| project.id.clone())
+        .unwrap_or_default()
+}
+
+fn parse_auth_email(stdout: &str) -> Option<String> {
+    stdout
+        .lines()
+        .find_map(|line| line.trim().strip_prefix("Logged in as "))
+        .map(|value| value.trim().trim_end_matches('.').to_string())
+        .filter(|value| value.contains('@'))
+}
+
+fn run_opendock(project_dir: Option<&str>, args: &[&str]) -> Result<OpenDockCommandResult, String> {
+    let cwd = match project_dir {
+        Some(dir) => Some(canonical_project_dir(dir)?),
+        None => None,
+    };
+    let output = command_for_opendock()
+        .args(args)
+        .env("NO_COLOR", "1")
+        .current_dir(
+            cwd.as_ref()
+                .unwrap_or(&env::current_dir().map_err(|error| error.to_string())?),
+        )
+        .output()
+        .map_err(|error| format!("failed to run opendock: {error}"))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+    let success = output.status.success();
+    Ok(OpenDockCommandResult {
+        success,
+        code: output.status.code(),
+        json: parse_command_json(&stdout),
+        lines: command_lines(&stdout, &stderr, success),
+        stdout,
+        stderr,
+    })
+}
+
+fn command_failure_message(result: &OpenDockCommandResult) -> String {
+    let detail = result
+        .stderr
+        .trim()
+        .lines()
+        .next()
+        .or_else(|| result.stdout.trim().lines().next())
+        .unwrap_or("opendock command failed");
+    match result.code {
+        Some(code) => format!("{detail} (exit {code})"),
+        None => detail.to_string(),
+    }
+}
+
+fn run_opendock_streaming(
+    app: &tauri::AppHandle,
+    project_dir: Option<&str>,
+    args: &[&str],
+    command_id: Option<&str>,
+) -> Result<OpenDockCommandResult, String> {
+    let cwd = match project_dir {
+        Some(dir) => Some(canonical_project_dir(dir)?),
+        None => None,
+    };
+    let fallback_cwd = env::current_dir().map_err(|error| error.to_string())?;
+    let mut command = command_for_opendock();
+    command
+        .args(args)
+        .env("NO_COLOR", "1")
+        .current_dir(cwd.as_ref().unwrap_or(&fallback_cwd))
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+
+    let mut child = command
+        .spawn()
+        .map_err(|error| format!("failed to run opendock: {error}"))?;
+    if let Some(command_id) = command_id {
+        register_running_command(app, command_id, child.id())?;
+    }
+
+    let lines = Arc::new(Mutex::new(Vec::<OpenDockCommandLine>::new()));
+    let stdout_text = Arc::new(Mutex::new(String::new()));
+    let stderr_text = Arc::new(Mutex::new(String::new()));
+
+    let stdout_thread = child.stdout.take().map(|stdout| {
+        spawn_command_reader(
+            app.clone(),
+            stdout,
+            false,
+            Arc::clone(&lines),
+            Arc::clone(&stdout_text),
+        )
+    });
+    let stderr_thread = child.stderr.take().map(|stderr| {
+        spawn_command_reader(
+            app.clone(),
+            stderr,
+            true,
+            Arc::clone(&lines),
+            Arc::clone(&stderr_text),
+        )
+    });
+
+    let status = child
+        .wait()
+        .map_err(|error| format!("failed to wait for opendock: {error}"))?;
+    if let Some(command_id) = command_id {
+        unregister_running_command(app, command_id);
+    }
+
+    if let Some(handle) = stdout_thread {
+        let _ = handle.join();
+    }
+    if let Some(handle) = stderr_thread {
+        let _ = handle.join();
+    }
+
+    let success = status.success();
+    let stdout = stdout_text
+        .lock()
+        .map(|value| value.clone())
+        .unwrap_or_default();
+    let stderr = stderr_text
+        .lock()
+        .map(|value| value.clone())
+        .unwrap_or_default();
+    let mut collected_lines = lines.lock().map(|value| value.clone()).unwrap_or_default();
+    let json = parse_command_json(&stdout);
+
+    if collected_lines.is_empty() {
+        let payload = OpenDockCommandLine {
+            level: if success { "OK" } else { "ERR" }.to_string(),
+            message: empty_stream_message(success, json.as_ref()),
+        };
+        collected_lines.push(payload.clone());
+        let _ = app.emit("opendock-command-line", payload);
+    }
+
+    Ok(OpenDockCommandResult {
+        success,
+        code: status.code(),
+        json,
+        stdout,
+        stderr,
+        lines: collected_lines,
+    })
+}
+
+fn spawn_command_reader<R: Read + Send + 'static>(
+    app: tauri::AppHandle,
+    reader: R,
+    is_stderr: bool,
+    lines: Arc<Mutex<Vec<OpenDockCommandLine>>>,
+    text: Arc<Mutex<String>>,
+) -> thread::JoinHandle<()> {
+    thread::spawn(move || {
+        let reader = BufReader::new(reader);
+        for line in reader.lines().map_while(Result::ok) {
+            if let Ok(mut buffer) = text.lock() {
+                buffer.push_str(&line);
+                buffer.push('\n');
+            }
+            if line.trim().is_empty() {
+                continue;
+            }
+            if !is_stderr && is_command_json_line(&line) {
+                continue;
+            }
+            let payload = OpenDockCommandLine {
+                level: if is_stderr {
+                    "ERR".to_string()
+                } else {
+                    infer_level(&line, true).to_string()
+                },
+                message: line,
+            };
+            if let Ok(mut current_lines) = lines.lock() {
+                current_lines.push(payload.clone());
+            }
+            let _ = app.emit("opendock-command-line", payload);
+        }
+    })
+}
+
+fn register_running_command(
+    app: &tauri::AppHandle,
+    command_id: &str,
+    pid: u32,
+) -> Result<(), String> {
+    let state = app.state::<RunningCommands>();
+    let mut commands = state
+        .0
+        .lock()
+        .map_err(|_| "failed to lock running commands".to_string())?;
+    commands.insert(command_id.to_string(), pid);
+    Ok(())
+}
+
+fn unregister_running_command(app: &tauri::AppHandle, command_id: &str) {
+    if let Ok(mut commands) = app.state::<RunningCommands>().0.lock() {
+        commands.remove(command_id);
+    }
+}
+
+fn terminate_process(pid: u32) -> Result<(), String> {
+    if cfg!(target_os = "windows") {
+        let status = Command::new("taskkill")
+            .args(["/pid", &pid.to_string(), "/T", "/F"])
+            .status()
+            .map_err(|error| format!("failed to cancel command: {error}"))?;
+        if status.success() {
+            return Ok(());
+        }
+        return Err(format!("failed to cancel command: taskkill exited with {status}"));
+    }
+
+    let status = Command::new("kill")
+        .args(["-TERM", &pid.to_string()])
+        .status()
+        .map_err(|error| format!("failed to cancel command: {error}"))?;
+    if status.success() {
+        return Ok(());
+    }
+    Err(format!("failed to cancel command: kill exited with {status}"))
+}
+
+fn command_for_opendock() -> Command {
+    if let Ok(path) = env::var("OPENDOCK_CLI_PATH") {
+        if !path.trim().is_empty() {
+            return Command::new(path);
+        }
+    }
+
+    for candidate in sidecar_cli_candidates() {
+        if candidate.is_file() {
+            return Command::new(candidate);
+        }
+    }
+
+    for candidate in local_cli_candidates() {
+        if candidate.is_file() {
+            return Command::new(candidate);
+        }
+    }
+
+    Command::new("opendock")
+}
+
+fn open_path(path: &Path) -> Result<(), String> {
+    open_value(&path.to_string_lossy())
+}
+
+fn open_value(value: &str) -> Result<(), String> {
+    let status = if cfg!(target_os = "macos") {
+        Command::new("open").arg(value).status()
+    } else if cfg!(target_os = "windows") {
+        Command::new("explorer").arg(value).status()
+    } else {
+        Command::new("xdg-open").arg(value).status()
+    }
+    .map_err(|error| format!("failed to open target: {error}"))?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("open command exited with {status}"))
+    }
+}
+
+fn sidecar_cli_candidates() -> Vec<PathBuf> {
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let mut candidates = Vec::new();
+    for name in sidecar_file_names() {
+        candidates.push(manifest_dir.join("binaries").join(&name));
+    }
+
+    if let Ok(exe) = env::current_exe() {
+        if let Some(bin_dir) = exe.parent() {
+            for name in sidecar_file_names() {
+                candidates.push(bin_dir.join(&name));
+                candidates.push(bin_dir.join("resources").join(&name));
+            }
+            if let Some(contents_dir) = bin_dir.parent() {
+                for name in sidecar_file_names() {
+                    candidates.push(contents_dir.join("Resources").join(&name));
+                }
+            }
+        }
+    }
+
+    candidates
+}
+
+fn local_cli_candidates() -> Vec<PathBuf> {
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let workspace = manifest_dir
+        .parent()
+        .and_then(Path::parent)
+        .map(Path::to_path_buf);
+    let mut candidates = Vec::new();
+    if let Some(workspace) = workspace {
+        candidates.push(workspace.join("opendock").join("bin").join("opendock"));
+    }
+    candidates
+}
+
+fn sidecar_file_names() -> Vec<String> {
+    vec![
+        sidecar_target_name(),
+        "opendock".to_string(),
+        "opendock.exe".to_string(),
+    ]
+}
+
+fn sidecar_target_name() -> String {
+    format!("opendock-{}", sidecar_target_suffix())
+}
+
+#[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+fn sidecar_target_suffix() -> &'static str {
+    "aarch64-apple-darwin"
+}
+
+#[cfg(all(target_os = "macos", target_arch = "x86_64"))]
+fn sidecar_target_suffix() -> &'static str {
+    "x86_64-apple-darwin"
+}
+
+#[cfg(all(target_os = "windows", target_arch = "x86_64"))]
+fn sidecar_target_suffix() -> &'static str {
+    "x86_64-pc-windows-msvc.exe"
+}
+
+#[cfg(all(target_os = "windows", target_arch = "aarch64"))]
+fn sidecar_target_suffix() -> &'static str {
+    "aarch64-pc-windows-msvc.exe"
+}
+
+#[cfg(all(target_os = "linux", target_arch = "x86_64"))]
+fn sidecar_target_suffix() -> &'static str {
+    "x86_64-unknown-linux-gnu"
+}
+
+#[cfg(all(target_os = "linux", target_arch = "aarch64"))]
+fn sidecar_target_suffix() -> &'static str {
+    "aarch64-unknown-linux-gnu"
+}
+
+fn canonical_project_dir(project_dir: &str) -> Result<PathBuf, String> {
+    let path = PathBuf::from(project_dir);
+    if !path.is_absolute() {
+        return Err("project path must be absolute".to_string());
+    }
+    let canonical = fs::canonicalize(&path)
+        .map_err(|error| format!("failed to resolve project path: {error}"))?;
+    if !canonical.is_dir() {
+        return Err("project path must be a directory".to_string());
+    }
+    Ok(canonical)
+}
+
+fn validate_dock_ref(value: &str) -> Result<(), String> {
+    let (dock_id, version) = value
+        .split_once('@')
+        .ok_or_else(|| "dock reference must use owner/name@version".to_string())?;
+    validate_dock_id(dock_id)?;
+    if version.is_empty() || version == "latest" || !version.chars().all(is_version_char) {
+        return Err("dock reference must use an exact version".to_string());
+    }
+    Ok(())
+}
+
+fn validate_dock_id(value: &str) -> Result<(), String> {
+    let mut parts = value.split('/');
+    let owner = parts.next().unwrap_or_default();
+    let name = parts.next().unwrap_or_default();
+    if parts.next().is_some()
+        || owner.is_empty()
+        || name.is_empty()
+        || !owner.chars().all(is_dock_name_char)
+        || !name.chars().all(is_dock_name_char)
+    {
+        return Err("dock id must be owner/name".to_string());
+    }
+    Ok(())
+}
+
+fn is_dock_name_char(value: char) -> bool {
+    value.is_ascii_alphanumeric() || value == '-' || value == '_'
+}
+
+fn is_version_char(value: char) -> bool {
+    value.is_ascii_alphanumeric() || value == '.' || value == '-' || value == '_' || value == '+'
+}
+
+fn command_lines(stdout: &str, stderr: &str, success: bool) -> Vec<OpenDockCommandLine> {
+    let mut lines = Vec::new();
+    for line in stdout
+        .lines()
+        .filter(|line| !line.trim().is_empty() && !is_command_json_line(line))
+    {
+        lines.push(OpenDockCommandLine {
+            level: infer_level(line, success).to_string(),
+            message: line.to_string(),
+        });
+    }
+    for line in stderr.lines().filter(|line| !line.trim().is_empty()) {
+        lines.push(OpenDockCommandLine {
+            level: "ERR".to_string(),
+            message: line.to_string(),
+        });
+    }
+    if lines.is_empty() {
+        lines.push(OpenDockCommandLine {
+            level: if success { "OK" } else { "ERR" }.to_string(),
+            message: if success {
+                "opendock command completed".to_string()
+            } else {
+                "opendock command failed".to_string()
+            },
+        });
+    }
+    lines
+}
+
+fn parse_command_json(stdout: &str) -> Option<Value> {
+    stdout
+        .lines()
+        .rev()
+        .find_map(|line| serde_json::from_str::<Value>(line.trim()).ok())
+        .filter(is_command_json_value)
+}
+
+fn is_command_json_line(line: &str) -> bool {
+    serde_json::from_str::<Value>(line.trim())
+        .ok()
+        .as_ref()
+        .is_some_and(is_command_json_value)
+}
+
+fn is_command_json_value(value: &Value) -> bool {
+    value.get("reports").is_some()
+        && (value.get("operation").is_some() || value.get("updatesAvailable").is_some())
+}
+
+fn empty_stream_message(success: bool, json: Option<&Value>) -> String {
+    if !success {
+        return "opendock command failed".to_string();
+    }
+    if is_no_update_json(json) {
+        return "No OpenDock dock updates available.".to_string();
+    }
+    "opendock command completed".to_string()
+}
+
+fn is_no_update_json(json: Option<&Value>) -> bool {
+    let Some(value) = json else {
+        return false;
+    };
+    let reports_empty = value
+        .get("reports")
+        .and_then(Value::as_array)
+        .map(|reports| reports.is_empty())
+        .unwrap_or(false);
+    value.get("operation").and_then(Value::as_str) == Some("update")
+        && value.get("success").and_then(Value::as_bool) == Some(true)
+        && reports_empty
+}
+
+fn infer_level(line: &str, success: bool) -> &'static str {
+    let lower = line.to_ascii_lowercase();
+    if lower.contains("error") || lower.contains("failed") || !success {
+        "ERR"
+    } else if lower.contains("warning") || lower.contains("warn") || lower.contains("not logged") {
+        "WARN"
+    } else if lower.contains("running") || lower.starts_with("run ") {
+        "RUN"
+    } else if lower.contains("installed")
+        || lower.contains("updated")
+        || lower.contains("uninstalled")
+        || lower.contains("logged")
+        || lower.contains("success")
+    {
+        "OK"
+    } else {
+        "INFO"
+    }
+}
+
+fn home_dir() -> Option<PathBuf> {
+    env::var_os("HOME")
+        .map(PathBuf::from)
+        .or_else(|| env::var_os("USERPROFILE").map(PathBuf::from))
+}
+
+fn unique_project_path(base: &Path, preferred: &str) -> PathBuf {
+    let candidate = base.join(preferred);
+    if !candidate.exists() {
+        return candidate;
+    }
+    for index in 2..1000 {
+        let candidate = base.join(format!("{preferred} {index}"));
+        if !candidate.exists() {
+            return candidate;
+        }
+    }
+    base.join(format!("{preferred} {}", chrono_free_timestamp()))
+}
+
+fn chrono_free_timestamp() -> String {
+    match std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH) {
+        Ok(duration) => duration.as_secs().to_string(),
+        Err(_) => "0".to_string(),
+    }
+}
+
+fn file_name(path: &Path) -> Result<String, String> {
+    path.file_name()
+        .map(|name| name.to_string_lossy().to_string())
+        .ok_or_else(|| "folder name not found".to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn empty_update_json_uses_cli_no_updates_message() {
+        let value = json!({
+            "operation": "update",
+            "reports": [],
+            "summary": {
+                "created": [],
+                "deleted": [],
+                "reviewRequired": [],
+                "unchanged": [],
+                "updated": []
+            },
+            "success": true
+        });
+
+        assert_eq!(
+            empty_stream_message(true, Some(&value)),
+            "No OpenDock dock updates available."
+        );
+    }
+
+    #[test]
+    fn non_update_json_keeps_generic_success_message() {
+        let value = json!({
+            "operation": "install",
+            "reports": [],
+            "summary": {
+                "created": [],
+                "deleted": [],
+                "reviewRequired": [],
+                "unchanged": [],
+                "updated": []
+            },
+            "success": true
+        });
+
+        assert_eq!(
+            empty_stream_message(true, Some(&value)),
+            "opendock command completed"
+        );
+    }
+}
