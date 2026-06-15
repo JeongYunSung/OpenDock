@@ -1,0 +1,38 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "OpenDock",
+  "version": "0.1.0",
+  "identifier": "app.opendock.desktop",
+  "build": {
+    "beforeDevCommand": "bun run prepare:sidecars && bun run dev:web",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "bun run prepare:sidecars && bun run build:web",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "macOSPrivateApi": true,
+    "windows": [
+      {
+        "title": "OpenDock",
+        "width": 1180,
+        "height": 760,
+        "minWidth": 960,
+        "minHeight": 640,
+        "decorations": false,
+        "transparent": true,
+        "shadow": true,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": false,
+    "targets": "all",
+    "externalBin": [
+      "binaries/opendock"
+    ]
+  }
+}
