@@ -96,7 +96,7 @@ opendock bootstrap windows
 | `opendock update --force` | OpenDock-managed content が編集されていても dock version を優先. |
 | `opendock uninstall owner/name` | 1つの dock とその managed project files を削除. |
 | `opendock doctor` | project state と dock doctor steps を確認. |
-| `opendock log` | current project の最近の OpenDock run を表示. |
+| `opendock log` | current project の最近の command logs を表示. |
 | `opendock version` | CLI, schema, Registry information を表示. |
 | `opendock bootstrap mac` | macOS で Homebrew を確認またはインストール. |
 | `opendock bootstrap windows` | Windows で WinGet を確認または Microsoft App Installer を開く. |

@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from
 import { dirname, join } from "node:path";
 import { dataRoot } from "./paths.js";
 
-export type RunStatus = "Success" | "Failure";
+export type RunStatus = "Failure" | "Skipped" | "Success";
 
 export interface RunLog {
   timestamp: string;
@@ -17,7 +17,7 @@ export interface RunLog {
 export function appendRunLog(
   projectDir: string,
   command: string,
-  dockId: string,
+  dockId: string | undefined,
   status: RunStatus,
   message: string,
 ): void {
@@ -28,9 +28,9 @@ export function appendRunLog(
     timestamp: new Date().toISOString(),
     project_path: projectPath,
     command,
-    dock_id: dockId,
     status,
     message,
+    ...(dockId === undefined ? {} : { dock_id: dockId }),
   };
   const existing = existsSync(path) ? readFileSync(path, "utf8") : "";
   writeFileSync(path, `${existing}${JSON.stringify(log)}\n`);

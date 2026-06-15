@@ -721,6 +721,9 @@ version, platform, 관리 파일 수가 포함됩니다.
 
 다른 도구가 설치된 dock 목록을 읽어야 한다면 `opendock list --json`을 사용합니다.
 
+OpenDock은 프로젝트별 command log를 `Success`, `Failure`, `Skipped` 상태로
+기록합니다. `opendock log`는 현재 디렉터리의 최근 기록을 보여줍니다.
+
 ### update
 
 `update`는 현재 프로젝트에 설치된 모든 dock을 Registry의 최신 approved release로

@@ -337,6 +337,10 @@ not contact the Registry or modify files.
 
 Use `opendock list --json` when another tool needs the installed dock inventory.
 
+OpenDock records command logs per project with `Success`, `Failure`, or
+`Skipped` status. `opendock log` shows the most recent entries for the current
+directory.
+
 ## Deploy
 
 Deploy requires login and an exact version when running `opendock deploy`.

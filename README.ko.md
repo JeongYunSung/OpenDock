@@ -156,7 +156,7 @@ bin/opendock version
 | `opendock update --force` | OpenDock 관리 영역이 수정됐더라도 dock 버전으로 업데이트합니다. |
 | `opendock uninstall owner/name` | dock 하나와 그 dock이 관리하던 프로젝트 파일을 제거합니다. |
 | `opendock doctor` | 프로젝트 상태와 설치된 dock들의 doctor step을 점검합니다. |
-| `opendock log` | 현재 프로젝트의 최근 OpenDock 실행 기록을 보여줍니다. |
+| `opendock log` | 현재 프로젝트의 최근 command 실행 기록을 보여줍니다. |
 | `opendock version` | CLI, schema, Registry 정보를 출력합니다. |
 | `opendock bootstrap mac` | macOS에서 Homebrew를 확인하거나 설치합니다. |
 | `opendock bootstrap windows` | Windows에서 WinGet을 확인하거나 Microsoft App Installer를 엽니다. |

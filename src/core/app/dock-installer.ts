@@ -1,6 +1,5 @@
 import { rmSync } from "node:fs";
 import { relative } from "node:path";
-import { appendRunLog } from "../../logging.js";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
 import type { ResolvedDock } from "../../resolver.js";
 import { resolveDock } from "../../resolver.js";
@@ -93,65 +92,46 @@ export class DockInstaller {
       force,
     );
 
-    try {
-      if (priorDock) {
-        filePlan.verifyPriorState();
-      }
+    if (priorDock) {
+      filePlan.verifyPriorState();
+    }
 
-      const fileCandidates = this.collectManifestFiles(resolved);
-      this.seedWorkdir(options.projectDir, resolved);
-      const taskResult = options.runTasks
-        ? this.taskRunner.run(resolved.manifest, {
-            projectDir: options.projectDir,
-            dockId: resolved.manifest.id,
-            phase: options.phase ?? "install",
-            platform,
-            ...(options.live === undefined ? {} : { live: options.live }),
-          })
-        : { reports: [], exports: [] };
-      const candidates = [...fileCandidates, ...taskResult.exports];
-
-      filePlan.preflight(candidates);
-      const fileSummary = filePlan.apply(candidates);
-
-      store.saveDock(
-        this.recordFor(
-          options.projectDir,
-          resolved.manifest,
-          resolved.version,
-          options.dockRef.requested(),
-          resolved.checksum,
-          resolved.signature,
+    const fileCandidates = this.collectManifestFiles(resolved);
+    this.seedWorkdir(options.projectDir, resolved);
+    const taskResult = options.runTasks
+      ? this.taskRunner.run(resolved.manifest, {
+          projectDir: options.projectDir,
+          dockId: resolved.manifest.id,
+          phase: options.phase ?? "install",
           platform,
-          fileSummary,
-        ),
-      );
+          ...(options.live === undefined ? {} : { live: options.live }),
+        })
+      : { reports: [], exports: [] };
+    const candidates = [...fileCandidates, ...taskResult.exports];
 
-      const report = this.reportFor(
-        resolved.manifest.id,
+    filePlan.preflight(candidates);
+    const fileSummary = filePlan.apply(candidates);
+
+    store.saveDock(
+      this.recordFor(
+        options.projectDir,
+        resolved.manifest,
         resolved.version,
+        options.dockRef.requested(),
+        resolved.checksum,
+        resolved.signature,
         platform,
         fileSummary,
-        taskResult.reports,
-      );
-      appendRunLog(
-        options.projectDir,
-        options.operation,
-        report.dockId,
-        "Success",
-        `${report.dockId}@${report.version} (${report.filesCreated} created, ${report.filesUpdated} updated, ${report.filesDeleted} deleted, ${report.filesReviewRequired} review required)`,
-      );
-      return report;
-    } catch (error) {
-      appendRunLog(
-        options.projectDir,
-        options.operation,
-        resolved.manifest.id,
-        "Failure",
-        (error as Error).message,
-      );
-      throw error;
-    }
+      ),
+    );
+
+    return this.reportFor(
+      resolved.manifest.id,
+      resolved.version,
+      platform,
+      fileSummary,
+      taskResult.reports,
+    );
   }
 
   uninstall(options: UninstallOptions): UninstallReport {
@@ -170,13 +150,6 @@ export class DockInstaller {
     });
     pruneEmptyDirectoryChain(options.projectDir, relative(options.projectDir, workdir));
     store.removeDock(dock.id);
-    appendRunLog(
-      options.projectDir,
-      "uninstall",
-      dock.id,
-      "Success",
-      `${dock.id}@${dock.version} uninstalled (${summary.deleted} deleted, ${summary.updated} updated)`,
-    );
     return {
       dockId: dock.id,
       fileChanges: {

@@ -20,6 +20,7 @@ import { type DockManifest, DockRef, parseManifestFile } from "../src/core/domai
 import type { InstalledDockRecord } from "../src/core/domain/state-store.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
+import { readProjectLogs } from "../src/logging.js";
 import type { OpenDockPlatform } from "../src/platform.js";
 import type { ResolvedDock } from "../src/resolver.js";
 
@@ -739,6 +740,63 @@ describe("opendock TypeScript CLI", () => {
       success: true,
       summary: { installed: [] },
     });
+  });
+
+  it("records command logs for successes, failures, and skipped work", async () => {
+    const docks = tempDir();
+    const home = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+    });
+    const registry = mockRegistry([
+      {
+        archive: await createDockArchive(docks, "test", "designer", "1.0.0"),
+        id: "test/designer",
+        latest: true,
+        platform: "macos",
+        version: "1.0.0",
+      },
+    ]);
+    const previousExitCode = process.exitCode;
+
+    try {
+      await withEnv({ HOME: home }, async () => {
+        await withCwd(project, () =>
+          captureConsole(() =>
+            runCli(["bun", "opendock", "install", "test/designer@1.0.0", "--platform", "macos"]),
+          ),
+        );
+        await withCwd(project, () => captureConsole(() => runCli(["bun", "opendock", "list"])));
+        await withCwd(project, () => captureConsole(() => runCli(["bun", "opendock", "outdated"])));
+        await withCwd(project, () => captureConsole(() => runCli(["bun", "opendock", "update"])));
+
+        const agentsPath = join(project, "AGENTS.md");
+        writeFileSync(
+          agentsPath,
+          readFileSync(agentsPath, "utf8").replace("# Designer Agent", "# User Edit"),
+        );
+        await withCwd(project, () =>
+          captureConsole(() => runCli(["bun", "opendock", "uninstall", "test/designer", "--json"])),
+        );
+        process.exitCode = previousExitCode;
+        await withCwd(project, () => captureConsole(() => runCli(["bun", "opendock", "log"])));
+
+        expect(
+          readProjectLogs(project).map(({ command, status }) => ({ command, status })),
+        ).toEqual([
+          { command: "install", status: "Success" },
+          { command: "list", status: "Success" },
+          { command: "outdated", status: "Skipped" },
+          { command: "update", status: "Skipped" },
+          { command: "uninstall", status: "Failure" },
+          { command: "log", status: "Success" },
+        ]);
+      });
+    } finally {
+      process.exitCode = previousExitCode;
+      registry.restore();
+    }
   });
 
   it("checks installed docks for newer Registry releases", async () => {

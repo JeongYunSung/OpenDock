@@ -35,7 +35,7 @@ import {
 } from "./core/domain/manifest.js";
 import { type InstalledDockRecord, OpenDockStateStore } from "./core/domain/state-store.js";
 import { TaskRunner } from "./core/runtime/task-runner.js";
-import { readProjectLogs } from "./logging.js";
+import { appendRunLog, type RunStatus, readProjectLogs } from "./logging.js";
 import {
   detectPlatform,
   type OpenDockPlatform,
@@ -89,34 +89,48 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--platform <platform>", "Target platform: macos, windows, or linux")
     .option("--json", "Print a machine-readable change report")
     .action(async (dock: string, options: ChangeCommandOptions) => {
-      const platform = resolveCliPlatform(options.platform);
-      const report = await runMaybeQuietAsync(options.json === true, () =>
-        installer.install({
-          dockRef: parseInstallRef(dock),
-          force: options.force === true,
-          projectDir: process.cwd(),
-          runTasks: true,
-          operation: "install",
-          phase: "install",
-          platform,
-          live: options.json !== true,
-        }),
-      );
-      if (options.json === true) {
-        printJson(
-          changeCommandResult("install", [
-            installChangeReport(report, { operation: "install", status: "installed" }),
-          ]),
+      let dockId = dockIdFromReference(dock);
+      try {
+        const platform = resolveCliPlatform(options.platform);
+        const dockRef = parseInstallRef(dock);
+        dockId = dockRef.id();
+        const report = await runMaybeQuietAsync(options.json === true, () =>
+          installer.install({
+            dockRef,
+            force: options.force === true,
+            projectDir: process.cwd(),
+            runTasks: true,
+            operation: "install",
+            phase: "install",
+            platform,
+            live: options.json !== true,
+          }),
         );
-        return;
-      }
-      console.log(
-        `${terminalStyle.success("Installed")} ${formatDockVersion(
+        recordCommandLog(
+          "install",
+          "Success",
+          `${report.dockId}@${report.version} installed (${plainInstallFileSummary(report)})`,
           report.dockId,
-          report.version,
-        )} for ${formatPlatformName(report.platform)} (${formatFileSummary(report)})`,
-      );
-      printFileChanges(report);
+        );
+        if (options.json === true) {
+          printJson(
+            changeCommandResult("install", [
+              installChangeReport(report, { operation: "install", status: "installed" }),
+            ]),
+          );
+          return;
+        }
+        console.log(
+          `${terminalStyle.success("Installed")} ${formatDockVersion(
+            report.dockId,
+            report.version,
+          )} for ${formatPlatformName(report.platform)} (${formatFileSummary(report)})`,
+        );
+        printFileChanges(report);
+      } catch (error) {
+        recordCommandFailure("install", error, dockId);
+        handleChangeCommandError("install", error, options.json === true);
+      }
     });
 
   program
@@ -140,6 +154,11 @@ export async function run(argv = process.argv): Promise<void> {
         const updateChecks = await checkInstalledDockUpdates(installedDocks, platformOverride);
         const updateTargets = updateChecks.filter((check) => check.updateAvailable);
         if (updateTargets.length === 0) {
+          recordCommandLog(
+            "update",
+            "Skipped",
+            `no updates available for ${installedDocks.length} installed dock(s)`,
+          );
           if (options.json === true) {
             printJson(changeCommandResult("update", []));
           } else {
@@ -197,10 +216,18 @@ export async function run(argv = process.argv): Promise<void> {
           }
           printFileChanges(report);
         }
+        recordCommandLog(
+          "update",
+          "Success",
+          `updated ${changeReports.length} dock(s): ${changeReports
+            .map((report) => `${report.dockId}@${report.version}`)
+            .join(", ")}`,
+        );
         if (options.json === true) {
           printJson(changeCommandResult("update", changeReports));
         }
       } catch (error) {
+        recordCommandFailure("update", error);
         handleChangeCommandError("update", error, options.json === true);
       }
     });
@@ -212,13 +239,22 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--force", "Remove OpenDock-managed files even when edited managed files are detected")
     .option("--json", "Print a machine-readable change report")
     .action((dock: string, options: Pick<ChangeCommandOptions, "force" | "json">) => {
+      let dockId = dockIdFromReference(dock);
       try {
+        const parsedDockId = parseInstalledDockId(dock);
+        dockId = parsedDockId;
         const report = runMaybeQuiet(options.json === true, () =>
           installer.uninstall({
-            dockId: parseInstalledDockId(dock),
+            dockId: parsedDockId,
             force: options.force === true,
             projectDir: process.cwd(),
           }),
+        );
+        recordCommandLog(
+          "uninstall",
+          "Success",
+          `${report.dockId}@${report.version} uninstalled (${report.filesDeleted} files deleted, ${report.filesUpdated} files updated)`,
+          report.dockId,
         );
         if (options.json === true) {
           printJson(
@@ -238,6 +274,7 @@ export async function run(argv = process.argv): Promise<void> {
           )})`,
         );
       } catch (error) {
+        recordCommandFailure("uninstall", error, dockId);
         handleChangeCommandError("uninstall", error, options.json === true);
       }
     });
@@ -247,7 +284,13 @@ export async function run(argv = process.argv): Promise<void> {
     .description("Diagnose the current directory's OpenDock state.")
     .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
     .action(async (options: { platform?: string }) => {
-      await printDoctor(process.cwd(), options.platform);
+      try {
+        await printDoctor(process.cwd(), options.platform);
+        recordCommandLog("doctor", "Success", "doctor completed");
+      } catch (error) {
+        recordCommandFailure("doctor", error);
+        throw error;
+      }
     });
 
   program
@@ -255,7 +298,20 @@ export async function run(argv = process.argv): Promise<void> {
     .description("Show docks installed in the current directory.")
     .option("--json", "Print a machine-readable installed dock list")
     .action((options: { json?: boolean }) => {
-      printInstalledDocks(process.cwd(), options.json === true);
+      try {
+        printInstalledDocks(process.cwd(), options.json === true);
+        const docks = readInstalledDocks(process.cwd()) ?? [];
+        recordCommandLog(
+          "list",
+          docks.length === 0 ? "Skipped" : "Success",
+          docks.length === 0
+            ? "no docks installed in this project"
+            : `listed ${docks.length} installed dock(s)`,
+        );
+      } catch (error) {
+        recordCommandFailure("list", error);
+        throw error;
+      }
     });
 
   program
@@ -264,40 +320,61 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
     .option("--json", "Print a machine-readable update check report")
     .action(async (options: Pick<ChangeCommandOptions, "json" | "platform">) => {
-      const platformOverride =
-        options.platform === undefined ? undefined : resolveCliPlatform(options.platform);
-      const docks = readInstalledDocks(process.cwd());
-      if (docks === undefined || docks.length === 0) {
-        if (options.json === true) {
-          printJson(updateCheckCommandResult([]));
-        } else {
-          console.log(terminalStyle.dim("No OpenDock docks installed in this project."));
+      try {
+        const platformOverride =
+          options.platform === undefined ? undefined : resolveCliPlatform(options.platform);
+        const docks = readInstalledDocks(process.cwd());
+        if (docks === undefined || docks.length === 0) {
+          recordCommandLog("outdated", "Skipped", "no docks installed in this project");
+          if (options.json === true) {
+            printJson(updateCheckCommandResult([]));
+          } else {
+            console.log(terminalStyle.dim("No OpenDock docks installed in this project."));
+          }
+          return;
         }
-        return;
+        const updateChecks = await checkInstalledDockUpdates(docks, platformOverride);
+        const updates = updateChecks.filter((check) => check.updateAvailable);
+        recordCommandLog(
+          "outdated",
+          updates.length === 0 ? "Skipped" : "Success",
+          updates.length === 0
+            ? `no updates available for ${updateChecks.length} installed dock(s)`
+            : `found ${updates.length} update(s) for ${updateChecks.length} installed dock(s)`,
+        );
+        if (options.json === true) {
+          printJson(updateCheckCommandResult(updateChecks));
+          return;
+        }
+        printUpdateChecks(process.cwd(), updateChecks);
+      } catch (error) {
+        recordCommandFailure("outdated", error);
+        throw error;
       }
-      const updateChecks = await checkInstalledDockUpdates(docks, platformOverride);
-      if (options.json === true) {
-        printJson(updateCheckCommandResult(updateChecks));
-        return;
-      }
-      printUpdateChecks(process.cwd(), updateChecks);
     });
 
   program
     .command("log")
     .description("Show recent OpenDock logs for the current directory.")
     .action(() => {
-      const logs = readProjectLogs(process.cwd());
-      if (logs.length === 0) {
-        console.log(terminalStyle.dim("No OpenDock logs for this project."));
-        return;
-      }
-      for (const log of logs.slice(-20)) {
-        console.log(
-          `${terminalStyle.dim(log.timestamp)} ${formatStatus(log.status)} ${terminalStyle.bold(
-            log.command,
-          )} ${log.message}`,
-        );
+      try {
+        const logs = readProjectLogs(process.cwd());
+        if (logs.length === 0) {
+          console.log(terminalStyle.dim("No OpenDock logs for this project."));
+          recordCommandLog("log", "Skipped", "no logs for this project");
+          return;
+        }
+        for (const log of logs.slice(-20)) {
+          console.log(
+            `${terminalStyle.dim(log.timestamp)} ${formatStatus(log.status)} ${terminalStyle.bold(
+              log.command,
+            )} ${log.message}`,
+          );
+        }
+        recordCommandLog("log", "Success", `displayed ${Math.min(logs.length, 20)} log(s)`);
+      } catch (error) {
+        recordCommandFailure("log", error);
+        throw error;
       }
     });
 
@@ -305,9 +382,15 @@ export async function run(argv = process.argv): Promise<void> {
     .command("version")
     .description("Show CLI, schema, and registry information.")
     .action(() => {
-      console.log(`opendock ${VERSION}`);
-      console.log(`schema ${SCHEMA_VERSION}`);
-      console.log(`registry ${DEFAULT_REGISTRY_URL}`);
+      try {
+        console.log(`opendock ${VERSION}`);
+        console.log(`schema ${SCHEMA_VERSION}`);
+        console.log(`registry ${DEFAULT_REGISTRY_URL}`);
+        recordCommandLog("version", "Success", `opendock ${VERSION}`);
+      } catch (error) {
+        recordCommandFailure("version", error);
+        throw error;
+      }
     });
 
   const bootstrap = program.command("bootstrap").description("Prepare first-party host tools.");
@@ -316,7 +399,13 @@ export async function run(argv = process.argv): Promise<void> {
     .description("Install or verify Homebrew for macOS docks.")
     .option("-y, --yes", "Run the official Homebrew installer without OpenDock confirmation")
     .action(async (options: { yes?: boolean }) => {
-      await bootstrapMac({ assumeYes: options.yes === true });
+      try {
+        await bootstrapMac({ assumeYes: options.yes === true });
+        recordCommandLog("bootstrap mac", "Success", "mac bootstrap completed");
+      } catch (error) {
+        recordCommandFailure("bootstrap mac", error);
+        throw error;
+      }
     });
   bootstrap
     .command("windows")
@@ -324,7 +413,13 @@ export async function run(argv = process.argv): Promise<void> {
     .description("Verify WinGet or open Microsoft App Installer for Windows docks.")
     .option("-y, --yes", "Open Microsoft App Installer without OpenDock confirmation")
     .action(async (options: { yes?: boolean }) => {
-      await bootstrapWindows({ assumeYes: options.yes === true });
+      try {
+        await bootstrapWindows({ assumeYes: options.yes === true });
+        recordCommandLog("bootstrap windows", "Success", "windows bootstrap completed");
+      } catch (error) {
+        recordCommandFailure("bootstrap windows", error);
+        throw error;
+      }
     });
 
   const auth = program.command("auth").description("Authenticate with OpenDock Registry.");
@@ -334,44 +429,68 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--token <token>", "Existing CLI token to store without opening a browser")
     .option("--provider <provider>", "Browser login provider: google or github", "google")
     .action(async (options: { token?: string; provider: string }) => {
-      const tokenStore = new TokenStore();
-      if (options.token) {
-        await tokenStore.saveToken(options.token);
-        console.log(terminalStyle.success("Logged in to OpenDock Registry."));
-        return;
+      try {
+        const tokenStore = new TokenStore();
+        if (options.token) {
+          await tokenStore.saveToken(options.token);
+          console.log(terminalStyle.success("Logged in to OpenDock Registry."));
+          recordCommandLog("auth login", "Success", "stored provided auth token");
+          return;
+        }
+        const provider = parseAuthProvider(options.provider);
+        await performBrowserLogin({ tokenStore, provider });
+        recordCommandLog("auth login", "Success", `browser login completed with ${provider}`);
+      } catch (error) {
+        recordCommandFailure("auth login", error);
+        throw error;
       }
-      const provider = parseAuthProvider(options.provider);
-      await performBrowserLogin({ tokenStore, provider });
     });
   auth
     .command("status")
     .description("Show the current OpenDock Registry login.")
     .action(async () => {
-      const token = new TokenStore().loadToken();
-      if (!token) {
-        console.log(terminalStyle.warning("Not logged in."));
-        return;
+      try {
+        const token = new TokenStore().loadToken();
+        if (!token) {
+          console.log(terminalStyle.warning("Not logged in."));
+          recordCommandLog("auth status", "Skipped", "not logged in");
+          return;
+        }
+        const user = await new OpenDockRegistryClient().currentUser(token);
+        console.log(`${terminalStyle.success("Logged in as")} ${terminalStyle.bold(user.email)}.`);
+        recordCommandLog("auth status", "Success", `logged in as ${user.email}`);
+      } catch (error) {
+        recordCommandFailure("auth status", error);
+        throw error;
       }
-      const user = await new OpenDockRegistryClient().currentUser(token);
-      console.log(`${terminalStyle.success("Logged in as")} ${terminalStyle.bold(user.email)}.`);
     });
   auth
     .command("logout")
     .description("Log out of OpenDock Registry on this machine.")
     .action(async () => {
-      const tokenStore = new TokenStore();
-      const token = tokenStore.loadToken();
-      if (token) {
-        try {
-          await new OpenDockRegistryClient().logout(token);
-        } catch (error) {
-          if (!(error instanceof RegistryRequestError && error.status === 401)) {
-            throw error;
+      try {
+        const tokenStore = new TokenStore();
+        const token = tokenStore.loadToken();
+        if (token) {
+          try {
+            await new OpenDockRegistryClient().logout(token);
+          } catch (error) {
+            if (!(error instanceof RegistryRequestError && error.status === 401)) {
+              throw error;
+            }
           }
         }
+        tokenStore.clearToken();
+        console.log(terminalStyle.success("Logged out of OpenDock Registry."));
+        recordCommandLog(
+          "auth logout",
+          token ? "Success" : "Skipped",
+          token ? "logged out of registry" : "no local auth token to clear",
+        );
+      } catch (error) {
+        recordCommandFailure("auth logout", error);
+        throw error;
       }
-      tokenStore.clearToken();
-      console.log(terminalStyle.success("Logged out of OpenDock Registry."));
     });
 
   program
@@ -381,40 +500,53 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--platform <platform>", "Release platform: any, macos, windows, or linux")
     .option("--file <path>", "Manifest file to submit as dock.yml", "dock.yml")
     .action(async (dockName: string, options: { platform?: string; file: string }) => {
-      const dockRef = parseDeployRef(dockName);
-      const manifestPath = resolveDeployManifest(process.cwd(), options.file);
-      const releasePlatform = resolveDeployPlatform(options.platform, manifestPath);
-      const deployRoot = dirname(manifestPath);
-      const manifest = readFileSync(manifestPath, "utf8");
-      const parsedManifest = parseManifestFile(manifestPath);
-      validateManifestFor(parsedManifest, dockRef);
-      const readmeMarkdown = readDeployReadme(deployRoot, parsedManifest);
-      const logo = readDeployLogo(deployRoot, parsedManifest);
-      const archive = await createDeployArchive(
-        deployRoot,
-        parsedManifest,
-        dockRef.requested(),
-        releasePlatform,
-        manifest,
-      );
-      const client = new OpenDockRegistryClient();
-      const request = {
-        dock_name: dockRef.id(),
-        version: dockRef.requested(),
-        platform: releasePlatform,
-        manifest,
-        archive,
-        ...(readmeMarkdown === undefined ? {} : { readme_markdown: readmeMarkdown }),
-        ...(logo === undefined ? {} : { logo }),
-      };
-      const response = await submitDockWithLogin(client, new TokenStore(), request);
-      console.log(
-        `${terminalStyle.success("Submitted")} ${terminalStyle.bold(
-          dockRef.toString(),
-        )} ${formatListPlatform(releasePlatform)} for review: ${terminalStyle.dim(
-          response.id,
-        )} (${formatStatus(response.status)})`,
-      );
+      let dockId = dockIdFromReference(dockName);
+      try {
+        const dockRef = parseDeployRef(dockName);
+        dockId = dockRef.id();
+        const manifestPath = resolveDeployManifest(process.cwd(), options.file);
+        const releasePlatform = resolveDeployPlatform(options.platform, manifestPath);
+        const deployRoot = dirname(manifestPath);
+        const manifest = readFileSync(manifestPath, "utf8");
+        const parsedManifest = parseManifestFile(manifestPath);
+        validateManifestFor(parsedManifest, dockRef);
+        const readmeMarkdown = readDeployReadme(deployRoot, parsedManifest);
+        const logo = readDeployLogo(deployRoot, parsedManifest);
+        const archive = await createDeployArchive(
+          deployRoot,
+          parsedManifest,
+          dockRef.requested(),
+          releasePlatform,
+          manifest,
+        );
+        const client = new OpenDockRegistryClient();
+        const request = {
+          dock_name: dockRef.id(),
+          version: dockRef.requested(),
+          platform: releasePlatform,
+          manifest,
+          archive,
+          ...(readmeMarkdown === undefined ? {} : { readme_markdown: readmeMarkdown }),
+          ...(logo === undefined ? {} : { logo }),
+        };
+        const response = await submitDockWithLogin(client, new TokenStore(), request);
+        recordCommandLog(
+          "deploy",
+          "Success",
+          `${dockRef.toString()} ${releasePlatform} submitted for review: ${response.id} (${response.status})`,
+          dockRef.id(),
+        );
+        console.log(
+          `${terminalStyle.success("Submitted")} ${terminalStyle.bold(
+            dockRef.toString(),
+          )} ${formatListPlatform(releasePlatform)} for review: ${terminalStyle.dim(
+            response.id,
+          )} (${formatStatus(response.status)})`,
+        );
+      } catch (error) {
+        recordCommandFailure("deploy", error, dockId);
+        throw error;
+      }
     });
 
   await program.parseAsync(argv);
@@ -445,6 +577,32 @@ function parseInstalledDockId(value: string): string {
     throw new Error("dock id must be in owner/name form");
   }
   return `${parts[0]}/${parts[1]}`;
+}
+
+function dockIdFromReference(value: string): string | undefined {
+  try {
+    const [id] = value.trim().split("@");
+    return parseInstalledDockId(id ?? "");
+  } catch {
+    return undefined;
+  }
+}
+
+function recordCommandLog(
+  command: string,
+  status: RunStatus,
+  message: string,
+  dockId?: string,
+): void {
+  try {
+    appendRunLog(process.cwd(), command, dockId, status, message);
+  } catch {
+    // Logging should never make the requested command fail.
+  }
+}
+
+function recordCommandFailure(command: string, error: unknown, dockId?: string): void {
+  recordCommandLog(command, "Failure", errorMessage(error), dockId);
 }
 
 function parseAuthProvider(value: string): AuthProvider {
@@ -1182,6 +1340,10 @@ function formatFileSummary(report: InstallReport): string {
     "review required",
     "review",
   )}`;
+}
+
+function plainInstallFileSummary(report: InstallReport): string {
+  return `${report.filesCreated} files created, ${report.filesUpdated} files updated, ${report.filesDeleted} files deleted, ${report.filesReviewRequired} review required`;
 }
 
 function formatFileCount(

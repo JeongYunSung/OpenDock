@@ -80,6 +80,8 @@ opendock deploy opendock/codex@1.0.0
 
 安装后，`opendock list` 会显示当前项目已经安装的 docks。
 如果其他工具需要读取清单，请使用 `opendock list --json`。
+`opendock log` 会显示当前项目的 command logs，状态为 `Success`、`Failure` 或
+`Skipped`。
 
 ## Files And Ownership
 

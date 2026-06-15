@@ -97,7 +97,7 @@ opendock bootstrap windows
 | `opendock update --force` | Privilégie la version du dock malgré des modifications locales gérées. |
 | `opendock uninstall owner/name` | Supprime un dock et ses managed project files. |
 | `opendock doctor` | Vérifie project state et doctor steps de chaque dock. |
-| `opendock log` | Affiche les runs OpenDock récents du projet courant. |
+| `opendock log` | Affiche les command logs récents du projet courant. |
 | `opendock version` | Affiche CLI, schema et Registry information. |
 | `opendock bootstrap mac` | Vérifie ou installe Homebrew sur macOS. |
 | `opendock bootstrap windows` | Vérifie WinGet ou ouvre Microsoft App Installer sur Windows. |

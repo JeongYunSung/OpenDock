@@ -84,6 +84,8 @@ opendock deploy opendock/codex@1.0.0
 Nach der Installation zeigt `opendock list`, welche docks im aktuellen Projekt
 installiert sind.
 Wenn ein Tool die Liste lesen muss, verwenden Sie `opendock list --json`.
+`opendock log` zeigt project-local command logs mit `Success`, `Failure` oder
+`Skipped`.
 
 ## Files And Ownership
 

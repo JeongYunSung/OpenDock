@@ -94,7 +94,7 @@ opendock bootstrap windows
 | `opendock update --force` | 即使 managed content 被本地修改，也以 dock version 为准. |
 | `opendock uninstall owner/name` | 移除一个 dock 及其 managed project files. |
 | `opendock doctor` | 检查 project state 和 dock doctor steps. |
-| `opendock log` | 显示当前项目最近的 OpenDock runs. |
+| `opendock log` | 显示当前项目最近的 command logs. |
 | `opendock version` | 显示 CLI, schema 和 Registry information. |
 | `opendock bootstrap mac` | 在 macOS 上检查或安装 Homebrew. |
 | `opendock bootstrap windows` | 在 Windows 上检查 WinGet 或打开 Microsoft App Installer. |

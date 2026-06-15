@@ -5,6 +5,20 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.19 - 2026-06-15
+
+### Changed
+
+- Moved persistent run logging to CLI command entrypoints so install, update,
+  uninstall, deploy, auth, bootstrap, doctor, list, outdated, version, and log
+  record command-level outcomes.
+- Added `Skipped` run status for no-op command outcomes such as no installed
+  docks, no available updates, no auth token, and no logs.
+
+### Tests
+
+- Added command log coverage for success, failure, and skipped outcomes.
+
 ## 0.1.18 - 2026-06-15
 
 ### Added
