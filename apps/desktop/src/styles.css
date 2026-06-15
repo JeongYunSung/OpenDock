@@ -291,8 +291,7 @@ input:focus-visible,
   color: var(--text-3);
 }
 
-.app-menu-group:hover > .app-menu-group-button,
-.app-menu-group:focus-within > .app-menu-group-button,
+.app-menu-group.active > .app-menu-group-button,
 .app-menu-item:hover,
 .app-menu-item:focus-visible {
   background: var(--surface-3);
@@ -305,8 +304,7 @@ input:focus-visible,
   min-width: 248px;
 }
 
-.app-menu-group:hover > .app-menu-flyout,
-.app-menu-group:focus-within > .app-menu-flyout {
+.app-menu-group.active > .app-menu-flyout {
   display: block;
 }
 

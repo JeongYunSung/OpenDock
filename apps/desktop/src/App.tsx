@@ -2216,6 +2216,12 @@ function AppMenu(props: {
   open: boolean;
   t: (typeof TEXT)[Lang];
 }) {
+  const [activeGroupKey, setActiveGroupKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!props.open) setActiveGroupKey(null);
+  }, [props.open]);
+
   const runCommand = (id: string) => {
     props.onCommand(id);
   };
@@ -2234,10 +2240,17 @@ function AppMenu(props: {
         <MenuIcon size={18} />
       </button>
       {props.open ? (
-        <div aria-label={props.t.appMenu} className="app-menu-panel" role="menu">
+        <div aria-label={props.t.appMenu} className="app-menu-panel" onMouseLeave={() => setActiveGroupKey(null)} role="menu">
           {props.groups.map((group) => (
-            <div className="app-menu-group" key={group.key}>
-              <button className="app-menu-group-button" type="button">
+            <div className={`app-menu-group ${activeGroupKey === group.key ? "active" : ""}`} key={group.key}>
+              <button
+                aria-expanded={activeGroupKey === group.key}
+                className="app-menu-group-button"
+                onClick={() => setActiveGroupKey(group.key)}
+                onFocus={() => setActiveGroupKey(group.key)}
+                onMouseEnter={() => setActiveGroupKey(group.key)}
+                type="button"
+              >
                 <span>{group.label}</span>
                 <ChevronRight size={14} />
               </button>

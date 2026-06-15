@@ -40,6 +40,7 @@ try {
   await runViewportFlow({ width: 1180, height: 760 });
   await runViewportFlow({ width: 1024, height: 720 });
   await runViewportFlow({ width: 960, height: 640 });
+  await assertWindowsAppMenuFlyoutDoesNotOverlap({ width: 1180, height: 760 });
 
   console.log("OD Applied Mockup verification passed");
 } finally {
@@ -252,6 +253,50 @@ async function runViewportFlow(viewport) {
     await assertNoForbiddenText(page, "github account menu");
   } finally {
     await context.close();
+  }
+}
+
+async function assertWindowsAppMenuFlyoutDoesNotOverlap(viewport) {
+  const context = await browser.newContext({
+    viewport,
+    userAgent:
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  });
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, "platform", { configurable: true, value: "Win32" });
+  });
+  const page = await context.newPage();
+  try {
+    await page.goto(appUrl, { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => localStorage.clear());
+    await page.reload({ waitUntil: "domcontentloaded" });
+
+    await assertVisible(page.locator('.titlebar.windows[data-platform="windows"]'), "Windows titlebar");
+    await page.locator(".app-menu-button").click();
+    await assertVisible(page.locator(".app-menu-panel"), "Windows app menu panel");
+
+    await page.locator(".app-menu-group-button").nth(0).click();
+    await assertSingleVisibleAppMenuFlyout(page, "after clicking a Windows app menu group");
+    await page.locator(".app-menu-group-button").nth(1).hover();
+    await assertSingleVisibleAppMenuFlyout(page, "after hovering a second Windows app menu group");
+  } finally {
+    await context.close();
+  }
+}
+
+async function assertSingleVisibleAppMenuFlyout(page, label) {
+  const menuState = await page.evaluate(() => {
+    const visibleFlyoutCount = Array.from(document.querySelectorAll(".app-menu-flyout")).filter((element) => {
+      const rect = element.getBoundingClientRect();
+      return getComputedStyle(element).display !== "none" && rect.width > 0 && rect.height > 0;
+    }).length;
+    return {
+      activeGroupCount: document.querySelectorAll(".app-menu-group.active").length,
+      visibleFlyoutCount
+    };
+  });
+  if (menuState.activeGroupCount !== 1 || menuState.visibleFlyoutCount !== 1) {
+    throw new Error(`Windows app menu must show one flyout ${label}, got ${JSON.stringify(menuState)}`);
   }
 }
 
