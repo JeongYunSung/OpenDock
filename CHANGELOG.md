@@ -7,6 +7,19 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.23 - 2026-06-15
+
+### Changed
+
+- Align CLI and desktop app release versions so GitHub release assets use the
+  published release version.
+- Use an absolute macOS browser opener for packaged login flows.
+
+### Desktop App
+
+- Show login progress and failures on the sign-in screen.
+- Enable native dragging for the custom titlebar in packaged desktop builds.
+
 ## 0.1.22 - 2026-06-15
 
 ### Changed
