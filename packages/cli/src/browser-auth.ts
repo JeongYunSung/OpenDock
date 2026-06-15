@@ -71,18 +71,21 @@ export async function performBrowserLogin(
 
 async function openSystemBrowser(url: string): Promise<void> {
   assertSafeBrowserUrl(url);
-  const command =
-    process.platform === "darwin" ? "open" : process.platform === "win32" ? "cmd" : "xdg-open";
-  const args =
-    process.platform === "darwin"
-      ? [url]
-      : process.platform === "win32"
-        ? ["/c", "start", "", url]
-        : [url];
+  const { command, args } = browserOpenCommand(url);
 
   const child = spawn(command, args, { detached: true, stdio: "ignore" });
   await once(child, "spawn");
   child.unref();
+}
+
+export function browserOpenCommand(
+  url: string,
+  platform: NodeJS.Platform = process.platform,
+): { command: string; args: string[] } {
+  return {
+    command: platform === "darwin" ? "/usr/bin/open" : platform === "win32" ? "cmd" : "xdg-open",
+    args: platform === "darwin" ? [url] : platform === "win32" ? ["/c", "start", "", url] : [url],
+  };
 }
 
 async function startCallbackServer(timeoutMs = loginTimeoutMs): Promise<{

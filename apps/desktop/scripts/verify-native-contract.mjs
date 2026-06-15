@@ -96,6 +96,14 @@ const logStorageIsCapped =
   app.includes("const MAX_STORED_LOGS = 400") &&
   app.includes("result.lines.slice(-MAX_STORED_LOGS)") &&
   app.includes("current.length - (MAX_STORED_LOGS - 1)");
+const titlebarUsesNativeDragFallback =
+  app.includes("getCurrentWindow().startDragging()") &&
+  app.includes("function isInteractiveTitlebarTarget") &&
+  app.includes("onMouseDown={startDrag}");
+const authFailuresAreVisible =
+  app.includes("const [authMessage, setAuthMessage]") &&
+  app.includes("commandFailureMessage(result, t.signInFailed)") &&
+  app.includes("className=\"signin-status\"");
 
 const failures = [
   ...unhandledMenuIds.map((id) => `menu id is not handled in App.tsx: ${id}`),
@@ -140,6 +148,12 @@ const failures = [
     ? ["blocking opendock CLI commands must run through the background runtime"]
     : []),
   ...(!logStorageIsCapped ? ["app logs must be capped before rendering and persisting"] : []),
+  ...(!titlebarUsesNativeDragFallback
+    ? ["custom titlebar must call startDragging with an interactive-target guard for packaged apps"]
+    : []),
+  ...(!authFailuresAreVisible
+    ? ["auth login failures must be surfaced on the sign-in screen instead of being swallowed"]
+    : []),
   ...(forbiddenTitlebarDragCss
     ? ["CSS app-region drag is forbidden; use data-tauri-drag-region on the dedicated drag target instead"]
     : [])

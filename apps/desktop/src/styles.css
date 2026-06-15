@@ -528,6 +528,12 @@ input:focus-visible,
   line-height: 1.6;
 }
 
+.signin-card .signin-status {
+  color: var(--warning);
+  font-weight: 700;
+  font-size: 12px;
+}
+
 .signin-actions {
   display: grid;
   gap: 12px;
@@ -552,6 +558,11 @@ input:focus-visible,
 .signin-actions button:hover {
   border-color: var(--accent-border);
   background: var(--surface-2);
+}
+
+.signin-actions button:disabled {
+  cursor: wait;
+  opacity: 0.62;
 }
 
 .project-empty {

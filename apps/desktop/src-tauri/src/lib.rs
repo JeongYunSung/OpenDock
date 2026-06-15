@@ -291,13 +291,17 @@ fn opendock_cancel_command(
 }
 
 #[tauri::command]
-async fn opendock_auth_login(provider: String) -> Result<OpenDockCommandResult, String> {
+async fn opendock_auth_login(
+    app: tauri::AppHandle,
+    provider: String,
+) -> Result<OpenDockCommandResult, String> {
     let provider = match provider.as_str() {
         "gmail" | "google" => "google",
         "github" => "github",
         _ => return Err("auth provider must be google or github".to_string()),
     };
-    run_opendock_blocking(
+    run_opendock_streaming_blocking(
+        app,
         None,
         vec![
             "auth".to_string(),
@@ -305,6 +309,7 @@ async fn opendock_auth_login(provider: String) -> Result<OpenDockCommandResult, 
             "--provider".to_string(),
             provider.to_string(),
         ],
+        None,
     )
     .await
 }

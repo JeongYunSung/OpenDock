@@ -250,6 +250,25 @@ function commandTaskLevel(status: CommandTaskStatus) {
   return "RUN";
 }
 
+function commandFailureMessage(result: OpenDockCommandResult, fallback: string) {
+  return (
+    result.stderr.trim().split("\n").find(Boolean) ??
+    result.stdout.trim().split("\n").find(Boolean) ??
+    result.lines.find((line) => line.message.trim())?.message ??
+    fallback
+  );
+}
+
+function isAuthStatusLine(message: string) {
+  return (
+    message.startsWith("Opening browser") ||
+    message.startsWith("Open this URL") ||
+    message.startsWith("Browser did not open") ||
+    message.startsWith("Waiting for login") ||
+    message.startsWith("Logged in as")
+  );
+}
+
 function waitForCommandPopupPaint() {
   return new Promise<void>((resolve) => {
     if (typeof window === "undefined" || typeof window.requestAnimationFrame !== "function") {
@@ -514,6 +533,8 @@ export function App() {
   const [deleteProjectId, setDeleteProjectId] = useState("");
   const [deleteProjectName, setDeleteProjectName] = useState("");
   const [openMenu, setOpenMenu] = useState<OpenMenu>("");
+  const [authWorking, setAuthWorking] = useState(false);
+  const [authMessage, setAuthMessage] = useState("");
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [projectSwitcherOpen, setProjectSwitcherOpen] = useState(false);
   const [sortMode, setSortMode] = useStoredState<SortMode>("opendock.sortMode", "downloads");
@@ -826,6 +847,7 @@ export function App() {
     const unlisteners: Array<() => void> = [];
     void listen<OpenDockCommandLine>("opendock-command-line", (event) => {
       const line = event.payload;
+      if (isAuthStatusLine(line.message)) setAuthMessage(line.message);
       appendLog(line.level, logColor(line.level), line.message);
       applyCommandLineToTask(line);
     }).then((dispose) => {
@@ -857,16 +879,26 @@ export function App() {
   }, []);
 
   async function login(provider: "gmail" | "github") {
+    setAuthWorking(true);
+    setAuthMessage(t.signInWaiting);
     if (isTauriRuntime()) {
       try {
         const result = await invoke<OpenDockCommandResult>("opendock_auth_login", { provider });
-        if (!result.success) return;
+        if (!result.success) {
+          setAuthMessage(commandFailureMessage(result, t.signInFailed));
+          return;
+        }
         const session = await invoke<AuthSession>("opendock_auth_session");
         if (session.email) setAccountEmail(session.email);
-      } catch {
+      } catch (error) {
+        setAuthMessage(error instanceof Error ? error.message : String(error));
         return;
+      } finally {
+        setAuthWorking(false);
       }
     }
+    setAuthWorking(false);
+    setAuthMessage("");
     setLoggedIn(true);
     setAuthProvider(provider);
     resetDockWorkspaceView();
@@ -1842,7 +1874,13 @@ export function App() {
         {showAppLoading ? (
           <ProjectLoading t={t} />
         ) : !loggedIn ? (
-          <SignInScreen onGmail={() => login("gmail")} onGitHub={() => login("github")} t={t} />
+          <SignInScreen
+            authMessage={authMessage}
+            authWorking={authWorking}
+            onGmail={() => login("gmail")}
+            onGitHub={() => login("github")}
+            t={t}
+          />
         ) : !activeProject ? (
           <ProjectEmpty onAddExisting={() => void addExistingProjectFromFolder()} onCreate={createBlankProject} t={t} />
         ) : (
@@ -1993,8 +2031,15 @@ function Titlebar(props: {
   windowControlPlatform: WindowControlPlatform;
 }) {
   const isMac = props.windowControlPlatform === "macos";
+  const startDrag = (event: MouseEvent<HTMLElement>) => {
+    if (event.button !== 0 || event.detail > 1 || isInteractiveTitlebarTarget(event.target)) return;
+    if (!isTauriRuntime()) return;
+    void getCurrentWindow().startDragging().catch((error) => {
+      console.warn("OpenDock window drag failed", error);
+    });
+  };
   return (
-    <header className={`titlebar ${props.windowControlPlatform}`} data-platform={props.windowControlPlatform}>
+    <header className={`titlebar ${props.windowControlPlatform}`} data-platform={props.windowControlPlatform} onMouseDown={startDrag}>
       {isMac ? (
         <WindowControls
           onClose={props.onClose}
@@ -2064,6 +2109,15 @@ function Titlebar(props: {
   );
 }
 
+function isInteractiveTitlebarTarget(target: EventTarget | null) {
+  const element = target instanceof HTMLElement ? target : null;
+  return Boolean(
+    element?.closest(
+      'button,a,input,textarea,select,[role="button"],[role="menu"],.dropdown-menu,.window-controls,.titlebar-actions'
+    )
+  );
+}
+
 function WindowControls(props: {
   onClose: () => void;
   onMaximize: () => void;
@@ -2108,7 +2162,7 @@ function WindowControls(props: {
   );
 }
 
-function SignInScreen(props: { onGmail: () => void; onGitHub: () => void; t: (typeof TEXT)[Lang] }) {
+function SignInScreen(props: { authMessage: string; authWorking: boolean; onGmail: () => void; onGitHub: () => void; t: (typeof TEXT)[Lang] }) {
   return (
     <section className="center-stage">
       <div className="signin-card">
@@ -2116,11 +2170,12 @@ function SignInScreen(props: { onGmail: () => void; onGitHub: () => void; t: (ty
         <div className="kicker">{props.t.memberSignIn}</div>
         <h1>{props.t.signInTitle}</h1>
         <p>{props.t.signInSub}</p>
+        {props.authMessage ? <p className="signin-status">{props.authMessage}</p> : null}
         <div className="signin-actions">
-          <button onClick={props.onGmail} type="button">
+          <button disabled={props.authWorking} onClick={props.onGmail} type="button">
             <GoogleMark /> {props.t.continueGmail}
           </button>
-          <button onClick={props.onGitHub} type="button">
+          <button disabled={props.authWorking} onClick={props.onGitHub} type="button">
             <Github size={19} /> {props.t.continueGitHub}
           </button>
         </div>

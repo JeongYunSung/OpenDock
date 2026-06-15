@@ -13,7 +13,7 @@ import { join } from "node:path";
 import { c as createTar } from "tar";
 import { afterEach, describe, expect, it } from "vitest";
 import { TokenStore } from "../src/auth.js";
-import { performBrowserLogin } from "../src/browser-auth.js";
+import { browserOpenCommand, performBrowserLogin } from "../src/browser-auth.js";
 import { DockRef } from "../src/core/domain/manifest.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
 import { resolveDock } from "../src/resolver.js";
@@ -137,6 +137,13 @@ describe("security regression coverage", () => {
         write: () => undefined,
       }),
     ).rejects.toThrow("insecure browser login URL");
+  });
+
+  it("uses an absolute macOS browser opener for packaged app environments", () => {
+    expect(browserOpenCommand("https://registry.opendock.app/login", "darwin")).toEqual({
+      command: "/usr/bin/open",
+      args: ["https://registry.opendock.app/login"],
+    });
   });
 
   it("stores auth tokens in a private file and private data directory", async () => {
