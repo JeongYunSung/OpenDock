@@ -7,6 +7,8 @@ const rust = readFileSync(resolve(appRoot, "src-tauri", "src", "lib.rs"), "utf8"
 const app = readFileSync(resolve(appRoot, "src", "App.tsx"), "utf8");
 const data = readFileSync(resolve(appRoot, "src", "data.ts"), "utf8");
 const styles = readFileSync(resolve(appRoot, "src", "styles.css"), "utf8");
+const prepareSidecars = readFileSync(resolve(appRoot, "scripts", "prepare-sidecars.mjs"), "utf8");
+const cli = readFileSync(resolve(appRoot, "..", "..", "packages", "cli", "src", "cli.ts"), "utf8");
 const defaultCapability = JSON.parse(
   readFileSync(resolve(appRoot, "src-tauri", "capabilities", "default.json"), "utf8")
 );
@@ -104,6 +106,15 @@ const authFailuresAreVisible =
   app.includes("const [authMessage, setAuthMessage]") &&
   app.includes("commandFailureMessage(result, t.signInFailed)") &&
   app.includes("className=\"signin-status\"");
+const sidecarBuildsStandalone =
+  prepareSidecars.includes('"--compile"') &&
+  prepareSidecars.includes("assertStandaloneSidecar") &&
+  prepareSidecars.includes("OpenDock sidecar must be standalone") &&
+  prepareSidecars.includes("assertSidecarCliRuns") &&
+  prepareSidecars.includes("sidecarSmokeTestEnv") &&
+  prepareSidecars.includes('PATH: "/usr/bin:/bin:/usr/sbin:/sbin"');
+const compiledCliCanStart = cli.includes("(import.meta as ImportMeta & { main?: boolean }).main === true");
+const macosOpenUsesAbsolutePath = rust.includes('Command::new("/usr/bin/open")');
 
 const failures = [
   ...unhandledMenuIds.map((id) => `menu id is not handled in App.tsx: ${id}`),
@@ -153,6 +164,15 @@ const failures = [
     : []),
   ...(!authFailuresAreVisible
     ? ["auth login failures must be surfaced on the sign-in screen instead of being swallowed"]
+    : []),
+  ...(!sidecarBuildsStandalone
+    ? ["desktop sidecar must be compiled as a standalone binary and reject bun shebang scripts"]
+    : []),
+  ...(!compiledCliCanStart
+    ? ["CLI entrypoint must honor import.meta.main so Bun-compiled sidecars execute run()"]
+    : []),
+  ...(!macosOpenUsesAbsolutePath
+    ? ["macOS open calls must use /usr/bin/open for Finder-launched app environments"]
     : []),
   ...(forbiddenTitlebarDragCss
     ? ["CSS app-region drag is forbidden; use data-tauri-drag-region on the dedicated drag target instead"]

@@ -1855,6 +1855,10 @@ if (isMainModule()) {
 }
 
 function isMainModule(): boolean {
+  if ((import.meta as ImportMeta & { main?: boolean }).main === true) {
+    return true;
+  }
+
   const entrypoint = process.argv[1];
   if (entrypoint === undefined) {
     return false;

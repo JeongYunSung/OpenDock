@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { delimiter, dirname, sep } from "node:path";
+import { delimiter, dirname, join, sep } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
 
 export interface CommandResult {
@@ -200,11 +200,40 @@ function parseVersion(version: string): [number, number, number] {
 function commandEnvironment(program: string): NodeJS.ProcessEnv {
   const env = minimalEnvironment();
   delete env._VOLTA_TOOL_RECURSION;
+  env.PATH = opendockCommandPath(env.PATH);
   if (program === "oma") {
     env.OMA_SKIP_VERSION_CHECK = env.OMA_SKIP_VERSION_CHECK ?? "1";
     env.PATH = withoutVoltaNodeImageBin(env.PATH);
   }
   return env;
+}
+
+export function opendockCommandPath(
+  pathValue = process.env.PATH,
+  platform: NodeJS.Platform = process.platform,
+  env: NodeJS.ProcessEnv = process.env,
+): string | undefined {
+  if (platform === "win32") {
+    return pathValue;
+  }
+
+  return uniquePathEntries([
+    ...(pathValue ? pathValue.split(delimiter) : []),
+    ...(platform === "darwin"
+      ? [
+          "/opt/homebrew/bin",
+          "/opt/homebrew/sbin",
+          "/usr/local/bin",
+          "/usr/local/sbin",
+          "/usr/bin",
+          "/bin",
+          "/usr/sbin",
+          "/sbin",
+        ]
+      : ["/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"]),
+    ...(env.HOME ? [join(env.HOME, ".bun", "bin"), join(env.HOME, ".local", "bin")] : []),
+    ...(env.BUN_INSTALL ? [join(env.BUN_INSTALL, "bin")] : []),
+  ]).join(delimiter);
 }
 
 function minimalEnvironment(): NodeJS.ProcessEnv {
@@ -239,6 +268,19 @@ function minimalEnvironment(): NodeJS.ProcessEnv {
     }
   }
   return env;
+}
+
+function uniquePathEntries(entries: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const entry of entries) {
+    if (entry === "" || seen.has(entry)) {
+      continue;
+    }
+    seen.add(entry);
+    result.push(entry);
+  }
+  return result;
 }
 
 function withoutVoltaNodeImageBin(pathValue: string | undefined): string | undefined {

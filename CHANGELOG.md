@@ -7,6 +7,22 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.24 - 2026-06-15
+
+### Fixed
+
+- Compile the desktop app sidecar as a standalone binary so first-run macOS
+  installs do not require Bun to be installed on the host.
+- Ensure Bun-compiled CLI binaries start the OpenDock command entrypoint.
+- Add standard macOS tool paths for commands launched from the desktop app.
+- Use `/usr/bin/open` for macOS open actions from packaged app builds.
+
+### Tests
+
+- Added desktop native contract coverage for standalone sidecars, cold-start
+  sidecar smoke checks, and absolute macOS opener usage.
+- Added CLI regression coverage for GUI-launched macOS command PATH handling.
+
 ## 0.1.23 - 2026-06-15
 
 ### Changed

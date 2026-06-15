@@ -14,7 +14,7 @@ import YAML from "yaml";
 import { DockInstaller } from "../src/core/app/dock-installer.js";
 import { type DockManifest, DockRef, parseManifestFile } from "../src/core/domain/manifest.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
-import { CommandRunner } from "../src/core/runtime/command-runner.js";
+import { CommandRunner, opendockCommandPath } from "../src/core/runtime/command-runner.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
 import { detectPlatform, parsePlatform, parseReleasePlatform } from "../src/platform.js";
 import { OpenDockRegistryClient } from "../src/registry.js";
@@ -350,6 +350,26 @@ describe("platform regression coverage", () => {
     expect(readFileSync(log, "utf8")).toBe(
       "brew:--version\nwinget:--version\npowershell:-NoProfile -NonInteractive -Command if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }\n",
     );
+  });
+
+  it("adds standard macOS tool locations for GUI-launched app commands", () => {
+    const commandPath = opendockCommandPath("/usr/bin:/bin", "darwin", {
+      BUN_INSTALL: "/Users/test/.bun",
+      HOME: "/Users/test",
+    });
+
+    expect(commandPath?.split(":")).toEqual([
+      "/usr/bin",
+      "/bin",
+      "/opt/homebrew/bin",
+      "/opt/homebrew/sbin",
+      "/usr/local/bin",
+      "/usr/local/sbin",
+      "/usr/sbin",
+      "/sbin",
+      "/Users/test/.bun/bin",
+      "/Users/test/.local/bin",
+    ]);
   });
 
   it("records the selected platform in lock state and can reuse it for an update", async () => {

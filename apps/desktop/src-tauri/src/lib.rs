@@ -1102,7 +1102,7 @@ fn open_path(path: &Path) -> Result<(), String> {
 
 fn open_value(value: &str) -> Result<(), String> {
     let status = if cfg!(target_os = "macos") {
-        Command::new("open").arg(value).status()
+        Command::new("/usr/bin/open").arg(value).status()
     } else if cfg!(target_os = "windows") {
         Command::new("explorer").arg(value).status()
     } else {

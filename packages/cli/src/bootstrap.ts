@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { stdin as defaultInput, stdout as defaultOutput } from "node:process";
 import { createInterface } from "node:readline/promises";
+import { opendockCommandPath } from "./core/runtime/command-runner.js";
 
 const HOMEBREW_INSTALL_URL = "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh";
 const HOMEBREW_INSTALL_COMMAND = `/bin/bash -c "$(curl -fsSL ${HOMEBREW_INSTALL_URL})"`;
@@ -132,6 +133,7 @@ export async function bootstrapWindows(
 function defaultCommandAvailable(command: string): boolean {
   const result = spawnSync(command, ["--version"], {
     encoding: "utf8",
+    env: { ...process.env, PATH: opendockCommandPath() },
     stdio: "pipe",
   });
   return result.status === 0;
