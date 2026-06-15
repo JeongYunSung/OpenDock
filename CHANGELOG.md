@@ -7,6 +7,25 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.21 - 2026-06-15
+
+### Added
+
+- Added `--events` JSONL progress output for `opendock install`, `opendock update`,
+  and `opendock uninstall`.
+
+### Desktop App
+
+- Switched install, update, and uninstall actions to consume structured CLI progress
+  events for smoother command progress dialogs.
+- Updated the native contract checks to keep the desktop app on event-based command
+  progress.
+
+### Tests
+
+- Added CLI coverage for install, update, and uninstall event streams.
+- Added desktop bridge coverage for parsing progress and result events.
+
 ## 0.1.20 - 2026-06-15
 
 ### Changed

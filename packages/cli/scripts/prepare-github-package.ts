@@ -9,7 +9,7 @@ const githubRepository =
   process.env.GITHUB_REPOSITORY ??
   "JeongYunSung/OpenDock";
 const packageOwner = githubRepository.split("/")[0]?.toLowerCase() ?? "opendock";
-const repositoryUrl = `https://github.com/${githubRepository}.git`;
+const repositoryUrl = `git+https://github.com/${githubRepository}.git`;
 const cliPackage = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as {
   description?: string;
   engines?: Record<string, string>;

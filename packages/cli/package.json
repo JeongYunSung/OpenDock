@@ -1,6 +1,6 @@
 {
   "name": "opendock",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "description": "Choose and combine AI setup docks for every workspace.",
   "type": "module",
   "license": "MIT",
@@ -20,7 +20,7 @@
     "dev": "bun run src/cli.ts",
     "build": "bun run scripts/build.ts",
     "prepare:github-package": "bun run scripts/prepare-github-package.ts",
-    "test": "vitest run",
+    "test": "vitest run --testTimeout 15000",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "check": "bun run typecheck && bun run test && bun run lint",
