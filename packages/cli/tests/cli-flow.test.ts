@@ -44,6 +44,10 @@ function installedDocks(projectDir: string): InstalledDockRecord[] {
   return new OpenDockStateStore(projectDir).readLock().docks;
 }
 
+function restoreExitCode(previousExitCode: string | number | null | undefined): void {
+  process.exitCode = previousExitCode ?? 0;
+}
+
 function runTasks(
   manifest: DockManifest,
   phase: keyof DockManifest["tasks"],
@@ -551,11 +555,17 @@ describe("opendock TypeScript CLI", () => {
 
   it("fails CLI update when the current directory has no OpenDock state", async () => {
     const project = tempDir();
-    await withCwd(project, async () => {
-      await expect(runCli(["bun", "opendock", "update"])).rejects.toThrow(
-        ".opendock/dock.lock.yml missing",
-      );
-    });
+    const previousExitCode = process.exitCode;
+
+    try {
+      await withCwd(project, async () => {
+        await expect(runCli(["bun", "opendock", "update"])).rejects.toThrow(
+          ".opendock/dock.lock.yml missing",
+        );
+      });
+    } finally {
+      restoreExitCode(previousExitCode);
+    }
   });
 
   it("prints JSON update failures without throwing", async () => {
@@ -610,7 +620,7 @@ describe("opendock TypeScript CLI", () => {
       });
       expect(output.message).toContain("checksum mismatch for managed block");
     } finally {
-      process.exitCode = previousExitCode;
+      restoreExitCode(previousExitCode);
       registry.restore();
     }
   });
@@ -654,7 +664,7 @@ describe("opendock TypeScript CLI", () => {
       });
       expect(output.message).toContain("checksum mismatch for managed block");
     } finally {
-      process.exitCode = previousExitCode;
+      restoreExitCode(previousExitCode);
     }
   });
 
@@ -721,6 +731,92 @@ describe("opendock TypeScript CLI", () => {
     ]);
   });
 
+  it("verifies and runs checksum-managed hook targets", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "harness", "1.0.0", {
+      files: [
+        {
+          path: ".opendock/harness/test__harness/check.mjs",
+          content:
+            'import { writeFileSync } from "node:fs";\nwriteFileSync("hook-ran.txt", "ok\\n");\n',
+        },
+      ],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/harness@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    await withCwd(project, () =>
+      captureConsole(() =>
+        runCli([
+          "bun",
+          "opendock",
+          "verify-hook",
+          "test/harness",
+          ".opendock/harness/test__harness/check.mjs",
+        ]),
+      ),
+    );
+
+    expect(readFileSync(join(project, "hook-ran.txt"), "utf8")).toBe("ok\n");
+  });
+
+  it("blocks modified hook targets before execution", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "harness", "1.0.0", {
+      files: [
+        {
+          path: ".opendock/harness/test__harness/check.mjs",
+          content:
+            'import { writeFileSync } from "node:fs";\nwriteFileSync("hook-ran.txt", "ok\\n");\n',
+        },
+      ],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/harness@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    writeFileSync(
+      join(project, ".opendock", "harness", "test__harness", "check.mjs"),
+      'import { writeFileSync } from "node:fs";\nwriteFileSync("pwned.txt", "bad\\n");\n',
+    );
+    const previousExitCode = process.exitCode;
+
+    try {
+      await withCwd(project, async () => {
+        await expect(
+          runCli([
+            "bun",
+            "opendock",
+            "verify-hook",
+            "test/harness",
+            ".opendock/harness/test__harness/check.mjs",
+          ]),
+        ).rejects.toThrow("checksum mismatch for hook target");
+      });
+    } finally {
+      restoreExitCode(previousExitCode);
+    }
+
+    expect(existsSync(join(project, "pwned.txt"))).toBe(false);
+  });
+
   it("prints an empty list message when the current directory has no OpenDock state", async () => {
     const project = tempDir();
     const logs = await withCwd(project, () =>
@@ -779,7 +875,7 @@ describe("opendock TypeScript CLI", () => {
         await withCwd(project, () =>
           captureConsole(() => runCli(["bun", "opendock", "uninstall", "test/designer", "--json"])),
         );
-        process.exitCode = previousExitCode;
+        restoreExitCode(previousExitCode);
         await withCwd(project, () => captureConsole(() => runCli(["bun", "opendock", "log"])));
 
         expect(
@@ -794,7 +890,7 @@ describe("opendock TypeScript CLI", () => {
         ]);
       });
     } finally {
-      process.exitCode = previousExitCode;
+      restoreExitCode(previousExitCode);
       registry.restore();
     }
   });

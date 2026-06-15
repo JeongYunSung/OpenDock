@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
+import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   copyFileSync,
+  existsSync,
   lstatSync,
   mkdirSync,
   mkdtempSync,
@@ -34,6 +36,8 @@ import {
   validateManifestFor,
 } from "./core/domain/manifest.js";
 import { type InstalledDockRecord, OpenDockStateStore } from "./core/domain/state-store.js";
+import { fileChecksum } from "./core/files/checksum.js";
+import { assertRegularOrMissing, safeJoin } from "./core/files/path-utils.js";
 import { TaskRunner } from "./core/runtime/task-runner.js";
 import { appendRunLog, type RunStatus, readProjectLogs } from "./logging.js";
 import {
@@ -66,6 +70,7 @@ const maxDeployReadmeBytes = 64 * 1024;
 const maxDeployLogoBytes = 512 * 1024;
 const maxDeployManifestBytes = 64 * 1024;
 const maxDeployArchiveBytes = 50 * 1024 * 1024;
+const hookTimeoutMs = 30_000;
 
 interface ChangeCommandOptions {
   force?: boolean;
@@ -276,6 +281,25 @@ export async function run(argv = process.argv): Promise<void> {
       } catch (error) {
         recordCommandFailure("uninstall", error, dockId);
         handleChangeCommandError("uninstall", error, options.json === true);
+      }
+    });
+
+  program
+    .command("verify-hook")
+    .alias("run-hook")
+    .description("Verify and run an OpenDock-managed hook target.")
+    .argument("<dock>", "Installed dock id: owner/name")
+    .argument("<file>", "OpenDock-managed JavaScript file to execute")
+    .action((dock: string, file: string) => {
+      let dockId = dockIdFromReference(dock);
+      try {
+        const parsedDockId = parseInstalledDockId(dock);
+        dockId = parsedDockId;
+        runVerifiedHook(process.cwd(), parsedDockId, file);
+        recordCommandLog("verify-hook", "Success", `verified and ran ${file}`, parsedDockId);
+      } catch (error) {
+        recordCommandFailure("verify-hook", error, dockId);
+        throw error;
       }
     });
 
@@ -586,6 +610,85 @@ function dockIdFromReference(value: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+function runVerifiedHook(projectDir: string, dockId: string, filePath: string): void {
+  const normalizedPath = filePath.trim().replaceAll("\\", "/").replaceAll(/\/+/g, "/");
+  if (![".js", ".mjs", ".cjs"].includes(extname(normalizedPath).toLowerCase())) {
+    throw new Error("hook target must be a JavaScript file managed by OpenDock");
+  }
+
+  const store = new OpenDockStateStore(projectDir);
+  if (!store.hasState()) {
+    throw new Error(".opendock/dock.lock.yml missing");
+  }
+  const dock = store.findDock(dockId);
+  if (!dock) {
+    throw new Error(`dock \`${dockId}\` is not installed in this project`);
+  }
+  const record = dock.files.find((file) => file.path === normalizedPath);
+  if (!record) {
+    throw new Error(`hook target is not managed by dock \`${dockId}\`: ${normalizedPath}`);
+  }
+  if (record.mode !== "managed_file") {
+    throw new Error(`hook target must be checksum-managed: ${normalizedPath}`);
+  }
+
+  const absoluteTarget = safeJoin(projectDir, normalizedPath, "hook target");
+  assertRegularOrMissing(absoluteTarget, normalizedPath);
+  if (!existsSync(absoluteTarget)) {
+    throw new Error(`hook target missing: ${normalizedPath}`);
+  }
+  if (fileChecksum(absoluteTarget) !== record.checksum) {
+    throw new Error(`checksum mismatch for hook target ${normalizedPath}`);
+  }
+
+  const result = spawnSync(process.execPath, [absoluteTarget], {
+    cwd: projectDir,
+    env: hookEnvironment(),
+    stdio: "inherit",
+    timeout: hookTimeoutMs,
+  });
+  if (result.error) {
+    throw result.error;
+  }
+  if (result.signal) {
+    throw new Error(`hook target terminated by ${result.signal}: ${normalizedPath}`);
+  }
+  if (result.status !== 0) {
+    throw new Error(`hook target failed with exit code ${result.status ?? 1}: ${normalizedPath}`);
+  }
+}
+
+function hookEnvironment(): NodeJS.ProcessEnv {
+  const allowed = [
+    "CI",
+    "ComSpec",
+    "COMSPEC",
+    "FORCE_COLOR",
+    "HOME",
+    "LANG",
+    "LC_ALL",
+    "NO_COLOR",
+    "PATH",
+    "PATHEXT",
+    "SystemRoot",
+    "SYSTEMROOT",
+    "TEMP",
+    "TMP",
+    "TMPDIR",
+    "USER",
+    "USERNAME",
+    "WINDIR",
+  ];
+  const env: NodeJS.ProcessEnv = {};
+  for (const key of allowed) {
+    const value = process.env[key];
+    if (value !== undefined) {
+      env[key] = value;
+    }
+  }
+  return env;
 }
 
 function recordCommandLog(
