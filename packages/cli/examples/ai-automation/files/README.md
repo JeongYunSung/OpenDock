@@ -58,10 +58,6 @@ Review this MCP or API integration plan for over-broad access.
 - WORKFLOW_LIBRARY.md
 - MCP_GUIDE.md
 
-## Edition
-
-This is the simple edition of `opendock/ai-automation`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/ai-automation-pro](https://hub.opendock.app/docks/opendock/ai-automation-pro).
-
 ## Good Pairings
 
 - opendock/mcp-safe

@@ -59,10 +59,6 @@ Create a backend implementation plan with files to inspect first.
 - SECURITY_CHECKLIST.md
 - TESTING.md
 
-## Edition
-
-This is the simple edition of `opendock/backend-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/backend-ai-pro](https://hub.opendock.app/docks/opendock/backend-ai-pro).
-
 ## Good Pairings
 
 - opendock/agent-safety

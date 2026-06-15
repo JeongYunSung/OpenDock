@@ -28,7 +28,3 @@ After installation, open `README.md` in the target project and follow the first 
 - opendock/startup-founder
 - opendock/data-analyst
 - opendock/customer-support
-
-## Edition
-
-This is the simple edition of `opendock/marketer-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/marketer-ai-pro](https://hub.opendock.app/docks/opendock/marketer-ai-pro).

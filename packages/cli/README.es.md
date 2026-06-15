@@ -6,8 +6,8 @@
 
 **Simple AI setup for every workspace.**
 
-Elige los docks que necesitas, combínalos a tu manera y mantén cada proyecto
-AI-ready.
+Elige los setups de IA que necesitas, combina docks por proyecto y mantenlos
+fáciles de actualizar o eliminar.
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -20,13 +20,14 @@ AI-ready.
 
 ---
 
-OpenDock te ayuda a preparar workspaces listos para IA.
+OpenDock te ayuda a agregar setup de IA a un proyecto sin reconstruir los mismos
+archivos y pasos de herramientas a mano.
 
 En lugar de copiar prompts, crear archivos de configuración, instalar
 herramientas y repetir el mismo setup en cada proyecto, instalas un **dock**.
 
-Un dock es un paquete de workspace de IA listo para usar. Puedes instalar uno o
-combinar varios docks en el mismo proyecto.
+Un dock es un paquete reutilizable de setup de IA. Puedes instalar uno o combinar
+varios docks en el mismo proyecto.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -46,7 +47,7 @@ hay que actualizar.
 
 OpenDock convierte ese setup en docks que puedes gestionar.
 
-- Elige el setup de workspace de IA que necesitas.
+- Elige el setup de IA que necesitas.
 - Combina varios docks en un proyecto.
 - Actualiza los docks instalados más tarde.
 - Elimina los docks que ya no necesitas.
@@ -54,17 +55,17 @@ OpenDock convierte ese setup en docks que puedes gestionar.
 - Evita sobrescribir tus cambios sin avisar.
 
 OpenDock no reemplaza la terminal ni es un script runner genérico. Es una
-herramienta pequeña para instalar y gestionar setup de workspaces de IA repetible.
+herramienta pequeña para instalar y gestionar setup de IA repetible.
 
 ## Scopes
 
 | Scope | Owner | Purpose |
 |---|---|---|
-| **Registry scope** | OpenDock Registry | Metadata y archives de releases aprobadas. |
-| **Project scope** | Workspace actual | Installed dock list, lock, logs y metadata del proyecto. |
-| **Dock scope** | Un dock instalado | Version, checksum, managed file records y private workdir. |
-| **Root output scope** | OpenDock file engine | Archivos aplicados al project root tras preflight. |
-| **System/tool scope** | Host tools | Runtimes preparados por `requires` y herramientas instaladas por install/update/doctor tasks permitidas, como Homebrew, npm, Bun, pip o winget. |
+| **Registry scope** | OpenDock Registry | Metadatos y archivos de versiones revisadas. |
+| **Project scope** | Proyecto actual | Lista de docks instalados, lock, logs y metadatos del proyecto. |
+| **Dock scope** | Un dock instalado | Versión, checksum, registros de archivos gestionados y workdir privado. |
+| **Root output scope** | OpenDock file engine | Archivos aplicados al project root tras la comprobación previa. |
+| **System/tool scope** | Host tools | Runtimes preparados por `requires` y herramientas instaladas por tasks permitidas, como Homebrew, npm, Bun, pip o winget. |
 
 ## Install
 
@@ -89,26 +90,26 @@ opendock bootstrap windows
 
 | Command | Purpose |
 |---|---|
-| `opendock install owner/name@1.0.0` | Instala un approved dock release en el directorio actual. |
+| `opendock install owner/name@1.0.0` | Instala una versión revisada del dock en el directorio actual. |
 | `opendock list` | Muestra los docks instalados en el proyecto actual. |
 | `opendock list --json` | Imprime el inventario de docks instalados en JSON legible por máquina. |
-| `opendock outdated` | Comprueba si los docks instalados tienen approved releases más recientes. |
-| `opendock update` | Mueve los installed docks a las últimas approved Registry releases. |
+| `opendock outdated` | Comprueba si los docks instalados tienen versiones revisadas más recientes. |
+| `opendock update` | Aplica versiones revisadas más recientes cuando hay actualizaciones. |
 | `opendock update --force` | Prioriza la versión del dock aunque haya cambios locales gestionados. |
-| `opendock uninstall owner/name` | Elimina un dock y sus managed project files. |
-| `opendock doctor` | Comprueba project state y doctor steps de cada dock. |
-| `opendock log` | Muestra command logs recientes para el proyecto actual. |
-| `opendock version` | Muestra CLI, schema y Registry information. |
+| `opendock uninstall owner/name` | Elimina un dock y los archivos de proyecto que gestiona. |
+| `opendock doctor` | Comprueba el estado del proyecto y los steps de revisión de cada dock. |
+| `opendock log` | Muestra los logs recientes de comandos para el proyecto actual. |
+| `opendock version` | Muestra información de CLI, schema y Registry. |
 | `opendock bootstrap mac` | Verifica o instala Homebrew en macOS. |
 | `opendock bootstrap windows` | Verifica WinGet o abre Microsoft App Installer en Windows. |
 | `opendock auth login` | Inicia sesión en Registry para deploy. |
 | `opendock auth status` | Muestra el login actual de Registry. |
 | `opendock auth logout` | Borra el login local de Registry. |
-| `opendock deploy owner/name@1.0.0` | Envía un local dock release a Registry review. |
-| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Envía un artifact de release específico de la plataforma. |
-| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Envía un artifact de release específico de la plataforma. |
+| `opendock deploy owner/name@1.0.0` | Envía una versión local del dock para revisión en Registry. |
+| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Envía un archivo de versión para macOS. |
+| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Envía un archivo de versión para Windows. |
 
-Las referencias dock requieren un exact version identifier.
+Las referencias de dock requieren una versión exacta.
 
 ```text
 owner/name                  rejected
@@ -160,9 +161,9 @@ en el project root.
 
 ## Example Docks
 
-Los workspace examples no son muestras vacías: son payloads listos para usar.
-Instalan `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, un `README.md` local y archivos
-provider-specific de skills/rules bajo `.agents/skills/`, `.codex/skills/`,
+Los docks de ejemplo están pensados para combinarse. La mayoría instala
+`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, un `README.md` local y archivos de
+skills/rules por herramienta bajo `.agents/skills/`, `.codex/skills/`,
 `.claude/skills/` y `.cursor/rules/`. Después de instalar un dock, Codex,
 Claude Code, agentes tipo Gemini, Cursor y OMA-style skill discovery pueden leer
 el mismo context del proyecto.
@@ -171,11 +172,6 @@ Los tool docks son `codex`, `claude-code` y `oma`. Los outcome docks como
 `designer-ai`, `product-manager` y `frontend-ai` agregan workspaces por rol. Los
 utility docks como `agent-ready`, `agent-safety` y `repo-context` agregan
 harnesses reutilizables.
-
-Los pro addon docks usan el patrón `<dock>-pro`. El dock simple se mantiene
-ligero; el pro addon agrega specialist skills, workflow playbooks, Claude Code
-subagents, Claude Code command adapters, Codex custom agents y Cursor rules. Ejemplo:
-[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
 
 Consulta la referencia completa en [docs/guides/guide.es.md](./docs/guides/guide.es.md).
 

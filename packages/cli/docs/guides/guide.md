@@ -3,7 +3,7 @@
 `dock.yml` describes what a dock adds to a project: files, required tools,
 install/update/doctor tasks, generated outputs, and health checks.
 
-OpenDock is a small packaging layer for AI workspace setup. Pick the docks you
+OpenDock is a small packaging layer for repeatable AI setup. Pick the docks you
 need, combine them in one project, and keep each dock independently tracked for
 update and uninstall.
 
@@ -20,7 +20,7 @@ Translations:
 
 Decide these first:
 
-1. **Outcome**: a tool-only dock, or a ready-to-use AI workspace for a role or workflow.
+1. **Outcome**: a tool-only dock, or a ready-to-use AI setup for a role or workflow.
 2. **Root files**: files the project should actually read, such as `AGENTS.md`, `.codex/`, `.agents/`, `DESIGN.md`, or `README.md`.
 3. **Task location**: run tasks in the project root, or in a private dock workdir and export selected outputs.
 4. **Required runtimes**: host runtimes such as Git, Node, Bun, npm, pip, or Python.
@@ -140,7 +140,7 @@ owner/name/extra@1.0.0
 
 ```yaml
 name: Designer AI
-summary: AI workspace for UI, UX, and product design.
+summary: AI setup for UI, UX, and product design.
 readme: DOCK.md
 logo: logo.png
 tags:
@@ -291,12 +291,7 @@ fixtures. Each non-tool workspace dock installs:
 
 Use the tool docks (`opendock/codex`, `opendock/claude-code`, `opendock/oma`)
 when you only need an AI tool. Use outcome and utility docks when you want a
-ready workspace that an agent can read immediately.
-
-Pro addon docks use the `<dock>-pro` naming pattern. They keep the simple dock
-small while adding curated specialist skills, workflow playbooks, Claude Code
-subagents, Claude Code command adapters, Codex custom agents, and Cursor rules. Link to them by dock name on the hub, for
-example [opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
+ready project context that an agent can read immediately.
 
 ## Platforms
 

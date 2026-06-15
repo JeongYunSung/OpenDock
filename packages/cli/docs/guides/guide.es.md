@@ -4,8 +4,8 @@
 requeridas, tasks de install/update/doctor y outputs generados por herramientas
 externas que deben exportarse al project root.
 
-OpenDock es una pequeña capa de packaging para AI workspace setup. Puedes elegir
-varios docks, combinarlos en un mismo workspace y mantener update y uninstall
+OpenDock es una pequeña capa de packaging para setup de IA repetible. Puedes elegir
+varios docks, combinarlos en un mismo proyecto y mantener update y uninstall
 separados por dock.
 
 Translations:
@@ -84,7 +84,7 @@ opendock deploy opendock/codex@1.0.0
 Después de instalar, `opendock list` muestra qué docks están instalados en el
 proyecto actual.
 Cuando otra herramienta necesite leer la lista, usa `opendock list --json`.
-`opendock log` muestra command logs del proyecto con estado `Success`,
+`opendock log` muestra el historial de comandos del proyecto con estado `Success`,
 `Failure` o `Skipped`.
 
 ## Files And Ownership
@@ -161,11 +161,6 @@ docks, instalan `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `README.md` y archivos
 provider-specific bajo `.agents/skills/`, `.codex/skills/`, `.claude/skills/` y
 `.cursor/rules/`, para que los agentes de IA puedan leer el context del proyecto
 de inmediato.
-
-Los pro addon docks usan el patrón `<dock>-pro`. Mantienen ligero el dock simple
-y agregan specialist skills, workflow playbooks, Claude Code subagents,
-Claude Code command adapters, Codex custom agents y Cursor rules. Ejemplo:
-[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
 
 ## Deploy
 

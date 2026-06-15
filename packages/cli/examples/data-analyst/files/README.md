@@ -59,10 +59,6 @@ Analyze this experiment and separate evidence from recommendation.
 - DASHBOARD_BRIEF.md
 - EXPERIMENT_ANALYSIS.md
 
-## Edition
-
-This is the simple edition of `opendock/data-analyst`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/data-analyst-pro](https://hub.opendock.app/docks/opendock/data-analyst-pro).
-
 ## Good Pairings
 
 - opendock/product-manager

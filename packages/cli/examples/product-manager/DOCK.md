@@ -28,7 +28,3 @@ After installation, open `README.md` in the target project and follow the first 
 - opendock/designer-ai
 - opendock/data-analyst
 - opendock/docs-ai
-
-## Edition
-
-This is the simple edition of `opendock/product-manager`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/product-manager-pro](https://hub.opendock.app/docks/opendock/product-manager-pro).

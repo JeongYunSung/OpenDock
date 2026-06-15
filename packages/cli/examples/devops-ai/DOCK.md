@@ -28,7 +28,3 @@ After installation, open `README.md` in the target project and follow the first 
 - opendock/agent-safety
 - opendock/mcp-safe
 - opendock/repo-context
-
-## Edition
-
-This is the simple edition of `opendock/devops-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/devops-ai-pro](https://hub.opendock.app/docks/opendock/devops-ai-pro).

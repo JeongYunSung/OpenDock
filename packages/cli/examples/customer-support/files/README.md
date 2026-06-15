@@ -59,10 +59,6 @@ Create an escalation brief with customer impact and evidence.
 - TICKET_TRIAGE.md
 - ESCALATION.md
 
-## Edition
-
-This is the simple edition of `opendock/customer-support`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/customer-support-pro](https://hub.opendock.app/docks/opendock/customer-support-pro).
-
 ## Good Pairings
 
 - opendock/ai-automation

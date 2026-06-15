@@ -132,19 +132,17 @@ describe("example dock manifests", () => {
     }
   });
 
-  it("links every simple workspace example to its pro addon", () => {
-    for (const example of simpleWorkspaceExampleNames()) {
+  it("does not reference unavailable pro addons from bundled examples", () => {
+    for (const example of workspaceExampleNames()) {
       const root = join(examplesRoot, example);
-      const proExample = `${example}-pro`;
-      const proUrl = `https://hub.opendock.app/docks/opendock/${proExample}`;
 
-      expect(readFileSync(join(root, "DOCK.md"), "utf8"), `${example} DOCK pro link`).toContain(
-        proUrl,
+      expect(readFileSync(join(root, "DOCK.md"), "utf8"), `${example} DOCK pro link`).not.toMatch(
+        /-pro\b|pro addon/i,
       );
       expect(
         readFileSync(join(root, "files", "README.md"), "utf8"),
         `${example} README pro link`,
-      ).toContain(proUrl);
+      ).not.toMatch(/-pro\b|pro addon/i);
     }
   });
 });
@@ -159,10 +157,6 @@ function exampleNames(): string[] {
 function workspaceExampleNames(): string[] {
   const toolOnly = new Set(["claude-code", "codex", "oma"]);
   return exampleNames().filter((example) => !toolOnly.has(example));
-}
-
-function simpleWorkspaceExampleNames(): string[] {
-  return workspaceExampleNames().filter((example) => !example.endsWith("-pro"));
 }
 
 function commandsFor(

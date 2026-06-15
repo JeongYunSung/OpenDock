@@ -3,8 +3,8 @@
 `dock.yml` 描述一个 dock 会给项目添加什么：文件、所需工具、install/update/doctor
 tasks，以及外部工具生成后需要导出到 project root 的文件。
 
-OpenDock 是一个面向 AI workspace setup 的小型 packaging layer。你可以选择多个
-dock，把它们组合到同一个 workspace，并分别追踪 update 和 uninstall。
+OpenDock 是一个面向可重复 AI setup 的小型 packaging layer。你可以选择多个
+dock，把它们组合到同一个项目，并分别追踪 update 和 uninstall。
 
 Translations:
 
@@ -80,7 +80,7 @@ opendock deploy opendock/codex@1.0.0
 
 安装后，`opendock list` 会显示当前项目已经安装的 docks。
 如果其他工具需要读取清单，请使用 `opendock list --json`。
-`opendock log` 会显示当前项目的 command logs，状态为 `Success`、`Failure` 或
+`opendock log` 会显示当前项目的命令历史，状态为 `Success`、`Failure` 或
 `Skipped`。
 
 ## Files And Ownership
@@ -151,10 +151,6 @@ install:
 会一起安装 `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、`README.md`，以及
 `.agents/skills/`、`.codex/skills/`、`.claude/skills/`、`.cursor/rules/`
 下的 provider-specific files，让 AI agent 能立刻读取项目 context。
-
-Pro addon docks 使用 `<dock>-pro` 命名。Simple dock 保持轻量，pro addon 添加
-specialist skills、workflow playbooks、Claude Code subagents、Claude Code command adapters、Codex custom agents 和 Cursor rules。
-例如：[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro)。
 
 ## Deploy
 

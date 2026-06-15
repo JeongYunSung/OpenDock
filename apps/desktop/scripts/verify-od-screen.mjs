@@ -64,7 +64,7 @@ async function runViewportFlow(viewport) {
     await page.evaluate(() => localStorage.clear());
     await page.reload({ waitUntil: "domcontentloaded" });
     await assertVisible(page.getByRole("heading", { name: "로그인" }), "signed-out login screen after registered-project check");
-    await page.getByRole("button", { name: /Gmail로 계속하기/ }).click();
+    await page.getByRole("button", { name: /Google로 계속하기/ }).click();
 
     await assertVisible(page.getByRole("heading", { name: "프로젝트를 선택하세요" }), "empty project screen");
     await page.getByRole("button", { name: /새 프로젝트 만들기/ }).first().click();
@@ -108,6 +108,13 @@ async function runViewportFlow(viewport) {
 
     await page.getByRole("button", { name: "설치됨" }).click();
     await assertVisible(page.locator(".installed-row"), "installed dock row");
+    const installedRowCopy = await page.locator(".installed-row").first().innerText();
+    if (installedRowCopy.includes(["설치", "현재"].join(" "))) {
+      throw new Error(`installed row should not show awkward copy: ${installedRowCopy}`);
+    }
+    if (!installedRowCopy.includes("설치됨")) {
+      throw new Error(`installed row should show installed state, got ${installedRowCopy}`);
+    }
     await assertVisible(page.locator(".installed-row .ready-chip, .installed-row .update-chip"), "installed status dot");
     const installedStatusText = await page.locator(".installed-row .ready-chip, .installed-row .update-chip").first().innerText();
     if (installedStatusText.trim() !== "") {
@@ -181,7 +188,7 @@ async function runViewportFlow(viewport) {
 
     await page.locator(".avatar-button").click();
     await assertVisible(page.locator(".account-name", { hasText: "kjyscom@gmail.com" }), "gmail account menu label");
-    await page.getByRole("button", { name: /계정 프로필/ }).click();
+    await page.getByRole("button", { name: /^계정$/ }).click();
     await assertVisible(page.getByRole("heading", { name: "내 정보" }), "account profile panel");
     await page.getByRole("button", { name: /메인으로/ }).click();
     await assertWorkspaceList(page);
@@ -399,7 +406,7 @@ async function assertProjectDeleteFlow(page) {
 }
 
 async function assertWorkspaceList(page) {
-  await assertVisible(page.getByRole("heading", { name: "AI-ready 도크 탐색" }), "dock explore list");
+  await assertVisible(page.getByRole("heading", { name: "필요한 AI 셋업 찾기" }), "dock explore list");
   await assertVisible(page.getByRole("button", { name: "탐색" }), "explore tab");
   await assertVisible(page.getByRole("button", { name: "설치됨" }), "installed tab");
   await assertVisible(page.getByRole("button", { name: "로그" }), "logs tab");

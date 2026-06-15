@@ -4,10 +4,9 @@
 어떤 파일을 넣을지, 어떤 도구를 준비할지, 설치/업데이트/점검 task에서 무엇을
 실행할지, 외부 도구가 만든 결과물 중 무엇을 프로젝트 root로 가져올지 선언합니다.
 
-OpenDock은 필요한 AI setup을 고르고, 한 workspace에 섞어 쓰고, 나중에 update와
-uninstall까지 추적할 수 있게 만드는 작은 packaging layer입니다. 단순한 설치
-스크립트가 아니라, 프로젝트마다 반복 가능한 AI workspace 구성을 만드는 데 초점을
-둡니다.
+OpenDock은 필요한 AI setup을 고르고, 한 프로젝트에 여러 dock을 섞어 쓰고, 나중에
+update와 uninstall까지 추적할 수 있게 만드는 작은 packaging layer입니다. 단순한
+설치 스크립트가 아니라, 프로젝트마다 반복 가능한 AI 셋업을 만드는 데 초점을 둡니다.
 
 다른 언어:
 
@@ -56,7 +55,7 @@ uninstall까지 추적할 수 있게 만드는 작은 packaging layer입니다. 
 
 dock을 작성하기 전에 네 가지를 먼저 정하세요.
 
-1. **대상 결과**: 단순 도구 설치인지, 특정 직군/워크플로우용 AI-ready workspace인지 정합니다.
+1. **대상 결과**: 단순 도구 설치인지, 특정 직군/워크플로우용 AI 셋업인지 정합니다.
 2. **root에 남길 파일**: `AGENTS.md`, `.agents/`, `.codex/`, `DESIGN.md`처럼 프로젝트가 실제로 읽을 파일을 정합니다.
 3. **task 실행 위치**: 프로젝트 root에서 실행할지, dock 전용 workdir에서 실행한 뒤 export할지 정합니다.
 4. **필요한 runtime**: Node, Bun, npm, Python처럼 host에서 확인해야 하는 runtime을 정합니다.
@@ -189,7 +188,7 @@ doctor:
 id: opendock/codex
 ```
 
-설치와 배포 명령에서만 exact version identifier를 붙입니다.
+설치와 배포 명령에서만 정확한 version을 붙입니다.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -422,14 +421,14 @@ doctor: []
 | task | 실행되는 OpenDock 명령 | 목적 |
 |---|---|---|
 | `install` | `opendock install owner/name@version` | 최초 적용과 초기 생성 작업 |
-| `update` | `opendock update` | 최신 approved release로 이동하며 유지보수 작업 실행 |
+| `update` | `opendock update` | 업데이트 가능한 검토 완료 버전이 있을 때 유지보수 작업 실행 |
 | `doctor` | `opendock doctor` | 현재 프로젝트와 도구 상태 점검 |
 
 `install`, `update`, `uninstall`은 자동화 도구가 변경 결과를 읽을 수 있도록
 `--json` 출력도 지원합니다.
 
-`opendock outdated`는 현재 설치된 dock을 Registry의 최신 approved release와
-비교합니다. `opendock update`는 이 조회 결과에서 업데이트 대상이 하나라도 있을
+`opendock outdated`는 현재 설치된 dock을 Registry의 검토 완료 버전과 비교합니다.
+`opendock update`는 이 조회 결과에서 업데이트 대상이 하나라도 있을
 때만 실제 update를 실행합니다.
 
 ### step 필드
@@ -726,8 +725,8 @@ OpenDock은 프로젝트별 command log를 `Success`, `Failure`, `Skipped` 상�
 
 ### update
 
-`update`는 현재 프로젝트에 설치된 모든 dock을 Registry의 최신 approved release로
-이동합니다.
+`update`는 현재 프로젝트에 설치된 dock을 확인하고, 업데이트 가능한 검토 완료
+버전이 있을 때만 적용합니다.
 
 ```bash
 opendock update
@@ -829,11 +828,6 @@ tool dock을 제외한 workspace dock은 공통 root context와 provider별 runt
 tool dock입니다. outcome/utility dock은 설치 직후 agent가 읽을 수 있는 workspace
 context까지 제공합니다.
 
-pro addon dock은 `<dock>-pro` 이름을 사용합니다. 기본 dock은 간소형으로 유지하고,
-pro addon은 curated specialist skill, workflow playbook, Claude Code subagent,
-Claude Code command adapter, Codex custom agent, Cursor rule을 추가합니다. hub URL은 dock 이름 그대로 연결합니다:
-[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
-
 ### Tool docks
 
 Tool dock은 특정 CLI나 외부 setup engine을 준비합니다. project payload를 최소화하고
@@ -847,7 +841,7 @@ Tool dock은 특정 CLI나 외부 setup engine을 준비합니다. project paylo
 
 ### Outcome docks
 
-Outcome dock은 특정 직군이나 작업 결과를 위한 AI-ready workspace 파일을 설치합니다.
+Outcome dock은 특정 직군이나 작업 결과에 맞춘 AI 셋업 파일을 설치합니다.
 도구 설치는 하지 않으며, `opendock/codex`, `opendock/claude-code`, `opendock/oma`
 같은 tool dock과 함께 조합합니다.
 
@@ -881,13 +875,6 @@ Utility dock은 여러 outcome dock과 같이 섞어 쓰는 보조 harness입니
 | `examples/dev-env/dock.{macos,windows}.yml` | project-local tool versions와 validation task reference |
 | `examples/devops-ai/dock.{macos,windows}.yml` | CI/CD, deployment, incident runbook workspace |
 | `examples/monorepo-ai/dock.{macos,windows}.yml` | package boundary and change impact workspace |
-
-### Pro addon docks
-
-각 workspace/utility dock에는 같은 이름의 pro addon이 있습니다. 예를 들어
-`opendock/designer-ai-pro`는 `opendock/designer-ai`의 전문가 팀 확장판입니다.
-pro addon은 기본 dock과 함께 설치하는 것을 전제로 하며, 여러 specialist skill,
-workflow playbook, Claude command adapter, Claude/Codex subagent를 추가합니다.
 
 조합 예시는 다음과 같습니다.
 

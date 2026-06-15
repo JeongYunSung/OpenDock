@@ -27,7 +27,3 @@ After installation, open `README.md` in the target project and follow the first 
 
 - opendock/docs-ai
 - opendock/customer-support
-
-## Edition
-
-This is the simple edition of `opendock/recruiter-ai`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/recruiter-ai-pro](https://hub.opendock.app/docks/opendock/recruiter-ai-pro).

@@ -60,10 +60,6 @@ Turn these notes into a clear bug report with reproduction steps.
 - ACCESSIBILITY_CHECKLIST.md
 - PERFORMANCE_CHECKLIST.md
 
-## Edition
-
-This is the simple edition of `opendock/qa-engineer`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/qa-engineer-pro](https://hub.opendock.app/docks/opendock/qa-engineer-pro).
-
 ## Good Pairings
 
 - opendock/frontend-ai

@@ -6,7 +6,7 @@
 
 **Simple AI setup for every workspace.**
 
-选择你需要的 dock，按自己的方式组合它们，让每个项目保持 AI-ready。
+选择你需要的 AI setup，在每个项目里组合多个 dock，并让它们之后容易更新或移除。
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -19,13 +19,13 @@
 
 ---
 
-OpenDock 帮你快速准备 AI-ready workspace。
+OpenDock 帮你把 AI setup 加到项目里，不用每次都手动复制同样的文件和工具步骤。
 
 不必在每个项目里手动复制 prompts、创建配置文件、安装工具并重复同样的步骤。
 你只需要安装一个 **dock**。
 
-dock 是一个可直接使用的 AI workspace package。你可以安装一个 dock，也可以在
-同一个项目里组合多个 dock。
+dock 是一个可重复使用的 AI setup package。你可以安装一个 dock，也可以在同一个
+项目里组合多个 dock。
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -43,7 +43,7 @@ AI setup 一开始很简单：复制几个 prompts，添加几个文件，安装
 
 OpenDock 把这些 setup 变成可以管理的 dock。
 
-- 选择你需要的 AI workspace setup。
+- 选择你需要的 AI setup。
 - 在一个项目中组合多个 dock。
 - 之后更新已安装的 dock。
 - 移除不再需要的 dock。
@@ -51,17 +51,17 @@ OpenDock 把这些 setup 变成可以管理的 dock。
 - 避免默默覆盖你自己的修改。
 
 OpenDock 不是 terminal replacement，也不是通用 script runner。它是用来安装和
-管理可重复 AI workspace setup 的小工具。
+管理可重复 AI setup 的小工具。
 
 ## Scopes
 
 | Scope | Owner | Purpose |
 |---|---|---|
-| **Registry scope** | OpenDock Registry | 已批准的 dock metadata 和 release archives. |
-| **Project scope** | 当前 workspace | installed dock list, lock, logs, project metadata. |
+| **Registry scope** | OpenDock Registry | 已审核 dock 的 metadata 和版本 archive. |
+| **Project scope** | 当前项目 | installed dock list, lock, logs, project metadata. |
 | **Dock scope** | 单个 installed dock | version, checksum, managed file records, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 后应用到 project root 的文件. |
-| **System/tool scope** | host tools | 由 `requires` 准备的 runtime，以及允许的 install/update/doctor tasks 安装的 Homebrew、npm、Bun、pip、winget 等 host tools. |
+| **System/tool scope** | host tools | 由 `requires` 准备的 runtime，以及允许的 task 安装的 Homebrew、npm、Bun、pip、winget 等 host tools. |
 
 ## Install
 
@@ -86,26 +86,26 @@ opendock bootstrap windows
 
 | Command | Purpose |
 |---|---|
-| `opendock install owner/name@1.0.0` | 将 approved dock release 安装到当前目录. |
+| `opendock install owner/name@1.0.0` | 将已审核的 dock 版本安装到当前目录. |
 | `opendock list` | 显示当前项目已安装的 docks. |
 | `opendock list --json` | 以机器可读 JSON 输出已安装 docks 清单. |
-| `opendock outdated` | 检查已安装 docks 是否有更新的 approved release. |
-| `opendock update` | 将 installed docks 移动到最新 approved Registry release. |
+| `opendock outdated` | 检查已安装 docks 是否有新的已审核版本. |
+| `opendock update` | 仅在有更新时应用新的已审核版本. |
 | `opendock update --force` | 即使 managed content 被本地修改，也以 dock version 为准. |
-| `opendock uninstall owner/name` | 移除一个 dock 及其 managed project files. |
-| `opendock doctor` | 检查 project state 和 dock doctor steps. |
-| `opendock log` | 显示当前项目最近的 command logs. |
-| `opendock version` | 显示 CLI, schema 和 Registry information. |
+| `opendock uninstall owner/name` | 移除一个 dock 及其管理的项目文件. |
+| `opendock doctor` | 检查项目状态和 dock 的检查 step. |
+| `opendock log` | 显示当前项目最近的命令日志. |
+| `opendock version` | 显示 CLI, schema 和 Registry 信息. |
 | `opendock bootstrap mac` | 在 macOS 上检查或安装 Homebrew. |
 | `opendock bootstrap windows` | 在 Windows 上检查 WinGet 或打开 Microsoft App Installer. |
 | `opendock auth login` | 为 deploy 登录 Registry. |
 | `opendock auth status` | 显示当前 Registry login. |
 | `opendock auth logout` | 清除本地 Registry login. |
-| `opendock deploy owner/name@1.0.0` | 提交 local dock release 供 Registry review. |
-| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | 提交特定平台的 release artifact。 |
-| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | 提交特定平台的 release artifact。 |
+| `opendock deploy owner/name@1.0.0` | 提交本地 dock 版本供 Registry review. |
+| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | 提交 macOS 用版本文件。 |
+| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | 提交 Windows 用版本文件。 |
 
-dock reference 必须包含 exact version identifier。
+dock reference 必须包含准确的 version。
 
 ```text
 owner/name                  rejected
@@ -155,20 +155,15 @@ doctor:
 
 ## Example Docks
 
-Workspace examples 不是空的示例，而是可以直接使用的 payload。它们会安装
-`AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、本地 `README.md`，以及
-`.agents/skills/`、`.codex/skills/`、`.claude/skills/`、`.cursor/rules/`
-下的 provider-specific skill/rule files。安装后，Codex、Claude Code、
-Gemini 类 agent、Cursor 和 OMA-style skill discovery 可以读取同一份项目
-context。
+示例 dock 是为了方便组合使用而准备的。大多数 dock 会安装 `AGENTS.md`、
+`CLAUDE.md`、`GEMINI.md`、本地 `README.md`，以及 `.agents/skills/`、
+`.codex/skills/`、`.claude/skills/`、`.cursor/rules/` 下的 tool-specific
+skill/rule files。安装后，Codex、Claude Code、Gemini 类 agent、Cursor 和
+OMA-style skill discovery 可以读取同一份项目 context。
 
 Tool docks 包括 `codex`、`claude-code`、`oma`。Outcome docks 包括
 `designer-ai`、`product-manager`、`frontend-ai` 等角色 workspace。Utility
 docks 包括 `agent-ready`、`agent-safety`、`repo-context` 等可组合 harness。
-
-Pro addon docks 使用 `<dock>-pro` 命名。Simple dock 保持轻量，pro addon 添加
-specialist skills、workflow playbooks、Claude Code subagents、Claude Code command adapters、Codex custom agents 和 Cursor rules。
-例如：[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro)。
 
 完整 manifest reference 见 [docs/guides/guide.zh.md](./docs/guides/guide.zh.md)。
 

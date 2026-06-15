@@ -6,8 +6,8 @@
 
 **Simple AI setup for every workspace.**
 
-Choose the docks you need, combine them your way, and keep every project
-AI-ready.
+Choose ready-made AI setups, combine docks for each project, and keep them easy
+to update or remove.
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -20,12 +20,13 @@ AI-ready.
 
 ---
 
-OpenDock helps you set up AI-ready workspaces.
+OpenDock helps you add AI setup to a project without rebuilding the same files
+and tool steps by hand.
 
 Instead of manually copying prompts, creating config files, installing tools,
 and repeating the same setup for every project, you install a **dock**.
 
-A dock is a ready-made AI workspace package. You can install one dock or combine
+A dock is a reusable AI setup package. You can install one dock or combine
 several docks in the same project.
 
 ```bash
@@ -61,7 +62,7 @@ which files were added, which tools were installed, and what needs to be updated
 
 OpenDock turns that setup into a dock you can manage:
 
-- Choose the AI workspace setup you need.
+- Choose the AI setup you need.
 - Combine multiple docks in one project.
 - Update installed docks later.
 - Remove docks you no longer need.
@@ -69,7 +70,7 @@ OpenDock turns that setup into a dock you can manage:
 - Avoid silently overwriting your own work.
 
 OpenDock is not a terminal replacement or a general script runner. It is a small
-tool for installing and managing repeatable AI workspace setup.
+tool for installing and managing repeatable AI setup.
 
 ## How It Works
 
@@ -81,7 +82,7 @@ opendock install opendock/designer-ai@1.0.0
 
 OpenDock then:
 
-1. Downloads an approved dock from the Registry.
+1. Downloads a reviewed dock from the Registry.
 2. Checks the host runtimes the dock needs.
 3. Adds the dock's files to your project.
 4. Checks for conflicts before writing files.
@@ -153,24 +154,24 @@ bin/opendock version
 | `opendock install owner/name@1.0.0` | Install a reviewed dock release into the current directory. |
 | `opendock list` | Show docks installed in the current project. |
 | `opendock list --json` | Print a machine-readable installed dock inventory. |
-| `opendock outdated` | Check installed docks for newer approved Registry releases. |
-| `opendock update` | Move installed docks to their latest approved Registry releases. |
+| `opendock outdated` | Check whether installed docks have newer reviewed versions. |
+| `opendock update` | Apply newer reviewed versions when installed docks have updates. |
 | `opendock update --force` | Update even when OpenDock-managed content was edited locally. |
-| `opendock uninstall owner/name` | Remove one installed dock and its managed project files. |
+| `opendock uninstall owner/name` | Remove one installed dock and the project files it manages. |
 | `opendock install/update/uninstall --json` | Print a machine-readable change report. |
-| `opendock doctor` | Check project state and each installed dock's doctor steps. |
-| `opendock log` | Show recent command logs for the current project. |
-| `opendock version` | Print CLI, schema, and Registry information. |
+| `opendock doctor` | Check the project state and each installed dock's check steps. |
+| `opendock log` | Show recent command history for the current project. |
+| `opendock version` | Print CLI, schema, and Registry details. |
 | `opendock bootstrap mac` | Verify or install Homebrew on macOS. |
 | `opendock bootstrap windows` | Verify WinGet or open Microsoft App Installer on Windows. |
 | `opendock auth login` | Log in to OpenDock Registry for deploy. |
 | `opendock auth status` | Show the current Registry login. |
 | `opendock auth logout` | Clear local Registry login. |
-| `opendock deploy owner/name@1.0.0` | Submit a local dock release for Registry review. |
-| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Submit a platform-specific release artifact. |
-| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Submit a platform-specific release artifact. |
+| `opendock deploy owner/name@1.0.0` | Submit a local dock version for Registry review. |
+| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Submit a macOS version file. |
+| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Submit a Windows version file. |
 
-Dock references require an exact version identifier.
+Dock references require an exact version.
 
 ```text
 owner/name                  rejected
@@ -179,9 +180,9 @@ owner/name@1.2.0            accepted
 owner/name@designer-build   accepted
 ```
 
-`opendock update` resolves each installed dock id to the latest approved release
-in the Registry. To move to a specific release, run `opendock install
-owner/name@new-version`.
+`opendock update` checks the docks already installed in this project and only
+applies docks that have newer reviewed versions. To move to a specific release,
+run `opendock install owner/name@new-version`.
 
 ## Dock Format
 
@@ -316,24 +317,18 @@ AI setup generators while still tracking the files that reach the project root.
 
 ## Example Docks
 
-The examples are intentionally composable.
-Workspace examples are production-ready payloads, not placeholder samples: they
-install shared root context (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and a local
-`README.md`) plus provider-specific skill/rule files under `.agents/skills/`,
-`.codex/skills/`, `.claude/skills/`, and `.cursor/rules/`. This keeps Codex,
-Claude Code, Gemini-style agents, Cursor, and OMA-style skill discovery ready as
-soon as the dock is installed.
+The examples are built to be combined.
+Most docks add shared project context (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
+and a local `README.md`) plus tool-specific skill/rule files under
+`.agents/skills/`, `.codex/skills/`, `.claude/skills/`, and `.cursor/rules/`.
+After install, Codex, Claude Code, Gemini-style agents, Cursor, and OMA-style
+skill discovery can read the same project context.
 
 | Group | Examples | Role |
 |---|---|---|
 | Tool docks | `codex`, `claude-code`, `oma` | Install or run an AI tool without forcing a role workflow. |
-| Outcome docks | `designer-ai`, `product-manager`, `frontend-ai`, `backend-ai`, `mobile-ai`, `qa-engineer`, `docs-ai`, `data-analyst`, `startup-founder`, `marketer-ai`, `customer-support`, `recruiter-ai`, `ai-automation`, `ui-case-study` | Add role-specific AI-ready workspace files. |
+| Outcome docks | `designer-ai`, `product-manager`, `frontend-ai`, `backend-ai`, `mobile-ai`, `qa-engineer`, `docs-ai`, `data-analyst`, `startup-founder`, `marketer-ai`, `customer-support`, `recruiter-ai`, `ai-automation`, `ui-case-study` | Add role-specific setup files, prompts, and agent instructions. |
 | Utility docks | `agent-ready`, `agent-safety`, `repo-context`, `mcp-safe`, `dev-env`, `devops-ai`, `monorepo-ai` | Add reusable context, safety, MCP, validation, operations, or repository harnesses. |
-| Pro addon docks | `<dock>-pro`, for example `designer-ai-pro` or `frontend-ai-pro` | Add curated specialist skills, workflow playbooks, Claude Code subagents, Claude Code command adapters, Codex custom agents, and Cursor rules on top of the simple dock. |
-
-Simple docks stay lightweight. When you want a deeper specialist team, install
-the matching pro addon and open its hub page by dock name, for example
-[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro).
 
 Example combination:
 
@@ -341,7 +336,6 @@ Example combination:
 opendock install opendock/codex@1.0.0
 opendock install opendock/agent-ready@1.0.0
 opendock install opendock/frontend-ai@1.0.0
-opendock install opendock/frontend-ai-pro@1.0.0
 opendock install opendock/repo-context@1.0.0
 opendock list
 ```

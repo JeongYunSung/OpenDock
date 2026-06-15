@@ -6,8 +6,8 @@
 
 **Simple AI setup for every workspace.**
 
-必要な dock を選び、自分のやり方で組み合わせ、すべてのプロジェクトを
-AI-ready な workspace に保ちます。
+必要な AI setup を選び、プロジェクトごとに dock を組み合わせ、あとから簡単に
+更新または削除できる状態にします。
 
 [English](./README.md) · [한국어](./README.ko.md) · [日本語](./README.ja.md) · [简体中文](./README.zh.md) · [Español](./README.es.md) · [Français](./README.fr.md) · [Deutsch](./README.de.md)
 
@@ -20,12 +20,13 @@ AI-ready な workspace に保ちます。
 
 ---
 
-OpenDock は、AI-ready workspace をすばやく準備するためのツールです。
+OpenDock は、同じファイルやツール手順を毎回手で作らずに、プロジェクトへ
+AI setup を追加するためのツールです。
 
 プロジェクトごとに prompts をコピーし、設定ファイルを作り、必要なツールを
 インストールする作業を繰り返す代わりに、**dock** をインストールします。
 
-dock はすぐ使える AI workspace package です。1つだけ入れることも、同じ
+dock は再利用できる AI setup package です。1つだけ入れることも、同じ
 プロジェクトに複数の dock を組み合わせることもできます。
 
 ```bash
@@ -45,25 +46,25 @@ AI setup は最初は簡単です。prompt をいくつかコピーし、ファ�
 
 OpenDock はその setup を管理できる dock にまとめます。
 
-- 必要な AI workspace setup を選べます。
+- 必要な AI setup を選べます。
 - 1つのプロジェクトに複数の dock を組み合わせられます。
 - インストール済み dock を後から更新できます。
 - 不要になった dock を削除できます。
 - OpenDock が追加した内容を追跡します。
 - 自分の変更を黙って上書きしません。
 
-OpenDock は terminal replacement でも汎用 script runner でもありません。
-再現可能な AI workspace setup をインストールして管理するための小さなツールです。
+OpenDock はターミナルの代替でも、汎用 script runner でもありません。
+再現可能な AI setup をインストールして管理するための小さなツールです。
 
 ## Scopes
 
 | Scope | 所有者 | 目的 |
 |---|---|---|
-| **Registry scope** | OpenDock Registry | 承認済み dock metadata と release archive. |
-| **Project scope** | 現在の workspace | installed dock list, lock, log, project metadata. |
+| **Registry scope** | OpenDock Registry | レビュー済み dock の metadata と version archive. |
+| **Project scope** | 現在の project | installed dock list, lock, log, project metadata. |
 | **Dock scope** | 1つの installed dock | version, checksum, managed file record, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 後に project root へ適用される file. |
-| **System/tool scope** | host tool | `requires` が準備する runtime と、許可された install/update/doctor task がインストールする Homebrew, npm, Bun, pip, winget などの host tool. |
+| **System/tool scope** | host tool | `requires` が準備する runtime と、許可された task がインストールする Homebrew, npm, Bun, pip, winget などの host tool. |
 
 ## Install
 
@@ -88,26 +89,26 @@ opendock bootstrap windows
 
 | Command | Purpose |
 |---|---|
-| `opendock install owner/name@1.0.0` | 承認済み dock release を現在の directory に install. |
-| `opendock list` | 現在の project に installed docks を表示. |
-| `opendock list --json` | installed docks の inventory を machine-readable JSON で出力. |
-| `opendock outdated` | installed docks に新しい approved release があるか確認. |
-| `opendock update` | installed docks を最新の approved Registry release へ移動. |
+| `opendock install owner/name@1.0.0` | レビュー済み dock version を現在の directory に install. |
+| `opendock list` | 現在の project に入っている dock を表示. |
+| `opendock list --json` | installed docks の一覧を machine-readable JSON で出力. |
+| `opendock outdated` | installed docks に新しいレビュー済み version があるか確認. |
+| `opendock update` | 更新できる dock があるときだけ新しいレビュー済み version を適用. |
 | `opendock update --force` | OpenDock-managed content が編集されていても dock version を優先. |
-| `opendock uninstall owner/name` | 1つの dock とその managed project files を削除. |
-| `opendock doctor` | project state と dock doctor steps を確認. |
-| `opendock log` | current project の最近の command logs を表示. |
-| `opendock version` | CLI, schema, Registry information を表示. |
+| `opendock uninstall owner/name` | 1つの dock と、その dock が管理する project files を削除. |
+| `opendock doctor` | project state と dock の確認 step を実行. |
+| `opendock log` | current project の最近の command log を表示. |
+| `opendock version` | CLI, schema, Registry 情報を表示. |
 | `opendock bootstrap mac` | macOS で Homebrew を確認またはインストール. |
 | `opendock bootstrap windows` | Windows で WinGet を確認または Microsoft App Installer を開く. |
 | `opendock auth login` | deploy のため Registry に login. |
 | `opendock auth status` | 現在の Registry login を表示. |
 | `opendock auth logout` | local Registry login を削除. |
-| `opendock deploy owner/name@1.0.0` | local dock release を Registry review に提出. |
-| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | platform 別の release artifact を提出. |
-| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | platform 別の release artifact を提出. |
+| `opendock deploy owner/name@1.0.0` | local dock version を Registry review に提出. |
+| `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | macOS 用の version file を提出. |
+| `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Windows 用の version file を提出. |
 
-dock reference には exact version identifier が必要です。
+dock reference には正確な version が必要です。
 
 ```text
 owner/name                  rejected
@@ -158,22 +159,17 @@ dock-private workdir で実行する task が事前に input file を必要と�
 
 ## Example Docks
 
-Workspace examples は空のサンプルではなく、そのまま使える payload です。
+Example dock は組み合わせて使いやすいように用意されています。多くの dock は
 `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、local `README.md` に加えて、
 `.agents/skills/`、`.codex/skills/`、`.claude/skills/`、`.cursor/rules/`
-配下の provider-specific skill/rule files をインストールします。Codex、
-Claude Code、Gemini 系 agent、Cursor、OMA-style skill discovery が同じ
-project context をすぐ読める状態になります。
+配下の tool-specific skill/rule files をインストールします。Codex、Claude
+Code、Gemini 系 agent、Cursor、OMA-style skill discovery が同じ project
+context をすぐ読める状態になります。
 
 Tool docks は `codex`、`claude-code`、`oma` です。Outcome docks は
 `designer-ai`、`product-manager`、`frontend-ai` などの役割別 workspace を
 追加します。Utility docks は `agent-ready`、`agent-safety`、`repo-context`
 などを組み合わせ用の harness として追加します。
-
-Pro addon docks は `<dock>-pro` という名前です。Simple dock は軽く保ち、pro
-addon で specialist skills、workflow playbooks、Claude Code subagents、Claude Code
-command adapters、Codex custom agents、Cursor rules を追加します。例:
-[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro)。
 
 詳しい manifest reference は [docs/guides/guide.ja.md](./docs/guides/guide.ja.md) を参照してください。
 

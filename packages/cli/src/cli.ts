@@ -83,7 +83,7 @@ export async function run(argv = process.argv): Promise<void> {
   const installer = new DockInstaller();
   program
     .name("opendock")
-    .description("Install, update, doctor, and deploy OpenDock docks.")
+    .description("Install, inspect, update, remove, and deploy OpenDock docks.")
     .version(VERSION);
 
   program

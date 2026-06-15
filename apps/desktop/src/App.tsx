@@ -324,7 +324,7 @@ function platformLabel(platform: string) {
 }
 
 function installedAtLabel(lang: Lang) {
-  return lang === "ko" ? "현재" : "current";
+  return lang === "ko" ? "설치됨" : "Installed";
 }
 
 function matchesDockSearch(dock: Dock, query: string) {
@@ -1301,7 +1301,7 @@ export function App() {
       return;
     }
     appendLog("INFO", "var(--text-2)", `update ${project.path}`);
-    appendLog("OK", "var(--success)", "updated docks · latest approved releases");
+    appendLog("OK", "var(--success)", "update check completed");
     appendCommandResultLog(commandId, previewChangeResult("update", project.path));
     finishCommandTask(commandId, "success", t.taskCompleted);
   }
@@ -2278,9 +2278,7 @@ function InstalledPanel(props: {
                   <DockIcon dock={row} size="small" />
                   <div>
                     <strong>{dockFullId(row)}</strong>
-                    <small>
-                      {props.t.installedAt} {row.installedAt}
-                    </small>
+                    <small>{row.installedAt}</small>
                   </div>
                 </div>
                 <code className={row.updateAvailable ? "version-update" : ""}>

@@ -28,7 +28,3 @@ After installation, open `README.md` in the target project and follow the first 
 - opendock/product-manager
 - opendock/startup-founder
 - opendock/agent-safety
-
-## Edition
-
-This is the simple edition of `opendock/data-analyst`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/data-analyst-pro](https://hub.opendock.app/docks/opendock/data-analyst-pro).

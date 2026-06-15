@@ -60,10 +60,6 @@ Review this planned change against the context and list risky files.
 - .opendock/prompts/architecture-map.md
 - .opendock/prompts/change-risk-review.md
 
-## Edition
-
-This is the simple edition of `opendock/repo-context`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/repo-context-pro](https://hub.opendock.app/docks/opendock/repo-context-pro).
-
 ## Good Pairings
 
 - opendock/agent-ready

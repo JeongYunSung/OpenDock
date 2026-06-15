@@ -4,7 +4,7 @@
 追加するファイル、必要なツール、install/update/doctor task、
 外部ツールが生成した output のうち project root に取り込むものを宣言します。
 
-OpenDock は AI setup を選び、1 つの workspace に組み合わせ、dock ごとに update
+OpenDock は AI setup を選び、1 つのプロジェクトに組み合わせ、dock ごとに update
 と uninstall を追跡するための小さな packaging layer です。
 
 Translations:
@@ -82,8 +82,8 @@ opendock deploy opendock/codex@1.0.0
 After installation, `opendock list` shows which docks are installed in the
 current project.
 Use `opendock list --json` when another tool needs to read that inventory.
-`opendock log` shows project-local command logs with `Success`, `Failure`, or
-`Skipped` status.
+`opendock log` は project ごとの command history を `Success`、`Failure`、
+`Skipped` の status 付きで表示します。
 
 ## Files And Ownership
 
@@ -156,11 +156,6 @@ tool dock 以外は `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、`README.md` と、
 `.agents/skills/`、`.codex/skills/`、`.claude/skills/`、`.cursor/rules/`
 配下の provider-specific files を一緒に入れます。AI agent が project context
 をすぐ読める状態を作るためです。
-
-Pro addon docks は `<dock>-pro` という名前です。Simple dock を軽く保ち、
-specialist skills、workflow playbooks、Claude Code subagents、Claude Code command
-adapters、Codex custom agents、Cursor rules を追加します。例:
-[opendock/designer-ai-pro](https://hub.opendock.app/docks/opendock/designer-ai-pro)。
 
 ## Deploy
 

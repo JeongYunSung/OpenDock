@@ -56,10 +56,6 @@ Create a short handoff note for the next agent, including what was verified and 
 
 - CONVENTIONS.md
 
-## Edition
-
-This is the simple edition of `opendock/agent-ready`. It keeps setup small and installs the core workspace context. For a stronger specialist team, use the pro addon: [opendock/agent-ready-pro](https://hub.opendock.app/docks/opendock/agent-ready-pro).
-
 ## Good Pairings
 
 - opendock/codex
