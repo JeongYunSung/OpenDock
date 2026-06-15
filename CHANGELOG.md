@@ -7,6 +7,8 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.20 - 2026-06-15
+
 ### Changed
 
 - Split the repository into a monorepo with the CLI in `packages/cli` and the

@@ -199,12 +199,7 @@ fn opendock_update(
     } else {
         vec!["update", "--json"]
     };
-    run_opendock_streaming(
-        &app,
-        Some(&project_dir),
-        &args,
-        command_id.as_deref(),
-    )
+    run_opendock_streaming(&app, Some(&project_dir), &args, command_id.as_deref())
 }
 
 #[tauri::command]
@@ -225,12 +220,7 @@ fn opendock_uninstall(
     if force.unwrap_or(false) {
         args.push("--force");
     }
-    run_opendock_streaming(
-        &app,
-        Some(&project_dir),
-        &args,
-        command_id.as_deref(),
-    )
+    run_opendock_streaming(&app, Some(&project_dir), &args, command_id.as_deref())
 }
 
 #[tauri::command]
@@ -842,10 +832,10 @@ fn run_opendock_streaming(
     let mut collected_lines = lines.lock().map(|value| value.clone()).unwrap_or_default();
     let json = parse_command_json(&stdout);
 
-    if collected_lines.is_empty() {
+    if collected_lines.is_empty() && should_emit_empty_stream_message(success, json.as_ref()) {
         let payload = OpenDockCommandLine {
             level: if success { "OK" } else { "ERR" }.to_string(),
-            message: empty_stream_message(success, json.as_ref()),
+            message: empty_stream_message(success),
         };
         collected_lines.push(payload.clone());
         let _ = app.emit("opendock-command-line", payload);
@@ -926,7 +916,9 @@ fn terminate_process(pid: u32) -> Result<(), String> {
         if status.success() {
             return Ok(());
         }
-        return Err(format!("failed to cancel command: taskkill exited with {status}"));
+        return Err(format!(
+            "failed to cancel command: taskkill exited with {status}"
+        ));
     }
 
     let status = Command::new("kill")
@@ -936,7 +928,9 @@ fn terminate_process(pid: u32) -> Result<(), String> {
     if status.success() {
         return Ok(());
     }
-    Err(format!("failed to cancel command: kill exited with {status}"))
+    Err(format!(
+        "failed to cancel command: kill exited with {status}"
+    ))
 }
 
 fn command_for_opendock() -> Command {
@@ -1015,7 +1009,13 @@ fn local_cli_candidates() -> Vec<PathBuf> {
         .map(Path::to_path_buf);
     let mut candidates = Vec::new();
     if let Some(repo_root) = repo_root {
-        candidates.push(repo_root.join("packages").join("cli").join("bin").join("opendock"));
+        candidates.push(
+            repo_root
+                .join("packages")
+                .join("cli")
+                .join("bin")
+                .join("opendock"),
+        );
     }
     candidates
 }
@@ -1159,28 +1159,16 @@ fn is_command_json_value(value: &Value) -> bool {
         && (value.get("operation").is_some() || value.get("updatesAvailable").is_some())
 }
 
-fn empty_stream_message(success: bool, json: Option<&Value>) -> String {
-    if !success {
-        return "opendock command failed".to_string();
-    }
-    if is_no_update_json(json) {
-        return "No OpenDock dock updates available.".to_string();
-    }
-    "opendock command completed".to_string()
+fn should_emit_empty_stream_message(success: bool, json: Option<&Value>) -> bool {
+    !success || json.is_none()
 }
 
-fn is_no_update_json(json: Option<&Value>) -> bool {
-    let Some(value) = json else {
-        return false;
-    };
-    let reports_empty = value
-        .get("reports")
-        .and_then(Value::as_array)
-        .map(|reports| reports.is_empty())
-        .unwrap_or(false);
-    value.get("operation").and_then(Value::as_str) == Some("update")
-        && value.get("success").and_then(Value::as_bool) == Some(true)
-        && reports_empty
+fn empty_stream_message(success: bool) -> String {
+    if success {
+        "opendock command completed".to_string()
+    } else {
+        "opendock command failed".to_string()
+    }
 }
 
 fn infer_level(line: &str, success: bool) -> &'static str {
@@ -1242,7 +1230,7 @@ mod tests {
     use serde_json::json;
 
     #[test]
-    fn empty_update_json_uses_cli_no_updates_message() {
+    fn successful_json_result_does_not_emit_empty_stream_message() {
         let value = json!({
             "operation": "update",
             "reports": [],
@@ -1256,30 +1244,18 @@ mod tests {
             "success": true
         });
 
-        assert_eq!(
-            empty_stream_message(true, Some(&value)),
-            "No OpenDock dock updates available."
-        );
+        assert!(!should_emit_empty_stream_message(true, Some(&value)));
     }
 
     #[test]
-    fn non_update_json_keeps_generic_success_message() {
-        let value = json!({
-            "operation": "install",
-            "reports": [],
-            "summary": {
-                "created": [],
-                "deleted": [],
-                "reviewRequired": [],
-                "unchanged": [],
-                "updated": []
-            },
-            "success": true
-        });
+    fn empty_stream_without_json_keeps_generic_success_message() {
+        assert!(should_emit_empty_stream_message(true, None));
+        assert_eq!(empty_stream_message(true), "opendock command completed");
+    }
 
-        assert_eq!(
-            empty_stream_message(true, Some(&value)),
-            "opendock command completed"
-        );
+    #[test]
+    fn empty_stream_failure_keeps_error_message() {
+        assert!(should_emit_empty_stream_message(false, None));
+        assert_eq!(empty_stream_message(false), "opendock command failed");
     }
 }
