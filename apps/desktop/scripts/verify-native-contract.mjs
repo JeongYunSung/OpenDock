@@ -58,6 +58,13 @@ const registryRequestsBypassCache =
   rust.includes("reqwest::header::CACHE_CONTROL") &&
   rust.includes("reqwest::header::PRAGMA") &&
   app.includes('cache: "no-store"');
+const desktopCatalogUsesLiveRegistry =
+  app.includes("const [catalogDocks, setCatalogDocks] = useState<Dock[]>([])") &&
+  app.includes("requestCatalog(sortMode, searchQuery)") &&
+  data.includes("export function normalizeRegistryDock") &&
+  !data.includes("export const DOCKS") &&
+  !data.includes("DOCKS.find");
+const desktopStartsWithoutSampleLogs = data.includes("export const BASE_LOGS: AppLog[] = []");
 const detailMergeUsesRegistryLatestVersion = data.includes("version: detail.latestVersion ?? base.version");
 const installRefreshesDockBeforeResolvingRef = (() => {
   const installBody = extractFunctionBody(app, "async function installDock");
@@ -176,6 +183,12 @@ const failures = [
     : []),
   ...(!registryRequestsBypassCache
     ? ["registry reads must bypass cache so disabled releases are reflected before actions"]
+    : []),
+  ...(!desktopCatalogUsesLiveRegistry
+    ? ["desktop catalog must use live registry responses instead of static dock fixtures"]
+    : []),
+  ...(!desktopStartsWithoutSampleLogs
+    ? ["desktop logs must start empty instead of shipping sample command history"]
     : []),
   ...(!detailMergeUsesRegistryLatestVersion
     ? ["registry detail merge must update Dock.version from latestVersion"]

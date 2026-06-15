@@ -258,7 +258,6 @@ export const TEXT = {
     versions: "버전",
     updated: "업데이트",
     provides: "포함된 셋업",
-    supportedModes: "분류",
     packageDetails: "도크 정보",
     latestRelease: "최신 버전",
     publisher: "게시자",
@@ -417,7 +416,6 @@ export const TEXT = {
     versions: "Versions",
     updated: "Updated",
     provides: "Included setup",
-    supportedModes: "Categories",
     packageDetails: "Dock details",
     latestRelease: "Latest version",
     publisher: "Publisher",
@@ -548,89 +546,7 @@ export const TEXT = {
   }
 } as const;
 
-export const DOCKS: Dock[] = [
-  {
-    id: "creative-gen-ultrawork",
-    short: "creative-gen-ultrawork",
-    grad: "linear-gradient(135deg,var(--dock-creative-a),var(--dock-creative-b) 55%,var(--dock-creative-c))",
-    desc: "Creative generation loop for image, logo, favicon, video, audio, and asset analysis deliverables.",
-    tagA: "assets",
-    tagB: "audio",
-    more: "6",
-    dl: "9",
-    updatedRank: 4,
-    version: "1.0.3",
-    size: "8,521 bytes",
-    checksum: "ee9aae96...664829",
-    readmeTitle: "Creative Generation Ultrawork",
-    readmeIntro: "이미지, 로고, 파비콘, 비디오, 오디오, 에셋 분석 작업을 검토 가능한 결과물로 묶는 생성 워크플로입니다.",
-    tags: ["assets", "audio", "favicon", "generation", "image", "logo", "ultrawork", "video"],
-    modes: ["image", "logo", "favicon", "video", "audio"]
-  },
-  {
-    id: "backend-ultrawork",
-    short: "backend-ultrawork",
-    grad: "linear-gradient(135deg,var(--dock-backend-a),var(--dock-backend-b) 55%,var(--dock-backend-c))",
-    desc: "Backend quality gate for API contracts, validation, authentication, migrations, logging, and service safety.",
-    tagA: "api",
-    tagB: "backend",
-    more: "3",
-    dl: "3",
-    updatedRank: 3,
-    version: "1.0.2",
-    size: "7,399 bytes",
-    checksum: "ba4c9210...92fd18",
-    readmeTitle: "Backend Ultrawork",
-    readmeIntro: "API 계약, 인증, 마이그레이션, 로깅, 서비스 안전성 검토를 한 번에 묶는 백엔드 품질 게이트입니다.",
-    tags: ["api", "backend", "auth", "migration", "logging"],
-    modes: ["api", "auth", "database", "logging"]
-  },
-  {
-    id: "design-ultrawork",
-    short: "design-ultrawork",
-    grad: "linear-gradient(135deg,var(--dock-design-a),var(--dock-design-b) 55%,var(--dock-design-c))",
-    desc: "Design implementation quality gate aligned to DESIGN.md plus hard UI checks.",
-    tagA: "accessibility",
-    tagB: "design",
-    more: "3",
-    dl: "1",
-    updatedRank: 2,
-    version: "1.0.1",
-    size: "7,607 bytes",
-    checksum: "d91e3b60...73aa21",
-    readmeTitle: "Design Ultrawork",
-    readmeIntro: "DESIGN.md 기준, 접근성, 반응형, 시각적 일관성 검토를 구현 단계에서 반복 확인하는 디자인 게이트입니다.",
-    tags: ["accessibility", "design", "tokens", "responsive", "ui"],
-    modes: ["tokens", "accessibility", "responsive", "review"]
-  },
-  {
-    id: "frontend-ultrawork",
-    short: "frontend-ultrawork",
-    grad: "linear-gradient(135deg,var(--dock-frontend-a),var(--dock-frontend-b) 55%,var(--dock-frontend-c))",
-    desc: "Frontend quality gate for React, TypeScript, accessibility, route smoke checks, and build readiness.",
-    tagA: "accessibility",
-    tagB: "frontend",
-    more: "3",
-    dl: "5",
-    updatedRank: 1,
-    version: "1.0.0",
-    size: "7,607 bytes",
-    checksum: "f24a8e15...18cb90",
-    readmeTitle: "Frontend Ultrawork",
-    readmeIntro: "React, TypeScript, 접근성, 라우트 스모크 체크, 빌드 준비 상태를 점검하는 프론트엔드 품질 게이트입니다.",
-    tags: ["accessibility", "frontend", "react", "typescript", "build"],
-    modes: ["react", "typescript", "a11y", "build"]
-  }
-];
-
-export const BASE_LOGS: AppLog[] = [
-  { time: "09:24:01", level: "INFO", color: "var(--text-2)", message: "install opendock/backend-ultrawork@1.0.2" },
-  { time: "09:24:01", level: "OK", color: "var(--success)", message: "resolved release · registry.opendock.app" },
-  { time: "09:24:02", level: "RUN", color: "var(--info)", message: "git init -b main" },
-  { time: "09:24:03", level: "OK", color: "var(--success)", message: "files → AGENTS.md (managed block)" },
-  { time: "09:24:04", level: "WARN", color: "var(--warning)", message: "node 20.11.0 < requires >=22.0.0" },
-  { time: "09:24:05", level: "OK", color: "var(--success)", message: "doctor · 6 checks passed" }
-];
+export const BASE_LOGS: AppLog[] = [];
 
 export function dockFullId(dock: Pick<Dock, "id" | "fullId" | "owner">) {
   return dock.fullId ?? `${dock.owner ?? "opendock"}/${dock.id}`;
@@ -642,7 +558,6 @@ export function dockShortId(id: string) {
 
 export function normalizeRegistryDock(summary: RegistryDockSummary, index = 0): Dock {
   const tags = summary.tags ?? [];
-  const fallback = DOCKS.find((dock) => dock.id === summary.name);
   const logoUrl = summary.logo?.url ?? null;
   return {
     id: summary.name,
@@ -651,14 +566,14 @@ export function normalizeRegistryDock(summary: RegistryDockSummary, index = 0): 
     owner: summary.owner,
     name: summary.name,
     displayName: summary.displayName,
-    grad: fallback?.grad ?? dockGradient(index),
+    grad: dockGradient(index),
     desc: summary.summary,
     tagA: tags[0] ?? "dock",
     tagB: tags[1] ?? "workspace",
     more: String(Math.max(tags.length - 2, 0)),
     dl: String(summary.downloads ?? 0),
     downloads: summary.downloads ?? 0,
-    updatedRank: fallback?.updatedRank ?? Math.max(1, 999 - index),
+    updatedRank: Math.max(1, 999 - index),
     updatedAt: summary.updatedAt,
     version: summary.latestVersion,
     size: "-",
@@ -757,31 +672,30 @@ function versionStatusPriority(status?: string) {
 
 export function dockFromInstalledRecord(record: InstalledDockRecord, fallbackIndex = 0): Dock {
   const short = dockShortId(record.id);
-  const fallback = DOCKS.find((dock) => dock.id === short);
   return {
     id: short,
     short,
     fullId: record.id,
     owner: record.id.split("/")[0] || "opendock",
     name: short,
-    grad: fallback?.grad ?? dockGradient(fallbackIndex),
+    grad: dockGradient(fallbackIndex),
     desc: record.name ?? `${record.id}@${record.version}`,
     tagA: record.platform ?? "dock",
     tagB: "installed",
     more: "0",
-    dl: fallback?.dl ?? "0",
-    downloads: fallback?.downloads,
-    updatedRank: fallback?.updatedRank ?? fallbackIndex,
+    dl: "0",
+    downloads: 0,
+    updatedRank: fallbackIndex,
     version: record.version,
     size: `${record.files?.length ?? 0} files`,
     checksum: record.checksum ?? "-",
     readmeTitle: record.name ?? short,
-    readmeIntro: fallback?.readmeIntro ?? `${record.id} is installed in this project.`,
+    readmeIntro: `${record.id} is installed in this project.`,
     publisher: record.id.split("/")[0] || "opendock",
-    official: fallback?.official ?? true,
-    platforms: record.platform ? [record.platform] : fallback?.platforms ?? [],
-    tags: fallback?.tags ?? [record.platform ?? "dock", "installed"],
-    modes: fallback?.modes ?? ["install"]
+    official: true,
+    platforms: record.platform ? [record.platform] : [],
+    tags: [record.platform ?? "dock", "installed"],
+    modes: ["install"]
   };
 }
 
