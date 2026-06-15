@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   existsSync,
   lstatSync,
@@ -205,5 +206,7 @@ export function toPosixPath(value: string): string {
 }
 
 export function safeDockDirectoryName(dockId: string): string {
-  return dockId.replaceAll(/[^A-Za-z0-9._-]/g, "__");
+  const readable = dockId.replaceAll(/[^A-Za-z0-9._-]/g, "__");
+  const digest = createHash("sha256").update(dockId).digest("hex").slice(0, 12);
+  return `${readable}__${digest}`;
 }

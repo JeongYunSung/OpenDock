@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { chmod } from "node:fs/promises";
 import { join } from "node:path";
 import { dataRoot } from "./paths.js";
@@ -11,9 +12,17 @@ export class TokenStore {
   }
 
   async saveToken(token: string): Promise<void> {
-    mkdirSync(this.root, { recursive: true });
+    mkdirSync(this.root, { recursive: true, mode: 0o700 });
+    if (process.platform !== "win32") {
+      await chmod(this.root, 0o700);
+    }
     const path = this.tokenPath();
-    writeFileSync(path, token.trim());
+    const tempPath = join(this.root, `.auth-token.${process.pid}.${randomUUID()}.tmp`);
+    writeFileSync(tempPath, token.trim(), { mode: 0o600 });
+    if (process.platform !== "win32") {
+      await chmod(tempPath, 0o600);
+    }
+    renameSync(tempPath, path);
     if (process.platform !== "win32") {
       await chmod(path, 0o600);
     }

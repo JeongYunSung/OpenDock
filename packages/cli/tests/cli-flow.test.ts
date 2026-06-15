@@ -19,10 +19,12 @@ import { DockInstaller } from "../src/core/app/dock-installer.js";
 import { type DockManifest, DockRef, parseManifestFile } from "../src/core/domain/manifest.js";
 import type { InstalledDockRecord } from "../src/core/domain/state-store.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
+import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
 import { readProjectLogs } from "../src/logging.js";
 import type { OpenDockPlatform } from "../src/platform.js";
 import type { ResolvedDock } from "../src/resolver.js";
+import { testReleaseSignature } from "./release-signature-helper.js";
 
 const tempRoots: string[] = [];
 
@@ -257,7 +259,11 @@ describe("opendock TypeScript CLI", () => {
       "reviewer",
     );
     expect(existsSync(join(project, ".agents", "cache", "ignored.log"))).toBe(false);
-    expect(existsSync(join(project, ".opendock", "workdirs", "test__oma", "AGENTS.md"))).toBe(true);
+    expect(
+      existsSync(
+        join(project, ".opendock", "workdirs", safeDockDirectoryName("test/oma"), "AGENTS.md"),
+      ),
+    ).toBe(true);
   });
 
   it("seeds dock workdir files before running external commands", async () => {
@@ -301,7 +307,14 @@ describe("opendock TypeScript CLI", () => {
 
     expect(
       readFileSync(
-        join(project, ".opendock", "workdirs", "test__oma", ".agents", "oma-config.yaml"),
+        join(
+          project,
+          ".opendock",
+          "workdirs",
+          safeDockDirectoryName("test/oma"),
+          ".agents",
+          "oma-config.yaml",
+        ),
         "utf8",
       ),
     ).toContain("model_preset: codex");
@@ -1592,13 +1605,19 @@ function mockRegistry(releases: MockRegistryRelease[]): {
         status: 200,
       });
     }
+    const checksum = release.archive === undefined ? "metadata-only" : sha256(release.archive);
     return new Response(
       JSON.stringify({
         approved: true,
-        checksum: release.archive === undefined ? "metadata-only" : sha256(release.archive),
+        checksum,
         id: release.id,
         platform: release.platform,
-        signature: "test-signature",
+        signature: testReleaseSignature({
+          id: release.id,
+          version: release.version,
+          platform: release.platform,
+          checksum,
+        }),
         version: release.version,
       }),
       { headers: { "content-type": "application/json" }, status: 200 },

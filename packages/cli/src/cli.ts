@@ -57,6 +57,7 @@ import {
   type SubmissionRequest,
   type SubmissionResponse,
 } from "./registry.js";
+import { verifyReleaseSignature } from "./release-signature.js";
 import { resolveDock } from "./resolver.js";
 import {
   formatDockVersion,
@@ -828,6 +829,24 @@ async function resolveLatestDockVersion(
       `registry returned ${metadata.platform} artifact for requested platform \`${platform}\``,
     );
   }
+  const releasePlatform = metadata.platform ?? "any";
+  if (
+    releasePlatform !== "any" &&
+    releasePlatform !== "macos" &&
+    releasePlatform !== "windows" &&
+    releasePlatform !== "linux"
+  ) {
+    throw new Error(`registry returned unsupported platform \`${releasePlatform}\``);
+  }
+  verifyReleaseSignature(
+    {
+      id: metadata.id,
+      version: metadata.version,
+      platform: releasePlatform as OpenDockReleasePlatform,
+      checksum: metadata.checksum,
+    },
+    metadata.signature,
+  );
   return metadata;
 }
 

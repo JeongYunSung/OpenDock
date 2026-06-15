@@ -11,13 +11,15 @@ import {
   validateManifestFor,
 } from "./core/domain/manifest.js";
 import { cacheRoot } from "./paths.js";
-import type { OpenDockPlatform } from "./platform.js";
+import type { OpenDockPlatform, OpenDockReleasePlatform } from "./platform.js";
 import { OpenDockRegistryClient } from "./registry.js";
+import { verifyReleaseSignature } from "./release-signature.js";
 
 const safeResolvedVersionPattern = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,79}$/;
 const allowedArchiveEntryTypes = new Set(["File", "OldFile", "Directory"]);
 const maxExtractedArchiveBytes = 100 * 1024 * 1024;
 const maxExtractedEntryBytes = 25 * 1024 * 1024;
+const maxExtractedEntries = 5_000;
 const maxExtractedFiles = 2_000;
 
 export interface ResolvedDock {
@@ -94,9 +96,27 @@ async function resolveRemoteDockMetadata(
       `registry returned ${metadata.platform} artifact for requested platform \`${platform}\``,
     );
   }
-  if (metadata.signature.trim() === "") {
+  const releasePlatform = metadata.platform ?? "any";
+  if (
+    releasePlatform !== "any" &&
+    releasePlatform !== "macos" &&
+    releasePlatform !== "windows" &&
+    releasePlatform !== "linux"
+  ) {
+    throw new Error(`registry returned unsupported platform \`${releasePlatform}\``);
+  }
+  if (metadata.signature.value.trim() === "") {
     throw new Error(`dock \`${requestedLabel}\` is missing an OpenDock Registry signature`);
   }
+  verifyReleaseSignature(
+    {
+      id: metadata.id,
+      version: metadata.version,
+      platform: releasePlatform as OpenDockReleasePlatform,
+      checksum: metadata.checksum,
+    },
+    metadata.signature,
+  );
 
   const client = new OpenDockRegistryClient();
   const archive = await client.downloadDock(owner, name, metadata.version, platform);
@@ -114,7 +134,7 @@ async function resolveRemoteDockMetadata(
   const temp = mkdtempSync(join(tmpdir(), "opendock-"));
   const archivePath = join(temp, "dock.tgz");
   writeFileSync(archivePath, archive);
-  const extractionLimits: ExtractionLimits = { fileCount: 0, totalBytes: 0 };
+  const extractionLimits: ExtractionLimits = { entryCount: 0, fileCount: 0, totalBytes: 0 };
   let blockedArchiveEntry: string | undefined;
 
   await extractTar({
@@ -148,7 +168,7 @@ async function resolveRemoteDockMetadata(
     platform,
     root: dockRoot,
     checksum: actualChecksum,
-    signature: metadata.signature,
+    signature: metadata.signature.value,
   };
 }
 
@@ -183,6 +203,7 @@ interface ArchiveEntry {
 }
 
 interface ExtractionLimits {
+  entryCount: number;
   fileCount: number;
   totalBytes: number;
 }
@@ -201,6 +222,11 @@ function isSafeArchiveEntry(
 ): boolean {
   if (!isSafeArchivePath(destination, entryPath)) {
     throw new Error(`archive entry escapes destination: ${entryPath}`);
+  }
+
+  limits.entryCount += 1;
+  if (limits.entryCount > maxExtractedEntries) {
+    throw new Error(`downloaded dock archive contains more than ${maxExtractedEntries} entries`);
   }
 
   const type = entry.type ?? "";

@@ -15,6 +15,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { DockInstaller } from "../src/core/app/dock-installer.js";
 import { DockRef, parseManifestFile } from "../src/core/domain/manifest.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
+import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
 import type { OpenDockPlatform } from "../src/platform.js";
 import type { ResolvedDock } from "../src/resolver.js";
 
@@ -144,11 +145,15 @@ describe("example dock cleanup behavior", () => {
     expect(isExecutable(join(project, ".claude", "hooks", "oma-hook.sh"))).toBe(true);
     expect(existsSync(join(project, ".github", "instructions", "oma.instructions.md"))).toBe(true);
     expect(existsSync(join(project, ".agents", "cache", "ignored.log"))).toBe(false);
-    expect(existsSync(join(project, ".opendock", "workdirs", "opendock__oma"))).toBe(true);
+    expect(
+      existsSync(join(project, ".opendock", "workdirs", safeDockDirectoryName("opendock/oma"))),
+    ).toBe(true);
 
     uninstallExample(example, project);
 
-    expect(existsSync(join(project, ".opendock", "workdirs", "opendock__oma"))).toBe(false);
+    expect(
+      existsSync(join(project, ".opendock", "workdirs", safeDockDirectoryName("opendock/oma"))),
+    ).toBe(false);
     expect(nonStateEntries(project)).toEqual([]);
     expect(installedDocks(project)).toEqual([]);
   });

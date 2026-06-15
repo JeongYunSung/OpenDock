@@ -20,6 +20,7 @@ import { detectPlatform, parsePlatform, parseReleasePlatform } from "../src/plat
 import { OpenDockRegistryClient } from "../src/registry.js";
 import type { ResolvedDock } from "../src/resolver.js";
 import { resolveDock } from "../src/resolver.js";
+import { testReleaseSignature } from "./release-signature-helper.js";
 
 const tempRoots: string[] = [];
 
@@ -66,7 +67,12 @@ describe("platform regression coverage", () => {
           platform: "windows",
           approved: true,
           checksum: "checksum",
-          signature: "signature",
+          signature: testReleaseSignature({
+            id: "opendock/codex",
+            version: "1.0.0",
+            platform: "windows",
+            checksum: "checksum",
+          }),
         }),
         { status: 200, headers: { "content-type": "application/json" } },
       );
@@ -100,7 +106,12 @@ describe("platform regression coverage", () => {
           platform: "macos",
           approved: true,
           checksum: "checksum",
-          signature: "signature",
+          signature: testReleaseSignature({
+            id: "opendock/codex",
+            version: "1.0.0",
+            platform: "macos",
+            checksum: "checksum",
+          }),
         }),
         { status: 200, headers: { "content-type": "application/json" } },
       );

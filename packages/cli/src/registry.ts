@@ -10,7 +10,13 @@ export interface DockVersionResponse {
   platform?: OpenDockReleasePlatform;
   approved: boolean;
   checksum: string;
-  signature: string;
+  signature: ReleaseSignatureResponse;
+}
+
+export interface ReleaseSignatureResponse {
+  algorithm: "ed25519";
+  keyId: string;
+  value: string;
 }
 
 export interface CliLoginStartResponse {

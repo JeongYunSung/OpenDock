@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { once } from "node:events";
 import { createServer, type Server } from "node:http";
 import { stdin as defaultInput, stdout as defaultOutput } from "node:process";
@@ -47,6 +48,7 @@ export async function performBrowserLogin(
 
   try {
     const login = await client.startCliLogin(redirectUri, provider);
+    assertSafeBrowserUrl(login.authUrl);
     write("Opening browser for OpenDock login.");
     write(`Open this URL if the browser does not open: ${login.authUrl}`);
     write("Waiting for login... press Enter to check again.");
@@ -68,6 +70,7 @@ export async function performBrowserLogin(
 }
 
 async function openSystemBrowser(url: string): Promise<void> {
+  assertSafeBrowserUrl(url);
   const command =
     process.platform === "darwin" ? "open" : process.platform === "win32" ? "cmd" : "xdg-open";
   const args =
@@ -88,6 +91,7 @@ async function startCallbackServer(timeoutMs = loginTimeoutMs): Promise<{
   waitForCode: Promise<string>;
   cleanup: () => void;
 }> {
+  const state = randomBytes(24).toString("base64url");
   let settle:
     | {
         resolve: (code: string) => void;
@@ -107,6 +111,12 @@ async function startCallbackServer(timeoutMs = loginTimeoutMs): Promise<{
     if (url.pathname !== "/callback") {
       response.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
       response.end("Not found");
+      return;
+    }
+    if (url.searchParams.get("state") !== state) {
+      response.writeHead(400, { "content-type": "text/plain; charset=utf-8" });
+      response.end("Invalid state");
+      settle?.reject(new Error("OpenDock login returned an invalid state"));
       return;
     }
     const error = url.searchParams.get("error");
@@ -137,10 +147,31 @@ async function startCallbackServer(timeoutMs = loginTimeoutMs): Promise<{
   waitForCode.finally(() => clearTimeout(timeout)).catch(() => undefined);
   return {
     server,
-    redirectUri: `http://${callbackHost}:${address.port}/callback`,
+    redirectUri: `http://${callbackHost}:${address.port}/callback?state=${state}`,
     waitForCode,
     cleanup: () => clearTimeout(timeout),
   };
+}
+
+function assertSafeBrowserUrl(value: string): void {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error("Registry returned an invalid browser login URL");
+  }
+  if (url.protocol === "https:") {
+    return;
+  }
+  if (url.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) {
+    return;
+  }
+  if (url.protocol === "http:") {
+    throw new Error("Registry returned an insecure browser login URL");
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    throw new Error(`Registry returned an unsupported browser login URL scheme: ${url.protocol}`);
+  }
 }
 
 function maybeCreateReadline(
