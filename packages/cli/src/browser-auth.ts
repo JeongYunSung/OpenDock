@@ -73,7 +73,7 @@ async function openSystemBrowser(url: string): Promise<void> {
   assertSafeBrowserUrl(url);
   const { command, args } = browserOpenCommand(url);
 
-  const child = spawn(command, args, { detached: true, stdio: "ignore" });
+  const child = spawn(command, args, { detached: true, stdio: "ignore", windowsHide: true });
   await once(child, "spawn");
   child.unref();
 }

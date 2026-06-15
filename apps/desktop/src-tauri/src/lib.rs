@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::env;
+use std::ffi::OsStr;
 use std::fs;
 use std::io::{BufRead, BufReader, Read};
 use std::path::{Path, PathBuf};
@@ -1050,7 +1051,7 @@ fn unregister_running_command(app: &tauri::AppHandle, command_id: &str) {
 
 fn terminate_process(pid: u32) -> Result<(), String> {
     if cfg!(target_os = "windows") {
-        let status = Command::new("taskkill")
+        let status = command_without_window("taskkill")
             .args(["/pid", &pid.to_string(), "/T", "/F"])
             .status()
             .map_err(|error| format!("failed to cancel command: {error}"))?;
@@ -1062,7 +1063,7 @@ fn terminate_process(pid: u32) -> Result<(), String> {
         ));
     }
 
-    let status = Command::new("kill")
+    let status = command_without_window("kill")
         .args(["-TERM", &pid.to_string()])
         .status()
         .map_err(|error| format!("failed to cancel command: {error}"))?;
@@ -1077,23 +1078,23 @@ fn terminate_process(pid: u32) -> Result<(), String> {
 fn command_for_opendock() -> Command {
     if let Ok(path) = env::var("OPENDOCK_CLI_PATH") {
         if !path.trim().is_empty() {
-            return Command::new(path);
+            return command_without_window(path);
         }
     }
 
     for candidate in sidecar_cli_candidates() {
         if candidate.is_file() {
-            return Command::new(candidate);
+            return command_without_window(candidate);
         }
     }
 
     for candidate in local_cli_candidates() {
         if candidate.is_file() {
-            return Command::new(candidate);
+            return command_without_window(candidate);
         }
     }
 
-    Command::new("opendock")
+    command_without_window("opendock")
 }
 
 fn open_path(path: &Path) -> Result<(), String> {
@@ -1102,11 +1103,11 @@ fn open_path(path: &Path) -> Result<(), String> {
 
 fn open_value(value: &str) -> Result<(), String> {
     let status = if cfg!(target_os = "macos") {
-        Command::new("/usr/bin/open").arg(value).status()
+        command_without_window("/usr/bin/open").arg(value).status()
     } else if cfg!(target_os = "windows") {
-        Command::new("explorer").arg(value).status()
+        command_without_window("explorer").arg(value).status()
     } else {
-        Command::new("xdg-open").arg(value).status()
+        command_without_window("xdg-open").arg(value).status()
     }
     .map_err(|error| format!("failed to open target: {error}"))?;
 
@@ -1116,6 +1117,23 @@ fn open_value(value: &str) -> Result<(), String> {
         Err(format!("open command exited with {status}"))
     }
 }
+
+fn command_without_window<S: AsRef<OsStr>>(program: S) -> Command {
+    let mut command = Command::new(program);
+    apply_no_console_window(&mut command);
+    command
+}
+
+#[cfg(target_os = "windows")]
+fn apply_no_console_window(command: &mut Command) {
+    use std::os::windows::process::CommandExt;
+
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+    command.creation_flags(CREATE_NO_WINDOW);
+}
+
+#[cfg(not(target_os = "windows"))]
+fn apply_no_console_window(_command: &mut Command) {}
 
 fn sidecar_cli_candidates() -> Vec<PathBuf> {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
