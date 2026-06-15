@@ -332,17 +332,18 @@ async function requestRegistryJson<T>(path: string, params: Record<string, strin
 }
 
 function resolveRegistryAssetUrl(url?: string | null) {
-  if (!url || typeof window === "undefined") return url ?? null;
+  if (!url || typeof window === "undefined") return null;
   try {
     const parsed = new URL(url);
+    if (parsed.origin !== REGISTRY_ORIGIN) return null;
     const canUseDevProxy = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-    if (parsed.origin === REGISTRY_ORIGIN && canUseDevProxy) {
+    if (canUseDevProxy) {
       return `/registry${parsed.pathname}${parsed.search}`;
     }
+    return parsed.toString();
   } catch {
-    return url;
+    return null;
   }
-  return url;
 }
 
 function findDockByKey(docks: Dock[], key: string) {

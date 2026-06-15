@@ -1416,15 +1416,6 @@ input:focus-visible,
   background: var(--surface-2);
 }
 
-.versions-list > button.latest.version-approved {
-  background: var(--accent-soft);
-}
-
-.versions-list > button.latest.version-approved:hover,
-.versions-list > button.latest.version-approved.selected {
-  background: var(--surface-2);
-}
-
 .versions-list > button:last-child {
   border-bottom: 0;
 }
