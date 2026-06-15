@@ -1,43 +1,19 @@
 {
-  "name": "opendock",
-  "version": "0.1.19",
-  "description": "Choose and combine AI setup docks for every workspace.",
+  "name": "opendock-monorepo",
+  "private": true,
   "type": "module",
-  "license": "MIT",
-  "bin": {
-    "opendock": "bin/opendock"
-  },
-  "files": [
-    "bin",
-    "assets/opendock-logo-96.png",
-    "docs",
-    "examples",
-    "CHANGELOG.md",
-    "README.md",
-    "README.*.md"
+  "workspaces": [
+    "packages/cli",
+    "apps/desktop"
   ],
   "scripts": {
-    "dev": "bun run src/cli.ts",
-    "build": "bun run scripts/build.ts",
-    "prepare:github-package": "bun run scripts/prepare-github-package.ts",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome check .",
-    "check": "bun run typecheck && bun run test && bun run lint",
-    "prepack": "bun run build"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.4.15",
-    "@types/node": "^22.18.6",
-    "commander": "^14.0.3",
-    "tar": "^7.5.2",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18",
-    "yaml": "^2.8.2",
-    "zod": "^4.3.6"
-  },
-  "engines": {
-    "bun": ">=1.3.0"
+    "dev:cli": "cd packages/cli && bun run dev",
+    "build:cli": "cd packages/cli && bun run build",
+    "check:cli": "cd packages/cli && bun run check",
+    "dev:desktop": "cd apps/desktop && bun run dev",
+    "build:desktop": "cd apps/desktop && bun run build",
+    "verify:desktop": "cd apps/desktop && bun run verify",
+    "check": "bun run check:cli && bun run verify:desktop"
   },
   "packageManager": "bun@1.3.11"
 }

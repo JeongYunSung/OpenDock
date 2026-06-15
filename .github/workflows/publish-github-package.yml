@@ -35,9 +35,11 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Verify
+        working-directory: packages/cli
         run: bun run check
 
       - name: Build CLI
+        working-directory: packages/cli
         run: bun run build
 
       - name: Validate GitHub Packages token
@@ -50,6 +52,7 @@ jobs:
           fi
 
       - name: Prepare GitHub package
+        working-directory: packages/cli
         run: bun run prepare:github-package
 
       - name: Configure GitHub Packages auth
