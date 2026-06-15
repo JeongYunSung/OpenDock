@@ -79,6 +79,7 @@ opendock deploy opendock/codex@1.0.0
 `owner/name` 和 `owner/name@latest` 会被拒绝。请使用明确版本。
 
 安装后，`opendock list` 会显示当前项目已经安装的 docks。
+如果其他工具需要读取清单，请使用 `opendock list --json`。
 
 ## Files And Ownership
 

@@ -83,6 +83,7 @@ opendock deploy opendock/codex@1.0.0
 
 Nach der Installation zeigt `opendock list`, welche docks im aktuellen Projekt
 installiert sind.
+Wenn ein Tool die Liste lesen muss, verwenden Sie `opendock list --json`.
 
 ## Files And Ownership
 

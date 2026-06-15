@@ -92,6 +92,7 @@ opendock bootstrap windows
 |---|---|
 | `opendock install owner/name@1.0.0` | Installiert einen approved dock release im aktuellen Verzeichnis. |
 | `opendock list` | Zeigt die im aktuellen Projekt installierten docks. |
+| `opendock list --json` | Gibt die installierten docks als maschinenlesbares JSON aus. |
 | `opendock outdated` | Prüft, ob installed docks neuere approved releases haben. |
 | `opendock update` | Bringt installed docks auf die neuesten approved Registry releases. |
 | `opendock update --force` | Bevorzugt die dock-Version trotz lokaler Änderungen an managed content. |

@@ -152,6 +152,7 @@ bin/opendock version
 |---|---|
 | `opendock install owner/name@1.0.0` | Install a reviewed dock release into the current directory. |
 | `opendock list` | Show docks installed in the current project. |
+| `opendock list --json` | Print a machine-readable installed dock inventory. |
 | `opendock outdated` | Check installed docks for newer approved Registry releases. |
 | `opendock update` | Move installed docks to their latest approved Registry releases. |
 | `opendock update --force` | Update even when OpenDock-managed content was edited locally. |

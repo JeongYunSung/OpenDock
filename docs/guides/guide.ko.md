@@ -719,6 +719,8 @@ opendock list
 Registry에 요청하지 않고 `.opendock/dock.lock.yml`만 읽습니다. 출력에는 dock id,
 version, platform, 관리 파일 수가 포함됩니다.
 
+다른 도구가 설치된 dock 목록을 읽어야 한다면 `opendock list --json`을 사용합니다.
+
 ### update
 
 `update`는 현재 프로젝트에 설치된 모든 dock을 Registry의 최신 approved release로

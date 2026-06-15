@@ -698,6 +698,26 @@ describe("opendock TypeScript CLI", () => {
     expect(logs).toContain("Installed:");
     expect(logs).toContain("- test/designer@1.0.0 [macos] (1 file)");
     expect(logs).toContain("- test/frontend@1.2.0 [macos] (2 files)");
+
+    const jsonLogs = await withCwd(project, () =>
+      captureConsole(() => runCli(["bun", "opendock", "list", "--json"])),
+    );
+    const listJson = JSON.parse(jsonLogs[0] ?? "{}");
+    expect(listJson).toMatchObject({
+      hasState: true,
+      operation: "list",
+      reports: [
+        { dockId: "test/designer", fileCount: 1, platform: "macos", status: "installed" },
+        { dockId: "test/frontend", fileCount: 2, platform: "macos", status: "installed" },
+      ],
+      success: true,
+      summary: { installed: ["test/designer", "test/frontend"] },
+    });
+    expect(listJson.docks).toHaveLength(2);
+    expect(listJson.docks.map((dock: InstalledDockRecord) => dock.id)).toEqual([
+      "test/designer",
+      "test/frontend",
+    ]);
   });
 
   it("prints an empty list message when the current directory has no OpenDock state", async () => {
@@ -707,6 +727,18 @@ describe("opendock TypeScript CLI", () => {
     );
 
     expect(logs).toEqual(["No OpenDock docks installed in this project."]);
+
+    const jsonLogs = await withCwd(project, () =>
+      captureConsole(() => runCli(["bun", "opendock", "list", "--json"])),
+    );
+    expect(JSON.parse(jsonLogs[0] ?? "{}")).toMatchObject({
+      docks: [],
+      hasState: false,
+      operation: "list",
+      reports: [],
+      success: true,
+      summary: { installed: [] },
+    });
   });
 
   it("checks installed docks for newer Registry releases", async () => {

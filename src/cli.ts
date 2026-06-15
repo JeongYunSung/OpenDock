@@ -253,8 +253,9 @@ export async function run(argv = process.argv): Promise<void> {
   program
     .command("list")
     .description("Show docks installed in the current directory.")
-    .action(() => {
-      printInstalledDocks(process.cwd());
+    .option("--json", "Print a machine-readable installed dock list")
+    .action((options: { json?: boolean }) => {
+      printInstalledDocks(process.cwd(), options.json === true);
     });
 
   program
@@ -527,7 +528,12 @@ function readInstalledDocks(cwd: string): InstalledDockRecord[] | undefined {
   return store.readLock().docks;
 }
 
-function printInstalledDocks(cwd: string): void {
+function printInstalledDocks(cwd: string, json = false): void {
+  if (json) {
+    printJson(installedDockListCommandResult(cwd));
+    return;
+  }
+
   const docks = readInstalledDocks(cwd);
   if (docks === undefined) {
     console.log(terminalStyle.dim("No OpenDock docks installed in this project."));
@@ -886,6 +892,29 @@ interface JsonUpdateCheckCommandResult {
   updatesAvailable: boolean;
 }
 
+interface JsonInstalledDockReport {
+  dockId: string;
+  fileCount: number;
+  platform: OpenDockPlatform;
+  requested: string;
+  status: "installed";
+  version: string;
+}
+
+interface JsonInstalledDockListCommandResult {
+  docks: InstalledDockRecord[];
+  hasState: boolean;
+  lockPath: string;
+  operation: "list";
+  projectDir: string;
+  projectPath: string;
+  reports: JsonInstalledDockReport[];
+  success: true;
+  summary: {
+    installed: string[];
+  };
+}
+
 interface JsonDockChangeReport {
   dockId: string;
   fileChanges: FileChangeDetails;
@@ -948,6 +977,33 @@ function updateCheckCommandResult(
         .map((report) => report.dockId),
     },
     updatesAvailable: reports.some((report) => report.status === "outdated"),
+  };
+}
+
+function installedDockListCommandResult(cwd: string): JsonInstalledDockListCommandResult {
+  const store = new OpenDockStateStore(cwd);
+  const hasState = store.hasState();
+  const docks = hasState ? store.readLock().docks : [];
+  const reports = docks.map((dock) => ({
+    dockId: dock.id,
+    fileCount: dock.files.length,
+    platform: dock.platform,
+    requested: dock.requested,
+    status: "installed" as const,
+    version: dock.version,
+  }));
+  return {
+    docks,
+    hasState,
+    lockPath: store.lockPath(),
+    operation: "list",
+    projectDir: cwd,
+    projectPath: store.projectPath(),
+    reports,
+    success: true,
+    summary: {
+      installed: reports.map((report) => report.dockId),
+    },
   };
 }
 

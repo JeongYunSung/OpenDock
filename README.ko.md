@@ -150,6 +150,7 @@ bin/opendock version
 |---|---|
 | `opendock install owner/name@1.0.0` | 검토된 dock release를 현재 디렉터리에 설치합니다. |
 | `opendock list` | 현재 프로젝트에 설치된 dock 목록을 보여줍니다. |
+| `opendock list --json` | 설치된 dock 목록을 기계가 읽기 쉬운 JSON으로 출력합니다. |
 | `opendock outdated` | 설치된 dock에 최신 승인 release가 있는지 확인합니다. |
 | `opendock update` | 설치된 dock들을 최신 승인 Registry release로 이동합니다. |
 | `opendock update --force` | OpenDock 관리 영역이 수정됐더라도 dock 버전으로 업데이트합니다. |

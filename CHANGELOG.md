@@ -5,6 +5,17 @@ All notable OpenDock CLI changes are recorded here.
 OpenDock uses exact package versions for CLI releases. GitHub Actions publish the
 version declared in `package.json`; they do not auto-increment versions.
 
+## 0.1.18 - 2026-06-15
+
+### Added
+
+- Added `opendock list --json` for machine-readable installed dock inventory
+  output.
+
+### Tests
+
+- Added list JSON coverage for projects with and without OpenDock state.
+
 ## 0.1.17 - 2026-06-15
 
 ### Changed

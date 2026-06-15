@@ -335,6 +335,8 @@ matching artifact. With `--platform`, OpenDock asks for that specific platform.
 the installed docks, their versions, platforms, and managed file counts. It does
 not contact the Registry or modify files.
 
+Use `opendock list --json` when another tool needs the installed dock inventory.
+
 ## Deploy
 
 Deploy requires login and an exact version when running `opendock deploy`.
