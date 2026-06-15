@@ -19,6 +19,7 @@ version declared in `package.json`; they do not auto-increment versions.
 
 - Restrict Registry asset URLs to the configured Registry origin.
 - Refresh desktop build tooling versions used by the app package.
+- Add complete desktop icon resources for macOS and Windows bundles.
 
 ### Tests
 
