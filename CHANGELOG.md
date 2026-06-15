@@ -7,6 +7,19 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.27 - 2026-06-16
+
+### Desktop App
+
+- Load dock logos from the live Registry in packaged desktop builds.
+- Render Registry README markdown in the dock detail screen.
+- Remove the local sample dock catalog and sample command logs from the desktop app.
+
+### Tests
+
+- Added desktop verification for live Registry detail content, logo rendering,
+  and the absence of bundled sample data.
+
 ## 0.1.26 - 2026-06-16
 
 ### Desktop App
