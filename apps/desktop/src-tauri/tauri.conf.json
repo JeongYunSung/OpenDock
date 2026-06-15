@@ -40,6 +40,12 @@
       "icons/icon.ico",
       "icons/icon.png"
     ],
+    "windows": {
+      "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico"
+      }
+    },
     "externalBin": [
       "binaries/opendock"
     ]
