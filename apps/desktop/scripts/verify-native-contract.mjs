@@ -4,9 +4,12 @@ import { fileURLToPath } from "node:url";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const rust = readFileSync(resolve(appRoot, "src-tauri", "src", "lib.rs"), "utf8");
+const mainRust = readFileSync(resolve(appRoot, "src-tauri", "src", "main.rs"), "utf8");
 const app = readFileSync(resolve(appRoot, "src", "App.tsx"), "utf8");
 const data = readFileSync(resolve(appRoot, "src", "data.ts"), "utf8");
 const styles = readFileSync(resolve(appRoot, "src", "styles.css"), "utf8");
+const tauriConfig = JSON.parse(readFileSync(resolve(appRoot, "src-tauri", "tauri.conf.json"), "utf8"));
+const windowsIcon = readFileSync(resolve(appRoot, "src-tauri", "icons", "icon.ico"));
 const prepareSidecars = readFileSync(resolve(appRoot, "scripts", "prepare-sidecars.mjs"), "utf8");
 const cli = readFileSync(resolve(appRoot, "..", "..", "packages", "cli", "src", "cli.ts"), "utf8");
 const defaultCapability = JSON.parse(
@@ -114,7 +117,8 @@ const sidecarBuildsStandalone =
   prepareSidecars.includes("sidecarSmokeTestEnv") &&
   prepareSidecars.includes('PATH: "/usr/bin:/bin:/usr/sbin:/sbin"');
 const compiledCliCanStart = cli.includes("(import.meta as ImportMeta & { main?: boolean }).main === true");
-const macosOpenUsesAbsolutePath = rust.includes('Command::new("/usr/bin/open")');
+const macosOpenUsesAbsolutePath =
+  rust.includes('Command::new("/usr/bin/open")') || rust.includes('command_without_window("/usr/bin/open")');
 const desktopAppMenuUsesNativeCommands =
   app.includes('type OpenMenu = "" | "app" | "lang" | "account" | "sort"') &&
   app.includes("function appMenuGroups") &&
@@ -126,6 +130,28 @@ const desktopAppMenuHiddenOnMac =
   app.includes("const isMac = props.windowControlPlatform === \"macos\"") &&
   app.includes("{!isMac ? (") &&
   app.includes("<AppMenu");
+const desktopAppMenuUsesSingleActiveFlyout =
+  app.includes("const [activeGroupKey, setActiveGroupKey]") &&
+  app.includes("app-menu-group ${activeGroupKey === group.key ? \"active\" : \"\"}") &&
+  styles.includes(".app-menu-group.active > .app-menu-flyout") &&
+  !styles.includes(".app-menu-group:hover > .app-menu-flyout") &&
+  !styles.includes(".app-menu-group:focus-within > .app-menu-flyout");
+const requiredWindowsIconSizes = ["16x16", "32x32", "48x48", "64x64", "128x128", "256x256"];
+const windowsIconSizes = parseIcoSizes(windowsIcon).map(({ width, height }) => `${width}x${height}`);
+const windowsIconIncludesRequiredSizes = requiredWindowsIconSizes.every((size) => windowsIconSizes.includes(size));
+const windowsInstallerUsesOpenDockIcon =
+  tauriConfig.bundle?.windows?.nsis?.installerIcon === "icons/icon.ico" &&
+  tauriConfig.bundle?.windows?.nsis?.uninstallerIcon === "icons/icon.ico";
+const windowsReleaseAppHidesConsole =
+  mainRust.includes('cfg_attr(not(debug_assertions), windows_subsystem = "windows")');
+const windowsChildCommandsHideConsole =
+  rust.includes("fn command_without_window") &&
+  rust.includes("fn apply_no_console_window(command: &mut Command)") &&
+  rust.includes("const CREATE_NO_WINDOW: u32 = 0x08000000") &&
+  rust.includes("command.creation_flags(CREATE_NO_WINDOW)") &&
+  !rust.includes("Command::new(\"taskkill\")") &&
+  !rust.includes("Command::new(\"explorer\")") &&
+  !rust.includes("Command::new(\"opendock\")");
 
 const failures = [
   ...unhandledMenuIds.map((id) => `menu id is not handled in App.tsx: ${id}`),
@@ -191,6 +217,17 @@ const failures = [
   ...(!desktopAppMenuHiddenOnMac
     ? ["desktop app menu must be hidden on macOS and visible on non-macOS titlebars"]
     : []),
+  ...(!desktopAppMenuUsesSingleActiveFlyout
+    ? ["desktop app menu flyouts must be controlled by one active group instead of CSS hover/focus state"]
+    : []),
+  ...(!windowsIconIncludesRequiredSizes
+    ? [`Windows icon.ico must include ${requiredWindowsIconSizes.join(", ")}; got ${windowsIconSizes.join(", ")}`]
+    : []),
+  ...(!windowsInstallerUsesOpenDockIcon
+    ? ["Windows NSIS installer and uninstaller must explicitly use icons/icon.ico"]
+    : []),
+  ...(!windowsReleaseAppHidesConsole ? ["Windows release app must hide the launcher console window"] : []),
+  ...(!windowsChildCommandsHideConsole ? ["Windows child commands must use CREATE_NO_WINDOW"] : []),
   ...(forbiddenTitlebarDragCss
     ? ["CSS app-region drag is forbidden; use data-tauri-drag-region on the dedicated drag target instead"]
     : [])
@@ -204,6 +241,22 @@ if (failures.length > 0) {
 console.log(
   `native contract verification passed (${emittedMenuIds.length} menu ids, ${invokedCommands.length} invokes, ${requiredWindowPermissions.length} window permissions)`
 );
+
+function parseIcoSizes(buffer) {
+  if (buffer.length < 6 || buffer.readUInt16LE(0) !== 0 || buffer.readUInt16LE(2) !== 1) {
+    return [];
+  }
+  const count = buffer.readUInt16LE(4);
+  const sizes = [];
+  for (let index = 0; index < count; index += 1) {
+    const offset = 6 + index * 16;
+    if (offset + 16 > buffer.length) break;
+    const width = buffer.readUInt8(offset) || 256;
+    const height = buffer.readUInt8(offset + 1) || 256;
+    sizes.push({ width, height });
+  }
+  return sizes;
+}
 
 function unique(values) {
   return [...new Set(values)];
