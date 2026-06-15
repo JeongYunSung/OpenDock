@@ -1109,7 +1109,7 @@ input:focus-visible,
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .dock-icon.large {
@@ -1490,6 +1490,42 @@ input:focus-visible,
 .readme-markdown p {
   margin: 0 0 12px;
   word-break: break-word;
+}
+
+.readme-markdown h4,
+.readme-markdown h5 {
+  margin: 18px 0 10px;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.readme-markdown h4 {
+  font-size: 18px;
+}
+
+.readme-markdown h5 {
+  font-size: 15px;
+}
+
+.readme-markdown ul {
+  margin: 0 0 18px;
+  padding-left: 20px;
+}
+
+.readme-markdown pre {
+  overflow-x: auto;
+  margin: 0 0 18px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 14px 16px;
+  background: var(--surface-2);
+}
+
+.readme-markdown pre code {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  white-space: pre;
 }
 
 .readme-card h4 {

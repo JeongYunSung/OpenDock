@@ -102,6 +102,8 @@ const badgeSrc = "/official-badge.png";
 const REGISTRY_ORIGIN = "https://registry.opendock.app";
 const CATALOG_PAGE_LIMIT = 12;
 const MAX_STORED_LOGS = 400;
+const registryAssetCache = new Map<string, string | null>();
+const registryAssetRequests = new Map<string, Promise<string | null>>();
 type WindowControlPlatform = "macos" | "windows";
 type CommandTaskKind = "install" | "update" | "delete" | "doctor";
 type CommandTaskStatus = "running" | "cancelling" | "success" | "error" | "cancelled";
@@ -438,6 +440,30 @@ function resolveRegistryAssetUrl(url?: string | null) {
   }
 }
 
+async function loadRegistryAssetUrl(url?: string | null) {
+  if (!url) return null;
+  if (registryAssetCache.has(url)) return registryAssetCache.get(url) ?? null;
+  const existing = registryAssetRequests.get(url);
+  if (existing) return existing;
+  const request = (async () => {
+    try {
+      const value = isTauriRuntime()
+        ? await invoke<string>("opendock_registry_asset_data_url", { url })
+        : resolveRegistryAssetUrl(url);
+      registryAssetCache.set(url, value);
+      return value;
+    } catch {
+      const fallback = resolveRegistryAssetUrl(url);
+      registryAssetCache.set(url, fallback);
+      return fallback;
+    } finally {
+      registryAssetRequests.delete(url);
+    }
+  })();
+  registryAssetRequests.set(url, request);
+  return request;
+}
+
 function findDockByKey(docks: Dock[], key: string) {
   return docks.find((dock) => dockFullId(dock) === key || dock.id === key || dock.name === key);
 }
@@ -572,7 +598,19 @@ function IconButton(props: {
 
 function DockIcon(props: { dock: Dock; size?: "small" | "large" }) {
   const [imageFailed, setImageFailed] = useState(false);
-  const logoUrl = resolveRegistryAssetUrl(props.dock.logoUrl);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const sourceLogoUrl = props.dock.logoUrl ?? null;
+  useEffect(() => {
+    let cancelled = false;
+    setImageFailed(false);
+    setLogoUrl(null);
+    void loadRegistryAssetUrl(sourceLogoUrl).then((nextLogoUrl) => {
+      if (!cancelled) setLogoUrl(nextLogoUrl);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [sourceLogoUrl]);
   const hasLogo = Boolean(logoUrl && !imageFailed);
   const className = ["dock-icon", props.size, hasLogo ? "has-logo" : ""].filter(Boolean).join(" ");
   const iconSize = props.size === "large" ? 27 : props.size === "small" ? 16 : 19;
@@ -613,7 +651,7 @@ export function App() {
   const [sortMode, setSortMode] = useStoredState<SortMode>("opendock.sortMode", "downloads");
   const [searchQuery, setSearchQuery] = useStoredState("opendock.searchQuery", "");
   const [dockView, setDockView] = useStoredState<DockView>("opendock.dockView", "list");
-  const [detailId, setDetailId] = useStoredState("opendock.detailId", "creative-gen-ultrawork");
+  const [detailId, setDetailId] = useStoredState("opendock.detailId", "");
   const [detailTab, setDetailTab] = useStoredState<"readme" | "versions">("opendock.detailTab", "readme");
   const [detailVersion, setDetailVersion] = useStoredState("opendock.detailVersion", "");
   const [installedDocks, setInstalledDocks] = useStoredState<Record<string, boolean>>("opendock.installedDocks", {});
@@ -2778,29 +2816,119 @@ function DetailPanel(props: {
 }
 
 function ReadmePanel(props: { detail: Dock; t: (typeof TEXT)[Lang] }) {
-  const readmeBlocks = props.detail.readmeMarkdown
-    ?.split(/\n{2,}/)
-    .map((block) => block.trim())
-    .filter(Boolean)
-    .slice(0, 4) ?? [];
+  const readme = parseReadmeMarkdown(props.detail.readmeMarkdown);
+  const title = readme.title || props.detail.readmeTitle;
+  const intro = readme.intro || props.detail.readmeIntro;
   return (
     <div className="readme-panel">
       <h2>{props.t.readme}</h2>
       <div className="readme-card">
-        <h3>{props.detail.readmeTitle}</h3>
-        <p>{props.detail.readmeIntro}</p>
-        {readmeBlocks.length > 0 ? (
+        <h3>{title}</h3>
+        {intro ? <p>{intro}</p> : null}
+        {readme.blocks.length > 0 ? (
           <div className="readme-markdown">
-            {readmeBlocks.map((block) => (
-              <p key={block}>{block.replace(/^#+\s*/, "")}</p>
-            ))}
+            {readme.blocks.map((block, index) => renderReadmeBlock(block, index))}
           </div>
         ) : null}
-        <h4>{props.t.supportedModes}</h4>
-        <ul>{props.detail.modes.map((mode) => <li key={mode}><code>{mode}</code></li>)}</ul>
       </div>
     </div>
   );
+}
+
+type ReadmeBlock =
+  | { type: "heading"; level: number; text: string }
+  | { type: "paragraph"; text: string }
+  | { type: "list"; items: string[] }
+  | { type: "code"; text: string };
+
+function parseReadmeMarkdown(markdown?: string | null) {
+  const blocks = markdown ? markdownToBlocks(markdown) : [];
+  const [firstBlock, ...rest] = blocks;
+  const title = firstBlock?.type === "heading" && firstBlock.level === 1 ? firstBlock.text : "";
+  const content = title ? rest : blocks;
+  const introIndex = content.findIndex((block) => block.type === "paragraph");
+  const intro = introIndex >= 0 && content[introIndex]?.type === "paragraph" ? content[introIndex].text : "";
+  const visibleBlocks = content.filter((_, index) => index !== introIndex);
+  return { title, intro, blocks: visibleBlocks };
+}
+
+function markdownToBlocks(markdown: string): ReadmeBlock[] {
+  const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+  const blocks: ReadmeBlock[] = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index] ?? "";
+    const trimmed = line.trim();
+    if (!trimmed) {
+      index += 1;
+      continue;
+    }
+
+    if (trimmed.startsWith("```")) {
+      const code: string[] = [];
+      index += 1;
+      while (index < lines.length && !(lines[index] ?? "").trim().startsWith("```")) {
+        code.push(lines[index] ?? "");
+        index += 1;
+      }
+      if (index < lines.length) index += 1;
+      blocks.push({ type: "code", text: code.join("\n").trimEnd() });
+      continue;
+    }
+
+    const heading = /^(#{1,6})\s+(.+)$/.exec(trimmed);
+    if (heading) {
+      blocks.push({ type: "heading", level: heading[1].length, text: stripInlineMarkdown(heading[2]) });
+      index += 1;
+      continue;
+    }
+
+    if (/^[-*]\s+/.test(trimmed)) {
+      const items: string[] = [];
+      while (index < lines.length) {
+        const item = /^[-*]\s+(.+)$/.exec((lines[index] ?? "").trim());
+        if (!item) break;
+        items.push(stripInlineMarkdown(item[1]));
+        index += 1;
+      }
+      blocks.push({ type: "list", items });
+      continue;
+    }
+
+    const paragraph: string[] = [];
+    while (index < lines.length) {
+      const current = (lines[index] ?? "").trim();
+      if (!current || current.startsWith("```") || /^(#{1,6})\s+/.test(current) || /^[-*]\s+/.test(current)) break;
+      paragraph.push(current);
+      index += 1;
+    }
+    blocks.push({ type: "paragraph", text: stripInlineMarkdown(paragraph.join(" ")) });
+  }
+
+  return blocks;
+}
+
+function renderReadmeBlock(block: ReadmeBlock, index: number) {
+  if (block.type === "heading") {
+    const HeadingTag = block.level <= 2 ? "h4" : "h5";
+    return <HeadingTag key={`${block.type}-${index}`}>{block.text}</HeadingTag>;
+  }
+  if (block.type === "list") {
+    return (
+      <ul key={`${block.type}-${index}`}>
+        {block.items.map((item) => <li key={item}>{item}</li>)}
+      </ul>
+    );
+  }
+  if (block.type === "code") {
+    return <pre key={`${block.type}-${index}`}><code>{block.text}</code></pre>;
+  }
+  return <p key={`${block.type}-${index}`}>{block.text}</p>;
+}
+
+function stripInlineMarkdown(value: string) {
+  return value.replace(/`([^`]+)`/g, "$1").replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1").trim();
 }
 
 function VersionsPanel(props: { detail: Dock; selectedVersion: DockVersion | null; onSelectVersion: (version: DockVersion) => void; t: (typeof TEXT)[Lang] }) {

@@ -1,3 +1,4 @@
+use base64::{engine::general_purpose, Engine as _};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -383,6 +384,42 @@ async fn opendock_dock_versions(dock_id: String) -> Result<Value, String> {
 }
 
 #[tauri::command]
+async fn opendock_registry_asset_data_url(url: String) -> Result<String, String> {
+    let url = validate_registry_asset_url(&url)?;
+    let response = reqwest::Client::new()
+        .get(url.clone())
+        .header(reqwest::header::ACCEPT, "image/*")
+        .header(reqwest::header::CACHE_CONTROL, "no-cache, no-store")
+        .header(reqwest::header::PRAGMA, "no-cache")
+        .send()
+        .await
+        .map_err(|error| format!("failed to request registry asset: {error}"))?;
+    let status = response.status();
+    if !status.is_success() {
+        return Err(format!("registry asset returned {status} for {url}"));
+    }
+    let content_type = response
+        .headers()
+        .get(reqwest::header::CONTENT_TYPE)
+        .and_then(|value| value.to_str().ok())
+        .map(str::trim)
+        .filter(|value| value.starts_with("image/"))
+        .ok_or_else(|| "registry asset is not an image".to_string())?
+        .to_string();
+    let bytes = response
+        .bytes()
+        .await
+        .map_err(|error| format!("failed to read registry asset: {error}"))?;
+    if bytes.len() > 2 * 1024 * 1024 {
+        return Err("registry asset is too large".to_string());
+    }
+    Ok(format!(
+        "data:{content_type};base64,{}",
+        general_purpose::STANDARD.encode(bytes)
+    ))
+}
+
+#[tauri::command]
 async fn opendock_project_state(project_dir: String) -> Result<ProjectStateResult, String> {
     let result = run_opendock_blocking(
         Some(project_dir),
@@ -504,6 +541,7 @@ pub fn run() {
             opendock_catalog,
             opendock_dock_detail,
             opendock_dock_versions,
+            opendock_registry_asset_data_url,
             opendock_project_state,
             opendock_import_shortcuts,
             opendock_export_shortcuts,
@@ -743,6 +781,24 @@ fn registry_base() -> String {
         .map(|value| value.trim().trim_end_matches('/').to_string())
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| DEFAULT_REGISTRY_URL.to_string())
+}
+
+fn validate_registry_asset_url(value: &str) -> Result<reqwest::Url, String> {
+    let url = reqwest::Url::parse(value.trim())
+        .map_err(|error| format!("invalid registry asset URL: {error}"))?;
+    let registry = reqwest::Url::parse(&registry_base())
+        .map_err(|error| format!("invalid registry URL: {error}"))?;
+    let same_origin = url.scheme() == registry.scheme()
+        && url.host_str() == registry.host_str()
+        && url.port_or_known_default() == registry.port_or_known_default();
+    if !same_origin {
+        return Err("registry asset URL must use the configured registry origin".to_string());
+    }
+    let path = url.path();
+    if !path.starts_with("/v1/docks/") || !path.ends_with("/logo") {
+        return Err("registry asset URL must point to a dock logo".to_string());
+    }
+    Ok(url)
 }
 
 fn app_state_path() -> Result<PathBuf, String> {

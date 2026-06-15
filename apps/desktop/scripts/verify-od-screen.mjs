@@ -85,6 +85,33 @@ async function runViewportFlow(viewport) {
       throw new Error(`expected at least 4 dock cards, got ${initialCardCount}`);
     }
 
+    await page.getByRole("searchbox", { name: "도크 검색" }).fill("backend-ultrawork");
+    await page.waitForFunction(() => document.querySelectorAll(".dock-card").length >= 1);
+    await page.locator(".dock-card").first().click();
+    await assertVisible(page.locator(".detail-panel"), "backend dock detail panel");
+    await page.waitForFunction(() => document.querySelector(".readme-markdown ul li"));
+    const backendLogoSrc = await page.locator(".detail-hero .dock-icon img").first().getAttribute("src");
+    if (!backendLogoSrc?.includes("/registry/v1/docks/opendock/backend-ultrawork/logo")) {
+      throw new Error(`backend detail should render the registry logo, got ${backendLogoSrc}`);
+    }
+    const backendReadmeCopy = await page.locator(".readme-card").innerText();
+    if (!backendReadmeCopy.includes("Backend Ultrawork") || !backendReadmeCopy.includes("What It Checks") || !backendReadmeCopy.includes("opendock verify-hook")) {
+      throw new Error(`backend readme should render registry markdown content, got ${backendReadmeCopy}`);
+    }
+    if (backendReadmeCopy.includes("Categories") || backendReadmeCopy.includes("분류")) {
+      throw new Error(`readme card should not append a local categories section, got ${backendReadmeCopy}`);
+    }
+    const backendReadmeListCount = await page.locator(".readme-markdown ul li").count();
+    if (backendReadmeListCount < 6) {
+      throw new Error(`backend readme should render markdown bullets as list items, got ${backendReadmeListCount}`);
+    }
+    const backendCodeBlockCount = await page.locator(".readme-markdown pre code", { hasText: "opendock verify-hook" }).count();
+    if (backendCodeBlockCount !== 1) {
+      throw new Error(`backend readme should render the command as one code block, got ${backendCodeBlockCount}`);
+    }
+    await page.getByRole("button", { name: "뒤로" }).click();
+    await assertWorkspaceList(page);
+
     await page.getByRole("searchbox", { name: "도크 검색" }).fill("frontend");
     await page.waitForFunction(() => document.querySelectorAll(".dock-card").length === 1);
     await page.locator(".dock-card").first().click();
