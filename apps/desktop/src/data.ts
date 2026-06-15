@@ -133,6 +133,19 @@ export interface OpenDockCommandLine {
   message: string;
 }
 
+export interface OpenDockCommandProgress {
+  commandId?: string | null;
+  current?: number | null;
+  dockId?: string | null;
+  level: "INFO" | "OK" | "RUN" | "WARN" | "ERR" | string;
+  message: string;
+  operation: string;
+  percent: number;
+  phase: string;
+  total?: number | null;
+  version?: string | null;
+}
+
 export interface OpenDockCommandResult {
   success: boolean;
   code: number | null;

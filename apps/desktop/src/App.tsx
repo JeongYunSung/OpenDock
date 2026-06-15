@@ -48,6 +48,7 @@ import {
   type OpenDockChangeReport,
   type OpenDockChangeResult,
   type OpenDockCommandLine,
+  type OpenDockCommandProgress,
   type OpenDockCommandResult,
   type OpenDockOutdatedReport,
   type OpenDockOutdatedResult,
@@ -654,7 +655,7 @@ export function App() {
   useEffect(() => {
     if (!isTauriRuntime()) return;
     let disposed = false;
-    let unlisten: (() => void) | undefined;
+    const unlisteners: Array<() => void> = [];
     void listen<OpenDockCommandLine>("opendock-command-line", (event) => {
       const line = event.payload;
       appendLog(line.level, logColor(line.level), line.message);
@@ -664,11 +665,26 @@ export function App() {
         dispose();
         return;
       }
-      unlisten = dispose;
+      unlisteners.push(dispose);
+    });
+    void listen<OpenDockCommandProgress>("opendock-command-progress", (event) => {
+      const progress = event.payload;
+      if (progress.commandId && commandTaskRef.current?.id !== progress.commandId) return;
+      const level = progress.level.toUpperCase();
+      appendLog(level, logColor(level), progress.message);
+      applyCommandProgressToTask(progress);
+    }).then((dispose) => {
+      if (disposed) {
+        dispose();
+        return;
+      }
+      unlisteners.push(dispose);
     });
     return () => {
       disposed = true;
-      unlisten?.();
+      for (const dispose of unlisteners) {
+        dispose();
+      }
     };
   }, []);
 
@@ -994,6 +1010,28 @@ export function App() {
           { time: nowTime(), level: line.level.toUpperCase(), color: logColor(line.level.toUpperCase()), message: line.message },
           ...current.rows
         ].slice(0, 20),
+        updatedAt: nowTime()
+      };
+    });
+  }
+
+  function applyCommandProgressToTask(progress: OpenDockCommandProgress) {
+    setCommandTask((current) => {
+      if (!current || current.status !== "running") return current;
+      if (progress.commandId && progress.commandId !== current.id) return current;
+      const level = progress.level.toUpperCase();
+      const percent = Number.isFinite(progress.percent)
+        ? Math.max(current.progress, Math.min(100, progress.percent))
+        : current.progress;
+      const row = { time: nowTime(), level, color: logColor(level), message: progress.message };
+      const shouldAddRow =
+        current.rows[0]?.message !== progress.message || current.rows[0]?.level !== level;
+      return {
+        ...current,
+        progress: percent,
+        step: progress.message,
+        lines: current.lines + 1,
+        rows: shouldAddRow ? [row, ...current.rows].slice(0, 20) : current.rows,
         updatedAt: nowTime()
       };
     });

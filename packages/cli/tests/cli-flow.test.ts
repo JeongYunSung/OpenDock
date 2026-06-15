@@ -668,6 +668,139 @@ describe("opendock TypeScript CLI", () => {
     }
   });
 
+  it("prints JSONL install events with the final change result", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+    });
+    const registry = mockRegistry([
+      {
+        archive: await createDockArchive(docks, "test", "designer", "1.0.0"),
+        id: "test/designer",
+        latest: false,
+        platform: "macos",
+        version: "1.0.0",
+      },
+    ]);
+
+    try {
+      const logs = await withCwd(project, () =>
+        captureConsole(() =>
+          runCli([
+            "bun",
+            "opendock",
+            "install",
+            "test/designer@1.0.0",
+            "--platform",
+            "macos",
+            "--events",
+          ]),
+        ),
+      );
+      const events = parseJsonLines(logs);
+      const result = events.at(-1);
+
+      expect(events.every((event) => event.opendock === 1)).toBe(true);
+      expect(events.some((event) => event.type === "progress" && event.phase === "apply")).toBe(
+        true,
+      );
+      expect(result).toMatchObject({
+        operation: "install",
+        success: true,
+        type: "result",
+      });
+      expect(result?.result?.reports?.[0]).toMatchObject({
+        dockId: "test/designer",
+        status: "installed",
+        version: "1.0.0",
+      });
+    } finally {
+      registry.restore();
+    }
+  });
+
+  it("prints JSONL update events when no docks are outdated", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/designer@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    const registry = mockRegistry([
+      {
+        id: "test/designer",
+        latest: true,
+        platform: "macos",
+        version: "1.0.0",
+      },
+    ]);
+
+    try {
+      const logs = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "update", "--events"])),
+      );
+      const events = parseJsonLines(logs);
+      const result = events.at(-1);
+
+      expect(events.some((event) => event.type === "progress" && event.percent === 100)).toBe(true);
+      expect(result).toMatchObject({
+        operation: "update",
+        success: true,
+        type: "result",
+      });
+      expect(result?.result?.reports).toEqual([]);
+    } finally {
+      registry.restore();
+    }
+  });
+
+  it("prints JSONL uninstall events with the final change result", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/designer@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    const logs = await withCwd(project, () =>
+      captureConsole(() => runCli(["bun", "opendock", "uninstall", "test/designer", "--events"])),
+    );
+    const events = parseJsonLines(logs);
+    const result = events.at(-1);
+
+    expect(events.some((event) => event.type === "progress" && event.phase === "apply")).toBe(true);
+    expect(result).toMatchObject({
+      operation: "uninstall",
+      success: true,
+      type: "result",
+    });
+    expect(result?.result?.reports?.[0]).toMatchObject({
+      dockId: "test/designer",
+      status: "uninstalled",
+      version: "1.0.0",
+    });
+  });
+
   it("lists installed docks in the current directory", async () => {
     const docks = tempDir();
     const project = tempDir();
@@ -1532,4 +1665,20 @@ async function captureConsole(fn: () => Promise<void>): Promise<string[]> {
   } finally {
     console.log = previous;
   }
+}
+
+interface TestOpenDockEvent {
+  opendock?: number;
+  operation?: string;
+  percent?: number;
+  phase?: string;
+  result?: {
+    reports?: Array<Record<string, unknown>>;
+  };
+  success?: boolean;
+  type?: string;
+}
+
+function parseJsonLines(lines: string[]): TestOpenDockEvent[] {
+  return lines.map((line) => JSON.parse(line) as TestOpenDockEvent);
 }

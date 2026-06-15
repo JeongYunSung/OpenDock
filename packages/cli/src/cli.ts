@@ -73,6 +73,7 @@ const maxDeployArchiveBytes = 50 * 1024 * 1024;
 const hookTimeoutMs = 30_000;
 
 interface ChangeCommandOptions {
+  events?: boolean;
   force?: boolean;
   json?: boolean;
   platform?: string;
@@ -93,13 +94,25 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--force", "Overwrite user-edited managed files")
     .option("--platform <platform>", "Target platform: macos, windows, or linux")
     .option("--json", "Print a machine-readable change report")
+    .option("--events", "Print machine-readable progress events")
     .action(async (dock: string, options: ChangeCommandOptions) => {
       let dockId = dockIdFromReference(dock);
+      const outputMode = changeCommandOutputMode(options);
+      const events = createChangeEventReporter("install", options.events === true);
       try {
+        events.progress("prepare", "Preparing install", 8, optionalDockEventDetails(dockId));
         const platform = resolveCliPlatform(options.platform);
         const dockRef = parseInstallRef(dock);
         dockId = dockRef.id();
-        const report = await runMaybeQuietAsync(options.json === true, () =>
+        events.progress("resolve", `Resolving ${dockRef.id()}@${dockRef.requested()}`, 24, {
+          dockId,
+          version: dockRef.requested(),
+        });
+        events.progress("apply", `Applying ${dockRef.id()}`, 62, {
+          dockId,
+          version: dockRef.requested(),
+        });
+        const report = await runMaybeQuietAsync(outputMode.machine, () =>
           installer.install({
             dockRef,
             force: options.force === true,
@@ -108,21 +121,29 @@ export async function run(argv = process.argv): Promise<void> {
             operation: "install",
             phase: "install",
             platform,
-            live: options.json !== true,
+            live: !outputMode.machine,
           }),
         );
+        events.progress("record", `Recording ${report.dockId}@${report.version}`, 92, {
+          dockId: report.dockId,
+          level: "OK",
+          version: report.version,
+        });
         recordCommandLog(
           "install",
           "Success",
           `${report.dockId}@${report.version} installed (${plainInstallFileSummary(report)})`,
           report.dockId,
         );
+        const result = changeCommandResult("install", [
+          installChangeReport(report, { operation: "install", status: "installed" }),
+        ]);
+        events.result(result);
+        if (options.events === true) {
+          return;
+        }
         if (options.json === true) {
-          printJson(
-            changeCommandResult("install", [
-              installChangeReport(report, { operation: "install", status: "installed" }),
-            ]),
-          );
+          printJson(result);
           return;
         }
         console.log(
@@ -134,7 +155,7 @@ export async function run(argv = process.argv): Promise<void> {
         printFileChanges(report);
       } catch (error) {
         recordCommandFailure("install", error, dockId);
-        handleChangeCommandError("install", error, options.json === true);
+        handleChangeCommandError("install", error, options.json === true, events);
       }
     });
 
@@ -144,8 +165,12 @@ export async function run(argv = process.argv): Promise<void> {
     .option("--force", "Overwrite user-edited managed files")
     .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
     .option("--json", "Print a machine-readable change report")
+    .option("--events", "Print machine-readable progress events")
     .action(async (options: ChangeCommandOptions) => {
+      const outputMode = changeCommandOutputMode(options);
+      const events = createChangeEventReporter("update", options.events === true);
       try {
+        events.progress("prepare", "Preparing update", 8);
         const platformOverride =
           options.platform === undefined ? undefined : resolveCliPlatform(options.platform);
         const store = new OpenDockStateStore(process.cwd());
@@ -156,6 +181,10 @@ export async function run(argv = process.argv): Promise<void> {
         if (installedDocks.length === 0) {
           throw new Error("no OpenDock docks are installed in this project");
         }
+        events.progress("check", `Checking ${installedDocks.length} installed dock(s)`, 24, {
+          current: 0,
+          total: installedDocks.length,
+        });
         const updateChecks = await checkInstalledDockUpdates(installedDocks, platformOverride);
         const updateTargets = updateChecks.filter((check) => check.updateAvailable);
         if (updateTargets.length === 0) {
@@ -164,19 +193,55 @@ export async function run(argv = process.argv): Promise<void> {
             "Skipped",
             `no updates available for ${installedDocks.length} installed dock(s)`,
           );
+          const result = changeCommandResult("update", []);
+          events.progress("complete", "No OpenDock dock updates available.", 100, {
+            level: "OK",
+            total: 0,
+          });
+          events.result(result);
+          if (options.events === true) {
+            return;
+          }
           if (options.json === true) {
-            printJson(changeCommandResult("update", []));
+            printJson(result);
           } else {
             console.log(terminalStyle.success("No OpenDock dock updates available."));
           }
           return;
         }
         const changeReports: JsonDockChangeReport[] = [];
-        for (const updateTarget of updateTargets) {
+        events.progress("plan", `Found ${updateTargets.length} update(s)`, 36, {
+          current: 0,
+          total: updateTargets.length,
+        });
+        for (const [index, updateTarget] of updateTargets.entries()) {
           const dock = updateTarget.dock;
           const dockRef = DockRef.parse(`${dock.id}@${updateTarget.latestVersion}`);
+          const current = index + 1;
+          events.progress(
+            "resolve",
+            `Resolving ${dock.id}: ${dock.version} -> ${updateTarget.latestVersion}`,
+            updateProgressPercent(index, updateTargets.length, 0.15),
+            {
+              current,
+              dockId: dock.id,
+              total: updateTargets.length,
+              version: updateTarget.latestVersion,
+            },
+          );
           const resolved = await resolveDock(dockRef, updateTarget.platform);
-          const report = await runMaybeQuietAsync(options.json === true, () =>
+          events.progress(
+            "apply",
+            `Updating ${dock.id}: ${dock.version} -> ${updateTarget.latestVersion}`,
+            updateProgressPercent(index, updateTargets.length, 0.55),
+            {
+              current,
+              dockId: dock.id,
+              total: updateTargets.length,
+              version: updateTarget.latestVersion,
+            },
+          );
+          const report = await runMaybeQuietAsync(outputMode.machine, () =>
             installer.install({
               dockRef,
               force: options.force === true,
@@ -186,7 +251,7 @@ export async function run(argv = process.argv): Promise<void> {
               phase: "update",
               platform: updateTarget.platform,
               resolve: () => resolved,
-              live: options.json !== true,
+              live: !outputMode.machine,
             }),
           );
           changeReports.push(
@@ -199,7 +264,19 @@ export async function run(argv = process.argv): Promise<void> {
                   : "updated",
             }),
           );
-          if (options.json === true) {
+          events.progress(
+            "updated",
+            `Updated ${report.dockId}@${report.version}`,
+            updateProgressPercent(index, updateTargets.length, 0.9),
+            {
+              current,
+              dockId: report.dockId,
+              level: "OK",
+              total: updateTargets.length,
+              version: report.version,
+            },
+          );
+          if (outputMode.machine) {
             continue;
           }
           if (dock.version === report.version) {
@@ -228,12 +305,21 @@ export async function run(argv = process.argv): Promise<void> {
             .map((report) => `${report.dockId}@${report.version}`)
             .join(", ")}`,
         );
+        events.progress("record", `Recorded ${changeReports.length} update(s)`, 94, {
+          level: "OK",
+          total: changeReports.length,
+        });
+        const result = changeCommandResult("update", changeReports);
+        events.result(result);
+        if (options.events === true) {
+          return;
+        }
         if (options.json === true) {
-          printJson(changeCommandResult("update", changeReports));
+          printJson(result);
         }
       } catch (error) {
         recordCommandFailure("update", error);
-        handleChangeCommandError("update", error, options.json === true);
+        handleChangeCommandError("update", error, options.json === true, events);
       }
     });
 
@@ -243,30 +329,44 @@ export async function run(argv = process.argv): Promise<void> {
     .argument("<dock>", "Installed dock id: owner/name")
     .option("--force", "Remove OpenDock-managed files even when edited managed files are detected")
     .option("--json", "Print a machine-readable change report")
-    .action((dock: string, options: Pick<ChangeCommandOptions, "force" | "json">) => {
+    .option("--events", "Print machine-readable progress events")
+    .action((dock: string, options: Pick<ChangeCommandOptions, "events" | "force" | "json">) => {
       let dockId = dockIdFromReference(dock);
+      const outputMode = changeCommandOutputMode(options);
+      const events = createChangeEventReporter("uninstall", options.events === true);
       try {
+        events.progress("prepare", "Preparing uninstall", 8, optionalDockEventDetails(dockId));
         const parsedDockId = parseInstalledDockId(dock);
         dockId = parsedDockId;
-        const report = runMaybeQuiet(options.json === true, () =>
+        events.progress("check", `Checking ${parsedDockId}`, 30, { dockId: parsedDockId });
+        events.progress("apply", `Removing ${parsedDockId}`, 70, { dockId: parsedDockId });
+        const report = runMaybeQuiet(outputMode.machine, () =>
           installer.uninstall({
             dockId: parsedDockId,
             force: options.force === true,
             projectDir: process.cwd(),
           }),
         );
+        events.progress("record", `Recording uninstall ${report.dockId}@${report.version}`, 92, {
+          dockId: report.dockId,
+          level: "OK",
+          version: report.version,
+        });
         recordCommandLog(
           "uninstall",
           "Success",
           `${report.dockId}@${report.version} uninstalled (${report.filesDeleted} files deleted, ${report.filesUpdated} files updated)`,
           report.dockId,
         );
+        const result = changeCommandResult("uninstall", [
+          uninstallChangeReport(report, { operation: "uninstall", status: "uninstalled" }),
+        ]);
+        events.result(result);
+        if (options.events === true) {
+          return;
+        }
         if (options.json === true) {
-          printJson(
-            changeCommandResult("uninstall", [
-              uninstallChangeReport(report, { operation: "uninstall", status: "uninstalled" }),
-            ]),
-          );
+          printJson(result);
           return;
         }
         console.log(
@@ -280,7 +380,7 @@ export async function run(argv = process.argv): Promise<void> {
         );
       } catch (error) {
         recordCommandFailure("uninstall", error, dockId);
-        handleChangeCommandError("uninstall", error, options.json === true);
+        handleChangeCommandError("uninstall", error, options.json === true, events);
       }
     });
 
@@ -1216,6 +1316,29 @@ interface JsonChangeSummary {
   updated: string[];
 }
 
+interface ChangeCommandOutputMode {
+  machine: boolean;
+}
+
+interface ChangeEventProgressDetails {
+  current?: number;
+  dockId?: string;
+  level?: "INFO" | "OK" | "RUN" | "WARN" | "ERR";
+  total?: number;
+  version?: string;
+}
+
+interface ChangeEventReporter {
+  enabled: boolean;
+  progress: (
+    phase: string,
+    message: string,
+    percent: number,
+    details?: ChangeEventProgressDetails,
+  ) => void;
+  result: (result: JsonChangeCommandFailureResult | JsonChangeCommandResult) => void;
+}
+
 function updateCheckCommandResult(
   updateChecks: InstalledDockUpdateCheck[],
 ): JsonUpdateCheckCommandResult {
@@ -1363,12 +1486,80 @@ function handleChangeCommandError(
   operation: JsonChangeOperation,
   error: unknown,
   json: boolean,
+  events: ChangeEventReporter = createChangeEventReporter(operation, false),
 ): void {
-  if (!json) {
+  if (!json && !events.enabled) {
     throw error;
   }
-  printJson(changeCommandFailureResult(operation, error));
+  const result = changeCommandFailureResult(operation, error);
+  if (events.enabled) {
+    events.progress("error", result.message, 100, { level: "ERR" });
+    events.result(result);
+  } else {
+    printJson(result);
+  }
   process.exitCode = 1;
+}
+
+function changeCommandOutputMode(
+  options: Pick<ChangeCommandOptions, "events" | "json">,
+): ChangeCommandOutputMode {
+  return {
+    machine: options.events === true || options.json === true,
+  };
+}
+
+function createChangeEventReporter(
+  operation: JsonChangeOperation,
+  enabled: boolean,
+): ChangeEventReporter {
+  return {
+    enabled,
+    progress: (phase, message, percent, details = {}) => {
+      if (!enabled) {
+        return;
+      }
+      printJson({
+        opendock: 1,
+        type: "progress",
+        operation,
+        phase,
+        message,
+        percent: clampProgressPercent(percent),
+        level: details.level ?? "RUN",
+        ...(details.current === undefined ? {} : { current: details.current }),
+        ...(details.dockId === undefined ? {} : { dockId: details.dockId }),
+        ...(details.total === undefined ? {} : { total: details.total }),
+        ...(details.version === undefined ? {} : { version: details.version }),
+      });
+    },
+    result: (result) => {
+      if (!enabled) {
+        return;
+      }
+      printJson({
+        opendock: 1,
+        type: "result",
+        operation,
+        success: result.success,
+        result,
+      });
+    },
+  };
+}
+
+function clampProgressPercent(percent: number): number {
+  return Math.max(0, Math.min(100, Math.round(percent)));
+}
+
+function updateProgressPercent(index: number, total: number, phaseOffset: number): number {
+  const slotCount = Math.max(total, 1);
+  const slotSize = 48 / slotCount;
+  return Math.min(90, Math.round(40 + slotSize * index + slotSize * phaseOffset));
+}
+
+function optionalDockEventDetails(dockId: string | undefined): ChangeEventProgressDetails {
+  return dockId === undefined ? {} : { dockId };
 }
 
 function isForceableManagedFileError(error: unknown): boolean {

@@ -64,6 +64,15 @@ const installedViewPollsProjectState =
   app.includes("refreshInstalledProjectState") &&
   app.includes("window.setInterval(refreshInstalledProjectState, 5000)") &&
   app.includes("await refreshProjectState(project, { silent: true })");
+const changeCommandsUseEvents =
+  rust.includes('&["install", &dock_ref, "--events"]') &&
+  rust.includes('vec!["update", "--events"') &&
+  rust.includes('vec!["uninstall", dock_id.as_str(), "--events"]');
+const commandProgressBridge =
+  rust.includes('app.emit("opendock-command-progress"') &&
+  rust.includes("command_progress_from_event_line") &&
+  app.includes('listen<OpenDockCommandProgress>("opendock-command-progress"') &&
+  app.includes("applyCommandProgressToTask(progress)");
 
 const failures = [
   ...unhandledMenuIds.map((id) => `menu id is not handled in App.tsx: ${id}`),
@@ -97,6 +106,12 @@ const failures = [
     : []),
   ...(!installedViewPollsProjectState
     ? ["installed view must refresh project outdated state while visible and after update"]
+    : []),
+  ...(!changeCommandsUseEvents
+    ? ["install/update/uninstall app commands must use --events for structured progress"]
+    : []),
+  ...(!commandProgressBridge
+    ? ["desktop app must bridge opendock progress events into the command progress dialog"]
     : []),
   ...(forbiddenTitlebarDragCss
     ? ["CSS app-region drag is forbidden; use data-tauri-drag-region on the dedicated drag target instead"]

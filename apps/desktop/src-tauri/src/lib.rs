@@ -56,6 +56,21 @@ struct OpenDockCommandLine {
     message: String,
 }
 
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct OpenDockCommandProgress {
+    command_id: Option<String>,
+    current: Option<u64>,
+    dock_id: Option<String>,
+    level: String,
+    message: String,
+    operation: String,
+    percent: f64,
+    phase: String,
+    total: Option<u64>,
+    version: Option<String>,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct AuthSession {
@@ -182,7 +197,7 @@ fn opendock_install(
     run_opendock_streaming(
         &app,
         Some(&project_dir),
-        &["install", &dock_ref, "--json"],
+        &["install", &dock_ref, "--events"],
         command_id.as_deref(),
     )
 }
@@ -195,9 +210,9 @@ fn opendock_update(
     force: Option<bool>,
 ) -> Result<OpenDockCommandResult, String> {
     let args = if force.unwrap_or(false) {
-        vec!["update", "--json", "--force"]
+        vec!["update", "--events", "--force"]
     } else {
-        vec!["update", "--json"]
+        vec!["update", "--events"]
     };
     run_opendock_streaming(&app, Some(&project_dir), &args, command_id.as_deref())
 }
@@ -216,7 +231,7 @@ fn opendock_uninstall(
     force: Option<bool>,
 ) -> Result<OpenDockCommandResult, String> {
     validate_dock_id(&dock_id)?;
-    let mut args = vec!["uninstall", dock_id.as_str(), "--json"];
+    let mut args = vec!["uninstall", dock_id.as_str(), "--events"];
     if force.unwrap_or(false) {
         args.push("--force");
     }
@@ -786,6 +801,7 @@ fn run_opendock_streaming(
     let lines = Arc::new(Mutex::new(Vec::<OpenDockCommandLine>::new()));
     let stdout_text = Arc::new(Mutex::new(String::new()));
     let stderr_text = Arc::new(Mutex::new(String::new()));
+    let command_id_owned = command_id.map(str::to_string);
 
     let stdout_thread = child.stdout.take().map(|stdout| {
         spawn_command_reader(
@@ -794,6 +810,7 @@ fn run_opendock_streaming(
             false,
             Arc::clone(&lines),
             Arc::clone(&stdout_text),
+            command_id_owned.clone(),
         )
     });
     let stderr_thread = child.stderr.take().map(|stderr| {
@@ -803,6 +820,7 @@ fn run_opendock_streaming(
             true,
             Arc::clone(&lines),
             Arc::clone(&stderr_text),
+            command_id_owned.clone(),
         )
     });
 
@@ -857,6 +875,7 @@ fn spawn_command_reader<R: Read + Send + 'static>(
     is_stderr: bool,
     lines: Arc<Mutex<Vec<OpenDockCommandLine>>>,
     text: Arc<Mutex<String>>,
+    command_id: Option<String>,
 ) -> thread::JoinHandle<()> {
     thread::spawn(move || {
         let reader = BufReader::new(reader);
@@ -867,6 +886,12 @@ fn spawn_command_reader<R: Read + Send + 'static>(
             }
             if line.trim().is_empty() {
                 continue;
+            }
+            if !is_stderr {
+                if let Some(payload) = command_progress_from_event_line(&line, command_id.clone()) {
+                    let _ = app.emit("opendock-command-progress", payload);
+                    continue;
+                }
             }
             if !is_stderr && is_command_json_line(&line) {
                 continue;
@@ -1140,23 +1165,85 @@ fn command_lines(stdout: &str, stderr: &str, success: bool) -> Vec<OpenDockComma
 }
 
 fn parse_command_json(stdout: &str) -> Option<Value> {
-    stdout
-        .lines()
-        .rev()
-        .find_map(|line| serde_json::from_str::<Value>(line.trim()).ok())
-        .filter(is_command_json_value)
+    stdout.lines().rev().find_map(|line| {
+        serde_json::from_str::<Value>(line.trim())
+            .ok()
+            .and_then(|value| command_json_from_value(&value))
+    })
 }
 
 fn is_command_json_line(line: &str) -> bool {
     serde_json::from_str::<Value>(line.trim())
         .ok()
         .as_ref()
-        .is_some_and(is_command_json_value)
+        .is_some_and(|value| command_json_from_value(value).is_some() || is_opendock_event(value))
+}
+
+fn command_json_from_value(value: &Value) -> Option<Value> {
+    if is_command_json_value(value) {
+        return Some(value.clone());
+    }
+    if !is_opendock_event(value) || value.get("type").and_then(Value::as_str) != Some("result") {
+        return None;
+    }
+    value
+        .get("result")
+        .filter(|result| is_command_json_value(result))
+        .cloned()
 }
 
 fn is_command_json_value(value: &Value) -> bool {
     value.get("reports").is_some()
         && (value.get("operation").is_some() || value.get("updatesAvailable").is_some())
+}
+
+fn is_opendock_event(value: &Value) -> bool {
+    value.get("opendock").and_then(Value::as_u64) == Some(1)
+        && value.get("type").and_then(Value::as_str).is_some()
+}
+
+fn command_progress_from_event_line(
+    line: &str,
+    command_id: Option<String>,
+) -> Option<OpenDockCommandProgress> {
+    let value = serde_json::from_str::<Value>(line.trim()).ok()?;
+    if !is_opendock_event(&value) || value.get("type").and_then(Value::as_str) != Some("progress") {
+        return None;
+    }
+    Some(OpenDockCommandProgress {
+        command_id,
+        current: value.get("current").and_then(Value::as_u64),
+        dock_id: value
+            .get("dockId")
+            .and_then(Value::as_str)
+            .map(str::to_string),
+        level: value
+            .get("level")
+            .and_then(Value::as_str)
+            .unwrap_or("RUN")
+            .to_string(),
+        message: value
+            .get("message")
+            .and_then(Value::as_str)
+            .unwrap_or("opendock command running")
+            .to_string(),
+        operation: value
+            .get("operation")
+            .and_then(Value::as_str)
+            .unwrap_or("opendock")
+            .to_string(),
+        percent: value.get("percent").and_then(Value::as_f64).unwrap_or(0.0),
+        phase: value
+            .get("phase")
+            .and_then(Value::as_str)
+            .unwrap_or("progress")
+            .to_string(),
+        total: value.get("total").and_then(Value::as_u64),
+        version: value
+            .get("version")
+            .and_then(Value::as_str)
+            .map(str::to_string),
+    })
 }
 
 fn should_emit_empty_stream_message(success: bool, json: Option<&Value>) -> bool {
@@ -1257,5 +1344,31 @@ mod tests {
     fn empty_stream_failure_keeps_error_message() {
         assert!(should_emit_empty_stream_message(false, None));
         assert_eq!(empty_stream_message(false), "opendock command failed");
+    }
+
+    #[test]
+    fn parses_json_result_from_events_stream() {
+        let stdout = r#"{"opendock":1,"type":"progress","operation":"update","phase":"prepare","message":"Preparing update","percent":8,"level":"RUN"}
+{"opendock":1,"type":"result","operation":"update","success":true,"result":{"operation":"update","reports":[],"summary":{"created":[],"deleted":[],"reviewRequired":[],"unchanged":[],"updated":[]},"success":true}}"#;
+
+        let value = parse_command_json(stdout).expect("event result JSON");
+
+        assert_eq!(
+            value.get("operation").and_then(Value::as_str),
+            Some("update")
+        );
+        assert_eq!(value.get("success").and_then(Value::as_bool), Some(true));
+    }
+
+    #[test]
+    fn parses_progress_event_payload() {
+        let line = r#"{"opendock":1,"type":"progress","operation":"install","phase":"apply","message":"Applying test/designer","percent":62,"level":"RUN","dockId":"test/designer","version":"1.0.0"}"#;
+
+        let progress =
+            command_progress_from_event_line(line, Some("cmd-1".to_string())).expect("progress");
+
+        assert_eq!(progress.command_id.as_deref(), Some("cmd-1"));
+        assert_eq!(progress.dock_id.as_deref(), Some("test/designer"));
+        assert_eq!(progress.percent, 62.0);
     }
 }
