@@ -112,8 +112,12 @@ async function runViewportFlow(viewport) {
       throw new Error(`backend detail should render the registry logo, got ${backendLogoSrc}`);
     }
     const backendReadmeCopy = await page.locator(".readme-card").innerText();
-    if (!backendReadmeCopy.includes("Backend Ultrawork") || !backendReadmeCopy.includes("What It Checks") || !backendReadmeCopy.includes("opendock verify-hook")) {
+    if (!backendReadmeCopy.includes("Backend Ultrawork") || !backendReadmeCopy.includes("What It Checks")) {
       throw new Error(`backend readme should render registry markdown content, got ${backendReadmeCopy}`);
+    }
+    const deprecatedRunCommand = "opendock " + "verify" + "-hook";
+    if (backendReadmeCopy.includes(deprecatedRunCommand)) {
+      throw new Error(`backend readme should not expose deprecated run instructions, got ${backendReadmeCopy}`);
     }
     if (backendReadmeCopy.includes("Categories") || backendReadmeCopy.includes("분류")) {
       throw new Error(`readme card should not append a local categories section, got ${backendReadmeCopy}`);
@@ -122,9 +126,9 @@ async function runViewportFlow(viewport) {
     if (backendReadmeListCount < 6) {
       throw new Error(`backend readme should render markdown bullets as list items, got ${backendReadmeListCount}`);
     }
-    const backendCodeBlockCount = await page.locator(".readme-markdown pre code", { hasText: "opendock verify-hook" }).count();
-    if (backendCodeBlockCount !== 1) {
-      throw new Error(`backend readme should render the command as one code block, got ${backendCodeBlockCount}`);
+    const backendVerifyHookCodeBlockCount = await page.locator(".readme-markdown pre code", { hasText: deprecatedRunCommand }).count();
+    if (backendVerifyHookCodeBlockCount !== 0) {
+      throw new Error(`backend readme should not render deprecated run commands, got ${backendVerifyHookCodeBlockCount}`);
     }
     await page.getByRole("button", { name: "뒤로" }).click();
     await assertWorkspaceList(page);

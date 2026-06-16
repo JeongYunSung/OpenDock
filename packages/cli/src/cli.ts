@@ -368,8 +368,7 @@ export async function run(argv = process.argv): Promise<void> {
       }
     });
 
-  program
-    .command("verify-hook")
+  const verifyHookCommand = new Command("verify-hook")
     .alias("run-hook")
     .description("Verify and run an OpenDock-managed hook target.")
     .argument("<dock>", "Installed dock id: owner/name")
@@ -386,6 +385,7 @@ export async function run(argv = process.argv): Promise<void> {
         throw error;
       }
     });
+  program.addCommand(verifyHookCommand, { hidden: true });
 
   program
     .command("doctor")
