@@ -63,6 +63,7 @@ files:
 | `tags` | 用于 Hub 搜索和筛选的 lowercase catalog labels. |
 | `requires` | Runtime requirements. |
 | `files` | 应用到 project root 的文件或目录. |
+| `commands` | Verified commands for `opendock run`. |
 | `install` | Tasks for first install and initial generation. |
 | `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
@@ -115,6 +116,33 @@ doctor:
 ```
 
 步骤按顺序执行。`doctor` 应该只检查状态，不修改项目。
+
+## Commands
+
+Tasks are run by OpenDock during `install`, `update`, and `doctor`.
+`commands` are named commands that installed docs, skills, workflows, or harnesses can call later with `opendock run`.
+
+```yaml
+files:
+  - from: files/.opendock/harness/owner__name/check.mjs
+    to: .opendock/harness/owner__name/check.mjs
+
+commands:
+  check:
+    description: Run the dock quality gate.
+    file: .opendock/harness/owner__name/check.mjs
+    runner: node
+```
+
+Installed instructions should call:
+
+```bash
+opendock run check --dock owner/name
+```
+
+Do not put direct runtime calls such as `node .opendock/...` or `python .opendock/...` in installed agent docs.
+
+Supported runners: `bun`, `node`, `powershell`, `python`, `python3`, `sh`.
 
 ## Workdir Files And Export
 

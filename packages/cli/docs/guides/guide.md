@@ -1,7 +1,8 @@
 # OpenDock Guide
 
 `dock.yml` describes what a dock adds to a project: files, required tools,
-install/update/doctor tasks, generated outputs, and health checks.
+install/update/doctor tasks, generated outputs, post-install commands, and
+health checks.
 
 OpenDock is a small packaging layer for repeatable AI setup. Pick the docks you
 need, combine them in one project, and keep each dock independently tracked for
@@ -95,6 +96,7 @@ stay outside the OpenDock block.
 | `requires` | no | Runtime requirements prepared before tasks run. |
 | `workdir` | no | Files that prepare the private dock workdir before tasks run. |
 | `files` | no | File or directory mappings applied to the project root. |
+| `commands` | no | Verified commands that installed docs, skills, or harnesses can run later with `opendock run`. |
 | `install` | no | Tasks for first install and initial generation. |
 | `update` | no | Tasks for refresh and maintenance. |
 | `doctor` | no | Health checks that do not modify the project. |
@@ -212,7 +214,7 @@ files:
 Text files are usually applied as managed blocks. Agent runtime files under
 paths such as `.codex/`, `.claude/`, `.agents/`,
 `.github/copilot-instructions.md`, and `.github/instructions/` are tracked as
-whole files so skill frontmatter, hook scripts, and executable permissions stay
+whole files so skill frontmatter, workflow files, and executable permissions stay
 valid. Binary files and structured config files are also tracked by checksum. If
 a user edits OpenDock-managed content, OpenDock stops before writing root files.
 `--force` means the dock version wins.
@@ -235,6 +237,53 @@ doctor:
 
 Tasks run top to bottom. `check` makes a step idempotent. `doctor` should report
 state and avoid changing the project.
+
+## Commands
+
+Tasks are run by OpenDock during `install`, `update`, and `doctor`. Commands are
+run later by humans, agents, skills, workflows, or harness docs through
+`opendock run`.
+
+Use `commands` when a dock installs a harness or helper that should be callable
+after install:
+
+```yaml
+files:
+  - from: files/.opendock/harness/opendock__design-ultrawork/check.mjs
+    to: .opendock/harness/opendock__design-ultrawork/check.mjs
+
+commands:
+  check:
+    description: Run the design quality gate.
+    file: .opendock/harness/opendock__design-ultrawork/check.mjs
+    runner: node
+```
+
+Installed instructions should call the command by name:
+
+```bash
+opendock run check --dock opendock/design-ultrawork
+```
+
+Do not put direct runtime calls such as `node .opendock/...` or
+`python .opendock/...` in `AGENTS.md`, `CLAUDE.md`, skills, workflows, or
+README files. Those bypass OpenDock's installed-file checks and are rejected at
+deploy for declared command files.
+
+Supported runners:
+
+| Runner | File extensions |
+|---|---|
+| `bun` | `.cjs`, `.js`, `.mjs`, `.ts` |
+| `node` | `.cjs`, `.js`, `.mjs` |
+| `powershell` | `.ps1` |
+| `python`, `python3` | `.py` |
+| `sh` | `.sh` |
+
+The command file must be installed through `files`, not only generated from a
+task export. `opendock run` verifies the installed dock, release metadata,
+current file checksum, declared runner, file extension, symlink status, and path
+safety before executing it.
 
 ## Workdir Files And Export
 
@@ -386,6 +435,13 @@ Tasks:
 2. Important tool checks include `version`.
 3. Long-running tasks use `timeout_ms`.
 4. External generators use `workdir: dock` and `export`.
+
+Commands:
+
+1. Harnesses and helper scripts are declared under `commands`.
+2. Installed agent docs use `opendock run <command> --dock owner/name`.
+3. Command files are installed through `files`.
+4. Direct runtime calls into `.opendock/` are not used in installed docs.
 
 Release:
 

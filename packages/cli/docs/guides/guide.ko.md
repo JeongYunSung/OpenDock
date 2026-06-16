@@ -176,6 +176,7 @@ doctor:
 | `tags` | 선택 | Hub 검색과 필터에 사용할 lowercase catalog label입니다. |
 | `requires` | 선택 | dock 실행 전에 준비할 runtime requirement입니다. |
 | `files` | 선택 | 프로젝트 root로 적용할 파일 또는 디렉터리 mapping입니다. |
+| `commands` | 선택 | 설치 후 agent 문서, skill, workflow, harness가 `opendock run`으로 호출할 command입니다. |
 | `install` | 선택 | 최초 install과 초기 생성 작업 task입니다. |
 | `update` | 선택 | refresh와 유지보수 작업 task입니다. |
 | `doctor` | 선택 | 프로젝트를 수정하지 않는 상태 점검 task입니다. |
@@ -372,7 +373,7 @@ Markdown, text, common root instruction 파일은 managed block으로 적용됩�
 
 `.codex/`, `.claude/`, `.agents/`, `.github/copilot-instructions.md`,
 `.github/instructions/` 아래의 agent runtime 파일은 block으로 감싸지 않습니다.
-skill frontmatter, hook script, 실행권한이 깨지지 않도록 checksum 기반 managed
+skill frontmatter, workflow file, 실행권한이 깨지지 않도록 checksum 기반 managed
 file로 그대로 관리합니다.
 
 예시:
@@ -482,6 +483,50 @@ doctor:
     check: node --version
     version: ">=22.0.0"
 ```
+
+## commands
+
+`install`, `update`, `doctor`는 OpenDock이 설치와 점검 과정에서 실행하는 task입니다.
+반면 `commands`는 설치가 끝난 뒤 `AGENTS.md`, `CLAUDE.md`, skill, workflow,
+harness 문서가 호출할 수 있는 이름 있는 command입니다.
+
+harness나 helper script를 함께 설치하는 dock은 command를 명시합니다.
+
+```yaml
+files:
+  - from: files/.opendock/harness/opendock__design-ultrawork/check.mjs
+    to: .opendock/harness/opendock__design-ultrawork/check.mjs
+
+commands:
+  check:
+    description: Run the design quality gate.
+    file: .opendock/harness/opendock__design-ultrawork/check.mjs
+    runner: node
+```
+
+설치된 agent 문서에서는 runtime을 직접 호출하지 말고 command 이름으로 실행합니다.
+
+```bash
+opendock run check --dock opendock/design-ultrawork
+```
+
+`AGENTS.md`, `CLAUDE.md`, skill, workflow, README에 `node .opendock/...` 또는
+`python .opendock/...` 같은 직접 실행 명령을 쓰지 마세요. declared command file에
+대해서는 deploy 단계에서도 이런 직접 runtime 호출을 거부합니다.
+
+지원 runner:
+
+| runner | file extension |
+|---|---|
+| `bun` | `.cjs`, `.js`, `.mjs`, `.ts` |
+| `node` | `.cjs`, `.js`, `.mjs` |
+| `powershell` | `.ps1` |
+| `python`, `python3` | `.py` |
+| `sh` | `.sh` |
+
+command file은 `files`를 통해 설치되어야 합니다. `opendock run`은 설치된 dock,
+release metadata, 현재 파일 checksum, runner, 확장자, symlink 여부, path safety를
+확인한 뒤 실행합니다.
 
 ## workdir.files와 export
 
@@ -913,7 +958,7 @@ files:
 3. root Markdown instruction은 managed block으로, agent runtime 파일은 exact file로 적용되는지 확인했는가?
 4. 설정 파일이나 binary는 checksum managed file로 충돌 감지되는지 확인했는가?
 
-tasks:
+steps:
 
 1. 재실행 가능한 step에는 `check`를 붙였는가?
 2. 버전이 중요한 도구에는 `version` 범위를 넣었는가?

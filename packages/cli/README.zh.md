@@ -93,6 +93,7 @@ opendock bootstrap windows
 | `opendock update` | 仅在有更新时应用新的已审核版本. |
 | `opendock update --force` | 即使 managed content 被本地修改，也以 dock version 为准. |
 | `opendock uninstall owner/name` | 移除一个 dock 及其管理的项目文件. |
+| `opendock run check --dock owner/name` | 运行已安装 dock 声明的 command，例如 harness check. |
 | `opendock doctor` | 检查项目状态和 dock 的检查 step. |
 | `opendock log` | 显示当前项目最近的命令日志. |
 | `opendock version` | 显示 CLI, schema 和 Registry 信息. |
@@ -152,6 +153,31 @@ doctor:
 
 如果 dock-private workdir 中运行的 task 需要先读取输入文件，请使用
 `workdir.files`。需要写入 project root 的文件使用 `files`。
+
+## Run Commands
+
+`install`, `update`, `doctor` tasks 由 OpenDock 在安装和检查时执行。
+`commands` 是安装后给 docs、skills、workflows 或 harness 调用的命名 command。
+
+如果 dock 提供 harness，安装后的说明应调用 OpenDock，而不是直接运行 runtime 命令。
+
+```yaml
+files:
+  - from: files/.opendock/harness/owner__name/check.mjs
+    to: .opendock/harness/owner__name/check.mjs
+
+commands:
+  check:
+    description: Run the dock quality gate.
+    file: .opendock/harness/owner__name/check.mjs
+    runner: node
+```
+
+```bash
+opendock run check --dock owner/name
+```
+
+不要在安装的 agent docs 里写 `node .opendock/...` 这类直接调用。
 
 ## Example Docks
 

@@ -96,6 +96,7 @@ opendock bootstrap windows
 | `opendock update` | 更新できる dock があるときだけ新しいレビュー済み version を適用. |
 | `opendock update --force` | OpenDock-managed content が編集されていても dock version を優先. |
 | `opendock uninstall owner/name` | 1つの dock と、その dock が管理する project files を削除. |
+| `opendock run check --dock owner/name` | インストール済み dock が宣言した command を実行します。例: harness check. |
 | `opendock doctor` | project state と dock の確認 step を実行. |
 | `opendock log` | current project の最近の command log を表示. |
 | `opendock version` | CLI, schema, Registry 情報を表示. |
@@ -156,6 +157,31 @@ doctor:
 
 dock-private workdir で実行する task が事前に input file を必要とする場合は
 `workdir.files` を使います。project root に書き込む file には `files` を使います。
+
+## Run Commands
+
+`install`, `update`, `doctor` tasks are run by OpenDock during setup and checks.
+`commands` are named commands that installed docs, skills, workflows, or harnesses can call later.
+
+When a dock ships a harness, installed instructions should call OpenDock instead of direct runtime commands.
+
+```yaml
+files:
+  - from: files/.opendock/harness/owner__name/check.mjs
+    to: .opendock/harness/owner__name/check.mjs
+
+commands:
+  check:
+    description: Run the dock quality gate.
+    file: .opendock/harness/owner__name/check.mjs
+    runner: node
+```
+
+```bash
+opendock run check --dock owner/name
+```
+
+Do not use direct calls like `node .opendock/...` in installed agent docs.
 
 ## Example Docks
 

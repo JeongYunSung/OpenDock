@@ -159,6 +159,7 @@ bin/opendock version
 | `opendock update` | Apply newer reviewed versions when installed docks have updates. |
 | `opendock update --force` | Update even when OpenDock-managed content was edited locally. |
 | `opendock uninstall owner/name` | Remove one installed dock and the project files it manages. |
+| `opendock run check --dock owner/name` | Run a command declared by an installed dock, such as a harness check. |
 | `opendock install/update/uninstall --json` | Print a machine-readable change report. |
 | `opendock doctor` | Check the project state and each installed dock's check steps. |
 | `opendock log` | Show recent command history for the current project. |
@@ -215,6 +216,14 @@ tags:
 files:
   - from: files/AGENTS.md
     to: AGENTS.md
+  - from: files/.opendock/harness/owner__name/check.mjs
+    to: .opendock/harness/owner__name/check.mjs
+
+commands:
+  check:
+    description: Run the dock quality gate.
+    file: .opendock/harness/owner__name/check.mjs
+    runner: node
 
 requires:
   runtimes:
@@ -315,6 +324,38 @@ install:
 
 This lets OpenDock cooperate with external tools such as `oma`, `omx`, or other
 AI setup generators while still tracking the files that reach the project root.
+
+## Run Commands
+
+Tasks are for OpenDock itself during install, update, and doctor. Commands are
+for the files a dock installs and the agents that read those files later.
+
+Use `commands` when a dock ships a harness or helper that should be run after
+install:
+
+```yaml
+files:
+  - from: files/.opendock/harness/owner__name/check.mjs
+    to: .opendock/harness/owner__name/check.mjs
+
+commands:
+  check:
+    description: Run the dock quality gate.
+    file: .opendock/harness/owner__name/check.mjs
+    runner: node
+```
+
+Then `AGENTS.md`, `CLAUDE.md`, skills, workflows, and other installed
+instructions should call:
+
+```bash
+opendock run check --dock owner/name
+```
+
+Do not tell agents to run `node .opendock/...`, `python .opendock/...`, or
+similar direct runtime commands. `opendock run` checks the installed dock,
+release metadata, file checksum, declared runner, and file type before it runs
+the command.
 
 ## Example Docks
 

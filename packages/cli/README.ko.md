@@ -156,6 +156,7 @@ bin/opendock version
 | `opendock update` | 업데이트 가능한 dock이 있을 때 더 새로운 검토 완료 버전을 적용합니다. |
 | `opendock update --force` | 직접 수정한 OpenDock 관리 파일도 dock 버전으로 업데이트합니다. |
 | `opendock uninstall owner/name` | dock 하나와 그 dock이 관리하던 프로젝트 파일을 제거합니다. |
+| `opendock run check --dock owner/name` | 설치된 dock이 선언한 command를 실행합니다. 예: harness check. |
 | `opendock doctor` | 프로젝트 상태와 설치된 dock의 점검 step을 실행합니다. |
 | `opendock log` | 현재 프로젝트의 최근 명령 실행 기록을 보여줍니다. |
 | `opendock version` | CLI, schema, Registry 정보를 출력합니다. |
@@ -301,6 +302,34 @@ install:
 
 이 구조는 `oma`, `omx` 또는 다른 AI setup generator와 협력하면서도 프로젝트
 root에 들어온 최종 파일을 OpenDock이 추적할 수 있게 해줍니다.
+
+## Run Commands
+
+`install`, `update`, `doctor` task는 OpenDock이 설치와 점검 과정에서 실행합니다.
+`commands`는 설치 후 `AGENTS.md`, `CLAUDE.md`, skill, workflow, harness 문서가
+호출할 수 있는 이름 있는 command입니다.
+
+`commands`로 harness를 선언하면 설치된 instruction에서는 직접 `node .opendock/...`를
+실행하지 않고 아래처럼 호출합니다.
+
+```yaml
+files:
+  - from: files/.opendock/harness/owner__name/check.mjs
+    to: .opendock/harness/owner__name/check.mjs
+
+commands:
+  check:
+    description: Run the dock quality gate.
+    file: .opendock/harness/owner__name/check.mjs
+    runner: node
+```
+
+```bash
+opendock run check --dock owner/name
+```
+
+`opendock run`은 설치된 dock, release metadata, 현재 파일 checksum, runner, 확장자를
+확인한 뒤 command를 실행합니다.
 
 ## Example Docks
 

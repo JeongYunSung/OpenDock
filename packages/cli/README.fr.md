@@ -97,6 +97,7 @@ opendock bootstrap windows
 | `opendock update` | Applique les versions revues plus récentes quand des mises à jour existent. |
 | `opendock update --force` | Privilégie la version du dock malgré des modifications locales gérées. |
 | `opendock uninstall owner/name` | Supprime un dock et les fichiers projet qu'il gère. |
+| `opendock run check --dock owner/name` | Exécute un command déclaré par un dock installé, par exemple un harness check. |
 | `opendock doctor` | Vérifie l'état du projet et les steps de diagnostic de chaque dock. |
 | `opendock log` | Affiche les logs de commandes récents du projet courant. |
 | `opendock version` | Affiche les informations CLI, schema et Registry. |
@@ -158,6 +159,31 @@ doivent aussi être déclarés dans `files`.
 Utilisez `workdir.files` quand une task dans le dock-private workdir a besoin de
 fichiers d'entrée avant son exécution. Utilisez `files` pour les fichiers à
 écrire dans le project root.
+
+## Run Commands
+
+`install`, `update`, and `doctor` tasks are run by OpenDock during setup and checks.
+`commands` are named commands that installed docs, skills, workflows, or harnesses can call later.
+
+When a dock ships a harness, installed instructions should call OpenDock instead of direct runtime commands.
+
+```yaml
+files:
+  - from: files/.opendock/harness/owner__name/check.mjs
+    to: .opendock/harness/owner__name/check.mjs
+
+commands:
+  check:
+    description: Run the dock quality gate.
+    file: .opendock/harness/owner__name/check.mjs
+    runner: node
+```
+
+```bash
+opendock run check --dock owner/name
+```
+
+Do not use direct calls like `node .opendock/...` in installed agent docs.
 
 ## Example Docks
 
