@@ -7,6 +7,33 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.30 - 2026-06-16
+
+### CLI
+
+- Add `opendock run <command> --dock owner/name` for commands declared by
+  installed docks.
+- Store declared commands in `.opendock/dock.lock.yml` so installed projects can
+  list and run dock-owned helpers.
+- Validate deploy content so declared command files are called through
+  `opendock run` instead of direct runtime invocations.
+- Fix deploy argument handling for platform-specific manifest files.
+
+### Desktop App
+
+- Normalize shortcut import, export, and display labels across macOS and Windows.
+- Close the command palette reliably with Escape or backdrop clicks.
+
+### Docs
+
+- Document dock `commands`, `opendock run`, and the task/command split across
+  README, guides, and site docs.
+
+### Tests
+
+- Add regression coverage for verified command execution, lock tampering,
+  deploy validation, shortcut config handling, and command palette closing.
+
 ## 0.1.29 - 2026-06-16
 
 ### Fixed
