@@ -433,6 +433,14 @@ export class DockInstaller {
       platform,
       workdir: relative(projectDir, workdir).replaceAll("\\", "/"),
       files: fileSummary.records,
+      commands: Object.entries(manifest.commands)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([name, command]) => ({
+          name,
+          file: command.file,
+          runner: command.runner,
+          ...(command.description === undefined ? {} : { description: command.description }),
+        })),
     };
   }
 

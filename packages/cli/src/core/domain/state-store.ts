@@ -15,6 +15,13 @@ export interface AppliedFileRecord {
   executable?: boolean;
 }
 
+export interface InstalledCommandRecord {
+  name: string;
+  file: string;
+  runner: string;
+  description?: string;
+}
+
 export interface InstalledDockRecord {
   id: string;
   name: string;
@@ -25,6 +32,7 @@ export interface InstalledDockRecord {
   platform: OpenDockPlatform;
   workdir: string;
   files: AppliedFileRecord[];
+  commands?: InstalledCommandRecord[];
 }
 
 export interface ProjectState {

@@ -960,66 +960,94 @@ describe("opendock TypeScript CLI", () => {
     ]);
   });
 
-  it("verifies and runs checksum-managed hook targets", async () => {
+  it("runs Registry-verified dock commands", async () => {
     const docks = tempDir();
     const project = tempDir();
+    const commandFile = ".opendock/harness/test__harness/check.mjs";
     writeDock(docks, "test", "harness", "1.0.0", {
       files: [
         {
-          path: ".opendock/harness/test__harness/check.mjs",
+          path: commandFile,
           content:
-            'import { writeFileSync } from "node:fs";\nwriteFileSync("hook-ran.txt", "ok\\n");\n',
+            'import { writeFileSync } from "node:fs";\nwriteFileSync("command-ran.txt", "ok\\n");\n',
         },
       ],
+      commands: {
+        check: {
+          description: "Check generated harness files.",
+          file: commandFile,
+          runner: "node",
+        },
+      },
     });
+    const registry = mockRegistry([
+      {
+        archive: await createDockArchive(docks, "test", "harness", "1.0.0"),
+        id: "test/harness",
+        latest: true,
+        platform: "macos",
+        version: "1.0.0",
+      },
+    ]);
 
-    await install({
-      dockRef: DockRef.parse("test/harness@1.0.0"),
-      projectDir: project,
-      operation: "install",
-      phase: "install",
-      platform: "macos",
-      runTasks: true,
-      resolve: localResolver(docks),
+    try {
+      await withCwd(project, () =>
+        captureConsole(() =>
+          runCli(["bun", "opendock", "install", "test/harness@1.0.0", "--platform", "macos"]),
+        ),
+      );
+      await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "run", "check"])),
+      );
+    } finally {
+      registry.restore();
+    }
+
+    expect(readFileSync(join(project, "command-ran.txt"), "utf8")).toBe("ok\n");
+    expect(installedDocks(project)[0]?.commands).toEqual([
+      {
+        description: "Check generated harness files.",
+        file: commandFile,
+        name: "check",
+        runner: "node",
+      },
+    ]);
+  });
+
+  it("blocks modified dock commands before execution", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const commandFile = ".opendock/harness/test__harness/check.mjs";
+    writeDock(docks, "test", "harness", "1.0.0", {
+      files: [
+        {
+          path: commandFile,
+          content:
+            'import { writeFileSync } from "node:fs";\nwriteFileSync("command-ran.txt", "ok\\n");\n',
+        },
+      ],
+      commands: {
+        check: {
+          file: commandFile,
+          runner: "node",
+        },
+      },
     });
+    const registry = mockRegistry([
+      {
+        archive: await createDockArchive(docks, "test", "harness", "1.0.0"),
+        id: "test/harness",
+        latest: true,
+        platform: "macos",
+        version: "1.0.0",
+      },
+    ]);
 
     await withCwd(project, () =>
       captureConsole(() =>
-        runCli([
-          "bun",
-          "opendock",
-          "verify-hook",
-          "test/harness",
-          ".opendock/harness/test__harness/check.mjs",
-        ]),
+        runCli(["bun", "opendock", "install", "test/harness@1.0.0", "--platform", "macos"]),
       ),
     );
-
-    expect(readFileSync(join(project, "hook-ran.txt"), "utf8")).toBe("ok\n");
-  });
-
-  it("blocks modified hook targets before execution", async () => {
-    const docks = tempDir();
-    const project = tempDir();
-    writeDock(docks, "test", "harness", "1.0.0", {
-      files: [
-        {
-          path: ".opendock/harness/test__harness/check.mjs",
-          content:
-            'import { writeFileSync } from "node:fs";\nwriteFileSync("hook-ran.txt", "ok\\n");\n',
-        },
-      ],
-    });
-
-    await install({
-      dockRef: DockRef.parse("test/harness@1.0.0"),
-      projectDir: project,
-      operation: "install",
-      phase: "install",
-      platform: "macos",
-      runTasks: true,
-      resolve: localResolver(docks),
-    });
 
     writeFileSync(
       join(project, ".opendock", "harness", "test__harness", "check.mjs"),
@@ -1029,18 +1057,79 @@ describe("opendock TypeScript CLI", () => {
 
     try {
       await withCwd(project, async () => {
-        await expect(
-          runCli([
-            "bun",
-            "opendock",
-            "verify-hook",
-            "test/harness",
-            ".opendock/harness/test__harness/check.mjs",
-          ]),
-        ).rejects.toThrow("checksum mismatch for hook target");
+        await expect(runCli(["bun", "opendock", "run", "check"])).rejects.toThrow(
+          "checksum mismatch for command file",
+        );
       });
     } finally {
       restoreExitCode(previousExitCode);
+      registry.restore();
+    }
+
+    expect(existsSync(join(project, "pwned.txt"))).toBe(false);
+  });
+
+  it("blocks lock-edited dock commands against signed Registry metadata", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const commandFile = ".opendock/harness/test__harness/check.mjs";
+    writeDock(docks, "test", "harness", "1.0.0", {
+      files: [
+        {
+          path: commandFile,
+          content:
+            'import { writeFileSync } from "node:fs";\nwriteFileSync("command-ran.txt", "ok\\n");\n',
+        },
+      ],
+      commands: {
+        check: {
+          file: commandFile,
+          runner: "node",
+        },
+      },
+    });
+    const registry = mockRegistry([
+      {
+        archive: await createDockArchive(docks, "test", "harness", "1.0.0"),
+        id: "test/harness",
+        latest: true,
+        platform: "macos",
+        version: "1.0.0",
+      },
+    ]);
+
+    await withCwd(project, () =>
+      captureConsole(() =>
+        runCli(["bun", "opendock", "install", "test/harness@1.0.0", "--platform", "macos"]),
+      ),
+    );
+
+    const targetPath = join(project, ".opendock", "harness", "test__harness", "check.mjs");
+    writeFileSync(
+      targetPath,
+      'import { writeFileSync } from "node:fs";\nwriteFileSync("pwned.txt", "bad\\n");\n',
+    );
+    const lockPath = join(project, ".opendock", "dock.lock.yml");
+    const lock = YAML.parse(readFileSync(lockPath, "utf8")) as {
+      docks: Array<{ files: Array<{ checksum: string; path: string }> }>;
+    };
+    const record = lock.docks[0]?.files.find((file) => file.path === commandFile);
+    if (!record) {
+      throw new Error("expected command file record");
+    }
+    record.checksum = sha256(readFileSync(targetPath));
+    writeFileSync(lockPath, YAML.stringify(lock));
+
+    const previousExitCode = process.exitCode;
+    try {
+      await withCwd(project, async () => {
+        await expect(runCli(["bun", "opendock", "run", "check"])).rejects.toThrow(
+          "lock checksum does not match signed release for command file",
+        );
+      });
+    } finally {
+      restoreExitCode(previousExitCode);
+      registry.restore();
     }
 
     expect(existsSync(join(project, "pwned.txt"))).toBe(false);
@@ -1254,6 +1343,7 @@ describe("opendock TypeScript CLI", () => {
       id: "test/unsafe",
       summary: "",
       tags: [],
+      commands: {},
       requires: { runtimes: {} },
       files: [],
       tasks: {
@@ -1273,6 +1363,7 @@ describe("opendock TypeScript CLI", () => {
       id: "test/unsafe-oma-link",
       summary: "",
       tags: [],
+      commands: {},
       requires: { runtimes: {} },
       files: [],
       tasks: {
@@ -1285,6 +1376,55 @@ describe("opendock TypeScript CLI", () => {
     expect(() => runTasks(manifest, "install", project)).toThrow("not allowed");
   });
 
+  it("rejects direct runtime calls to declared command files during deploy", async () => {
+    const dockRoot = tempDir();
+    const commandFile = ".opendock/harness/test__harness/check.mjs";
+    mkdirSync(join(dockRoot, "files", ".opendock", "harness", "test__harness"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(dockRoot, "files", ".opendock", "harness", "test__harness", "check.mjs"),
+      "console.log('ok');\n",
+    );
+    writeFileSync(
+      join(dockRoot, "files", "AGENTS.md"),
+      `# Agent\n\nRun \`node "${commandFile}"\` before handoff.\n`,
+    );
+    writeFileSync(
+      join(dockRoot, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/harness",
+        summary: "Harness dock",
+        files: [
+          { from: "files/AGENTS.md", to: "AGENTS.md" },
+          { from: `files/${commandFile}`, to: commandFile },
+        ],
+        commands: {
+          check: {
+            file: commandFile,
+            runner: "node",
+          },
+        },
+      }),
+    );
+
+    const previousFetch = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      throw new Error("deploy should not reach registry");
+    }) as typeof fetch;
+
+    try {
+      await withCwd(dockRoot, async () => {
+        await expect(runCli(["bun", "opendock", "deploy", "test/harness@1.0.0"])).rejects.toThrow(
+          "must use `opendock run check`",
+        );
+      });
+    } finally {
+      globalThis.fetch = previousFetch;
+    }
+  });
+
   it("submits platform-specific deploy manifests as dock.yml archives", async () => {
     const dockRoot = tempDir();
     const extractRoot = tempDir();
@@ -1293,8 +1433,15 @@ describe("opendock TypeScript CLI", () => {
     mkdirSync(dataDir, { recursive: true });
     writeFileSync(join(dataDir, "auth-token"), "test-token");
     mkdirSync(join(dockRoot, "macos", "files"), { recursive: true });
+    mkdirSync(join(dockRoot, "macos", "files", ".opendock", "harness", "test__platform-dock"), {
+      recursive: true,
+    });
     mkdirSync(join(dockRoot, "macos", "inputs"), { recursive: true });
     writeFileSync(join(dockRoot, "macos", "files", "AGENTS.md"), "# macOS Agent\n");
+    writeFileSync(
+      join(dockRoot, "macos", "files", ".opendock", "harness", "test__platform-dock", "check.mjs"),
+      "console.log('ok');\n",
+    );
     writeFileSync(
       join(dockRoot, "macos", "inputs", "oma-config.yaml"),
       "language: en\nmodel_preset: codex\n",
@@ -1313,10 +1460,22 @@ describe("opendock TypeScript CLI", () => {
         readme: "DOCK.md",
         logo: "logo.png",
         tags: ["testing", "ai-agent"],
+        commands: {
+          check: {
+            file: ".opendock/harness/test__platform-dock/check.mjs",
+            runner: "node",
+          },
+        },
         workdir: {
           files: [{ from: "inputs/oma-config.yaml", to: ".agents/oma-config.yaml" }],
         },
-        files: [{ from: "files/AGENTS.md", to: "AGENTS.md" }],
+        files: [
+          { from: "files/AGENTS.md", to: "AGENTS.md" },
+          {
+            from: "files/.opendock/harness/test__platform-dock/check.mjs",
+            to: ".opendock/harness/test__platform-dock/check.mjs",
+          },
+        ],
       }),
     );
 
@@ -1372,6 +1531,12 @@ describe("opendock TypeScript CLI", () => {
     expect(archivedManifest).toContain("tags:");
     expect(archivedManifest).toContain("- testing");
     expect(readFileSync(join(extractRoot, "files", "AGENTS.md"), "utf8")).toBe("# macOS Agent\n");
+    expect(
+      readFileSync(
+        join(extractRoot, "files", ".opendock", "harness", "test__platform-dock", "check.mjs"),
+        "utf8",
+      ),
+    ).toBe("console.log('ok');\n");
     expect(readFileSync(join(extractRoot, "inputs", "oma-config.yaml"), "utf8")).toContain(
       "model_preset: codex",
     );
@@ -1498,6 +1663,14 @@ function writeDock(
   options: {
     files?: Array<{ path: string; content: string }>;
     workdirFiles?: Array<{ path: string; to: string; content: string }>;
+    commands?: Record<
+      string,
+      {
+        description?: string;
+        file: string;
+        runner: string;
+      }
+    >;
     tasks?: {
       install?: unknown[];
       update?: unknown[];
@@ -1524,6 +1697,7 @@ function writeDock(
     summary: "",
     readme: "DOCK.md",
     logo: "logo.png",
+    commands: options.commands ?? {},
     files: (options.files ?? []).map((file) => ({
       from: `files/${file.path}`,
       to: file.path,

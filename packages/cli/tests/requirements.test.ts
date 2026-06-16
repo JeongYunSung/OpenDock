@@ -248,6 +248,7 @@ function omaManifest(): DockManifest {
     id: "test/oma",
     summary: "",
     tags: [],
+    commands: {},
     requires: {
       runtimes: {
         bun: ">=1.3.0",

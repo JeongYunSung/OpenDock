@@ -173,6 +173,25 @@ const tagsSchema = z
   })
   .default([]);
 
+const commandNameSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(64)
+  .regex(/^[a-z][a-z0-9-]*$/, "command names must be lowercase slugs");
+
+const commandRunnerSchema = z.enum(["bun", "node", "powershell", "python", "python3", "sh"]);
+
+const commandSpecSchema = z
+  .object({
+    description: z.string().max(240).optional(),
+    file: z.string(),
+    runner: commandRunnerSchema,
+  })
+  .strict();
+
+const commandsSchema = z.record(commandNameSchema, commandSpecSchema).default({});
+
 const manifestSchema = z
   .object({
     opendock: z.number().optional(),
@@ -182,6 +201,7 @@ const manifestSchema = z
     readme: z.string().optional(),
     logo: z.string().optional(),
     tags: tagsSchema,
+    commands: commandsSchema,
     requires: requiresSchema,
     workdir: workdirSpecSchema,
     files: z.array(fileSpecSchema).default([]),
@@ -206,6 +226,7 @@ export type Tasks = z.infer<typeof tasksSchema>;
 export type TaskPhase = keyof Tasks;
 export type TaskStep = z.infer<typeof taskStepSchema>;
 export type ExportSpec = z.infer<typeof exportSpecSchema>;
+export type CommandSpec = z.infer<typeof commandSpecSchema>;
 type ParsedDockManifest = z.infer<typeof manifestSchema>;
 export type DockManifest = Omit<ParsedDockManifest, "workdir"> & { workdir?: WorkdirSpec };
 

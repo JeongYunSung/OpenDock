@@ -34,6 +34,7 @@ const commonAllowedCommands = new Set([
   "npx",
   "oma",
   "omx",
+  "opendock",
   "pip",
   "pip3",
   "pipx",
@@ -373,6 +374,9 @@ function isAllowedCommandShape(program: string, args: string[]): boolean {
   if (program === "omx") {
     return isSafeOmxCommand(args);
   }
+  if (program === "opendock") {
+    return isSafeOpenDockCommand(args);
+  }
   return false;
 }
 
@@ -473,6 +477,19 @@ function isSafeOmxCommand(args: string[]): boolean {
   );
 }
 
+function isSafeOpenDockCommand(args: string[]): boolean {
+  if (args.length !== 2 && args.length !== 4) {
+    return false;
+  }
+  if (args[0] !== "run" || !isSafeCommandName(args[1] ?? "")) {
+    return false;
+  }
+  if (args.length === 2) {
+    return true;
+  }
+  return args[2] === "--dock" && isSafeDockId(args[3] ?? "");
+}
+
 function isSafeWingetCommand(args: string[]): boolean {
   if (isExact(args, ["--version"])) {
     return true;
@@ -529,6 +546,14 @@ function isExact(args: string[], expected: string[]): boolean {
 
 function isSafePackageName(value: string): boolean {
   return safePackagePattern.test(value);
+}
+
+function isSafeCommandName(value: string): boolean {
+  return /^[a-z][a-z0-9-]{0,63}$/.test(value);
+}
+
+function isSafeDockId(value: string): boolean {
+  return /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(value) && !value.includes("..");
 }
 
 function isSafeRunnerArg(value: string): boolean {

@@ -228,6 +228,7 @@ describe("platform regression coverage", () => {
       id: "test/common",
       summary: "",
       tags: [],
+      commands: {},
       requires: { runtimes: {} },
       files: [],
       tasks: {
@@ -260,6 +261,7 @@ describe("platform regression coverage", () => {
       id: "test/doctor",
       summary: "",
       tags: [],
+      commands: {},
       requires: { runtimes: {} },
       files: [],
       tasks: {
@@ -440,6 +442,7 @@ function platformManifest(): DockManifest {
     id: "test/platform",
     summary: "",
     tags: [],
+    commands: {},
     requires: { runtimes: {} },
     files: [],
     tasks: {
