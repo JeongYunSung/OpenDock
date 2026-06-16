@@ -1,4 +1,5 @@
 use base64::{engine::general_purpose, Engine as _};
+use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -14,7 +15,12 @@ use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{Emitter, Manager, Runtime};
 
 const DEFAULT_REGISTRY_URL: &str = "https://registry.opendock.app";
-const CATALOG_PAGE_LIMIT: &str = "12";
+const DEFAULT_CATALOG_PAGE_LIMIT: u32 = 12;
+const MAX_CATALOG_PAGE_LIMIT: u32 = 60;
+const DEFAULT_VERSION_PAGE_LIMIT: u32 = 6;
+const MAX_VERSION_PAGE_LIMIT: u32 = 30;
+const DEFAULT_ACCOUNT_PAGE_LIMIT: u32 = 6;
+const MAX_ACCOUNT_PAGE_LIMIT: u32 = 60;
 
 #[derive(Default)]
 struct RunningCommands(Mutex<HashMap<String, u32>>);
@@ -339,19 +345,29 @@ async fn opendock_auth_logout() -> Result<OpenDockCommandResult, String> {
 }
 
 #[tauri::command]
-async fn opendock_catalog(sort: Option<String>, query: Option<String>) -> Result<Value, String> {
+async fn opendock_catalog(
+    sort: Option<String>,
+    query: Option<String>,
+    page: Option<u32>,
+    limit: Option<u32>,
+) -> Result<Value, String> {
     let sort = match sort.as_deref().unwrap_or("downloads") {
-        "downloads" | "updated" | "name" => sort.unwrap_or_else(|| "downloads".to_string()),
+        "downloads" | "stars" | "updated" | "name" => {
+            sort.unwrap_or_else(|| "downloads".to_string())
+        }
         "recent" => "updated".to_string(),
-        _ => return Err("catalog sort must be downloads, updated, recent, or name".to_string()),
+        _ => return Err("catalog sort must be downloads, stars, updated, recent, or name".to_string()),
     };
     let mut url = reqwest::Url::parse(&format!("{}/v1/docks", registry_base()))
         .map_err(|error| format!("invalid registry URL: {error}"))?;
     {
         let mut pairs = url.query_pairs_mut();
         pairs.append_pair("sort", &sort);
-        pairs.append_pair("page", "1");
-        pairs.append_pair("limit", CATALOG_PAGE_LIMIT);
+        pairs.append_pair("page", &bounded_page(page));
+        pairs.append_pair(
+            "limit",
+            &bounded_limit(limit, DEFAULT_CATALOG_PAGE_LIMIT, MAX_CATALOG_PAGE_LIMIT),
+        );
         if let Some(query) = query
             .as_deref()
             .map(str::trim)
@@ -372,7 +388,11 @@ async fn opendock_dock_detail(dock_id: String) -> Result<Value, String> {
 }
 
 #[tauri::command]
-async fn opendock_dock_versions(dock_id: String) -> Result<Value, String> {
+async fn opendock_dock_versions(
+    dock_id: String,
+    page: Option<u32>,
+    limit: Option<u32>,
+) -> Result<Value, String> {
     validate_dock_id(&dock_id)?;
     let url = reqwest::Url::parse(&format!(
         "{}/v1/docks/{}/versions",
@@ -380,7 +400,78 @@ async fn opendock_dock_versions(dock_id: String) -> Result<Value, String> {
         dock_id
     ))
     .map_err(|error| format!("invalid registry URL: {error}"))?;
+    let mut url = url;
+    {
+        let mut pairs = url.query_pairs_mut();
+        pairs.append_pair("page", &bounded_page(page));
+        pairs.append_pair(
+            "limit",
+            &bounded_limit(limit, DEFAULT_VERSION_PAGE_LIMIT, MAX_VERSION_PAGE_LIMIT),
+        );
+    }
     request_registry_json(url).await
+}
+
+#[tauri::command]
+async fn opendock_star_status(ids: Vec<String>) -> Result<Value, String> {
+    if ids.is_empty() {
+        return Ok(serde_json::json!({ "items": [] }));
+    }
+    for id in &ids {
+        validate_dock_id(id)?;
+    }
+    let token = load_auth_token()?;
+    let mut url = reqwest::Url::parse(&format!("{}/v1/me/stars/status", registry_base()))
+        .map_err(|error| format!("invalid registry URL: {error}"))?;
+    {
+        let mut pairs = url.query_pairs_mut();
+        for id in ids {
+            pairs.append_pair("ids", &id);
+        }
+    }
+    request_registry_json_with_auth(Method::GET, url, &token).await
+}
+
+#[tauri::command]
+async fn opendock_my_stars() -> Result<Value, String> {
+    let token = load_auth_token()?;
+    let url = reqwest::Url::parse(&format!("{}/v1/me/stars", registry_base()))
+        .map_err(|error| format!("invalid registry URL: {error}"))?;
+    request_registry_json_with_auth(Method::GET, url, &token).await
+}
+
+#[tauri::command]
+async fn opendock_my_docks(page: Option<u32>, limit: Option<u32>) -> Result<Value, String> {
+    let token = load_auth_token()?;
+    let mut url = reqwest::Url::parse(&format!("{}/v1/me/docks", registry_base()))
+        .map_err(|error| format!("invalid registry URL: {error}"))?;
+    {
+        let mut pairs = url.query_pairs_mut();
+        pairs.append_pair("page", &bounded_page(page));
+        pairs.append_pair(
+            "limit",
+            &bounded_limit(limit, DEFAULT_ACCOUNT_PAGE_LIMIT, MAX_ACCOUNT_PAGE_LIMIT),
+        );
+    }
+    request_registry_json_with_auth(Method::GET, url, &token).await
+}
+
+#[tauri::command]
+async fn opendock_star_dock(dock_id: String) -> Result<Value, String> {
+    validate_dock_id(&dock_id)?;
+    let token = load_auth_token()?;
+    let url = reqwest::Url::parse(&format!("{}/v1/me/stars/{}", registry_base(), dock_id))
+        .map_err(|error| format!("invalid registry URL: {error}"))?;
+    request_registry_json_with_auth(Method::POST, url, &token).await
+}
+
+#[tauri::command]
+async fn opendock_unstar_dock(dock_id: String) -> Result<Value, String> {
+    validate_dock_id(&dock_id)?;
+    let token = load_auth_token()?;
+    let url = reqwest::Url::parse(&format!("{}/v1/me/stars/{}", registry_base(), dock_id))
+        .map_err(|error| format!("invalid registry URL: {error}"))?;
+    request_registry_json_with_auth(Method::DELETE, url, &token).await
 }
 
 #[tauri::command]
@@ -541,6 +632,11 @@ pub fn run() {
             opendock_catalog,
             opendock_dock_detail,
             opendock_dock_versions,
+            opendock_star_status,
+            opendock_my_stars,
+            opendock_my_docks,
+            opendock_star_dock,
+            opendock_unstar_dock,
             opendock_registry_asset_data_url,
             opendock_project_state,
             opendock_import_shortcuts,
@@ -775,12 +871,83 @@ async fn request_registry_json(url: reqwest::Url) -> Result<Value, String> {
         .map_err(|error| format!("failed to parse registry response: {error}"))
 }
 
+async fn request_registry_json_with_auth(
+    method: Method,
+    url: reqwest::Url,
+    token: &str,
+) -> Result<Value, String> {
+    let response = reqwest::Client::new()
+        .request(method, url.clone())
+        .bearer_auth(token)
+        .header(reqwest::header::ACCEPT, "application/json")
+        .header(reqwest::header::CACHE_CONTROL, "no-cache, no-store")
+        .header(reqwest::header::PRAGMA, "no-cache")
+        .send()
+        .await
+        .map_err(|error| format!("failed to request registry: {error}"))?;
+    let status = response.status();
+    if !status.is_success() {
+        let text = response.text().await.unwrap_or_default();
+        let detail = text.trim();
+        if detail.is_empty() {
+            return Err(format!("registry returned {status} for {url}"));
+        }
+        return Err(format!("registry returned {status} for {url}: {detail}"));
+    }
+    response
+        .json::<Value>()
+        .await
+        .map_err(|error| format!("failed to parse registry response: {error}"))
+}
+
 fn registry_base() -> String {
     env::var("OPENDOCK_REGISTRY_URL")
         .ok()
         .map(|value| value.trim().trim_end_matches('/').to_string())
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| DEFAULT_REGISTRY_URL.to_string())
+}
+
+fn bounded_page(page: Option<u32>) -> String {
+    page.unwrap_or(1).max(1).to_string()
+}
+
+fn bounded_limit(limit: Option<u32>, default_limit: u32, max_limit: u32) -> String {
+    limit.unwrap_or(default_limit).clamp(1, max_limit).to_string()
+}
+
+fn load_auth_token() -> Result<String, String> {
+    let path = auth_token_path()?;
+    let token = fs::read_to_string(&path)
+        .map_err(|_| "OpenDock auth token was not found. Run opendock auth login.".to_string())?
+        .trim()
+        .to_string();
+    if token.is_empty() {
+        return Err("OpenDock auth token is empty. Run opendock auth login.".to_string());
+    }
+    Ok(token)
+}
+
+fn auth_token_path() -> Result<PathBuf, String> {
+    Ok(cli_data_dir()?.join("auth-token"))
+}
+
+fn cli_data_dir() -> Result<PathBuf, String> {
+    if cfg!(target_os = "windows") {
+        if let Some(appdata) = env::var_os("APPDATA") {
+            return Ok(PathBuf::from(appdata).join("OpenDock"));
+        }
+    }
+
+    let home = home_dir().ok_or_else(|| "home directory not found".to_string())?;
+    if cfg!(target_os = "macos") {
+        Ok(home
+            .join("Library")
+            .join("Application Support")
+            .join("OpenDock"))
+    } else {
+        Ok(home.join(".local").join("share").join("OpenDock"))
+    }
 }
 
 fn validate_registry_asset_url(value: &str) -> Result<reqwest::Url, String> {

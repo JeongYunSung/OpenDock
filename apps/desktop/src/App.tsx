@@ -9,7 +9,6 @@ import {
   useState,
   type Dispatch,
   type FormEvent,
-  type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent,
   type ReactNode,
   type SetStateAction,
@@ -28,7 +27,6 @@ import {
   FolderOpen,
   Github,
   Globe2,
-  Keyboard,
   LogOut,
   Maximize2,
   Menu as MenuIcon,
@@ -37,14 +35,12 @@ import {
   Pencil,
   Plus,
   RefreshCw,
-  RotateCcw,
   Search,
+  Star,
   Sun,
   Trash2,
-  Upload,
   UserRound,
-  X,
-  Zap
+  X
 } from "lucide-react";
 import {
   BASE_LOGS,
@@ -58,6 +54,8 @@ import {
   type AppLog,
   type DesktopAppState,
   type Dock,
+  type DockStarResponse,
+  type DockStarStatusResponse,
   type DockVersion,
   type DockView,
   type InstalledDockRecord,
@@ -75,6 +73,10 @@ import {
   type RegistryDockDetail,
   type RegistryDockSearchResponse,
   type RegistryDockVersionsResponse,
+  type MyDock,
+  type MyDocksCounts,
+  type MyDocksResponse,
+  type MyStarsResponse,
   type SortMode,
   TEXT,
   type Theme
@@ -93,15 +95,16 @@ import {
   type ShortcutCommandId,
   type ShortcutOverrides,
   type ShortcutPlatform,
-  shortcutFromKeyboardEvent,
   shortcutPlatformForWindow,
 } from "./shortcuts";
 
 const logoSrc = "/opendock-logo.png";
 const badgeSrc = "/official-badge.png";
 const REGISTRY_ORIGIN = "https://registry.opendock.app";
-const CATALOG_PAGE_LIMIT = 12;
 const MAX_STORED_LOGS = 400;
+const DEFAULT_CATALOG_PAGE_LIMIT = 12;
+const DEFAULT_VERSION_PAGE_LIMIT = 6;
+const ACCOUNT_PAGE_LIMIT = 6;
 const registryAssetCache = new Map<string, string | null>();
 const registryAssetRequests = new Map<string, Promise<string | null>>();
 type WindowControlPlatform = "macos" | "windows";
@@ -152,6 +155,11 @@ type InstalledDockRow = Dock & {
   updateAvailable?: boolean;
   updatePlatform?: string;
 };
+
+interface ResponsivePageSizes {
+  catalog: number;
+  versions: number;
+}
 
 function isTauriRuntime() {
   return typeof window !== "undefined" && Boolean(window.__TAURI_INTERNALS__ || window.__TAURI__);
@@ -360,6 +368,54 @@ function registrySortMode(mode: SortMode) {
   return mode === "recent" ? "updated" : mode;
 }
 
+function readResponsivePageSizes(): ResponsivePageSizes {
+  if (typeof window === "undefined") {
+    return { catalog: DEFAULT_CATALOG_PAGE_LIMIT, versions: DEFAULT_VERSION_PAGE_LIMIT };
+  }
+  return {
+    catalog: catalogPageLimitForViewport(window.innerWidth, window.innerHeight),
+    versions: versionPageLimitForViewport(window.innerWidth, window.innerHeight)
+  };
+}
+
+function catalogPageLimitForViewport(width: number, height: number) {
+  const columns = width <= 520 ? 1 : width <= 980 ? 2 : 3;
+  const baseRows = width <= 520 ? 5 : 3;
+  const extraRows = Math.max(0, Math.floor((height - 980) / 420));
+  return Math.min(24, columns * Math.min(8, baseRows + extraRows));
+}
+
+function versionPageLimitForViewport(width: number, height: number) {
+  const baseRows = width <= 980 ? 5 : 6;
+  const extraRows = Math.max(0, Math.floor((height - 900) / 180));
+  return Math.min(18, baseRows + extraRows);
+}
+
+function useResponsivePageSizes() {
+  const [sizes, setSizes] = useState<ResponsivePageSizes>(() => readResponsivePageSizes());
+
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const next = readResponsivePageSizes();
+        setSizes((current) =>
+          current.catalog === next.catalog && current.versions === next.versions ? current : next
+        );
+      });
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  return sizes;
+}
+
 function versionStatusClass(status?: string): VersionStatusClass {
   const normalized = status?.toLowerCase();
   if (normalized === "approved") return "approved";
@@ -382,19 +438,21 @@ function versionStatusLabel(status?: string) {
   return "Pending review";
 }
 
-async function requestCatalog(sortMode: SortMode, query: string) {
+async function requestCatalog(sortMode: SortMode, query: string, page: number, limit: number) {
   const sort = registrySortMode(sortMode);
   const trimmedQuery = query.trim();
   if (isTauriRuntime()) {
     return invoke<RegistryDockSearchResponse>("opendock_catalog", {
+      page,
+      limit,
       sort,
       query: trimmedQuery || null
     });
   }
   return requestRegistryJson<RegistryDockSearchResponse>("/v1/docks", {
     sort,
-    page: "1",
-    limit: String(CATALOG_PAGE_LIMIT),
+    page: String(page),
+    limit: String(limit),
     ...(trimmedQuery ? { query: trimmedQuery } : {})
   });
 }
@@ -404,9 +462,56 @@ async function requestDockDetail(dockId: string) {
   return requestRegistryJson<RegistryDockDetail>(`/v1/docks/${dockId}`);
 }
 
-async function requestDockVersions(dockId: string) {
-  if (isTauriRuntime()) return invoke<RegistryDockVersionsResponse>("opendock_dock_versions", { dockId });
-  return requestRegistryJson<RegistryDockVersionsResponse>(`/v1/docks/${dockId}/versions`);
+async function requestDockVersions(dockId: string, page: number, limit: number) {
+  if (isTauriRuntime()) return invoke<RegistryDockVersionsResponse>("opendock_dock_versions", { dockId, page, limit });
+  return requestRegistryJson<RegistryDockVersionsResponse>(`/v1/docks/${dockId}/versions`, {
+    page: String(page),
+    limit: String(limit)
+  });
+}
+
+async function requestStarStatus(ids: string[]) {
+  if (ids.length === 0) return { items: [] } satisfies DockStarStatusResponse;
+  if (!isTauriRuntime()) {
+    return { items: ids.map((id) => ({ id, starred: false })) } satisfies DockStarStatusResponse;
+  }
+  return invoke<DockStarStatusResponse>("opendock_star_status", { ids });
+}
+
+async function requestMyStars() {
+  if (!isTauriRuntime()) return { items: [] } satisfies MyStarsResponse;
+  return invoke<MyStarsResponse>("opendock_my_stars");
+}
+
+async function requestMyDocks(page: number, limit: number) {
+  if (!isTauriRuntime()) {
+    return {
+      counts: emptyMyDocksCounts(),
+      items: [],
+      limit,
+      page,
+      total: 0
+    } satisfies MyDocksResponse;
+  }
+  return invoke<MyDocksResponse>("opendock_my_docks", { page, limit });
+}
+
+function emptyMyDocksCounts(): MyDocksCounts {
+  return {
+    all: 0,
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+    unavailable: 0,
+    hidden: 0
+  };
+}
+
+async function requestSetDockStar(dockId: string, starred: boolean) {
+  if (!isTauriRuntime()) {
+    return { id: dockId, starred, stars: starred ? 1 : 0 } satisfies DockStarResponse;
+  }
+  return invoke<DockStarResponse>(starred ? "opendock_star_dock" : "opendock_unstar_dock", { dockId });
 }
 
 async function requestRegistryJson<T>(path: string, params: Record<string, string> = {}) {
@@ -537,7 +642,7 @@ function downloadShortcutFile(contents: string) {
   URL.revokeObjectURL(url);
 }
 
-function matchesDockSearch(dock: Dock, query: string) {
+function matchesInstalledSearch(dock: InstalledDockRow, query: string) {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return true;
   return [
@@ -547,6 +652,8 @@ function matchesDockSearch(dock: Dock, query: string) {
     dock.owner,
     dock.publisher,
     dock.desc,
+    dock.version,
+    dock.latestVersion,
     ...dock.tags,
     ...dock.modes
   ]
@@ -611,18 +718,18 @@ function DockIcon(props: { dock: Dock; size?: "small" | "large" }) {
       cancelled = true;
     };
   }, [sourceLogoUrl]);
-  const hasLogo = Boolean(logoUrl && !imageFailed);
-  const className = ["dock-icon", props.size, hasLogo ? "has-logo" : ""].filter(Boolean).join(" ");
-  const iconSize = props.size === "large" ? 27 : props.size === "small" ? 16 : 19;
+  const hasRegistryLogo = Boolean(logoUrl && !imageFailed);
+  const imageUrl = hasRegistryLogo ? logoUrl : logoSrc;
+  const className = ["dock-icon", props.size, "has-logo", hasRegistryLogo ? "" : "fallback-logo"].filter(Boolean).join(" ");
   const label = props.dock.displayName ?? props.dock.short ?? props.dock.id;
 
   return (
     <div className={className} style={{ background: props.dock.grad }}>
-      {hasLogo ? (
-        <img alt={`${label} logo`} src={logoUrl ?? ""} onError={() => setImageFailed(true)} />
-      ) : (
-        <Zap fill="currentColor" size={iconSize} />
-      )}
+      <img
+        alt={hasRegistryLogo ? `${label} logo` : "OpenDock logo"}
+        src={imageUrl ?? logoSrc}
+        onError={hasRegistryLogo ? () => setImageFailed(true) : undefined}
+      />
     </div>
   );
 }
@@ -650,16 +757,28 @@ export function App() {
   const [projectSwitcherOpen, setProjectSwitcherOpen] = useState(false);
   const [sortMode, setSortMode] = useStoredState<SortMode>("opendock.sortMode", "downloads");
   const [searchQuery, setSearchQuery] = useStoredState("opendock.searchQuery", "");
+  const [installedSearchQuery, setInstalledSearchQuery] = useStoredState("opendock.installedSearchQuery", "");
   const [dockView, setDockView] = useStoredState<DockView>("opendock.dockView", "list");
   const [detailId, setDetailId] = useStoredState("opendock.detailId", "");
   const [detailTab, setDetailTab] = useStoredState<"readme" | "versions">("opendock.detailTab", "readme");
   const [detailVersion, setDetailVersion] = useStoredState("opendock.detailVersion", "");
+  const [catalogPage, setCatalogPage] = useState(1);
+  const [catalogTotal, setCatalogTotal] = useState(0);
+  const [versionPage, setVersionPage] = useState(1);
+  const [versionTotal, setVersionTotal] = useState(0);
   const [installedDocks, setInstalledDocks] = useStoredState<Record<string, boolean>>("opendock.installedDocks", {});
   const [installedRecords, setInstalledRecords] = useState<InstalledDockRecord[]>([]);
   const [outdatedReportsById, setOutdatedReportsById] = useState<Record<string, OpenDockOutdatedReport>>({});
   const [projectStateLoaded, setProjectStateLoaded] = useState(false);
   const [catalogDocks, setCatalogDocks] = useState<Dock[]>([]);
   const [dockDetails, setDockDetails] = useState<Record<string, Dock>>({});
+  const [starredDockIds, setStarredDockIds] = useState<Record<string, boolean>>({});
+  const [starUpdatingId, setStarUpdatingId] = useState("");
+  const [myDocks, setMyDocks] = useState<MyDock[]>([]);
+  const [myDocksPage, setMyDocksPage] = useState(1);
+  const [myDocksTotal, setMyDocksTotal] = useState(0);
+  const [myDocksCounts, setMyDocksCounts] = useState<MyDocksCounts>(() => emptyMyDocksCounts());
+  const [myStarredDocks, setMyStarredDocks] = useState<Dock[]>([]);
   const [logs, setLogs] = useStoredState<AppLog[]>("opendock.logs", BASE_LOGS, {
     defer: true,
     normalize: (value) => (Array.isArray(value) ? value.slice(-MAX_STORED_LOGS) : BASE_LOGS),
@@ -676,6 +795,9 @@ export function App() {
   const [nickname, setNickname] = useStoredState("opendock.nickname", "opendock");
   const [accountEmail, setAccountEmail] = useStoredState("opendock.accountEmail", "kjyscom@gmail.com");
   const [appStateLoaded, setAppStateLoaded] = useState(!isTauriRuntime());
+  const responsivePageSizes = useResponsivePageSizes();
+  const catalogPageSize = responsivePageSizes.catalog;
+  const versionPageSize = responsivePageSizes.versions;
 
   const t = TEXT[lang];
   const activeProject = useMemo(
@@ -684,10 +806,7 @@ export function App() {
   );
   const projectPathLabel = activeProject ? activeProject.path : t.noProjectPath;
   const registryDocks = catalogDocks;
-  const visibleDocks = useMemo(
-    () => registryDocks.filter((dock) => matchesDockSearch(dock, searchQuery)),
-    [registryDocks, searchQuery]
-  );
+  const visibleDocks = registryDocks;
   const installedFallbackDocks = useMemo(
     () => installedRecords.map((record, index) => dockFromInstalledRecord(record, index)),
     [installedRecords]
@@ -720,6 +839,7 @@ export function App() {
     () =>
       [...visibleDocks].sort((a, b) => {
         if (sortMode === "name") return a.short.localeCompare(b.short);
+        if (sortMode === "stars") return (b.stars ?? 0) - (a.stars ?? 0) || a.short.localeCompare(b.short);
         if (sortMode === "recent") {
           const byDate = new Date(b.updatedAt ?? "").getTime() - new Date(a.updatedAt ?? "").getTime();
           return Number.isNaN(byDate) || byDate === 0 ? b.updatedRank - a.updatedRank : byDate;
@@ -753,6 +873,13 @@ export function App() {
     () => installedRows.filter((row) => row.updateAvailable).length,
     [installedRows]
   );
+  const filteredInstalledRows = useMemo(
+    () => installedRows.filter((row) => matchesInstalledSearch(row, installedSearchQuery)),
+    [installedRows, installedSearchQuery]
+  );
+  const catalogPageCount = Math.max(1, Math.ceil(Math.max(catalogTotal, sortedDocks.length) / catalogPageSize));
+  const versionPageCount = Math.max(1, Math.ceil(Math.max(versionTotal, detail?.versions?.length ?? 0) / versionPageSize));
+  const myDocksPageCount = Math.max(1, Math.ceil(myDocksTotal / ACCOUNT_PAGE_LIMIT));
   const overlayOpen = openMenu !== "";
   const accountMenuName = authProvider === "github" ? t.githubAccount : accountEmail;
   const showAppLoading = isTauriRuntime() && !appStateLoaded;
@@ -768,6 +895,9 @@ export function App() {
     setDetailTab("readme");
     setDetailVersion("");
     setSearchQuery("");
+    setInstalledSearchQuery("");
+    setCatalogPage(1);
+    setVersionPage(1);
     setOpenMenu("");
   }
 
@@ -825,24 +955,47 @@ export function App() {
   }, [projects, activeProjectId]);
 
   useEffect(() => {
+    setCatalogPage(1);
+  }, [searchQuery, sortMode, catalogPageSize]);
+
+  useEffect(() => {
+    setVersionPage(1);
+    setVersionTotal(0);
+  }, [detailKey, versionPageSize]);
+
+  useEffect(() => {
+    if (catalogPage > catalogPageCount) setCatalogPage(catalogPageCount);
+  }, [catalogPage, catalogPageCount]);
+
+  useEffect(() => {
+    if (versionPage > versionPageCount) setVersionPage(versionPageCount);
+  }, [versionPage, versionPageCount]);
+
+  useEffect(() => {
+    if (myDocksPage > myDocksPageCount) setMyDocksPage(myDocksPageCount);
+  }, [myDocksPage, myDocksPageCount]);
+
+  useEffect(() => {
     let cancelled = false;
-    void requestCatalog(sortMode, searchQuery)
+    void requestCatalog(sortMode, searchQuery, catalogPage, catalogPageSize)
       .then((response) => {
         if (cancelled) return;
         const nextDocks = response.items.map((item, index) => normalizeRegistryDock(item, index));
         setCatalogDocks(nextDocks);
+        setCatalogTotal(response.total ?? nextDocks.length);
       })
       .catch((error) => {
         if (!cancelled) {
           const message = error instanceof Error ? error.message : String(error);
           setCatalogDocks([]);
+          setCatalogTotal(0);
           appendLog("WARN", "var(--warning)", message);
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [searchQuery, sortMode]);
+  }, [searchQuery, sortMode, catalogPage, catalogPageSize]);
 
   useEffect(() => {
     if (!activeProject || !isTauriRuntime()) {
@@ -887,10 +1040,11 @@ export function App() {
       try {
         const [detailResponse, versionsResponse] = await Promise.all([
           requestDockDetail(dockFullId(baseDetail)),
-          requestDockVersions(dockFullId(baseDetail))
+          requestDockVersions(dockFullId(baseDetail), versionPage, versionPageSize)
         ]);
         if (cancelled) return;
         const versions = normalizeRegistryVersions(versionsResponse);
+        setVersionTotal(versionsResponse.total ?? versions.length);
         setDockDetails((current) => ({
           ...current,
           [detailKey]: mergeRegistryDockDetail(baseDetail, detailResponse, versions)
@@ -905,11 +1059,57 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [detailKey, dockView]);
+  }, [detailKey, dockView, versionPage, versionPageSize]);
 
   useEffect(() => {
     setDetailVersion("");
   }, [detailKey]);
+
+  useEffect(() => {
+    if (!loggedIn) {
+      setStarredDockIds({});
+      setMyStarredDocks([]);
+      setMyDocks([]);
+      return;
+    }
+    let cancelled = false;
+    const ids = [
+      ...catalogDocks.map((dock) => dockFullId(dock)),
+      ...(detailKey ? [detailKey] : [])
+    ].filter((id, index, values) => id && values.indexOf(id) === index);
+    void requestStarStatus(ids)
+      .then((response) => {
+        if (cancelled) return;
+        setStarredDockIds((current) => {
+          const next = { ...current };
+          for (const item of response.items ?? []) next[item.id] = item.starred;
+          return next;
+        });
+      })
+      .catch((error) => {
+        if (!cancelled) appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loggedIn, catalogDocks, detailKey]);
+
+  useEffect(() => {
+    if (!loggedIn) {
+      setMyStarredDocks([]);
+      setMyDocks([]);
+      setMyDocksTotal(0);
+      setMyDocksCounts(emptyMyDocksCounts());
+      setMyDocksPage(1);
+      return;
+    }
+    void refreshMyStars();
+  }, [loggedIn]);
+
+  useEffect(() => {
+    if (!loggedIn) return;
+    void refreshMyDocks(myDocksPage);
+  }, [loggedIn, myDocksPage]);
 
   useLayoutEffect(() => {
     handleNativeMenuRef.current = handleNativeMenu;
@@ -1041,6 +1241,12 @@ export function App() {
     setDeleteProjectName("");
     setInstalledDocks({});
     setInstalledRecords([]);
+    setStarredDockIds({});
+    setMyDocks([]);
+    setMyDocksPage(1);
+    setMyDocksTotal(0);
+    setMyDocksCounts(emptyMyDocksCounts());
+    setMyStarredDocks([]);
     setProjectStateLoaded(false);
     resetDockWorkspaceView();
   }
@@ -1314,6 +1520,68 @@ export function App() {
     const normalized = nextNickname.trim();
     if (!normalized) return;
     setNickname(normalized);
+  }
+
+  async function refreshMyStars() {
+    try {
+      const response = await requestMyStars();
+      const docks = (response.items ?? []).map((item, index) => normalizeRegistryDock(item.dock, index));
+      setMyStarredDocks(docks);
+      setStarredDockIds((current) => ({
+        ...current,
+        ...Object.fromEntries(docks.map((dock) => [dockFullId(dock), true]))
+      }));
+    } catch (error) {
+      appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  async function refreshMyDocks(page: number) {
+    try {
+      const response = await requestMyDocks(page, ACCOUNT_PAGE_LIMIT);
+      setMyDocks(response.items ?? []);
+      setMyDocksTotal(response.total ?? response.items?.length ?? 0);
+      setMyDocksCounts(response.counts ?? emptyMyDocksCounts());
+      if (response.page && response.page !== page) setMyDocksPage(response.page);
+    } catch (error) {
+      appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  async function toggleDockStar(dock: Dock) {
+    const dockId = dockFullId(dock);
+    if (starUpdatingId) return;
+    if (!loggedIn) {
+      appendLog("WARN", "var(--warning)", t.signInToStar);
+      return;
+    }
+    const nextStarred = !starredDockIds[dockId];
+    setStarUpdatingId(dockId);
+    try {
+      const response = await requestSetDockStar(dockId, nextStarred);
+      applyDockStarResponse(response);
+      await refreshMyStars();
+    } catch (error) {
+      appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
+    } finally {
+      setStarUpdatingId("");
+    }
+  }
+
+  function applyDockStarResponse(response: DockStarResponse) {
+    const updateDock = (dock: Dock) =>
+      dockFullId(dock) === response.id ? { ...dock, stars: response.stars, dl: dock.dl } : dock;
+    setStarredDockIds((current) => ({ ...current, [response.id]: response.starred }));
+    setCatalogDocks((current) => current.map(updateDock));
+    setDockDetails((current) =>
+      Object.fromEntries(
+        Object.entries(current).map(([key, dock]) => [key, updateDock(dock)])
+      )
+    );
+    setMyStarredDocks((current) => {
+      if (!response.starred) return current.filter((dock) => dockFullId(dock) !== response.id);
+      return current.map(updateDock);
+    });
   }
 
   async function handleNativeMenu(id: string) {
@@ -1688,9 +1956,10 @@ export function App() {
     const base = findDockByKey([...catalogDocks, dock], dockId) ?? dock;
     const [detailResponse, versionsResponse] = await Promise.all([
       requestDockDetail(dockId),
-      requestDockVersions(dockId)
+      requestDockVersions(dockId, 1, versionPageSize)
     ]);
     const versions = normalizeRegistryVersions(versionsResponse);
+    setVersionTotal(versionsResponse.total ?? versions.length);
     const freshDock = mergeRegistryDockDetail(base, detailResponse, versions);
     setDockDetails((current) => ({
       ...current,
@@ -1712,13 +1981,15 @@ export function App() {
 
   async function refreshCatalogFromRegistry() {
     try {
-      const response = await requestCatalog(sortMode, searchQuery);
+      const response = await requestCatalog(sortMode, searchQuery, catalogPage, catalogPageSize);
       const nextDocks = response.items.map((item, index) => normalizeRegistryDock(item, index));
       setCatalogDocks(nextDocks);
+      setCatalogTotal(response.total ?? nextDocks.length);
       appendLog("OK", "var(--success)", "registry refreshed · registry.opendock.app");
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setCatalogDocks([]);
+      setCatalogTotal(0);
       appendLog("WARN", "var(--warning)", message);
     }
   }
@@ -2006,14 +2277,24 @@ export function App() {
         ) : (
           <Workspace
             activeProject={activeProject}
+            catalogPage={catalogPage}
+            catalogPageCount={catalogPageCount}
             detail={detail}
             detailTab={detailTab}
             detailVersion={selectedDetailVersion}
             dockView={dockView}
             installedDocks={activeInstalledDocks}
-            installedRows={installedRows}
+            installedRows={filteredInstalledRows}
+            installedSearchQuery={installedSearchQuery}
+            installedTotalCount={installedRows.length}
             lang={lang}
             logs={logs}
+            myDocks={myDocks}
+            myDocksCounts={myDocksCounts}
+            myDocksPage={myDocksPage}
+            myDocksPageCount={myDocksPageCount}
+            myDocksTotal={myDocksTotal}
+            myStarredDocks={myStarredDocks}
             nickname={nickname}
             accountEmail={accountEmail}
             commandTask={commandTask}
@@ -2035,14 +2316,19 @@ export function App() {
             onRename={openRenameProject}
             onSaveNickname={saveNickname}
             onSelectProject={selectProject}
+            onSetCatalogPage={setCatalogPage}
             onSetDetailTab={setDetailTab}
             onSetDetailVersion={(version) => setDetailVersion(version.version)}
+            onSetInstalledSearchQuery={setInstalledSearchQuery}
+            onSetMyDocksPage={setMyDocksPage}
             onSetSearchQuery={setSearchQuery}
             onSetSortMode={(mode) => {
               setSortMode(mode);
               setOpenMenu("");
             }}
+            onSetVersionPage={setVersionPage}
             onSetView={setMainView}
+            onToggleDockStar={toggleDockStar}
             onToggleSidebar={() => setProjectSidebarCollapsed((current) => !current)}
             onUpdateDocks={() => void updateDocks(activeProject, { showLogs: false })}
             openMenu={openMenu}
@@ -2055,8 +2341,12 @@ export function App() {
             shortcutStatus={shortcutStatus}
             sortMode={sortMode}
             sortedDocks={sortedDocks}
+            starredDockIds={starredDockIds}
+            starUpdatingId={starUpdatingId}
             t={t}
             updateAvailableCount={updateAvailableCount}
+            versionPage={versionPage}
+            versionPageCount={versionPageCount}
             onExportShortcuts={() => void exportShortcuts()}
             onImportShortcuts={() => void importShortcuts()}
             onResetAllShortcuts={resetAllShortcuts}
@@ -2426,6 +2716,8 @@ function ProjectLoading(props: { t: (typeof TEXT)[Lang] }) {
 function Workspace(props: {
   activeProject: Project;
   accountEmail: string;
+  catalogPage: number;
+  catalogPageCount: number;
   commandTask: CommandTask | null;
   detail: Dock | null;
   detailTab: "readme" | "versions";
@@ -2433,8 +2725,16 @@ function Workspace(props: {
   dockView: DockView;
   installedDocks: Record<string, boolean>;
   installedRows: InstalledDockRow[];
+  installedSearchQuery: string;
+  installedTotalCount: number;
   lang: Lang;
   logs: AppLog[];
+  myDocks: MyDock[];
+  myDocksCounts: MyDocksCounts;
+  myDocksPage: number;
+  myDocksPageCount: number;
+  myDocksTotal: number;
+  myStarredDocks: Dock[];
   nickname: string;
   onAddExisting: () => void;
   onBack: () => void;
@@ -2449,11 +2749,16 @@ function Workspace(props: {
   onRename: (project: Project) => void;
   onSaveNickname: (nickname: string) => void;
   onSelectProject: (projectId: string) => void;
+  onSetCatalogPage: (page: number) => void;
   onSetDetailTab: (tab: "readme" | "versions") => void;
   onSetDetailVersion: (version: DockVersion) => void;
+  onSetInstalledSearchQuery: (query: string) => void;
+  onSetMyDocksPage: (page: number) => void;
   onSetSearchQuery: (query: string) => void;
   onSetSortMode: (mode: SortMode) => void;
+  onSetVersionPage: (page: number) => void;
   onSetView: (view: DockView) => void;
+  onToggleDockStar: (dock: Dock) => void;
   onToggleSidebar: () => void;
   onUpdateDocks: () => void;
   openMenu: OpenMenu;
@@ -2466,8 +2771,12 @@ function Workspace(props: {
   shortcutStatus: string;
   sortMode: SortMode;
   sortedDocks: Dock[];
+  starredDockIds: Record<string, boolean>;
+  starUpdatingId: string;
   t: (typeof TEXT)[Lang];
   updateAvailableCount: number;
+  versionPage: number;
+  versionPageCount: number;
   onExportShortcuts: () => void;
   onImportShortcuts: () => void;
   onResetAllShortcuts: () => void;
@@ -2520,17 +2829,17 @@ function Workspace(props: {
           <AccountPanel
             accountEmail={props.accountEmail}
             lang={props.lang}
+            myDocks={props.myDocks}
+            myDocksCounts={props.myDocksCounts}
+            myDocksPage={props.myDocksPage}
+            myDocksPageCount={props.myDocksPageCount}
+            myDocksTotal={props.myDocksTotal}
+            myStarredDocks={props.myStarredDocks}
             nickname={props.nickname}
             onBack={props.onBack}
-            onExportShortcuts={props.onExportShortcuts}
-            onImportShortcuts={props.onImportShortcuts}
-            onResetAllShortcuts={props.onResetAllShortcuts}
-            onResetShortcut={props.onResetShortcut}
+            onOpenDetail={props.onOpenDetail}
             onSaveNickname={props.onSaveNickname}
-            onSetShortcut={props.onSetShortcut}
-            shortcutBindings={props.shortcutBindings}
-            shortcutPlatform={props.shortcutPlatform}
-            shortcutStatus={props.shortcutStatus}
+            onSetMyDocksPage={props.onSetMyDocksPage}
             t={props.t}
           />
         ) : null}
@@ -2617,6 +2926,7 @@ function DetailSidebar(props: { detail: Dock; detailTab: "readme" | "versions"; 
           <h4>{props.t.packageDetails}</h4>
           <Meta label={props.t.latestRelease} value={props.detail.version} />
           <Meta label={props.t.downloads} value={props.detail.dl} />
+          <Meta label={props.t.stars} value={String(props.detail.stars ?? 0)} />
           <Meta label={props.t.updated} value={formatDateLabel(props.detail.updatedAt)} />
           <Meta label={props.t.publisher} value={props.detail.publisher ?? props.detail.owner ?? "opendock"} />
           <h4>{props.t.tags}</h4>
@@ -2644,18 +2954,25 @@ function DetailSidebar(props: { detail: Dock; detailTab: "readme" | "versions"; 
 }
 
 function ExplorePanel(props: {
+  catalogPage: number;
+  catalogPageCount: number;
   openMenu: OpenMenu;
   onOpenDetail: (dockId: string) => void;
+  onSetCatalogPage: (page: number) => void;
   onSetSearchQuery: (query: string) => void;
   onSetSortMode: (mode: SortMode) => void;
+  onToggleDockStar: (dock: Dock) => void;
   searchQuery: string;
   setOpenMenu: (menu: OpenMenu) => void;
   sortMode: SortMode;
   sortedDocks: Dock[];
+  starredDockIds: Record<string, boolean>;
+  starUpdatingId: string;
   t: (typeof TEXT)[Lang];
 }) {
   const sortLabels = {
     downloads: props.t.sortDownloads,
+    stars: props.t.sortStars,
     recent: props.t.sortRecent,
     name: props.t.sortName
   };
@@ -2681,7 +2998,7 @@ function ExplorePanel(props: {
           </button>
           {props.openMenu === "sort" ? (
             <div className="dropdown-menu compact sort-menu">
-              {(["downloads", "recent", "name"] as const).map((mode) => (
+              {(["downloads", "stars", "recent", "name"] as const).map((mode) => (
                 <button className={mode === props.sortMode ? "selected" : ""} key={mode} onClick={() => props.onSetSortMode(mode)} type="button">
                   {sortLabels[mode]}
                   <span />
@@ -2695,10 +3012,24 @@ function ExplorePanel(props: {
         <>
           <div className="dock-grid">
             {props.sortedDocks.map((dock) => (
-              <DockCard dock={dock} key={dockFullId(dock)} onOpen={() => props.onOpenDetail(dockFullId(dock))} t={props.t} />
+              <DockCard
+                dock={dock}
+                key={dockFullId(dock)}
+                onOpen={() => props.onOpenDetail(dockFullId(dock))}
+                onToggleStar={props.onToggleDockStar}
+                starred={Boolean(props.starredDockIds[dockFullId(dock)])}
+                starBusy={props.starUpdatingId === dockFullId(dock)}
+                t={props.t}
+              />
             ))}
           </div>
-          <Pagination t={props.t} />
+          <Pagination
+            label={props.t.explorePagination}
+            onPageChange={props.onSetCatalogPage}
+            page={props.catalogPage}
+            pageCount={props.catalogPageCount}
+            t={props.t}
+          />
         </>
       ) : (
         <CatalogEmptyState t={props.t} />
@@ -2716,7 +3047,14 @@ function CatalogEmptyState(props: { t: (typeof TEXT)[Lang] }) {
   );
 }
 
-function DockCard(props: { dock: Dock; onOpen: () => void; t: (typeof TEXT)[Lang] }) {
+function DockCard(props: {
+  dock: Dock;
+  onOpen: () => void;
+  onToggleStar: (dock: Dock) => void;
+  starred: boolean;
+  starBusy: boolean;
+  t: (typeof TEXT)[Lang];
+}) {
   const platforms = props.dock.platforms?.length ? props.dock.platforms : ["macos", "windows"];
   return (
     <KeyboardButton ariaLabel={`${props.t.openDetail}: ${dockFullId(props.dock)}`} className="dock-card" onOpen={props.onOpen}>
@@ -2725,9 +3063,11 @@ function DockCard(props: { dock: Dock; onOpen: () => void; t: (typeof TEXT)[Lang
         <div>
           <div className="dock-title">
             <strong>{props.dock.short}</strong>
-            {props.dock.official === false ? null : <img alt="official badge" src={badgeSrc} />}
           </div>
-          <small>{props.t.by} {props.dock.publisher ?? props.dock.owner ?? "opendock"}</small>
+          <small className="dock-publisher-line">
+            {props.t.by} {props.dock.publisher ?? props.dock.owner ?? "opendock"}
+            {props.dock.official === false ? null : <img alt="official badge" src={badgeSrc} />}
+          </small>
         </div>
       </div>
       <p>{props.dock.desc}</p>
@@ -2742,11 +3082,56 @@ function DockCard(props: { dock: Dock; onOpen: () => void; t: (typeof TEXT)[Lang
             <span key={platform}>{platformLabel(platform)}</span>
           ))}
         </div>
-        <small>
-          {props.dock.dl} {props.t.downloads}
-        </small>
+        <div className="dock-metrics">
+          <DockMetric count={props.dock.dl} icon={<Download size={13} />} label={props.t.downloads} />
+          <StarButton
+            busy={props.starBusy}
+            count={props.dock.stars ?? 0}
+            dock={props.dock}
+            onToggle={props.onToggleStar}
+            starred={props.starred}
+            t={props.t}
+          />
+        </div>
       </div>
     </KeyboardButton>
+  );
+}
+
+function DockMetric(props: { count: string | number; icon: ReactNode; label: string }) {
+  return (
+    <span aria-label={`${props.count} ${props.label}`} className="dock-metric" title={`${props.count} ${props.label}`}>
+      {props.icon}
+      <span>{props.count}</span>
+    </span>
+  );
+}
+
+function StarButton(props: {
+  busy?: boolean;
+  count: number;
+  dock: Dock;
+  onToggle: (dock: Dock) => void;
+  starred: boolean;
+  t: (typeof TEXT)[Lang];
+}) {
+  const label = `${props.starred ? props.t.unstarAction : props.t.starAction}: ${dockFullId(props.dock)}`;
+  return (
+    <button
+      aria-label={label}
+      className={`star-button ${props.starred ? "starred" : ""}`}
+      disabled={props.busy}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        props.onToggle(props.dock);
+      }}
+      title={label}
+      type="button"
+    >
+      <Star fill={props.starred ? "currentColor" : "none"} size={13} />
+      <span>{props.count}</span>
+    </button>
   );
 }
 
@@ -2762,7 +3147,13 @@ function DetailPanel(props: {
   onInstallDock: (dock: Dock) => void;
   onSetDetailTab: (tab: "readme" | "versions") => void;
   onSetDetailVersion: (version: DockVersion) => void;
+  onSetVersionPage: (page: number) => void;
+  onToggleDockStar: (dock: Dock) => void;
+  starredDockIds: Record<string, boolean>;
+  starUpdatingId: string;
   t: (typeof TEXT)[Lang];
+  versionPage: number;
+  versionPageCount: number;
 }) {
   const fullId = dockFullId(props.detail);
   const installed = Boolean(props.installedDocks[fullId] || props.installedDocks[props.detail.id]);
@@ -2771,21 +3162,33 @@ function DetailPanel(props: {
   return (
     <div className="panel detail-panel">
       <div className="detail-sticky-header">
-        <button className="text-button" onClick={props.onBack} type="button">
-          <ArrowLeft size={15} /> {props.t.back}
-        </button>
         <div className="detail-hero">
-          <DockIcon dock={props.detail} size="large" />
-          <div className="detail-copy">
-            <div className="detail-breadcrumb">{props.t.explore} / {props.detail.owner ?? "opendock"}</div>
-            <div className="detail-title-row">
-              <h1>{fullId}</h1>
-              {props.detail.official === false ? null : <img alt="official badge" src={badgeSrc} />}
+          <button aria-label={props.t.back} className="detail-back-button" onClick={props.onBack} title={props.t.back} type="button">
+            <ChevronLeft className="detail-back-icon-compact" size={19} />
+            <ArrowLeft className="detail-back-icon-expanded" size={15} />
+            <span className="detail-back-label">{props.t.back}</span>
+          </button>
+          <div className="detail-identity">
+            <DockIcon dock={props.detail} size="small" />
+            <div className="detail-copy">
+              <div className="detail-breadcrumb">{props.t.explore} / {props.detail.owner ?? "opendock"}</div>
+              <div className="detail-title-row">
+                <h1>{fullId}</h1>
+              </div>
+              <div className="detail-meta">
+                {props.t.by} {publisher} {props.detail.official === false ? null : <img alt="official badge" src={badgeSrc} />} <span>·</span> {props.t.updated} {formatDateLabel(props.detail.updatedAt)}
+                <span>·</span>
+                <StarButton
+                  busy={props.starUpdatingId === fullId}
+                  count={props.detail.stars ?? 0}
+                  dock={props.detail}
+                  onToggle={props.onToggleDockStar}
+                  starred={Boolean(props.starredDockIds[fullId])}
+                  t={props.t}
+                />
+              </div>
+              {props.detail.desc ? <p className="detail-header-description">{props.detail.desc}</p> : null}
             </div>
-            <div className="detail-meta">
-              {props.t.by} {publisher} {props.detail.official === false ? null : <img alt="official badge" src={badgeSrc} />} <span>·</span> {props.t.updated} {formatDateLabel(props.detail.updatedAt)}
-            </div>
-            <p>{props.detail.desc}</p>
           </div>
           <div className="detail-action">
             {installed ? (
@@ -2799,19 +3202,27 @@ function DetailPanel(props: {
             )}
           </div>
         </div>
-      </div>
-      <div className="detail-tabs">
-        <button className={props.detailTab === "readme" ? "active" : ""} onClick={() => props.onSetDetailTab("readme")} type="button">
-          {props.t.readme}
-        </button>
-        <button className={props.detailTab === "versions" ? "active" : ""} onClick={() => props.onSetDetailTab("versions")} type="button">
-          {props.t.versions}
-        </button>
+        <div className="detail-tabs">
+          <button className={props.detailTab === "readme" ? "active" : ""} onClick={() => props.onSetDetailTab("readme")} type="button">
+            {props.t.readme}
+          </button>
+          <button className={props.detailTab === "versions" ? "active" : ""} onClick={() => props.onSetDetailTab("versions")} type="button">
+            {props.t.versions}
+          </button>
+        </div>
       </div>
       {props.detailTab === "readme" ? (
         <ReadmePanel detail={props.detail} t={props.t} />
       ) : (
-        <VersionsPanel detail={props.detail} selectedVersion={props.detailVersion} onSelectVersion={props.onSetDetailVersion} t={props.t} />
+        <VersionsPanel
+          detail={props.detail}
+          onPageChange={props.onSetVersionPage}
+          onSelectVersion={props.onSetDetailVersion}
+          page={props.versionPage}
+          pageCount={props.versionPageCount}
+          selectedVersion={props.detailVersion}
+          t={props.t}
+        />
       )}
     </div>
   );
@@ -2821,11 +3232,14 @@ function ReadmePanel(props: { detail: Dock; t: (typeof TEXT)[Lang] }) {
   const readme = parseReadmeMarkdown(props.detail.readmeMarkdown);
   const title = readme.title || props.detail.readmeTitle;
   const intro = readme.intro || props.detail.readmeIntro;
+  const description = props.detail.desc?.trim();
+  const shouldShowDescription = Boolean(description && description !== intro?.trim());
   return (
     <div className="readme-panel">
       <h2>{props.t.readme}</h2>
       <div className="readme-card">
         <h3>{title}</h3>
+        {shouldShowDescription ? <p className="readme-description">{description}</p> : null}
         {intro ? <p>{intro}</p> : null}
         {readme.blocks.length > 0 ? (
           <div className="readme-markdown">
@@ -2933,7 +3347,15 @@ function stripInlineMarkdown(value: string) {
   return value.replace(/`([^`]+)`/g, "$1").replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1").trim();
 }
 
-function VersionsPanel(props: { detail: Dock; selectedVersion: DockVersion | null; onSelectVersion: (version: DockVersion) => void; t: (typeof TEXT)[Lang] }) {
+function VersionsPanel(props: {
+  detail: Dock;
+  onPageChange: (page: number) => void;
+  onSelectVersion: (version: DockVersion) => void;
+  page: number;
+  pageCount: number;
+  selectedVersion: DockVersion | null;
+  t: (typeof TEXT)[Lang];
+}) {
   const versions: DockVersion[] = props.detail.versions ?? [];
   return (
     <div className="versions-panel">
@@ -2962,7 +3384,13 @@ function VersionsPanel(props: { detail: Dock; selectedVersion: DockVersion | nul
               );
             })}
           </div>
-          <Pagination t={props.t} />
+          <Pagination
+            label={props.t.versions}
+            onPageChange={props.onPageChange}
+            page={props.page}
+            pageCount={props.pageCount}
+            t={props.t}
+          />
         </>
       ) : (
         <div className="empty-state">
@@ -2978,8 +3406,11 @@ function InstalledPanel(props: {
   activeProject: Project;
   commandTask: CommandTask | null;
   installedRows: InstalledDockRow[];
+  installedSearchQuery: string;
+  installedTotalCount: number;
   onDeleteDock: (dock: Dock) => void;
   onOpenDetail: (dockId: string) => void;
+  onSetInstalledSearchQuery: (query: string) => void;
   onUpdateDocks: () => void;
   t: (typeof TEXT)[Lang];
   updateAvailableCount: number;
@@ -2994,15 +3425,27 @@ function InstalledPanel(props: {
           <h1>{props.t.installedTitle}</h1>
           <p>{props.t.installedSub}</p>
         </div>
-        {props.installedRows.length > 0 ? (
-          <button className="primary-button" disabled={commandActive} onClick={props.onUpdateDocks} type="button">
-            {updateActive ? <span aria-hidden="true" className="button-spinner" /> : <RefreshCw size={15} />}
-            {updateActive ? props.t.updatingAction : props.t.updateAllAction}
-            {props.updateAvailableCount > 0 ? <span className="button-count-chip">{updateCountLabel}</span> : null}
-          </button>
+        {props.installedTotalCount > 0 ? (
+          <div className="installed-toolbar-actions">
+            <label className="search-box installed-search">
+              <Search size={16} />
+              <input
+                aria-label={props.t.installedSearch}
+                onChange={(event) => props.onSetInstalledSearchQuery(event.target.value)}
+                placeholder={props.t.installedSearch}
+                type="search"
+                value={props.installedSearchQuery}
+              />
+            </label>
+            <button className="primary-button" disabled={commandActive} onClick={props.onUpdateDocks} type="button">
+              {updateActive ? <span aria-hidden="true" className="button-spinner" /> : <RefreshCw size={15} />}
+              {updateActive ? props.t.updatingAction : props.t.updateAllAction}
+              {props.updateAvailableCount > 0 ? <span className="button-count-chip">{updateCountLabel}</span> : null}
+            </button>
+          </div>
         ) : null}
       </div>
-      {props.installedRows.length > 0 ? (
+      {props.installedTotalCount > 0 && props.installedRows.length > 0 ? (
         <div className="installed-table">
           <div className="installed-head">
             <span>{props.t.dock}</span>
@@ -3053,6 +3496,11 @@ function InstalledPanel(props: {
               </div>
             ))}
           </div>
+        </div>
+      ) : props.installedTotalCount > 0 ? (
+        <div className="empty-state">
+          <strong>{props.t.noInstalledSearchTitle}</strong>
+          <p>{props.t.noInstalledSearchSub}</p>
         </div>
       ) : (
         <div className="empty-state">
@@ -3398,23 +3846,99 @@ function ProjectSwitcherDialog(props: {
   );
 }
 
+type MyDockReviewGroup = "approved" | "pending" | "rejected" | "unavailable";
+
+function accountStatsFor(counts: MyDocksCounts, stars: number) {
+  return {
+    submitted: counts.all,
+    approved: counts.approved,
+    pending: counts.pending,
+    rejected: counts.rejected,
+    unavailable: counts.unavailable,
+    hidden: counts.hidden,
+    stars
+  };
+}
+
+function myDockReviewGroup(dock: MyDock): MyDockReviewGroup {
+  const status = myDockStatus(dock);
+  if (status === "approved") return "approved";
+  if (status === "pending") return "pending";
+  if (status === "rejected") return "rejected";
+  return "unavailable";
+}
+
+function myDockStatus(dock: MyDock) {
+  if (dock.suspended) return "suspended";
+  if (dock.hidden) return primaryMyDockVersion(dock)?.status?.toLowerCase() ?? "hidden";
+  return dock.status?.toLowerCase() || primaryMyDockVersion(dock)?.status?.toLowerCase() || "pending";
+}
+
+function primaryMyDockVersion(dock: MyDock) {
+  return dock.versions?.find((version) => version.version === dock.version) ?? dock.versions?.[0] ?? null;
+}
+
+function myDockStatusLabel(status: MyDockReviewGroup, t: (typeof TEXT)[Lang]) {
+  if (status === "approved") return t.approved;
+  if (status === "pending") return t.pending;
+  if (status === "rejected") return t.rejected;
+  return t.unavailable;
+}
+
+function dockFromMyDock(dock: MyDock): Dock {
+  return {
+    id: dock.name,
+    short: dock.name,
+    fullId: dock.id,
+    owner: dock.owner ?? dock.id.split("/")[0] ?? "opendock",
+    name: dock.name,
+    displayName: dock.displayName ?? dock.name,
+    grad: "linear-gradient(135deg,var(--dock-backend-a),var(--dock-backend-b) 55%,var(--dock-backend-c))",
+    desc: dock.summary ?? dock.displayName ?? dock.name,
+    tagA: myDockReviewGroup(dock),
+    tagB: dock.hidden ? "hidden" : "submitted",
+    more: "0",
+    dl: "0",
+    downloads: 0,
+    stars: 0,
+    updatedRank: 0,
+    updatedAt: dock.updatedAt ?? dock.submittedAt ?? undefined,
+    version: dock.latestApprovedVersion ?? dock.version ?? "-",
+    size: "-",
+    checksum: "-",
+    readmeTitle: dock.displayName ?? dock.name,
+    readmeIntro: dock.summary ?? "",
+    logoUrl: dock.logo?.url ?? null,
+    publisher: dock.owner ?? "opendock",
+    official: dock.official,
+    platforms: dock.versions?.map((version) => version.platform).filter(Boolean) ?? [],
+    tags: [myDockReviewGroup(dock), dock.hidden ? "hidden" : "submitted"],
+    modes: ["submitted"]
+  };
+}
+
 function AccountPanel(props: {
   accountEmail: string;
   lang: Lang;
+  myDocks: MyDock[];
+  myDocksCounts: MyDocksCounts;
+  myDocksPage: number;
+  myDocksPageCount: number;
+  myDocksTotal: number;
+  myStarredDocks: Dock[];
   nickname: string;
   onBack: () => void;
-  onExportShortcuts: () => void;
-  onImportShortcuts: () => void;
-  onResetAllShortcuts: () => void;
-  onResetShortcut: (commandId: ShortcutCommandId) => void;
+  onOpenDetail: (dockId: string) => void;
   onSaveNickname: (nickname: string) => void;
-  onSetShortcut: (commandId: ShortcutCommandId, shortcut: string | null) => boolean;
-  shortcutBindings: ShortcutBinding[];
-  shortcutPlatform: ShortcutPlatform;
-  shortcutStatus: string;
+  onSetMyDocksPage: (page: number) => void;
   t: (typeof TEXT)[Lang];
 }) {
   const [draftNickname, setDraftNickname] = useState(props.nickname);
+  const [accountTab, setAccountTab] = useState<"profile" | "docks" | "stars">("profile");
+  const accountStats = accountStatsFor(props.myDocksCounts, props.myStarredDocks.length);
+  const myDocksStart =
+    props.myDocksTotal === 0 || props.myDocks.length === 0 ? 0 : (props.myDocksPage - 1) * ACCOUNT_PAGE_LIMIT + 1;
+  const myDocksEnd = myDocksStart === 0 ? 0 : Math.min(props.myDocksTotal, myDocksStart + props.myDocks.length - 1);
 
   useEffect(() => {
     setDraftNickname(props.nickname);
@@ -3425,131 +3949,117 @@ function AccountPanel(props: {
       <button className="text-button" onClick={props.onBack} type="button">
         <ArrowLeft size={15} /> {props.t.backToMain}
       </button>
-      <div className="kicker">{props.t.memberWorkspace}</div>
-      <h1>{props.t.accountInfoTitle}</h1>
-      <p>{props.t.accountInfoSub}</p>
+      <div className="account-heading">
+        <div className="kicker">{props.t.memberWorkspace}</div>
+        <h1>{props.t.accountInfoTitle}</h1>
+        <p>{props.t.accountInfoSub}</p>
+      </div>
       <div className="account-layout">
-        <div className="profile-card">
+        <aside className="profile-card" aria-label={props.t.accountProfile}>
           <div className="profile-avatar">O</div>
           <div>
             <strong>opendock</strong>
             <img alt="official badge" src={badgeSrc} />
           </div>
           <p>{props.accountEmail}</p>
-        </div>
-        <div className="profile-form">
-          <div className="profile-tab">{props.t.profile}</div>
-          <label>
-            <span>{props.t.email}</span>
-            <div>{props.accountEmail}</div>
-          </label>
-          <label>
-            <span>{props.t.nickname}</span>
-            <input onChange={(event) => setDraftNickname(event.target.value)} value={draftNickname} />
-          </label>
-          <button onClick={() => props.onSaveNickname(draftNickname)} type="button">{props.t.saveChanges}</button>
-        </div>
+          <div className="profile-stats">
+            <StatRow label={props.t.submittedDocks} value={accountStats.submitted} />
+            <StatRow label={props.t.approved} value={accountStats.approved} />
+            <StatRow label={props.t.pending} value={accountStats.pending} />
+            <StatRow label={props.t.rejected} value={accountStats.rejected} />
+            <StatRow label={props.t.unavailable} value={accountStats.unavailable} />
+            <StatRow label={props.t.hidden} value={accountStats.hidden} />
+            <StatRow label={props.t.stars} value={accountStats.stars} />
+          </div>
+        </aside>
+        <section className="account-main">
+          <div className="account-tabs">
+            <button className={accountTab === "profile" ? "active" : ""} onClick={() => setAccountTab("profile")} type="button">
+              {props.t.profile}
+            </button>
+            <button className={accountTab === "docks" ? "active" : ""} onClick={() => setAccountTab("docks")} type="button">
+              {props.t.myDocks}
+            </button>
+            <button className={accountTab === "stars" ? "active" : ""} onClick={() => setAccountTab("stars")} type="button">
+              {props.t.stars}
+            </button>
+          </div>
+          {accountTab === "profile" ? (
+            <div className="profile-form">
+              <label>
+                <span>{props.t.email}</span>
+                <div>{props.accountEmail}</div>
+              </label>
+              <label>
+                <span>{props.t.nickname}</span>
+                <input onChange={(event) => setDraftNickname(event.target.value)} value={draftNickname} />
+              </label>
+              <button onClick={() => props.onSaveNickname(draftNickname)} type="button">{props.t.saveChanges}</button>
+            </div>
+          ) : null}
+          {accountTab === "docks" ? (
+            <section className="account-list-panel">
+              <div className="account-range">{myDocksStart}-{myDocksEnd} / {props.myDocksTotal}</div>
+              {props.myDocks.length > 0 ? (
+                <div className="starred-dock-list">
+                  {props.myDocks.map((dock) => (
+                    <button key={dock.id} onClick={() => props.onOpenDetail(dock.id)} type="button">
+                      <DockIcon dock={dockFromMyDock(dock)} size="small" />
+                      <span>
+                        <strong>{dock.id}</strong>
+                        <small>{dock.summary ?? dock.displayName ?? dock.name}</small>
+                      </span>
+                      <span className={`account-status ${myDockReviewGroup(dock)}`}>{myDockStatusLabel(myDockReviewGroup(dock), props.t)}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="starred-empty">{props.t.noSubmittedDocks}</p>
+              )}
+              {props.myDocksTotal > 0 ? (
+                <Pagination
+                  label={props.t.myDocks}
+                  onPageChange={props.onSetMyDocksPage}
+                  page={props.myDocksPage}
+                  pageCount={props.myDocksPageCount}
+                  t={props.t}
+                />
+              ) : null}
+            </section>
+          ) : null}
+          {accountTab === "stars" ? (
+            <section className="account-list-panel">
+              <div className="account-range">0-0 / {props.myStarredDocks.length}</div>
+              {props.myStarredDocks.length > 0 ? (
+                <div className="starred-dock-list">
+                  {props.myStarredDocks.map((dock) => (
+                    <button key={dockFullId(dock)} onClick={() => props.onOpenDetail(dockFullId(dock))} type="button">
+                      <DockIcon dock={dock} size="small" />
+                      <span>
+                        <strong>{dockFullId(dock)}</strong>
+                        <small>{dock.desc}</small>
+                      </span>
+                      <DockMetric count={dock.stars ?? 0} icon={<Star fill="currentColor" size={13} />} label={props.t.stars} />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="starred-empty">{props.t.noStarredDocks}</p>
+              )}
+            </section>
+          ) : null}
+        </section>
       </div>
-      <ShortcutSettings
-        bindings={props.shortcutBindings}
-        lang={props.lang}
-        onExport={props.onExportShortcuts}
-        onImport={props.onImportShortcuts}
-        onReset={props.onResetShortcut}
-        onResetAll={props.onResetAllShortcuts}
-        onSetShortcut={props.onSetShortcut}
-        platform={props.shortcutPlatform}
-        status={props.shortcutStatus}
-        t={props.t}
-      />
     </div>
   );
 }
 
-function ShortcutSettings(props: {
-  bindings: ShortcutBinding[];
-  lang: Lang;
-  onExport: () => void;
-  onImport: () => void;
-  onReset: (commandId: ShortcutCommandId) => void;
-  onResetAll: () => void;
-  onSetShortcut: (commandId: ShortcutCommandId, shortcut: string | null) => boolean;
-  platform: ShortcutPlatform;
-  status: string;
-  t: (typeof TEXT)[Lang];
-}) {
-  const [capturingId, setCapturingId] = useState<ShortcutCommandId | null>(null);
-
-  function captureShortcut(commandId: ShortcutCommandId, event: ReactKeyboardEvent<HTMLButtonElement>) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (event.key === "Escape") {
-      setCapturingId(null);
-      return;
-    }
-    if (event.key === "Backspace" || event.key === "Delete") {
-      props.onSetShortcut(commandId, null);
-      setCapturingId(null);
-      return;
-    }
-    const shortcut = shortcutFromKeyboardEvent(event);
-    if (!shortcut) return;
-    if (props.onSetShortcut(commandId, shortcut)) {
-      setCapturingId(null);
-    }
-  }
-
+function StatRow(props: { label: string; value: number }) {
   return (
-    <section className="shortcut-settings">
-      <div className="shortcut-settings-head">
-        <div>
-          <div className="profile-tab">{props.t.shortcuts}</div>
-          <p>{props.t.shortcutsSub}</p>
-        </div>
-        <div className="shortcut-actions">
-          <button onClick={props.onImport} type="button">
-            <Upload size={14} /> {props.t.importShortcuts}
-          </button>
-          <button onClick={props.onExport} type="button">
-            <Download size={14} /> {props.t.exportShortcuts}
-          </button>
-          <button onClick={props.onResetAll} type="button">
-            <RotateCcw size={14} /> {props.t.resetShortcuts}
-          </button>
-        </div>
-      </div>
-      <div className="shortcut-list">
-        {props.bindings.map((binding) => (
-          <div className="shortcut-row" key={binding.id}>
-            <div>
-              <Keyboard size={15} />
-              <span>
-                <strong>{shortcutCommandLabel(binding, props.lang)}</strong>
-                <small>{binding.description[props.lang] ?? binding.description.en}</small>
-              </span>
-            </div>
-            <div>
-              <button
-                className={capturingId === binding.id ? "capturing" : ""}
-                onClick={() => setCapturingId(binding.id)}
-                onKeyDown={(event) => captureShortcut(binding.id, event)}
-                type="button"
-              >
-                {capturingId === binding.id
-                  ? props.t.pressShortcut
-                  : binding.accelerator
-                    ? formatShortcutForDisplay(binding.accelerator, props.platform)
-                    : props.t.shortcutUnset}
-              </button>
-              <IconButton label={props.t.resetShortcut} onClick={() => props.onReset(binding.id)}>
-                <RotateCcw size={13} />
-              </IconButton>
-            </div>
-          </div>
-        ))}
-      </div>
-      {props.status ? <p className="shortcut-status">{props.status}</p> : null}
-    </section>
+    <div>
+      <span>{props.label}</span>
+      <strong>{props.value}</strong>
+    </div>
   );
 }
 
@@ -3658,14 +4168,27 @@ function Meta(props: { label: string; value: string }) {
   );
 }
 
-function Pagination(props: { t: (typeof TEXT)[Lang] }) {
+function Pagination(props: {
+  label: string;
+  onPageChange: (page: number) => void;
+  page: number;
+  pageCount: number;
+  t: (typeof TEXT)[Lang];
+}) {
+  const pageCount = Math.max(1, props.pageCount);
+  const page = Math.min(Math.max(1, props.page), pageCount);
+  const canPrevious = page > 1;
+  const canNext = page < pageCount;
+  const pageLabel = props.t.pageCount
+    .replace("{page}", String(page))
+    .replace("{pages}", String(pageCount));
   return (
-    <nav aria-label={props.t.explorePagination} className="pagination">
-      <button aria-disabled="true" aria-label={props.t.firstPage} disabled tabIndex={-1} type="button"><ChevronsLeft size={13} /></button>
-      <button aria-disabled="true" aria-label={props.t.previousPage} disabled tabIndex={-1} type="button"><ChevronLeft size={13} /></button>
-      <span>{props.t.pageCount}</span>
-      <button aria-disabled="true" aria-label={props.t.nextPage} disabled tabIndex={-1} type="button"><ChevronRight size={13} /></button>
-      <button aria-disabled="true" aria-label={props.t.lastPage} disabled tabIndex={-1} type="button"><ChevronsRight size={13} /></button>
+    <nav aria-label={props.label} className="pagination">
+      <button aria-label={props.t.firstPage} disabled={!canPrevious} onClick={() => props.onPageChange(1)} type="button"><ChevronsLeft size={13} /></button>
+      <button aria-label={props.t.previousPage} disabled={!canPrevious} onClick={() => props.onPageChange(page - 1)} type="button"><ChevronLeft size={13} /></button>
+      <span>{pageLabel}</span>
+      <button aria-label={props.t.nextPage} disabled={!canNext} onClick={() => props.onPageChange(page + 1)} type="button"><ChevronRight size={13} /></button>
+      <button aria-label={props.t.lastPage} disabled={!canNext} onClick={() => props.onPageChange(pageCount)} type="button"><ChevronsRight size={13} /></button>
     </nav>
   );
 }

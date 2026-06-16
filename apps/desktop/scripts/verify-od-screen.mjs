@@ -38,6 +38,7 @@ try {
   });
 
   await runViewportFlow({ width: 1180, height: 760 });
+  await runViewportFlow({ width: 1360, height: 800 });
   await runViewportFlow({ width: 1024, height: 720 });
   await runViewportFlow({ width: 960, height: 640 });
   await assertWindowsAppMenuFlyoutDoesNotOverlap({ width: 1180, height: 760 });
@@ -65,7 +66,7 @@ async function runViewportFlow(viewport) {
     await page.evaluate(() => localStorage.clear());
     await page.reload({ waitUntil: "domcontentloaded" });
     await assertVisible(page.getByRole("heading", { name: "로그인" }), "signed-out login screen after registered-project check");
-    await page.getByRole("button", { name: /Google로 계속하기/ }).click();
+    await page.getByRole("button", { name: /Google로 계속/ }).click();
 
     await assertVisible(page.getByRole("heading", { name: "프로젝트를 선택하세요" }), "empty project screen");
     await page.getByRole("button", { name: /새 프로젝트 만들기/ }).first().click();
@@ -84,11 +85,27 @@ async function runViewportFlow(viewport) {
     if (initialCardCount < 4) {
       throw new Error(`expected at least 4 dock cards, got ${initialCardCount}`);
     }
+    const expectedCatalogLimit = catalogPageLimitForViewport(viewport.width, viewport.height);
+    if (initialCardCount > expectedCatalogLimit) {
+      throw new Error(`catalog should respect responsive page limit ${expectedCatalogLimit}, got ${initialCardCount}`);
+    }
+    await assertVisible(page.locator(".dock-card .dock-metric").first(), "dock card download metric");
+    await assertVisible(page.locator(".dock-card .star-button").first(), "dock card star metric");
 
-    await page.getByRole("searchbox", { name: "도크 검색" }).fill("backend-ultrawork");
+    await page.getByRole("searchbox", { name: "Dock 검색" }).fill("backend-ultrawork");
     await page.waitForFunction(() => document.querySelectorAll(".dock-card").length >= 1);
+    const titleBadgeCount = await page.locator(".dock-card .dock-title img").count();
+    if (titleBadgeCount !== 0) {
+      throw new Error(`explore dock title should not render official badges, got ${titleBadgeCount}`);
+    }
+    await assertVisible(page.locator(".dock-card .dock-publisher-line img").first(), "explore publisher official badge");
     await page.locator(".dock-card").first().click();
     await assertVisible(page.locator(".detail-panel"), "backend dock detail panel");
+    const detailTitleBadgeCount = await page.locator(".detail-title-row img").count();
+    if (detailTitleBadgeCount !== 0) {
+      throw new Error(`detail dock title should not render official badges, got ${detailTitleBadgeCount}`);
+    }
+    await assertVisible(page.locator(".detail-meta img").first(), "detail publisher official badge");
     await page.waitForFunction(() => document.querySelector(".readme-markdown ul li"));
     const backendLogoSrc = await page.locator(".detail-hero .dock-icon img").first().getAttribute("src");
     if (!backendLogoSrc?.includes("/registry/v1/docks/opendock/backend-ultrawork/logo")) {
@@ -112,16 +129,56 @@ async function runViewportFlow(viewport) {
     await page.getByRole("button", { name: "뒤로" }).click();
     await assertWorkspaceList(page);
 
-    await page.getByRole("searchbox", { name: "도크 검색" }).fill("frontend");
+    await page.getByRole("searchbox", { name: "Dock 검색" }).fill("frontend");
     await page.waitForFunction(() => document.querySelectorAll(".dock-card").length === 1);
     await page.locator(".dock-card").first().click();
     await assertVisible(page.locator(".detail-panel"), "dock detail panel");
     await assertVisible(page.locator(".detail-sidebar"), "detail metadata sidebar");
-    await page.getByRole("button", { name: "버전" }).click();
+    await assertVisible(page.locator(".detail-meta .star-button"), "detail star action next to updated metadata");
+    const detailActionStarCount = await page.locator(".detail-action .star-button").count();
+    if (detailActionStarCount !== 0) {
+      throw new Error(`detail star action should not sit next to install/delete actions, got ${detailActionStarCount}`);
+    }
+    await assertVisible(page.locator(".detail-sidebar .meta-row", { hasText: "Stars" }), "detail sidebar stars metric");
+    const backButtonText = await page.getByRole("button", { name: "뒤로" }).innerText();
+    const expandedDetailHeader = viewport.width >= 1360 && viewport.height >= 800;
+    if (expandedDetailHeader) {
+      if (!backButtonText.includes("뒤로")) {
+        throw new Error(`expanded detail back button should include a text label, got ${backButtonText}`);
+      }
+      await assertVisible(page.locator(".detail-header-description"), "expanded detail header description");
+      const titleWhiteSpace = await page.locator(".detail-title-row h1").evaluate((element) => getComputedStyle(element).whiteSpace);
+      if (titleWhiteSpace === "nowrap") {
+        throw new Error("expanded detail title should allow wrapping");
+      }
+    } else if (backButtonText.trim() !== "") {
+      throw new Error(`compact detail back button should be icon-only, got ${backButtonText}`);
+    }
+    const readmeSidebarBox = await page.locator(".detail-sidebar").evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { height: rect.height, top: rect.top };
+    });
+    await page.getByRole("button", { name: "Versions" }).click();
     await assertOneVisible(
-      [page.locator(".versions-list"), page.locator(".empty-state", { hasText: "표시할 버전이 없습니다" })],
+      [page.locator(".versions-list"), page.locator(".empty-state", { hasText: "이 dock에서 확인할 수 있는 버전이 없습니다" })],
       "versions panel or empty registry versions state"
     );
+    const versionsSidebarBox = await page.locator(".detail-sidebar").evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { height: rect.height, top: rect.top };
+    });
+    if (Math.abs(readmeSidebarBox.top - versionsSidebarBox.top) > 1 || Math.abs(readmeSidebarBox.height - versionsSidebarBox.height) > 1) {
+      throw new Error(`detail sidebar frame should match between tabs: ${JSON.stringify({ readmeSidebarBox, versionsSidebarBox })}`);
+    }
+    const expectedSidebarHeight = expandedDetailHeader ? 430 : 360;
+    if (Math.abs(readmeSidebarBox.height - expectedSidebarHeight) > 1) {
+      throw new Error(`detail sidebar height should follow viewport mode: expected ${expectedSidebarHeight}, got ${readmeSidebarBox.height}`);
+    }
+    const versionRowCount = await page.locator(".versions-list > button").count();
+    const expectedVersionLimit = versionPageLimitForViewport(viewport.width, viewport.height);
+    if (versionRowCount > expectedVersionLimit) {
+      throw new Error(`versions should respect responsive page limit ${expectedVersionLimit}, got ${versionRowCount}`);
+    }
     await page.getByRole("button", { name: "Readme" }).click();
     await page.getByRole("button", { name: "설치", exact: true }).click();
     await assertVisible(page.locator(".command-progress-overlay .command-progress"), "command progress popup after install");
@@ -137,6 +194,7 @@ async function runViewportFlow(viewport) {
     await page.getByRole("button", { name: "설치됨" }).click();
     await assertVisible(page.locator(".installed-row"), "installed dock row");
     const installedRowCopy = await page.locator(".installed-row").first().innerText();
+    const installedSearchTerm = installedRowCopy.split("\n").find((line) => line.startsWith("opendock/")) ?? "frontend";
     if (installedRowCopy.includes(["설치", "현재"].join(" "))) {
       throw new Error(`installed row should not show awkward copy: ${installedRowCopy}`);
     }
@@ -202,6 +260,11 @@ async function runViewportFlow(viewport) {
       throw new Error(`installed status/action columns are misaligned: ${JSON.stringify(installedColumnAlignment)}`);
     }
     await assertVisible(page.getByRole("button", { name: /전체 업데이트/ }), "update all button on installed screen");
+    await assertVisible(page.getByRole("searchbox", { name: "설치된 dock 검색" }), "installed search box");
+    await page.getByRole("searchbox", { name: "설치된 dock 검색" }).fill("not-a-real-dock");
+    await assertVisible(page.locator(".empty-state", { hasText: "검색 결과가 없습니다" }), "installed search empty state");
+    await page.getByRole("searchbox", { name: "설치된 dock 검색" }).fill(installedSearchTerm);
+    await assertVisible(page.locator(".installed-row"), "installed search restored row");
     await page.getByRole("button", { name: /전체 업데이트/ }).click();
     await assertVisible(page.locator(".installed-panel"), "installed screen stays visible after update all");
     await assertVisible(page.locator(".command-progress-overlay .command-progress"), "command progress popup after update all");
@@ -217,7 +280,24 @@ async function runViewportFlow(viewport) {
     await page.locator(".avatar-button").click();
     await assertVisible(page.locator(".account-name", { hasText: "kjyscom@gmail.com" }), "gmail account menu label");
     await page.getByRole("button", { name: /^계정$/ }).click();
-    await assertVisible(page.getByRole("heading", { name: "내 정보" }), "account profile panel");
+    await assertVisible(page.getByRole("heading", { name: "내 계정" }), "account profile panel");
+    await assertVisible(page.locator(".account-tabs").getByRole("button", { name: "프로필" }), "account profile tab");
+    await assertVisible(page.locator(".account-tabs").getByRole("button", { name: "내 Docks" }), "account my docks tab");
+    const shortcutSettingsVisible = await page.locator(".shortcut-settings").count();
+    if (shortcutSettingsVisible !== 0) {
+      throw new Error(`account panel should not render shortcut settings, got ${shortcutSettingsVisible}`);
+    }
+    await page.locator(".account-tabs").getByRole("button", { name: "내 Docks" }).click();
+    await assertOneVisible(
+      [page.locator(".starred-dock-list"), page.locator(".starred-empty", { hasText: "아직 제출한 dock이 없습니다" })],
+      "account my docks tab"
+    );
+    await assertVisible(page.locator(".account-list-panel .account-range", { hasText: "0-0 / 0" }), "account my docks range");
+    await page.locator(".account-tabs").getByRole("button", { name: "Stars" }).click();
+    await assertOneVisible(
+      [page.locator(".starred-dock-list"), page.locator(".starred-empty")],
+      "account stars tab"
+    );
     await page.getByRole("button", { name: /메인으로/ }).click();
     await assertWorkspaceList(page);
 
@@ -230,12 +310,12 @@ async function runViewportFlow(viewport) {
     if (activeProjectAfterAdd !== "빈 프로젝트 2") {
       throw new Error(`newly added project should be active, got ${activeProjectAfterAdd}`);
     }
-    await page.getByRole("searchbox", { name: "도크 검색" }).fill("frontend");
+    await page.getByRole("searchbox", { name: "Dock 검색" }).fill("frontend");
     await page.locator(".dock-card").first().click();
     await assertVisible(page.locator(".detail-panel"), "detail before project selection reset");
     await page.locator(".project-row").first().getByRole("button").first().click();
     await assertWorkspaceList(page);
-    const searchAfterProjectSwitch = await page.getByRole("searchbox", { name: "도크 검색" }).inputValue();
+    const searchAfterProjectSwitch = await page.getByRole("searchbox", { name: "Dock 검색" }).inputValue();
     if (searchAfterProjectSwitch !== "") {
       throw new Error(`project selection should reset search query, got ${searchAfterProjectSwitch}`);
     }
@@ -269,7 +349,7 @@ async function runViewportFlow(viewport) {
       throw new Error(`logout must keep the active project id, got ${activeProjectAfterLogout}`);
     }
 
-    await page.getByRole("button", { name: /GitHub로 계속하기/ }).click();
+    await page.getByRole("button", { name: /GitHub로 계속/ }).click();
     await assertWorkspaceList(page);
     const chooserVisibleAfterRelogin = await page.getByRole("heading", { name: "프로젝트를 선택하세요" }).isVisible().catch(() => false);
     if (chooserVisibleAfterRelogin) {
@@ -405,6 +485,7 @@ async function assertSidebarToggle(page) {
 
 async function assertSortMenu(page) {
   await page.locator(".sort-button").click();
+  await assertVisible(page.locator(".sort-menu").getByRole("button", { name: /Star 많은 순/ }), "stars sort option");
   await page.locator(".sort-menu").getByRole("button", { name: /이름순/ }).click();
   const sortMode = await page.evaluate(() => localStorage.getItem("opendock.sortMode"));
   if (sortMode !== "\"name\"") {
@@ -414,6 +495,19 @@ async function assertSortMenu(page) {
   if (firstDockTitle !== "backend-ultrawork") {
     throw new Error(`name sort should put backend-ultrawork first, got ${firstDockTitle}`);
   }
+}
+
+function catalogPageLimitForViewport(width, height) {
+  const columns = width <= 520 ? 1 : width <= 980 ? 2 : 3;
+  const baseRows = width <= 520 ? 5 : 3;
+  const extraRows = Math.max(0, Math.floor((height - 980) / 420));
+  return Math.min(24, columns * Math.min(8, baseRows + extraRows));
+}
+
+function versionPageLimitForViewport(width, height) {
+  const baseRows = width <= 980 ? 5 : 6;
+  const extraRows = Math.max(0, Math.floor((height - 900) / 180));
+  return Math.min(18, baseRows + extraRows);
 }
 
 async function assertRegisteredProjectSkipsChooser(page) {
@@ -478,7 +572,7 @@ async function assertProjectDeleteFlow(page) {
 }
 
 async function assertWorkspaceList(page) {
-  await assertVisible(page.getByRole("heading", { name: "필요한 AI 셋업 찾기" }), "dock explore list");
+  await assertVisible(page.getByRole("heading", { name: "프로젝트에 맞는 dock 찾기" }), "dock explore list");
   await assertVisible(page.getByRole("button", { name: "탐색" }), "explore tab");
   await assertVisible(page.getByRole("button", { name: "설치됨" }), "installed tab");
   await assertVisible(page.getByRole("button", { name: "로그" }), "logs tab");

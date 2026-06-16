@@ -60,10 +60,55 @@ const registryRequestsBypassCache =
   app.includes('cache: "no-store"');
 const desktopCatalogUsesLiveRegistry =
   app.includes("const [catalogDocks, setCatalogDocks] = useState<Dock[]>([])") &&
-  app.includes("requestCatalog(sortMode, searchQuery)") &&
+  app.includes("requestCatalog(sortMode, searchQuery, catalogPage, catalogPageSize)") &&
   data.includes("export function normalizeRegistryDock") &&
   !data.includes("export const DOCKS") &&
   !data.includes("DOCKS.find");
+const desktopCatalogUsesResponsivePaging =
+  app.includes("function useResponsivePageSizes") &&
+  app.includes("catalogPageLimitForViewport(window.innerWidth, window.innerHeight)") &&
+  app.includes("versionPageLimitForViewport(window.innerWidth, window.innerHeight)") &&
+  app.includes('invoke<RegistryDockSearchResponse>("opendock_catalog",') &&
+  app.includes("page,") &&
+  app.includes("limit,") &&
+  rust.includes("async fn opendock_catalog(") &&
+  rust.includes("page: Option<u32>") &&
+  rust.includes("limit: Option<u32>") &&
+  rust.includes("bounded_limit(limit, DEFAULT_CATALOG_PAGE_LIMIT, MAX_CATALOG_PAGE_LIMIT)");
+const desktopVersionsUseResponsivePaging =
+  app.includes('invoke<RegistryDockVersionsResponse>("opendock_dock_versions", { dockId, page, limit })') &&
+  app.includes("requestDockVersions(dockFullId(baseDetail), versionPage, versionPageSize)") &&
+  rust.includes("async fn opendock_dock_versions(") &&
+  rust.includes("DEFAULT_VERSION_PAGE_LIMIT") &&
+  rust.includes("MAX_VERSION_PAGE_LIMIT");
+const desktopUsesRegistryStars =
+  data.includes("stars: summary.stars ?? 0") &&
+  data.includes('export type SortMode = "downloads" | "stars" | "recent" | "name"') &&
+  app.includes("props.t.sortStars") &&
+  app.includes("function StarButton") &&
+  app.includes('invoke<DockStarStatusResponse>("opendock_star_status", { ids })') &&
+  rust.includes("async fn opendock_star_status") &&
+  rust.includes("/v1/me/stars/status") &&
+  rust.includes("async fn opendock_my_stars") &&
+  rust.includes("load_auth_token()");
+const desktopMyDocksUsesPaging =
+  data.includes("export interface MyDocksCounts") &&
+  app.includes('invoke<MyDocksResponse>("opendock_my_docks", { page, limit })') &&
+  app.includes("myDocksPageCount") &&
+  app.includes("accountStatsFor(props.myDocksCounts, props.myStarredDocks.length)") &&
+  rust.includes("async fn opendock_my_docks(page: Option<u32>, limit: Option<u32>)") &&
+  rust.includes("DEFAULT_ACCOUNT_PAGE_LIMIT") &&
+  rust.includes("MAX_ACCOUNT_PAGE_LIMIT");
+const dockIconUsesOpenDockLogoFallback =
+  app.includes("const imageUrl = hasRegistryLogo ? logoUrl : logoSrc") &&
+  app.includes('"fallback-logo"') &&
+  styles.includes(".dock-icon.fallback-logo img") &&
+  !app.includes("<Zap");
+const desktopInstalledSearchExists =
+  app.includes('useStoredState("opendock.installedSearchQuery", "")') &&
+  app.includes("function matchesInstalledSearch") &&
+  app.includes("props.t.installedSearch") &&
+  app.includes("noInstalledSearchTitle");
 const desktopStartsWithoutSampleLogs = data.includes("export const BASE_LOGS: AppLog[] = []");
 const detailMergeUsesRegistryLatestVersion = data.includes("version: detail.latestVersion ?? base.version");
 const installRefreshesDockBeforeResolvingRef = (() => {
@@ -192,6 +237,24 @@ const failures = [
     : []),
   ...(!desktopCatalogUsesLiveRegistry
     ? ["desktop catalog must use live registry responses instead of static dock fixtures"]
+    : []),
+  ...(!desktopCatalogUsesResponsivePaging
+    ? ["desktop catalog must send responsive page/limit values to registry"]
+    : []),
+  ...(!desktopVersionsUseResponsivePaging
+    ? ["desktop dock versions must send responsive page/limit values to registry"]
+    : []),
+  ...(!desktopUsesRegistryStars
+    ? ["desktop app must surface registry star counts and authenticated star actions"]
+    : []),
+  ...(!desktopMyDocksUsesPaging
+    ? ["desktop account My Docks must use paginated registry responses and total counts"]
+    : []),
+  ...(!dockIconUsesOpenDockLogoFallback
+    ? ["dock icons must use the OpenDock logo while registry logos are loading or unavailable"]
+    : []),
+  ...(!desktopInstalledSearchExists
+    ? ["installed view must provide local search over installed docks"]
     : []),
   ...(!desktopStartsWithoutSampleLogs
     ? ["desktop logs must start empty instead of shipping sample command history"]

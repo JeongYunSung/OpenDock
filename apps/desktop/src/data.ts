@@ -1,7 +1,7 @@
 export type Lang = "ko" | "en";
 export type Theme = "light" | "dark";
 export type DockView = "list" | "detail" | "installed" | "logs" | "account";
-export type SortMode = "downloads" | "recent" | "name";
+export type SortMode = "downloads" | "stars" | "recent" | "name";
 
 export interface Project {
   id: string;
@@ -29,6 +29,7 @@ export interface Dock {
   more: string;
   dl: string;
   downloads?: number;
+  stars?: number;
   updatedRank: number;
   updatedAt?: string;
   version: string;
@@ -71,6 +72,7 @@ export interface RegistryDockSummary {
   platforms: string[];
   latestVersion: string;
   downloads: number;
+  stars: number;
   updatedAt: string;
   tags: string[];
 }
@@ -88,18 +90,95 @@ export interface RegistryDockSearchResponse {
 }
 
 export interface RegistryDockVersionsResponse {
+  id?: string;
+  items: Array<RegistryDockVersionItem | RegistryDockVersionGroup>;
+  page?: number;
+  limit?: number;
+  total?: number;
+}
+
+export interface RegistryDockVersionGroup {
+  version: string;
+  status?: string;
+  summary?: string | null;
+  updatedAt?: string | null;
+  platforms?: RegistryDockVersionItem[];
+}
+
+export interface RegistryDockVersionItem {
+  version: string;
+  platform?: string;
+  approved?: boolean;
+  status?: string;
+  checksum?: string;
+  publishedAt?: string | null;
+  approvedAt?: string | null;
+  revokedAt?: string | null;
+  downloadCount?: number;
+  metadata?: { summary?: string | null };
+  archive?: { sizeBytes?: number | null };
+}
+
+export interface DockStarResponse {
+  id: string;
+  starred: boolean;
+  stars: number;
+}
+
+export interface DockStarStatusResponse {
   items: Array<{
-    version: string;
-    platform?: string;
-    approved?: boolean;
-    status?: string;
-    checksum?: string;
-    publishedAt?: string | null;
-    approvedAt?: string | null;
-    revokedAt?: string | null;
-    downloadCount?: number;
-    metadata?: { summary?: string | null };
-    archive?: { sizeBytes?: number | null };
+    id: string;
+    starred: boolean;
+  }>;
+}
+
+export interface MyStarsResponse {
+  items: Array<{
+    starredAt: string;
+    dock: RegistryDockSummary;
+  }>;
+}
+
+export interface MyDocksResponse {
+  items: MyDock[];
+  page: number;
+  limit: number;
+  total: number;
+  counts: MyDocksCounts;
+}
+
+export interface MyDocksCounts {
+  all: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+  unavailable: number;
+  hidden: number;
+}
+
+export interface MyDock {
+  id: string;
+  owner: string | null;
+  name: string;
+  displayName: string | null;
+  summary: string | null;
+  version: string | null;
+  status: string;
+  hidden: boolean;
+  suspended: boolean;
+  official: boolean;
+  logo: { url: string; contentType: string; sizeBytes: number } | null;
+  latestApprovedVersion: string | null;
+  submittedAt: string | null;
+  updatedAt: string | null;
+  versions: Array<{
+    version: string | null;
+    platform: string;
+    status: string;
+    submittedAt: string | null;
+    approvedAt: string | null;
+    revokedAt: string | null;
+    downloadCount: number | null;
   }>;
 }
 
@@ -233,32 +312,38 @@ export const TEXT = {
     explore: "탐색",
     installed: "설치됨",
     logs: "로그",
-    heroTitle: "필요한 AI 셋업 찾기",
-    heroSub: "프로젝트에 맞는 셋업을 고르고 바로 추가하세요. 업데이트와 제거도 OpenDock이 기록합니다.",
-    search: "도크 검색",
-    sortDownloads: "다운로드순",
-    sortRecent: "최근 업데이트순",
+    heroTitle: "프로젝트에 맞는 dock 찾기",
+    heroSub: "검토된 셋업을 둘러보고, Mac과 Windows 버전을 확인한 뒤 필요한 dock을 설치하세요.",
+    search: "Dock 검색",
+    installedSearch: "설치된 dock 검색",
+    sortDownloads: "다운로드 많은 순",
+    sortStars: "Star 많은 순",
+    sortRecent: "최근 업데이트 순",
     sortName: "이름순",
-    noDocksTitle: "표시할 도크가 없습니다",
-    noDocksSub: "검색어를 바꾸거나 잠시 후 다시 새로고침하세요.",
-    noVersionsTitle: "표시할 버전이 없습니다",
-    noVersionsSub: "검토가 끝난 버전이 생기면 여기에 표시됩니다.",
-    explorePagination: "탐색 페이지네이션",
+    noDocksTitle: "검색과 일치하는 dock이 없습니다",
+    noDocksSub: "검색어를 바꾸거나 Registry를 다시 새로고침하세요.",
+    noVersionsTitle: "이 dock에서 확인할 수 있는 버전이 없습니다",
+    noVersionsSub: "검토된 버전이 생기면 여기에 표시됩니다.",
+    explorePagination: "Dock 카탈로그 페이지",
     firstPage: "첫 페이지",
     previousPage: "이전 페이지",
     nextPage: "다음 페이지",
     lastPage: "마지막 페이지",
-    by: "제작",
+    by: "게시자",
     downloads: "다운로드",
-    pageCount: "1 of 1",
+    stars: "Stars",
+    pageCount: "{page} / {pages}",
+    starAction: "이 dock star하기",
+    unstarAction: "Star 제거",
+    signInToStar: "로그인하고 star하기",
     accountProfile: "계정",
     logout: "로그아웃",
     back: "뒤로",
     readme: "Readme",
-    versions: "버전",
+    versions: "Versions",
     updated: "업데이트",
-    provides: "포함된 셋업",
-    packageDetails: "도크 정보",
+    provides: "추가되는 내용",
+    packageDetails: "Dock 정보",
     latestRelease: "최신 버전",
     publisher: "게시자",
     tags: "태그",
@@ -278,16 +363,29 @@ export const TEXT = {
     resultDeleted: "삭제됨",
     resultNoChanges: "변경 없음",
     resultReviewRequired: "확인 필요",
-    installedTitle: "설치된 도크",
-    installedSub: "현재 프로젝트에 추가된 도크와 업데이트 상태를 확인합니다.",
-    dock: "도크",
+    installedTitle: "설치된 dock",
+    installedSub: "현재 프로젝트에 추가된 dock과 업데이트 상태를 확인합니다.",
+    dock: "Dock",
     version: "버전",
     status: "상태",
     action: "작업",
     ready: "준비됨",
     openDetail: "상세 보기",
-    noInstalledTitle: "설치된 도크가 없습니다",
-    noInstalledSub: "탐색에서 필요한 셋업을 설치하면 여기에 표시됩니다.",
+    noInstalledTitle: "설치된 dock이 없습니다",
+    noInstalledSub: "탐색에서 필요한 dock을 설치하면 여기에 표시됩니다.",
+    noInstalledSearchTitle: "검색 결과가 없습니다",
+    noInstalledSearchSub: "검색어를 바꾸면 설치된 dock을 다시 볼 수 있습니다.",
+    starredDocks: "Starred docks",
+    noStarredDocks: "아직 star한 dock이 없습니다.",
+    myDocks: "내 Docks",
+    submittedDocks: "제출한 docks",
+    approved: "승인됨",
+    pending: "승인 대기",
+    rejected: "반려됨",
+    unavailable: "사용 불가",
+    hidden: "숨김",
+    all: "전체",
+    noSubmittedDocks: "아직 제출한 dock이 없습니다.",
     logsTitle: "프로젝트 로그",
     logsSub: "설치, 업데이트, 제거, 상태 확인 기록을 시간순으로 봅니다.",
     liveTail: "실시간 로그",
@@ -301,15 +399,15 @@ export const TEXT = {
     taskCompleted: "완료",
     taskFailed: "실패",
     taskCancelled: "취소됨",
-    noUpdatesAvailable: "업데이트할 도크가 없습니다.",
+    noUpdatesAvailable: "업데이트할 dock이 없습니다.",
     operationLog: "작업 로그",
     memberSignIn: "로그인",
     signInTitle: "로그인",
-    signInSub: "Google 또는 GitHub로 로그인하세요.",
+    signInSub: "Google 또는 GitHub로 로그인해 계속하세요.",
     signInWaiting: "브라우저에서 로그인을 완료하세요.",
     signInFailed: "로그인에 실패했습니다.",
-    continueGmail: "Google로 계속하기",
-    continueGitHub: "GitHub로 계속하기",
+    continueGmail: "Google로 계속",
+    continueGitHub: "GitHub로 계속",
     githubAccount: "GitHub 계정",
     toggleTheme: "테마 전환",
     minimizeWindow: "창 최소화",
@@ -341,8 +439,8 @@ export const TEXT = {
     expandProjects: "프로젝트 사이드바 펼치기",
     projectNameLabel: "프로젝트 이름",
     memberWorkspace: "계정",
-    accountInfoTitle: "내 정보",
-    accountInfoSub: "로그인한 계정 정보를 봅니다.",
+    accountInfoTitle: "내 계정",
+    accountInfoSub: "닉네임을 수정하고 제출한 dock을 확인하세요.",
     backToMain: "메인으로",
     commandPaletteSearch: "명령 검색",
     profile: "프로필",
@@ -350,7 +448,7 @@ export const TEXT = {
     nickname: "닉네임",
     saveChanges: "변경사항 저장",
     switchProjectTitle: "프로젝트 전환",
-    switchProjectSub: "열려 있는 프로젝트를 선택하세요.",
+    switchProjectSub: "등록된 프로젝트를 선택하세요.",
     shortcuts: "단축키",
     shortcutsSub: "자주 쓰는 명령을 키보드로 실행합니다. JSON 파일로 가져오거나 내보낼 수 있습니다.",
     importShortcuts: "가져오기",
@@ -371,7 +469,7 @@ export const TEXT = {
     menuEdit: "편집",
     menuView: "보기",
     menuProject: "프로젝트",
-    menuDock: "도크",
+    menuDock: "Dock",
     menuWindow: "창",
     menuHelp: "도움말",
     menuCopyProjectPath: "프로젝트 경로 복사",
@@ -391,31 +489,37 @@ export const TEXT = {
     explore: "Explore",
     installed: "Installed",
     logs: "Logs",
-    heroTitle: "Find the setup you need",
-    heroSub: "Pick a setup, add it to a project, and keep updates and removals easy to track.",
+    heroTitle: "Find a dock for your project",
+    heroSub: "Browse reviewed setups, check the available Mac and Windows versions, and install the one you need.",
     search: "Search docks",
-    sortDownloads: "Downloads",
+    installedSearch: "Search installed docks",
+    sortDownloads: "Most downloaded",
+    sortStars: "Most starred",
     sortRecent: "Recently updated",
     sortName: "Name",
-    noDocksTitle: "No docks to show",
-    noDocksSub: "Try a different search or refresh again in a moment.",
-    noVersionsTitle: "No versions to show",
-    noVersionsSub: "Versions will appear here after review.",
-    explorePagination: "Explore pagination",
+    noDocksTitle: "No docks match this search",
+    noDocksSub: "Try a different search or refresh the Registry again.",
+    noVersionsTitle: "No versions are available for this dock",
+    noVersionsSub: "Reviewed versions will appear here.",
+    explorePagination: "Dock catalog pages",
     firstPage: "First page",
     previousPage: "Previous page",
     nextPage: "Next page",
     lastPage: "Last page",
     by: "By",
-    downloads: "downloads",
-    pageCount: "1 of 1",
+    downloads: "Downloads",
+    stars: "Stars",
+    pageCount: "{page} of {pages}",
+    starAction: "Star this dock",
+    unstarAction: "Unstar",
+    signInToStar: "Sign in to star docks.",
     accountProfile: "Account",
     logout: "Logout",
     back: "Back",
     readme: "Readme",
     versions: "Versions",
     updated: "Updated",
-    provides: "Included setup",
+    provides: "What it adds",
     packageDetails: "Dock details",
     latestRelease: "Latest version",
     publisher: "Publisher",
@@ -446,6 +550,19 @@ export const TEXT = {
     openDetail: "Open detail",
     noInstalledTitle: "No installed docks",
     noInstalledSub: "Install a dock from Explore and it will appear here.",
+    noInstalledSearchTitle: "No installed docks match",
+    noInstalledSearchSub: "Change the search term to see installed docks again.",
+    starredDocks: "Starred docks",
+    noStarredDocks: "No starred docks yet.",
+    myDocks: "My Docks",
+    submittedDocks: "Submitted docks",
+    approved: "Approved",
+    pending: "Pending",
+    rejected: "Rejected",
+    unavailable: "Unavailable",
+    hidden: "Hidden",
+    all: "All",
+    noSubmittedDocks: "You have not submitted any docks yet.",
     logsTitle: "Project logs",
     logsSub: "See installs, updates, removals, and project checks in time order.",
     liveTail: "live tail",
@@ -459,7 +576,7 @@ export const TEXT = {
     taskCompleted: "Completed",
     taskFailed: "Failed",
     taskCancelled: "Cancelled",
-    noUpdatesAvailable: "No dock updates available.",
+    noUpdatesAvailable: "No OpenDock dock updates available.",
     operationLog: "Operation log",
     memberSignIn: "Sign in",
     signInTitle: "Sign in",
@@ -499,8 +616,8 @@ export const TEXT = {
     expandProjects: "Expand project sidebar",
     projectNameLabel: "Project name",
     memberWorkspace: "Account",
-    accountInfoTitle: "Account",
-    accountInfoSub: "View your signed-in account details.",
+    accountInfoTitle: "Your account",
+    accountInfoSub: "Update your nickname and check your submitted docks.",
     backToMain: "Back to main",
     commandPaletteSearch: "Search commands",
     profile: "Profile",
@@ -508,7 +625,7 @@ export const TEXT = {
     nickname: "Nickname",
     saveChanges: "Save changes",
     switchProjectTitle: "Switch project",
-    switchProjectSub: "Choose an open project.",
+    switchProjectSub: "Choose a registered project.",
     shortcuts: "Shortcuts",
     shortcutsSub: "Run common commands from the keyboard. Import or export them as JSON.",
     importShortcuts: "Import",
@@ -573,6 +690,7 @@ export function normalizeRegistryDock(summary: RegistryDockSummary, index = 0): 
     more: String(Math.max(tags.length - 2, 0)),
     dl: String(summary.downloads ?? 0),
     downloads: summary.downloads ?? 0,
+    stars: summary.stars ?? 0,
     updatedRank: Math.max(1, 999 - index),
     updatedAt: summary.updatedAt,
     version: summary.latestVersion,
@@ -607,6 +725,7 @@ export function mergeRegistryDockDetail(base: Dock, detail: RegistryDockDetail, 
     logoUrl: detail.logo?.url ?? base.logoUrl ?? null,
     updatedAt: detail.updatedAt ?? base.updatedAt,
     downloads: detail.downloads ?? base.downloads,
+    stars: detail.stars ?? base.stars ?? 0,
     dl: String(detail.downloads ?? base.downloads ?? base.dl)
   };
 }
@@ -614,6 +733,25 @@ export function mergeRegistryDockDetail(base: Dock, detail: RegistryDockDetail, 
 export function normalizeRegistryVersions(response: RegistryDockVersionsResponse): DockVersion[] {
   const grouped = new Map<string, DockVersion & { platforms?: string[] }>();
   for (const item of response.items ?? []) {
+    if (isRegistryDockVersionGroup(item)) {
+      const platforms = item.platforms ?? [];
+      const status = normalizeVersionStatus(item.status ?? platforms[0]?.status, platforms[0]?.approved);
+      const archiveBytes = platforms.reduce((total, platform) => total + (platform.archive?.sizeBytes ?? 0), 0);
+      grouped.set(item.version, {
+        version: item.version,
+        platform: platforms.map((platform) => platform.platform).filter(isNonEmptyString).map(platformLabelForData).join(" · "),
+        platforms: platforms.map((platform) => platform.platform).filter(isNonEmptyString),
+        size: formatBytes(archiveBytes),
+        checksum: platforms[0]?.checksum,
+        status,
+        approved: platforms.some((platform) => platform.approved),
+        publishedAt: item.updatedAt ?? platforms[0]?.publishedAt ?? platforms[0]?.approvedAt ?? null,
+        revokedAt: platforms.find((platform) => platform.revokedAt)?.revokedAt ?? null,
+        downloadCount: platforms.reduce((total, platform) => total + (platform.downloadCount ?? 0), 0),
+        summary: item.summary ?? platforms.find((platform) => platform.metadata?.summary)?.metadata?.summary ?? null
+      });
+      continue;
+    }
     const status = normalizeVersionStatus(item.status, item.approved);
     const existing = grouped.get(item.version);
     if (existing) {
@@ -644,6 +782,16 @@ export function normalizeRegistryVersions(response: RegistryDockVersionsResponse
     ...version,
     platform: platforms?.map(platformLabelForData).join(" · ") || version.platform
   }));
+}
+
+function isRegistryDockVersionGroup(
+  item: RegistryDockVersionItem | RegistryDockVersionGroup,
+): item is RegistryDockVersionGroup {
+  return Array.isArray((item as RegistryDockVersionGroup).platforms);
+}
+
+function isNonEmptyString(value: string | undefined): value is string {
+  return typeof value === "string" && value.length > 0;
 }
 
 function normalizeVersionStatus(status?: string, approved?: boolean) {
@@ -685,6 +833,7 @@ export function dockFromInstalledRecord(record: InstalledDockRecord, fallbackInd
     more: "0",
     dl: "0",
     downloads: 0,
+    stars: 0,
     updatedRank: fallbackIndex,
     version: record.version,
     size: `${record.files?.length ?? 0} files`,
