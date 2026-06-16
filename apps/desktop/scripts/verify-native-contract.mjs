@@ -88,6 +88,12 @@ const commandProgressBridge =
   rust.includes("command_progress_from_event_line") &&
   app.includes('listen<OpenDockCommandProgress>("opendock-command-progress"') &&
   app.includes("applyCommandProgressToTask(progress)");
+const noUpdateProgressDoesNotDuplicatePopupRows =
+  app.includes("function isNoUpdateProgress") &&
+  app.includes("const suppressProgressRow = isNoUpdateProgress(progress)") &&
+  app.includes("step: suppressProgressRow ? current.step : progress.message") &&
+  app.includes("!suppressProgressRow &&") &&
+  app.includes('progress.message === "No OpenDock dock updates available."');
 const blockingCliCommandsUseBackgroundRuntime = [
   "opendock_install",
   "opendock_update",
@@ -204,6 +210,9 @@ const failures = [
     : []),
   ...(!commandProgressBridge
     ? ["desktop app must bridge opendock progress events into the command progress dialog"]
+    : []),
+  ...(!noUpdateProgressDoesNotDuplicatePopupRows
+    ? ["no-update progress events must not duplicate final update result rows in the command popup"]
     : []),
   ...(!blockingCliCommandsUseBackgroundRuntime
     ? ["blocking opendock CLI commands must run through the background runtime"]

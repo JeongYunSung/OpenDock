@@ -1451,12 +1451,14 @@ export function App() {
         ? Math.max(current.progress, Math.min(100, progress.percent))
         : current.progress;
       const row = { time: nowTime(), level, color: logColor(level), message: progress.message };
+      const suppressProgressRow = isNoUpdateProgress(progress);
       const shouldAddRow =
-        current.rows[0]?.message !== progress.message || current.rows[0]?.level !== level;
+        !suppressProgressRow &&
+        (current.rows[0]?.message !== progress.message || current.rows[0]?.level !== level);
       return {
         ...current,
         progress: percent,
-        step: progress.message,
+        step: suppressProgressRow ? current.step : progress.message,
         lines: current.lines + 1,
         rows: shouldAddRow ? [row, ...current.rows].slice(0, 20) : current.rows,
         updatedAt: nowTime()
@@ -3207,6 +3209,15 @@ function openDockChangeResult(
 
 function isNoUpdateChangeResult(result: OpenDockChangeResult | null) {
   return result?.success === true && result.operation === "update" && result.reports.length === 0;
+}
+
+function isNoUpdateProgress(progress: OpenDockCommandProgress) {
+  return (
+    progress.operation === "update" &&
+    progress.phase === "complete" &&
+    progress.level.toUpperCase() === "OK" &&
+    progress.message === "No OpenDock dock updates available."
+  );
 }
 
 function successStepForChangeResult(result: OpenDockChangeResult | null, fallback: string, t: (typeof TEXT)[Lang]) {
