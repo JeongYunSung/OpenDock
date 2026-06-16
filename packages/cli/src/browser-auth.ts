@@ -32,7 +32,7 @@ interface BrowserLoginClient {
 interface KeypressInput extends NodeJS.ReadableStream {
   isRaw?: boolean;
   isTTY?: boolean;
-  setRawMode?: (mode: boolean) => unknown;
+  setRawMode?: (this: KeypressInput, mode: boolean) => unknown;
 }
 
 interface AuthProviderSelectOptions {
@@ -96,7 +96,7 @@ export async function selectAuthProvider(
   const input = (options.input ?? defaultInput) as KeypressInput;
   const output = options.output ?? defaultOutput;
   const writable = output as NodeJS.WritableStream & { isTTY?: boolean };
-  const setRawMode = input.setRawMode;
+  const setRawMode = input.setRawMode?.bind(input);
   if (input.isTTY !== true || writable.isTTY !== true || setRawMode === undefined) {
     return "google";
   }
@@ -109,6 +109,7 @@ export async function selectAuthProvider(
     const cleanup = () => {
       input.off("keypress", onKeypress);
       setRawMode(previousRawMode === true);
+      input.pause();
     };
 
     const finish = (provider: AuthProvider) => {

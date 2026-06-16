@@ -159,11 +159,18 @@ describe("security regression coverage", () => {
     };
     const output = new PassThrough() as PassThrough & { isTTY?: boolean };
     let rendered = "";
+    let paused = false;
 
     input.isTTY = true;
     input.isRaw = false;
-    input.setRawMode = (mode: boolean) => {
+    input.setRawMode = function setRawMode(this: typeof input, mode: boolean) {
+      expect(this).toBe(input);
       input.isRaw = mode;
+    };
+    const originalPause = input.pause.bind(input);
+    input.pause = () => {
+      paused = true;
+      return originalPause();
     };
     output.isTTY = true;
     output.on("data", (chunk) => {
@@ -182,6 +189,7 @@ describe("security regression coverage", () => {
     expect(rendered).toContain("❯ GitHub");
     expect(rendered).toContain("↑/↓ to move, Enter to continue");
     expect(input.isRaw).toBe(false);
+    expect(paused).toBe(true);
   });
 
   it("defaults auth provider selection to Google outside an interactive terminal", async () => {

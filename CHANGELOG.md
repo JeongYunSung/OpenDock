@@ -7,6 +7,19 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.29 - 2026-06-16
+
+### Fixed
+
+- Fix `opendock auth login` crashing in Bun TTY sessions with
+  `undefined is not an object (evaluating 'flag')`.
+- Ensure the interactive login picker restores terminal input state and exits
+  cleanly when cancelled.
+
+### Tests
+
+- Added regression coverage for TTY `setRawMode` binding and prompt cleanup.
+
 ## 0.1.28 - 2026-06-16
 
 ### CLI
