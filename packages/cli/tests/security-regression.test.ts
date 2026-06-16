@@ -10,10 +10,15 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { PassThrough } from "node:stream";
 import { c as createTar } from "tar";
 import { afterEach, describe, expect, it } from "vitest";
 import { TokenStore } from "../src/auth.js";
-import { browserOpenCommand, performBrowserLogin } from "../src/browser-auth.js";
+import {
+  browserOpenCommand,
+  performBrowserLogin,
+  selectAuthProvider,
+} from "../src/browser-auth.js";
 import { DockRef } from "../src/core/domain/manifest.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
 import { resolveDock } from "../src/resolver.js";
@@ -144,6 +149,52 @@ describe("security regression coverage", () => {
       command: "/usr/bin/open",
       args: ["https://registry.opendock.app/login"],
     });
+  });
+
+  it("lets TTY users choose GitHub login with arrow keys", async () => {
+    const input = new PassThrough() as PassThrough & {
+      isRaw?: boolean;
+      isTTY?: boolean;
+      setRawMode: (mode: boolean) => void;
+    };
+    const output = new PassThrough() as PassThrough & { isTTY?: boolean };
+    let rendered = "";
+
+    input.isTTY = true;
+    input.isRaw = false;
+    input.setRawMode = (mode: boolean) => {
+      input.isRaw = mode;
+    };
+    output.isTTY = true;
+    output.on("data", (chunk) => {
+      rendered += chunk.toString();
+    });
+
+    const selection = selectAuthProvider({ input, output });
+    await Promise.resolve();
+    input.emit("keypress", "", { name: "down" });
+    input.emit("keypress", "", { name: "return" });
+
+    await expect(selection).resolves.toBe("github");
+    expect(rendered).toContain("OpenDock Login");
+    expect(rendered).toContain("Choose a login method:");
+    expect(rendered).toContain("❯ Google");
+    expect(rendered).toContain("❯ GitHub");
+    expect(rendered).toContain("↑/↓ to move, Enter to continue");
+    expect(input.isRaw).toBe(false);
+  });
+
+  it("defaults auth provider selection to Google outside an interactive terminal", async () => {
+    const input = new PassThrough();
+    const output = new PassThrough();
+    let rendered = "";
+
+    output.on("data", (chunk) => {
+      rendered += chunk.toString();
+    });
+
+    await expect(selectAuthProvider({ input, output })).resolves.toBe("google");
+    expect(rendered).toBe("");
   });
 
   it("stores auth tokens in a private file and private data directory", async () => {

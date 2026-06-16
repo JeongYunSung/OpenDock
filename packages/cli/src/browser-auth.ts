@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto";
 import { once } from "node:events";
 import { createServer, type Server } from "node:http";
 import { stdin as defaultInput, stdout as defaultOutput } from "node:process";
-import { createInterface } from "node:readline";
+import { createInterface, emitKeypressEvents } from "node:readline";
 import { TokenStore } from "./auth.js";
 import { type AuthProvider, type CliTokenResponse, OpenDockRegistryClient } from "./registry.js";
 
@@ -28,6 +28,27 @@ interface BrowserLoginClient {
   ): Promise<{ authUrl: string; expiresAt: string }>;
   exchangeCliCode(code: string): Promise<CliTokenResponse>;
 }
+
+interface KeypressInput extends NodeJS.ReadableStream {
+  isRaw?: boolean;
+  isTTY?: boolean;
+  setRawMode?: (mode: boolean) => unknown;
+}
+
+interface AuthProviderSelectOptions {
+  input?: NodeJS.ReadableStream;
+  output?: NodeJS.WritableStream;
+}
+
+interface KeypressEvent {
+  ctrl?: boolean;
+  name?: string;
+}
+
+const authProviderChoices: Array<{ label: string; provider: AuthProvider }> = [
+  { label: "Google", provider: "google" },
+  { label: "GitHub", provider: "github" },
+];
 
 export async function performBrowserLogin(
   options: BrowserLoginOptions = {},
@@ -67,6 +88,95 @@ export async function performBrowserLogin(
     readline?.close();
     await closeServer(server);
   }
+}
+
+export async function selectAuthProvider(
+  options: AuthProviderSelectOptions = {},
+): Promise<AuthProvider> {
+  const input = (options.input ?? defaultInput) as KeypressInput;
+  const output = options.output ?? defaultOutput;
+  const writable = output as NodeJS.WritableStream & { isTTY?: boolean };
+  const setRawMode = input.setRawMode;
+  if (input.isTTY !== true || writable.isTTY !== true || setRawMode === undefined) {
+    return "google";
+  }
+
+  return new Promise<AuthProvider>((resolve, reject) => {
+    let selectedIndex = 0;
+    let renderedLines = 0;
+    const previousRawMode = input.isRaw;
+
+    const cleanup = () => {
+      input.off("keypress", onKeypress);
+      setRawMode(previousRawMode === true);
+    };
+
+    const finish = (provider: AuthProvider) => {
+      cleanup();
+      output.write("\n");
+      resolve(provider);
+    };
+
+    const cancel = () => {
+      cleanup();
+      output.write("\n");
+      reject(new Error("login cancelled"));
+    };
+
+    const render = () => {
+      renderedLines = renderAuthProviderPrompt(output, selectedIndex, renderedLines);
+    };
+
+    function onKeypress(_value: string, key: KeypressEvent = {}) {
+      if (key.ctrl === true && key.name === "c") {
+        cancel();
+        return;
+      }
+      if (key.name === "up") {
+        selectedIndex =
+          (selectedIndex + authProviderChoices.length - 1) % authProviderChoices.length;
+        render();
+        return;
+      }
+      if (key.name === "down") {
+        selectedIndex = (selectedIndex + 1) % authProviderChoices.length;
+        render();
+        return;
+      }
+      if (key.name === "return" || key.name === "enter") {
+        finish(authProviderChoices[selectedIndex]?.provider ?? "google");
+      }
+    }
+
+    emitKeypressEvents(input);
+    setRawMode(true);
+    input.resume();
+    input.on("keypress", onKeypress);
+    render();
+  });
+}
+
+function renderAuthProviderPrompt(
+  output: NodeJS.WritableStream,
+  selectedIndex: number,
+  previousLineCount: number,
+): number {
+  if (previousLineCount > 0) {
+    output.write(`\x1b[${previousLineCount}A\x1b[0J`);
+  }
+  const lines = [
+    "OpenDock Login",
+    "",
+    "Choose a login method:",
+    "",
+    ...authProviderChoices.map(
+      (choice, index) => `${index === selectedIndex ? "❯" : " "} ${choice.label}`,
+    ),
+    "",
+    "↑/↓ to move, Enter to continue",
+  ];
+  output.write(`${lines.join("\n")}\n`);
+  return lines.length;
 }
 
 async function openSystemBrowser(url: string): Promise<void> {

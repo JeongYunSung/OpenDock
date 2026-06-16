@@ -7,6 +7,20 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.28 - 2026-06-16
+
+### CLI
+
+- Add an interactive `opendock auth login` provider picker for Google and
+  GitHub sign-in.
+- Keep `--provider google|github` and `--token` available for scripted login
+  flows.
+
+### Tests
+
+- Added regression coverage for interactive and non-interactive auth provider
+  selection.
+
 ## 0.1.27 - 2026-06-16
 
 ### Desktop App

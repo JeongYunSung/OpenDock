@@ -21,7 +21,7 @@ import { Command } from "commander";
 import { c as createTar } from "tar";
 import { TokenStore } from "./auth.js";
 import { bootstrapMac, bootstrapWindows } from "./bootstrap.js";
-import { performBrowserLogin } from "./browser-auth.js";
+import { performBrowserLogin, selectAuthProvider } from "./browser-auth.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
 import {
   DockInstaller,
@@ -535,8 +535,8 @@ export async function run(argv = process.argv): Promise<void> {
     .command("login")
     .description("Log in to OpenDock Registry.")
     .option("--token <token>", "Existing CLI token to store without opening a browser")
-    .option("--provider <provider>", "Browser login provider: google or github", "google")
-    .action(async (options: { token?: string; provider: string }) => {
+    .option("--provider <provider>", "Browser login provider: google or github")
+    .action(async (options: { token?: string; provider?: string }) => {
       try {
         const tokenStore = new TokenStore();
         if (options.token) {
@@ -545,7 +545,10 @@ export async function run(argv = process.argv): Promise<void> {
           recordCommandLog("auth login", "Success", "stored provided auth token");
           return;
         }
-        const provider = parseAuthProvider(options.provider);
+        const provider =
+          options.provider === undefined
+            ? await selectAuthProvider()
+            : parseAuthProvider(options.provider);
         await performBrowserLogin({ tokenStore, provider });
         recordCommandLog("auth login", "Success", `browser login completed with ${provider}`);
       } catch (error) {
