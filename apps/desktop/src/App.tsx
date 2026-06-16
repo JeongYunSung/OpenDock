@@ -1283,8 +1283,8 @@ export function App() {
           // Fall through to the preview-mode in-memory project.
         }
       }
-      const folderName = `빈 프로젝트${next}`;
-      registerProject(`빈 프로젝트 ${next}`, folderName, `~/.opendock/project/${folderName}`);
+      const folderName = `empty-project-${next}`;
+      registerProject(`Empty Project ${next}`, folderName, `~/.opendock/project/${folderName}`);
       setEmptyProjectIndex((current) => current + 1);
     } finally {
       blankProjectCreatingRef.current = false;

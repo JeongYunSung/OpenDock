@@ -312,8 +312,12 @@ async function runViewportFlow(viewport) {
     await page.waitForFunction(() => document.querySelectorAll(".project-row").length === 2);
     await assertWorkspaceList(page);
     const activeProjectAfterAdd = await page.locator(".project-row.active strong").innerText();
-    if (activeProjectAfterAdd !== "빈 프로젝트 2") {
+    if (activeProjectAfterAdd !== "Empty Project 2") {
       throw new Error(`newly added project should be active, got ${activeProjectAfterAdd}`);
+    }
+    const storedProjectsAfterAdd = await page.evaluate(() => JSON.parse(localStorage.getItem("opendock.projects") ?? "[]"));
+    if (storedProjectsAfterAdd[1]?.folderName !== "empty-project-2") {
+      throw new Error(`blank project folder name should be an English slug, got ${JSON.stringify(storedProjectsAfterAdd)}`);
     }
     await page.getByRole("searchbox", { name: "Dock 검색" }).fill("frontend");
     await page.locator(".dock-card").first().click();
@@ -346,7 +350,11 @@ async function runViewportFlow(viewport) {
     await page.getByRole("button", { name: /로그아웃/ }).click();
     await assertVisible(page.getByRole("heading", { name: "로그인" }), "login screen after logout");
     const storedProjectsAfterLogout = await page.evaluate(() => JSON.parse(localStorage.getItem("opendock.projects") ?? "[]"));
-    if (storedProjectsAfterLogout.length !== 1 || storedProjectsAfterLogout[0]?.name !== "빈 프로젝트 2") {
+    if (
+      storedProjectsAfterLogout.length !== 1 ||
+      storedProjectsAfterLogout[0]?.name !== "Empty Project 2" ||
+      storedProjectsAfterLogout[0]?.folderName !== "empty-project-2"
+    ) {
       throw new Error(`logout must keep registered projects, got ${JSON.stringify(storedProjectsAfterLogout)}`);
     }
     const activeProjectAfterLogout = await page.evaluate(() => JSON.parse(localStorage.getItem("opendock.activeProjectId") ?? "\"\""));
@@ -573,7 +581,7 @@ async function assertProjectDeleteFlow(page) {
   await page.locator(".project-row").first().locator(".icon-button").nth(1).click();
   await assertVisible(page.getByRole("heading", { name: "정말로 삭제하시겠습니까?" }), "project delete confirmation");
   await assertVisible(page.locator(".modal", { hasText: "실제 폴더와 경로는 삭제되지 않습니다." }), "project delete safety copy");
-  await assertVisible(page.locator(".delete-project-name", { hasText: "빈 프로젝트 1" }), "project name in delete modal");
+  await assertVisible(page.locator(".delete-project-name", { hasText: "Empty Project 1" }), "project name in delete modal");
   await page.locator(".modal").getByRole("button", { name: "취소" }).click();
   const countAfterCancel = await page.locator(".project-row").count();
   if (countAfterCancel !== initialCount) {
@@ -584,11 +592,15 @@ async function assertProjectDeleteFlow(page) {
   await page.locator(".modal").getByRole("button", { name: "삭제" }).click();
   await page.waitForFunction(() => document.querySelectorAll(".project-row").length === 1);
   const remainingProject = await page.locator(".project-row strong").first().innerText();
-  if (remainingProject !== "빈 프로젝트 2") {
+  if (remainingProject !== "Empty Project 2") {
     throw new Error(`delete should remove only the selected project and activate the remaining project, got ${remainingProject}`);
   }
   const storedProjects = await page.evaluate(() => JSON.parse(localStorage.getItem("opendock.projects") ?? "[]"));
-  if (storedProjects.length !== 1 || storedProjects[0]?.name !== "빈 프로젝트 2") {
+  if (
+    storedProjects.length !== 1 ||
+    storedProjects[0]?.name !== "Empty Project 2" ||
+    storedProjects[0]?.folderName !== "empty-project-2"
+  ) {
     throw new Error(`delete should update only stored project registration, got ${JSON.stringify(storedProjects)}`);
   }
   const chooserVisible = await page.getByRole("heading", { name: "프로젝트를 선택하세요" }).isVisible().catch(() => false);

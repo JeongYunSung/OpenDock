@@ -151,13 +151,14 @@ fn create_blank_project(index: u32) -> Result<ProjectFolder, String> {
     let base = home.join("OpenDock Projects");
     fs::create_dir_all(&base).map_err(|error| format!("failed to create project root: {error}"))?;
 
-    let preferred = format!("빈 프로젝트{}", index.max(1));
+    let normalized_index = index.max(1);
+    let preferred = format!("empty-project-{normalized_index}");
     let path = unique_project_path(&base, &preferred);
     fs::create_dir_all(&path)
         .map_err(|error| format!("failed to create project folder: {error}"))?;
     let folder_name = file_name(&path)?;
     Ok(ProjectFolder {
-        name: folder_name.clone(),
+        name: format!("Empty Project {normalized_index}"),
         folder_name,
         path: path.to_string_lossy().to_string(),
     })
