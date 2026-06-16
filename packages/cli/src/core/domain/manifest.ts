@@ -235,9 +235,66 @@ export class ManifestReader {
     try {
       return manifestSchema.parse(YAML.parse(readFileSync(path, "utf8")));
     } catch (error) {
-      throw new Error(`failed to parse ${path}: ${(error as Error).message}`);
+      throw new Error(formatManifestReadError(path, error));
     }
   }
+}
+
+function formatManifestReadError(path: string, error: unknown): string {
+  if (error instanceof z.ZodError) {
+    return formatManifestSchemaError(path, error);
+  }
+  return `failed to parse ${path}: ${(error as Error).message}`;
+}
+
+function formatManifestSchemaError(path: string, error: z.ZodError): string {
+  const unsupportedFields = unsupportedManifestFields(error);
+  if (unsupportedFields.length > 0) {
+    const fields = unsupportedFields.map((field) => `\`${field}\``).join(", ");
+    const legacyHint = unsupportedFields.some(isLikelyLegacyManifestField)
+      ? " This dock may use an older OpenDock v1 manifest format."
+      : "";
+    return [
+      `failed to parse ${path}: unsupported dock.yml field${unsupportedFields.length === 1 ? "" : "s"} ${fields}.`,
+      legacyHint,
+      " Update the dock release or upgrade OpenDock CLI before installing or updating it.",
+    ].join("");
+  }
+
+  const issue = error.issues[0];
+  if (issue === undefined) {
+    return `failed to parse ${path}: invalid dock.yml manifest`;
+  }
+  const field = issue.path.length > 0 ? ` field \`${issue.path.join(".")}\`` : "";
+  return `failed to parse ${path}: invalid dock.yml${field}: ${issue.message}`;
+}
+
+function unsupportedManifestFields(error: z.ZodError): string[] {
+  const fields: string[] = [];
+  for (const issue of error.issues) {
+    if (issue.code !== "unrecognized_keys") {
+      continue;
+    }
+    const pathPrefix = issue.path.map(String).join(".");
+    for (const key of issue.keys) {
+      fields.push(pathPrefix.length > 0 ? `${pathPrefix}.${key}` : key);
+    }
+  }
+  return fields;
+}
+
+function isLikelyLegacyManifestField(field: string): boolean {
+  return (
+    field === "schema" ||
+    field === "kind" ||
+    field === "lifecycle" ||
+    field === "needs" ||
+    field === "supports" ||
+    field === "version" ||
+    field.startsWith("requires.tools") ||
+    field.startsWith("requires.packages") ||
+    field.endsWith(".update")
+  );
 }
 
 export function parseManifestFile(path: string): DockManifest {

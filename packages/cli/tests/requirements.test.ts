@@ -99,7 +99,7 @@ describe("requires regression coverage", () => {
     expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow("duplicate tag");
   });
 
-  it("rejects unknown requires fields", () => {
+  it("rejects unknown requires fields with compatibility guidance", () => {
     const root = tempDir();
     writeFileSync(
       join(root, "dock.yml"),
@@ -114,7 +114,11 @@ describe("requires regression coverage", () => {
       }),
     );
 
-    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow("Unrecognized key");
+    const error = captureManifestError(join(root, "dock.yml"));
+
+    expect(error.message).toContain("unsupported dock.yml field `requires.tools`");
+    expect(error.message).toContain("older OpenDock v1 manifest format");
+    expect(error.message).not.toContain("Unrecognized key");
   });
 
   it("parses top-level tasks from dock.yml", () => {
@@ -157,7 +161,7 @@ describe("requires regression coverage", () => {
     ]);
   });
 
-  it("rejects legacy lifecycle field from dock.yml", () => {
+  it("rejects legacy lifecycle field with compatibility guidance", () => {
     const root = tempDir();
     writeFileSync(
       join(root, "dock.yml"),
@@ -170,7 +174,11 @@ describe("requires regression coverage", () => {
       }),
     );
 
-    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow("Unrecognized key");
+    const error = captureManifestError(join(root, "dock.yml"));
+
+    expect(error.message).toContain("unsupported dock.yml field `lifecycle`");
+    expect(error.message).toContain("older OpenDock v1 manifest format");
+    expect(error.message).not.toContain("Unrecognized key");
   });
 
   it("rejects unsupported required runtimes", () => {
@@ -283,6 +291,15 @@ function tempDir(): string {
   const dir = mkdtempSync(join(tmpdir(), "opendock-requires-test-"));
   tempRoots.push(dir);
   return dir;
+}
+
+function captureManifestError(path: string): Error {
+  try {
+    parseManifestFile(path);
+  } catch (error) {
+    return error as Error;
+  }
+  throw new Error("expected manifest parse to fail");
 }
 
 function writeFakeBun(bin: string, log: string): void {
