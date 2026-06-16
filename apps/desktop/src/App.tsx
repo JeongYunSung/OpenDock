@@ -3764,6 +3764,17 @@ function CommandPaletteDialog(props: {
     inputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopPropagation();
+      props.onClose();
+    };
+    document.addEventListener("keydown", closeOnEscape, true);
+    return () => document.removeEventListener("keydown", closeOnEscape, true);
+  }, [props.onClose]);
+
   const normalizedQuery = query.trim().toLowerCase();
   const visibleBindings = props.bindings.filter((binding) => {
     if (!normalizedQuery) return true;
@@ -3778,7 +3789,12 @@ function CommandPaletteDialog(props: {
   });
 
   return (
-    <div className="modal-layer command-palette-layer">
+    <div
+      className="modal-layer command-palette-layer"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) props.onClose();
+      }}
+    >
       <div aria-labelledby="command-palette-title" aria-modal="true" className="command-palette" role="dialog">
         <div className="command-palette-search">
           <Search size={16} />
@@ -3786,7 +3802,6 @@ function CommandPaletteDialog(props: {
             aria-label={props.t.commandPaletteSearch}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === "Escape") props.onClose();
               if (event.key === "Enter" && visibleBindings[0]) props.onRun(visibleBindings[0].id);
             }}
             placeholder={props.t.commandPaletteSearch}

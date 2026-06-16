@@ -11,9 +11,10 @@
     "build:web": "tsc && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc --noEmit",
-    "verify": "bun run verify:od && bun run verify:native && bun run typecheck && cargo check --manifest-path src-tauri/Cargo.toml",
+    "verify": "bun run verify:od && bun run verify:native && bun run verify:shortcuts && bun run typecheck && cargo check --manifest-path src-tauri/Cargo.toml",
     "verify:native": "bun scripts/verify-native-contract.mjs",
-    "verify:od": "bun scripts/verify-od-screen.mjs"
+    "verify:od": "bun scripts/verify-od-screen.mjs",
+    "verify:shortcuts": "bun scripts/verify-shortcuts.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.9.1",

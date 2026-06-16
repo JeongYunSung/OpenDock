@@ -278,7 +278,7 @@ const failures = [
     ? ["no-update progress events must not duplicate final update result rows in the command popup"]
     : []),
   ...(!blockingCliCommandsUseBackgroundRuntime
-    ? ["blocking opendock CLI commands must run through the background runtime"]
+    ? ["blocking OpenDock commands must run through the background runtime"]
     : []),
   ...(!logStorageIsCapped ? ["app logs must be capped before rendering and persisting"] : []),
   ...(!titlebarUsesNativeDragFallback

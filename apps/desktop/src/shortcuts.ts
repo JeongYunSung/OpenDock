@@ -31,9 +31,22 @@ type KeyboardLikeEvent = Pick<
   "altKey" | "ctrlKey" | "key" | "metaKey" | "shiftKey"
 >;
 
-const defaultShortcuts = defaultShortcutConfig.shortcuts;
-const commandIds = Object.keys(defaultShortcuts) as ShortcutCommandId[];
+const rawDefaultShortcuts = defaultShortcutConfig.shortcuts;
+const commandIds = Object.keys(rawDefaultShortcuts) as ShortcutCommandId[];
 const commandIdSet = new Set<string>(commandIds);
+const defaultShortcuts = Object.fromEntries(
+  commandIds.map((id) => {
+    const shortcut = rawDefaultShortcuts[id];
+    return [
+      id,
+      {
+        ...shortcut,
+        mac: normalizeDefaultShortcut(shortcut.mac, "mac"),
+        windows: normalizeDefaultShortcut(shortcut.windows, "windows"),
+      },
+    ];
+  }),
+) as typeof rawDefaultShortcuts;
 
 export const shortcutDefinitions: ShortcutDefinition[] = commandIds.map((id) => ({
   id,
@@ -111,7 +124,7 @@ export function formatShortcutForDisplay(shortcut: string | null, platform: Shor
   return shortcut
     .split("+")
     .map((part) => labels[part] ?? part)
-    .join(platform === "mac" ? "" : "+");
+    .join(" + ");
 }
 
 export function findShortcutConflict(
@@ -156,8 +169,8 @@ export function exportShortcutConfig(overrides: ShortcutOverrides): string {
   const shortcuts: ShortcutConfigFile["shortcuts"] = {};
   for (const definition of shortcutDefinitions) {
     shortcuts[definition.id] = {
-      mac: shortcutForCommand(definition.id, overrides, "mac"),
-      windows: shortcutForCommand(definition.id, overrides, "windows"),
+      mac: shortcutToConfigString(shortcutForCommand(definition.id, overrides, "mac"), "mac"),
+      windows: shortcutToConfigString(shortcutForCommand(definition.id, overrides, "windows"), "windows"),
     };
   }
   return `${JSON.stringify({ version: 1, shortcuts }, null, 2)}\n`;
@@ -176,8 +189,8 @@ export function importShortcutConfig(raw: string): ShortcutOverrides {
   const next: ShortcutOverrides = {};
   for (const [commandId, value] of Object.entries(parsed.shortcuts)) {
     if (!commandIdSet.has(commandId) || !isRecord(value)) continue;
-    const mac = normalizeImportedShortcut(value.mac);
-    const windows = normalizeImportedShortcut(value.windows);
+    const mac = normalizeImportedShortcut(value.mac, "mac");
+    const windows = normalizeImportedShortcut(value.windows, "windows");
     const entry: Partial<Record<ShortcutPlatform, string | null>> = {};
     if (mac !== undefined) entry.mac = mac;
     if (windows !== undefined) entry.windows = windows;
@@ -196,6 +209,25 @@ export function shortcutCommandLabel(
   return binding.label[locale] ?? binding.label.en;
 }
 
+function shortcutToConfigString(shortcut: string | null, platform: ShortcutPlatform): string | null {
+  if (!shortcut) return null;
+  return shortcut
+    .split("+")
+    .map((part) => shortcutPartToConfigString(part, platform))
+    .join("+");
+}
+
+function shortcutPartToConfigString(part: string, platform: ShortcutPlatform): string {
+  if (platform === "mac") {
+    if (part === "Meta") return "Command";
+    if (part === "Ctrl") return "Control";
+    if (part === "Alt") return "Option";
+    return part;
+  }
+  if (part === "Meta") return "Win";
+  return part;
+}
+
 function validateShortcutConflicts(overrides: ShortcutOverrides): void {
   for (const platform of ["mac", "windows"] as const) {
     const seen = new Map<string, ShortcutCommandId>();
@@ -211,40 +243,60 @@ function validateShortcutConflicts(overrides: ShortcutOverrides): void {
   }
 }
 
-function normalizeImportedShortcut(value: unknown): string | null | undefined {
+function normalizeImportedShortcut(value: unknown, platform: ShortcutPlatform): string | null | undefined {
   if (value === undefined) return undefined;
   if (value === null) return null;
   if (typeof value !== "string") {
     throw new Error("Shortcut values must be strings or null.");
   }
-  const normalized = normalizeShortcutString(value);
+  const normalized = normalizeShortcutString(value, platform);
   if (!normalized) {
     throw new Error(`Invalid shortcut: ${value}`);
   }
   return normalized;
 }
 
-function normalizeShortcutString(value: string): string | null {
+function normalizeDefaultShortcut(value: string | null, platform: ShortcutPlatform): string | null {
+  const normalized = normalizeImportedShortcut(value, platform);
+  if (normalized === undefined) {
+    throw new Error(`Missing default shortcut for ${platform}`);
+  }
+  return normalized;
+}
+
+function normalizeShortcutString(value: string, platform: ShortcutPlatform): string | null {
   const parts = value
     .split("+")
-    .map((part) => normalizeShortcutPart(part.trim()))
+    .map((part) => normalizeShortcutPart(part.trim(), platform))
     .filter(Boolean);
   const key = parts.at(-1);
-  if (!key || parts.length < 2) return null;
+  if (!key || isShortcutModifier(key) || parts.length < 2) return null;
   return parts.join("+");
 }
 
-function normalizeShortcutPart(value: string): string | null {
+function normalizeShortcutPart(value: string, platform: ShortcutPlatform): string | null {
   const lower = value.toLowerCase();
-  if (lower === "cmd" || lower === "command" || lower === "meta" || lower === "super") return "Meta";
-  if (lower === "control" || lower === "ctrl") return "Ctrl";
-  if (lower === "option" || lower === "alt") return "Alt";
+  if (platform === "mac" && lower === "command") return "Meta";
+  if (platform === "mac" && lower === "control") return "Ctrl";
+  if (platform === "mac" && lower === "option") return "Alt";
+  if (platform === "windows" && lower === "win") return "Meta";
+  if (platform === "windows" && lower === "ctrl") return "Ctrl";
+  if (platform === "windows" && lower === "alt") return "Alt";
   if (lower === "shift") return "Shift";
-  if (lower === "return" || lower === "enter") return "Enter";
+  if (lower === "enter") return "Enter";
+  if (lower === "escape") return "Escape";
+  if (lower === "space") return "Space";
+  if (lower === "tab") return "Tab";
+  if (lower === "backspace") return "Backspace";
+  if (lower === "delete") return "Delete";
   if (/^[a-z]$/.test(lower)) return lower.toUpperCase();
   if (/^[0-9]$/.test(lower)) return lower;
+  if (/^arrow(left|right|up|down)$/.test(lower)) {
+    return `Arrow${lower.slice(5, 6).toUpperCase()}${lower.slice(6)}`;
+  }
+  if (/^f([1-9]|1[0-2])$/.test(lower)) return lower.toUpperCase();
   if (["[", "]", "/", "\\", ".", ",", "-", "="].includes(value)) return value;
-  return normalizeShortcutKey(value);
+  return null;
 }
 
 function normalizeShortcutKey(key: string): string | null {
@@ -257,6 +309,10 @@ function normalizeShortcutKey(key: string): string | null {
   if (/^F([1-9]|1[0-2])$/.test(key)) return key;
   if (["Backspace", "Delete", "Enter", "Escape", "Space", "Tab"].includes(key)) return key;
   return null;
+}
+
+function isShortcutModifier(value: string): boolean {
+  return value === "Alt" || value === "Ctrl" || value === "Meta" || value === "Shift";
 }
 
 function pruneShortcutOverrides(overrides: ShortcutOverrides): ShortcutOverrides {

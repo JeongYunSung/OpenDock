@@ -2798,13 +2798,18 @@ input:focus-visible,
 }
 
 .command-palette-list kbd {
+  display: inline-flex;
+  align-items: center;
   flex: none;
   border: 1px solid var(--border-strong);
   border-radius: 6px;
-  padding: 4px 7px;
+  min-width: 48px;
+  justify-content: center;
+  padding: 4px 9px;
   color: var(--text-2);
   background: var(--surface-2);
   font: 800 11px var(--font-mono);
+  white-space: nowrap;
 }
 
 .project-switcher {

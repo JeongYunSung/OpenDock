@@ -10,7 +10,7 @@
         "ko": "명령을 검색해 실행합니다.",
         "en": "Search and run commands."
       },
-      "mac": "Meta+K",
+      "mac": "Command+K",
       "windows": "Ctrl+K",
       "editable": true
     },
@@ -23,7 +23,7 @@
         "ko": "빈 프로젝트를 만듭니다.",
         "en": "Create an empty project."
       },
-      "mac": "Meta+N",
+      "mac": "Command+N",
       "windows": "Ctrl+N",
       "editable": true
     },
@@ -36,7 +36,7 @@
         "ko": "로컬 폴더를 프로젝트로 추가합니다.",
         "en": "Add a local folder as a project."
       },
-      "mac": "Meta+O",
+      "mac": "Command+O",
       "windows": "Ctrl+O",
       "editable": true
     },
@@ -49,7 +49,7 @@
         "ko": "등록된 프로젝트 목록을 엽니다.",
         "en": "Open the registered project switcher."
       },
-      "mac": "Meta+Shift+O",
+      "mac": "Command+Shift+O",
       "windows": "Ctrl+Shift+O",
       "editable": true
     },
@@ -62,7 +62,7 @@
         "ko": "Dock 탐색 화면으로 이동합니다.",
         "en": "Go to the dock Explore view."
       },
-      "mac": "Meta+1",
+      "mac": "Command+1",
       "windows": "Ctrl+1",
       "editable": true
     },
@@ -75,7 +75,7 @@
         "ko": "설치된 dock 화면으로 이동합니다.",
         "en": "Go to the Installed view."
       },
-      "mac": "Meta+2",
+      "mac": "Command+2",
       "windows": "Ctrl+2",
       "editable": true
     },
@@ -88,7 +88,7 @@
         "ko": "프로젝트 로그 화면으로 이동합니다.",
         "en": "Go to the project Logs view."
       },
-      "mac": "Meta+3",
+      "mac": "Command+3",
       "windows": "Ctrl+3",
       "editable": true
     },
@@ -101,7 +101,7 @@
         "ko": "현재 프로젝트의 dock을 업데이트합니다.",
         "en": "Update docks in the active project."
       },
-      "mac": "Meta+U",
+      "mac": "Command+U",
       "windows": "Ctrl+U",
       "editable": true
     },
@@ -114,7 +114,7 @@
         "ko": "Dock 목록을 다시 가져옵니다.",
         "en": "Refresh the dock catalog."
       },
-      "mac": "Meta+R",
+      "mac": "Command+R",
       "windows": "Ctrl+R",
       "editable": true
     },
@@ -127,7 +127,7 @@
         "ko": "상세 화면의 dock을 설치합니다.",
         "en": "Install the dock shown in detail."
       },
-      "mac": "Meta+Enter",
+      "mac": "Command+Enter",
       "windows": "Ctrl+Enter",
       "editable": true
     }

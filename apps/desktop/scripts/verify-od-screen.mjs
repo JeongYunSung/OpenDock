@@ -75,6 +75,7 @@ async function runViewportFlow(viewport) {
     await assertNoHorizontalOverflow(page, "workspace list", viewport);
     await assertSidebarToggle(page);
     await assertSortMenu(page);
+    await assertCommandPaletteEscapeClosesWithoutInputFocus(page);
 
     const catalogStatusCount = await page.locator(".catalog-status").count();
     if (catalogStatusCount !== 0) {
@@ -499,6 +500,27 @@ async function assertSortMenu(page) {
   if (firstDockTitle !== "backend-ultrawork") {
     throw new Error(`name sort should put backend-ultrawork first, got ${firstDockTitle}`);
   }
+}
+
+async function assertCommandPaletteEscapeClosesWithoutInputFocus(page) {
+  const modifier = await page.evaluate(() => (/Mac|iPhone|iPad|iPod/.test(navigator.platform) ? "Meta" : "Control"));
+  await page.keyboard.press(`${modifier}+K`);
+  await assertVisible(page.locator(".command-palette"), "command palette");
+  await page.evaluate(() => {
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) activeElement.blur();
+  });
+  const focusedInput = await page.evaluate(() => document.activeElement?.tagName === "INPUT");
+  if (focusedInput) {
+    throw new Error("command palette input should lose focus before Escape regression check");
+  }
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector(".command-palette"));
+
+  await page.keyboard.press(`${modifier}+K`);
+  await assertVisible(page.locator(".command-palette"), "command palette after reopen");
+  await page.mouse.click(20, 60);
+  await page.waitForFunction(() => !document.querySelector(".command-palette"));
 }
 
 function catalogPageLimitForViewport(width, height) {

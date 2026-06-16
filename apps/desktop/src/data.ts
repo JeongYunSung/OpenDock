@@ -658,7 +658,7 @@ export const TEXT = {
     menuRefreshRegistry: "Refresh Registry",
     menuReloadWindow: "Reload window",
     menuDocs: "OpenDock Docs",
-    menuCliCommands: "View CLI commands",
+    menuCliCommands: "View commands",
     menuTroubleshooting: "Troubleshooting"
   }
 } as const;
