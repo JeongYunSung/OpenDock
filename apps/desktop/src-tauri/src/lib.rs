@@ -21,6 +21,7 @@ const DEFAULT_VERSION_PAGE_LIMIT: u32 = 6;
 const MAX_VERSION_PAGE_LIMIT: u32 = 30;
 const DEFAULT_ACCOUNT_PAGE_LIMIT: u32 = 6;
 const MAX_ACCOUNT_PAGE_LIMIT: u32 = 60;
+const MAX_REGISTRY_ASSET_BYTES: usize = 2 * 1024 * 1024;
 
 #[derive(Default)]
 struct RunningCommands(Mutex<HashMap<String, u32>>);
@@ -357,7 +358,11 @@ async fn opendock_catalog(
             sort.unwrap_or_else(|| "downloads".to_string())
         }
         "recent" => "updated".to_string(),
-        _ => return Err("catalog sort must be downloads, stars, updated, recent, or name".to_string()),
+        _ => {
+            return Err(
+                "catalog sort must be downloads, stars, updated, recent, or name".to_string(),
+            )
+        }
     };
     let mut url = reqwest::Url::parse(&format!("{}/v1/docks", registry_base()))
         .map_err(|error| format!("invalid registry URL: {error}"))?;
@@ -486,6 +491,13 @@ async fn opendock_registry_asset_data_url(url: String) -> Result<String, String>
         .send()
         .await
         .map_err(|error| format!("failed to request registry asset: {error}"))?;
+    registry_asset_response_to_data_url(response, &url).await
+}
+
+async fn registry_asset_response_to_data_url(
+    mut response: reqwest::Response,
+    url: &reqwest::Url,
+) -> Result<String, String> {
     let status = response.status();
     if !status.is_success() {
         return Err(format!("registry asset returned {status} for {url}"));
@@ -498,17 +510,36 @@ async fn opendock_registry_asset_data_url(url: String) -> Result<String, String>
         .filter(|value| value.starts_with("image/"))
         .ok_or_else(|| "registry asset is not an image".to_string())?
         .to_string();
-    let bytes = response
-        .bytes()
-        .await
-        .map_err(|error| format!("failed to read registry asset: {error}"))?;
-    if bytes.len() > 2 * 1024 * 1024 {
+
+    if response
+        .content_length()
+        .is_some_and(|length| length > MAX_REGISTRY_ASSET_BYTES as u64)
+    {
         return Err("registry asset is too large".to_string());
     }
+
+    let mut bytes = Vec::with_capacity(response.content_length().unwrap_or(0) as usize);
+    while let Some(chunk) = response
+        .chunk()
+        .await
+        .map_err(|error| format!("failed to read registry asset: {error}"))?
+    {
+        append_registry_asset_chunk(&mut bytes, &chunk)?;
+    }
+
     Ok(format!(
         "data:{content_type};base64,{}",
         general_purpose::STANDARD.encode(bytes)
     ))
+}
+
+fn append_registry_asset_chunk(bytes: &mut Vec<u8>, chunk: &[u8]) -> Result<(), String> {
+    let remaining = MAX_REGISTRY_ASSET_BYTES.saturating_sub(bytes.len());
+    if chunk.len() > remaining {
+        return Err("registry asset is too large".to_string());
+    }
+    bytes.extend_from_slice(chunk);
+    Ok(())
 }
 
 #[tauri::command]
@@ -914,7 +945,10 @@ fn bounded_page(page: Option<u32>) -> String {
 }
 
 fn bounded_limit(limit: Option<u32>, default_limit: u32, max_limit: u32) -> String {
-    limit.unwrap_or(default_limit).clamp(1, max_limit).to_string()
+    limit
+        .unwrap_or(default_limit)
+        .clamp(1, max_limit)
+        .to_string()
 }
 
 fn load_auth_token() -> Result<String, String> {
@@ -1673,6 +1707,7 @@ fn file_name(path: &Path) -> Result<String, String> {
 mod tests {
     use super::*;
     use serde_json::json;
+    use std::net::TcpListener;
 
     #[test]
     fn successful_json_result_does_not_emit_empty_stream_message() {
@@ -1728,5 +1763,49 @@ mod tests {
         assert_eq!(progress.command_id.as_deref(), Some("cmd-1"));
         assert_eq!(progress.dock_id.as_deref(), Some("test/designer"));
         assert_eq!(progress.percent, 62.0);
+    }
+
+    #[test]
+    fn registry_asset_chunk_limit_rejects_before_extending_buffer() {
+        let mut bytes = vec![0; MAX_REGISTRY_ASSET_BYTES];
+
+        let error = append_registry_asset_chunk(&mut bytes, &[1]).expect_err("oversized chunk");
+
+        assert_eq!(error, "registry asset is too large");
+        assert_eq!(bytes.len(), MAX_REGISTRY_ASSET_BYTES);
+    }
+
+    #[test]
+    fn registry_asset_response_rejects_oversized_content_length_before_body_read() {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind test server");
+        let address = listener.local_addr().expect("test server address");
+        let response = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: image/png\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+            MAX_REGISTRY_ASSET_BYTES + 1
+        );
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("accept request");
+            let mut request = [0; 1024];
+            let _ = std::io::Read::read(&mut stream, &mut request);
+            std::io::Write::write_all(&mut stream, response.as_bytes())
+                .expect("write response headers");
+        });
+        let url = reqwest::Url::parse(&format!("http://{address}/v1/docks/test/logo"))
+            .expect("test logo URL");
+
+        let result = tauri::async_runtime::block_on(async {
+            let response = reqwest::Client::new()
+                .get(url.clone())
+                .send()
+                .await
+                .expect("registry asset response");
+            registry_asset_response_to_data_url(response, &url).await
+        });
+
+        server.join().expect("server thread");
+        assert_eq!(
+            result.expect_err("oversized asset"),
+            "registry asset is too large"
+        );
     }
 }
