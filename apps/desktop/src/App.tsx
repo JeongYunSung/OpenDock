@@ -263,6 +263,16 @@ function commandTaskLevel(status: CommandTaskStatus) {
   return "RUN";
 }
 
+function normalizeCommandRowMessage(message: string) {
+  return message.trim().replace(/\s+/g, " ");
+}
+
+function commandRowsContainMessage(rows: CommandTaskRow[], message: string) {
+  const normalized = normalizeCommandRowMessage(message);
+  if (!normalized) return true;
+  return rows.some((row) => normalizeCommandRowMessage(row.message) === normalized);
+}
+
 function appMenuGroups(t: (typeof TEXT)[Lang]): AppMenuGroup[] {
   return [
     {
@@ -1749,8 +1759,9 @@ export function App() {
   ) {
     setCommandTask((current) => {
       if (!current || current.id !== commandId) return current;
+      const hasSpecificError = status === "error" && current.rows.some((row) => row.level === "ERR" && row.message !== step);
       const nextRows =
-        current.step === step
+        current.step === step || hasSpecificError
           ? current.rows
           : [
               { time: nowTime(), level: commandTaskLevel(status), color: logColor(commandTaskLevel(status)), message: step },
@@ -1898,7 +1909,8 @@ export function App() {
   function appendCommandFailureLog(commandId: string, result: OpenDockChangeResult | null) {
     if (!result || result.success) return;
     const rows: CommandTaskRow[] = [];
-    if (result.message) {
+    const currentRows = commandTaskRef.current?.id === commandId ? commandTaskRef.current.rows : [];
+    if (result.message && !commandRowsContainMessage(currentRows, result.message)) {
       rows.push({ time: nowTime(), level: "ERR", color: logColor("ERR"), message: result.message });
     }
     if (result.forceable) {

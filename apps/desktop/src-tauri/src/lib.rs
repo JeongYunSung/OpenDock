@@ -1225,7 +1225,7 @@ fn run_opendock_streaming(
     let mut collected_lines = lines.lock().map(|value| value.clone()).unwrap_or_default();
     let json = parse_command_json(&stdout);
 
-    if collected_lines.is_empty() && should_emit_empty_stream_message(success, json.as_ref()) {
+    if collected_lines.is_empty() && should_emit_empty_stream_message(&stdout, &stderr) {
         let payload = OpenDockCommandLine {
             level: if success { "OK" } else { "ERR" }.to_string(),
             message: empty_stream_message(success),
@@ -1638,8 +1638,8 @@ fn command_progress_from_event_line(
     })
 }
 
-fn should_emit_empty_stream_message(success: bool, json: Option<&Value>) -> bool {
-    !success || json.is_none()
+fn should_emit_empty_stream_message(stdout: &str, stderr: &str) -> bool {
+    stdout.trim().is_empty() && stderr.trim().is_empty()
 }
 
 fn empty_stream_message(success: bool) -> String {
@@ -1706,36 +1706,25 @@ fn file_name(path: &Path) -> Result<String, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json::json;
     use std::net::TcpListener;
 
     #[test]
-    fn successful_json_result_does_not_emit_empty_stream_message() {
-        let value = json!({
-            "operation": "update",
-            "reports": [],
-            "summary": {
-                "created": [],
-                "deleted": [],
-                "reviewRequired": [],
-                "unchanged": [],
-                "updated": []
-            },
-            "success": true
-        });
+    fn event_stream_result_does_not_emit_empty_stream_message() {
+        let stdout = r#"{"opendock":1,"type":"progress","operation":"install","phase":"error","message":"OpenDock Registry signature verification failed","percent":100,"level":"ERR"}
+{"opendock":1,"type":"result","operation":"install","success":false,"result":{"operation":"install","reports":[],"summary":{"created":[],"deleted":[],"reviewRequired":[],"unchanged":[],"updated":[]},"success":false,"message":"OpenDock Registry signature verification failed"}}"#;
 
-        assert!(!should_emit_empty_stream_message(true, Some(&value)));
+        assert!(!should_emit_empty_stream_message(stdout, ""));
     }
 
     #[test]
-    fn empty_stream_without_json_keeps_generic_success_message() {
-        assert!(should_emit_empty_stream_message(true, None));
+    fn empty_stream_keeps_generic_success_message() {
+        assert!(should_emit_empty_stream_message("", ""));
         assert_eq!(empty_stream_message(true), "opendock command completed");
     }
 
     #[test]
     fn empty_stream_failure_keeps_error_message() {
-        assert!(should_emit_empty_stream_message(false, None));
+        assert!(should_emit_empty_stream_message("", ""));
         assert_eq!(empty_stream_message(false), "opendock command failed");
     }
 

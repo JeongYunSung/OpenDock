@@ -139,6 +139,12 @@ const noUpdateProgressDoesNotDuplicatePopupRows =
   app.includes("step: suppressProgressRow ? current.step : progress.message") &&
   app.includes("!suppressProgressRow &&") &&
   app.includes('progress.message === "No OpenDock dock updates available."');
+const commandFailureProgressDoesNotDuplicatePopupRows =
+  app.includes("function commandRowsContainMessage") &&
+  app.includes("!commandRowsContainMessage(currentRows, result.message)") &&
+  app.includes("const hasSpecificError = status === \"error\"") &&
+  rust.includes("should_emit_empty_stream_message(&stdout, &stderr)") &&
+  rust.includes("stdout.trim().is_empty() && stderr.trim().is_empty()");
 const blockingCliCommandsUseBackgroundRuntime = [
   "opendock_install",
   "opendock_update",
@@ -276,6 +282,9 @@ const failures = [
     : []),
   ...(!noUpdateProgressDoesNotDuplicatePopupRows
     ? ["no-update progress events must not duplicate final update result rows in the command popup"]
+    : []),
+  ...(!commandFailureProgressDoesNotDuplicatePopupRows
+    ? ["failure progress events must not duplicate final command error rows in the command popup"]
     : []),
   ...(!blockingCliCommandsUseBackgroundRuntime
     ? ["blocking OpenDock commands must run through the background runtime"]
