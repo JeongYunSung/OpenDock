@@ -39,6 +39,7 @@ try {
 
   await runViewportFlow({ width: 1180, height: 760 });
   await runViewportFlow({ width: 1360, height: 800 });
+  await runViewportFlow({ width: 1720, height: 900 });
   await runViewportFlow({ width: 1024, height: 720 });
   await runViewportFlow({ width: 960, height: 640 });
   await assertWindowsAppMenuFlyoutDoesNotOverlap({ width: 1180, height: 760 });
@@ -90,6 +91,7 @@ async function runViewportFlow(viewport) {
     if (initialCardCount > expectedCatalogLimit) {
       throw new Error(`catalog should respect responsive page limit ${expectedCatalogLimit}, got ${initialCardCount}`);
     }
+    await assertCatalogGridDensity(page, viewport);
     await assertVisible(page.locator(".dock-card .dock-metric").first(), "dock card download metric");
     await assertVisible(page.locator(".dock-card .star-button").first(), "dock card star metric");
 
@@ -532,16 +534,42 @@ async function assertCommandPaletteEscapeClosesWithoutInputFocus(page) {
 }
 
 function catalogPageLimitForViewport(width, height) {
-  const columns = width <= 520 ? 1 : width <= 980 ? 2 : 3;
+  const columns = catalogColumnsForViewport(width);
   const baseRows = width <= 520 ? 5 : 3;
   const extraRows = Math.max(0, Math.floor((height - 980) / 420));
   return Math.min(24, columns * Math.min(8, baseRows + extraRows));
+}
+
+function catalogColumnsForViewport(width) {
+  if (width <= 520) return 1;
+  if (width <= 980) return 2;
+  if (width >= 1600) return 4;
+  return 3;
 }
 
 function versionPageLimitForViewport(width, height) {
   const baseRows = width <= 980 ? 5 : 6;
   const extraRows = Math.max(0, Math.floor((height - 900) / 180));
   return Math.min(18, baseRows + extraRows);
+}
+
+async function assertCatalogGridDensity(page, viewport) {
+  const expectedColumns = catalogColumnsForViewport(viewport.width);
+  const metrics = await page.locator(".dock-card").evaluateAll((cards) => {
+    const rects = cards.map((card) => card.getBoundingClientRect());
+    const firstTop = Math.min(...rects.map((rect) => Math.round(rect.top)));
+    const firstRow = rects.filter((rect) => Math.abs(Math.round(rect.top) - firstTop) <= 1);
+    return {
+      firstCardWidth: rects[0]?.width ?? 0,
+      firstRowCount: firstRow.length
+    };
+  });
+  if (metrics.firstRowCount !== expectedColumns) {
+    throw new Error(`catalog grid should render ${expectedColumns} columns at ${viewport.width}px, got ${metrics.firstRowCount}`);
+  }
+  if (viewport.width >= 1600 && metrics.firstCardWidth < 320) {
+    throw new Error(`wide catalog cards should be enlarged, got ${metrics.firstCardWidth}px`);
+  }
 }
 
 async function assertRegisteredProjectSkipsChooser(page) {

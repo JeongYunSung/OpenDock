@@ -379,10 +379,17 @@ function readResponsivePageSizes(): ResponsivePageSizes {
 }
 
 function catalogPageLimitForViewport(width: number, height: number) {
-  const columns = width <= 520 ? 1 : width <= 980 ? 2 : 3;
+  const columns = catalogColumnsForViewport(width);
   const baseRows = width <= 520 ? 5 : 3;
   const extraRows = Math.max(0, Math.floor((height - 980) / 420));
   return Math.min(24, columns * Math.min(8, baseRows + extraRows));
+}
+
+function catalogColumnsForViewport(width: number) {
+  if (width <= 520) return 1;
+  if (width <= 980) return 2;
+  if (width >= 1600) return 4;
+  return 3;
 }
 
 function versionPageLimitForViewport(width: number, height: number) {
