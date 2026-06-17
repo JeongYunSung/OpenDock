@@ -401,14 +401,25 @@ export async function run(argv = process.argv): Promise<void> {
 
   program
     .command("doctor")
+    .argument("[dock]", "Installed dock id to diagnose, e.g. opendock/oma")
     .description("Diagnose the current directory's OpenDock state.")
     .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
-    .action(async (options: { platform?: string }) => {
+    .action(async (dock: string | undefined, options: { platform?: string }) => {
+      let dockId: string | undefined;
       try {
-        await printDoctor(process.cwd(), options.platform);
-        recordCommandLog("doctor", "Success", "doctor completed");
+        dockId = dock === undefined ? undefined : dockIdFromReference(dock);
+        if (dock !== undefined && dockId === undefined) {
+          throw new Error("dock id must be in owner/name form");
+        }
+        await printDoctor(process.cwd(), options.platform, dockId);
+        recordCommandLog(
+          "doctor",
+          "Success",
+          dockId === undefined ? "doctor completed" : `doctor completed for ${dockId}`,
+          dockId,
+        );
       } catch (error) {
-        recordCommandFailure("doctor", error);
+        recordCommandFailure("doctor", error, dockId);
         throw error;
       }
     });
@@ -2110,7 +2121,7 @@ async function loadOrLoginToken(
   return (await performBrowserLogin({ client, tokenStore })).token;
 }
 
-async function printDoctor(cwd: string, platformOverride?: string): Promise<void> {
+async function printDoctor(cwd: string, platformOverride?: string, dockId?: string): Promise<void> {
   console.log(terminalStyle.bold("OpenDock Doctor"));
   console.log(`${terminalStyle.dim("Project:")} ${cwd}`);
 
@@ -2121,7 +2132,12 @@ async function printDoctor(cwd: string, platformOverride?: string): Promise<void
     console.log(`${formatStepSymbol("✓")} .opendock/project.yml`);
     console.log(`${formatStepSymbol("✓")} .opendock/dock.lock.yml`);
     const lock = store.readLock();
-    for (const dock of lock.docks) {
+    const selectedDocks =
+      dockId === undefined ? lock.docks : lock.docks.filter((dock) => dock.id === dockId);
+    if (dockId !== undefined && selectedDocks.length === 0) {
+      throw new Error(`dock \`${dockId}\` is not installed in this project`);
+    }
+    for (const dock of selectedDocks) {
       const platform = resolveCliPlatform(platformOverride ?? dock.platform);
       console.log(
         `${formatStepSymbol("✓")} ${formatDockVersion(dock.id, dock.version)} ${formatListPlatform(platform)}`,
@@ -2137,6 +2153,9 @@ async function printDoctor(cwd: string, platformOverride?: string): Promise<void
     console.log(`${terminalStyle.bold("Checks")}:`);
     console.log(`${formatStepSymbol("!")} .opendock/project.yml missing`);
     console.log(`${formatStepSymbol("!")} .opendock/dock.lock.yml missing`);
+    if (dockId !== undefined) {
+      throw new Error(`dock \`${dockId}\` is not installed in this project`);
+    }
   }
 }
 

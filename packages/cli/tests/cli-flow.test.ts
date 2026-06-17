@@ -94,6 +94,10 @@ describe("opendock TypeScript CLI", () => {
         expected: ["Usage: opendock install [options] <dock>", "--platform <platform>", "--json"],
       },
       {
+        args: ["doctor", "--help"],
+        expected: ["Usage: opendock doctor [options] [dock]", "--platform <platform>"],
+      },
+      {
         args: ["auth", "login", "--help"],
         expected: [
           "Usage: opendock auth login [options]",
@@ -1206,6 +1210,94 @@ describe("opendock TypeScript CLI", () => {
       success: true,
       summary: { installed: [] },
     });
+  });
+
+  it("runs doctor checks for only the requested installed dock", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+      tasks: {
+        doctor: [{ id: "designer-ready", check: "test -f AGENTS.md" }],
+      },
+    });
+    writeDock(docks, "test", "frontend", "1.0.0", {
+      files: [{ path: "FRONTEND.md", content: "# Frontend\n" }],
+      tasks: {
+        doctor: [{ id: "frontend-ready", check: "test -f FRONTEND.md" }],
+      },
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/designer@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+    await install({
+      dockRef: DockRef.parse("test/frontend@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    const registry = mockRegistry([
+      {
+        archive: await createDockArchive(docks, "test", "designer", "1.0.0"),
+        id: "test/designer",
+        platform: "macos",
+        version: "1.0.0",
+      },
+      {
+        archive: await createDockArchive(docks, "test", "frontend", "1.0.0"),
+        id: "test/frontend",
+        platform: "macos",
+        version: "1.0.0",
+      },
+    ]);
+
+    try {
+      const logs = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "doctor", "test/designer"])),
+      );
+
+      expect(logs).toContain("✓ test/designer@1.0.0 [macos]");
+      expect(logs).toContain("✓ designer-ready");
+      expect(logs.some((line) => line.includes("test/frontend"))).toBe(false);
+      expect(logs.some((line) => line.includes("frontend-ready"))).toBe(false);
+    } finally {
+      registry.restore();
+    }
+  });
+
+  it("rejects doctor for a dock that is not installed", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/designer@1.0.0"),
+      projectDir: project,
+      operation: "install",
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    await expect(
+      withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "doctor", "test/frontend"])),
+      ),
+    ).rejects.toThrow("dock `test/frontend` is not installed in this project");
   });
 
   it("records command logs for successes, failures, and skipped work", async () => {
