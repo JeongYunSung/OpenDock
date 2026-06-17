@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/backend-ai
 summary: Backend API, database, security, and testing guidance for AI-assisted engineering.
 readme: DOCK.md
 logo: logo.png

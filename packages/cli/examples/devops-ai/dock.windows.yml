@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/devops-ai
 summary: CI/CD, deployment, incident, and secrets policy guidance for AI-assisted operations.
 readme: DOCK.md
 logo: logo.png

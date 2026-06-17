@@ -13,7 +13,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { DockInstaller } from "../src/core/app/dock-installer.js";
-import { DockRef, parseManifestFile } from "../src/core/domain/manifest.js";
+import { DockRef, manifestForRef, parseManifestFile } from "../src/core/domain/manifest.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
 import type { OpenDockPlatform } from "../src/platform.js";
@@ -205,7 +205,7 @@ function localExampleResolver(example: ExampleDock) {
     expect(dockRef.id()).toBe(example.id);
     expect(platform).toBe(example.platform);
     return {
-      manifest: parseManifestFile(example.manifestFile),
+      manifest: manifestForRef(parseManifestFile(example.manifestFile), dockRef),
       version: testVersion,
       platform,
       root: example.root,
@@ -230,7 +230,7 @@ function discoverExampleDocks(): ExampleDock[] {
         .filter((candidate) => existsSync(candidate.manifestFile))
         .map((candidate) => ({
           ...candidate,
-          id: parseManifestFile(candidate.manifestFile).id,
+          id: `opendock/${entry.name}`,
         }));
     })
     .sort((a, b) => exampleLabel(a).localeCompare(exampleLabel(b)));

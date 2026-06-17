@@ -21,8 +21,11 @@ describe("example dock manifests", () => {
       for (const file of ["dock.macos.yml", "dock.windows.yml"]) {
         const root = join(examplesRoot, example);
         const manifest = parseManifestFile(join(root, file));
+        const manifestText = readFileSync(join(root, file), "utf8");
 
-        expect(manifest.id, `${example}/${file} id`).toBe(`opendock/${example}`);
+        expect(manifestText, `${example}/${file} should use deploy ref for identity`).not.toMatch(
+          /^id:/m,
+        );
         expect(manifest.tags.length, `${example}/${file} tags`).toBeGreaterThan(0);
         expect(new Set(manifest.tags).size, `${example}/${file} unique tags`).toBe(
           manifest.tags.length,

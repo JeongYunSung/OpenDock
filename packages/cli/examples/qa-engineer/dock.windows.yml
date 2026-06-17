@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/qa-engineer
 summary: Test planning, regression, bug report, accessibility, and performance review templates.
 readme: DOCK.md
 logo: logo.png

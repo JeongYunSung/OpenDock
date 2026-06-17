@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/codex
 summary: Tool dock for installing the Codex CLI without project payloads.
 readme: DOCK.md
 logo: logo.png

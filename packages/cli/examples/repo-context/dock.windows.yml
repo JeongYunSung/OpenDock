@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/repo-context
 summary: Repository context packaging, architecture mapping, and change-risk prompts.
 readme: DOCK.md
 logo: logo.png

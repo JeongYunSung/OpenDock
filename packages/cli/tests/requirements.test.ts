@@ -3,7 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import YAML from "yaml";
-import { type DockManifest, parseManifestFile } from "../src/core/domain/manifest.js";
+import {
+  type DockManifest,
+  DockRef,
+  manifestForRef,
+  parseManifestFile,
+} from "../src/core/domain/manifest.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
 
@@ -16,6 +21,24 @@ afterEach(() => {
 });
 
 describe("requires regression coverage", () => {
+  it("parses manifests without a top-level dock id", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        summary: "Identity comes from the install or deploy reference.",
+      }),
+    );
+
+    const manifest = parseManifestFile(join(root, "dock.yml"));
+    const bound = manifestForRef(manifest, DockRef.parse("test/idless@1.0.0"));
+
+    expect(manifest.id).toBe("");
+    expect(bound.id).toBe("test/idless");
+    expect(manifest.summary).toBe("Identity comes from the install or deploy reference.");
+  });
+
   it("parses runtime requirements from dock.yml", () => {
     const root = tempDir();
     writeFileSync(

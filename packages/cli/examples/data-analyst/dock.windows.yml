@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/data-analyst
 summary: Metric definitions, SQL review, dashboard briefs, and experiment analysis templates.
 readme: DOCK.md
 logo: logo.png

@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/customer-support
 summary: Support playbooks, FAQ structure, ticket triage, escalation, and reusable response prompts.
 readme: DOCK.md
 logo: logo.png

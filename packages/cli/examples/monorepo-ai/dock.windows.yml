@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/monorepo-ai
 summary: Workspace maps, package boundaries, change impact review, and build cache notes.
 readme: DOCK.md
 logo: logo.png

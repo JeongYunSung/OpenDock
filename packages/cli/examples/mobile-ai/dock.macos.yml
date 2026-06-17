@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/mobile-ai
 summary: Mobile architecture, UI patterns, release readiness, and testing guidance.
 readme: DOCK.md
 logo: logo.png

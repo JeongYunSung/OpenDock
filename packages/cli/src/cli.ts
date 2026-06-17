@@ -33,8 +33,8 @@ import {
   type CommandSpec,
   type DockManifest,
   DockRef,
+  manifestForRef,
   parseManifestFile,
-  validateManifestFor,
 } from "./core/domain/manifest.js";
 import { type InstalledDockRecord, OpenDockStateStore } from "./core/domain/state-store.js";
 import { fileChecksum } from "./core/files/checksum.js";
@@ -637,8 +637,7 @@ export async function run(argv = process.argv): Promise<void> {
         );
         const deployRoot = dirname(manifestPath);
         const manifest = readFileSync(manifestPath, "utf8");
-        const parsedManifest = parseManifestFile(manifestPath);
-        validateManifestFor(parsedManifest, dockRef);
+        const parsedManifest = manifestForRef(parseManifestFile(manifestPath), dockRef);
         validateDeployCommands(deployRoot, parsedManifest);
         const readmeMarkdown = readDeployReadme(deployRoot, parsedManifest);
         const logo = readDeployLogo(deployRoot, parsedManifest);

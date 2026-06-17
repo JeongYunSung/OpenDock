@@ -7,8 +7,8 @@ import {
   assertVersionSatisfiesSelector,
   type DockManifest,
   DockRef,
+  manifestForRef,
   parseManifestFile,
-  validateManifestFor,
 } from "./core/domain/manifest.js";
 import { cacheRoot } from "./paths.js";
 import { isOpenDockPlatform, type OpenDockPlatform } from "./platform.js";
@@ -150,8 +150,7 @@ async function resolveRemoteDockMetadata(
     throw new Error(`downloaded dock \`${requestedLabel}\` did not contain dock.yml`);
   }
 
-  const manifest = parseManifestFile(join(dockRoot, "dock.yml"));
-  validateManifestFor(manifest, exactDockRef);
+  const manifest = manifestForRef(parseManifestFile(join(dockRoot, "dock.yml")), exactDockRef);
 
   return {
     manifest,

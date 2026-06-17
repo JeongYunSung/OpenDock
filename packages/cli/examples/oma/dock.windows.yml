@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/oma
 summary: Oh My Agent setup with OpenDock-managed install, update, and uninstall.
 readme: DOCK.md
 logo: logo.png

@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/mcp-safe
 summary: Security-first MCP inventory, config examples, and review checklists.
 readme: DOCK.md
 logo: logo.png

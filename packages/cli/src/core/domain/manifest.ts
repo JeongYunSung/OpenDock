@@ -195,7 +195,7 @@ const commandsSchema = z.record(commandNameSchema, commandSpecSchema).default({}
 const manifestSchema = z
   .object({
     opendock: z.number().optional(),
-    id: z.string(),
+    id: z.string().optional(),
     name: z.string().optional(),
     summary: z.string().default(""),
     readme: z.string().optional(),
@@ -210,8 +210,9 @@ const manifestSchema = z
     doctor: phaseTasksSchema.optional(),
   })
   .strict()
-  .transform(({ install, update, doctor, ...manifest }) => ({
+  .transform(({ install, update, doctor, id, ...manifest }) => ({
     ...manifest,
+    id: id ?? "",
     tasks: {
       install: install ?? [],
       update: update ?? [],
@@ -308,11 +309,19 @@ export function validateManifestFor(manifest: DockManifest, requested: DockRef):
   if (manifest.opendock !== 1) {
     throw new Error(`unsupported opendock manifest version \`${manifest.opendock}\``);
   }
-  if (manifest.id !== requested.id()) {
+  if (manifest.id !== "" && manifest.id !== requested.id()) {
     throw new Error(
       `manifest id \`${manifest.id}\` does not match requested dock \`${requested}\``,
     );
   }
+}
+
+export function manifestForRef(manifest: DockManifest, requested: DockRef): DockManifest {
+  validateManifestFor(manifest, requested);
+  return {
+    ...manifest,
+    id: requested.id(),
+  };
 }
 
 export function assertVersionSatisfiesSelector(version: string, selector: string): void {

@@ -1540,7 +1540,6 @@ describe("opendock TypeScript CLI", () => {
       join(dockRoot, "macos", "dock.macos.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/platform-dock",
         summary: "macOS artifact",
         readme: "DOCK.md",
         logo: "logo.png",
@@ -1605,6 +1604,7 @@ describe("opendock TypeScript CLI", () => {
     expect(body.platform).toBe("macos");
     expect(body.archive.filename).toBe("test-platform-dock-1.0.0-macos.tgz");
     expect(body.manifest).toContain("summary: macOS artifact");
+    expect(body.manifest).not.toContain("id: test/platform-dock");
     expect(body.manifest).toContain("tags:");
     expect(body.manifest).toContain("- testing");
 
@@ -1613,6 +1613,7 @@ describe("opendock TypeScript CLI", () => {
     await extractTar({ file: archivePath, cwd: extractRoot });
     const archivedManifest = readFileSync(join(extractRoot, "dock.yml"), "utf8");
     expect(archivedManifest).toContain("summary: macOS artifact");
+    expect(archivedManifest).not.toContain("id: test/platform-dock");
     expect(archivedManifest).toContain("tags:");
     expect(archivedManifest).toContain("- testing");
     expect(readFileSync(join(extractRoot, "files", "AGENTS.md"), "utf8")).toBe("# macOS Agent\n");
@@ -1640,7 +1641,6 @@ describe("opendock TypeScript CLI", () => {
       join(dockRoot, "windows", "dock.windows.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/platform-dock",
         summary: "Windows artifact",
         files: [{ from: "files/AGENTS.md", to: "AGENTS.md" }],
       }),

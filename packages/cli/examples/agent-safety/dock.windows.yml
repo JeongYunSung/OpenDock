@@ -1,5 +1,4 @@
 opendock: 1
-id: opendock/agent-safety
 summary: Review rails, PR structure, and secret-scan defaults for AI-generated changes.
 readme: DOCK.md
 logo: logo.png
