@@ -21,6 +21,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Copy,
   Download,
   Eye,
   Folder,
@@ -3538,14 +3539,31 @@ function LogsPanel(props: { activeProject: Project; logs: AppLog[]; t: (typeof T
     tailRef.current?.scrollIntoView({ block: "end" });
   }, [props.logs.length]);
 
+  async function copyLogs() {
+    const logText = props.logs.map((log) => `${log.time}\t${log.level}\t${log.message}`).join("\n");
+    await navigator.clipboard.writeText(logText);
+  }
+
   return (
     <div className="panel logs-panel">
       <h1>{props.t.logsTitle}</h1>
       <p>{props.t.logsSub}</p>
       <div className="log-shell">
         <div className="log-head">
-          <strong>{props.activeProject.name}</strong>
-          <code>{props.t.liveTail}</code>
+          <div className="log-head-main">
+            <strong>{props.activeProject.name}</strong>
+            <code>{props.t.liveTail}</code>
+          </div>
+          <button
+            aria-label={props.t.copyLogs}
+            className="icon-button log-copy-button"
+            disabled={props.logs.length === 0}
+            onClick={() => void copyLogs().catch(() => undefined)}
+            title={props.t.copyLogs}
+            type="button"
+          >
+            <Copy size={14} />
+          </button>
         </div>
         <div aria-live="polite" className="log-lines">
           {props.logs.map((log, index) => (

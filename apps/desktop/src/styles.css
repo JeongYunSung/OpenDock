@@ -2403,6 +2403,12 @@ input:focus-visible,
   background: var(--surface-2);
 }
 
+.log-head-main {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
 .log-head strong {
   color: var(--text);
   font-weight: 800;
@@ -2412,6 +2418,17 @@ input:focus-visible,
 .log-head code {
   color: var(--text-3);
   font: 800 11px var(--font-mono);
+}
+
+.log-copy-button:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.log-copy-button:disabled:hover {
+  color: var(--text-3);
+  background: transparent;
+  border-color: transparent;
 }
 
 .log-lines {
@@ -2426,8 +2443,10 @@ input:focus-visible,
 
 .log-line {
   display: grid;
-  grid-template-columns: 72px 48px minmax(0, 1fr);
+  grid-template-columns: 72px 48px max-content;
   gap: 12px;
+  width: max-content;
+  min-width: 100%;
 }
 
 .log-tail-anchor {
@@ -2441,10 +2460,10 @@ input:focus-visible,
 }
 
 .log-lines p {
-  overflow: hidden;
+  overflow: visible;
   margin: 0;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-overflow: clip;
+  white-space: pre;
 }
 
 .account-panel {

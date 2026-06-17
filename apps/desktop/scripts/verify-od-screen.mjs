@@ -283,6 +283,16 @@ async function runViewportFlow(viewport) {
     await page.locator(".command-progress-overlay").getByRole("button", { name: "닫기" }).click();
     await page.getByRole("button", { name: "로그" }).click();
     await assertVisible(page.locator(".log-shell"), "project logs panel");
+    await assertVisible(page.getByRole("button", { name: "로그 복사" }), "copy logs button");
+    const logLinesCanScrollHorizontally = await page.locator(".log-lines").evaluate((node) => {
+      const firstMessage = node.querySelector(".log-line p");
+      if (!firstMessage) return false;
+      firstMessage.textContent = `${firstMessage.textContent} ${"x".repeat(360)}`;
+      return node.scrollWidth > node.clientWidth;
+    });
+    if (!logLinesCanScrollHorizontally) {
+      throw new Error("project logs should support horizontal scrolling for long messages");
+    }
 
     await page.locator(".avatar-button").click();
     await assertVisible(page.locator(".account-name", { hasText: "kjyscom@gmail.com" }), "gmail account menu label");
