@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.33 - 2026-06-17
+
+### CLI
+
+- Keep installs working for legacy releases whose Registry signatures were
+  minted before concrete platform metadata replaced platform-neutral releases.
+
 ## 0.1.32 - 2026-06-17
 
 ### CLI
