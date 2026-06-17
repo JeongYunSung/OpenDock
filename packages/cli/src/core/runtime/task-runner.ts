@@ -1,10 +1,9 @@
-import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
 import { formatStepSymbol, terminalStyle } from "../../terminal-style.js";
 import type { DockManifest, TaskPhase, TaskStep } from "../domain/manifest.js";
 import { type FileCandidate, FileCandidateCollector } from "../files/file-candidate.js";
-import { safeDockDirectoryName } from "../files/path-utils.js";
+import { ensureRealDirectoryPath, safeDockDirectoryName } from "../files/path-utils.js";
 import {
   CommandRunner,
   combinedOutput,
@@ -271,9 +270,9 @@ export class TaskRunner {
       return projectDir;
     }
     if (workdir === "dock") {
-      const path = this.dockWorkdir(projectDir, dockId);
-      mkdirSync(path, { recursive: true });
-      return path;
+      const relativeWorkdir = `.opendock/workdirs/${safeDockDirectoryName(dockId)}`;
+      ensureRealDirectoryPath(projectDir, relativeWorkdir, "dock workdir");
+      return join(projectDir, relativeWorkdir);
     }
     throw new Error(`unsupported task workdir \`${workdir}\`; use root or dock`);
   }

@@ -1238,6 +1238,10 @@ function resolveDeployFile(
 
   const root = realpathSync(projectDir);
   const candidate = resolve(root, relativePath);
+  const linkStats = lstatSync(candidate);
+  if (linkStats.isSymbolicLink()) {
+    throw new Error(`manifest \`${manifestField}\` path cannot be a symlink`);
+  }
   const realCandidate = realpathSync(candidate);
   assertInsideDeployRoot(root, realCandidate, manifestField);
 
@@ -1245,6 +1249,7 @@ function resolveDeployFile(
   if (!stats.isFile()) {
     throw new Error(`manifest \`${manifestField}\` path must point to a file`);
   }
+  assertDeployFileHasSingleLink(stats, relativePath, manifestField);
   if (manifestField === "logo" && stats.size === 0) {
     throw new Error("manifest `logo` file cannot be empty");
   }
@@ -1363,22 +1368,35 @@ function isDeployTextPolicyFile(path: string): boolean {
 }
 
 function directRuntimeInvocation(content: string, file: string): string | undefined {
-  const normalizedContent = content.replaceAll("\\", "/");
-  const escapedFile = escapeRegExp(file);
-  for (const runner of ["node", "bun", "python", "python3", "sh", "powershell"]) {
-    const pattern = new RegExp(
-      `(^|[\\s"'(\`])${escapeRegExp(runner)}\\s+["']?${escapedFile}["']?(?=$|[\\s"')\`])`,
-      "m",
-    );
-    if (pattern.test(normalizedContent)) {
-      return `${runner} ${file}`;
+  const normalizedFile = normalizeRelativePath(file);
+  const fileTokens = new Set([normalizedFile, `./${normalizedFile}`]);
+  for (const line of content.replaceAll("\\", "/").split(/\r?\n/)) {
+    const tokens = deployTextTokens(line);
+    for (const [index, token] of tokens.entries()) {
+      if (!runtimeRunnerTokens.has(token)) {
+        continue;
+      }
+      for (const next of tokens.slice(index + 1)) {
+        if (deployCommandSeparators.has(next)) {
+          break;
+        }
+        if (fileTokens.has(next)) {
+          return `${token} ${file}`;
+        }
+      }
     }
   }
   return undefined;
 }
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const runtimeRunnerTokens = new Set(["node", "bun", "python", "python3", "sh", "powershell"]);
+const deployCommandSeparators = new Set(["&&", "||", "|", ";"]);
+
+function deployTextTokens(line: string): string[] {
+  return line
+    .split(/\s+/)
+    .map((token) => token.replace(/^[`"'([{]+/, "").replace(/[.`,"')\]}:;]+$/, ""))
+    .filter((token) => token !== "");
 }
 
 async function createDeployArchive(
@@ -1459,6 +1477,7 @@ function expandDeployArchiveRoot(projectDir: string, relativePathValue: string):
     throw new Error(`deploy archive entry cannot be a symlink: ${rel}`);
   }
   if (stats.isFile()) {
+    assertDeployFileHasSingleLink(stats, rel, "archive entry");
     return [rel];
   }
   if (!stats.isDirectory()) {
@@ -1485,6 +1504,7 @@ function listDeployDirectoryFiles(projectDir: string, root: string): string[] {
     if (!entry.isFile()) {
       throw new Error(`deploy archive entry must be a regular file: ${rel}`);
     }
+    assertDeployFileHasSingleLink(lstatSync(path), rel, "archive entry");
     files.push(rel);
   }
   return files;
@@ -1499,6 +1519,19 @@ function resolveDeployFileOrDirectory(projectDir: string, relativePathValue: str
   const realCandidate = realpathSync(candidate);
   assertInsideDeployRoot(root, realCandidate, "archive entry");
   return realCandidate;
+}
+
+function assertDeployFileHasSingleLink(
+  stats: { nlink: number },
+  path: string,
+  field: string,
+): void {
+  if (stats.nlink > 1) {
+    if (field === "archive entry") {
+      throw new Error(`deploy archive entry cannot be a hardlink: ${path}`);
+    }
+    throw new Error(`manifest \`${field}\` path cannot be a hardlink: ${path}`);
+  }
 }
 
 function resolveCliPlatform(value: string | undefined): OpenDockPlatform {

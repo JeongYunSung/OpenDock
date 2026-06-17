@@ -20,7 +20,17 @@ export class WorkdirSeeder {
     if (mappings.length === 0) {
       return;
     }
-    mkdirSync(workdir, { recursive: true });
+    const stat = lstatIfPresent(workdir);
+    if (stat) {
+      if (stat.isSymbolicLink()) {
+        throw new Error(`dock workdir cannot be a symlink: ${workdir}`);
+      }
+      if (!stat.isDirectory()) {
+        throw new Error(`dock workdir must be a directory: ${workdir}`);
+      }
+    } else {
+      mkdirSync(workdir, { recursive: true });
+    }
     for (const mapping of mappings) {
       this.seedMapping(workdir, mapping);
     }
@@ -69,5 +79,16 @@ export class WorkdirSeeder {
     assertRegularOrMissing(target, targetPath);
     ensureParentDirectory(workdir, targetPath);
     writeFileSync(target, readFileSync(source));
+  }
+}
+
+function lstatIfPresent(path: string): ReturnType<typeof lstatSync> | undefined {
+  try {
+    return lstatSync(path);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return undefined;
+    }
+    throw error;
   }
 }

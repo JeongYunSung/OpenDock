@@ -244,15 +244,14 @@ export class FilePlan {
     if (!existsSync(target)) {
       return;
     }
-    const currentChecksum = fileChecksum(target);
-    const incomingChecksum = sha256Bytes(candidate.content);
     if (prior !== undefined) {
+      const currentChecksum = fileChecksum(target);
       if (currentChecksum !== prior.checksum && !this.force) {
         throw new Error(`checksum mismatch for managed file ${candidate.path}`);
       }
       return;
     }
-    if (currentChecksum !== incomingChecksum && !this.force) {
+    if (!this.force) {
       throw new Error(`target already exists and is not OpenDock-owned: ${candidate.path}`);
     }
   }

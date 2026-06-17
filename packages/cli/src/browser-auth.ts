@@ -194,8 +194,9 @@ export function browserOpenCommand(
   platform: NodeJS.Platform = process.platform,
 ): { command: string; args: string[] } {
   return {
-    command: platform === "darwin" ? "/usr/bin/open" : platform === "win32" ? "cmd" : "xdg-open",
-    args: platform === "darwin" ? [url] : platform === "win32" ? ["/c", "start", "", url] : [url],
+    command:
+      platform === "darwin" ? "/usr/bin/open" : platform === "win32" ? "explorer.exe" : "xdg-open",
+    args: [url],
   };
 }
 

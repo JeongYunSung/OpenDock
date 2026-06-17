@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import {
   chmodSync,
   existsSync,
+  linkSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -1388,7 +1389,7 @@ describe("opendock TypeScript CLI", () => {
     );
     writeFileSync(
       join(dockRoot, "files", "AGENTS.md"),
-      `# Agent\n\nRun \`node "${commandFile}"\` before handoff.\n`,
+      `# Agent\n\nRun \`node -- "${commandFile}"\` before handoff.\n`,
     );
     writeFileSync(
       join(dockRoot, "dock.yml"),
@@ -1418,6 +1419,39 @@ describe("opendock TypeScript CLI", () => {
       await withCwd(dockRoot, async () => {
         await expect(runCli(["bun", "opendock", "deploy", "test/harness@1.0.0"])).rejects.toThrow(
           "must use `opendock run check`",
+        );
+      });
+    } finally {
+      globalThis.fetch = previousFetch;
+    }
+  });
+
+  it("rejects hardlinked files during deploy archive creation", async () => {
+    const dockRoot = tempDir();
+    const outside = tempDir();
+    mkdirSync(join(dockRoot, "files"), { recursive: true });
+    const outsideFile = join(outside, "secret.md");
+    writeFileSync(outsideFile, "# Secret from outside\n");
+    linkSync(outsideFile, join(dockRoot, "files", "secret.md"));
+    writeFileSync(
+      join(dockRoot, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/hardlink",
+        summary: "Hardlink dock",
+        files: [{ from: "files/secret.md", to: "secret.md" }],
+      }),
+    );
+
+    const previousFetch = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      throw new Error("deploy should not reach registry");
+    }) as typeof fetch;
+
+    try {
+      await withCwd(dockRoot, async () => {
+        await expect(runCli(["bun", "opendock", "deploy", "test/hardlink@1.0.0"])).rejects.toThrow(
+          "hardlink",
         );
       });
     } finally {

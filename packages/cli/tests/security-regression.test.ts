@@ -6,6 +6,7 @@ import {
   readFileSync,
   rmSync,
   statSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -19,8 +20,12 @@ import {
   performBrowserLogin,
   selectAuthProvider,
 } from "../src/browser-auth.js";
-import { DockRef } from "../src/core/domain/manifest.js";
+import { type DockManifest, DockRef } from "../src/core/domain/manifest.js";
+import { OpenDockStateStore } from "../src/core/domain/state-store.js";
+import { type FileCandidate, FilePlan } from "../src/core/files/file-candidate.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
+import { CommandRunner } from "../src/core/runtime/command-runner.js";
+import { TaskRunner } from "../src/core/runtime/task-runner.js";
 import { resolveDock } from "../src/resolver.js";
 import { testReleaseSignature } from "./release-signature-helper.js";
 
@@ -225,6 +230,120 @@ describe("security regression coverage", () => {
     expect(first).not.toBe(second);
     expect(first).toMatch(/^acme__tools__agent__[a-f0-9]{12}$/);
     expect(second).toMatch(/^acme__tools__agent__[a-f0-9]{12}$/);
+  });
+
+  it("rejects local path package specs in package-manager task commands", () => {
+    const project = tempDir();
+    const runner = new CommandRunner();
+
+    for (const command of [
+      "npm install --global .",
+      "bun install -g .",
+      "pnpm add -g .",
+      "pip install .",
+      "pip3 install .",
+      "pipx install .",
+      "uv tool install .",
+      "npx .",
+      "bunx .",
+    ]) {
+      expect(() => runner.run(command, { cwd: project, platform: "macos" })).toThrow("not allowed");
+    }
+  });
+
+  it("rejects symlinked OpenDock state directories and files", () => {
+    const project = tempDir();
+    const outside = tempDir();
+    symlinkSync(outside, join(project, ".opendock"));
+
+    expect(() => new OpenDockStateStore(project).readLock()).toThrow(
+      "OpenDock state directory cannot be a symlink",
+    );
+
+    rmSync(join(project, ".opendock"), { force: true });
+    mkdirSync(join(project, ".opendock"));
+    const outsideStateFile = join(outside, "project.yml");
+    writeFileSync(outsideStateFile, "outside: true\n");
+    symlinkSync(outsideStateFile, join(project, ".opendock", "project.yml"));
+
+    expect(() => new OpenDockStateStore(project).hasState()).toThrow(
+      "OpenDock state file cannot be a symlink",
+    );
+  });
+
+  it("rejects symlinked dock workdir roots before running task commands", () => {
+    const project = tempDir();
+    const outside = tempDir();
+    const dockId = "test/workdir";
+    const workdirRoot = join(project, ".opendock", "workdirs");
+    mkdirSync(workdirRoot, { recursive: true });
+    symlinkSync(outside, join(workdirRoot, safeDockDirectoryName(dockId)));
+    const manifest: DockManifest = {
+      opendock: 1,
+      id: dockId,
+      summary: "",
+      tags: [],
+      commands: {},
+      requires: { runtimes: {} },
+      files: [],
+      tasks: {
+        install: [{ id: "check-workdir", check: "test -d .", workdir: "dock", platforms: {} }],
+        update: [],
+        doctor: [],
+      },
+    };
+
+    expect(() =>
+      new TaskRunner().run(manifest, {
+        dockId,
+        phase: "install",
+        platform: "macos",
+        projectDir: project,
+      }),
+    ).toThrow("dock workdir cannot be a symlink");
+  });
+
+  it("does not adopt pre-existing unmanaged managed-file targets even when bytes match", () => {
+    const project = tempDir();
+    const candidate: FileCandidate = {
+      content: Buffer.from('{"keep":true}\n'),
+      executable: false,
+      mode: "managed_file",
+      path: "secret.json",
+      source: "export",
+    };
+    writeFileSync(join(project, candidate.path), candidate.content);
+
+    expect(() => new FilePlan(project, "test/dock", [], false).preflight([candidate])).toThrow(
+      "target already exists and is not OpenDock-owned",
+    );
+    expect(() => new FilePlan(project, "test/dock", [], true).preflight([candidate])).not.toThrow();
+  });
+
+  it("rejects broken symlink managed-file targets as symlinks", () => {
+    const project = tempDir();
+    const outside = tempDir();
+    const candidate: FileCandidate = {
+      content: Buffer.from("new content\n"),
+      executable: false,
+      mode: "managed_file",
+      path: "secret.txt",
+      source: "files",
+    };
+    symlinkSync(join(outside, "missing.txt"), join(project, candidate.path));
+
+    expect(() => new FilePlan(project, "test/dock", [], false).preflight([candidate])).toThrow(
+      "target cannot be a symlink",
+    );
+  });
+
+  it("uses a shell-free Windows browser opener for auth URLs", () => {
+    const url = "https://registry.opendock.app/login?next=1&provider=github";
+
+    expect(browserOpenCommand(url, "win32")).toEqual({
+      command: "explorer.exe",
+      args: [url],
+    });
   });
 
   it("rejects dock archives with too many entries even when they are directories", async () => {

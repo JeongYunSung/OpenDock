@@ -385,10 +385,12 @@ function isSafePackageManagerCommand(program: string, args: string[]): boolean {
     return true;
   }
   if (program === "pnpm" && args[0] === "add") {
-    return hasGlobalFlag(args) && packageArgs(args.slice(1)).every(isSafePackageName);
+    const packages = packageArgs(args.slice(1));
+    return hasGlobalFlag(args) && packages.length > 0 && packages.every(isSafePackageName);
   }
   if ((args[0] === "install" || args[0] === "update") && hasGlobalFlag(args)) {
-    return packageArgs(args.slice(1)).every(isSafePackageName);
+    const packages = packageArgs(args.slice(1));
+    return packages.length > 0 && packages.every(isSafePackageName);
   }
   return false;
 }
@@ -545,7 +547,34 @@ function isExact(args: string[], expected: string[]): boolean {
 }
 
 function isSafePackageName(value: string): boolean {
-  return safePackagePattern.test(value);
+  return safePackagePattern.test(value) && !isLocalPackageSpec(value);
+}
+
+function isLocalPackageSpec(value: string): boolean {
+  const packageName = stripPackageVersion(value);
+  const unscopedName = packageName.startsWith("@")
+    ? (packageName.split("/")[1] ?? "")
+    : packageName;
+  return (
+    unscopedName === "." ||
+    unscopedName === ".." ||
+    unscopedName.startsWith(".") ||
+    packageName.includes("\\") ||
+    packageName.toLowerCase().startsWith("file:")
+  );
+}
+
+function stripPackageVersion(value: string): string {
+  if (value.startsWith("@")) {
+    const slashIndex = value.indexOf("/");
+    if (slashIndex < 0) {
+      return value;
+    }
+    const versionIndex = value.indexOf("@", slashIndex + 1);
+    return versionIndex < 0 ? value : value.slice(0, versionIndex);
+  }
+  const versionIndex = value.indexOf("@");
+  return versionIndex < 0 ? value : value.slice(0, versionIndex);
 }
 
 function isSafeCommandName(value: string): boolean {

@@ -1,8 +1,9 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import YAML from "yaml";
 import { LOCK_SCHEMA_VERSION, PROJECT_SCHEMA_VERSION } from "../../constants.js";
 import type { OpenDockPlatform } from "../../platform.js";
+import { assertRealDirectoryPath, ensureRealDirectoryPath } from "../files/path-utils.js";
 
 export type ManagedMode = "managed_block" | "managed_file";
 
@@ -68,6 +69,7 @@ export class OpenDockStateStore {
   }
 
   readLock(): LockState {
+    this.assertStatePathsSafe();
     if (!existsSync(this.lockPath())) {
       return { schema: LOCK_SCHEMA_VERSION, docks: [] };
     }
@@ -79,6 +81,7 @@ export class OpenDockStateStore {
   }
 
   hasState(): boolean {
+    this.assertStatePathsSafe();
     return existsSync(this.projectPath()) && existsSync(this.lockPath());
   }
 
@@ -102,7 +105,7 @@ export class OpenDockStateStore {
   }
 
   private write(lock: LockState): void {
-    mkdirSync(this.opendockDir(), { recursive: true });
+    ensureRealDirectoryPath(this.projectDir, ".opendock", "OpenDock state directory");
     const sortedDocks = [...lock.docks].sort((a, b) => a.id.localeCompare(b.id));
     const project: ProjectState = {
       schema: PROJECT_SCHEMA_VERSION,
@@ -120,5 +123,32 @@ export class OpenDockStateStore {
       this.lockPath(),
       YAML.stringify({ schema: LOCK_SCHEMA_VERSION, docks: sortedDocks }),
     );
+  }
+
+  private assertStatePathsSafe(): void {
+    assertRealDirectoryPath(this.projectDir, ".opendock", "OpenDock state directory");
+    for (const path of [this.projectPath(), this.lockPath()]) {
+      const stat = lstatIfPresent(path);
+      if (!stat) {
+        continue;
+      }
+      if (stat.isSymbolicLink()) {
+        throw new Error(`OpenDock state file cannot be a symlink: ${path}`);
+      }
+      if (!stat.isFile()) {
+        throw new Error(`OpenDock state path must be a file: ${path}`);
+      }
+    }
+  }
+}
+
+function lstatIfPresent(path: string): ReturnType<typeof lstatSync> | undefined {
+  try {
+    return lstatSync(path);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return undefined;
+    }
+    throw error;
   }
 }

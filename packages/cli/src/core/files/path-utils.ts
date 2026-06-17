@@ -56,15 +56,60 @@ export function ensureSafeParent(root: string, relativePath: string): void {
   let current = root;
   for (const part of parts.slice(0, -1)) {
     current = join(current, part);
-    if (!existsSync(current)) {
+    const stat = lstatIfPresent(current);
+    if (!stat) {
       continue;
     }
-    const stat = lstatSync(current);
     if (stat.isSymbolicLink()) {
       throw new Error(`target parent cannot be a symlink: ${relativePath}`);
     }
     if (!stat.isDirectory()) {
       throw new Error(`target parent must be a directory: ${relativePath}`);
+    }
+  }
+}
+
+export function ensureRealDirectoryPath(
+  root: string,
+  relativePath: string,
+  label = "directory",
+): void {
+  const normalized = assertSafeRelativePath(relativePath, label);
+  let current = root;
+  for (const part of normalized.split("/")) {
+    current = join(current, part);
+    const stat = lstatIfPresent(current);
+    if (!stat) {
+      mkdirSync(current);
+      continue;
+    }
+    if (stat.isSymbolicLink()) {
+      throw new Error(`${label} cannot be a symlink: ${normalized}`);
+    }
+    if (!stat.isDirectory()) {
+      throw new Error(`${label} must be a directory: ${normalized}`);
+    }
+  }
+}
+
+export function assertRealDirectoryPath(
+  root: string,
+  relativePath: string,
+  label = "directory",
+): void {
+  const normalized = assertSafeRelativePath(relativePath, label);
+  let current = root;
+  for (const part of normalized.split("/")) {
+    current = join(current, part);
+    const stat = lstatIfPresent(current);
+    if (!stat) {
+      return;
+    }
+    if (stat.isSymbolicLink()) {
+      throw new Error(`${label} cannot be a symlink: ${normalized}`);
+    }
+    if (!stat.isDirectory()) {
+      throw new Error(`${label} must be a directory: ${normalized}`);
     }
   }
 }
@@ -79,10 +124,10 @@ export function ensureParentDirectory(root: string, relativePath: string): void 
 }
 
 export function assertRegularOrMissing(path: string, relativePath: string): void {
-  if (!existsSync(path)) {
+  const stat = lstatIfPresent(path);
+  if (!stat) {
     return;
   }
-  const stat = lstatSync(path);
   if (stat.isSymbolicLink()) {
     throw new Error(`target cannot be a symlink: ${relativePath}`);
   }
@@ -209,4 +254,15 @@ export function safeDockDirectoryName(dockId: string): string {
   const readable = dockId.replaceAll(/[^A-Za-z0-9._-]/g, "__");
   const digest = createHash("sha256").update(dockId).digest("hex").slice(0, 12);
   return `${readable}__${digest}`;
+}
+
+function lstatIfPresent(path: string): ReturnType<typeof lstatSync> | undefined {
+  try {
+    return lstatSync(path);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return undefined;
+    }
+    throw error;
+  }
 }
