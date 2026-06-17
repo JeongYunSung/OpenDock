@@ -1,14 +1,17 @@
+import { createHash } from "node:crypto";
 import {
   chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { c as createTar } from "tar";
 import { afterEach, describe, expect, it } from "vitest";
 import YAML from "yaml";
 import { DockInstaller } from "../src/core/app/dock-installer.js";
@@ -118,6 +121,54 @@ describe("platform regression coverage", () => {
     } finally {
       globalThis.fetch = previousFetch;
     }
+  });
+
+  it("accepts platform-neutral Registry signatures for the requested concrete platform", async () => {
+    const docks = tempDir();
+    writeDock(docks, "opendock", "common", "1.0.0", {});
+    const archive = await createDockArchive(docks, "opendock", "common", "1.0.0");
+    const checksum = sha256(archive);
+    const requestedUrls: string[] = [];
+    const previousFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: string | URL | Request) => {
+      const url = String(input);
+      requestedUrls.push(url);
+      if (url.includes("/download")) {
+        return new Response(archive, {
+          status: 200,
+          headers: { "content-length": String(archive.length) },
+        });
+      }
+      return new Response(
+        JSON.stringify({
+          id: "opendock/common",
+          version: "1.0.0",
+          platform: "macos",
+          approved: true,
+          checksum,
+          signature: testReleaseSignature({
+            id: "opendock/common",
+            version: "1.0.0",
+            platform: "any",
+            checksum,
+          }),
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as typeof fetch;
+
+    try {
+      const resolved = await resolveDock(DockRef.parse("opendock/common@1.0.0"), "macos");
+      expect(resolved.manifest.id).toBe("opendock/common");
+      expect(resolved.platform).toBe("macos");
+    } finally {
+      globalThis.fetch = previousFetch;
+    }
+
+    expect(requestedUrls).toEqual([
+      "https://registry.opendock.app/v1/docks/opendock/common/versions/1.0.0?platform=macos",
+      "https://registry.opendock.app/v1/docks/opendock/common/versions/1.0.0/download?platform=macos",
+    ]);
   });
 
   it("rejects unsupported platform keys in dock.yml", () => {
@@ -531,6 +582,29 @@ function writeDock(
     join(dockRoot, "logo.png"),
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
   );
+}
+
+async function createDockArchive(
+  root: string,
+  owner: string,
+  name: string,
+  version: string,
+): Promise<Buffer> {
+  const dockRoot = join(root, `${owner}-${name}-${version}`);
+  const archivePath = join(tempDir(), "dock.tgz");
+  await createTar(
+    {
+      cwd: dockRoot,
+      file: archivePath,
+      gzip: true,
+    },
+    readdirSync(dockRoot),
+  );
+  return readFileSync(archivePath);
+}
+
+function sha256(bytes: Buffer): string {
+  return createHash("sha256").update(bytes).digest("hex");
 }
 
 function localResolver(root: string) {

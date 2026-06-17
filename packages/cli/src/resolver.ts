@@ -13,7 +13,7 @@ import {
 import { cacheRoot } from "./paths.js";
 import { isOpenDockPlatform, type OpenDockPlatform } from "./platform.js";
 import { OpenDockRegistryClient } from "./registry.js";
-import { verifyReleaseSignature } from "./release-signature.js";
+import { isReleaseSignatureValid, verifyReleaseSignature } from "./release-signature.js";
 
 const safeResolvedVersionPattern = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,79}$/;
 const allowedArchiveEntryTypes = new Set(["File", "OldFile", "Directory"]);
@@ -99,7 +99,7 @@ async function resolveRemoteDockMetadata(
   if (metadata.signature.value.trim() === "") {
     throw new Error(`dock \`${requestedLabel}\` is missing an OpenDock Registry signature`);
   }
-  verifyReleaseSignature(
+  verifyCompatibleReleaseSignature(
     {
       id: metadata.id,
       version: metadata.version,
@@ -165,6 +165,16 @@ async function resolveRemoteDockMetadata(
 
 function sha256Bytes(bytes: Buffer): string {
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+function verifyCompatibleReleaseSignature(
+  subject: Parameters<typeof verifyReleaseSignature>[0],
+  signature: Parameters<typeof verifyReleaseSignature>[1],
+): void {
+  if (isReleaseSignatureValid(subject, signature)) {
+    return;
+  }
+  verifyReleaseSignature({ ...subject, platform: "any" }, signature);
 }
 
 function findManifestRoot(root: string): string | undefined {

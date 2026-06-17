@@ -10,9 +10,11 @@ const defaultTrustedPublicKeys: Record<string, string> = {
 export interface ReleaseSignatureSubject {
   id: string;
   version: string;
-  platform: OpenDockPlatform;
+  platform: ReleaseSignaturePlatform;
   checksum: string;
 }
+
+export type ReleaseSignaturePlatform = OpenDockPlatform | "any";
 
 export function releaseSignaturePayload(subject: ReleaseSignatureSubject): string {
   return [
@@ -30,6 +32,18 @@ export function verifyReleaseSignature(
   signature: ReleaseSignatureResponse,
   trustedPublicKeys = trustedReleasePublicKeys(),
 ): void {
+  if (!isReleaseSignatureValid(subject, signature, trustedPublicKeys)) {
+    throw new Error(
+      `OpenDock Registry signature verification failed for \`${subject.id}@${subject.version}\``,
+    );
+  }
+}
+
+export function isReleaseSignatureValid(
+  subject: ReleaseSignatureSubject,
+  signature: ReleaseSignatureResponse,
+  trustedPublicKeys = trustedReleasePublicKeys(),
+): boolean {
   if (signature.algorithm !== "ed25519") {
     throw new Error(`unsupported OpenDock Registry signature algorithm \`${signature.algorithm}\``);
   }
@@ -46,17 +60,12 @@ export function verifyReleaseSignature(
   }
   const publicKeyBytes = decodeBase64(publicKeyBase64, "OpenDock Registry public key");
   const publicKey = createPublicKey({ key: publicKeyBytes, format: "der", type: "spki" });
-  const valid = verify(
+  return verify(
     null,
     Buffer.from(releaseSignaturePayload(subject), "utf8"),
     publicKey,
     signatureBytes,
   );
-  if (!valid) {
-    throw new Error(
-      `OpenDock Registry signature verification failed for \`${subject.id}@${subject.version}\``,
-    );
-  }
 }
 
 function trustedReleasePublicKeys(): Record<string, string> {

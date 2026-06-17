@@ -1,7 +1,9 @@
 import { createPrivateKey, sign } from "node:crypto";
-import type { OpenDockPlatform } from "../src/platform.js";
 import type { ReleaseSignatureResponse } from "../src/registry.js";
-import { releaseSignaturePayload } from "../src/release-signature.js";
+import {
+  type ReleaseSignaturePlatform,
+  releaseSignaturePayload,
+} from "../src/release-signature.js";
 
 export const testReleaseSignatureKeyId = "opendock-test-2026-01";
 export const testReleaseSignaturePrivateKeyBase64 =
@@ -21,7 +23,7 @@ const testPrivateKey = createPrivateKey({
 export function testReleaseSignature(subject: {
   id: string;
   version: string;
-  platform: OpenDockPlatform;
+  platform: ReleaseSignaturePlatform;
   checksum: string;
 }): ReleaseSignatureResponse {
   return {
