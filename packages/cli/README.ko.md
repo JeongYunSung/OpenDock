@@ -380,7 +380,7 @@ deploy는 다음을 업로드합니다.
 
 - `dock.yml`
 - `dock.yml`, `files[].from`, `workdir.files[].from`으로 만든 archive
-- platform metadata: `any`, `macos`, `windows`, `linux`
+- platform metadata: `macos`, `windows`, `linux`
 - 선택 사항인 catalog용 `readme` markdown
 - 선택 사항인 catalog용 `logo` image
 - manifest의 선택 사항인 `tags`

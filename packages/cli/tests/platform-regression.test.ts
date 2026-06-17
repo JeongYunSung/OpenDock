@@ -16,7 +16,7 @@ import { type DockManifest, DockRef, parseManifestFile } from "../src/core/domai
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
 import { CommandRunner, opendockCommandPath } from "../src/core/runtime/command-runner.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
-import { detectPlatform, parsePlatform, parseReleasePlatform } from "../src/platform.js";
+import { detectPlatform, parsePlatform } from "../src/platform.js";
 import { OpenDockRegistryClient } from "../src/registry.js";
 import type { ResolvedDock } from "../src/resolver.js";
 import { resolveDock } from "../src/resolver.js";
@@ -41,14 +41,8 @@ describe("platform regression coverage", () => {
     expect(parsePlatform("win")).toBe("windows");
     expect(parsePlatform("win32")).toBe("windows");
     expect(parsePlatform("linux")).toBe("linux");
-    expect(parseReleasePlatform("any")).toBe("any");
-    expect(parseReleasePlatform("all")).toBe("any");
-    expect(parseReleasePlatform("neutral")).toBe("any");
-    expect(parseReleasePlatform("darwin")).toBe("macos");
-
     expect(() => detectPlatform("freebsd" as NodeJS.Platform)).toThrow("unsupported host platform");
     expect(() => parsePlatform("freebsd")).toThrow("unsupported OpenDock platform");
-    expect(() => parseReleasePlatform("freebsd")).toThrow("unsupported OpenDock platform");
   });
 
   it("passes platform selectors to Registry resolve and download requests", async () => {
@@ -221,7 +215,7 @@ describe("platform regression coverage", () => {
     ).toThrow("does not support platform `linux`");
   });
 
-  it("treats steps without platform overrides as platform-neutral", () => {
+  it("runs steps without platform overrides on every supported platform", () => {
     const project = tempDir();
     const manifest: DockManifest = {
       opendock: 1,

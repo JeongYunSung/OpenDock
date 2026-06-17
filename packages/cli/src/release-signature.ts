@@ -1,5 +1,5 @@
 import { createPublicKey, verify } from "node:crypto";
-import type { OpenDockReleasePlatform } from "./platform.js";
+import type { OpenDockPlatform } from "./platform.js";
 import type { ReleaseSignatureResponse } from "./registry.js";
 
 const defaultTrustedPublicKeys: Record<string, string> = {
@@ -10,7 +10,7 @@ const defaultTrustedPublicKeys: Record<string, string> = {
 export interface ReleaseSignatureSubject {
   id: string;
   version: string;
-  platform: OpenDockReleasePlatform;
+  platform: OpenDockPlatform;
   checksum: string;
 }
 

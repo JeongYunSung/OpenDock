@@ -1,5 +1,5 @@
 import { API_PREFIX, DEFAULT_REGISTRY_URL } from "./constants.js";
-import type { OpenDockPlatform, OpenDockReleasePlatform } from "./platform.js";
+import type { OpenDockPlatform } from "./platform.js";
 
 const requestTimeoutMs = 30_000;
 const maxDockArchiveBytes = 50 * 1024 * 1024;
@@ -7,7 +7,7 @@ const maxDockArchiveBytes = 50 * 1024 * 1024;
 export interface DockVersionResponse {
   id: string;
   version: string;
-  platform?: OpenDockReleasePlatform;
+  platform?: OpenDockPlatform;
   approved: boolean;
   checksum: string;
   signature: ReleaseSignatureResponse;
@@ -43,7 +43,7 @@ export interface AuthUserResponse {
 export interface SubmissionRequest {
   dock_name: string;
   version: string;
-  platform: OpenDockReleasePlatform;
+  platform: OpenDockPlatform;
   manifest: string;
   archive: SubmissionArchiveRequest;
   readme_markdown?: string;

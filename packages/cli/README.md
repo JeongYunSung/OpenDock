@@ -407,7 +407,7 @@ Deploy uploads:
 
 - `dock.yml`
 - the archive built from `dock.yml`, `files[].from`, and `workdir.files[].from`
-- release platform metadata: `any`, `macos`, `windows`, or `linux`
+- release platform metadata: `macos`, `windows`, or `linux`
 - optional `readme` markdown for the catalog
 - optional `logo` image for the catalog
 - optional `tags` from the manifest for catalog search and filtering

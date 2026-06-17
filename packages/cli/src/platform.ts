@@ -1,7 +1,6 @@
 const SUPPORTED_PLATFORMS = ["macos", "windows", "linux"] as const;
 
 export type OpenDockPlatform = (typeof SUPPORTED_PLATFORMS)[number];
-export type OpenDockReleasePlatform = OpenDockPlatform | "any";
 
 export function detectPlatform(hostPlatform: NodeJS.Platform = process.platform): OpenDockPlatform {
   if (hostPlatform === "darwin") {
@@ -28,14 +27,6 @@ export function parsePlatform(value: string): OpenDockPlatform {
     return "linux";
   }
   throw new Error(`unsupported OpenDock platform \`${value}\``);
-}
-
-export function parseReleasePlatform(value: string): OpenDockReleasePlatform {
-  const normalized = value.trim().toLowerCase();
-  if (normalized === "any" || normalized === "all" || normalized === "neutral") {
-    return "any";
-  }
-  return parsePlatform(value);
 }
 
 export function isOpenDockPlatform(value: string): value is OpenDockPlatform {

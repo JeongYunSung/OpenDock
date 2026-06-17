@@ -11,7 +11,7 @@ import {
   validateManifestFor,
 } from "./core/domain/manifest.js";
 import { cacheRoot } from "./paths.js";
-import type { OpenDockPlatform, OpenDockReleasePlatform } from "./platform.js";
+import { isOpenDockPlatform, type OpenDockPlatform } from "./platform.js";
 import { OpenDockRegistryClient } from "./registry.js";
 import { verifyReleaseSignature } from "./release-signature.js";
 
@@ -87,22 +87,13 @@ async function resolveRemoteDockMetadata(
   if (!metadata.approved) {
     throw new Error(`dock \`${requestedLabel}\` is not approved by OpenDock Registry`);
   }
-  if (
-    metadata.platform !== undefined &&
-    metadata.platform !== "any" &&
-    metadata.platform !== platform
-  ) {
+  if (metadata.platform !== undefined && metadata.platform !== platform) {
     throw new Error(
       `registry returned ${metadata.platform} artifact for requested platform \`${platform}\``,
     );
   }
-  const releasePlatform = metadata.platform ?? "any";
-  if (
-    releasePlatform !== "any" &&
-    releasePlatform !== "macos" &&
-    releasePlatform !== "windows" &&
-    releasePlatform !== "linux"
-  ) {
+  const releasePlatform = metadata.platform ?? platform;
+  if (!isOpenDockPlatform(releasePlatform)) {
     throw new Error(`registry returned unsupported platform \`${releasePlatform}\``);
   }
   if (metadata.signature.value.trim() === "") {
@@ -112,7 +103,7 @@ async function resolveRemoteDockMetadata(
     {
       id: metadata.id,
       version: metadata.version,
-      platform: releasePlatform as OpenDockReleasePlatform,
+      platform: releasePlatform,
       checksum: metadata.checksum,
     },
     metadata.signature,

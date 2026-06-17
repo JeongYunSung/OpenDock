@@ -24,7 +24,7 @@ import { OpenDockStateStore } from "../src/core/domain/state-store.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
 import { readProjectLogs } from "../src/logging.js";
-import type { OpenDockPlatform } from "../src/platform.js";
+import { detectPlatform, type OpenDockPlatform } from "../src/platform.js";
 import type { ResolvedDock } from "../src/resolver.js";
 import { testReleaseSignature } from "./release-signature-helper.js";
 
@@ -1685,20 +1685,20 @@ describe("opendock TypeScript CLI", () => {
     expect(body.archive.filename).toBe("test-platform-dock-1.0.0-windows.tgz");
   });
 
-  it("submits platform-neutral deploys as any artifacts by default", async () => {
+  it("submits deploys for the current host platform by default", async () => {
     const dockRoot = tempDir();
     const home = tempDir();
     const dataDir = join(home, "Library", "Application Support", "OpenDock");
     mkdirSync(dataDir, { recursive: true });
     writeFileSync(join(dataDir, "auth-token"), "test-token");
     mkdirSync(join(dockRoot, "files"), { recursive: true });
-    writeFileSync(join(dockRoot, "files", "AGENTS.md"), "# Any Agent\n");
+    writeFileSync(join(dockRoot, "files", "AGENTS.md"), "# Host Agent\n");
     writeFileSync(
       join(dockRoot, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/any-dock",
-        summary: "platform-neutral artifact",
+        id: "test/host-dock",
+        summary: "host platform artifact",
         files: [{ from: "files/AGENTS.md", to: "AGENTS.md" }],
       }),
     );
@@ -1720,7 +1720,7 @@ describe("opendock TypeScript CLI", () => {
 
     try {
       await withEnv({ HOME: home }, () =>
-        withCwd(dockRoot, () => runCli(["bun", "opendock", "deploy", "test/any-dock@1.0.0"])),
+        withCwd(dockRoot, () => runCli(["bun", "opendock", "deploy", "test/host-dock@1.0.0"])),
       );
     } finally {
       globalThis.fetch = previousFetch;
@@ -1729,8 +1729,9 @@ describe("opendock TypeScript CLI", () => {
     if (!body) {
       throw new Error("expected deploy request body");
     }
-    expect(body.platform).toBe("any");
-    expect(body.archive.filename).toBe("test-any-dock-1.0.0-any.tgz");
+    const platform = detectPlatform();
+    expect(body.platform).toBe(platform);
+    expect(body.archive.filename).toBe(`test-host-dock-1.0.0-${platform}.tgz`);
   });
 });
 

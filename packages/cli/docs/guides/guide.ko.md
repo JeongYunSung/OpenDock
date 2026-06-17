@@ -601,7 +601,9 @@ opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 opendock deploy owner/name@1.0.0 --platform linux --file dock.linux.yml
 ```
 
-platform과 무관한 dock은 `--platform`을 생략하면 `any` artifact로 제출됩니다.
+`--platform`을 생략하면 OpenDock이 현재 실행 중인 OS를 기준으로 platform을
+정합니다. `dock.macos.yml`, `dock.windows.yml`, `dock.linux.yml`처럼 파일명에
+platform이 들어가 있으면 deploy 때 그 값을 힌트로 사용합니다.
 
 이 repository의 example dock은 배포용 파일명을 명확히 하기 위해
 `dock.macos.yml`과 `dock.windows.yml`을 함께 둡니다.
@@ -832,7 +834,7 @@ deploy가 제출하는 것:
 
 1. `dock.yml` 원문.
 2. `dock.yml`, `files[].from`, `workdir.files[].from`으로 만든 `.tgz` archive.
-3. release platform metadata: `any`, `macos`, `windows`, `linux`.
+3. release platform metadata: `macos`, `windows`, `linux`.
 4. 선택 사항인 `readme_markdown`.
 5. 선택 사항인 `logo`.
 6. manifest의 선택 사항인 `tags`.

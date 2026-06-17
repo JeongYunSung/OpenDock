@@ -49,10 +49,9 @@ import { TaskRunner } from "./core/runtime/task-runner.js";
 import { appendRunLog, type RunStatus, readProjectLogs } from "./logging.js";
 import {
   detectPlatform,
+  isOpenDockPlatform,
   type OpenDockPlatform,
-  type OpenDockReleasePlatform,
   parsePlatform,
-  parseReleasePlatform,
 } from "./platform.js";
 import {
   type AuthProvider,
@@ -621,7 +620,7 @@ export async function run(argv = process.argv): Promise<void> {
     .command("deploy")
     .description("Submit a dock to OpenDock Registry for review.")
     .argument("<dock>", "Dock release reference: owner/name@version")
-    .option("--platform <platform>", "Release platform: any, macos, windows, or linux")
+    .option("--platform <platform>", "Release platform: macos, windows, or linux")
     .option("--file <path>", "Manifest file to submit as dock.yml", "dock.yml")
     .action(async (dockName: string, options: { platform?: string; file: string }) => {
       let dockId = dockIdFromReference(dockName);
@@ -1047,29 +1046,20 @@ async function resolveLatestDockVersion(
   if (!metadata.approved) {
     throw new Error(`dock \`${dockId}@latest\` is not approved by OpenDock Registry`);
   }
-  if (
-    metadata.platform !== undefined &&
-    metadata.platform !== "any" &&
-    metadata.platform !== platform
-  ) {
+  if (metadata.platform !== undefined && metadata.platform !== platform) {
     throw new Error(
       `registry returned ${metadata.platform} artifact for requested platform \`${platform}\``,
     );
   }
-  const releasePlatform = metadata.platform ?? "any";
-  if (
-    releasePlatform !== "any" &&
-    releasePlatform !== "macos" &&
-    releasePlatform !== "windows" &&
-    releasePlatform !== "linux"
-  ) {
+  const releasePlatform = metadata.platform ?? platform;
+  if (!isOpenDockPlatform(releasePlatform)) {
     throw new Error(`registry returned unsupported platform \`${releasePlatform}\``);
   }
   verifyReleaseSignature(
     {
       id: metadata.id,
       version: metadata.version,
-      platform: releasePlatform as OpenDockReleasePlatform,
+      platform: releasePlatform,
       checksum: metadata.checksum,
     },
     metadata.signature,
@@ -1403,7 +1393,7 @@ async function createDeployArchive(
   projectDir: string,
   manifest: DockManifest,
   version: string,
-  platform: OpenDockReleasePlatform,
+  platform: OpenDockPlatform,
   manifestText: string,
   manifestSourceName = "dock.yml",
 ): Promise<SubmissionRequest["archive"]> {
@@ -1541,17 +1531,15 @@ function resolveCliPlatform(value: string | undefined): OpenDockPlatform {
 function resolveDeployPlatform(
   value: string | undefined,
   manifestPath: string | undefined,
-): OpenDockReleasePlatform {
+): OpenDockPlatform {
   return value === undefined
     ? inferDeployPlatformFromManifestPath(manifestPath)
-    : parseReleasePlatform(value);
+    : parsePlatform(value);
 }
 
-function inferDeployPlatformFromManifestPath(
-  manifestPath: string | undefined,
-): OpenDockReleasePlatform {
+function inferDeployPlatformFromManifestPath(manifestPath: string | undefined): OpenDockPlatform {
   if (manifestPath === undefined) {
-    return "any";
+    return detectPlatform();
   }
   const tokens = new Set(basename(manifestPath).toLowerCase().split("."));
   if (tokens.has("macos") || tokens.has("mac") || tokens.has("darwin")) {
@@ -1563,7 +1551,7 @@ function inferDeployPlatformFromManifestPath(
   if (tokens.has("linux")) {
     return "linux";
   }
-  return "any";
+  return detectPlatform();
 }
 
 type JsonChangeOperation = "install" | "uninstall" | "update";

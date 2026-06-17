@@ -359,8 +359,9 @@ opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml
 opendock deploy owner/name@1.0.0 --platform linux --file dock.linux.yml
 ```
 
-Platform-neutral docks can omit `--platform`, which submits the artifact as
-`any`.
+If `--platform` is omitted, OpenDock uses the current host OS. A manifest name
+such as `dock.macos.yml`, `dock.windows.yml`, or `dock.linux.yml` is also used as
+a platform hint during deploy.
 
 Example docks in this repository use explicit `dock.macos.yml` and
 `dock.windows.yml` files so they can be deployed directly as platform-specific
@@ -406,7 +407,7 @@ Deploy submits:
 1. `dock.yml`.
 2. A `.tgz` archive built from `dock.yml`, `files[].from`, and
    `workdir.files[].from`.
-3. The target platform: `any`, `macos`, `windows`, or `linux`.
+3. The target platform: `macos`, `windows`, or `linux`.
 4. Optional `readme_markdown`.
 5. Optional `logo`.
 6. Optional manifest `tags` for catalog search and filtering.

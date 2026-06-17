@@ -1,5 +1,5 @@
 import { createPrivateKey, sign } from "node:crypto";
-import type { OpenDockReleasePlatform } from "../src/platform.js";
+import type { OpenDockPlatform } from "../src/platform.js";
 import type { ReleaseSignatureResponse } from "../src/registry.js";
 import { releaseSignaturePayload } from "../src/release-signature.js";
 
@@ -21,7 +21,7 @@ const testPrivateKey = createPrivateKey({
 export function testReleaseSignature(subject: {
   id: string;
   version: string;
-  platform: OpenDockReleasePlatform;
+  platform: OpenDockPlatform;
   checksum: string;
 }): ReleaseSignatureResponse {
   return {
