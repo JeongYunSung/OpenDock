@@ -7,6 +7,19 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.34 - 2026-06-17
+
+### CLI
+
+- Derive dock identity from install and deploy references instead of requiring
+  `id` inside `dock.yml`.
+- Allow `opendock doctor owner/name` to check one installed dock.
+- Update dock identity and doctor guidance in the CLI docs.
+
+### Desktop App
+
+- Support copying long app logs from the desktop app.
+
 ## 0.1.33 - 2026-06-17
 
 ### CLI
