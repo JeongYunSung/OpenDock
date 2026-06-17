@@ -77,6 +77,14 @@ opendock install opendock/codex@1.0.0
 opendock deploy opendock/codex@1.0.0
 ```
 
+使用 `opendock <command> --help` 查看某个命令的选项。
+
+```bash
+opendock run --help
+opendock auth login --help
+opendock help run
+```
+
 `owner/name` 和 `owner/name@latest` 会被拒绝。请使用明确版本。
 
 安装后，`opendock list` 会显示当前项目已经安装的 docks。

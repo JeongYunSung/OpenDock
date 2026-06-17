@@ -119,6 +119,14 @@ opendock deploy opendock/codex@1.0.0
 `install`, `update`, and `uninstall` also accept `--json` when another tool
 needs a machine-readable change report.
 
+Use `opendock <command> --help` to see the options for one command. For example:
+
+```bash
+opendock run --help
+opendock auth login --help
+opendock help run
+```
+
 Use `opendock outdated` to check installed docks before updating. `opendock
 update` only runs when at least one installed dock has a newer approved Registry
 release.

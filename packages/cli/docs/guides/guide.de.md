@@ -80,6 +80,14 @@ opendock install opendock/codex@1.0.0
 opendock deploy opendock/codex@1.0.0
 ```
 
+Nutze `opendock <command> --help`, um Optionen für einen Befehl zu sehen.
+
+```bash
+opendock run --help
+opendock auth login --help
+opendock help run
+```
+
 `owner/name` und `owner/name@latest` werden abgelehnt. Nutze eine exakte Version.
 
 Nach der Installation zeigt `opendock list`, welche docks im aktuellen Projekt

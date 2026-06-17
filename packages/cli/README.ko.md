@@ -168,6 +168,8 @@ bin/opendock version
 | `opendock deploy owner/name@1.0.0` | 로컬 dock 버전을 Registry 검토로 제출합니다. |
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | macOS용 버전 파일을 제출합니다. |
 | `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Windows용 버전 파일을 제출합니다. |
+| `opendock <command> --help` | 특정 명령의 옵션과 사용법을 보여줍니다. |
+| `opendock help run` | 명령 이름으로 help를 보여줍니다. |
 
 dock reference에는 정확한 version이 필요합니다.
 

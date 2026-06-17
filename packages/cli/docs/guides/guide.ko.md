@@ -196,6 +196,14 @@ opendock install opendock/codex@1.0.0
 opendock deploy opendock/codex@1.0.0
 ```
 
+특정 명령의 옵션은 `opendock <command> --help`로 확인합니다.
+
+```bash
+opendock run --help
+opendock auth login --help
+opendock help run
+```
+
 허용되는 id 형태:
 
 ```text

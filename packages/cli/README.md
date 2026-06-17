@@ -171,6 +171,8 @@ bin/opendock version
 | `opendock deploy owner/name@1.0.0` | Submit a local dock version for Registry review. |
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Submit a macOS version file. |
 | `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Submit a Windows version file. |
+| `opendock <command> --help` | Show options and usage for a specific command. |
+| `opendock help run` | Show help for a command by name. |
 
 Dock references require an exact version.
 

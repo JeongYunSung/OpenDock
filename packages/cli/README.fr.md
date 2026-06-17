@@ -97,7 +97,7 @@ opendock bootstrap windows
 | `opendock update` | Applique les versions revues plus récentes quand des mises à jour existent. |
 | `opendock update --force` | Privilégie la version du dock malgré des modifications locales gérées. |
 | `opendock uninstall owner/name` | Supprime un dock et les fichiers projet qu'il gère. |
-| `opendock run check --dock owner/name` | Exécute un command déclaré par un dock installé, par exemple un harness check. |
+| `opendock run check --dock owner/name` | Exécute un helper ou check nommé installé par un dock. |
 | `opendock doctor` | Vérifie l'état du projet et les steps de diagnostic de chaque dock. |
 | `opendock log` | Affiche les logs de commandes récents du projet courant. |
 | `opendock version` | Affiche les informations CLI, schema et Registry. |
@@ -109,6 +109,8 @@ opendock bootstrap windows
 | `opendock deploy owner/name@1.0.0` | Soumet une version locale du dock à la revue Registry. |
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Soumet un fichier de version pour macOS. |
 | `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Soumet un fichier de version pour Windows. |
+| `opendock <command> --help` | Affiche les options et l'utilisation d'une commande précise. |
+| `opendock help run` | Affiche l'aide d'une commande par son nom. |
 
 Les références de dock exigent une version exacte.
 

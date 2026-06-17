@@ -93,7 +93,7 @@ opendock bootstrap windows
 | `opendock update` | 仅在有更新时应用新的已审核版本. |
 | `opendock update --force` | 即使 managed content 被本地修改，也以 dock version 为准. |
 | `opendock uninstall owner/name` | 移除一个 dock 及其管理的项目文件. |
-| `opendock run check --dock owner/name` | 运行已安装 dock 声明的 command，例如 harness check. |
+| `opendock run check --dock owner/name` | 运行 dock 安装的命名 helper 或 check。 |
 | `opendock doctor` | 检查项目状态和 dock 的检查 step. |
 | `opendock log` | 显示当前项目最近的命令日志. |
 | `opendock version` | 显示 CLI, schema 和 Registry 信息. |
@@ -105,6 +105,8 @@ opendock bootstrap windows
 | `opendock deploy owner/name@1.0.0` | 提交本地 dock 版本供 Registry review. |
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | 提交 macOS 用版本文件。 |
 | `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | 提交 Windows 用版本文件。 |
+| `opendock <command> --help` | 查看某个命令的选项和用法. |
+| `opendock help run` | 按命令名称查看 help. |
 
 dock reference 必须包含准确的 version。
 

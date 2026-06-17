@@ -78,6 +78,14 @@ opendock install opendock/codex@1.0.0
 opendock deploy opendock/codex@1.0.0
 ```
 
+commandごとのoptionsは `opendock <command> --help` で確認します。
+
+```bash
+opendock run --help
+opendock auth login --help
+opendock help run
+```
+
 `owner/name` and `owner/name@latest` are rejected. Use an exact version.
 
 After installation, `opendock list` shows which docks are installed in the
