@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   chmodSync,
@@ -66,6 +67,56 @@ function runTasks(
 }
 
 describe("opendock TypeScript CLI", () => {
+  it("lists run in top-level help", () => {
+    const result = spawnSync("bun", ["run", "src/cli.ts", "--help"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      env: { ...process.env, NO_COLOR: "1" },
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("run");
+    expect(result.stdout).toContain("Run a named helper or check installed by a dock.");
+  });
+
+  it("prints command-specific help", () => {
+    const cases = [
+      {
+        args: ["run", "--help"],
+        expected: ["Usage: opendock run [options] <command>", "--dock <dock>"],
+      },
+      {
+        args: ["help", "run"],
+        expected: ["Usage: opendock run [options] <command>", "--dock <dock>"],
+      },
+      {
+        args: ["install", "--help"],
+        expected: ["Usage: opendock install [options] <dock>", "--platform <platform>", "--json"],
+      },
+      {
+        args: ["auth", "login", "--help"],
+        expected: [
+          "Usage: opendock auth login [options]",
+          "--provider <provider>",
+          "--token <token>",
+        ],
+      },
+    ];
+
+    for (const { args, expected } of cases) {
+      const result = spawnSync("bun", ["run", "src/cli.ts", ...args], {
+        cwd: process.cwd(),
+        encoding: "utf8",
+        env: { ...process.env, NO_COLOR: "1" },
+      });
+
+      expect(result.status).toBe(0);
+      for (const text of expected) {
+        expect(result.stdout).toContain(text);
+      }
+    }
+  });
+
   it("installs text files as managed blocks and preserves existing content", async () => {
     const docks = tempDir();
     const project = tempDir();

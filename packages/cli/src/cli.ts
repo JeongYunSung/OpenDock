@@ -375,7 +375,7 @@ export async function run(argv = process.argv): Promise<void> {
     });
 
   const runCommand = new Command("run")
-    .description("Run a Registry-verified command declared by an installed dock.")
+    .description("Run a named helper or check installed by a dock.")
     .argument("<command>", "Command name declared in dock.yml")
     .option("--dock <dock>", "Installed dock id to run from when command names overlap")
     .action(async (command: string, options: { dock?: string }) => {
@@ -398,7 +398,7 @@ export async function run(argv = process.argv): Promise<void> {
         throw error;
       }
     });
-  program.addCommand(runCommand, { hidden: true });
+  program.addCommand(runCommand);
 
   program
     .command("doctor")
