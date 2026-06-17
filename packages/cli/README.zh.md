@@ -157,9 +157,9 @@ doctor:
 ## Run Commands
 
 `install`, `update`, `doctor` tasks 由 OpenDock 在安装和检查时执行。
-`commands` 是安装后给 docs、skills、workflows 或 harness 调用的命名 command。
+`commands` 是安装后给 docs、skills、workflows 或 harness 调用的命名 helper 或 check。
 
-如果 dock 提供 harness，安装后的说明应调用 OpenDock，而不是直接运行 runtime 命令。
+如果 dock 提供 helper 或 harness，安装后的说明应通过 OpenDock 调用它。
 
 ```yaml
 files:
@@ -177,7 +177,7 @@ commands:
 opendock run check --dock owner/name
 ```
 
-不要在安装的 agent docs 里写 `node .opendock/...` 这类直接调用。
+建议在安装后的 agent docs 中使用 `opendock run`，这样 helper 会和安装它的 dock 保持关联。
 
 ## Example Docks
 

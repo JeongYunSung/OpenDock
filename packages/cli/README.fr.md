@@ -162,10 +162,10 @@ fichiers d'entrée avant son exécution. Utilisez `files` pour les fichiers à
 
 ## Run Commands
 
-`install`, `update`, and `doctor` tasks are run by OpenDock during setup and checks.
-`commands` are named commands that installed docs, skills, workflows, or harnesses can call later.
+`install`, `update`, and `doctor` tasks run while OpenDock installs, updates, or checks a dock.
+`commands` are named helpers or checks that installed docs, skills, workflows, or harnesses can call later.
 
-When a dock ships a harness, installed instructions should call OpenDock instead of direct runtime commands.
+When a dock ships a helper or harness, installed instructions should call it through OpenDock.
 
 ```yaml
 files:
@@ -183,7 +183,7 @@ commands:
 opendock run check --dock owner/name
 ```
 
-Do not use direct calls like `node .opendock/...` in installed agent docs.
+Prefer `opendock run` in installed agent docs so the helper stays tied to the dock that installed it.
 
 ## Example Docks
 

@@ -66,7 +66,7 @@ files:
 | `tags` | Labels lowercase para búsqueda y filtros en Hub. |
 | `requires` | Requisitos de runtime. |
 | `files` | Archivos o directorios aplicados al project root. |
-| `commands` | Verified commands for `opendock run`. |
+| `commands` | Named helpers or checks for `opendock run`. |
 | `install` | Tasks for first install and initial generation. |
 | `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
@@ -128,7 +128,7 @@ modificar el proyecto.
 ## Commands
 
 Tasks are run by OpenDock during `install`, `update`, and `doctor`.
-`commands` are named commands that installed docs, skills, workflows, or harnesses can call later with `opendock run`.
+`commands` are named helpers or checks that installed docs, skills, workflows, or harnesses can call later with `opendock run`.
 
 ```yaml
 files:
@@ -148,7 +148,7 @@ Installed instructions should call:
 opendock run check --dock owner/name
 ```
 
-Do not put direct runtime calls such as `node .opendock/...` or `python .opendock/...` in installed agent docs.
+Prefer `opendock run` in installed agent docs so the helper stays tied to the dock that installed it.
 
 Supported runners: `bun`, `node`, `powershell`, `python`, `python3`, `sh`.
 

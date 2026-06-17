@@ -158,7 +158,7 @@ bin/opendock version
 | `opendock update` | Apply newer reviewed versions when installed docks have updates. |
 | `opendock update --force` | Update even when OpenDock-managed content was edited locally. |
 | `opendock uninstall owner/name` | Remove one installed dock and the project files it manages. |
-| `opendock run check --dock owner/name` | Run a command declared by an installed dock, such as a harness check. |
+| `opendock run check --dock owner/name` | Run a named helper or check installed by a dock. |
 | `opendock install/update/uninstall --json` | Print a machine-readable change report. |
 | `opendock doctor` | Check the project state and each installed dock's check steps. |
 | `opendock log` | Show recent command history for the current project. |
@@ -326,11 +326,9 @@ AI setup generators while still tracking the files that reach the project root.
 
 ## Run Commands
 
-Tasks are for OpenDock itself during install, update, and doctor. Commands are
-for the files a dock installs and the agents that read those files later.
-
-Use `commands` when a dock ships a harness or helper that should be run after
-install:
+Tasks run while OpenDock installs, updates, or checks a dock. `commands` are for
+later, after the dock has installed its files. Use them when a dock includes a
+helper, check, or harness that people or agents should call by name.
 
 ```yaml
 files:
@@ -345,16 +343,16 @@ commands:
 ```
 
 Then `AGENTS.md`, `CLAUDE.md`, skills, workflows, and other installed
-instructions should call:
+instructions can call the helper without knowing its runtime path:
 
 ```bash
 opendock run check --dock owner/name
 ```
 
-Do not tell agents to run `node .opendock/...`, `python .opendock/...`, or
-similar direct runtime commands. `opendock run` checks the installed dock,
-release metadata, file checksum, declared runner, and file type before it runs
-the command.
+Prefer `opendock run` in installed instructions instead of documenting a
+runtime-specific file path. That keeps the helper tied to the dock that
+installed it and lets OpenDock show a consistent command in docs, logs, and
+support notes.
 
 ## Example Docks
 
@@ -428,7 +426,7 @@ src/
   core/
     app/                    # Install, update, uninstall orchestration
     domain/                 # Manifest and project state models
-    files/                  # Managed blocks, checksums, path safety, file plans
+    files/                  # Managed blocks, checksums, path handling, file plans
     runtime/                # Task runner, command runner, and allowlist
 tests/
   cli-flow.test.ts          # Integration-style temp-dir tests

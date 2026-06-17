@@ -96,7 +96,7 @@ stay outside the OpenDock block.
 | `requires` | no | Runtime requirements prepared before tasks run. |
 | `workdir` | no | Files that prepare the private dock workdir before tasks run. |
 | `files` | no | File or directory mappings applied to the project root. |
-| `commands` | no | Verified commands that installed docs, skills, or harnesses can run later with `opendock run`. |
+| `commands` | no | Named helpers or checks that installed docs, skills, or harnesses can run later with `opendock run`. |
 | `install` | no | Tasks for first install and initial generation. |
 | `update` | no | Tasks for refresh and maintenance. |
 | `doctor` | no | Health checks that do not modify the project. |
@@ -240,12 +240,10 @@ state and avoid changing the project.
 
 ## Commands
 
-Tasks are run by OpenDock during `install`, `update`, and `doctor`. Commands are
-run later by humans, agents, skills, workflows, or harness docs through
+Tasks run while OpenDock installs, updates, or checks a dock. `commands` are for
+later, after the dock has installed its files. Use them when a dock includes a
+helper, check, or harness that people or agents should call by name through
 `opendock run`.
-
-Use `commands` when a dock installs a harness or helper that should be callable
-after install:
 
 ```yaml
 files:
@@ -259,16 +257,16 @@ commands:
     runner: node
 ```
 
-Installed instructions should call the command by name:
+Installed instructions should call the command by name instead of hard-coding
+the helper path:
 
 ```bash
 opendock run check --dock opendock/design-ultrawork
 ```
 
-Do not put direct runtime calls such as `node .opendock/...` or
-`python .opendock/...` in `AGENTS.md`, `CLAUDE.md`, skills, workflows, or
-README files. Those bypass OpenDock's installed-file checks and are rejected at
-deploy for declared command files.
+Prefer `opendock run` in `AGENTS.md`, `CLAUDE.md`, skills, workflows, and README
+files. Avoid runtime-specific file paths; they are harder for users and agents
+to recognize as part of the installed dock.
 
 Supported runners:
 
@@ -281,9 +279,8 @@ Supported runners:
 | `sh` | `.sh` |
 
 The command file must be installed through `files`, not only generated from a
-task export. `opendock run` verifies the installed dock, release metadata,
-current file checksum, declared runner, file extension, symlink status, and path
-safety before executing it.
+task export. That keeps the command visible in the manifest and makes the same
+`opendock run` call work for humans, agents, docs, and workflows.
 
 ## Workdir Files And Export
 

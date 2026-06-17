@@ -156,7 +156,7 @@ bin/opendock version
 | `opendock update` | 업데이트 가능한 dock이 있을 때 더 새로운 검토 완료 버전을 적용합니다. |
 | `opendock update --force` | 직접 수정한 OpenDock 관리 파일도 dock 버전으로 업데이트합니다. |
 | `opendock uninstall owner/name` | dock 하나와 그 dock이 관리하던 프로젝트 파일을 제거합니다. |
-| `opendock run check --dock owner/name` | 설치된 dock이 선언한 command를 실행합니다. 예: harness check. |
+| `opendock run check --dock owner/name` | dock이 설치한 이름 있는 helper나 check를 실행합니다. |
 | `opendock doctor` | 프로젝트 상태와 설치된 dock의 점검 step을 실행합니다. |
 | `opendock log` | 현재 프로젝트의 최근 명령 실행 기록을 보여줍니다. |
 | `opendock version` | CLI, schema, Registry 정보를 출력합니다. |
@@ -305,12 +305,12 @@ root에 들어온 최종 파일을 OpenDock이 추적할 수 있게 해줍니다
 
 ## Run Commands
 
-`install`, `update`, `doctor` task는 OpenDock이 설치와 점검 과정에서 실행합니다.
-`commands`는 설치 후 `AGENTS.md`, `CLAUDE.md`, skill, workflow, harness 문서가
-호출할 수 있는 이름 있는 command입니다.
+`install`, `update`, `doctor` task는 OpenDock이 설치, 업데이트, 점검 중에
+실행합니다. `commands`는 설치가 끝난 뒤 사람이거나 agent가 이름으로 호출할 수
+있는 helper, check, harness입니다.
 
-`commands`로 harness를 선언하면 설치된 instruction에서는 직접 `node .opendock/...`를
-실행하지 않고 아래처럼 호출합니다.
+`commands`로 harness를 선언하면 설치된 instruction은 runtime path를 몰라도 아래처럼
+호출할 수 있습니다.
 
 ```yaml
 files:
@@ -328,8 +328,8 @@ commands:
 opendock run check --dock owner/name
 ```
 
-`opendock run`은 설치된 dock, release metadata, 현재 파일 checksum, runner, 확장자를
-확인한 뒤 command를 실행합니다.
+설치된 문서에는 runtime-specific file path보다 `opendock run`을 적는 것이 좋습니다.
+이렇게 하면 docs, log, agent instruction에서 같은 command 이름을 사용할 수 있습니다.
 
 ## Example Docks
 
@@ -399,7 +399,7 @@ src/
   core/
     app/                    # Install, update, uninstall orchestration
     domain/                 # Manifest and project state models
-    files/                  # Managed blocks, checksums, path safety, file plans
+    files/                  # Managed blocks, checksums, path handling, file plans
     runtime/                # Task runner, command runner, allowlist
 tests/
   cli-flow.test.ts          # Integration-style temp-dir tests

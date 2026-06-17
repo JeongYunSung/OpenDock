@@ -176,7 +176,7 @@ doctor:
 | `tags` | 선택 | Hub 검색과 필터에 사용할 lowercase catalog label입니다. |
 | `requires` | 선택 | dock 실행 전에 준비할 runtime requirement입니다. |
 | `files` | 선택 | 프로젝트 root로 적용할 파일 또는 디렉터리 mapping입니다. |
-| `commands` | 선택 | 설치 후 agent 문서, skill, workflow, harness가 `opendock run`으로 호출할 command입니다. |
+| `commands` | 선택 | 설치 후 문서, skill, workflow, harness가 `opendock run`으로 호출할 helper나 check입니다. |
 | `install` | 선택 | 최초 install과 초기 생성 작업 task입니다. |
 | `update` | 선택 | refresh와 유지보수 작업 task입니다. |
 | `doctor` | 선택 | 프로젝트를 수정하지 않는 상태 점검 task입니다. |
@@ -486,11 +486,9 @@ doctor:
 
 ## commands
 
-`install`, `update`, `doctor`는 OpenDock이 설치와 점검 과정에서 실행하는 task입니다.
-반면 `commands`는 설치가 끝난 뒤 `AGENTS.md`, `CLAUDE.md`, skill, workflow,
-harness 문서가 호출할 수 있는 이름 있는 command입니다.
-
-harness나 helper script를 함께 설치하는 dock은 command를 명시합니다.
+`install`, `update`, `doctor`는 OpenDock이 설치, 업데이트, 점검 중에 실행하는
+task입니다. `commands`는 설치가 끝난 뒤 사람이거나 agent가 이름으로 호출할 수 있는
+helper, check, harness입니다.
 
 ```yaml
 files:
@@ -504,15 +502,15 @@ commands:
     runner: node
 ```
 
-설치된 agent 문서에서는 runtime을 직접 호출하지 말고 command 이름으로 실행합니다.
+설치된 agent 문서에서는 runtime path를 직접 적지 말고 command 이름으로 실행합니다.
 
 ```bash
 opendock run check --dock opendock/design-ultrawork
 ```
 
-`AGENTS.md`, `CLAUDE.md`, skill, workflow, README에 `node .opendock/...` 또는
-`python .opendock/...` 같은 직접 실행 명령을 쓰지 마세요. declared command file에
-대해서는 deploy 단계에서도 이런 직접 runtime 호출을 거부합니다.
+`AGENTS.md`, `CLAUDE.md`, skill, workflow, README에는 runtime-specific file path보다
+`opendock run`을 적는 것이 좋습니다.
+이렇게 하면 사용자, agent, 문서, log가 같은 command 이름을 공유할 수 있습니다.
 
 지원 runner:
 
@@ -524,9 +522,9 @@ opendock run check --dock opendock/design-ultrawork
 | `python`, `python3` | `.py` |
 | `sh` | `.sh` |
 
-command file은 `files`를 통해 설치되어야 합니다. `opendock run`은 설치된 dock,
-release metadata, 현재 파일 checksum, runner, 확장자, symlink 여부, path safety를
-확인한 뒤 실행합니다.
+command file은 `files`를 통해 설치되어야 합니다. task export로만 생성된 파일은
+command로 선언하지 마세요. manifest에 보이는 파일이어야 사용자와 agent가 같은
+`opendock run` 호출을 재사용할 수 있습니다.
 
 ## workdir.files와 export
 
@@ -810,7 +808,7 @@ OpenDock은 root 파일을 쓰기 전에 preflight를 수행합니다.
 - source 또는 target path가 안전하지 않음.
 
 `--force`를 쓰면 OpenDock 소유였던 파일/블록의 변경은 dock 내용으로 되돌립니다.
-하지만 `--force`는 임의 shell 명령을 허용하거나 path safety를 우회하지 않습니다.
+하지만 `--force`는 OpenDock이 관리하지 않는 변경까지 무조건 허용하는 옵션은 아닙니다.
 
 ## deploy와 archive
 
