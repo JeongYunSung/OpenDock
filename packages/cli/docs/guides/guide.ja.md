@@ -34,7 +34,6 @@ my-dock/
 
 ```yaml
 opendock: 1
-id: opendock/agent-ready
 summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
@@ -56,7 +55,6 @@ files:
 | Field | Meaning |
 |---|---|
 | `opendock` | Manifest version. Current value is `1`. |
-| `id` | Dock id in `owner/name` form. |
 | `name` | Human-readable catalog name. |
 | `summary` | Short Registry catalog summary. |
 | `readme` | Markdown content for the catalog detail page. |

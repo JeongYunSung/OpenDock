@@ -34,6 +34,7 @@ opendock install opendock/codex@1.0.0
 opendock list
 opendock update
 opendock doctor
+opendock doctor opendock/codex
 opendock uninstall opendock/codex
 ```
 
@@ -160,7 +161,8 @@ bin/opendock version
 | `opendock uninstall owner/name` | Remove one installed dock and the project files it manages. |
 | `opendock run check --dock owner/name` | Run a named helper or check installed by a dock. |
 | `opendock install/update/uninstall --json` | Print a machine-readable change report. |
-| `opendock doctor` | Check the project state and each installed dock's check steps. |
+| `opendock doctor` | Check the project state and every installed dock's check steps. |
+| `opendock doctor owner/name` | Check only one installed dock. |
 | `opendock log` | Show recent command history for the current project. |
 | `opendock version` | Print CLI, schema, and Registry details. |
 | `opendock bootstrap mac` | Verify or install Homebrew on macOS. |
@@ -206,7 +208,6 @@ Minimal `dock.yml`:
 
 ```yaml
 opendock: 1
-id: owner/name
 summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
@@ -247,7 +248,8 @@ doctor:
 understand and filter a dock in Hub, but they are not installed into a project
 unless the referenced files are also listed in `files`.
 
-Release versions are not declared in `dock.yml`; the version comes from deploy:
+Dock names and release versions are not declared in `dock.yml`; they come from
+the install or deploy reference:
 
 ```bash
 opendock deploy owner/name@1.0.0

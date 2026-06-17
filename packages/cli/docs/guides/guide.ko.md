@@ -101,7 +101,6 @@ files:
 
 ```yaml
 opendock: 1
-id: opendock/agent-ready
 summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
@@ -126,7 +125,6 @@ block을 추가하거나 갱신합니다.
 
 ```yaml
 opendock: 1
-id: opendock/agent-ready
 summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
@@ -168,7 +166,6 @@ doctor:
 | 필드 | 필수 | 설명 |
 |---|---:|---|
 | `opendock` | 필수 | 현재 지원 manifest version은 `1`입니다. |
-| `id` | 필수 | dock id입니다. `owner/name` 형식입니다. |
 | `name` | 선택 | 사람이 읽는 이름입니다. 실행 로직에는 영향이 없습니다. |
 | `summary` | 선택 | Registry catalog에 표시할 짧은 설명입니다. |
 | `readme` | 선택 | Registry catalog 상세 본문으로 제출할 Markdown 경로입니다. |
@@ -181,15 +178,10 @@ doctor:
 | `update` | 선택 | refresh와 유지보수 작업 task입니다. |
 | `doctor` | 선택 | 프로젝트를 수정하지 않는 상태 점검 task입니다. |
 
-## id와 version
+## Dock reference
 
-`dock.yml`의 `id`에는 version을 쓰지 않습니다.
-
-```yaml
-id: opendock/codex
-```
-
-설치와 배포 명령에서만 정확한 version을 붙입니다.
+`dock.yml`에는 dock id나 release version을 쓰지 않습니다. Dock 이름과
+version은 설치와 배포 명령의 reference에서 가져옵니다.
 
 ```bash
 opendock install opendock/codex@1.0.0
@@ -432,6 +424,7 @@ doctor: []
 | `install` | `opendock install owner/name@version` | 최초 적용과 초기 생성 작업 |
 | `update` | `opendock update` | 업데이트 가능한 검토 완료 버전이 있을 때 유지보수 작업 실행 |
 | `doctor` | `opendock doctor` | 현재 프로젝트와 도구 상태 점검 |
+| `doctor` | `opendock doctor owner/name` | 설치된 특정 dock만 점검 |
 
 `install`, `update`, `uninstall`은 자동화 도구가 변경 결과를 읽을 수 있도록
 `--json` 출력도 지원합니다.
@@ -980,6 +973,6 @@ release:
 2. 같은 dock을 다시 install해도 block이 중복되지 않는가?
 3. 사용자가 managed block/file을 수정했을 때 update가 중단되는가?
 4. `--force`가 의도대로 복구하는가?
-5. `opendock doctor`가 필요한 상태를 보여주는가?
+5. `opendock doctor` 또는 `opendock doctor owner/name`이 필요한 상태를 보여주는가?
 6. `opendock deploy owner/name@version`으로 제출할 exact version을 정했는가?
 7. OS별 동작이 다르면 platform artifact를 각각 deploy/test했는가?

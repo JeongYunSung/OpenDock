@@ -36,7 +36,6 @@ verwendet werden.
 
 ```yaml
 opendock: 1
-id: opendock/agent-ready
 summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
@@ -58,7 +57,6 @@ files:
 | Field | Meaning |
 |---|---|
 | `opendock` | Manifest version. Current value is `1`. |
-| `id` | Dock id im Format `owner/name`. |
 | `name` | Lesbarer Name im catalog. |
 | `summary` | Kurze Beschreibung für Registry catalog. |
 | `readme` | Markdown für die catalog detail page. |

@@ -61,7 +61,6 @@ files are not installed into a project unless they are also listed in `files`.
 
 ```yaml
 opendock: 1
-id: opendock/agent-ready
 summary: Shared instruction files for AI coding agents.
 readme: DOCK.md
 logo: logo.png
@@ -87,7 +86,6 @@ stay outside the OpenDock block.
 | Field | Required | Meaning |
 |---|---:|---|
 | `opendock` | yes | Manifest version. Current value: `1`. |
-| `id` | yes | Dock id in `owner/name` form. |
 | `name` | no | Human-readable catalog name. |
 | `summary` | no | Short Registry catalog summary. |
 | `readme` | no | Markdown file submitted as catalog detail content. |
@@ -101,13 +99,10 @@ stay outside the OpenDock block.
 | `update` | no | Tasks for refresh and maintenance. |
 | `doctor` | no | Health checks that do not modify the project. |
 
-## Id And Version
+## Dock Reference
 
-Do not put a release version in `dock.yml`.
-
-```yaml
-id: opendock/codex
-```
+Do not put a dock id or release version in `dock.yml`. The dock identity and
+version come from the OpenDock command reference.
 
 Use exact versions when running OpenDock:
 
@@ -350,8 +345,8 @@ ready project context that an agent can read immediately.
 ## Platforms
 
 Prefer separate platform artifacts instead of putting platform branches inside
-one manifest. The dock id and version stay the same, while each release artifact
-targets one platform.
+one manifest. The command reference keeps the dock id and version the same,
+while each release artifact targets one platform.
 
 ```bash
 opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml
@@ -457,5 +452,6 @@ Release:
 4. Test `--force`.
 5. Test uninstall.
 6. Run `opendock list`.
-7. Run `opendock doctor`.
+7. Run `opendock doctor`, or `opendock doctor owner/name` when you only want to
+   check one installed dock.
 8. If OS behavior differs, deploy and test each platform artifact separately.
