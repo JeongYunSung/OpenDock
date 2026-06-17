@@ -7,6 +7,19 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.32 - 2026-06-17
+
+### CLI
+
+- Show `opendock run` in the top-level help output.
+- Keep `opendock <command> --help` and `opendock help run` documented and
+  covered by regression tests.
+
+### Docs
+
+- Add command-specific help examples to README, guides, and site docs.
+- Add `opendock run` to the install guide's project-management command list.
+
 ## 0.1.30 - 2026-06-16
 
 ### CLI

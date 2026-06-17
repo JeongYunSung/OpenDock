@@ -1,6 +1,6 @@
 {
   "name": "opendock",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "description": "Choose and combine AI setup docks for every workspace.",
   "type": "module",
   "license": "MIT",
