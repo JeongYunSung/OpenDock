@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const rust = readFileSync(resolve(appRoot, "src-tauri", "src", "lib.rs"), "utf8");
 const appMenuRust = readFileSync(resolve(appRoot, "src-tauri", "src", "app_menu.rs"), "utf8");
+const commandOutputRust = readFileSync(resolve(appRoot, "src-tauri", "src", "command_output.rs"), "utf8");
 const registryRust = readFileSync(resolve(appRoot, "src-tauri", "src", "registry.rs"), "utf8");
 const mainRust = readFileSync(resolve(appRoot, "src-tauri", "src", "main.rs"), "utf8");
 const accountPanel = readFileSync(resolve(appRoot, "src", "account-panel.tsx"), "utf8");
@@ -159,7 +160,7 @@ const commandFailureProgressDoesNotDuplicatePopupRows =
   app.includes("!commandRowsContainMessage(currentRows, result.message)") &&
   commandTask.includes("const hasSpecificError = status === \"error\"") &&
   rust.includes("should_emit_empty_stream_message(&stdout, &stderr)") &&
-  rust.includes("stdout.trim().is_empty() && stderr.trim().is_empty()");
+  commandOutputRust.includes("stdout.trim().is_empty() && stderr.trim().is_empty()");
 const blockingCliCommandsUseBackgroundRuntime = [
   "opendock_install",
   "opendock_update",

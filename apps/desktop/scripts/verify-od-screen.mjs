@@ -1,22 +1,26 @@
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
+import {
+  isReachable,
+  resolveChromeExecutable,
+  terminateServer,
+  waitForReachable
+} from "./browser-test-runtime.mjs";
+import {
+  assertCatalogGridDensity,
+  assertNoForbiddenText,
+  assertNoHorizontalOverflow,
+  assertOneVisible,
+  assertVisible,
+  catalogPageLimitForViewport,
+  versionPageLimitForViewport
+} from "./verify-od-assertions.mjs";
 import { installRegistryFixtures } from "./registry-fixtures.mjs";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const appUrl = process.env.OPENDOCK_APP_URL ?? "http://127.0.0.1:1420";
-const forbiddenVisibleText = new RegExp(
-  [
-    "\\b[Pp]lan\\b",
-    ["Dash", "board"].join(""),
-    ["dash", "board"].join(""),
-    ["right", "sidebar"].join("-"),
-    ["opendock", "runner"].join("-"),
-    ["app", "runner"].join("-")
-  ].join("|")
-);
 
 let server;
 let browser;
@@ -31,7 +35,7 @@ try {
     });
     server.stdout.on("data", (chunk) => process.stdout.write(`[vite] ${chunk}`));
     server.stderr.on("data", (chunk) => process.stderr.write(`[vite] ${chunk}`));
-    await waitForReachable(appUrl);
+    await waitForReachable(appUrl, server);
   }
 
   browser = await chromium.launch({
@@ -550,45 +554,6 @@ async function assertCommandPaletteEscapeClosesWithoutInputFocus(page) {
   await page.waitForFunction(() => !document.querySelector(".command-palette"));
 }
 
-function catalogPageLimitForViewport(width, height) {
-  const columns = catalogColumnsForViewport(width);
-  const baseRows = width <= 520 ? 5 : 3;
-  const extraRows = Math.max(0, Math.floor((height - 980) / 420));
-  return Math.min(24, columns * Math.min(8, baseRows + extraRows));
-}
-
-function catalogColumnsForViewport(width) {
-  if (width <= 520) return 1;
-  if (width <= 980) return 2;
-  if (width >= 1600) return 4;
-  return 3;
-}
-
-function versionPageLimitForViewport(width, height) {
-  const baseRows = width <= 980 ? 5 : 6;
-  const extraRows = Math.max(0, Math.floor((height - 900) / 180));
-  return Math.min(18, baseRows + extraRows);
-}
-
-async function assertCatalogGridDensity(page, viewport) {
-  const expectedColumns = catalogColumnsForViewport(viewport.width);
-  const metrics = await page.locator(".dock-card").evaluateAll((cards) => {
-    const rects = cards.map((card) => card.getBoundingClientRect());
-    const firstTop = Math.min(...rects.map((rect) => Math.round(rect.top)));
-    const firstRow = rects.filter((rect) => Math.abs(Math.round(rect.top) - firstTop) <= 1);
-    return {
-      firstCardWidth: rects[0]?.width ?? 0,
-      firstRowCount: firstRow.length
-    };
-  });
-  if (metrics.firstRowCount !== expectedColumns) {
-    throw new Error(`catalog grid should render ${expectedColumns} columns at ${viewport.width}px, got ${metrics.firstRowCount}`);
-  }
-  if (viewport.width >= 1600 && metrics.firstCardWidth < 320) {
-    throw new Error(`wide catalog cards should be enlarged, got ${metrics.firstCardWidth}px`);
-  }
-}
-
 async function assertRegisteredProjectSkipsChooser(page) {
   await page.evaluate(() => {
     localStorage.clear();
@@ -661,100 +626,4 @@ async function assertWorkspaceList(page) {
   await assertVisible(page.getByRole("button", { name: "로그" }), "logs tab");
   await assertVisible(page.locator(".project-sidebar"), "project sidebar");
   await assertNoForbiddenText(page, "workspace list");
-}
-
-async function assertVisible(locator, label) {
-  try {
-    await locator.waitFor({ state: "visible", timeout: 5000 });
-  } catch (error) {
-    throw new Error(`expected visible: ${label}\n${error instanceof Error ? error.message : String(error)}`);
-  }
-}
-
-async function assertOneVisible(locators, label) {
-  const deadline = Date.now() + 5000;
-  let lastError = "";
-  while (Date.now() < deadline) {
-    for (const locator of locators) {
-      try {
-        if (await locator.first().isVisible({ timeout: 250 })) return;
-      } catch (error) {
-        lastError = error instanceof Error ? error.message : String(error);
-      }
-    }
-  }
-  throw new Error(`expected visible: ${label}${lastError ? `\n${lastError}` : ""}`);
-}
-
-async function assertNoForbiddenText(page, label) {
-  const text = await page.locator("body").evaluate((body) => {
-    const clone = body.cloneNode(true);
-    clone
-      .querySelectorAll(".dock-grid, .detail-panel, .detail-sidebar, .installed-table, .readme-panel, .versions-panel")
-      .forEach((element) => element.remove());
-    return clone.innerText;
-  });
-  if (forbiddenVisibleText.test(text)) {
-    throw new Error(`forbidden non-OD text found on ${label}`);
-  }
-}
-
-async function assertNoHorizontalOverflow(page, label, viewport) {
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  if (overflow > 1) {
-    throw new Error(`${label} overflows horizontally at ${viewport.width}x${viewport.height}: ${overflow}px`);
-  }
-}
-
-async function isReachable(url) {
-  try {
-    const response = await fetch(url);
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
-
-async function waitForReachable(url) {
-  const started = Date.now();
-  while (Date.now() - started < 20_000) {
-    if (await isReachable(url)) return;
-    if (server?.exitCode !== null) {
-      throw new Error(`dev server exited before ${url} was reachable`);
-    }
-    await new Promise((resolveWait) => setTimeout(resolveWait, 250));
-  }
-  throw new Error(`timed out waiting for ${url}`);
-}
-
-function resolveChromeExecutable() {
-  const candidates = [
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/Applications/Chromium.app/Contents/MacOS/Chromium",
-    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-  ];
-  return candidates.find((candidate) => existsSync(candidate));
-}
-
-async function terminateServer(child) {
-  if (!child.pid) return;
-  if (process.platform === "win32") {
-    child.kill("SIGTERM");
-    await new Promise((resolveStop) => setTimeout(resolveStop, 300));
-    child.kill("SIGKILL");
-    return;
-  }
-
-  try {
-    process.kill(-child.pid, "SIGTERM");
-  } catch {
-    // The process group may already be gone.
-  }
-  await new Promise((resolveStop) => setTimeout(resolveStop, 300));
-  try {
-    process.kill(-child.pid, "SIGKILL");
-  } catch {
-    // Already stopped.
-  }
 }
