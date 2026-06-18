@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { extname } from "node:path";
 import { isCommandRunnerName } from "./core/domain/command-runners.js";
 import type { DockManifest } from "./core/domain/manifest.js";
+import { isShellCommandSeparator } from "./core/domain/shell-operators.js";
 import {
   assertRegularOrMissing,
   assertSafeRelativePath,
@@ -73,7 +74,7 @@ function directRuntimeInvocation(content: string, file: string): string | undefi
         continue;
       }
       for (const next of tokens.slice(index + 1)) {
-        if (deployCommandSeparators.has(next)) {
+        if (isShellCommandSeparator(next)) {
           break;
         }
         if (fileTokens.has(next)) {
@@ -84,8 +85,6 @@ function directRuntimeInvocation(content: string, file: string): string | undefi
   }
   return undefined;
 }
-
-const deployCommandSeparators = new Set(["&&", "||", "|", ";"]);
 
 function deployTextTokens(line: string): string[] {
   return line
