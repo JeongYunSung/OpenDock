@@ -6,6 +6,7 @@ const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const rust = readFileSync(resolve(appRoot, "src-tauri", "src", "lib.rs"), "utf8");
 const appMenuRust = readFileSync(resolve(appRoot, "src-tauri", "src", "app_menu.rs"), "utf8");
 const commandOutputRust = readFileSync(resolve(appRoot, "src-tauri", "src", "command_output.rs"), "utf8");
+const opendockRunnerRust = readFileSync(resolve(appRoot, "src-tauri", "src", "opendock_runner.rs"), "utf8");
 const registryRust = readFileSync(resolve(appRoot, "src-tauri", "src", "registry.rs"), "utf8");
 const mainRust = readFileSync(resolve(appRoot, "src-tauri", "src", "main.rs"), "utf8");
 const accountPanel = readFileSync(resolve(appRoot, "src", "account-panel.tsx"), "utf8");
@@ -13,14 +14,18 @@ const app = readFileSync(resolve(appRoot, "src", "App.tsx"), "utf8");
 const appMenu = readFileSync(resolve(appRoot, "src", "app-menu.tsx"), "utf8");
 const commandLog = readFileSync(resolve(appRoot, "src", "command-log.ts"), "utf8");
 const commandTask = readFileSync(resolve(appRoot, "src", "command-task.ts"), "utf8");
+const commandTaskController = readFileSync(resolve(appRoot, "src", "use-command-task-controller.ts"), "utf8");
+const catalogController = readFileSync(resolve(appRoot, "src", "use-catalog-controller.ts"), "utf8");
 const data = readFileSync(resolve(appRoot, "src", "data.ts"), "utf8");
 const dockData = readFileSync(resolve(appRoot, "src", "dock-data.ts"), "utf8");
 const desktopUi = readFileSync(resolve(appRoot, "src", "desktop-ui.tsx"), "utf8");
 const display = readFileSync(resolve(appRoot, "src", "display.tsx"), "utf8");
 const dockPanels = readFileSync(resolve(appRoot, "src", "dock-panels.tsx"), "utf8");
 const dockWorkspaceModel = readFileSync(resolve(appRoot, "src", "dock-workspace-model.ts"), "utf8");
+const projectController = readFileSync(resolve(appRoot, "src", "use-project-controller.ts"), "utf8");
 const responsivePageSize = readFileSync(resolve(appRoot, "src", "responsive-page-size.ts"), "utf8");
 const registryClient = readFileSync(resolve(appRoot, "src", "registry-client.ts"), "utf8");
+const shortcutController = readFileSync(resolve(appRoot, "src", "use-shortcut-controller.ts"), "utf8");
 const titlebar = readFileSync(resolve(appRoot, "src", "titlebar.tsx"), "utf8");
 const workspaceShell = readFileSync(resolve(appRoot, "src", "workspace-shell.tsx"), "utf8");
 const styles = readFileSync(resolve(appRoot, "src", "styles.css"), "utf8");
@@ -47,7 +52,8 @@ const staleMenuCases = frontendMenuCases.filter(
 );
 
 const registeredCommands = extractGenerateHandlerCommands(rust);
-const invokedCommands = unique([...app.matchAll(/invoke(?:<[^>]+>)?\("([^"]+)"/g)].map((match) => match[1]));
+const frontendRuntimeSources = [app, projectController, shortcutController].join("\n");
+const invokedCommands = unique([...frontendRuntimeSources.matchAll(/invoke(?:<[^>]+>)?\("([^"]+)"/g)].map((match) => match[1]));
 const unregisteredInvokes = invokedCommands.filter((command) => !registeredCommands.includes(command));
 const requiredWindowPermissions = requiredCoreWindowPermissions(app);
 const capabilityPermissions = defaultCapability.permissions ?? [];
@@ -59,9 +65,9 @@ const menuListenerEffect = extractUseEffectContaining(app, 'listen<string>("open
 const menuListenerUsesRef = menuListenerEffect.includes("handleNativeMenuRef.current");
 const menuListenerHasEmptyDeps = /\},\s*\[\]\s*\)/.test(menuListenerEffect);
 const blankProjectHasInFlightGuard =
-  app.includes("if (blankProjectCreatingRef.current) return;") &&
-  app.includes("blankProjectCreatingRef.current = true;") &&
-  app.includes("blankProjectCreatingRef.current = false;");
+  projectController.includes("if (blankProjectCreatingRef.current) return;") &&
+  projectController.includes("blankProjectCreatingRef.current = true;") &&
+  projectController.includes("blankProjectCreatingRef.current = false;");
 const logCommandBody = extractFunctionBody(rust, "fn opendock_log");
 const logCommandIsNonStreaming =
   logCommandBody.includes("run_opendock_blocking") &&
@@ -70,14 +76,17 @@ const logCommandIsNonStreaming =
 const appParsesHistoricalLogLines =
   commandLog.includes("function parseOpenDockHistoryLine") &&
   commandLog.includes("function formatHistoryTime") &&
-  app.includes("setLogs(result.lines.slice(-MAX_STORED_LOGS).map(commandLineLogEntry))");
+  commandLog.includes("function commandLinesToStoredLogs") &&
+  app.includes("setLogs(commandLinesToStoredLogs(result.lines))");
 const registryRequestsBypassCache =
   registryRust.includes("reqwest::header::CACHE_CONTROL") &&
   registryRust.includes("reqwest::header::PRAGMA") &&
   registryClient.includes('cache: "no-store"');
 const desktopCatalogUsesLiveRegistry =
-  app.includes("const [catalogDocks, setCatalogDocks] = useState<Dock[]>([])") &&
-  app.includes("requestCatalog(sortMode, searchQuery, catalogPage, catalogPageSize)") &&
+  catalogController.includes("const [catalogDocks, setCatalogDocks] = useState<Dock[]>([])") &&
+  catalogController.includes(
+    "requestCatalog(options.sortMode, options.searchQuery, options.catalogPage, options.catalogPageSize)"
+  ) &&
   (data.includes("export function normalizeRegistryDock") ||
     dockData.includes("export function normalizeRegistryDock")) &&
   !data.includes("export const DOCKS") &&
@@ -96,7 +105,9 @@ const desktopCatalogUsesResponsivePaging =
   rust.includes("bounded_limit(limit, DEFAULT_CATALOG_PAGE_LIMIT, MAX_CATALOG_PAGE_LIMIT)");
 const desktopVersionsUseResponsivePaging =
   registryClient.includes('invoke<RegistryDockVersionsResponse>("opendock_dock_versions", { dockId, page, limit })') &&
-  app.includes("requestDockVersions(dockFullId(baseDetail), versionPage, versionPageSize)") &&
+  catalogController.includes(
+    "requestDockVersions(dockFullId(options.baseDetail!), options.versionPage, options.versionPageSize)"
+  ) &&
   rust.includes("async fn opendock_dock_versions(") &&
   rust.includes("DEFAULT_VERSION_PAGE_LIMIT") &&
   rust.includes("MAX_VERSION_PAGE_LIMIT");
@@ -152,8 +163,8 @@ const changeCommandsUseEvents =
   rust.includes('"uninstall".to_string()') &&
   (rust.match(/"--events"\.to_string\(\)/g) ?? []).length >= 3;
 const commandProgressBridge =
-  rust.includes('app.emit("opendock-command-progress"') &&
-  rust.includes("command_progress_from_event_line") &&
+  opendockRunnerRust.includes('app.emit("opendock-command-progress"') &&
+  opendockRunnerRust.includes("command_progress_from_event_line") &&
   app.includes('listen<OpenDockCommandProgress>("opendock-command-progress"') &&
   app.includes("applyCommandProgressToTask(progress)");
 const noUpdateProgressDoesNotDuplicatePopupRows =
@@ -164,9 +175,9 @@ const noUpdateProgressDoesNotDuplicatePopupRows =
   commandTask.includes('progress.message === "No OpenDock dock updates available."');
 const commandFailureProgressDoesNotDuplicatePopupRows =
   commandTask.includes("function commandRowsContainMessage") &&
-  app.includes("!commandRowsContainMessage(currentRows, result.message)") &&
+  commandTaskController.includes("!commandRowsContainMessage(currentRows, result.message)") &&
   commandTask.includes("const hasSpecificError = status === \"error\"") &&
-  rust.includes("should_emit_empty_stream_message(&stdout, &stderr)") &&
+  opendockRunnerRust.includes("should_emit_empty_stream_message(&stdout, &stderr)") &&
   commandOutputRust.includes("stdout.trim().is_empty() && stderr.trim().is_empty()");
 const blockingCliCommandsUseBackgroundRuntime = [
   "opendock_install",
@@ -185,9 +196,9 @@ const blockingCliCommandsUseBackgroundRuntime = [
   return body.includes("run_opendock_blocking") || body.includes("run_opendock_streaming_blocking");
 });
 const logStorageIsCapped =
-  app.includes("const MAX_STORED_LOGS = 400") &&
-  app.includes("result.lines.slice(-MAX_STORED_LOGS)") &&
-  app.includes("current.length - (MAX_STORED_LOGS - 1)");
+  commandLog.includes("const MAX_STORED_LOGS = 400") &&
+  commandLog.includes("lines.slice(-MAX_STORED_LOGS)") &&
+  commandLog.includes("current.length - (MAX_STORED_LOGS - 1)");
 const titlebarUsesNativeDragFallback =
   titlebar.includes("getCurrentWindow().startDragging()") &&
   titlebar.includes("function isInteractiveTitlebarTarget") &&
@@ -205,7 +216,8 @@ const sidecarBuildsStandalone =
   prepareSidecars.includes('PATH: "/usr/bin:/bin:/usr/sbin:/sbin"');
 const compiledCliCanStart = cli.includes("(import.meta as ImportMeta & { main?: boolean }).main === true");
 const macosOpenUsesAbsolutePath =
-  rust.includes('Command::new("/usr/bin/open")') || rust.includes('command_without_window("/usr/bin/open")');
+  opendockRunnerRust.includes('Command::new("/usr/bin/open")') ||
+  opendockRunnerRust.includes('command_without_window("/usr/bin/open")');
 const desktopAppMenuUsesNativeCommands =
   titlebar.includes('export type OpenMenu = "" | "app" | "lang" | "account" | "sort"') &&
   appMenu.includes("function appMenuGroups") &&
@@ -232,13 +244,13 @@ const windowsInstallerUsesOpenDockIcon =
 const windowsReleaseAppHidesConsole =
   mainRust.includes('cfg_attr(not(debug_assertions), windows_subsystem = "windows")');
 const windowsChildCommandsHideConsole =
-  rust.includes("fn command_without_window") &&
-  rust.includes("fn apply_no_console_window(command: &mut Command)") &&
-  rust.includes("const CREATE_NO_WINDOW: u32 = 0x08000000") &&
-  rust.includes("command.creation_flags(CREATE_NO_WINDOW)") &&
-  !rust.includes("Command::new(\"taskkill\")") &&
-  !rust.includes("Command::new(\"explorer\")") &&
-  !rust.includes("Command::new(\"opendock\")");
+  opendockRunnerRust.includes("fn command_without_window") &&
+  opendockRunnerRust.includes("fn apply_no_console_window(command: &mut Command)") &&
+  opendockRunnerRust.includes("const CREATE_NO_WINDOW: u32 = 0x08000000") &&
+  opendockRunnerRust.includes("command.creation_flags(CREATE_NO_WINDOW)") &&
+  !opendockRunnerRust.includes("Command::new(\"taskkill\")") &&
+  !opendockRunnerRust.includes("Command::new(\"explorer\")") &&
+  !opendockRunnerRust.includes("Command::new(\"opendock\")");
 
 const failures = [
   ...unhandledMenuIds.map((id) => `menu id is not handled in App.tsx: ${id}`),

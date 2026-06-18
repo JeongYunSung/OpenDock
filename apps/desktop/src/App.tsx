@@ -7,99 +7,55 @@ import {
   useMemo,
   useRef,
   useState,
-  type FormEvent,
 } from "react";
 import {
   BASE_LOGS,
   dockFullId,
-  mergeRegistryDockDetail,
-  normalizeRegistryDock,
-  normalizeRegistryVersions,
   type AuthSession,
   type AppLog,
-  type DesktopAppState,
   type Dock,
-  type DockStarResponse,
   type DockView,
   type InstalledDockRecord,
   type Lang,
-  type OpenDockChangeResult,
   type OpenDockCommandLine,
   type OpenDockCommandProgress,
   type OpenDockCommandResult,
   type OpenDockOutdatedReport,
   type Project,
-  type ProjectFolder,
   type ProjectStateResult,
-  type MyDock,
-  type MyDocksCounts,
   type SortMode,
   TEXT,
   type Theme
 } from "./data";
+import { isTaskActive, markCommandTaskCancelling, markCommandTaskForceRetrying } from "./command-task";
 import {
-  appendCommandTaskRows,
-  applyCommandLineToRunningTask,
-  applyCommandProgressToRunningTask,
-  commandRowsContainMessage,
-  createCommandTask,
-  finishCommandTaskState,
-  isTaskActive,
-  markCommandTaskCancelling,
-  markCommandTaskForceRetrying,
-  type CommandForceRetry,
-  type CommandTask,
-  type CommandTaskKind,
-  type CommandTaskRow,
-  type CommandTaskStatus,
-} from "./command-task";
-import {
+  appendStoredLog,
+  commandLinesToStoredLogs,
   commandFailureMessage,
-  commandLineLogEntry,
   isAuthStatusLine,
   logColor,
-  nowTime,
+  normalizeStoredLogs,
   waitForCommandPopupPaint,
 } from "./command-log";
-import {
-  commandForceRetryFor,
-  commandResultRows,
-  openDockChangeResult,
-  outdatedReportsByDockId,
-  successStepForChangeResult,
-} from "./command-change-result";
-import {
-  emptyMyDocksCounts,
-  requestCatalog,
-  requestDockDetail,
-  requestDockVersions,
-  requestMyDocks,
-  requestMyStars,
-  requestSetDockStar,
-  requestStarStatus,
-} from "./registry-client";
+import { outdatedReportsByDockId } from "./command-change-result";
 import { findDockByKey } from "./display";
 import { CommandPaletteDialog, CommandProgressDialog, ProjectSwitcherDialog } from "./app-dialogs";
 import { ProjectEmpty, ProjectLoading, SignInScreen } from "./workspace-shell";
 import {
-  exportShortcutConfig,
-  findShortcutConflict,
-  importShortcutConfig,
-  resetShortcutOverride,
-  setShortcutOverride,
-  shortcutBindingsForPlatform,
   shortcutCommandForEvent,
-  shortcutCommandLabel,
   type ShortcutBinding,
   type ShortcutCommandId,
-  type ShortcutOverrides,
-  shortcutPlatformForWindow,
 } from "./shortcuts";
 import { useResponsivePageSizes } from "./responsive-page-size";
-import { chooseShortcutFileFromBrowser, downloadShortcutFile, type ShortcutFileResult } from "./shortcut-file";
 import { isTauriRuntime } from "./tauri-runtime";
 import { useStoredState } from "./use-stored-state";
-import { detectWindowControlPlatform } from "./app-menu";
+import { shouldIgnoreGlobalShortcut } from "./keyboard-events";
+import { useAccountDocksController } from "./use-account-docks-controller";
+import { useCatalogController, useDockDetailController } from "./use-catalog-controller";
+import { useCommandTaskController } from "./use-command-task-controller";
+import { useDesktopStateSync } from "./use-desktop-state-sync";
+import { useProjectController } from "./use-project-controller";
+import { useShortcutController } from "./use-shortcut-controller";
 import { ProjectAddModal, ProjectDeleteModal, ProjectRenameModal } from "./project-modals";
 import { Titlebar, type OpenMenu } from "./titlebar";
 import { ACCOUNT_PAGE_LIMIT, Workspace } from "./workspace-view";
@@ -109,41 +65,16 @@ import {
   installedDockRows,
   installedDockStateMap,
   matchesInstalledSearch,
-  resolveActiveProjectId,
   sortCatalogDocks,
   type InstalledDockRow,
 } from "./dock-workspace-model";
 
-const MAX_STORED_LOGS = 400;
-
-function shouldIgnoreGlobalShortcut(event: KeyboardEvent) {
-  if (event.defaultPrevented) return true;
-  const target = event.target instanceof HTMLElement ? event.target : null;
-  if (!target) return false;
-  const editable =
-    target.isContentEditable ||
-    target.tagName === "INPUT" ||
-    target.tagName === "TEXTAREA" ||
-    target.tagName === "SELECT";
-  return editable && !event.metaKey && !event.ctrlKey;
-}
-
 export function App() {
   const [theme, setTheme] = useStoredState<Theme>("opendock.theme", "light");
   const [lang, setLang] = useStoredState<Lang>("opendock.lang", "ko");
+  const t = TEXT[lang];
   const [loggedIn, setLoggedIn] = useStoredState("opendock.loggedIn", false);
   const [authProvider, setAuthProvider] = useStoredState("opendock.authProvider", "");
-  const [projects, setProjects] = useStoredState<Project[]>("opendock.projects", []);
-  const [activeProjectId, setActiveProjectId] = useStoredState("opendock.activeProjectId", "");
-  const [emptyProjectIndex, setEmptyProjectIndex] = useStoredState("opendock.emptyProjectIndex", 1);
-  const [projectAddOpen, setProjectAddOpen] = useState(false);
-  const [projectRenameOpen, setProjectRenameOpen] = useState(false);
-  const [projectDeleteOpen, setProjectDeleteOpen] = useState(false);
-  const [projectSidebarCollapsed, setProjectSidebarCollapsed] = useStoredState("opendock.projectSidebarCollapsed", false);
-  const [renameProjectId, setRenameProjectId] = useState("");
-  const [renameProjectName, setRenameProjectName] = useState("");
-  const [deleteProjectId, setDeleteProjectId] = useState("");
-  const [deleteProjectName, setDeleteProjectName] = useState("");
   const [openMenu, setOpenMenu] = useState<OpenMenu>("");
   const [authWorking, setAuthWorking] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
@@ -157,31 +88,27 @@ export function App() {
   const [detailTab, setDetailTab] = useStoredState<"readme" | "versions">("opendock.detailTab", "readme");
   const [detailVersion, setDetailVersion] = useStoredState("opendock.detailVersion", "");
   const [catalogPage, setCatalogPage] = useState(1);
-  const [catalogTotal, setCatalogTotal] = useState(0);
   const [versionPage, setVersionPage] = useState(1);
-  const [versionTotal, setVersionTotal] = useState(0);
   const [installedDocks, setInstalledDocks] = useStoredState<Record<string, boolean>>("opendock.installedDocks", {});
   const [installedRecords, setInstalledRecords] = useState<InstalledDockRecord[]>([]);
   const [outdatedReportsById, setOutdatedReportsById] = useState<Record<string, OpenDockOutdatedReport>>({});
   const [projectStateLoaded, setProjectStateLoaded] = useState(false);
-  const [catalogDocks, setCatalogDocks] = useState<Dock[]>([]);
-  const [dockDetails, setDockDetails] = useState<Record<string, Dock>>({});
-  const [starredDockIds, setStarredDockIds] = useState<Record<string, boolean>>({});
-  const [starUpdatingId, setStarUpdatingId] = useState("");
-  const [myDocks, setMyDocks] = useState<MyDock[]>([]);
-  const [myDocksPage, setMyDocksPage] = useState(1);
-  const [myDocksTotal, setMyDocksTotal] = useState(0);
-  const [myDocksCounts, setMyDocksCounts] = useState<MyDocksCounts>(() => emptyMyDocksCounts());
-  const [myStarredDocks, setMyStarredDocks] = useState<Dock[]>([]);
   const [logs, setLogs] = useStoredState<AppLog[]>("opendock.logs", BASE_LOGS, {
     defer: true,
-    normalize: (value) => (Array.isArray(value) ? value.slice(-MAX_STORED_LOGS) : BASE_LOGS),
+    normalize: (value) => normalizeStoredLogs(value, BASE_LOGS),
   });
-  const [shortcutOverrides, setShortcutOverrides] = useStoredState<ShortcutOverrides>("opendock.shortcutOverrides", {});
-  const [shortcutStatus, setShortcutStatus] = useState("");
-  const [commandTask, setCommandTaskState] = useState<CommandTask | null>(null);
-  const commandTaskRef = useRef<CommandTask | null>(null);
-  const blankProjectCreatingRef = useRef(false);
+  const {
+    applyCommandLineToTask,
+    applyCommandProgressToTask,
+    appendCommandResultLog,
+    beginCommandTask,
+    closeCommandProgress,
+    commandTask,
+    commandTaskRef,
+    finishCommandResult,
+    finishCommandTask,
+    setCommandTask,
+  } = useCommandTaskController(t);
   const handleNativeMenuRef = useRef<(id: string) => Promise<void> | void>(() => undefined);
   const shortcutBindingsRef = useRef<ShortcutBinding[]>([]);
   const shortcutSuspendedRef = useRef(false);
@@ -192,8 +119,61 @@ export function App() {
   const responsivePageSizes = useResponsivePageSizes();
   const catalogPageSize = responsivePageSizes.catalog;
   const versionPageSize = responsivePageSizes.versions;
+  const {
+    catalogDocks,
+    catalogTotal,
+    refreshCatalogFromRegistry,
+    setCatalogDocks,
+  } = useCatalogController({
+    appendLog,
+    catalogPage,
+    catalogPageSize,
+    searchQuery,
+    sortMode,
+  });
+  const {
+    exportShortcuts,
+    importShortcuts,
+    resetAllShortcuts,
+    resetShortcut,
+    shortcutBindings,
+    shortcutPlatform,
+    shortcutStatus,
+    updateShortcut,
+    windowControlPlatform,
+  } = useShortcutController(lang, t);
 
-  const t = TEXT[lang];
+  const {
+    activeProjectId,
+    addExistingProjectFromFolder,
+    closeProjectDelete,
+    closeProjectRename,
+    confirmProjectDelete,
+    createBlankProject,
+    deleteProjectName,
+    openDeleteProject,
+    openRenameProject,
+    projectAddOpen,
+    projectDeleteOpen,
+    projectRenameOpen,
+    projects,
+    projectSidebarCollapsed,
+    renameProjectName,
+    resetProjectDialogs,
+    saveProjectRename,
+    setActiveProjectId,
+    setProjectAddOpen,
+    setProjectDeleteOpen,
+    setProjectRenameOpen,
+    setProjects,
+    setProjectSidebarCollapsed,
+    setRenameProjectName,
+  } = useProjectController({
+    appendLog,
+    resetDockWorkspaceView,
+    setOpenMenu,
+  });
+
   const activeProject = useMemo(
     () => projects.find((project) => project.id === activeProjectId) ?? projects[0],
     [projects, activeProjectId]
@@ -217,6 +197,22 @@ export function App() {
     [allKnownDocks, detailId]
   );
   const detailKey = baseDetail ? dockFullId(baseDetail) : "";
+  const {
+    dockDetails,
+    refreshDockDetail,
+    setDockDetails,
+    setVersionTotal,
+    versionTotal,
+  } = useDockDetailController({
+    appendLog,
+    baseDetail,
+    catalogDocks,
+    detailKey,
+    dockView,
+    setCatalogDocks,
+    versionPage,
+    versionPageSize,
+  });
   const detail = baseDetail ? dockDetails[detailKey] ?? baseDetail : null;
   const selectedDetailVersion = useMemo(
     () => detail?.versions?.find((version) => version.version === detailVersion) ?? detail?.versions?.[0] ?? null,
@@ -253,16 +249,31 @@ export function App() {
   );
   const catalogPageCount = Math.max(1, Math.ceil(Math.max(catalogTotal, sortedDocks.length) / catalogPageSize));
   const versionPageCount = Math.max(1, Math.ceil(Math.max(versionTotal, detail?.versions?.length ?? 0) / versionPageSize));
-  const myDocksPageCount = Math.max(1, Math.ceil(myDocksTotal / ACCOUNT_PAGE_LIMIT));
   const overlayOpen = openMenu !== "";
   const accountMenuName = authProvider === "github" ? t.githubAccount : accountEmail;
   const showAppLoading = isTauriRuntime() && !appStateLoaded;
-  const windowControlPlatform = detectWindowControlPlatform();
-  const shortcutPlatform = shortcutPlatformForWindow(windowControlPlatform);
-  const shortcutBindings = useMemo(
-    () => shortcutBindingsForPlatform(shortcutOverrides, shortcutPlatform),
-    [shortcutOverrides, shortcutPlatform]
-  );
+  const {
+    myDocks,
+    myDocksCounts,
+    myDocksPage,
+    myDocksTotal,
+    myStarredDocks,
+    resetAccountDocks,
+    setMyDocksPage,
+    starredDockIds,
+    starUpdatingId,
+    toggleDockStar,
+  } = useAccountDocksController({
+    appendLog,
+    catalogDocks,
+    detailKey,
+    loggedIn,
+    pageSize: ACCOUNT_PAGE_LIMIT,
+    setCatalogDocks,
+    setDockDetails,
+    signInToStar: t.signInToStar,
+  });
+  const myDocksPageCount = Math.max(1, Math.ceil(myDocksTotal / ACCOUNT_PAGE_LIMIT));
 
   function resetDockWorkspaceView() {
     setDockView("list");
@@ -280,53 +291,18 @@ export function App() {
     await handleNativeMenu(id);
   }
 
-  useEffect(() => {
-    if (!isTauriRuntime()) return;
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const [state, session] = await Promise.all([
-          invoke<DesktopAppState>("opendock_load_app_state"),
-          invoke<AuthSession>("opendock_auth_session")
-        ]);
-        if (cancelled) return;
-        const loadedProjects = state.projects ?? [];
-        setProjects(loadedProjects);
-        setActiveProjectId(resolveActiveProjectId(loadedProjects, state.activeProjectId ?? ""));
-        if (session.loggedIn) {
-          setLoggedIn(true);
-          setAuthProvider(session.provider ?? "google");
-          if (session.email) setAccountEmail(session.email);
-        } else {
-          setLoggedIn(false);
-          setAuthProvider("");
-        }
-      } catch (error) {
-        if (!cancelled) {
-          appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
-        }
-      } finally {
-        if (!cancelled) setAppStateLoaded(true);
-      }
-    };
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isTauriRuntime() || !appStateLoaded) return;
-    const state: DesktopAppState = { projects, activeProjectId };
-    void invoke("opendock_save_app_state", { state }).catch((error) => {
-      appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
-    });
-  }, [projects, activeProjectId, appStateLoaded]);
-
-  useEffect(() => {
-    const nextActiveProjectId = resolveActiveProjectId(projects, activeProjectId);
-    if (nextActiveProjectId !== activeProjectId) setActiveProjectId(nextActiveProjectId);
-  }, [projects, activeProjectId]);
+  useDesktopStateSync({
+    activeProjectId,
+    appendLog,
+    appStateLoaded,
+    projects,
+    setAccountEmail,
+    setActiveProjectId,
+    setAppStateLoaded,
+    setAuthProvider,
+    setLoggedIn,
+    setProjects,
+  });
 
   useEffect(() => {
     setCatalogPage(1);
@@ -348,28 +324,6 @@ export function App() {
   useEffect(() => {
     if (myDocksPage > myDocksPageCount) setMyDocksPage(myDocksPageCount);
   }, [myDocksPage, myDocksPageCount]);
-
-  useEffect(() => {
-    let cancelled = false;
-    void requestCatalog(sortMode, searchQuery, catalogPage, catalogPageSize)
-      .then((response) => {
-        if (cancelled) return;
-        const nextDocks = response.items.map((item, index) => normalizeRegistryDock(item, index));
-        setCatalogDocks(nextDocks);
-        setCatalogTotal(response.total ?? nextDocks.length);
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          const message = error instanceof Error ? error.message : String(error);
-          setCatalogDocks([]);
-          setCatalogTotal(0);
-          appendLog("WARN", "var(--warning)", message);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [searchQuery, sortMode, catalogPage, catalogPageSize]);
 
   useEffect(() => {
     if (!activeProject || !isTauriRuntime()) {
@@ -408,82 +362,8 @@ export function App() {
   }, [dockView, activeProject?.path]);
 
   useEffect(() => {
-    if (!baseDetail || dockView !== "detail") return;
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const [detailResponse, versionsResponse] = await Promise.all([
-          requestDockDetail(dockFullId(baseDetail)),
-          requestDockVersions(dockFullId(baseDetail), versionPage, versionPageSize)
-        ]);
-        if (cancelled) return;
-        const versions = normalizeRegistryVersions(versionsResponse);
-        setVersionTotal(versionsResponse.total ?? versions.length);
-        setDockDetails((current) => ({
-          ...current,
-          [detailKey]: mergeRegistryDockDetail(baseDetail, detailResponse, versions)
-        }));
-      } catch (error) {
-        if (!cancelled) {
-          appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
-        }
-      }
-    };
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [detailKey, dockView, versionPage, versionPageSize]);
-
-  useEffect(() => {
     setDetailVersion("");
   }, [detailKey]);
-
-  useEffect(() => {
-    if (!loggedIn) {
-      setStarredDockIds({});
-      setMyStarredDocks([]);
-      setMyDocks([]);
-      return;
-    }
-    let cancelled = false;
-    const ids = [
-      ...catalogDocks.map((dock) => dockFullId(dock)),
-      ...(detailKey ? [detailKey] : [])
-    ].filter((id, index, values) => id && values.indexOf(id) === index);
-    void requestStarStatus(ids)
-      .then((response) => {
-        if (cancelled) return;
-        setStarredDockIds((current) => {
-          const next = { ...current };
-          for (const item of response.items ?? []) next[item.id] = item.starred;
-          return next;
-        });
-      })
-      .catch((error) => {
-        if (!cancelled) appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [loggedIn, catalogDocks, detailKey]);
-
-  useEffect(() => {
-    if (!loggedIn) {
-      setMyStarredDocks([]);
-      setMyDocks([]);
-      setMyDocksTotal(0);
-      setMyDocksCounts(emptyMyDocksCounts());
-      setMyDocksPage(1);
-      return;
-    }
-    void refreshMyStars();
-  }, [loggedIn]);
-
-  useEffect(() => {
-    if (!loggedIn) return;
-    void refreshMyDocks(myDocksPage);
-  }, [loggedIn, myDocksPage]);
 
   useLayoutEffect(() => {
     handleNativeMenuRef.current = handleNativeMenu;
@@ -605,173 +485,13 @@ export function App() {
     setLoggedIn(false);
     setAuthProvider("");
     setAccountEmail("kjyscom@gmail.com");
-    setProjectAddOpen(false);
-    setProjectRenameOpen(false);
-    setProjectDeleteOpen(false);
+    resetProjectDialogs();
     setProjectSidebarCollapsed(false);
-    setRenameProjectId("");
-    setRenameProjectName("");
-    setDeleteProjectId("");
-    setDeleteProjectName("");
     setInstalledDocks({});
     setInstalledRecords([]);
-    setStarredDockIds({});
-    setMyDocks([]);
-    setMyDocksPage(1);
-    setMyDocksTotal(0);
-    setMyDocksCounts(emptyMyDocksCounts());
-    setMyStarredDocks([]);
+    resetAccountDocks();
     setProjectStateLoaded(false);
     resetDockWorkspaceView();
-  }
-
-  function registerProject(name: string, folderName: string, path: string) {
-    const cleanFolderName = (folderName || name || "selected-project").trim();
-    const cleanName = (name || cleanFolderName).trim();
-    const project = {
-      id: `project-${Date.now()}-${Math.round(Math.random() * 1000)}`,
-      name: cleanName,
-      folderName: cleanFolderName,
-      path
-    };
-    setProjects((current) => [...current, project]);
-    setActiveProjectId(project.id);
-    setProjectAddOpen(false);
-    setProjectRenameOpen(false);
-    setProjectDeleteOpen(false);
-    resetDockWorkspaceView();
-  }
-
-  async function createBlankProject() {
-    if (blankProjectCreatingRef.current) return;
-    blankProjectCreatingRef.current = true;
-    const next = emptyProjectIndex;
-    try {
-      if (isTauriRuntime()) {
-        try {
-          const folder = await invoke<ProjectFolder>("create_blank_project", { index: next });
-          registerProject(folder.name, folder.folder_name, folder.path);
-          setEmptyProjectIndex((current) => current + 1);
-          return;
-        } catch {
-          // Fall through to the preview-mode in-memory project.
-        }
-      }
-      const folderName = `empty-project-${next}`;
-      registerProject(`Empty Project ${next}`, folderName, `~/.opendock/project/${folderName}`);
-      setEmptyProjectIndex((current) => current + 1);
-    } finally {
-      blankProjectCreatingRef.current = false;
-    }
-  }
-
-  async function addExistingProjectFromFolder() {
-    if (isTauriRuntime()) {
-      try {
-        const folder = await invoke<ProjectFolder | null>("pick_project_folder");
-        if (folder) registerProject(folder.name, folder.folder_name, folder.path);
-        return;
-      } catch {
-        // Fall through to the browser-compatible picker for preview mode.
-      }
-    }
-
-    try {
-      if (window.showDirectoryPicker) {
-        const handle = await window.showDirectoryPicker();
-        const folderName = handle.name || "selected-project";
-        registerProject(folderName, folderName, `~/work/${folderName}`);
-        return;
-      }
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-    }
-
-    const input = document.createElement("input");
-    input.type = "file";
-    input.multiple = true;
-    input.setAttribute("webkitdirectory", "true");
-    input.addEventListener(
-      "change",
-      () => {
-        const file = input.files?.[0] as (File & { webkitRelativePath?: string }) | undefined;
-        const root = file?.webkitRelativePath?.split("/")[0] || file?.name || "selected-project";
-        registerProject(root, root, `~/work/${root}`);
-        input.remove();
-      },
-      { once: true }
-    );
-    input.style.display = "none";
-    document.body.appendChild(input);
-    input.click();
-  }
-
-  function openRenameProject(project: Project) {
-    setRenameProjectId(project.id);
-    setRenameProjectName(project.name);
-    setProjectRenameOpen(true);
-    setProjectAddOpen(false);
-    setProjectDeleteOpen(false);
-    setOpenMenu("");
-  }
-
-  function closeProjectRename() {
-    setProjectRenameOpen(false);
-    setRenameProjectId("");
-    setRenameProjectName("");
-  }
-
-  function saveProjectRename(event: FormEvent) {
-    event.preventDefault();
-    const nextName = renameProjectName.trim();
-    if (!nextName) return;
-    setProjects((current) => current.map((project) => (project.id === renameProjectId ? { ...project, name: nextName } : project)));
-    closeProjectRename();
-  }
-
-  function openDeleteProject(project: Project) {
-    setDeleteProjectId(project.id);
-    setDeleteProjectName(project.name);
-    setProjectDeleteOpen(true);
-    setProjectAddOpen(false);
-    setProjectRenameOpen(false);
-    setOpenMenu("");
-  }
-
-  function closeProjectDelete() {
-    setProjectDeleteOpen(false);
-    setDeleteProjectId("");
-    setDeleteProjectName("");
-  }
-
-  function confirmProjectDelete() {
-    const project = projects.find((item) => item.id === deleteProjectId);
-    if (!project) {
-      closeProjectDelete();
-      return;
-    }
-    removeProjectFromOpenDock(project);
-  }
-
-  function removeProjectFromOpenDock(project: Project | undefined) {
-    if (!project) return;
-    const nextProjects = projects.filter((item) => item.id !== project.id);
-    const wasActiveProject = activeProjectId === project.id;
-    setProjects(nextProjects);
-    if (wasActiveProject) setActiveProjectId(nextProjects[0]?.id ?? "");
-    setProjectAddOpen(false);
-    setProjectRenameOpen(false);
-    setProjectDeleteOpen(false);
-    setRenameProjectId("");
-    setRenameProjectName("");
-    setDeleteProjectId("");
-    setDeleteProjectName("");
-    if (wasActiveProject) {
-      resetDockWorkspaceView();
-    } else {
-      setOpenMenu("");
-    }
-    appendLog("OK", "var(--success)", `removed project · ${project.folderName}`);
   }
 
   function openDockDetail(dockId: string) {
@@ -838,124 +558,10 @@ export function App() {
     }
   }
 
-  function updateShortcut(commandId: ShortcutCommandId, shortcut: string | null) {
-    const conflict = findShortcutConflict(shortcutBindings, commandId, shortcut);
-    if (conflict) {
-      setShortcutStatus(
-        t.shortcutConflict.replace("{command}", shortcutCommandLabel(conflict, lang))
-      );
-      return false;
-    }
-    setShortcutOverrides((current) => setShortcutOverride(current, commandId, shortcutPlatform, shortcut));
-    setShortcutStatus(shortcut ? t.shortcutSaved : t.shortcutRemoved);
-    return true;
-  }
-
-  function resetShortcut(commandId: ShortcutCommandId) {
-    setShortcutOverrides((current) => resetShortcutOverride(current, commandId, shortcutPlatform));
-    setShortcutStatus(t.shortcutResetDone);
-  }
-
-  function resetAllShortcuts() {
-    setShortcutOverrides({});
-    setShortcutStatus(t.shortcutResetAllDone);
-  }
-
-  async function importShortcuts() {
-    try {
-      const raw = isTauriRuntime()
-        ? (await invoke<ShortcutFileResult | null>("opendock_import_shortcuts"))?.contents ?? null
-        : await chooseShortcutFileFromBrowser();
-      if (!raw) return;
-      const next = importShortcutConfig(raw);
-      setShortcutOverrides(next);
-      setShortcutStatus(t.shortcutImportDone);
-    } catch (error) {
-      setShortcutStatus(error instanceof Error ? error.message : String(error));
-    }
-  }
-
-  async function exportShortcuts() {
-    try {
-      const contents = exportShortcutConfig(shortcutOverrides);
-      if (isTauriRuntime()) {
-        const path = await invoke<string | null>("opendock_export_shortcuts", { contents });
-        if (!path) return;
-      } else {
-        downloadShortcutFile(contents);
-      }
-      setShortcutStatus(t.shortcutExportDone);
-    } catch (error) {
-      setShortcutStatus(error instanceof Error ? error.message : String(error));
-    }
-  }
-
   function saveNickname(nextNickname: string) {
     const normalized = nextNickname.trim();
     if (!normalized) return;
     setNickname(normalized);
-  }
-
-  async function refreshMyStars() {
-    try {
-      const response = await requestMyStars();
-      const docks = (response.items ?? []).map((item, index) => normalizeRegistryDock(item.dock, index));
-      setMyStarredDocks(docks);
-      setStarredDockIds((current) => ({
-        ...current,
-        ...Object.fromEntries(docks.map((dock) => [dockFullId(dock), true]))
-      }));
-    } catch (error) {
-      appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
-    }
-  }
-
-  async function refreshMyDocks(page: number) {
-    try {
-      const response = await requestMyDocks(page, ACCOUNT_PAGE_LIMIT);
-      setMyDocks(response.items ?? []);
-      setMyDocksTotal(response.total ?? response.items?.length ?? 0);
-      setMyDocksCounts(response.counts ?? emptyMyDocksCounts());
-      if (response.page && response.page !== page) setMyDocksPage(response.page);
-    } catch (error) {
-      appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
-    }
-  }
-
-  async function toggleDockStar(dock: Dock) {
-    const dockId = dockFullId(dock);
-    if (starUpdatingId) return;
-    if (!loggedIn) {
-      appendLog("WARN", "var(--warning)", t.signInToStar);
-      return;
-    }
-    const nextStarred = !starredDockIds[dockId];
-    setStarUpdatingId(dockId);
-    try {
-      const response = await requestSetDockStar(dockId, nextStarred);
-      applyDockStarResponse(response);
-      await refreshMyStars();
-    } catch (error) {
-      appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
-    } finally {
-      setStarUpdatingId("");
-    }
-  }
-
-  function applyDockStarResponse(response: DockStarResponse) {
-    const updateDock = (dock: Dock) =>
-      dockFullId(dock) === response.id ? { ...dock, stars: response.stars } : dock;
-    setStarredDockIds((current) => ({ ...current, [response.id]: response.starred }));
-    setCatalogDocks((current) => current.map(updateDock));
-    setDockDetails((current) =>
-      Object.fromEntries(
-        Object.entries(current).map(([key, dock]) => [key, updateDock(dock)])
-      )
-    );
-    setMyStarredDocks((current) => {
-      if (!response.starred) return current.filter((dock) => dockFullId(dock) !== response.id);
-      return current.map(updateDock);
-    });
   }
 
   async function handleNativeMenu(id: string) {
@@ -1033,41 +639,7 @@ export function App() {
   }
 
   function appendLog(level: string, color: string, message: string) {
-    setLogs((current) => [
-      ...current.slice(Math.max(0, current.length - (MAX_STORED_LOGS - 1))),
-      { time: nowTime(), level, color, message },
-    ]);
-  }
-
-  function setCommandTask(next: CommandTask | null | ((current: CommandTask | null) => CommandTask | null)) {
-    setCommandTaskState((current) => {
-      const value = typeof next === "function" ? next(current) : next;
-      commandTaskRef.current = value;
-      return value;
-    });
-  }
-
-  function beginCommandTask(kind: CommandTaskKind, target: string, projectPath?: string) {
-    const task = createCommandTask(kind, target, t.taskWaiting, projectPath);
-    setCommandTask(task);
-    return task.id;
-  }
-
-  function applyCommandLineToTask(line: OpenDockCommandLine) {
-    setCommandTask((current) => applyCommandLineToRunningTask(current, line));
-  }
-
-  function applyCommandProgressToTask(progress: OpenDockCommandProgress) {
-    setCommandTask((current) => applyCommandProgressToRunningTask(current, progress));
-  }
-
-  function finishCommandTask(
-    commandId: string,
-    status: Exclude<CommandTaskStatus, "running" | "cancelling">,
-    step: string,
-    options: { forceRetry?: CommandForceRetry | null } = {}
-  ) {
-    setCommandTask((current) => finishCommandTaskState(current, commandId, status, step, options));
+    setLogs((current) => appendStoredLog(current, level, color, message));
   }
 
   async function cancelCommandTask() {
@@ -1142,50 +714,6 @@ export function App() {
     }
   }
 
-  function finishCommandResult(commandId: string, result: OpenDockCommandResult, successStep: string) {
-    const changeResult = openDockChangeResult(result.json);
-    if (result.success) {
-      appendCommandResultLog(commandId, changeResult);
-      finishCommandTask(commandId, "success", successStepForChangeResult(changeResult, successStep, t), { forceRetry: null });
-      return true;
-    }
-    const current = commandTaskRef.current;
-    appendCommandFailureLog(commandId, changeResult);
-    const forceRetry = current ? commandForceRetryFor(current, changeResult) : null;
-    finishCommandTask(
-      commandId,
-      current?.id === commandId && current.status === "cancelling" ? "cancelled" : "error",
-      current?.id === commandId && current.status === "cancelling" ? t.taskCancelled : t.taskFailed,
-      { forceRetry }
-    );
-    return false;
-  }
-
-  function appendCommandResultLog(commandId: string, result: OpenDockChangeResult | null) {
-    if (!result) return;
-    const rows = commandResultRows(result, t);
-    if (rows.length === 0) return;
-    setCommandTask((current) => appendCommandTaskRows(current, commandId, rows));
-  }
-
-  function appendCommandFailureLog(commandId: string, result: OpenDockChangeResult | null) {
-    if (!result || result.success) return;
-    const rows: CommandTaskRow[] = [];
-    const currentRows = commandTaskRef.current?.id === commandId ? commandTaskRef.current.rows : [];
-    if (result.message && !commandRowsContainMessage(currentRows, result.message)) {
-      rows.push({ time: nowTime(), level: "ERR", color: logColor("ERR"), message: result.message });
-    }
-    if (result.forceable) {
-      rows.push({ time: nowTime(), level: "WARN", color: logColor("WARN"), message: t.forceRetryWarning });
-    }
-    if (rows.length === 0) return;
-    setCommandTask((current) => appendCommandTaskRows(current, commandId, rows));
-  }
-
-  function closeCommandProgress() {
-    setCommandTask((current) => (isTaskActive(current) ? current : null));
-  }
-
   async function refreshProjectState(project: Project | undefined, options: { silent?: boolean } = {}) {
     if (!project || !isTauriRuntime()) return;
     if (!options.silent) setProjectStateLoaded(false);
@@ -1214,46 +742,13 @@ export function App() {
     }
   }
 
-  async function refreshDockDetail(dock: Dock) {
-    const dockId = dockFullId(dock);
-    const base = findDockByKey([...catalogDocks, dock], dockId) ?? dock;
-    const [detailResponse, versionsResponse] = await Promise.all([
-      requestDockDetail(dockId),
-      requestDockVersions(dockId, 1, versionPageSize)
-    ]);
-    const versions = normalizeRegistryVersions(versionsResponse);
-    setVersionTotal(versionsResponse.total ?? versions.length);
-    const freshDock = mergeRegistryDockDetail(base, detailResponse, versions);
-    setDockDetails((current) => ({
-      ...current,
-      [dockId]: freshDock
-    }));
-    setCatalogDocks((current) => current.map((item) => (dockFullId(item) === dockId ? mergeRegistryDockDetail(item, detailResponse, versions) : item)));
-    return freshDock;
-  }
-
   async function refreshProjectLogs(project: Project | undefined) {
     if (!project || !isTauriRuntime()) return;
     try {
       const result = await invoke<OpenDockCommandResult>("opendock_log", { projectDir: project.path });
-      setLogs(result.lines.slice(-MAX_STORED_LOGS).map(commandLineLogEntry));
+      setLogs(commandLinesToStoredLogs(result.lines));
     } catch (error) {
       appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
-    }
-  }
-
-  async function refreshCatalogFromRegistry() {
-    try {
-      const response = await requestCatalog(sortMode, searchQuery, catalogPage, catalogPageSize);
-      const nextDocks = response.items.map((item, index) => normalizeRegistryDock(item, index));
-      setCatalogDocks(nextDocks);
-      setCatalogTotal(response.total ?? nextDocks.length);
-      appendLog("OK", "var(--success)", "registry refreshed · registry.opendock.app");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      setCatalogDocks([]);
-      setCatalogTotal(0);
-      appendLog("WARN", "var(--warning)", message);
     }
   }
 

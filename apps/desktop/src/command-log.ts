@@ -1,5 +1,7 @@
 import type { AppLog, OpenDockCommandLine, OpenDockCommandResult } from "./data";
 
+const MAX_STORED_LOGS = 400;
+
 export function nowTime() {
   return new Date().toLocaleTimeString("en-GB", { hour12: false }).slice(0, 8);
 }
@@ -19,11 +21,26 @@ export function logColor(level: string) {
   }
 }
 
-export function commandLineLogEntry(line: OpenDockCommandLine): AppLog {
+function commandLineLogEntry(line: OpenDockCommandLine): AppLog {
   const parsed = parseOpenDockHistoryLine(line.message);
   if (parsed) return parsed;
   const level = line.level.toUpperCase();
   return { time: nowTime(), level, color: logColor(level), message: line.message };
+}
+
+export function normalizeStoredLogs(value: unknown, fallback: AppLog[]) {
+  return Array.isArray(value) ? value.slice(-MAX_STORED_LOGS) : fallback;
+}
+
+export function appendStoredLog(current: AppLog[], level: string, color: string, message: string) {
+  return [
+    ...current.slice(Math.max(0, current.length - (MAX_STORED_LOGS - 1))),
+    { time: nowTime(), level, color, message },
+  ];
+}
+
+export function commandLinesToStoredLogs(lines: OpenDockCommandLine[]) {
+  return lines.slice(-MAX_STORED_LOGS).map(commandLineLogEntry);
 }
 
 export function commandFailureMessage(result: OpenDockCommandResult, fallback: string) {
