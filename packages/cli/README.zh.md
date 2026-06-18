@@ -121,7 +121,6 @@ owner/name@designer-build   accepted
 
 ```yaml
 opendock: 1
-id: owner/name
 summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
@@ -155,6 +154,17 @@ doctor:
 
 如果 dock-private workdir 中运行的 task 需要先读取输入文件，请使用
 `workdir.files`。需要写入 project root 的文件使用 `files`。
+
+## Task Command Permission
+
+OpenDock task 的 `run` 和 `check` 使用很小的默认策略。默认 command 包括 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 还允许 `brew`，Windows 还允许 `powershell`, `winget`。`oma`, `codex`, `claude`, `omx`, `mkdir` 这类 command 必须在 top-level `permission` 中精确声明。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permission`, `run`, `check` 中都会被拒绝。
+
+```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+  - codex --version
+```
 
 ## Run Commands
 

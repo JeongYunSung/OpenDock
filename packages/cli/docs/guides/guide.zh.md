@@ -59,6 +59,7 @@ files:
 | `readme` | Catalog detail 使用的 Markdown. |
 | `logo` | Catalog logo image. |
 | `tags` | 用于 Hub 搜索和筛选的 lowercase catalog labels. |
+| `permission` | 精确允许 `run` / `check` 中默认策略之外的命令。 |
 | `requires` | Runtime requirements. |
 | `files` | 应用到 project root 的文件或目录. |
 | `commands` | Named helpers or checks for `opendock run`. |
@@ -123,6 +124,17 @@ doctor:
 
 步骤按顺序执行。`doctor` 应该只检查状态，不修改项目。
 
+## Task Command Permission
+
+OpenDock 不会把 task 的 `run` 和 `check` 直接交给 shell。默认可用命令只包括 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 额外允许 `brew`，Windows 额外允许 `powershell` 和 `winget`。其他命令，例如 `oma`, `codex`, `claude`, `omx`, `mkdir`，必须在 top-level `permission` 中按完整形式声明。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permission`, `run`, `check` 中都会被拒绝。
+
+```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+  - codex --version
+```
+
 ## Commands
 
 Tasks are run by OpenDock during `install`, `update`, and `doctor`.
@@ -156,6 +168,10 @@ Supported runners: `bun`, `node`, `powershell`, `python`, `python3`, `sh`.
 `workdir: dock`，只 export 需要 OpenDock 在项目中管理的文件。
 
 ```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+
 workdir:
   files:
     - from: workdir/oma-config.yaml

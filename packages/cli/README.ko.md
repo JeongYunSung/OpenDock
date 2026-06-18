@@ -202,7 +202,6 @@ my-dock/
 
 ```yaml
 opendock: 1
-id: owner/name
 summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
@@ -235,7 +234,7 @@ doctor:
 이해하고 필터링하는 데 쓰이며, 실제 파일은 `files`에도 별도로 선언해야 프로젝트에
 설치됩니다.
 
-release version은 `dock.yml`에 쓰지 않고 deploy 명령에서 정합니다.
+Dock 이름과 release version은 `dock.yml`에 쓰지 않고 install/deploy reference에서 정합니다.
 
 ```bash
 opendock deploy owner/name@1.0.0
@@ -277,6 +276,9 @@ top-level `install`, `update`, `doctor`에 둡니다.
 workdir에 먼저 넣을 수 있습니다.
 
 ```yaml
+permission:
+  - oma -y install
+
 workdir:
   files:
     - from: workdir/oma-config.yaml
@@ -303,7 +305,19 @@ install:
 - export된 파일도 managed block/checksum engine을 거쳐 적용됩니다.
 
 이 구조는 `oma`, `omx` 또는 다른 AI setup generator와 협력하면서도 프로젝트
-root에 들어온 최종 파일을 OpenDock이 추적할 수 있게 해줍니다.
+root에 들어온 최종 파일을 OpenDock이 추적할 수 있게 해줍니다. `oma -y install`처럼
+기본 정책 밖의 command는 top-level `permission`에 정확히 선언해야 합니다.
+
+## Task Command Permission
+
+OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. `oma`, `codex`, `claude`, `omx`, `mkdir` 같은 command는 top-level `permission`에 정확히 선언해야 합니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permission`, `run`, `check`에서 거부됩니다.
+
+```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+  - codex --version
+```
 
 ## Run Commands
 
@@ -402,7 +416,7 @@ src/
     app/                    # Install, update, uninstall orchestration
     domain/                 # Manifest and project state models
     files/                  # Managed blocks, checksums, path handling, file plans
-    runtime/                # Task runner, command runner, allowlist
+    runtime/                # Task runner, command policy, allowlist
 tests/
   cli-flow.test.ts          # Integration-style temp-dir tests
 examples/

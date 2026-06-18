@@ -35,7 +35,7 @@ update와 uninstall까지 추적할 수 있게 만드는 작은 packaging layer�
 - [최소 예제](#최소-예제)
 - [전체 예제](#전체-예제)
 - [Top-Level 필드](#top-level-필드)
-- [id와 version](#id와-version)
+- [Dock reference](#dock-reference)
 - [readme, logo, tags](#readme-logo-tags)
 - [requires](#requires)
 - [files](#files)
@@ -171,6 +171,7 @@ doctor:
 | `readme` | 선택 | Registry catalog 상세 본문으로 제출할 Markdown 경로입니다. |
 | `logo` | 선택 | Registry catalog 대표 이미지로 제출할 이미지 경로입니다. |
 | `tags` | 선택 | Hub 검색과 필터에 사용할 lowercase catalog label입니다. |
+| `permission` | 선택 | 기본 정책 밖의 `run`/`check` command를 정확한 형태로 허용합니다. |
 | `requires` | 선택 | dock 실행 전에 준비할 runtime requirement입니다. |
 | `files` | 선택 | 프로젝트 root로 적용할 파일 또는 디렉터리 mapping입니다. |
 | `commands` | 선택 | 설치 후 문서, skill, workflow, harness가 `opendock run`으로 호출할 helper나 check입니다. |
@@ -541,6 +542,10 @@ OpenDock의 task 실행 위치는 두 가지입니다.
 workdir에 먼저 넣을 수 있습니다.
 
 ```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+
 workdir:
   files:
     - from: workdir/oma-config.yaml
@@ -581,11 +586,12 @@ install:
 | `export` | 프로젝트 root | `workdir: dock` task 실행 후 수집 |
 
 이 구조 덕분에 `oma`, `omx`, `npx ... install` 같은 외부 generator와 협력하면서도
-프로젝트 root에 들어온 최종 파일은 OpenDock이 추적할 수 있습니다.
+프로젝트 root에 들어온 최종 파일은 OpenDock이 추적할 수 있습니다. 단, `oma -y install`
+처럼 기본 정책 밖의 command는 top-level `permission`에 정확히 선언해야 합니다.
 
 ## platform artifact
 
-OS별 동작이 다르면 한 `dock.yml` 안에서 분기하지 말고, 같은 `id/version` 아래
+OS별 동작이 다르면 한 `dock.yml` 안에서 분기하지 말고, 같은 dock reference 아래
 platform별 artifact를 따로 배포하는 방식을 권장합니다.
 
 ```bash
@@ -637,7 +643,7 @@ version: ">=22.0.0 <25.0.0"
 ```text
 node --version    -> v22.18.0
 bun --version     -> 1.3.11
-codex --version   -> codex 0.128.0
+git --version     -> git version 2.51.0
 ```
 
 patch가 없는 `1.3` 같은 출력은 추출에 실패할 수 있습니다. 가능하면 세 자리
@@ -647,22 +653,18 @@ semver를 출력하는 명령을 `check`로 사용하세요.
 
 OpenDock은 `requires`와 task에 shell script를 그대로 넘기지
 않습니다. `run`/`check` 문자열을 분리한 뒤 allowlist와 shape 검사를 통과한
-프로그램만 실행합니다.
+프로그램만 실행합니다. 기본 정책 밖의 command는 top-level `permission`에 정확한
+형태로 선언해야 합니다.
 
 현재 공통 허용 프로그램:
 
 ```text
 bun
 bunx
-claude
-codex
 git
-mkdir
 node
 npm
 npx
-oma
-omx
 pip
 pip3
 pipx
@@ -684,6 +686,19 @@ host OS별 추가 허용 프로그램:
 `powershell`은 Windows doctor에서 파일 존재 여부를 확인하는 제한된
 `Test-Path -LiteralPath <relative-path>` 형태만 허용합니다. 임의 PowerShell
 script 실행용으로는 사용할 수 없습니다.
+
+기본 정책 밖의 command 예시:
+
+```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+  - codex --version
+```
+
+`permission`은 정확히 일치해야 합니다. `oma -y install`을 허용해도 `oma install`,
+`oma -y update`, `oma doctor`는 자동으로 허용되지 않습니다. 필요한 형태를 각각
+명시하세요.
 
 차단되는 shell operator:
 
@@ -713,7 +728,7 @@ $(
   run: git status
 ```
 
-전체 allowlist와 shape 검사는 `src/core/runtime/command-runner.ts`가 기준입니다.
+전체 allowlist와 shape 검사는 `src/core/runtime/command-policy.ts`가 기준입니다.
 
 ### Homebrew bootstrap
 
@@ -942,9 +957,9 @@ opendock install opendock/agent-safety@1.0.0
 manifest:
 
 1. `opendock: 1`을 선언했는가?
-2. `id`가 `owner/name` 형식인가?
-3. release version을 `dock.yml`이 아니라 deploy 명령에서 정했는가?
-4. `readme`와 `logo`가 dock root 안의 실제 파일인가?
+2. dock id와 release version을 `dock.yml`이 아니라 install/deploy 명령에서 정했는가?
+3. `readme`와 `logo`가 dock root 안의 실제 파일인가?
+4. 기본 정책 밖의 `run`/`check` command를 `permission`에 정확히 선언했는가?
 
 requires:
 

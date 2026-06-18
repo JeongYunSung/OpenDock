@@ -273,6 +273,7 @@ describe("platform regression coverage", () => {
       id: "test/common",
       summary: "",
       tags: [],
+      permission: ["mkdir -p common-output"],
       commands: {},
       requires: { runtimes: {} },
       files: [],
@@ -306,6 +307,7 @@ describe("platform regression coverage", () => {
       id: "test/doctor",
       summary: "",
       tags: [],
+      permission: [],
       commands: {},
       requires: { runtimes: {} },
       files: [],
@@ -487,6 +489,7 @@ function platformManifest(): DockManifest {
     id: "test/platform",
     summary: "",
     tags: [],
+    permission: ["mkdir -p before"],
     commands: {},
     requires: { runtimes: {} },
     files: [],
@@ -545,6 +548,7 @@ function writeDock(
   version: string,
   options: {
     files?: Array<{ path: string; content: string }>;
+    permission?: string[];
     tasks?: {
       install?: unknown[];
       update?: unknown[];
@@ -568,6 +572,7 @@ function writeDock(
       summary: "",
       readme: "DOCK.md",
       logo: "logo.png",
+      permission: options.permission ?? [],
       files: (options.files ?? []).map((file) => ({
         from: `files/${file.path}`,
         to: file.path,

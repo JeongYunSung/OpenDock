@@ -6,6 +6,8 @@ tags:
   - codex
   - tool
   - ai-agent
+permission:
+  - codex --version
 requires:
   runtimes:
     node: ">=22.0.0"

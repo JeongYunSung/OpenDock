@@ -6,6 +6,8 @@ tags:
   - claude-code
   - tool
   - ai-agent
+permission:
+  - claude --version
 requires:
   runtimes:
     node: ">=22.0.0"

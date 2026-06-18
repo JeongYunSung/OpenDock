@@ -207,7 +207,6 @@ Minimal `dock.yml`:
 
 ```yaml
 opendock: 1
-id: owner/name
 summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
@@ -248,13 +247,58 @@ doctor:
 understand and filter a dock in Hub, but they are not installed into a project
 unless the referenced files are also listed in `files`.
 
-Release versions are not declared in `dock.yml`; the version comes from deploy:
+Dock names and release versions are not declared in `dock.yml`; they come from
+the install or deploy reference:
 
 ```bash
 opendock deploy owner/name@1.0.0
 ```
 
 For the full manifest reference, see [docs/guides/guide.md](./packages/cli/docs/guides/guide.md).
+
+## Task Command Permission
+
+OpenDock tasks do not run arbitrary shell. A small default command set is
+available for common setup checks and package-manager work:
+
+```text
+bun
+bunx
+git
+node
+npm
+npx
+pip
+pip3
+pipx
+pnpm
+python
+python3
+test
+uv
+```
+
+Platform-specific defaults:
+
+| Platform | Commands |
+|---|---|
+| `macos` | `brew` |
+| `windows` | `powershell`, `winget` |
+| `linux` | none |
+
+Anything outside that default set, or outside the allowed command shape for that
+tool, must be declared in top-level `permission`.
+
+```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+  - codex --version
+```
+
+`permission` is exact. `oma -y install` does not allow `oma install` or
+`oma -y update`. Shell operators such as `|`, `&&`, `||`, `;`, backticks, `$(`,
+`>`, and `<` are rejected in `run`, `check`, and `permission`.
 
 ## File Ownership
 
@@ -293,6 +337,10 @@ Use `requires` for runtime prerequisites; use top-level `install`, `update`, and
 Use `workdir.files` when a generator needs input files before a task runs.
 
 ```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+
 workdir:
   files:
     - from: workdir/oma-config.yaml
@@ -319,13 +367,16 @@ install:
 
 - `workdir: root` runs in the project root.
 - `workdir: dock` runs in `.opendock/workdirs/<dock>/`.
+- Non-default task commands such as `oma -y install` must be declared exactly in
+  top-level `permission`.
 - `workdir.files` copies dock archive files into the private dock workdir before
   tasks run.
 - `export.include/exclude` selects generated files from the dock workdir.
 - Exported files are applied through the same managed block/checksum engine.
 
 This lets OpenDock cooperate with external tools such as `oma`, `omx`, or other
-AI setup generators while still tracking the files that reach the project root.
+AI setup generators, while still requiring the manifest to name the exact
+commands and while tracking the files that reach the project root.
 
 ## Run Commands
 
@@ -430,7 +481,7 @@ packages/cli/src/
     app/                    # Install, update, uninstall orchestration
     domain/                 # Manifest and project state models
     files/                  # Managed blocks, checksums, path handling, file plans
-    runtime/                # Task runner, command runner, and allowlist
+    runtime/                # Task runner, command policy, and allowlist
 packages/cli/tests/
   cli-flow.test.ts          # Integration-style temp-dir tests
 packages/cli/examples/

@@ -251,6 +251,62 @@ describe("security regression coverage", () => {
     }
   });
 
+  it("allows non-default command shapes only when the exact permission is declared", () => {
+    const project = tempDir();
+    const runner = new CommandRunner();
+
+    expect(() => runner.run("mkdir -p generated", { cwd: project, platform: "macos" })).toThrow(
+      "not allowed",
+    );
+
+    const result = runner.run("mkdir -p generated", {
+      cwd: project,
+      permissions: ["mkdir -p generated"],
+      platform: "macos",
+    });
+
+    expect(result.success).toBe(true);
+    expect(existsSync(join(project, "generated"))).toBe(true);
+    expect(() =>
+      runner.run("mkdir -p other", {
+        cwd: project,
+        permissions: ["mkdir -p generated"],
+        platform: "macos",
+      }),
+    ).toThrow("not allowed");
+  });
+
+  it("rejects shell operators in doctor checks even when permissions are declared", () => {
+    const project = tempDir();
+    const manifest: DockManifest = {
+      opendock: 1,
+      id: "test/doctor-shell",
+      summary: "",
+      tags: [],
+      permission: ["mkdir -p generated"],
+      commands: {},
+      requires: { runtimes: {} },
+      files: [],
+      tasks: {
+        install: [],
+        update: [],
+        doctor: [
+          { id: "bad-check", check: "test -f AGENTS.md && mkdir -p generated", platforms: {} },
+        ],
+      },
+    };
+
+    expect(() =>
+      new TaskRunner().run(manifest, {
+        dockId: manifest.id,
+        phase: "doctor",
+        platform: "macos",
+        projectDir: project,
+      }),
+    ).toThrow("shell operators are not allowed");
+    expect(existsSync(join(project, "generated"))).toBe(false);
+  });
+
   it("rejects symlinked OpenDock state directories and files", () => {
     const project = tempDir();
     const outside = tempDir();
@@ -283,6 +339,7 @@ describe("security regression coverage", () => {
       id: dockId,
       summary: "",
       tags: [],
+      permission: [],
       commands: {},
       requires: { runtimes: {} },
       files: [],

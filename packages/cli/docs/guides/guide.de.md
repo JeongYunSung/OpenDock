@@ -62,6 +62,7 @@ files:
 | `readme` | Markdown für die catalog detail page. |
 | `logo` | Logo image für den catalog. |
 | `tags` | Lowercase catalog labels für Hub-Suche und Filter. |
+| `permission` | Erlaubt exakt angegebene `run` / `check` Commands außerhalb der Standard-Policy. |
 | `requires` | Runtime requirements. |
 | `files` | Dateien oder Ordner für den project root. |
 | `commands` | Named helpers or checks for `opendock run`. |
@@ -131,6 +132,17 @@ doctor:
 Steps laufen von oben nach unten. `doctor` sollte nur prüfen und das Projekt
 nicht verändern.
 
+## Task Command Permission
+
+OpenDock gibt `run` und `check` nicht direkt an eine Shell weiter. Die Standard-Policy erlaubt nur `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Andere Commands wie `oma`, `codex`, `claude`, `omx` oder `mkdir` müssen exakt im top-level Feld `permission` stehen. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permission`, `run` und `check` abgelehnt.
+
+```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+  - codex --version
+```
+
 ## Commands
 
 Tasks are run by OpenDock during `install`, `update`, and `doctor`.
@@ -165,6 +177,10 @@ Nutze danach `workdir: dock` und exportiere nur die Dateien, die OpenDock im
 Projekt verwalten soll.
 
 ```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+
 workdir:
   files:
     - from: workdir/oma-config.yaml

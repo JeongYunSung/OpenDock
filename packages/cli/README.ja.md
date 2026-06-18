@@ -124,7 +124,6 @@ owner/name@designer-build   accepted
 
 ```yaml
 opendock: 1
-id: owner/name
 summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
@@ -159,6 +158,17 @@ doctor:
 
 dock-private workdir で実行する task が事前に input file を必要とする場合は
 `workdir.files` を使います。project root に書き込む file には `files` を使います。
+
+## Task Command Permission
+
+OpenDock の task は `run` と `check` を小さな標準ポリシーで実行します。標準 command は `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` です。macOS は `brew`、Windows は `powershell`, `winget` も許可します。`oma`, `codex`, `claude`, `omx`, `mkdir` のような command は top-level `permission` に完全一致する形で宣言します。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permission`, `run`, `check` で拒否されます。
+
+```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+  - codex --version
+```
 
 ## Run Commands
 

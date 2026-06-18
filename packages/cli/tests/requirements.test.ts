@@ -184,6 +184,36 @@ describe("requires regression coverage", () => {
     ]);
   });
 
+  it("parses exact command permissions from dock.yml", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        permission: ["oma -y install", "oma link claude codex"],
+      }),
+    );
+
+    const manifest = parseManifestFile(join(root, "dock.yml"));
+
+    expect(manifest.permission).toEqual(["oma -y install", "oma link claude codex"]);
+  });
+
+  it("rejects shell operators in dock.yml permissions", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        permission: ["oma -y install && rm -rf ."],
+      }),
+    );
+
+    const error = captureManifestError(join(root, "dock.yml"));
+
+    expect(error.message).toContain("shell operators are not allowed in permission command");
+  });
+
   it("rejects legacy lifecycle field with compatibility guidance", () => {
     const root = tempDir();
     writeFileSync(
@@ -279,6 +309,7 @@ function omaManifest(): DockManifest {
     id: "test/oma",
     summary: "",
     tags: [],
+    permission: ["oma -y install"],
     commands: {},
     requires: {
       runtimes: {

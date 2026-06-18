@@ -283,6 +283,7 @@ describe("opendock TypeScript CLI", () => {
     writeFakeOma(bin);
     writeDock(docks, "test", "oma", "1.0.0", {
       files: [{ path: "PROMPTS.md", content: "# Prompts\n" }],
+      permission: ["oma -y install", "oma doctor"],
       tasks: {
         install: [
           {
@@ -328,6 +329,7 @@ describe("opendock TypeScript CLI", () => {
     const bin = tempDir();
     writeFakeOmaRequiresSeed(bin);
     writeDock(docks, "test", "oma", "1.0.0", {
+      permission: ["oma -y install"],
       workdirFiles: [
         {
           path: "workdir/oma-config.yaml",
@@ -391,6 +393,7 @@ describe("opendock TypeScript CLI", () => {
     writeFileSync(outsideFile, "# Outside\n");
     writeFakeOmaWithExternalSymlink(bin, outsideFile);
     writeDock(docks, "test", "oma", "1.0.0", {
+      permission: ["oma -y install"],
       tasks: {
         install: [
           {
@@ -744,6 +747,7 @@ describe("opendock TypeScript CLI", () => {
     writeFakeOma(bin);
     writeDock(docks, "test", "designer", "1.0.0", {
       files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+      permission: ["oma -y install"],
       tasks: {
         install: [
           {
@@ -1487,6 +1491,7 @@ describe("opendock TypeScript CLI", () => {
       id: "test/unsafe",
       summary: "",
       tags: [],
+      permission: [],
       commands: {},
       requires: { runtimes: {} },
       files: [],
@@ -1507,6 +1512,7 @@ describe("opendock TypeScript CLI", () => {
       id: "test/unsafe-oma-link",
       summary: "",
       tags: [],
+      permission: [],
       commands: {},
       requires: { runtimes: {} },
       files: [],
@@ -1849,6 +1855,7 @@ function writeDock(
         runner: string;
       }
     >;
+    permission?: string[];
     tasks?: {
       install?: unknown[];
       update?: unknown[];
@@ -1875,6 +1882,7 @@ function writeDock(
     summary: "",
     readme: "DOCK.md",
     logo: "logo.png",
+    permission: options.permission ?? [],
     commands: options.commands ?? {},
     files: (options.files ?? []).map((file) => ({
       from: `files/${file.path}`,

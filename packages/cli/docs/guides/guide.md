@@ -91,6 +91,7 @@ stay outside the OpenDock block.
 | `readme` | no | Markdown file submitted as catalog detail content. |
 | `logo` | no | Catalog logo image path. |
 | `tags` | no | Lowercase catalog labels for Hub search and filtering. |
+| `permission` | no | Exact non-default task commands allowed in `run` and `check`. |
 | `requires` | no | Runtime requirements prepared before tasks run. |
 | `workdir` | no | Files that prepare the private dock workdir before tasks run. |
 | `files` | no | File or directory mappings applied to the project root. |
@@ -188,6 +189,58 @@ Behavior:
 3. Package manager commands such as `bun install --global ...` or
    `npm install --global ...` are normal `install`/`update` steps.
 4. `doctor` checks state only. It does not install or modify tools.
+
+## Task Command Permission
+
+OpenDock does not pass task strings to a shell. It splits each `run` and `check`
+command, rejects shell operators, then checks the command against a small
+default policy. This default set is intentionally limited to common runtimes,
+package managers, and simple checks:
+
+```text
+bun
+bunx
+git
+node
+npm
+npx
+pip
+pip3
+pipx
+pnpm
+python
+python3
+test
+uv
+```
+
+Platform-specific defaults:
+
+| Platform | Commands |
+|---|---|
+| `macos` | `brew` |
+| `windows` | `powershell`, `winget` |
+| `linux` | none |
+
+Commands outside this default policy must be declared in top-level `permission`
+with the exact shape OpenDock should allow.
+
+```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+  - codex --version
+```
+
+`permission` is exact. `oma -y install` does not allow `oma install`,
+`oma -y update`, or another `oma` command. Shell operators are still rejected in
+`permission`, `run`, and `check`: `|`, `&&`, `||`, `;`, backticks, `$(`, `>`,
+and `<`.
+
+Use `permission` for app-specific CLIs such as `oma`, `codex`, `claude`, `omx`,
+`hermes`, or any project-specific helper. Keep package-manager installs such as
+`bun install --global ...` as normal task steps when they match the default
+policy.
 
 ## Host Bootstrap
 
@@ -292,6 +345,10 @@ step in the private dock workdir and exports only declared outputs. Use
 `workdir.files` when that tool needs input files before it runs.
 
 ```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+
 workdir:
   files:
     - from: workdir/oma-config.yaml
@@ -419,9 +476,10 @@ normal `dock.yml` from the downloaded artifact.
 Manifest:
 
 1. `opendock: 1` is present.
-2. `id` is in `owner/name` form.
-3. The release version is in `opendock deploy`, not in `dock.yml`.
-4. `readme` and `logo` point to real files inside the dock directory.
+2. The dock id and release version are in the OpenDock command reference, not in
+   `dock.yml`.
+3. `readme` and `logo` point to real files inside the dock directory.
+4. Non-default `run` and `check` commands are declared exactly in `permission`.
 
 Files:
 
@@ -435,7 +493,8 @@ Tasks:
 1. Repeatable steps have `check`.
 2. Important tool checks include `version`.
 3. Long-running tasks use `timeout_ms`.
-4. External generators use `workdir: dock` and `export`.
+4. Task commands avoid shell operators and stay as one command per step.
+5. External generators use `workdir: dock` and `export`.
 
 Commands:
 

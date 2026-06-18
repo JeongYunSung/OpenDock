@@ -68,10 +68,10 @@ export class TaskRunner {
       ...(context.dockId === undefined ? {} : { dockId: context.dockId }),
     });
     if (context.phase === "doctor") {
-      const result = this.runDoctorSteps(steps, context, platform);
+      const result = this.runDoctorSteps(steps, context, platform, manifest.permission);
       return { reports: [...requirementReports, ...result.reports], exports: result.exports };
     }
-    const result = this.runSetupSteps(steps, context, platform);
+    const result = this.runSetupSteps(steps, context, platform, manifest.permission);
     return { reports: [...requirementReports, ...result.reports], exports: result.exports };
   }
 
@@ -83,6 +83,7 @@ export class TaskRunner {
     steps: TaskStep[],
     context: TaskContext,
     platform: OpenDockPlatform,
+    permissions: string[],
   ): TaskRunResult {
     const reports: StepReport[] = [];
     const exports: FileCandidate[] = [];
@@ -92,7 +93,7 @@ export class TaskRunner {
       const cwd = this.resolveWorkdir(step, context.projectDir, context.dockId);
       this.progress(context, step, "task-check", `Checking ${step.id}`, current, total, 0.12);
       const checkResult = step.check
-        ? this.evaluateStepCheck(step, cwd, platform)
+        ? this.evaluateStepCheck(step, cwd, platform, permissions)
         : { passed: false };
       if (checkResult.passed) {
         console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(step.id)}: ready`);
@@ -131,6 +132,7 @@ export class TaskRunner {
           cwd,
           live: context.live ?? true,
           platform,
+          permissions,
           ...(step.timeout_ms === undefined ? {} : { timeoutMs: step.timeout_ms }),
         };
         const result = this.commandRunner.run(step.run, runOptions);
@@ -152,7 +154,7 @@ export class TaskRunner {
         }
         if (step.check) {
           this.progress(context, step, "task-verify", `Verifying ${step.id}`, current, total, 0.75);
-          const postRunCheck = this.evaluateStepCheck(step, cwd, platform);
+          const postRunCheck = this.evaluateStepCheck(step, cwd, platform, permissions);
           if (!postRunCheck.passed) {
             const report: StepReport = { id: step.id, name: stepName(step), status: "Failed" };
             if (postRunCheck.message) {
@@ -219,6 +221,7 @@ export class TaskRunner {
     steps: TaskStep[],
     context: TaskContext,
     platform: OpenDockPlatform,
+    permissions: string[],
   ): TaskRunResult {
     const reports: StepReport[] = [];
     for (const step of steps) {
@@ -232,6 +235,7 @@ export class TaskRunner {
         cwd,
         missingAsFailure: true,
         platform,
+        permissions,
         timeoutMs: step.timeout_ms ?? defaultDoctorTimeoutMs,
       });
       if (!result.success) {
@@ -281,6 +285,7 @@ export class TaskRunner {
     step: TaskStep,
     cwd: string,
     platform: OpenDockPlatform,
+    permissions: string[],
   ): { passed: boolean; message?: string } {
     if (!step.check) {
       return { passed: false };
@@ -289,6 +294,7 @@ export class TaskRunner {
       cwd,
       missingAsFailure: true,
       platform,
+      permissions,
       ...(step.timeout_ms === undefined ? {} : { timeoutMs: step.timeout_ms }),
     });
     if (!result.success) {

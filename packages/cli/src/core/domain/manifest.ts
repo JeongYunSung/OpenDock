@@ -5,6 +5,7 @@ import { isOpenDockPlatform } from "../../platform.js";
 
 const safeSegmentPattern = /^[A-Za-z0-9._-]+$/;
 const versionSelectorPattern = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,79}$/;
+const blockedShellTokens = ["|", "&&", "||", ";", "`", "$(", ">", "<"];
 const supportedRuntimeNames = new Set([
   "bun",
   "git",
@@ -192,6 +193,25 @@ const commandSpecSchema = z
 
 const commandsSchema = z.record(commandNameSchema, commandSpecSchema).default({});
 
+const permissionSchema = z
+  .array(
+    z
+      .string()
+      .trim()
+      .min(1)
+      .max(240)
+      .superRefine((permission, context) => {
+        if (blockedShellTokens.some((token) => permission.includes(token))) {
+          context.addIssue({
+            code: "custom",
+            message: `shell operators are not allowed in permission command \`${permission}\``,
+          });
+        }
+      }),
+  )
+  .max(32)
+  .default([]);
+
 const manifestSchema = z
   .object({
     opendock: z.number().optional(),
@@ -201,6 +221,7 @@ const manifestSchema = z
     readme: z.string().optional(),
     logo: z.string().optional(),
     tags: tagsSchema,
+    permission: permissionSchema,
     commands: commandsSchema,
     requires: requiresSchema,
     workdir: workdirSpecSchema,

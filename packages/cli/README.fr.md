@@ -125,7 +125,6 @@ owner/name@designer-build   accepted
 
 ```yaml
 opendock: 1
-id: owner/name
 summary: Short catalog summary.
 readme: DOCK.md
 logo: logo.png
@@ -161,6 +160,17 @@ doivent aussi être déclarés dans `files`.
 Utilisez `workdir.files` quand une task dans le dock-private workdir a besoin de
 fichiers d'entrée avant son exécution. Utilisez `files` pour les fichiers à
 écrire dans le project root.
+
+## Task Command Permission
+
+Les tasks `run` et `check` d'OpenDock utilisent une petite politique par défaut : `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Sur macOS, `brew` est aussi autorisé; sur Windows, `powershell` et `winget`. Toute autre commande, comme `oma`, `codex`, `claude`, `omx` ou `mkdir`, doit être déclarée exactement dans le champ top-level `permission`. Les opérateurs `|`, `&&`, `||`, `;`, backticks, `$(`, `>` et `<` sont rejetés dans `permission`, `run` et `check`.
+
+```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+  - codex --version
+```
 
 ## Run Commands
 

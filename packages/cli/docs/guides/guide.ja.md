@@ -60,6 +60,7 @@ files:
 | `readme` | Markdown content for the catalog detail page. |
 | `logo` | Catalog logo image. |
 | `tags` | Lowercase catalog labels for Hub search and filtering. |
+| `permission` | 標準ポリシー外の `run` / `check` command を正確な形で許可します。 |
 | `requires` | Runtime requirements. |
 | `files` | Files or directories applied to the project root. |
 | `commands` | Named helpers or checks for `opendock run`. |
@@ -126,6 +127,17 @@ doctor:
 
 Steps run top to bottom. `doctor` should check state and avoid changing the project.
 
+## Task Command Permission
+
+OpenDock の task は `run` と `check` を shell にそのまま渡しません。標準で使える command は `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` に限られます。macOS では `brew`、Windows では `powershell` と `winget` も使えます。`oma`, `codex`, `claude`, `omx`, `mkdir` のようなそれ以外の command は top-level `permission` に完全一致する形で宣言します。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permission`, `run`, `check` で拒否されます。
+
+```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+  - codex --version
+```
+
 ## Commands
 
 Tasks are run by OpenDock during `install`, `update`, and `doctor`.
@@ -160,6 +172,10 @@ Use `workdir.files` when a generator needs input files before it runs. Then use
 root.
 
 ```yaml
+permission:
+  - oma -y install
+  - oma link claude codex
+
 workdir:
   files:
     - from: workdir/oma-config.yaml
