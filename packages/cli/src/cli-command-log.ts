@@ -1,4 +1,4 @@
-import { errorMessage } from "./change-output.js";
+import { errorMessage } from "./cli-errors.js";
 import { appendRunLog, type RunStatus } from "./logging.js";
 
 export function recordCommandLog(

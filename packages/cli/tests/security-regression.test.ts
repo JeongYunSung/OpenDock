@@ -22,7 +22,8 @@ import {
 } from "../src/browser-auth.js";
 import { type DockManifest, DockRef } from "../src/core/domain/manifest.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
-import { type FileCandidate, FilePlan } from "../src/core/files/file-candidate.js";
+import type { FileCandidate } from "../src/core/files/file-candidate.js";
+import { FilePlan } from "../src/core/files/file-plan.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
 import { CommandRunner } from "../src/core/runtime/command-runner.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";

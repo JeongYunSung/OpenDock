@@ -2,7 +2,7 @@ import { relative } from "node:path";
 import type { OpenDockPlatform } from "../../platform.js";
 import type { DockManifest } from "../domain/manifest.js";
 import type { InstalledDockRecord } from "../domain/state-store.js";
-import type { FileApplySummary } from "../files/file-candidate.js";
+import type { FileApplySummary } from "../files/file-plan.js";
 import type { StepReport } from "../runtime/step-report.js";
 
 export interface FileChangeDetails {

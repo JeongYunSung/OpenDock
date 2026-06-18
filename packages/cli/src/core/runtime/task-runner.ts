@@ -14,6 +14,7 @@ import {
 import { type ProgressReporter, reportProgress } from "./progress.js";
 import { RequirementRunner } from "./requirement-runner.js";
 import { type StepReport, stepProgressPercent } from "./step-report.js";
+import { assertManifestSupportsPlatform, selectTaskSteps } from "./task-selection.js";
 
 export interface TaskRunResult {
   reports: StepReport[];
@@ -314,52 +315,6 @@ export class TaskRunner {
     const include = step.export.include.length === 0 ? ["**"] : step.export.include;
     return this.collector.collectExport(cwd, include, step.export.exclude, "export");
   }
-}
-
-function assertManifestSupportsPlatform(manifest: DockManifest, platform: OpenDockPlatform): void {
-  const supported = collectManifestPlatforms(manifest);
-  if (supported.size === 0 || supported.has(platform)) {
-    return;
-  }
-  throw new Error(
-    `dock \`${manifest.id}\` does not support platform \`${platform}\`; available platforms: ${[
-      ...supported,
-    ].join(", ")}`,
-  );
-}
-
-function collectManifestPlatforms(manifest: DockManifest): Set<string> {
-  const platforms = new Set<string>();
-  const phases: TaskPhase[] = ["install", "update", "doctor"];
-  for (const phase of phases) {
-    for (const step of manifest.tasks[phase] ?? []) {
-      for (const platform of Object.keys(step.platforms ?? {})) {
-        platforms.add(platform);
-      }
-    }
-  }
-  return platforms;
-}
-
-function selectTaskSteps(steps: TaskStep[], platform: OpenDockPlatform): TaskStep[] {
-  return steps.flatMap((step) => {
-    const platformKeys = Object.keys(step.platforms ?? {});
-    if (platformKeys.length === 0) {
-      return [step];
-    }
-    const override = step.platforms?.[platform];
-    if (!override) {
-      return [];
-    }
-    return [
-      {
-        ...step,
-        ...override,
-        id: step.id,
-        platforms: {},
-      },
-    ];
-  });
 }
 
 function stepName(step: TaskStep): string {

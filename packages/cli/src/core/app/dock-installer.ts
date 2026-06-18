@@ -9,7 +9,8 @@ import {
   type TaskPhase,
 } from "../domain/manifest.js";
 import { OpenDockStateStore } from "../domain/state-store.js";
-import { FileCandidateCollector, FilePlan } from "../files/file-candidate.js";
+import { FileCandidateCollector } from "../files/file-candidate.js";
+import { FilePlan } from "../files/file-plan.js";
 import { pruneEmptyDirectoryChain } from "../files/path-utils.js";
 import { WorkdirSeeder } from "../files/workdir-seeder.js";
 import {
