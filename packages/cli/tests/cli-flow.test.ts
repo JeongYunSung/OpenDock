@@ -132,7 +132,6 @@ describe("opendock TypeScript CLI", () => {
     const report = await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       runTasks: true,
       resolve: localResolver(docks),
@@ -165,7 +164,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       runTasks: true,
       resolve: localResolver(docks),
@@ -173,7 +171,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.1"),
       projectDir: project,
-      operation: "update",
       phase: "update",
       runTasks: true,
       resolve: localResolver(docks),
@@ -208,7 +205,6 @@ describe("opendock TypeScript CLI", () => {
     const installReport = await install({
       dockRef: DockRef.parse("test/agent@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       runTasks: true,
       resolve: localResolver(docks),
@@ -216,7 +212,6 @@ describe("opendock TypeScript CLI", () => {
     const updateReport = await install({
       dockRef: DockRef.parse("test/agent@1.0.1"),
       projectDir: project,
-      operation: "update",
       phase: "update",
       runTasks: true,
       resolve: localResolver(docks),
@@ -250,7 +245,6 @@ describe("opendock TypeScript CLI", () => {
       install({
         dockRef: DockRef.parse("test/agent@1.0.0"),
         projectDir: project,
-        operation: "install",
         phase: "install",
         runTasks: true,
         resolve: localResolver(docks),
@@ -266,7 +260,6 @@ describe("opendock TypeScript CLI", () => {
       dockRef: DockRef.parse("test/agent@1.0.0"),
       force: true,
       projectDir: project,
-      operation: "install",
       phase: "install",
       runTasks: true,
       resolve: localResolver(docks),
@@ -304,7 +297,6 @@ describe("opendock TypeScript CLI", () => {
       install({
         dockRef: DockRef.parse("test/oma@1.0.0"),
         projectDir: project,
-        operation: "install",
         phase: "install",
         runTasks: true,
         resolve: localResolver(docks),
@@ -356,7 +348,6 @@ describe("opendock TypeScript CLI", () => {
       install({
         dockRef: DockRef.parse("test/oma@1.0.0"),
         projectDir: project,
-        operation: "install",
         phase: "install",
         runTasks: true,
         resolve: localResolver(docks),
@@ -414,7 +405,6 @@ describe("opendock TypeScript CLI", () => {
         install({
           dockRef: DockRef.parse("test/oma@1.0.0"),
           projectDir: project,
-          operation: "install",
           phase: "install",
           runTasks: true,
           resolve: localResolver(docks),
@@ -436,7 +426,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       runTasks: true,
       resolve: localResolver(docks),
@@ -451,7 +440,6 @@ describe("opendock TypeScript CLI", () => {
       install({
         dockRef: DockRef.parse("test/designer@1.0.1"),
         projectDir: project,
-        operation: "update",
         phase: "update",
         runTasks: true,
         resolve: localResolver(docks),
@@ -462,7 +450,6 @@ describe("opendock TypeScript CLI", () => {
       dockRef: DockRef.parse("test/designer@1.0.1"),
       force: true,
       projectDir: project,
-      operation: "update",
       phase: "update",
       runTasks: true,
       resolve: localResolver(docks),
@@ -490,7 +477,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       runTasks: true,
       resolve: localResolver(docks),
@@ -498,7 +484,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.1"),
       projectDir: project,
-      operation: "update",
       phase: "update",
       runTasks: true,
       resolve: localResolver(docks),
@@ -526,7 +511,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/oma@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       runTasks: true,
       resolve: localResolver(docks),
@@ -534,7 +518,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       runTasks: true,
       resolve: localResolver(docks),
@@ -573,7 +556,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/agent-ready@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       runTasks: true,
       resolve: localResolver(docks),
@@ -607,7 +589,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/agent-ready@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       runTasks: true,
       resolve: localResolver(docks),
@@ -653,7 +634,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -707,7 +687,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -829,7 +808,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -884,7 +862,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -929,7 +906,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -973,7 +949,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -982,7 +957,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/frontend@1.2.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -1235,7 +1209,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -1244,7 +1217,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/frontend@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -1290,7 +1262,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -1377,7 +1348,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -1386,7 +1356,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/frontend@1.2.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,
@@ -1450,7 +1419,6 @@ describe("opendock TypeScript CLI", () => {
     await install({
       dockRef: DockRef.parse("test/designer@1.0.0"),
       projectDir: project,
-      operation: "install",
       phase: "install",
       platform: "macos",
       runTasks: true,

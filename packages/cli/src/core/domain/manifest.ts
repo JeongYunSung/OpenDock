@@ -4,10 +4,10 @@ import { z } from "zod";
 import { isOpenDockPlatform } from "../../platform.js";
 import { commandRunnerNames } from "./command-runners.js";
 import { isSupportedRuntimeName } from "./runtime-names.js";
+import { includesShellOperator } from "./shell-operators.js";
 
 const safeSegmentPattern = /^[A-Za-z0-9._-]+$/;
 const versionSelectorPattern = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,79}$/;
-const blockedShellTokens = ["|", "&&", "||", ";", "`", "$(", ">", "<"];
 export class DockRef {
   constructor(
     readonly owner: string,
@@ -192,7 +192,7 @@ const permissionSchema = z
       .min(1)
       .max(240)
       .superRefine((permission, context) => {
-        if (blockedShellTokens.some((token) => permission.includes(token))) {
+        if (includesShellOperator(permission)) {
           context.addIssue({
             code: "custom",
             message: `shell operators are not allowed in permission command \`${permission}\``,

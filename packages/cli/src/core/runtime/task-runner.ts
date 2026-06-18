@@ -91,28 +91,12 @@ export class TaskRunner {
         ? this.evaluateStepCheck(step, cwd, platform, permissions)
         : { passed: false };
       if (checkResult.passed) {
-        console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(step.id)}: ready`);
-        this.progress(
-          context,
-          step,
-          "task-ready",
-          `${step.id} is ready`,
-          current,
-          total,
-          0.9,
-          "OK",
-        );
-        reports.push({ id: step.id, name: stepName(step), status: "Ready" });
-        this.progress(
-          context,
-          step,
-          "task-export",
-          `Collecting exports for ${step.id}`,
-          current,
-          total,
-          0.95,
-        );
-        exports.push(...this.collectStepExports(step, cwd));
+        this.finishSetupStep(reports, exports, context, step, cwd, current, total, {
+          phase: "task-ready",
+          status: "Ready",
+          terminalLabel: "ready",
+          progressMessage: `${step.id} is ready`,
+        });
         continue;
       }
 
@@ -172,22 +156,45 @@ export class TaskRunner {
             throw new Error(`step \`${step.id}\` did not satisfy its check after run${message}`);
           }
         }
-        console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(step.id)}: ran`);
-        this.progress(context, step, "task-ran", `${step.id} ran`, current, total, 0.9, "OK");
-        reports.push({ id: step.id, name: stepName(step), status: "Ran" });
-        this.progress(
-          context,
-          step,
-          "task-export",
-          `Collecting exports for ${step.id}`,
-          current,
-          total,
-          0.95,
-        );
-        exports.push(...this.collectStepExports(step, cwd));
+        this.finishSetupStep(reports, exports, context, step, cwd, current, total, {
+          phase: "task-ran",
+          status: "Ran",
+          terminalLabel: "ran",
+          progressMessage: `${step.id} ran`,
+        });
       }
     }
     return { reports, exports };
+  }
+
+  private finishSetupStep(
+    reports: StepReport[],
+    exports: FileCandidate[],
+    context: TaskContext,
+    step: TaskStep,
+    cwd: string,
+    current: number,
+    total: number,
+    result: {
+      phase: string;
+      progressMessage: string;
+      status: StepReport["status"];
+      terminalLabel: string;
+    },
+  ): void {
+    console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(step.id)}: ${result.terminalLabel}`);
+    this.progress(context, step, result.phase, result.progressMessage, current, total, 0.9, "OK");
+    reports.push({ id: step.id, name: stepName(step), status: result.status });
+    this.progress(
+      context,
+      step,
+      "task-export",
+      `Collecting exports for ${step.id}`,
+      current,
+      total,
+      0.95,
+    );
+    exports.push(...this.collectStepExports(step, cwd));
   }
 
   private progress(

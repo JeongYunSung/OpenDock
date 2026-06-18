@@ -185,7 +185,6 @@ async function installExample(
   await new DockInstaller().install({
     dockRef: DockRef.parse(`${example.id}@${testVersion}`),
     projectDir,
-    operation: "install",
     phase: "install",
     platform: example.platform,
     runTasks: options.runTasks ?? false,

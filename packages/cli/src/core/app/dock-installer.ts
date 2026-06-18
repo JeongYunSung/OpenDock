@@ -38,7 +38,6 @@ export interface InstallOptions {
   live?: boolean;
   projectDir: string;
   runTasks: boolean;
-  operation: string;
   phase?: TaskPhase;
   platform?: OpenDockPlatform;
   progress?: ProgressReporter;

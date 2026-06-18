@@ -442,7 +442,6 @@ describe("platform regression coverage", () => {
     await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
       await new DockInstaller().install({
         dockRef: DockRef.parse("test/tool@1.0.0"),
-        operation: "install",
         phase: "install",
         platform: "windows",
         projectDir: project,
@@ -459,7 +458,6 @@ describe("platform regression coverage", () => {
       rmSync(join(project, "runtime-ready"), { force: true });
       await new DockInstaller().install({
         dockRef: DockRef.parse("test/tool@1.0.1"),
-        operation: "update",
         phase: "update",
         platform: lockedDock.platform,
         projectDir: project,

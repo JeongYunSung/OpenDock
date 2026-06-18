@@ -1,10 +1,19 @@
 import type { OpenDockPlatform } from "../../platform.js";
+import { includesShellOperator } from "../domain/shell-operators.js";
 
 const safePackagePattern =
   /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+(?:@[A-Za-z0-9][A-Za-z0-9._+-]*)?$/;
 const safeIdentifierPattern = /^[A-Za-z0-9._:@/=-]+$/;
 const powershellTestPathPattern =
   /^if \(Test-Path -LiteralPath ([A-Za-z0-9._/@-]+)\) \{ exit 0 \} else \{ exit 1 \}$/;
+const blockedPackageRunnerFlags = new Set(["--package", "-p", "--eval", "-e", "--call", "-c"]);
+const pipAllowedFlags = new Set(["--user", "--upgrade", "-U"]);
+const wingetAllowedFlags = new Set([
+  "--accept-package-agreements",
+  "--accept-source-agreements",
+  "--exact",
+  "--id",
+]);
 
 const commonAllowedCommands = new Set([
   "bun",
@@ -70,8 +79,7 @@ export function splitCommand(command: string): string[] {
 }
 
 export function rejectShellMetacharacters(command: string): void {
-  const blocked = ["|", "&&", "||", ";", "`", "$(", ">", "<"];
-  if (blocked.some((token) => command.includes(token))) {
+  if (includesShellOperator(command)) {
     throw new Error(`shell operators are not allowed in OpenDock commands: ${command}`);
   }
 }
@@ -179,8 +187,7 @@ function isSafePipCommand(args: string[]): boolean {
   if (args[0] !== "install") {
     return false;
   }
-  const allowedFlags = new Set(["--user", "--upgrade", "-U"]);
-  const packages = args.slice(1).filter((arg) => !allowedFlags.has(arg));
+  const packages = args.slice(1).filter((arg) => !pipAllowedFlags.has(arg));
   return packages.length > 0 && packages.every(isSafePackageName);
 }
 
@@ -211,8 +218,7 @@ function isSafePackageRunnerCommand(args: string[]): boolean {
   if (args.length === 0 || !isSafePackageName(args[0] ?? "")) {
     return false;
   }
-  const blocked = new Set(["--package", "-p", "--eval", "-e", "--call", "-c"]);
-  return args.slice(1).every((arg) => !blocked.has(arg) && isSafeRunnerArg(arg));
+  return args.slice(1).every((arg) => !blockedPackageRunnerFlags.has(arg) && isSafeRunnerArg(arg));
 }
 
 function isSafeWingetCommand(args: string[]): boolean {
@@ -226,12 +232,6 @@ function isSafeWingetCommand(args: string[]): boolean {
   if (idIndex < 0 || !isSafePackageName(args[idIndex + 1] ?? "")) {
     return false;
   }
-  const allowedFlags = new Set([
-    "--accept-package-agreements",
-    "--accept-source-agreements",
-    "--exact",
-    "--id",
-  ]);
   return args.slice(1).every((arg, index) => {
     const originalIndex = index + 1;
     if (originalIndex === idIndex) {
@@ -240,7 +240,7 @@ function isSafeWingetCommand(args: string[]): boolean {
     if (originalIndex === idIndex + 1) {
       return isSafePackageName(arg);
     }
-    return allowedFlags.has(arg);
+    return wingetAllowedFlags.has(arg);
   });
 }
 
