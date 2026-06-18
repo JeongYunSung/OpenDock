@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { extname } from "node:path";
+import { commandRunnerExtensions, isCommandRunnerName } from "./core/domain/command-runners.js";
 import { type CommandSpec, type DockManifest, DockRef } from "./core/domain/manifest.js";
 import type { InstalledDockRecord } from "./core/domain/state-store.js";
 import { fileChecksum } from "./core/files/checksum.js";
@@ -171,15 +172,7 @@ export function resolveCommandSource(manifest: DockManifest, commandFile: string
 
 export function assertCommandRunnerMatchesFile(runner: string, file: string): void {
   const extension = extname(file).toLowerCase();
-  const allowedExtensions: Record<string, string[]> = {
-    bun: [".cjs", ".js", ".mjs", ".ts"],
-    node: [".cjs", ".js", ".mjs"],
-    powershell: [".ps1"],
-    python: [".py"],
-    python3: [".py"],
-    sh: [".sh"],
-  };
-  if (!allowedExtensions[runner]?.includes(extension)) {
+  if (!isCommandRunnerName(runner) || !commandRunnerExtensions[runner].includes(extension)) {
     throw new Error(
       `command runner \`${runner}\` is not allowed for ${extension || "extensionless"} files`,
     );

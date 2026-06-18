@@ -3,7 +3,7 @@ import type {
   FileChangeDetails,
   InstallReport,
   UninstallReport,
-} from "./core/app/dock-installer.js";
+} from "./core/app/dock-install-report.js";
 import { type InstalledDockRecord, OpenDockStateStore } from "./core/domain/state-store.js";
 import type { OpenDockPlatform } from "./platform.js";
 import { formatStepSymbol, terminalStyle } from "./terminal-style.js";

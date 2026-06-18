@@ -59,14 +59,10 @@ import {
   readDeployReadme,
   resolveDeployManifest,
 } from "./deploy-package.js";
+import { submitDockWithLogin } from "./deploy-submit.js";
 import { checkInstalledDockUpdates } from "./installed-dock-updates.js";
 import { readProjectLogs } from "./logging.js";
-import {
-  OpenDockRegistryClient,
-  RegistryRequestError,
-  type SubmissionRequest,
-  type SubmissionResponse,
-} from "./registry.js";
+import { OpenDockRegistryClient, RegistryRequestError } from "./registry.js";
 import {
   formatDockVersion,
   formatListPlatform,
@@ -724,35 +720,6 @@ export async function run(argv = process.argv): Promise<void> {
     });
 
   await program.parseAsync(normalizeCliArgv(argv), { from: "user" });
-}
-
-async function submitDockWithLogin(
-  client: OpenDockRegistryClient,
-  tokenStore: TokenStore,
-  request: SubmissionRequest,
-): Promise<SubmissionResponse> {
-  let token = await loadOrLoginToken(client, tokenStore);
-  try {
-    return await client.submitDock(request, token);
-  } catch (error) {
-    if (!(error instanceof RegistryRequestError && error.status === 401)) {
-      throw error;
-    }
-    tokenStore.clearToken();
-    token = (await performBrowserLogin({ client, tokenStore })).token;
-    return client.submitDock(request, token);
-  }
-}
-
-async function loadOrLoginToken(
-  client: OpenDockRegistryClient,
-  tokenStore: TokenStore,
-): Promise<string> {
-  const token = tokenStore.loadToken();
-  if (token) {
-    return token;
-  }
-  return (await performBrowserLogin({ client, tokenStore })).token;
 }
 
 if (isMainModule()) {

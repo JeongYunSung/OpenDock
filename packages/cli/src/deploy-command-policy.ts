@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { extname } from "node:path";
+import { isCommandRunnerName } from "./core/domain/command-runners.js";
 import type { DockManifest } from "./core/domain/manifest.js";
 import {
   assertRegularOrMissing,
@@ -68,7 +69,7 @@ function directRuntimeInvocation(content: string, file: string): string | undefi
   for (const line of content.replaceAll("\\", "/").split(/\r?\n/)) {
     const tokens = deployTextTokens(line);
     for (const [index, token] of tokens.entries()) {
-      if (!runtimeRunnerTokens.has(token)) {
+      if (!isCommandRunnerName(token)) {
         continue;
       }
       for (const next of tokens.slice(index + 1)) {
@@ -84,7 +85,6 @@ function directRuntimeInvocation(content: string, file: string): string | undefi
   return undefined;
 }
 
-const runtimeRunnerTokens = new Set(["node", "bun", "python", "python3", "sh", "powershell"]);
 const deployCommandSeparators = new Set(["&&", "||", "|", ";"]);
 
 function deployTextTokens(line: string): string[] {

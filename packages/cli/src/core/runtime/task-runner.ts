@@ -13,13 +13,7 @@ import {
 } from "./command-runner.js";
 import { type ProgressReporter, reportProgress } from "./progress.js";
 import { RequirementRunner } from "./requirement-runner.js";
-
-export interface StepReport {
-  id: string;
-  name: string;
-  status: "Ready" | "Ran" | "Failed";
-  message?: string;
-}
+import { type StepReport, stepProgressPercent } from "./step-report.js";
 
 export interface TaskRunResult {
   reports: StepReport[];
@@ -370,10 +364,4 @@ function selectTaskSteps(steps: TaskStep[], platform: OpenDockPlatform): TaskSte
 
 function stepName(step: TaskStep): string {
   return step.name ?? step.id;
-}
-
-function stepProgressPercent(current: number, total: number, offset: number): number {
-  const slotCount = Math.max(total, 1);
-  const slotSize = 100 / slotCount;
-  return Math.min(98, Math.round(slotSize * (current - 1 + offset)));
 }

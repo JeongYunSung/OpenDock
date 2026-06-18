@@ -2,21 +2,12 @@ import { readFileSync } from "node:fs";
 import YAML from "yaml";
 import { z } from "zod";
 import { isOpenDockPlatform } from "../../platform.js";
+import { commandRunnerNames } from "./command-runners.js";
+import { isSupportedRuntimeName } from "./runtime-names.js";
 
 const safeSegmentPattern = /^[A-Za-z0-9._-]+$/;
 const versionSelectorPattern = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,79}$/;
 const blockedShellTokens = ["|", "&&", "||", ";", "`", "$(", ">", "<"];
-const supportedRuntimeNames = new Set([
-  "bun",
-  "git",
-  "node",
-  "npm",
-  "pip",
-  "pip3",
-  "python",
-  "python3",
-]);
-
 export class DockRef {
   constructor(
     readonly owner: string,
@@ -88,7 +79,7 @@ const runtimeRequirementsSchema = z
   .default({})
   .superRefine((runtimes, context) => {
     for (const runtime of Object.keys(runtimes)) {
-      if (!supportedRuntimeNames.has(runtime)) {
+      if (!isSupportedRuntimeName(runtime)) {
         context.addIssue({
           code: "custom",
           message: `unsupported required runtime \`${runtime}\``,
@@ -181,7 +172,7 @@ const commandNameSchema = z
   .max(64)
   .regex(/^[a-z][a-z0-9-]*$/, "command names must be lowercase slugs");
 
-const commandRunnerSchema = z.enum(["bun", "node", "powershell", "python", "python3", "sh"]);
+const commandRunnerSchema = z.enum(commandRunnerNames);
 
 const commandSpecSchema = z
   .object({

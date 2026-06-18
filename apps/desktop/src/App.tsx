@@ -38,32 +38,36 @@ import {
   type Theme
 } from "./data";
 import {
-  commandFailureMessage,
   appendCommandTaskRows,
   applyCommandLineToRunningTask,
   applyCommandProgressToRunningTask,
-  commandLineLogEntry,
-  commandForceRetryFor,
-  commandResultRows,
   commandRowsContainMessage,
   createCommandTask,
   finishCommandTaskState,
-  isAuthStatusLine,
   isTaskActive,
-  logColor,
   markCommandTaskCancelling,
   markCommandTaskForceRetrying,
-  nowTime,
-  openDockChangeResult,
-  outdatedReportsByDockId,
-  successStepForChangeResult,
-  waitForCommandPopupPaint,
   type CommandForceRetry,
   type CommandTask,
   type CommandTaskKind,
   type CommandTaskRow,
   type CommandTaskStatus,
 } from "./command-task";
+import {
+  commandFailureMessage,
+  commandLineLogEntry,
+  isAuthStatusLine,
+  logColor,
+  nowTime,
+  waitForCommandPopupPaint,
+} from "./command-log";
+import {
+  commandForceRetryFor,
+  commandResultRows,
+  openDockChangeResult,
+  outdatedReportsByDockId,
+  successStepForChangeResult,
+} from "./command-change-result";
 import {
   emptyMyDocksCounts,
   requestCatalog,
@@ -99,6 +103,7 @@ import { detectWindowControlPlatform } from "./app-menu";
 import { ProjectAddModal, ProjectDeleteModal, ProjectRenameModal } from "./project-modals";
 import { Titlebar, type OpenMenu } from "./titlebar";
 import { ACCOUNT_PAGE_LIMIT, Workspace } from "./workspace-view";
+import { previewChangeResult } from "./preview-change-result";
 import {
   buildInstalledFallbackDocks,
   installedDockRows,
@@ -1093,7 +1098,12 @@ export function App() {
       const dock = retry.dockId ? findDockByKey(allKnownDocks, retry.dockId) ?? undefined : undefined;
       appendCommandResultLog(
         task.id,
-        previewChangeResult(retry.kind === "update" ? "update" : "uninstall", retry.dockId ?? retry.projectPath, dock),
+        previewChangeResult(
+          retry.kind === "update" ? "update" : "uninstall",
+          retry.dockId ?? retry.projectPath,
+          installedRows,
+          dock,
+        ),
       );
       finishCommandTask(task.id, "success", t.taskCompleted, { forceRetry: null });
       return;
@@ -1293,7 +1303,7 @@ export function App() {
     }
     appendLog("INFO", "var(--text-2)", `update ${project.path}`);
     appendLog("OK", "var(--success)", "update check completed");
-    appendCommandResultLog(commandId, previewChangeResult("update", project.path));
+    appendCommandResultLog(commandId, previewChangeResult("update", project.path, installedRows));
     finishCommandTask(commandId, "success", t.taskCompleted);
   }
 
@@ -1363,7 +1373,7 @@ export function App() {
       appendLog("OK", "var(--success)", "resolved release · registry.opendock.app");
       appendLog("OK", "var(--success)", "files → AGENTS.md (managed block)");
       appendLog("OK", "var(--success)", "doctor · 6 checks passed");
-      appendCommandResultLog(commandId, previewChangeResult("install", dockFullId(dock), dock));
+      appendCommandResultLog(commandId, previewChangeResult("install", dockFullId(dock), installedRows, dock));
       finishCommandTask(commandId, "success", t.taskCompleted);
     }
     setInstalledDocks((current) => ({ ...current, [dockFullId(dock)]: true }));
@@ -1395,7 +1405,7 @@ export function App() {
     } else {
       appendLog("INFO", "var(--text-2)", `uninstall ${dockId}`);
       appendLog("OK", "var(--success)", "dock removed from project");
-      appendCommandResultLog(commandId, previewChangeResult("uninstall", dockId, dock));
+      appendCommandResultLog(commandId, previewChangeResult("uninstall", dockId, installedRows, dock));
       finishCommandTask(commandId, "success", t.taskCompleted);
     }
     setInstalledDocks((current) => {
@@ -1404,71 +1414,6 @@ export function App() {
       delete next[dock.id];
       return next;
     });
-  }
-
-  function previewChangeResult(operation: "install" | "uninstall" | "update", target: string, dock?: Dock): OpenDockChangeResult {
-    const version = dock?.version ?? "preview";
-    const dockId = dock ? dockFullId(dock) : target;
-    if (operation === "uninstall") {
-      return {
-        operation,
-        reports: [
-          {
-            dockId,
-            fileChanges: { created: [], deleted: ["AGENTS.md"], reviewRequired: [], updated: [".opendock/dock.lock.yml"] },
-            filesCreated: 0,
-            filesDeleted: 1,
-            filesReviewRequired: 0,
-            filesUpdated: 1,
-            operation,
-            status: "uninstalled",
-            version
-          }
-        ],
-        success: true,
-        summary: { created: [], deleted: ["AGENTS.md"], reviewRequired: [], unchanged: [], updated: [".opendock/dock.lock.yml"] }
-      };
-    }
-    if (operation === "update") {
-      const rows = installedRows.length > 0 ? installedRows : [];
-      return {
-        operation,
-        reports: rows.map((row) => ({
-          dockId: dockFullId(row),
-          fileChanges: { created: [], deleted: [], reviewRequired: [], updated: ["AGENTS.md"] },
-          filesCreated: 0,
-          filesDeleted: 0,
-          filesReviewRequired: 0,
-          filesUpdated: 1,
-          fromVersion: row.version,
-          operation,
-          status: "updated",
-          toVersion: row.version,
-          version: row.version
-        })),
-        success: true,
-        summary: { created: [], deleted: [], reviewRequired: [], unchanged: [], updated: rows.length > 0 ? ["AGENTS.md"] : [] }
-      };
-    }
-    return {
-      operation,
-      reports: [
-        {
-          dockId,
-          fileChanges: { created: ["AGENTS.md", "DESIGN.md"], deleted: [], reviewRequired: [], updated: [] },
-          filesCreated: 2,
-          filesDeleted: 0,
-          filesReviewRequired: 0,
-          filesUpdated: 0,
-          operation,
-          status: "installed",
-          toVersion: version,
-          version
-        }
-      ],
-      success: true,
-      summary: { created: ["AGENTS.md", "DESIGN.md"], deleted: [], reviewRequired: [], unchanged: [], updated: [] }
-    };
   }
 
   async function handleWindow(action: "minimize" | "maximize" | "close") {

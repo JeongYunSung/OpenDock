@@ -11,6 +11,7 @@ const mainRust = readFileSync(resolve(appRoot, "src-tauri", "src", "main.rs"), "
 const accountPanel = readFileSync(resolve(appRoot, "src", "account-panel.tsx"), "utf8");
 const app = readFileSync(resolve(appRoot, "src", "App.tsx"), "utf8");
 const appMenu = readFileSync(resolve(appRoot, "src", "app-menu.tsx"), "utf8");
+const commandLog = readFileSync(resolve(appRoot, "src", "command-log.ts"), "utf8");
 const commandTask = readFileSync(resolve(appRoot, "src", "command-task.ts"), "utf8");
 const data = readFileSync(resolve(appRoot, "src", "data.ts"), "utf8");
 const desktopUi = readFileSync(resolve(appRoot, "src", "desktop-ui.tsx"), "utf8");
@@ -66,7 +67,8 @@ const logCommandIsNonStreaming =
   logCommandBody.includes('"log".to_string()') &&
   !logCommandBody.includes("run_opendock_streaming");
 const appParsesHistoricalLogLines =
-  commandTask.includes("function parseOpenDockHistoryLine") &&
+  commandLog.includes("function parseOpenDockHistoryLine") &&
+  commandLog.includes("function formatHistoryTime") &&
   app.includes("setLogs(result.lines.slice(-MAX_STORED_LOGS).map(commandLineLogEntry))");
 const registryRequestsBypassCache =
   registryRust.includes("reqwest::header::CACHE_CONTROL") &&

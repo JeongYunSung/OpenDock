@@ -5,16 +5,11 @@ import type { ResolvedDock } from "../../resolver.js";
 import { resolveDock } from "../../resolver.js";
 import {
   assertVersionSatisfiesSelector,
-  type DockManifest,
   type DockRef,
   type TaskPhase,
 } from "../domain/manifest.js";
-import { type InstalledDockRecord, OpenDockStateStore } from "../domain/state-store.js";
-import {
-  type FileApplySummary,
-  FileCandidateCollector,
-  FilePlan,
-} from "../files/file-candidate.js";
+import { OpenDockStateStore } from "../domain/state-store.js";
+import { FileCandidateCollector, FilePlan } from "../files/file-candidate.js";
 import { pruneEmptyDirectoryChain } from "../files/path-utils.js";
 import { WorkdirSeeder } from "../files/workdir-seeder.js";
 import {
@@ -22,7 +17,14 @@ import {
   type RuntimeProgressEvent,
   reportProgress,
 } from "../runtime/progress.js";
-import { type StepReport, TaskRunner } from "../runtime/task-runner.js";
+import { TaskRunner } from "../runtime/task-runner.js";
+import {
+  type InstallReport,
+  installedDockRecordFor,
+  installReportFor,
+  type UninstallReport,
+  uninstallReportFor,
+} from "./dock-install-report.js";
 
 type DockResolver = (
   dockRef: DockRef,
@@ -42,40 +44,11 @@ export interface InstallOptions {
   resolve?: DockResolver;
 }
 
-export interface InstallReport {
-  dockId: string;
-  fileChanges: FileChangeDetails;
-  version: string;
-  filesCreated: number;
-  filesDeleted: number;
-  filesReviewRequired: number;
-  filesUpdated: number;
-  platform: OpenDockPlatform;
-  steps: StepReport[];
-}
-
-export interface FileChangeDetails {
-  created: string[];
-  deleted: string[];
-  reviewRequired: string[];
-  updated: string[];
-}
-
 export interface UninstallOptions {
   dockId: string;
   force?: boolean;
   progress?: ProgressReporter;
   projectDir: string;
-}
-
-export interface UninstallReport {
-  fileChanges: FileChangeDetails;
-  dockId: string;
-  filesDeleted: number;
-  filesReviewRequired: number;
-  filesUpdated: number;
-  platform?: OpenDockPlatform;
-  version: string;
 }
 
 export class DockInstaller {
@@ -251,16 +224,17 @@ export class DockInstaller {
       version: resolved.version,
     });
     store.saveDock(
-      this.recordFor(
-        options.projectDir,
-        resolved.manifest,
-        resolved.version,
-        options.dockRef.requested(),
-        resolved.checksum,
-        resolved.signature,
-        platform,
+      installedDockRecordFor({
+        checksum: resolved.checksum,
         fileSummary,
-      ),
+        manifest: resolved.manifest,
+        platform,
+        projectDir: options.projectDir,
+        requested: options.dockRef.requested(),
+        signature: resolved.signature,
+        version: resolved.version,
+        workdir: this.taskRunner.dockWorkdir(options.projectDir, resolved.manifest.id),
+      }),
     );
     this.progress(options.progress, {
       dockId: resolved.manifest.id,
@@ -271,13 +245,13 @@ export class DockInstaller {
       version: resolved.version,
     });
 
-    return this.reportFor(
-      resolved.manifest.id,
-      resolved.version,
-      platform,
+    return installReportFor({
+      dockId: resolved.manifest.id,
       fileSummary,
-      taskResult.reports,
-    );
+      platform,
+      steps: taskResult.reports,
+      version: resolved.version,
+    });
   }
 
   uninstall(options: UninstallOptions): UninstallReport {
@@ -347,20 +321,12 @@ export class DockInstaller {
       phase: "lock-saved",
       version: dock.version,
     });
-    return {
+    return uninstallReportFor({
       dockId: dock.id,
-      fileChanges: {
-        created: [],
-        deleted: summary.deletedPaths,
-        reviewRequired: summary.reviewRequiredPaths,
-        updated: summary.updatedPaths,
-      },
-      filesDeleted: summary.deleted,
-      filesReviewRequired: summary.reviewRequired,
-      filesUpdated: summary.updated,
+      fileSummary: summary,
       platform: dock.platform,
       version: dock.version,
-    };
+    });
   }
 
   private collectManifestFiles(resolved: ResolvedDock) {
@@ -409,63 +375,6 @@ export class DockInstaller {
         percent: Math.round(startPercent + (span * rawPercent) / 100),
         version: event.version ?? version,
       });
-    };
-  }
-
-  private recordFor(
-    projectDir: string,
-    manifest: DockManifest,
-    version: string,
-    requested: string,
-    checksum: string,
-    signature: string,
-    platform: OpenDockPlatform,
-    fileSummary: FileApplySummary,
-  ): InstalledDockRecord {
-    const workdir = this.taskRunner.dockWorkdir(projectDir, manifest.id);
-    return {
-      id: manifest.id,
-      name: manifest.name ?? manifest.id,
-      requested,
-      version,
-      checksum,
-      signature,
-      platform,
-      workdir: relative(projectDir, workdir).replaceAll("\\", "/"),
-      files: fileSummary.records,
-      commands: Object.entries(manifest.commands)
-        .sort(([left], [right]) => left.localeCompare(right))
-        .map(([name, command]) => ({
-          name,
-          file: command.file,
-          runner: command.runner,
-          ...(command.description === undefined ? {} : { description: command.description }),
-        })),
-    };
-  }
-
-  private reportFor(
-    dockId: string,
-    version: string,
-    platform: OpenDockPlatform,
-    fileSummary: FileApplySummary,
-    steps: StepReport[],
-  ): InstallReport {
-    return {
-      dockId,
-      fileChanges: {
-        created: fileSummary.createdPaths,
-        deleted: fileSummary.deletedPaths,
-        reviewRequired: fileSummary.reviewRequiredPaths,
-        updated: fileSummary.updatedPaths,
-      },
-      version,
-      filesCreated: fileSummary.created,
-      filesDeleted: fileSummary.deleted,
-      filesReviewRequired: fileSummary.reviewRequired,
-      filesUpdated: fileSummary.updated,
-      platform,
-      steps,
     };
   }
 }

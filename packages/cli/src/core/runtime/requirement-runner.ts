@@ -1,6 +1,7 @@
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
 import { formatStepSymbol, terminalStyle } from "../../terminal-style.js";
 import type { DockManifest, TaskPhase } from "../domain/manifest.js";
+import { isSupportedRuntimeName } from "../domain/runtime-names.js";
 import {
   CommandRunner,
   combinedOutput,
@@ -9,7 +10,8 @@ import {
   satisfiesVersion,
 } from "./command-runner.js";
 import { type ProgressReporter, reportProgress } from "./progress.js";
-import type { StepReport } from "./task-runner.js";
+import { runtimeDefinitions } from "./runtime-requirements.js";
+import { type StepReport, stepProgressPercent } from "./step-report.js";
 
 interface RequirementContext {
   dockId?: string;
@@ -19,62 +21,6 @@ interface RequirementContext {
   progress?: ProgressReporter;
   projectDir: string;
 }
-
-interface RuntimeDefinition {
-  check: string;
-  install?: Partial<Record<OpenDockPlatform, string>>;
-}
-
-const runtimeDefinitions: Record<string, RuntimeDefinition> = {
-  bun: {
-    check: "bun --version",
-    install: {
-      macos: "brew install bun",
-      windows: "npm install --global bun",
-    },
-  },
-  git: {
-    check: "git --version",
-    install: {
-      macos: "brew install git",
-      windows:
-        "winget install --id Git.Git --exact --accept-package-agreements --accept-source-agreements",
-    },
-  },
-  node: {
-    check: "node --version",
-    install: {
-      macos: "brew install node",
-      windows:
-        "winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements",
-    },
-  },
-  npm: {
-    check: "npm --version",
-  },
-  pip: {
-    check: "pip --version",
-  },
-  pip3: {
-    check: "pip3 --version",
-  },
-  python: {
-    check: "python --version",
-    install: {
-      macos: "brew install python",
-      windows:
-        "winget install --id Python.Python.3.12 --exact --accept-package-agreements --accept-source-agreements",
-    },
-  },
-  python3: {
-    check: "python3 --version",
-    install: {
-      macos: "brew install python",
-      windows:
-        "winget install --id Python.Python.3.12 --exact --accept-package-agreements --accept-source-agreements",
-    },
-  },
-};
 
 export class RequirementRunner {
   constructor(private readonly commandRunner = new CommandRunner()) {}
@@ -99,11 +45,11 @@ export class RequirementRunner {
     current: number,
     total: number,
   ): StepReport {
-    const definition = runtimeDefinitions[runtime];
     const id = `require-runtime-${runtime}`;
-    if (!definition) {
+    if (!isSupportedRuntimeName(runtime)) {
       throw new Error(`unsupported required runtime \`${runtime}\``);
     }
+    const definition = runtimeDefinitions[runtime];
     this.progress(context, {
       current,
       id,
@@ -246,10 +192,4 @@ function failedReport(id: string, name: string, message: string): StepReport {
     status: "Failed",
     message,
   };
-}
-
-function stepProgressPercent(current: number, total: number, offset: number): number {
-  const slotCount = Math.max(total, 1);
-  const slotSize = 100 / slotCount;
-  return Math.min(98, Math.round(slotSize * (current - 1 + offset)));
 }
