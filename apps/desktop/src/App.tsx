@@ -100,7 +100,6 @@ import {
 } from "./command-task";
 import {
   emptyMyDocksCounts,
-  loadRegistryAssetUrl,
   requestCatalog,
   requestDockDetail,
   requestDockVersions,
@@ -110,6 +109,19 @@ import {
   requestStarStatus,
 } from "./registry-client";
 import { ReadmePanel } from "./readme-panel";
+import {
+  DockIcon,
+  IconButton,
+  KeyboardButton,
+  badgeSrc,
+  findDockByKey,
+  formatDateLabel,
+  installedAtLabel,
+  logoSrc,
+  platformLabel,
+  versionStatusClass,
+  versionStatusLabel,
+} from "./display";
 import {
   exportShortcutConfig,
   findShortcutConflict,
@@ -128,14 +140,11 @@ import {
 } from "./shortcuts";
 import { isTauriRuntime } from "./tauri-runtime";
 
-const logoSrc = "/opendock-logo.png";
-const badgeSrc = "/official-badge.png";
 const MAX_STORED_LOGS = 400;
 const DEFAULT_CATALOG_PAGE_LIMIT = 12;
 const DEFAULT_VERSION_PAGE_LIMIT = 6;
 const ACCOUNT_PAGE_LIMIT = 6;
 type WindowControlPlatform = "macos" | "windows";
-type VersionStatusClass = "approved" | "pending" | "rejected" | "revoked" | "hidden" | "suspended" | "unavailable";
 type OpenMenu = "" | "app" | "lang" | "account" | "sort";
 type AppMenuItem = { id: string; label: string; shortcut?: string } | { type: "separator" };
 type AppMenuGroup = { items: AppMenuItem[]; key: string; label: string };
@@ -288,51 +297,6 @@ function useResponsivePageSizes() {
   return sizes;
 }
 
-function versionStatusClass(status?: string): VersionStatusClass {
-  const normalized = status?.toLowerCase();
-  if (normalized === "approved") return "approved";
-  if (normalized === "rejected") return "rejected";
-  if (normalized === "revoked") return "revoked";
-  if (normalized === "hidden") return "hidden";
-  if (normalized === "suspended") return "suspended";
-  if (normalized === "unavailable") return "unavailable";
-  return "pending";
-}
-
-function versionStatusLabel(status?: string) {
-  const key = versionStatusClass(status);
-  if (key === "approved") return "Approved";
-  if (key === "rejected") return "Rejected";
-  if (key === "revoked") return "Revoked";
-  if (key === "hidden") return "Hidden";
-  if (key === "suspended") return "Suspended";
-  if (key === "unavailable") return "Unavailable";
-  return "Pending review";
-}
-
-function findDockByKey(docks: Dock[], key: string) {
-  return docks.find((dock) => dockFullId(dock) === key || dock.id === key || dock.name === key);
-}
-
-function formatDateLabel(value?: string | null) {
-  if (!value) return "Jun 14, 2026";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
-
-function platformLabel(platform: string) {
-  if (platform === "macos") return "macOS";
-  if (platform === "windows") return "Windows";
-  if (platform === "linux") return "Linux";
-  if (platform === "any") return "Any";
-  return platform;
-}
-
-function installedAtLabel(lang: Lang) {
-  return lang === "ko" ? "설치됨" : "Installed";
-}
-
 function shouldIgnoreGlobalShortcut(event: KeyboardEvent) {
   if (event.defaultPrevented) return true;
   const target = event.target instanceof HTMLElement ? event.target : null;
@@ -405,74 +369,6 @@ function matchesInstalledSearch(dock: InstalledDockRow, query: string) {
 function resolveActiveProjectId(projects: Project[], activeProjectId: string) {
   if (projects.some((project) => project.id === activeProjectId)) return activeProjectId;
   return projects[0]?.id ?? "";
-}
-
-function KeyboardButton(props: {
-  children: ReactNode;
-  className?: string;
-  ariaLabel: string;
-  onOpen: () => void;
-}) {
-  return (
-    <div
-      aria-label={props.ariaLabel}
-      className={props.className}
-      onClick={props.onOpen}
-      onKeyDown={(event) => {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        event.preventDefault();
-        props.onOpen();
-      }}
-      role="button"
-      tabIndex={0}
-    >
-      {props.children}
-    </div>
-  );
-}
-
-function IconButton(props: {
-  label: string;
-  children: ReactNode;
-  className?: string;
-  onClick: () => void;
-}) {
-  return (
-    <button aria-label={props.label} className={`icon-button ${props.className ?? ""}`} onClick={props.onClick} type="button">
-      {props.children}
-    </button>
-  );
-}
-
-function DockIcon(props: { dock: Dock; size?: "small" | "large" }) {
-  const [imageFailed, setImageFailed] = useState(false);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const sourceLogoUrl = props.dock.logoUrl ?? null;
-  useEffect(() => {
-    let cancelled = false;
-    setImageFailed(false);
-    setLogoUrl(null);
-    void loadRegistryAssetUrl(sourceLogoUrl).then((nextLogoUrl) => {
-      if (!cancelled) setLogoUrl(nextLogoUrl);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [sourceLogoUrl]);
-  const hasRegistryLogo = Boolean(logoUrl && !imageFailed);
-  const imageUrl = hasRegistryLogo ? logoUrl : logoSrc;
-  const className = ["dock-icon", props.size, "has-logo", hasRegistryLogo ? "" : "fallback-logo"].filter(Boolean).join(" ");
-  const label = props.dock.displayName ?? props.dock.short ?? props.dock.id;
-
-  return (
-    <div className={className} style={{ background: props.dock.grad }}>
-      <img
-        alt={hasRegistryLogo ? `${label} logo` : "OpenDock logo"}
-        src={imageUrl ?? logoSrc}
-        onError={hasRegistryLogo ? () => setImageFailed(true) : undefined}
-      />
-    </div>
-  );
 }
 
 export function App() {

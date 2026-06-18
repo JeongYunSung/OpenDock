@@ -8,6 +8,7 @@ const mainRust = readFileSync(resolve(appRoot, "src-tauri", "src", "main.rs"), "
 const app = readFileSync(resolve(appRoot, "src", "App.tsx"), "utf8");
 const commandTask = readFileSync(resolve(appRoot, "src", "command-task.ts"), "utf8");
 const data = readFileSync(resolve(appRoot, "src", "data.ts"), "utf8");
+const display = readFileSync(resolve(appRoot, "src", "display.tsx"), "utf8");
 const registryClient = readFileSync(resolve(appRoot, "src", "registry-client.ts"), "utf8");
 const styles = readFileSync(resolve(appRoot, "src", "styles.css"), "utf8");
 const tauriConfig = JSON.parse(readFileSync(resolve(appRoot, "src-tauri", "tauri.conf.json"), "utf8"));
@@ -102,10 +103,11 @@ const desktopMyDocksUsesPaging =
   rust.includes("DEFAULT_ACCOUNT_PAGE_LIMIT") &&
   rust.includes("MAX_ACCOUNT_PAGE_LIMIT");
 const dockIconUsesOpenDockLogoFallback =
-  app.includes("const imageUrl = hasRegistryLogo ? logoUrl : logoSrc") &&
-  app.includes('"fallback-logo"') &&
+  display.includes("const imageUrl = hasRegistryLogo ? logoUrl : logoSrc") &&
+  display.includes('"fallback-logo"') &&
   styles.includes(".dock-icon.fallback-logo img") &&
-  !app.includes("<Zap");
+  !app.includes("<Zap") &&
+  !display.includes("<Zap");
 const desktopInstalledSearchExists =
   app.includes('useStoredState("opendock.installedSearchQuery", "")') &&
   app.includes("function matchesInstalledSearch") &&
