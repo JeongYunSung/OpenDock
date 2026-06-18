@@ -1,6 +1,5 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
-  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -31,6 +30,7 @@ import { useDockCommandController } from "./use-dock-command-controller";
 import { useDockWorkspaceModel } from "./use-dock-workspace-model";
 import { useNativeEventBridge } from "./use-native-event-bridge";
 import { useNavigationController } from "./use-navigation-controller";
+import { usePaginationGuards } from "./use-pagination-guards";
 import { useProjectController } from "./use-project-controller";
 import { useProjectRuntimeController } from "./use-project-runtime-controller";
 import { useShortcutController } from "./use-shortcut-controller";
@@ -346,30 +346,24 @@ export function App() {
     setProjects,
   });
 
-  useEffect(() => {
-    setCatalogPage(1);
-  }, [searchQuery, sortMode, catalogPageSize]);
-
-  useEffect(() => {
-    setVersionPage(1);
-    setVersionTotal(0);
-  }, [detailKey, versionPageSize]);
-
-  useEffect(() => {
-    if (catalogPage > catalogPageCount) setCatalogPage(catalogPageCount);
-  }, [catalogPage, catalogPageCount]);
-
-  useEffect(() => {
-    if (versionPage > versionPageCount) setVersionPage(versionPageCount);
-  }, [versionPage, versionPageCount]);
-
-  useEffect(() => {
-    if (myDocksPage > myDocksPageCount) setMyDocksPage(myDocksPageCount);
-  }, [myDocksPage, myDocksPageCount]);
-
-  useEffect(() => {
-    setDetailVersion("");
-  }, [detailKey]);
+  usePaginationGuards({
+    catalogPage,
+    catalogPageCount,
+    catalogPageSize,
+    detailKey,
+    myDocksPage,
+    myDocksPageCount,
+    searchQuery,
+    setCatalogPage,
+    setDetailVersion,
+    setMyDocksPage,
+    setVersionPage,
+    setVersionTotal,
+    sortMode,
+    versionPage,
+    versionPageCount,
+    versionPageSize,
+  });
 
   function appendLog(level: string, color: string, message: string) {
     setLogs((current) => appendStoredLog(current, level, color, message));

@@ -12,8 +12,10 @@ import type {
   SortMode,
   TEXT,
 } from "./data";
-import { CatalogEmptyState, DetailPanel, ExplorePanel, InstalledPanel, LogsPanel } from "./dock-panels";
+import { CatalogEmptyState, DetailPanel, ExplorePanel } from "./dock-panels";
 import type { InstalledDockRow } from "./dock-workspace-model";
+import { InstalledPanel } from "./installed-panel";
+import { LogsPanel } from "./logs-panel";
 import type { ShortcutBinding, ShortcutCommandId, ShortcutPlatform } from "./shortcuts";
 import type { OpenMenu } from "./titlebar";
 import { ProjectSidebar } from "./workspace-shell";

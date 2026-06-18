@@ -2617,15 +2617,6 @@ input:focus-visible,
   border-bottom-color: var(--accent);
 }
 
-.profile-tab {
-  width: max-content;
-  border-bottom: 2px solid var(--accent);
-  padding-bottom: 12px;
-  color: var(--accent);
-  font-weight: 800;
-  font-size: 14px;
-}
-
 .profile-form label {
   display: grid;
   grid-template-columns: 74px minmax(0, 340px);
@@ -2695,10 +2686,6 @@ input:focus-visible,
   color: var(--text-3);
   font-weight: 850;
   font-size: 13px;
-}
-
-.starred-docks {
-  margin-top: 24px;
 }
 
 .starred-dock-list {

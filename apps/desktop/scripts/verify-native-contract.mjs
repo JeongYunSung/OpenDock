@@ -31,6 +31,7 @@ const desktopUi = readSrc("desktop-ui.tsx");
 const display = readSrc("display.tsx");
 const dockPanels = readSrc("dock-panels.tsx");
 const dockWorkspaceModel = readSrc("dock-workspace-model.ts");
+const installedPanel = readSrc("installed-panel.tsx");
 const authController = readSrc("use-auth-controller.ts");
 const dockCommandController = readSrc("use-dock-command-controller.ts");
 const projectController = readSrc("use-project-controller.ts");
@@ -159,8 +160,8 @@ const dockIconUsesOpenDockLogoFallback =
 const desktopInstalledSearchExists =
   app.includes('useStoredState("opendock.installedSearchQuery", "")') &&
   dockWorkspaceModel.includes("function matchesInstalledSearch") &&
-  dockPanels.includes("props.t.installedSearch") &&
-  dockPanels.includes("noInstalledSearchTitle");
+  installedPanel.includes("props.t.installedSearch") &&
+  installedPanel.includes("noInstalledSearchTitle");
 const desktopStartsWithoutSampleLogs = data.includes("export const BASE_LOGS: AppLog[] = []");
 const detailMergeUsesRegistryLatestVersion =
   data.includes("version: detail.latestVersion ?? base.version") ||

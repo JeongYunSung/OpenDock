@@ -8,6 +8,7 @@ import type {
   RegistryDockVersionItem,
   RegistryDockVersionsResponse,
 } from "./data";
+import { platformLabel } from "./platform-label";
 
 export function dockFullId(dock: Pick<Dock, "id" | "fullId" | "owner">) {
   return dock.fullId ?? `${dock.owner ?? "opendock"}/${dock.id}`;
@@ -83,7 +84,7 @@ export function normalizeRegistryVersions(response: RegistryDockVersionsResponse
       const archiveBytes = platforms.reduce((total, platform) => total + (platform.archive?.sizeBytes ?? 0), 0);
       grouped.set(item.version, {
         version: item.version,
-        platform: platforms.map((platform) => platform.platform).filter(isNonEmptyString).map(platformLabelForData).join(" · "),
+        platform: platforms.map((platform) => platform.platform).filter(isNonEmptyString).map(platformLabel).join(" · "),
         platforms: platforms.map((platform) => platform.platform).filter(isNonEmptyString),
         size: formatBytes(archiveBytes),
         checksum: platforms[0]?.checksum,
@@ -124,7 +125,7 @@ export function normalizeRegistryVersions(response: RegistryDockVersionsResponse
   }
   return [...grouped.values()].map(({ platforms, ...version }) => ({
     ...version,
-    platform: platforms?.map(platformLabelForData).join(" · ") || version.platform
+    platform: platforms?.map(platformLabel).join(" · ") || version.platform
   }));
 }
 
@@ -213,12 +214,4 @@ function firstMarkdownParagraph(markdown?: string | null) {
 function formatBytes(value?: number | null) {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return "-";
   return `${new Intl.NumberFormat("en-US").format(value)} bytes`;
-}
-
-function platformLabelForData(platform: string) {
-  if (platform === "macos") return "macOS";
-  if (platform === "windows") return "Windows";
-  if (platform === "linux") return "Linux";
-  if (platform === "any") return "Any";
-  return platform;
 }

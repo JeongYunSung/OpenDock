@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { type Dock, type Lang, dockFullId } from "./data";
+import { platformLabel } from "./platform-label";
 import { loadRegistryAssetUrl } from "./registry-client";
 
 export const logoSrc = "/opendock-logo.png";
@@ -40,13 +41,7 @@ export function formatDateLabel(value?: string | null) {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-export function platformLabel(platform: string) {
-  if (platform === "macos") return "macOS";
-  if (platform === "windows") return "Windows";
-  if (platform === "linux") return "Linux";
-  if (platform === "any") return "Any";
-  return platform;
-}
+export { platformLabel };
 
 export function installedAtLabel(lang: Lang) {
   return lang === "ko" ? "설치됨" : "Installed";
