@@ -6,7 +6,9 @@ const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const rust = readFileSync(resolve(appRoot, "src-tauri", "src", "lib.rs"), "utf8");
 const mainRust = readFileSync(resolve(appRoot, "src-tauri", "src", "main.rs"), "utf8");
 const app = readFileSync(resolve(appRoot, "src", "App.tsx"), "utf8");
+const commandTask = readFileSync(resolve(appRoot, "src", "command-task.ts"), "utf8");
 const data = readFileSync(resolve(appRoot, "src", "data.ts"), "utf8");
+const registryClient = readFileSync(resolve(appRoot, "src", "registry-client.ts"), "utf8");
 const styles = readFileSync(resolve(appRoot, "src", "styles.css"), "utf8");
 const tauriConfig = JSON.parse(readFileSync(resolve(appRoot, "src-tauri", "tauri.conf.json"), "utf8"));
 const windowsIcon = readFileSync(resolve(appRoot, "src-tauri", "icons", "icon.ico"));
@@ -52,12 +54,12 @@ const logCommandIsNonStreaming =
   logCommandBody.includes('"log".to_string()') &&
   !logCommandBody.includes("run_opendock_streaming");
 const appParsesHistoricalLogLines =
-  app.includes("function parseOpenDockHistoryLine") &&
+  commandTask.includes("function parseOpenDockHistoryLine") &&
   app.includes("setLogs(result.lines.slice(-MAX_STORED_LOGS).map(commandLineLogEntry))");
 const registryRequestsBypassCache =
   rust.includes("reqwest::header::CACHE_CONTROL") &&
   rust.includes("reqwest::header::PRAGMA") &&
-  app.includes('cache: "no-store"');
+  registryClient.includes('cache: "no-store"');
 const desktopCatalogUsesLiveRegistry =
   app.includes("const [catalogDocks, setCatalogDocks] = useState<Dock[]>([])") &&
   app.includes("requestCatalog(sortMode, searchQuery, catalogPage, catalogPageSize)") &&
@@ -68,15 +70,15 @@ const desktopCatalogUsesResponsivePaging =
   app.includes("function useResponsivePageSizes") &&
   app.includes("catalogPageLimitForViewport(window.innerWidth, window.innerHeight)") &&
   app.includes("versionPageLimitForViewport(window.innerWidth, window.innerHeight)") &&
-  app.includes('invoke<RegistryDockSearchResponse>("opendock_catalog",') &&
-  app.includes("page,") &&
-  app.includes("limit,") &&
+  registryClient.includes('invoke<RegistryDockSearchResponse>("opendock_catalog",') &&
+  registryClient.includes("page,") &&
+  registryClient.includes("limit,") &&
   rust.includes("async fn opendock_catalog(") &&
   rust.includes("page: Option<u32>") &&
   rust.includes("limit: Option<u32>") &&
   rust.includes("bounded_limit(limit, DEFAULT_CATALOG_PAGE_LIMIT, MAX_CATALOG_PAGE_LIMIT)");
 const desktopVersionsUseResponsivePaging =
-  app.includes('invoke<RegistryDockVersionsResponse>("opendock_dock_versions", { dockId, page, limit })') &&
+  registryClient.includes('invoke<RegistryDockVersionsResponse>("opendock_dock_versions", { dockId, page, limit })') &&
   app.includes("requestDockVersions(dockFullId(baseDetail), versionPage, versionPageSize)") &&
   rust.includes("async fn opendock_dock_versions(") &&
   rust.includes("DEFAULT_VERSION_PAGE_LIMIT") &&
@@ -86,14 +88,14 @@ const desktopUsesRegistryStars =
   data.includes('export type SortMode = "downloads" | "stars" | "recent" | "name"') &&
   app.includes("props.t.sortStars") &&
   app.includes("function StarButton") &&
-  app.includes('invoke<DockStarStatusResponse>("opendock_star_status", { ids })') &&
+  registryClient.includes('invoke<DockStarStatusResponse>("opendock_star_status", { ids })') &&
   rust.includes("async fn opendock_star_status") &&
   rust.includes("/v1/me/stars/status") &&
   rust.includes("async fn opendock_my_stars") &&
   rust.includes("load_auth_token()");
 const desktopMyDocksUsesPaging =
   data.includes("export interface MyDocksCounts") &&
-  app.includes('invoke<MyDocksResponse>("opendock_my_docks", { page, limit })') &&
+  registryClient.includes('invoke<MyDocksResponse>("opendock_my_docks", { page, limit })') &&
   app.includes("myDocksPageCount") &&
   app.includes("accountStatsFor(props.myDocksCounts, props.myStarredDocks.length)") &&
   rust.includes("async fn opendock_my_docks(page: Option<u32>, limit: Option<u32>)") &&
@@ -140,7 +142,7 @@ const noUpdateProgressDoesNotDuplicatePopupRows =
   app.includes("!suppressProgressRow &&") &&
   app.includes('progress.message === "No OpenDock dock updates available."');
 const commandFailureProgressDoesNotDuplicatePopupRows =
-  app.includes("function commandRowsContainMessage") &&
+  commandTask.includes("function commandRowsContainMessage") &&
   app.includes("!commandRowsContainMessage(currentRows, result.message)") &&
   app.includes("const hasSpecificError = status === \"error\"") &&
   rust.includes("should_emit_empty_stream_message(&stdout, &stderr)") &&

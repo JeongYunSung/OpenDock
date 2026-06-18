@@ -56,7 +56,6 @@ import {
   type DesktopAppState,
   type Dock,
   type DockStarResponse,
-  type DockStarStatusResponse,
   type DockVersion,
   type DockView,
   type InstalledDockRecord,
@@ -71,17 +70,46 @@ import {
   type Project,
   type ProjectFolder,
   type ProjectStateResult,
-  type RegistryDockDetail,
-  type RegistryDockSearchResponse,
-  type RegistryDockVersionsResponse,
   type MyDock,
   type MyDocksCounts,
-  type MyDocksResponse,
-  type MyStarsResponse,
   type SortMode,
   TEXT,
   type Theme
 } from "./data";
+import {
+  commandFailureMessage,
+  commandLineLogEntry,
+  commandResultRows,
+  commandRowsContainMessage,
+  commandTaskId,
+  commandTaskLevel,
+  commandTaskTitle,
+  isAuthStatusLine,
+  isTaskActive,
+  isTaskForTarget,
+  logColor,
+  nextCommandProgress,
+  nowTime,
+  statusLabel,
+  waitForCommandPopupPaint,
+  type CommandForceRetry,
+  type CommandTask,
+  type CommandTaskKind,
+  type CommandTaskRow,
+  type CommandTaskStatus,
+} from "./command-task";
+import {
+  emptyMyDocksCounts,
+  loadRegistryAssetUrl,
+  requestCatalog,
+  requestDockDetail,
+  requestDockVersions,
+  requestMyDocks,
+  requestMyStars,
+  requestSetDockStar,
+  requestStarStatus,
+} from "./registry-client";
+import { ReadmePanel } from "./readme-panel";
 import {
   exportShortcutConfig,
   findShortcutConflict,
@@ -98,52 +126,19 @@ import {
   type ShortcutPlatform,
   shortcutPlatformForWindow,
 } from "./shortcuts";
+import { isTauriRuntime } from "./tauri-runtime";
 
 const logoSrc = "/opendock-logo.png";
 const badgeSrc = "/official-badge.png";
-const REGISTRY_ORIGIN = "https://registry.opendock.app";
 const MAX_STORED_LOGS = 400;
 const DEFAULT_CATALOG_PAGE_LIMIT = 12;
 const DEFAULT_VERSION_PAGE_LIMIT = 6;
 const ACCOUNT_PAGE_LIMIT = 6;
-const registryAssetCache = new Map<string, string | null>();
-const registryAssetRequests = new Map<string, Promise<string | null>>();
 type WindowControlPlatform = "macos" | "windows";
-type CommandTaskKind = "install" | "update" | "delete" | "doctor";
-type CommandTaskStatus = "running" | "cancelling" | "success" | "error" | "cancelled";
 type VersionStatusClass = "approved" | "pending" | "rejected" | "revoked" | "hidden" | "suspended" | "unavailable";
 type OpenMenu = "" | "app" | "lang" | "account" | "sort";
 type AppMenuItem = { id: string; label: string; shortcut?: string } | { type: "separator" };
 type AppMenuGroup = { items: AppMenuItem[]; key: string; label: string };
-
-interface CommandForceRetry {
-  dockId?: string;
-  kind: "delete" | "update";
-  projectPath: string;
-}
-
-interface CommandTask {
-  forceRetry: CommandForceRetry | null;
-  forceRetryUsed: boolean;
-  id: string;
-  kind: CommandTaskKind;
-  projectPath?: string;
-  target: string;
-  progress: number;
-  status: CommandTaskStatus;
-  step: string;
-  lines: number;
-  rows: CommandTaskRow[];
-  startedAt: string;
-  updatedAt: string;
-}
-
-interface CommandTaskRow {
-  time: string;
-  level: string;
-  color: string;
-  message: string;
-}
 
 interface ShortcutFileResult {
   contents: string;
@@ -162,116 +157,10 @@ interface ResponsivePageSizes {
   versions: number;
 }
 
-function isTauriRuntime() {
-  return typeof window !== "undefined" && Boolean(window.__TAURI_INTERNALS__ || window.__TAURI__);
-}
-
 function detectWindowControlPlatform(): WindowControlPlatform {
   if (typeof navigator === "undefined") return "windows";
   const platform = `${navigator.platform} ${navigator.userAgent}`.toLowerCase();
   return platform.includes("mac") ? "macos" : "windows";
-}
-
-function nowTime() {
-  return new Date().toLocaleTimeString("en-GB", { hour12: false }).slice(0, 8);
-}
-
-function logColor(level: string) {
-  switch (level) {
-    case "OK":
-      return "var(--success)";
-    case "RUN":
-      return "var(--info)";
-    case "WARN":
-      return "var(--warning)";
-    case "ERR":
-      return "var(--danger)";
-    default:
-      return "var(--text-2)";
-  }
-}
-
-function commandLineLogEntry(line: OpenDockCommandLine): AppLog {
-  const parsed = parseOpenDockHistoryLine(line.message);
-  if (parsed) return parsed;
-  const level = line.level.toUpperCase();
-  return { time: nowTime(), level, color: logColor(level), message: line.message };
-}
-
-function parseOpenDockHistoryLine(message: string): AppLog | null {
-  const match = message.match(/^(\d{4}-\d{2}-\d{2}T\S+)\s+(\S+)\s+(.+)$/);
-  if (!match) return null;
-  const [, isoTime, status, body] = match;
-  const level = logLevelForHistoryStatus(status);
-  return {
-    time: formatHistoryTime(isoTime),
-    level,
-    color: logColor(level),
-    message: body
-  };
-}
-
-function logLevelForHistoryStatus(status: string) {
-  const normalized = status.toLowerCase();
-  if (normalized === "success") return "OK";
-  if (normalized === "warning" || normalized === "warn") return "WARN";
-  if (normalized === "running" || normalized === "run") return "RUN";
-  if (normalized === "failed" || normalized === "failure" || normalized === "error") return "ERR";
-  return "INFO";
-}
-
-function formatHistoryTime(isoTime: string) {
-  const date = new Date(isoTime);
-  if (Number.isNaN(date.getTime())) return nowTime();
-  const today = new Date();
-  const sameDay =
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate();
-  if (sameDay) return date.toLocaleTimeString("en-GB", { hour12: false }).slice(0, 8);
-  return `${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-}
-
-function isTaskActive(task: CommandTask | null) {
-  return task?.status === "running" || task?.status === "cancelling";
-}
-
-function isTaskForTarget(task: CommandTask | null, kind: CommandTaskKind, target: string) {
-  return isTaskActive(task) && task?.kind === kind && task.target.startsWith(target);
-}
-
-function commandTaskId(kind: CommandTaskKind) {
-  return `opendock-${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function commandTaskTitle(kind: CommandTaskKind, t: (typeof TEXT)[Lang]) {
-  if (kind === "install") return t.taskInstalling;
-  if (kind === "update") return t.taskUpdating;
-  if (kind === "delete") return t.taskDeleting;
-  return t.taskDoctor;
-}
-
-function nextCommandProgress(task: CommandTask, line: OpenDockCommandLine) {
-  const normalizedLevel = line.level.toUpperCase();
-  const bump = normalizedLevel === "OK" ? 18 : normalizedLevel === "RUN" ? 12 : normalizedLevel === "ERR" ? 8 : 7;
-  return Math.min(92, Math.max(task.progress + bump, 12));
-}
-
-function commandTaskLevel(status: CommandTaskStatus) {
-  if (status === "success") return "OK";
-  if (status === "error") return "ERR";
-  if (status === "cancelled" || status === "cancelling") return "WARN";
-  return "RUN";
-}
-
-function normalizeCommandRowMessage(message: string) {
-  return message.trim().replace(/\s+/g, " ");
-}
-
-function commandRowsContainMessage(rows: CommandTaskRow[], message: string) {
-  const normalized = normalizeCommandRowMessage(message);
-  if (!normalized) return true;
-  return rows.some((row) => normalizeCommandRowMessage(row.message) === normalized);
 }
 
 function appMenuGroups(t: (typeof TEXT)[Lang]): AppMenuGroup[] {
@@ -342,41 +231,6 @@ function appMenuGroups(t: (typeof TEXT)[Lang]): AppMenuGroup[] {
       ],
     },
   ];
-}
-
-function commandFailureMessage(result: OpenDockCommandResult, fallback: string) {
-  return (
-    result.stderr.trim().split("\n").find(Boolean) ??
-    result.stdout.trim().split("\n").find(Boolean) ??
-    result.lines.find((line) => line.message.trim())?.message ??
-    fallback
-  );
-}
-
-function isAuthStatusLine(message: string) {
-  return (
-    message.startsWith("Opening browser") ||
-    message.startsWith("Open this URL") ||
-    message.startsWith("Browser did not open") ||
-    message.startsWith("Waiting for login") ||
-    message.startsWith("Logged in as")
-  );
-}
-
-function waitForCommandPopupPaint() {
-  return new Promise<void>((resolve) => {
-    if (typeof window === "undefined" || typeof window.requestAnimationFrame !== "function") {
-      window.setTimeout(resolve, 0);
-      return;
-    }
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => resolve());
-    });
-  });
-}
-
-function registrySortMode(mode: SortMode) {
-  return mode === "recent" ? "updated" : mode;
 }
 
 function readResponsivePageSizes(): ResponsivePageSizes {
@@ -454,137 +308,6 @@ function versionStatusLabel(status?: string) {
   if (key === "suspended") return "Suspended";
   if (key === "unavailable") return "Unavailable";
   return "Pending review";
-}
-
-async function requestCatalog(sortMode: SortMode, query: string, page: number, limit: number) {
-  const sort = registrySortMode(sortMode);
-  const trimmedQuery = query.trim();
-  if (isTauriRuntime()) {
-    return invoke<RegistryDockSearchResponse>("opendock_catalog", {
-      page,
-      limit,
-      sort,
-      query: trimmedQuery || null
-    });
-  }
-  return requestRegistryJson<RegistryDockSearchResponse>("/v1/docks", {
-    sort,
-    page: String(page),
-    limit: String(limit),
-    ...(trimmedQuery ? { query: trimmedQuery } : {})
-  });
-}
-
-async function requestDockDetail(dockId: string) {
-  if (isTauriRuntime()) return invoke<RegistryDockDetail>("opendock_dock_detail", { dockId });
-  return requestRegistryJson<RegistryDockDetail>(`/v1/docks/${dockId}`);
-}
-
-async function requestDockVersions(dockId: string, page: number, limit: number) {
-  if (isTauriRuntime()) return invoke<RegistryDockVersionsResponse>("opendock_dock_versions", { dockId, page, limit });
-  return requestRegistryJson<RegistryDockVersionsResponse>(`/v1/docks/${dockId}/versions`, {
-    page: String(page),
-    limit: String(limit)
-  });
-}
-
-async function requestStarStatus(ids: string[]) {
-  if (ids.length === 0) return { items: [] } satisfies DockStarStatusResponse;
-  if (!isTauriRuntime()) {
-    return { items: ids.map((id) => ({ id, starred: false })) } satisfies DockStarStatusResponse;
-  }
-  return invoke<DockStarStatusResponse>("opendock_star_status", { ids });
-}
-
-async function requestMyStars() {
-  if (!isTauriRuntime()) return { items: [] } satisfies MyStarsResponse;
-  return invoke<MyStarsResponse>("opendock_my_stars");
-}
-
-async function requestMyDocks(page: number, limit: number) {
-  if (!isTauriRuntime()) {
-    return {
-      counts: emptyMyDocksCounts(),
-      items: [],
-      limit,
-      page,
-      total: 0
-    } satisfies MyDocksResponse;
-  }
-  return invoke<MyDocksResponse>("opendock_my_docks", { page, limit });
-}
-
-function emptyMyDocksCounts(): MyDocksCounts {
-  return {
-    all: 0,
-    approved: 0,
-    pending: 0,
-    rejected: 0,
-    unavailable: 0,
-    hidden: 0
-  };
-}
-
-async function requestSetDockStar(dockId: string, starred: boolean) {
-  if (!isTauriRuntime()) {
-    return { id: dockId, starred, stars: starred ? 1 : 0 } satisfies DockStarResponse;
-  }
-  return invoke<DockStarResponse>(starred ? "opendock_star_dock" : "opendock_unstar_dock", { dockId });
-}
-
-async function requestRegistryJson<T>(path: string, params: Record<string, string> = {}) {
-  const url = new URL(`/registry${path}`, window.location.origin);
-  for (const [key, value] of Object.entries(params)) {
-    url.searchParams.set(key, value);
-  }
-  const response = await fetch(url, {
-    cache: "no-store",
-    headers: { accept: "application/json", "cache-control": "no-cache" }
-  });
-  if (!response.ok) {
-    const detail = (await response.text()).trim();
-    throw new Error(`registry returned ${response.status} for ${url.pathname}${detail ? `: ${detail}` : ""}`);
-  }
-  return response.json() as Promise<T>;
-}
-
-function resolveRegistryAssetUrl(url?: string | null) {
-  if (!url || typeof window === "undefined") return null;
-  try {
-    const parsed = new URL(url);
-    if (parsed.origin !== REGISTRY_ORIGIN) return null;
-    const canUseDevProxy = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-    if (canUseDevProxy) {
-      return `/registry${parsed.pathname}${parsed.search}`;
-    }
-    return parsed.toString();
-  } catch {
-    return null;
-  }
-}
-
-async function loadRegistryAssetUrl(url?: string | null) {
-  if (!url) return null;
-  if (registryAssetCache.has(url)) return registryAssetCache.get(url) ?? null;
-  const existing = registryAssetRequests.get(url);
-  if (existing) return existing;
-  const request = (async () => {
-    try {
-      const value = isTauriRuntime()
-        ? await invoke<string>("opendock_registry_asset_data_url", { url })
-        : resolveRegistryAssetUrl(url);
-      registryAssetCache.set(url, value);
-      return value;
-    } catch {
-      const fallback = resolveRegistryAssetUrl(url);
-      registryAssetCache.set(url, fallback);
-      return fallback;
-    } finally {
-      registryAssetRequests.delete(url);
-    }
-  })();
-  registryAssetRequests.set(url, request);
-  return request;
 }
 
 function findDockByKey(docks: Dock[], key: string) {
@@ -3248,125 +2971,6 @@ function DetailPanel(props: {
   );
 }
 
-function ReadmePanel(props: { detail: Dock; t: (typeof TEXT)[Lang] }) {
-  const readme = parseReadmeMarkdown(props.detail.readmeMarkdown);
-  const title = readme.title || props.detail.readmeTitle;
-  const intro = readme.intro || props.detail.readmeIntro;
-  const description = props.detail.desc?.trim();
-  const shouldShowDescription = Boolean(description && description !== intro?.trim());
-  return (
-    <div className="readme-panel">
-      <h2>{props.t.readme}</h2>
-      <div className="readme-card">
-        <h3>{title}</h3>
-        {shouldShowDescription ? <p className="readme-description">{description}</p> : null}
-        {intro ? <p>{intro}</p> : null}
-        {readme.blocks.length > 0 ? (
-          <div className="readme-markdown">
-            {readme.blocks.map((block, index) => renderReadmeBlock(block, index))}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-type ReadmeBlock =
-  | { type: "heading"; level: number; text: string }
-  | { type: "paragraph"; text: string }
-  | { type: "list"; items: string[] }
-  | { type: "code"; text: string };
-
-function parseReadmeMarkdown(markdown?: string | null) {
-  const blocks = markdown ? markdownToBlocks(markdown) : [];
-  const [firstBlock, ...rest] = blocks;
-  const title = firstBlock?.type === "heading" && firstBlock.level === 1 ? firstBlock.text : "";
-  const content = title ? rest : blocks;
-  const introIndex = content.findIndex((block) => block.type === "paragraph");
-  const intro = introIndex >= 0 && content[introIndex]?.type === "paragraph" ? content[introIndex].text : "";
-  const visibleBlocks = content.filter((_, index) => index !== introIndex);
-  return { title, intro, blocks: visibleBlocks };
-}
-
-function markdownToBlocks(markdown: string): ReadmeBlock[] {
-  const lines = markdown.replace(/\r\n/g, "\n").split("\n");
-  const blocks: ReadmeBlock[] = [];
-  let index = 0;
-
-  while (index < lines.length) {
-    const line = lines[index] ?? "";
-    const trimmed = line.trim();
-    if (!trimmed) {
-      index += 1;
-      continue;
-    }
-
-    if (trimmed.startsWith("```")) {
-      const code: string[] = [];
-      index += 1;
-      while (index < lines.length && !(lines[index] ?? "").trim().startsWith("```")) {
-        code.push(lines[index] ?? "");
-        index += 1;
-      }
-      if (index < lines.length) index += 1;
-      blocks.push({ type: "code", text: code.join("\n").trimEnd() });
-      continue;
-    }
-
-    const heading = /^(#{1,6})\s+(.+)$/.exec(trimmed);
-    if (heading) {
-      blocks.push({ type: "heading", level: heading[1].length, text: stripInlineMarkdown(heading[2]) });
-      index += 1;
-      continue;
-    }
-
-    if (/^[-*]\s+/.test(trimmed)) {
-      const items: string[] = [];
-      while (index < lines.length) {
-        const item = /^[-*]\s+(.+)$/.exec((lines[index] ?? "").trim());
-        if (!item) break;
-        items.push(stripInlineMarkdown(item[1]));
-        index += 1;
-      }
-      blocks.push({ type: "list", items });
-      continue;
-    }
-
-    const paragraph: string[] = [];
-    while (index < lines.length) {
-      const current = (lines[index] ?? "").trim();
-      if (!current || current.startsWith("```") || /^(#{1,6})\s+/.test(current) || /^[-*]\s+/.test(current)) break;
-      paragraph.push(current);
-      index += 1;
-    }
-    blocks.push({ type: "paragraph", text: stripInlineMarkdown(paragraph.join(" ")) });
-  }
-
-  return blocks;
-}
-
-function renderReadmeBlock(block: ReadmeBlock, index: number) {
-  if (block.type === "heading") {
-    const HeadingTag = block.level <= 2 ? "h4" : "h5";
-    return <HeadingTag key={`${block.type}-${index}`}>{block.text}</HeadingTag>;
-  }
-  if (block.type === "list") {
-    return (
-      <ul key={`${block.type}-${index}`}>
-        {block.items.map((item) => <li key={item}>{item}</li>)}
-      </ul>
-    );
-  }
-  if (block.type === "code") {
-    return <pre key={`${block.type}-${index}`}><code>{block.text}</code></pre>;
-  }
-  return <p key={`${block.type}-${index}`}>{block.text}</p>;
-}
-
-function stripInlineMarkdown(value: string) {
-  return value.replace(/`([^`]+)`/g, "$1").replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1").trim();
-}
-
 function VersionsPanel(props: {
   detail: Dock;
   onPageChange: (page: number) => void;
@@ -3659,32 +3263,6 @@ function CommandProgressCard(props: {
   );
 }
 
-function commandResultGroups(result: OpenDockChangeResult, t: (typeof TEXT)[Lang]) {
-  const versionChanges = result.reports.flatMap(versionChangeLabel);
-  const unchanged = result.summary.unchanged.length > 0
-    ? result.summary.unchanged
-    : result.reports.filter((report) => report.status === "unchanged").map((report) => report.dockId);
-  return [
-    { count: result.summary.created.length, items: result.summary.created, key: "created", label: t.resultAdded, symbol: "+" },
-    {
-      count: versionChanges.length + result.summary.updated.length,
-      items: [...versionChanges, ...result.summary.updated],
-      key: "updated",
-      label: t.resultChanged,
-      symbol: "~",
-    },
-    { count: result.summary.deleted.length, items: result.summary.deleted, key: "deleted", label: t.resultDeleted, symbol: "-" },
-    {
-      count: result.summary.reviewRequired.length,
-      items: result.summary.reviewRequired,
-      key: "reviewRequired",
-      label: t.resultReviewRequired,
-      symbol: "!",
-    },
-    { count: unchanged.length, items: unchanged, key: "unchanged", label: t.resultNoChanges, symbol: "=" },
-  ];
-}
-
 function openDockChangeResult(
   value: OpenDockCommandResult["json"],
 ): OpenDockChangeResult | null {
@@ -3722,68 +3300,6 @@ function outdatedReportsByDockId(
   const result = openDockOutdatedResult(value);
   if (!result?.success) return {};
   return Object.fromEntries(result.reports.map((report) => [report.dockId, report]));
-}
-
-function commandResultRows(result: OpenDockChangeResult, t: (typeof TEXT)[Lang]): CommandTaskRow[] {
-  const rows: CommandTaskRow[] = [];
-  for (const group of commandResultGroups(result, t).filter((item) => item.items.length > 0)) {
-    const color = commandResultColor(group.symbol);
-    rows.push({
-      time: nowTime(),
-      level: group.symbol,
-      color,
-      message: `${group.label} ${group.count}`,
-    });
-    const visibleItems = visibleChangeItems(group.items);
-    for (const item of visibleItems) {
-      rows.push({
-        time: nowTime(),
-        level: group.symbol,
-        color,
-        message: item,
-      });
-    }
-    if (group.items.length > visibleItems.length) {
-      rows.push({
-        time: nowTime(),
-        level: group.symbol,
-        color,
-        message: `... +${group.items.length - visibleItems.length}`,
-      });
-    }
-  }
-  return rows;
-}
-
-function commandResultColor(symbol: string) {
-  if (symbol === "+") return "var(--success)";
-  if (symbol === "~") return "var(--info)";
-  if (symbol === "-") return "var(--danger)";
-  if (symbol === "!") return "var(--warning)";
-  return "var(--text-3)";
-}
-
-function versionChangeLabel(report: OpenDockChangeReport) {
-  if (report.operation !== "update") return [];
-  if (report.fromVersion && report.toVersion && report.fromVersion !== report.toVersion) {
-    return [`${report.dockId} ${report.fromVersion} -> ${report.toVersion}`];
-  }
-  if (report.status === "updated" && report.fromVersion) {
-    return [`${report.dockId} ${report.fromVersion} -> ${report.version}`];
-  }
-  return [];
-}
-
-function visibleChangeItems(items: string[]) {
-  return items.slice(0, 8);
-}
-
-function statusLabel(status: CommandTaskStatus, t: (typeof TEXT)[Lang]) {
-  if (status === "success") return t.taskCompleted;
-  if (status === "error") return t.taskFailed;
-  if (status === "cancelled") return t.taskCancelled;
-  if (status === "cancelling") return t.taskCancelling;
-  return t.taskWorking;
 }
 
 function CommandPaletteDialog(props: {

@@ -516,6 +516,9 @@ async function assertSortMenu(page) {
   if (sortMode !== "\"name\"") {
     throw new Error(`sort selection should persist name mode, got ${sortMode}`);
   }
+  await page.waitForFunction(
+    () => document.querySelector(".dock-title strong")?.textContent?.trim() === "backend-ultrawork"
+  );
   const firstDockTitle = await page.locator(".dock-title strong").first().innerText();
   if (firstDockTitle !== "backend-ultrawork") {
     throw new Error(`name sort should put backend-ultrawork first, got ${firstDockTitle}`);
