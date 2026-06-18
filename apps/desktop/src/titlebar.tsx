@@ -20,11 +20,8 @@ export function Titlebar(props: {
   onAccount: () => void;
   onAppMenu: () => void;
   onAppMenuCommand: (id: string) => void;
-  onClose: () => void;
   onLang: () => void;
   onLogout: () => void;
-  onMaximize: () => void;
-  onMinimize: () => void;
   onOpenProfile: () => void;
   onSetEnglish: () => void;
   onSetKorean: () => void;
@@ -35,6 +32,11 @@ export function Titlebar(props: {
   windowControlPlatform: WindowControlPlatform;
 }) {
   const isMac = props.windowControlPlatform === "macos";
+  const windowControls = {
+    onClose: () => void handleWindow("close"),
+    onMaximize: () => void handleWindow("maximize"),
+    onMinimize: () => void handleWindow("minimize"),
+  };
   const startDrag = (event: MouseEvent<HTMLElement>) => {
     if (event.button !== 0 || event.detail > 1 || isInteractiveTitlebarTarget(event.target)) return;
     if (!isTauriRuntime()) return;
@@ -46,9 +48,9 @@ export function Titlebar(props: {
     <header className={`titlebar ${props.windowControlPlatform}`} data-platform={props.windowControlPlatform} onMouseDown={startDrag}>
       {isMac ? (
         <WindowControls
-          onClose={props.onClose}
-          onMaximize={props.onMaximize}
-          onMinimize={props.onMinimize}
+          onClose={windowControls.onClose}
+          onMaximize={windowControls.onMaximize}
+          onMinimize={windowControls.onMinimize}
           platform={props.windowControlPlatform}
           t={props.t}
         />
@@ -110,9 +112,9 @@ export function Titlebar(props: {
         ) : null}
         {!isMac ? (
           <WindowControls
-            onClose={props.onClose}
-            onMaximize={props.onMaximize}
-            onMinimize={props.onMinimize}
+            onClose={windowControls.onClose}
+            onMaximize={windowControls.onMaximize}
+            onMinimize={windowControls.onMinimize}
             platform={props.windowControlPlatform}
             t={props.t}
           />
@@ -120,6 +122,17 @@ export function Titlebar(props: {
       </div>
     </header>
   );
+}
+
+async function handleWindow(action: "minimize" | "maximize" | "close") {
+  try {
+    const appWindow = getCurrentWindow();
+    if (action === "minimize") await appWindow.minimize();
+    if (action === "maximize") await appWindow.toggleMaximize();
+    if (action === "close") await appWindow.close();
+  } catch (error) {
+    console.warn(`OpenDock window control failed: ${action}`, error);
+  }
 }
 
 function isInteractiveTitlebarTarget(target: EventTarget | null) {

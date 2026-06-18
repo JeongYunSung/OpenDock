@@ -76,7 +76,7 @@ const frontendRuntimeSources = [
 ].join("\n");
 const invokedCommands = unique([...frontendRuntimeSources.matchAll(/invoke(?:<[^>]+>)?\("([^"]+)"/g)].map((match) => match[1]));
 const unregisteredInvokes = invokedCommands.filter((command) => !registeredCommands.includes(command));
-const requiredWindowPermissions = requiredCoreWindowPermissions(app);
+const requiredWindowPermissions = requiredCoreWindowPermissions([app, titlebar].join("\n"));
 const capabilityPermissions = defaultCapability.permissions ?? [];
 const missingWindowPermissions = requiredWindowPermissions.filter(
   (permission) => !capabilityPermissions.includes(permission)

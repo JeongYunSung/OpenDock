@@ -313,7 +313,7 @@ async function runViewportFlow(viewport) {
     }
 
     await page.locator(".avatar-button").click();
-    await assertVisible(page.locator(".account-name", { hasText: "kjyscom@gmail.com" }), "gmail account menu label");
+    await assertVisible(page.locator(".account-name", { hasText: "hello@opendock.app" }), "gmail account menu label");
     await page.getByRole("button", { name: /^계정$/ }).click();
     await assertVisible(page.getByRole("heading", { name: "내 계정" }), "account profile panel");
     await assertVisible(page.locator(".account-tabs").getByRole("button", { name: "프로필" }), "account profile tab");

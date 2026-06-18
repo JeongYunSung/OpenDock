@@ -1,4 +1,3 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   useMemo,
   useState,
@@ -16,7 +15,7 @@ import {
   appendStoredLog,
   normalizeStoredLogs,
 } from "./command-log";
-import { CommandPaletteDialog, CommandProgressDialog, ProjectSwitcherDialog } from "./app-dialogs";
+import { AppOverlays } from "./app-overlays";
 import { ProjectEmpty, ProjectLoading, SignInScreen } from "./workspace-shell";
 import { useResponsivePageSizes } from "./responsive-page-size";
 import { isTauriRuntime } from "./tauri-runtime";
@@ -34,7 +33,6 @@ import { usePaginationGuards } from "./use-pagination-guards";
 import { useProjectController } from "./use-project-controller";
 import { useProjectRuntimeController } from "./use-project-runtime-controller";
 import { useShortcutController } from "./use-shortcut-controller";
-import { ProjectAddModal, ProjectDeleteModal, ProjectRenameModal } from "./project-modals";
 import { Titlebar, type OpenMenu } from "./titlebar";
 import { ACCOUNT_PAGE_LIMIT, Workspace } from "./workspace-view";
 
@@ -74,7 +72,7 @@ export function App() {
     setCommandTask,
   } = useCommandTaskController(t);
   const [nickname, setNickname] = useStoredState("opendock.nickname", "opendock");
-  const [accountEmail, setAccountEmail] = useStoredState("opendock.accountEmail", "kjyscom@gmail.com");
+  const [accountEmail, setAccountEmail] = useStoredState("opendock.accountEmail", "");
   const [appStateLoaded, setAppStateLoaded] = useState(!isTauriRuntime());
   const responsivePageSizes = useResponsivePageSizes();
   const catalogPageSize = responsivePageSizes.catalog;
@@ -198,7 +196,7 @@ export function App() {
   const catalogPageCount = Math.max(1, Math.ceil(Math.max(catalogTotal, sortedDocks.length) / catalogPageSize));
   const versionPageCount = Math.max(1, Math.ceil(Math.max(versionTotal, detail?.versions?.length ?? 0) / versionPageSize));
   const overlayOpen = openMenu !== "";
-  const accountMenuName = authProvider === "github" ? t.githubAccount : accountEmail;
+  const accountMenuName = authProvider === "github" ? t.githubAccount : accountEmail || t.opendockAccount;
   const showAppLoading = isTauriRuntime() && !appStateLoaded;
   const {
     myDocks,
@@ -369,17 +367,6 @@ export function App() {
     setLogs((current) => appendStoredLog(current, level, color, message));
   }
 
-  async function handleWindow(action: "minimize" | "maximize" | "close") {
-    try {
-      const appWindow = getCurrentWindow();
-      if (action === "minimize") await appWindow.minimize();
-      if (action === "maximize") await appWindow.toggleMaximize();
-      if (action === "close") await appWindow.close();
-    } catch (error) {
-      console.warn(`OpenDock window control failed: ${action}`, error);
-    }
-  }
-
   return (
     <div className="app-root" data-lang={lang} data-theme={theme}>
       <Titlebar
@@ -389,11 +376,8 @@ export function App() {
         onAccount={() => setOpenMenu((current) => (current === "account" ? "" : "account"))}
         onAppMenu={() => setOpenMenu((current) => (current === "app" ? "" : "app"))}
         onAppMenuCommand={(id) => void runAppMenuCommand(id)}
-        onClose={() => void handleWindow("close")}
         onLang={() => setOpenMenu((current) => (current === "lang" ? "" : "lang"))}
         onLogout={logout}
-        onMaximize={() => void handleWindow("maximize")}
-        onMinimize={() => void handleWindow("minimize")}
         onOpenProfile={() => setMainView("account")}
         onSetEnglish={() => {
           setLang("en");
@@ -507,66 +491,39 @@ export function App() {
         )}
       </main>
 
-      {projectAddOpen ? (
-        <ProjectAddModal
-          onAddExisting={() => void addExistingProjectFromFolder()}
-          onClose={() => setProjectAddOpen(false)}
-          onCreate={createBlankProject}
-          t={t}
-        />
-      ) : null}
-
-      {projectRenameOpen ? (
-        <ProjectRenameModal
-          name={renameProjectName}
-          onChange={setRenameProjectName}
-          onClose={closeProjectRename}
-          onSubmit={saveProjectRename}
-          t={t}
-        />
-      ) : null}
-
-      {projectDeleteOpen ? (
-        <ProjectDeleteModal
-          name={deleteProjectName}
-          onCancel={closeProjectDelete}
-          onConfirm={confirmProjectDelete}
-          t={t}
-        />
-      ) : null}
-
-      {commandTask ? (
-        <CommandProgressDialog
-          commandTask={commandTask}
-          onClose={closeCommandProgress}
-          onForceRetryCommand={() => void forceRetryCommand()}
-          t={t}
-        />
-      ) : null}
-
-      {commandPaletteOpen ? (
-        <CommandPaletteDialog
-          bindings={shortcutBindings}
-          lang={lang}
-          onClose={() => setCommandPaletteOpen(false)}
-          onRun={(commandId) => {
-            setCommandPaletteOpen(false);
-            void runShortcutCommand(commandId);
-          }}
-          platform={shortcutPlatform}
-          t={t}
-        />
-      ) : null}
-
-      {projectSwitcherOpen ? (
-        <ProjectSwitcherDialog
-          activeProjectId={activeProjectId}
-          onClose={() => setProjectSwitcherOpen(false)}
-          onSelect={selectProject}
-          projects={projects}
-          t={t}
-        />
-      ) : null}
+      <AppOverlays
+        activeProjectId={activeProjectId}
+        bindings={shortcutBindings}
+        commandPaletteOpen={commandPaletteOpen}
+        commandTask={commandTask}
+        deleteProjectName={deleteProjectName}
+        lang={lang}
+        onAddExistingProject={() => void addExistingProjectFromFolder()}
+        onCloseCommandPalette={() => setCommandPaletteOpen(false)}
+        onCloseCommandProgress={closeCommandProgress}
+        onCloseProjectAdd={() => setProjectAddOpen(false)}
+        onCloseProjectRename={closeProjectRename}
+        onConfirmProjectDelete={confirmProjectDelete}
+        onCreateBlankProject={createBlankProject}
+        onForceRetryCommand={() => void forceRetryCommand()}
+        onProjectDeleteCancel={closeProjectDelete}
+        onRenameProjectChange={setRenameProjectName}
+        onRenameProjectSubmit={saveProjectRename}
+        onRunShortcutCommand={(commandId) => {
+          setCommandPaletteOpen(false);
+          void runShortcutCommand(commandId);
+        }}
+        onSelectProject={selectProject}
+        onSwitcherClose={() => setProjectSwitcherOpen(false)}
+        projectAddOpen={projectAddOpen}
+        projectDeleteOpen={projectDeleteOpen}
+        projectRenameOpen={projectRenameOpen}
+        projectSwitcherOpen={projectSwitcherOpen}
+        projects={projects}
+        renameProjectName={renameProjectName}
+        shortcutPlatform={shortcutPlatform}
+        t={t}
+      />
     </div>
   );
 }

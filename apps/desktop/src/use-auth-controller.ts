@@ -5,6 +5,7 @@ import type { AuthSession, Lang, OpenDockCommandResult, TEXT } from "./data";
 import { isTauriRuntime } from "./tauri-runtime";
 
 type AuthProvider = "gmail" | "github";
+const browserDemoEmail = "hello@opendock.app";
 
 interface AuthControllerOptions {
   resetAccountDocks: () => void;
@@ -41,6 +42,8 @@ export function useAuthController(options: AuthControllerOptions) {
       } finally {
         setAuthWorking(false);
       }
+    } else if (provider === "gmail") {
+      options.setAccountEmail(browserDemoEmail);
     }
     setAuthWorking(false);
     setAuthMessage("");
@@ -59,7 +62,7 @@ export function useAuthController(options: AuthControllerOptions) {
     }
     options.setLoggedIn(false);
     options.setAuthProvider("");
-    options.setAccountEmail("kjyscom@gmail.com");
+    options.setAccountEmail("");
     options.resetProjectDialogs();
     options.setProjectSidebarCollapsed(false);
     options.setInstalledDocks({});

@@ -119,7 +119,7 @@ export async function assertRegisteredProjectSkipsChooser(page) {
     localStorage.clear();
     localStorage.setItem("opendock.loggedIn", JSON.stringify(true));
     localStorage.setItem("opendock.authProvider", JSON.stringify("gmail"));
-    localStorage.setItem("opendock.accountEmail", JSON.stringify("kjyscom@gmail.com"));
+    localStorage.setItem("opendock.accountEmail", JSON.stringify("hello@opendock.app"));
     localStorage.setItem(
       "opendock.projects",
       JSON.stringify([
