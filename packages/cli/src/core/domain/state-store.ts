@@ -16,7 +16,7 @@ export interface AppliedFileRecord {
   executable?: boolean;
 }
 
-export interface InstalledCommandRecord {
+interface InstalledCommandRecord {
   name: string;
   file: string;
   runner: string;
@@ -36,7 +36,7 @@ export interface InstalledDockRecord {
   commands?: InstalledCommandRecord[];
 }
 
-export interface ProjectState {
+interface ProjectState {
   schema: string;
   docks: Array<{
     id: string;

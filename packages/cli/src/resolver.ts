@@ -38,16 +38,6 @@ export async function resolveDock(
   return resolveRemoteDock(dockRef, platform);
 }
 
-export async function resolveLatestDock(
-  owner: string,
-  name: string,
-  platform: OpenDockPlatform,
-): Promise<ResolvedDock> {
-  const client = new OpenDockRegistryClient();
-  const metadata = await client.resolveDockVersion(owner, name, "latest", platform);
-  return resolveRemoteDockMetadata(owner, name, metadata, `${owner}/${name}@latest`, platform);
-}
-
 async function resolveRemoteDock(
   dockRef: DockRef,
   platform: OpenDockPlatform,

@@ -5,10 +5,10 @@ import {
   releaseSignaturePayload,
 } from "../src/release-signature.js";
 
-export const testReleaseSignatureKeyId = "opendock-test-2026-01";
-export const testReleaseSignaturePrivateKeyBase64 =
+const testReleaseSignatureKeyId = "opendock-test-2026-01";
+const testReleaseSignaturePrivateKeyBase64 =
   "MC4CAQAwBQYDK2VwBCIEIDwzr4RZV26vCvzbJIzh58no4fPYis1vqujUDHsGrELR";
-export const testReleaseSignaturePublicKeyBase64 =
+const testReleaseSignaturePublicKeyBase64 =
   "MCowBQYDK2VwAyEAPgcscfvGY9zIgPXwOeboEKWoLgEJp/F18y4yD0NsxYw=";
 
 process.env.OPENDOCK_RELEASE_TRUSTED_PUBLIC_KEY_ID = testReleaseSignatureKeyId;

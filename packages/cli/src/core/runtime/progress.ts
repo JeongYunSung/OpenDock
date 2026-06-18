@@ -1,4 +1,4 @@
-export type ProgressLevel = "ERR" | "INFO" | "OK" | "RUN" | "WARN";
+type ProgressLevel = "ERR" | "INFO" | "OK" | "RUN" | "WARN";
 
 export interface RuntimeProgressEvent {
   current?: number;

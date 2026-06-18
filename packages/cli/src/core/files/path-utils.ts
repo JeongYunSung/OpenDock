@@ -29,7 +29,7 @@ export function assertSafeRelativePath(value: string, label = "path"): string {
   return normalized;
 }
 
-export function assertInsideRoot(root: string, candidate: string, label = "path"): void {
+function assertInsideRoot(root: string, candidate: string, label = "path"): void {
   const rootReal = resolve(root);
   const candidateReal = resolve(candidate);
   const rel = relative(rootReal, candidateReal);

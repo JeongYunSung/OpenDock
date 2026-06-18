@@ -242,17 +242,15 @@ const manifestSchema = z
   }));
 
 export type FileSpec = z.infer<typeof fileSpecSchema>;
-export type Requires = z.infer<typeof requiresSchema>;
-export type WorkdirSpec = z.infer<typeof workdirSpecSchema>;
-export type Tasks = z.infer<typeof tasksSchema>;
+type WorkdirSpec = z.infer<typeof workdirSpecSchema>;
+type Tasks = z.infer<typeof tasksSchema>;
 export type TaskPhase = keyof Tasks;
 export type TaskStep = z.infer<typeof taskStepSchema>;
-export type ExportSpec = z.infer<typeof exportSpecSchema>;
 export type CommandSpec = z.infer<typeof commandSpecSchema>;
 type ParsedDockManifest = z.infer<typeof manifestSchema>;
 export type DockManifest = Omit<ParsedDockManifest, "workdir"> & { workdir?: WorkdirSpec };
 
-export class ManifestReader {
+class ManifestReader {
   read(path: string): DockManifest {
     try {
       return manifestSchema.parse(YAML.parse(readFileSync(path, "utf8")));
@@ -323,7 +321,7 @@ export function parseManifestFile(path: string): DockManifest {
   return new ManifestReader().read(path);
 }
 
-export function validateManifestFor(manifest: DockManifest, requested: DockRef): void {
+function validateManifestFor(manifest: DockManifest, requested: DockRef): void {
   if (manifest.opendock === undefined) {
     throw new Error("manifest must declare `opendock: 1`");
   }

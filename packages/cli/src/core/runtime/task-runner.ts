@@ -322,10 +322,7 @@ export class TaskRunner {
   }
 }
 
-export function assertManifestSupportsPlatform(
-  manifest: DockManifest,
-  platform: OpenDockPlatform,
-): void {
+function assertManifestSupportsPlatform(manifest: DockManifest, platform: OpenDockPlatform): void {
   const supported = collectManifestPlatforms(manifest);
   if (supported.size === 0 || supported.has(platform)) {
     return;
