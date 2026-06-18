@@ -3,43 +3,55 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const rust = readFileSync(resolve(appRoot, "src-tauri", "src", "lib.rs"), "utf8");
-const appMenuRust = readFileSync(resolve(appRoot, "src-tauri", "src", "app_menu.rs"), "utf8");
-const commandOutputRust = readFileSync(resolve(appRoot, "src-tauri", "src", "command_output.rs"), "utf8");
-const opendockRunnerRust = readFileSync(resolve(appRoot, "src-tauri", "src", "opendock_runner.rs"), "utf8");
-const registryRust = readFileSync(resolve(appRoot, "src-tauri", "src", "registry.rs"), "utf8");
-const mainRust = readFileSync(resolve(appRoot, "src-tauri", "src", "main.rs"), "utf8");
-const accountPanel = readFileSync(resolve(appRoot, "src", "account-panel.tsx"), "utf8");
-const app = readFileSync(resolve(appRoot, "src", "App.tsx"), "utf8");
-const appMenu = readFileSync(resolve(appRoot, "src", "app-menu.tsx"), "utf8");
-const commandLog = readFileSync(resolve(appRoot, "src", "command-log.ts"), "utf8");
-const commandTask = readFileSync(resolve(appRoot, "src", "command-task.ts"), "utf8");
-const commandTaskController = readFileSync(resolve(appRoot, "src", "use-command-task-controller.ts"), "utf8");
-const catalogController = readFileSync(resolve(appRoot, "src", "use-catalog-controller.ts"), "utf8");
-const data = readFileSync(resolve(appRoot, "src", "data.ts"), "utf8");
-const dockData = readFileSync(resolve(appRoot, "src", "dock-data.ts"), "utf8");
-const desktopUi = readFileSync(resolve(appRoot, "src", "desktop-ui.tsx"), "utf8");
-const display = readFileSync(resolve(appRoot, "src", "display.tsx"), "utf8");
-const dockPanels = readFileSync(resolve(appRoot, "src", "dock-panels.tsx"), "utf8");
-const dockWorkspaceModel = readFileSync(resolve(appRoot, "src", "dock-workspace-model.ts"), "utf8");
-const projectController = readFileSync(resolve(appRoot, "src", "use-project-controller.ts"), "utf8");
-const responsivePageSize = readFileSync(resolve(appRoot, "src", "responsive-page-size.ts"), "utf8");
-const registryClient = readFileSync(resolve(appRoot, "src", "registry-client.ts"), "utf8");
-const shortcutController = readFileSync(resolve(appRoot, "src", "use-shortcut-controller.ts"), "utf8");
-const titlebar = readFileSync(resolve(appRoot, "src", "titlebar.tsx"), "utf8");
-const workspaceShell = readFileSync(resolve(appRoot, "src", "workspace-shell.tsx"), "utf8");
-const styles = readFileSync(resolve(appRoot, "src", "styles.css"), "utf8");
-const tauriConfig = JSON.parse(readFileSync(resolve(appRoot, "src-tauri", "tauri.conf.json"), "utf8"));
-const windowsIcon = readFileSync(resolve(appRoot, "src-tauri", "icons", "icon.ico"));
-const prepareSidecars = readFileSync(resolve(appRoot, "scripts", "prepare-sidecars.mjs"), "utf8");
-const cli = readFileSync(resolve(appRoot, "..", "..", "packages", "cli", "src", "cli.ts"), "utf8");
-const defaultCapability = JSON.parse(
-  readFileSync(resolve(appRoot, "src-tauri", "capabilities", "default.json"), "utf8")
-);
+const repoRoot = resolve(appRoot, "..", "..");
+const readAppText = (...parts) => readFileSync(resolve(appRoot, ...parts), "utf8");
+const readRepoText = (...parts) => readFileSync(resolve(repoRoot, ...parts), "utf8");
+const readAppBinary = (...parts) => readFileSync(resolve(appRoot, ...parts));
+const readSrc = (file) => readAppText("src", file);
+const readTauri = (...parts) => readAppText("src-tauri", ...parts);
+const readTauriSrc = (file) => readTauri("src", file);
+const readJson = (...parts) => JSON.parse(readAppText(...parts));
+
+const rust = readTauriSrc("lib.rs");
+const appMenuRust = readTauriSrc("app_menu.rs");
+const commandOutputRust = readTauriSrc("command_output.rs");
+const opendockRunnerRust = readTauriSrc("opendock_runner.rs");
+const registryRust = readTauriSrc("registry.rs");
+const mainRust = readTauriSrc("main.rs");
+const accountPanel = readSrc("account-panel.tsx");
+const app = readSrc("App.tsx");
+const appMenu = readSrc("app-menu.tsx");
+const commandLog = readSrc("command-log.ts");
+const commandTask = readSrc("command-task.ts");
+const commandTaskController = readSrc("use-command-task-controller.ts");
+const catalogController = readSrc("use-catalog-controller.ts");
+const data = readSrc("data.ts");
+const dockData = readSrc("dock-data.ts");
+const desktopUi = readSrc("desktop-ui.tsx");
+const display = readSrc("display.tsx");
+const dockPanels = readSrc("dock-panels.tsx");
+const dockWorkspaceModel = readSrc("dock-workspace-model.ts");
+const authController = readSrc("use-auth-controller.ts");
+const dockCommandController = readSrc("use-dock-command-controller.ts");
+const projectController = readSrc("use-project-controller.ts");
+const projectRuntimeController = readSrc("use-project-runtime-controller.ts");
+const nativeEventBridge = readSrc("use-native-event-bridge.ts");
+const navigationController = readSrc("use-navigation-controller.ts");
+const responsivePageSize = readSrc("responsive-page-size.ts");
+const registryClient = readSrc("registry-client.ts");
+const shortcutController = readSrc("use-shortcut-controller.ts");
+const titlebar = readSrc("titlebar.tsx");
+const workspaceShell = readSrc("workspace-shell.tsx");
+const styles = readSrc("styles.css");
+const tauriConfig = readJson("src-tauri", "tauri.conf.json");
+const windowsIcon = readAppBinary("src-tauri", "icons", "icon.ico");
+const prepareSidecars = readAppText("scripts", "prepare-sidecars.mjs");
+const cli = readRepoText("packages", "cli", "src", "cli.ts");
+const defaultCapability = readJson("src-tauri", "capabilities", "default.json");
 
 const menuIds = unique([...appMenuRust.matchAll(/MenuItem::with_id\(\s*app,\s*"([^"]+)"/g)].map((match) => match[1]));
 const frontendMenuCases = unique(
-  [...extractFunctionBody(app, "async function handleNativeMenu").matchAll(/case "([^"]+)":/g)].map(
+  [...extractFunctionBody(navigationController, "async function handleNativeMenu").matchAll(/case "([^"]+)":/g)].map(
     (match) => match[1]
   )
 );
@@ -52,7 +64,15 @@ const staleMenuCases = frontendMenuCases.filter(
 );
 
 const registeredCommands = extractGenerateHandlerCommands(rust);
-const frontendRuntimeSources = [app, projectController, shortcutController].join("\n");
+const frontendRuntimeSources = [
+  app,
+  authController,
+  dockCommandController,
+  navigationController,
+  projectController,
+  projectRuntimeController,
+  shortcutController,
+].join("\n");
 const invokedCommands = unique([...frontendRuntimeSources.matchAll(/invoke(?:<[^>]+>)?\("([^"]+)"/g)].map((match) => match[1]));
 const unregisteredInvokes = invokedCommands.filter((command) => !registeredCommands.includes(command));
 const requiredWindowPermissions = requiredCoreWindowPermissions(app);
@@ -61,7 +81,7 @@ const missingWindowPermissions = requiredWindowPermissions.filter(
   (permission) => !capabilityPermissions.includes(permission)
 );
 const forbiddenTitlebarDragCss = styles.includes("-webkit-app-region");
-const menuListenerEffect = extractUseEffectContaining(app, 'listen<string>("opendock-menu"');
+const menuListenerEffect = extractUseEffectContaining(nativeEventBridge, 'listen<string>("opendock-menu"');
 const menuListenerUsesRef = menuListenerEffect.includes("handleNativeMenuRef.current");
 const menuListenerHasEmptyDeps = /\},\s*\[\]\s*\)/.test(menuListenerEffect);
 const blankProjectHasInFlightGuard =
@@ -77,7 +97,7 @@ const appParsesHistoricalLogLines =
   commandLog.includes("function parseOpenDockHistoryLine") &&
   commandLog.includes("function formatHistoryTime") &&
   commandLog.includes("function commandLinesToStoredLogs") &&
-  app.includes("setLogs(commandLinesToStoredLogs(result.lines))");
+  projectRuntimeController.includes("options.setLogs(commandLinesToStoredLogs(result.lines))");
 const registryRequestsBypassCache =
   registryRust.includes("reqwest::header::CACHE_CONTROL") &&
   registryRust.includes("reqwest::header::PRAGMA") &&
@@ -146,16 +166,16 @@ const detailMergeUsesRegistryLatestVersion =
   data.includes("version: detail.latestVersion ?? base.version") ||
   dockData.includes("version: detail.latestVersion ?? base.version");
 const installRefreshesDockBeforeResolvingRef = (() => {
-  const installBody = extractFunctionBody(app, "async function installDock");
-  const refreshIndex = installBody.indexOf("await refreshDockDetail(dock)");
+  const installBody = extractFunctionBody(dockCommandController, "async function installDock");
+  const refreshIndex = installBody.indexOf("await options.refreshDockDetail(dock)");
   const refIndex = installBody.indexOf("const dockRef = `${dockFullId(freshDock)}@${freshDock.version}`");
   return refreshIndex !== -1 && refIndex !== -1 && refreshIndex < refIndex;
 })();
 const installedViewPollsProjectState =
-  app.includes('dockView !== "installed"') &&
-  app.includes("refreshInstalledProjectState") &&
-  app.includes("window.setInterval(refreshInstalledProjectState, 5000)") &&
-  app.includes("await refreshProjectState(project, { silent: true })");
+  projectRuntimeController.includes('options.dockView !== "installed"') &&
+  projectRuntimeController.includes("refreshInstalledProjectState") &&
+  projectRuntimeController.includes("window.setInterval(refreshInstalledProjectState, 5000)") &&
+  projectRuntimeController.includes("await refreshProjectState(options.activeProject, { silent: true })");
 const changeCommandsUseEvents =
   rust.includes('"install".to_string(),') &&
   rust.includes("dock_ref") &&
@@ -165,8 +185,8 @@ const changeCommandsUseEvents =
 const commandProgressBridge =
   opendockRunnerRust.includes('app.emit("opendock-command-progress"') &&
   opendockRunnerRust.includes("command_progress_from_event_line") &&
-  app.includes('listen<OpenDockCommandProgress>("opendock-command-progress"') &&
-  app.includes("applyCommandProgressToTask(progress)");
+  nativeEventBridge.includes('listen<OpenDockCommandProgress>("opendock-command-progress"') &&
+  nativeEventBridge.includes("handlers.applyCommandProgressToTask(progress)");
 const noUpdateProgressDoesNotDuplicatePopupRows =
   commandTask.includes("function isNoUpdateProgress") &&
   commandTask.includes("const suppressProgressRow = isNoUpdateProgress(progress)") &&
@@ -204,8 +224,8 @@ const titlebarUsesNativeDragFallback =
   titlebar.includes("function isInteractiveTitlebarTarget") &&
   titlebar.includes("onMouseDown={startDrag}");
 const authFailuresAreVisible =
-  app.includes("const [authMessage, setAuthMessage]") &&
-  app.includes("commandFailureMessage(result, t.signInFailed)") &&
+  authController.includes("const [authMessage, setAuthMessage]") &&
+  authController.includes("commandFailureMessage(result, options.t.signInFailed)") &&
   workspaceShell.includes("className=\"signin-status\"");
 const sidecarBuildsStandalone =
   prepareSidecars.includes('"--compile"') &&
@@ -224,7 +244,7 @@ const desktopAppMenuUsesNativeCommands =
   titlebar.includes("<AppMenu") &&
   titlebar.includes('props.openMenu === "app"') &&
   app.includes("onAppMenuCommand") &&
-  app.includes("await handleNativeMenu(id)");
+  navigationController.includes("await handleNativeMenu(id)");
 const desktopAppMenuHiddenOnMac =
   titlebar.includes("const isMac = props.windowControlPlatform === \"macos\"") &&
   titlebar.includes("{!isMac ? (") &&
@@ -253,11 +273,11 @@ const windowsChildCommandsHideConsole =
   !opendockRunnerRust.includes("Command::new(\"opendock\")");
 
 const failures = [
-  ...unhandledMenuIds.map((id) => `menu id is not handled in App.tsx: ${id}`),
-  ...staleMenuCases.map((id) => `App.tsx handles a menu id not created by Rust: ${id}`),
+  ...unhandledMenuIds.map((id) => `menu id is not handled in the navigation controller: ${id}`),
+  ...staleMenuCases.map((id) => `navigation controller handles a menu id not created by Rust: ${id}`),
   ...unregisteredInvokes.map((command) => `Tauri command is invoked but not registered: ${command}`),
   ...missingWindowPermissions.map((permission) => `window control permission is missing: ${permission}`),
-  ...(!menuListenerEffect ? ["opendock-menu listener is missing from App.tsx"] : []),
+  ...(!menuListenerEffect ? ["opendock-menu listener is missing from the native event bridge"] : []),
   ...(menuListenerEffect && !menuListenerUsesRef
     ? ["opendock-menu listener must dispatch through handleNativeMenuRef to avoid stale duplicate listeners"]
     : []),
