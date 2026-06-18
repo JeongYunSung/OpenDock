@@ -21,7 +21,7 @@ export type ShortcutOverrides = Partial<
   Record<ShortcutCommandId, Partial<Record<ShortcutPlatform, string | null>>>
 >;
 
-export interface ShortcutConfigFile {
+interface ShortcutConfigFile {
   shortcuts: Record<string, Partial<Record<ShortcutPlatform, string | null>>>;
   version: 1;
 }
@@ -48,7 +48,7 @@ const defaultShortcuts = Object.fromEntries(
   }),
 ) as typeof rawDefaultShortcuts;
 
-export const shortcutDefinitions: ShortcutDefinition[] = commandIds.map((id) => ({
+const shortcutDefinitions: ShortcutDefinition[] = commandIds.map((id) => ({
   id,
   description: defaultShortcuts[id].description,
   editable: defaultShortcuts[id].editable,
@@ -71,7 +71,7 @@ export function shortcutBindingsForPlatform(
   }));
 }
 
-export function shortcutForCommand(
+function shortcutForCommand(
   commandId: ShortcutCommandId,
   overrides: ShortcutOverrides,
   platform: ShortcutPlatform,
@@ -90,7 +90,7 @@ export function shortcutCommandForEvent(
   return bindings.find((binding) => binding.accelerator === shortcut)?.id ?? null;
 }
 
-export function shortcutFromKeyboardEvent(event: KeyboardLikeEvent): string | null {
+function shortcutFromKeyboardEvent(event: KeyboardLikeEvent): string | null {
   const key = normalizeShortcutKey(event.key);
   if (!key) return null;
   const parts = [

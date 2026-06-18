@@ -7,11 +7,8 @@ import {
   useMemo,
   useRef,
   useState,
-  type Dispatch,
   type FormEvent,
-  type MouseEvent,
   type ReactNode,
-  type SetStateAction,
 } from "react";
 import {
   ArrowLeft,
@@ -19,29 +16,19 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Copy,
   Download,
   Eye,
   Folder,
   FolderOpen,
   Github,
-  Globe2,
-  LogOut,
-  Maximize2,
-  Menu as MenuIcon,
-  Minus,
-  Moon,
   Pencil,
   Plus,
   RefreshCw,
   Search,
   Star,
-  Sun,
   Trash2,
-  UserRound,
-  X
+  X,
 } from "lucide-react";
 import {
   BASE_LOGS,
@@ -60,13 +47,11 @@ import {
   type DockView,
   type InstalledDockRecord,
   type Lang,
-  type OpenDockChangeReport,
   type OpenDockChangeResult,
   type OpenDockCommandLine,
   type OpenDockCommandProgress,
   type OpenDockCommandResult,
   type OpenDockOutdatedReport,
-  type OpenDockOutdatedResult,
   type Project,
   type ProjectFolder,
   type ProjectStateResult,
@@ -85,12 +70,16 @@ import {
   commandTaskLevel,
   commandTaskTitle,
   isAuthStatusLine,
+  isNoUpdateProgress,
   isTaskActive,
   isTaskForTarget,
   logColor,
   nextCommandProgress,
   nowTime,
+  openDockChangeResult,
+  outdatedReportsByDockId,
   statusLabel,
+  successStepForChangeResult,
   waitForCommandPopupPaint,
   type CommandForceRetry,
   type CommandTask,
@@ -122,6 +111,7 @@ import {
   versionStatusClass,
   versionStatusLabel,
 } from "./display";
+import { GoogleMark, Meta, Pagination, StatRow } from "./desktop-ui";
 import {
   exportShortcutConfig,
   findShortcutConflict,
@@ -138,160 +128,26 @@ import {
   type ShortcutPlatform,
   shortcutPlatformForWindow,
 } from "./shortcuts";
+import { useResponsivePageSizes } from "./responsive-page-size";
 import { chooseShortcutFileFromBrowser, downloadShortcutFile, type ShortcutFileResult } from "./shortcut-file";
 import { isTauriRuntime } from "./tauri-runtime";
+import { useStoredState } from "./use-stored-state";
+import {
+  detectWindowControlPlatform,
+  type WindowControlPlatform,
+} from "./app-menu";
+import { accountStatsFor, dockFromMyDock, myDockReviewGroup, myDockStatusLabel } from "./account-model";
+import { ProjectAddModal, ProjectDeleteModal, ProjectRenameModal } from "./project-modals";
+import { Titlebar, type OpenMenu } from "./titlebar";
 
 const MAX_STORED_LOGS = 400;
-const DEFAULT_CATALOG_PAGE_LIMIT = 12;
-const DEFAULT_VERSION_PAGE_LIMIT = 6;
 const ACCOUNT_PAGE_LIMIT = 6;
-type WindowControlPlatform = "macos" | "windows";
-type OpenMenu = "" | "app" | "lang" | "account" | "sort";
-type AppMenuItem = { id: string; label: string; shortcut?: string } | { type: "separator" };
-type AppMenuGroup = { items: AppMenuItem[]; key: string; label: string };
-
 type InstalledDockRow = Dock & {
   installedAt: string;
   latestVersion?: string;
   updateAvailable?: boolean;
   updatePlatform?: string;
 };
-
-interface ResponsivePageSizes {
-  catalog: number;
-  versions: number;
-}
-
-function detectWindowControlPlatform(): WindowControlPlatform {
-  if (typeof navigator === "undefined") return "windows";
-  const platform = `${navigator.platform} ${navigator.userAgent}`.toLowerCase();
-  return platform.includes("mac") ? "macos" : "windows";
-}
-
-function appMenuGroups(t: (typeof TEXT)[Lang]): AppMenuGroup[] {
-  return [
-    {
-      key: "file",
-      label: t.menuFile,
-      items: [
-        { id: "file:new-project", label: t.newProjectAction },
-        { id: "file:add-existing-project", label: t.existingProjectAction },
-      ],
-    },
-    {
-      key: "edit",
-      label: t.menuEdit,
-      items: [
-        { id: "edit:rename-project", label: t.renameProjectTitle },
-        { id: "edit:copy-project-path", label: t.menuCopyProjectPath, shortcut: "Ctrl+Shift+C" },
-        { id: "edit:import-shortcuts", label: t.importShortcuts },
-        { id: "edit:export-shortcuts", label: t.exportShortcuts },
-        { type: "separator" },
-        { id: "view:toggle-sidebar", label: t.menuToggleSidebar, shortcut: "Ctrl+B" },
-      ],
-    },
-    {
-      key: "view",
-      label: t.menuView,
-      items: [
-        { id: "view:explore", label: t.explore },
-        { id: "view:installed", label: t.installed },
-        { id: "view:logs", label: t.logs },
-      ],
-    },
-    {
-      key: "project",
-      label: t.menuProject,
-      items: [
-        { id: "project:run-doctor", label: t.menuRunDoctor, shortcut: "Ctrl+D" },
-        { id: "project:update-docks", label: t.updateAllAction },
-        { id: "project:open-folder", label: t.menuOpenProjectFolder },
-        { id: "project:reveal-folder", label: t.menuRevealProjectFolder },
-        { type: "separator" },
-        { id: "project:remove-from-opendock", label: t.menuRemoveProject },
-      ],
-    },
-    {
-      key: "dock",
-      label: t.menuDock,
-      items: [
-        { id: "dock:install", label: t.installAction },
-        { id: "dock:delete", label: t.deleteAction },
-        { id: "dock:refresh-registry", label: t.menuRefreshRegistry },
-        { id: "dock:open-detail", label: t.openDetail },
-      ],
-    },
-    {
-      key: "window",
-      label: t.menuWindow,
-      items: [{ id: "window:reload", label: t.menuReloadWindow, shortcut: "Ctrl+Shift+R" }],
-    },
-    {
-      key: "help",
-      label: t.menuHelp,
-      items: [
-        { id: "help:docs", label: t.menuDocs },
-        { id: "help:cli-commands", label: t.menuCliCommands },
-        { id: "help:troubleshooting", label: t.menuTroubleshooting },
-      ],
-    },
-  ];
-}
-
-function readResponsivePageSizes(): ResponsivePageSizes {
-  if (typeof window === "undefined") {
-    return { catalog: DEFAULT_CATALOG_PAGE_LIMIT, versions: DEFAULT_VERSION_PAGE_LIMIT };
-  }
-  return {
-    catalog: catalogPageLimitForViewport(window.innerWidth, window.innerHeight),
-    versions: versionPageLimitForViewport(window.innerWidth, window.innerHeight)
-  };
-}
-
-function catalogPageLimitForViewport(width: number, height: number) {
-  const columns = catalogColumnsForViewport(width);
-  const baseRows = width <= 520 ? 5 : 3;
-  const extraRows = Math.max(0, Math.floor((height - 980) / 420));
-  return Math.min(24, columns * Math.min(8, baseRows + extraRows));
-}
-
-function catalogColumnsForViewport(width: number) {
-  if (width <= 520) return 1;
-  if (width <= 980) return 2;
-  if (width >= 1600) return 4;
-  return 3;
-}
-
-function versionPageLimitForViewport(width: number, height: number) {
-  const baseRows = width <= 980 ? 5 : 6;
-  const extraRows = Math.max(0, Math.floor((height - 900) / 180));
-  return Math.min(18, baseRows + extraRows);
-}
-
-function useResponsivePageSizes() {
-  const [sizes, setSizes] = useState<ResponsivePageSizes>(() => readResponsivePageSizes());
-
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      window.cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(() => {
-        const next = readResponsivePageSizes();
-        setSizes((current) =>
-          current.catalog === next.catalog && current.versions === next.versions ? current : next
-        );
-      });
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("resize", update);
-    };
-  }, []);
-
-  return sizes;
-}
 
 function shouldIgnoreGlobalShortcut(event: KeyboardEvent) {
   if (event.defaultPrevented) return true;
@@ -318,7 +174,7 @@ function matchesInstalledSearch(dock: InstalledDockRow, query: string) {
     dock.version,
     dock.latestVersion,
     ...dock.tags,
-    ...dock.modes
+    ...dock.searchTerms
   ]
     .filter(Boolean)
     .some((value) => String(value).toLowerCase().includes(normalized));
@@ -437,9 +293,9 @@ export function App() {
         if (sortMode === "stars") return (b.stars ?? 0) - (a.stars ?? 0) || a.short.localeCompare(b.short);
         if (sortMode === "recent") {
           const byDate = new Date(b.updatedAt ?? "").getTime() - new Date(a.updatedAt ?? "").getTime();
-          return Number.isNaN(byDate) || byDate === 0 ? b.updatedRank - a.updatedRank : byDate;
+          return Number.isNaN(byDate) || byDate === 0 ? b.fallbackSortRank - a.fallbackSortRank : byDate;
         }
-        return (b.downloads ?? Number(b.dl)) - (a.downloads ?? Number(a.dl));
+        return (b.downloads ?? Number(b.downloadLabel)) - (a.downloads ?? Number(a.downloadLabel));
       }),
     [visibleDocks, sortMode]
   );
@@ -1165,7 +1021,7 @@ export function App() {
 
   function applyDockStarResponse(response: DockStarResponse) {
     const updateDock = (dock: Dock) =>
-      dockFullId(dock) === response.id ? { ...dock, stars: response.stars, dl: dock.dl } : dock;
+      dockFullId(dock) === response.id ? { ...dock, stars: response.stars } : dock;
     setStarredDockIds((current) => ({ ...current, [response.id]: response.starred }));
     setCatalogDocks((current) => current.map(updateDock));
     setDockDetails((current) =>
@@ -2018,238 +1874,6 @@ export function App() {
   );
 }
 
-function Titlebar(props: {
-  accountName: string;
-  lang: Lang;
-  loggedIn: boolean;
-  onAccount: () => void;
-  onAppMenu: () => void;
-  onAppMenuCommand: (id: string) => void;
-  onClose: () => void;
-  onLang: () => void;
-  onLogout: () => void;
-  onMaximize: () => void;
-  onMinimize: () => void;
-  onOpenProfile: () => void;
-  onSetEnglish: () => void;
-  onSetKorean: () => void;
-  onTheme: () => void;
-  openMenu: OpenMenu;
-  projectPathLabel: string;
-  t: (typeof TEXT)[Lang];
-  windowControlPlatform: WindowControlPlatform;
-}) {
-  const isMac = props.windowControlPlatform === "macos";
-  const startDrag = (event: MouseEvent<HTMLElement>) => {
-    if (event.button !== 0 || event.detail > 1 || isInteractiveTitlebarTarget(event.target)) return;
-    if (!isTauriRuntime()) return;
-    void getCurrentWindow().startDragging().catch((error) => {
-      console.warn("OpenDock window drag failed", error);
-    });
-  };
-  return (
-    <header className={`titlebar ${props.windowControlPlatform}`} data-platform={props.windowControlPlatform} onMouseDown={startDrag}>
-      {isMac ? (
-        <WindowControls
-          onClose={props.onClose}
-          onMaximize={props.onMaximize}
-          onMinimize={props.onMinimize}
-          platform={props.windowControlPlatform}
-          t={props.t}
-        />
-      ) : null}
-      {!isMac ? (
-        <AppMenu
-          groups={appMenuGroups(props.t)}
-          onCommand={props.onAppMenuCommand}
-          onToggle={props.onAppMenu}
-          open={props.openMenu === "app"}
-          t={props.t}
-        />
-      ) : null}
-      <div className="titlebar-brand" data-tauri-drag-region>
-        <img alt="OpenDock logo" src={logoSrc} />
-        <span>OpenDock</span>
-        <code>{props.projectPathLabel}</code>
-      </div>
-      <div className="titlebar-actions">
-        <div className="menu-anchor">
-          <button className="control-button" onClick={props.onLang} type="button">
-            <Globe2 size={14} />
-            <span>{props.lang === "ko" ? "한국어" : "English"}</span>
-            <ChevronDown size={13} />
-          </button>
-          {props.openMenu === "lang" ? (
-            <div className="dropdown-menu compact">
-              <button onClick={props.onSetKorean} type="button">
-                한국어 {props.lang === "ko" ? <Check size={14} /> : null}
-              </button>
-              <button onClick={props.onSetEnglish} type="button">
-                English {props.lang === "en" ? <Check size={14} /> : null}
-              </button>
-            </div>
-          ) : null}
-        </div>
-        <button aria-label={props.t.toggleTheme} className="theme-switch" onClick={props.onTheme} type="button">
-          <Sun size={11} />
-          <Moon size={11} />
-          <span />
-        </button>
-        {props.loggedIn ? (
-          <div className="menu-anchor">
-            <button className="avatar-button" onClick={props.onAccount} type="button">
-              O
-            </button>
-            {props.openMenu === "account" ? (
-              <div className="dropdown-menu account-menu">
-                <div className="account-name">{props.accountName}</div>
-                <button onClick={props.onOpenProfile} type="button">
-                  <UserRound size={16} /> {props.t.accountProfile}
-                </button>
-                <button className="danger-menu-item" onClick={props.onLogout} type="button">
-                  <LogOut size={16} /> {props.t.logout}
-                </button>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-        {!isMac ? (
-          <WindowControls
-            onClose={props.onClose}
-            onMaximize={props.onMaximize}
-            onMinimize={props.onMinimize}
-            platform={props.windowControlPlatform}
-            t={props.t}
-          />
-        ) : null}
-      </div>
-    </header>
-  );
-}
-
-function isInteractiveTitlebarTarget(target: EventTarget | null) {
-  const element = target instanceof HTMLElement ? target : null;
-  return Boolean(
-    element?.closest(
-      'button,a,input,textarea,select,[role="button"],[role="menu"],.dropdown-menu,.app-menu-panel,.window-controls,.titlebar-actions'
-    )
-  );
-}
-
-function AppMenu(props: {
-  groups: AppMenuGroup[];
-  onCommand: (id: string) => void;
-  onToggle: () => void;
-  open: boolean;
-  t: (typeof TEXT)[Lang];
-}) {
-  const [activeGroupKey, setActiveGroupKey] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!props.open) setActiveGroupKey(null);
-  }, [props.open]);
-
-  const runCommand = (id: string) => {
-    props.onCommand(id);
-  };
-
-  return (
-    <div className="app-menu-anchor">
-      <button
-        aria-expanded={props.open}
-        aria-haspopup="menu"
-        aria-label={props.t.appMenu}
-        className={`app-menu-button ${props.open ? "active" : ""}`}
-        onClick={props.onToggle}
-        title={props.t.appMenu}
-        type="button"
-      >
-        <MenuIcon size={18} />
-      </button>
-      {props.open ? (
-        <div aria-label={props.t.appMenu} className="app-menu-panel" onMouseLeave={() => setActiveGroupKey(null)} role="menu">
-          {props.groups.map((group) => (
-            <div className={`app-menu-group ${activeGroupKey === group.key ? "active" : ""}`} key={group.key}>
-              <button
-                aria-expanded={activeGroupKey === group.key}
-                className="app-menu-group-button"
-                onClick={() => setActiveGroupKey(group.key)}
-                onFocus={() => setActiveGroupKey(group.key)}
-                onMouseEnter={() => setActiveGroupKey(group.key)}
-                type="button"
-              >
-                <span>{group.label}</span>
-                <ChevronRight size={14} />
-              </button>
-              <div className="app-menu-flyout" role="menu">
-                {group.items.map((item, index) =>
-                  "type" in item ? (
-                    <div className="app-menu-separator" key={`${group.key}-separator-${index}`} role="separator" />
-                  ) : (
-                    <button
-                      className="app-menu-item"
-                      key={item.id}
-                      onClick={() => runCommand(item.id)}
-                      type="button"
-                    >
-                      <span>{item.label}</span>
-                      {item.shortcut ? <kbd>{item.shortcut}</kbd> : null}
-                    </button>
-                  )
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function WindowControls(props: {
-  onClose: () => void;
-  onMaximize: () => void;
-  onMinimize: () => void;
-  platform: WindowControlPlatform;
-  t: (typeof TEXT)[Lang];
-}) {
-  const runControl = (event: MouseEvent<HTMLButtonElement>, action: () => void) => {
-    event.preventDefault();
-    event.stopPropagation();
-    action();
-  };
-
-  if (props.platform === "macos") {
-    return (
-      <div aria-label="Window controls" className="window-controls macos">
-        <button aria-label={props.t.closeWindow} className="mac-window-control close" onClick={(event) => runControl(event, props.onClose)} type="button">
-          <span />
-        </button>
-        <button aria-label={props.t.minimizeWindow} className="mac-window-control minimize" onClick={(event) => runControl(event, props.onMinimize)} type="button">
-          <span />
-        </button>
-        <button aria-label={props.t.maximizeWindow} className="mac-window-control maximize" onClick={(event) => runControl(event, props.onMaximize)} type="button">
-          <span />
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div aria-label="Window controls" className="window-controls windows">
-      <button aria-label={props.t.minimizeWindow} className="windows-window-control" onClick={(event) => runControl(event, props.onMinimize)} type="button">
-        <Minus size={14} />
-      </button>
-      <button aria-label={props.t.maximizeWindow} className="windows-window-control" onClick={(event) => runControl(event, props.onMaximize)} type="button">
-        <Maximize2 size={13} />
-      </button>
-      <button aria-label={props.t.closeWindow} className="windows-window-control close" onClick={(event) => runControl(event, props.onClose)} type="button">
-        <X size={14} />
-      </button>
-    </div>
-  );
-}
-
 function SignInScreen(props: { authMessage: string; authWorking: boolean; onGmail: () => void; onGitHub: () => void; t: (typeof TEXT)[Lang] }) {
   return (
     <section className="center-stage">
@@ -2522,7 +2146,7 @@ function DetailSidebar(props: { detail: Dock; detailTab: "readme" | "versions"; 
         <>
           <h4>{props.t.packageDetails}</h4>
           <Meta label={props.t.latestRelease} value={props.detail.version} />
-          <Meta label={props.t.downloads} value={props.detail.dl} />
+          <Meta label={props.t.downloads} value={props.detail.downloadLabel} />
           <Meta label={props.t.stars} value={String(props.detail.stars ?? 0)} />
           <Meta label={props.t.updated} value={formatDateLabel(props.detail.updatedAt)} />
           <Meta label={props.t.publisher} value={props.detail.publisher ?? props.detail.owner ?? "opendock"} />
@@ -2542,7 +2166,7 @@ function DetailSidebar(props: { detail: Dock; detailTab: "readme" | "versions"; 
           <Meta label="Archive" value={version?.size ?? props.detail.size} />
           <Meta label="Checksum" value={version?.checksum ?? props.detail.checksum} />
           <Meta label={props.t.status} value={versionStatusLabel(version?.status)} />
-          <Meta label={props.t.downloads} value={version?.downloadCount == null ? props.detail.dl : String(version.downloadCount)} />
+          <Meta label={props.t.downloads} value={version?.downloadCount == null ? props.detail.downloadLabel : String(version.downloadCount)} />
           <Meta label={props.t.updated} value={formatDateLabel(version?.publishedAt ?? props.detail.updatedAt)} />
         </>
       )}
@@ -2669,9 +2293,9 @@ function DockCard(props: {
       </div>
       <p>{props.dock.desc}</p>
       <div className="tag-wrap">
-        <span>{props.dock.tagA}</span>
-        <span>{props.dock.tagB}</span>
-        <span>+{props.dock.more}</span>
+        <span>{props.dock.primaryTag}</span>
+        <span>{props.dock.secondaryTag}</span>
+        <span>+{props.dock.extraTagCount}</span>
       </div>
       <div className="card-foot">
         <div>
@@ -2680,7 +2304,7 @@ function DockCard(props: {
           ))}
         </div>
         <div className="dock-metrics">
-          <DockMetric count={props.dock.dl} icon={<Download size={13} />} label={props.t.downloads} />
+          <DockMetric count={props.dock.downloadLabel} icon={<Download size={13} />} label={props.t.downloads} />
           <StarButton
             busy={props.starBusy}
             count={props.dock.stars ?? 0}
@@ -3117,45 +2741,6 @@ function CommandProgressCard(props: {
   );
 }
 
-function openDockChangeResult(
-  value: OpenDockCommandResult["json"],
-): OpenDockChangeResult | null {
-  if (!value || !("operation" in value)) return null;
-  return value;
-}
-
-function isNoUpdateChangeResult(result: OpenDockChangeResult | null) {
-  return result?.success === true && result.operation === "update" && result.reports.length === 0;
-}
-
-function isNoUpdateProgress(progress: OpenDockCommandProgress) {
-  return (
-    progress.operation === "update" &&
-    progress.phase === "complete" &&
-    progress.level.toUpperCase() === "OK" &&
-    progress.message === "No OpenDock dock updates available."
-  );
-}
-
-function successStepForChangeResult(result: OpenDockChangeResult | null, fallback: string, t: (typeof TEXT)[Lang]) {
-  return isNoUpdateChangeResult(result) ? t.noUpdatesAvailable : fallback;
-}
-
-function openDockOutdatedResult(
-  value: OpenDockCommandResult["json"],
-): OpenDockOutdatedResult | null {
-  if (!value || !("updatesAvailable" in value)) return null;
-  return value;
-}
-
-function outdatedReportsByDockId(
-  value: OpenDockCommandResult["json"],
-): Record<string, OpenDockOutdatedReport> {
-  const result = openDockOutdatedResult(value);
-  if (!result?.success) return {};
-  return Object.fromEntries(result.reports.map((report) => [report.dockId, report]));
-}
-
 function CommandPaletteDialog(props: {
   bindings: ShortcutBinding[];
   lang: Lang;
@@ -3266,77 +2851,6 @@ function ProjectSwitcherDialog(props: {
       </div>
     </div>
   );
-}
-
-type MyDockReviewGroup = "approved" | "pending" | "rejected" | "unavailable";
-
-function accountStatsFor(counts: MyDocksCounts, stars: number) {
-  return {
-    submitted: counts.all,
-    approved: counts.approved,
-    pending: counts.pending,
-    rejected: counts.rejected,
-    unavailable: counts.unavailable,
-    hidden: counts.hidden,
-    stars
-  };
-}
-
-function myDockReviewGroup(dock: MyDock): MyDockReviewGroup {
-  const status = myDockStatus(dock);
-  if (status === "approved") return "approved";
-  if (status === "pending") return "pending";
-  if (status === "rejected") return "rejected";
-  return "unavailable";
-}
-
-function myDockStatus(dock: MyDock) {
-  if (dock.suspended) return "suspended";
-  if (dock.hidden) return primaryMyDockVersion(dock)?.status?.toLowerCase() ?? "hidden";
-  return dock.status?.toLowerCase() || primaryMyDockVersion(dock)?.status?.toLowerCase() || "pending";
-}
-
-function primaryMyDockVersion(dock: MyDock) {
-  return dock.versions?.find((version) => version.version === dock.version) ?? dock.versions?.[0] ?? null;
-}
-
-function myDockStatusLabel(status: MyDockReviewGroup, t: (typeof TEXT)[Lang]) {
-  if (status === "approved") return t.approved;
-  if (status === "pending") return t.pending;
-  if (status === "rejected") return t.rejected;
-  return t.unavailable;
-}
-
-function dockFromMyDock(dock: MyDock): Dock {
-  return {
-    id: dock.name,
-    short: dock.name,
-    fullId: dock.id,
-    owner: dock.owner ?? dock.id.split("/")[0] ?? "opendock",
-    name: dock.name,
-    displayName: dock.displayName ?? dock.name,
-    grad: "linear-gradient(135deg,var(--dock-backend-a),var(--dock-backend-b) 55%,var(--dock-backend-c))",
-    desc: dock.summary ?? dock.displayName ?? dock.name,
-    tagA: myDockReviewGroup(dock),
-    tagB: dock.hidden ? "hidden" : "submitted",
-    more: "0",
-    dl: "0",
-    downloads: 0,
-    stars: 0,
-    updatedRank: 0,
-    updatedAt: dock.updatedAt ?? dock.submittedAt ?? undefined,
-    version: dock.latestApprovedVersion ?? dock.version ?? "-",
-    size: "-",
-    checksum: "-",
-    readmeTitle: dock.displayName ?? dock.name,
-    readmeIntro: dock.summary ?? "",
-    logoUrl: dock.logo?.url ?? null,
-    publisher: dock.owner ?? "opendock",
-    official: dock.official,
-    platforms: dock.versions?.map((version) => version.platform).filter(Boolean) ?? [],
-    tags: [myDockReviewGroup(dock), dock.hidden ? "hidden" : "submitted"],
-    modes: ["submitted"]
-  };
 }
 
 function AccountPanel(props: {
@@ -3474,184 +2988,4 @@ function AccountPanel(props: {
       </div>
     </div>
   );
-}
-
-function StatRow(props: { label: string; value: number }) {
-  return (
-    <div>
-      <span>{props.label}</span>
-      <strong>{props.value}</strong>
-    </div>
-  );
-}
-
-function ProjectAddModal(props: {
-  onAddExisting: () => void;
-  onClose: () => void;
-  onCreate: () => void;
-  t: (typeof TEXT)[Lang];
-}) {
-  return (
-    <div className="modal-layer">
-      <div className="modal">
-        <div className="modal-head">
-          <div>
-            <h2>{props.t.addProjectTitle}</h2>
-            <p>{props.t.addProjectSub}</p>
-          </div>
-          <IconButton label={props.t.close} onClick={props.onClose}>
-            <X size={15} />
-          </IconButton>
-        </div>
-        <div className="modal-options">
-          <button className="project-option primary" onClick={props.onCreate} type="button">
-            <span><Plus size={19} /></span>
-            <strong>{props.t.newProjectAction}</strong>
-            <small>{props.t.newProjectSub}</small>
-          </button>
-          <button className="project-option" onClick={props.onAddExisting} type="button">
-            <span><FolderOpen size={19} /></span>
-            <strong>{props.t.existingProjectAction}</strong>
-            <small>{props.t.existingProjectSub}</small>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ProjectRenameModal(props: {
-  name: string;
-  onChange: (name: string) => void;
-  onClose: () => void;
-  onSubmit: (event: FormEvent) => void;
-  t: (typeof TEXT)[Lang];
-}) {
-  return (
-    <div className="modal-layer">
-      <form className="modal rename-modal" onSubmit={props.onSubmit}>
-        <div className="modal-head">
-          <div>
-            <h2>{props.t.renameProjectTitle}</h2>
-            <p>{props.t.renameProjectSub}</p>
-          </div>
-        </div>
-        <div className="rename-body">
-          <input aria-label={props.t.projectNameLabel} onChange={(event) => props.onChange(event.target.value)} value={props.name} />
-          <div>
-            <button onClick={props.onClose} type="button">
-              {props.t.cancel}
-            </button>
-            <button type="submit">{props.t.save}</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-function ProjectDeleteModal(props: {
-  name: string;
-  onCancel: () => void;
-  onConfirm: () => void;
-  t: (typeof TEXT)[Lang];
-}) {
-  return (
-    <div className="modal-layer">
-      <div aria-labelledby="project-delete-title" aria-modal="true" className="modal delete-modal" role="alertdialog">
-        <div className="modal-head">
-          <div>
-            <h2 id="project-delete-title">{props.t.deleteProjectConfirmTitle}</h2>
-            <p>{props.t.deleteProjectConfirmSub}</p>
-          </div>
-        </div>
-        <div className="delete-body">
-          <div className="delete-project-name">{props.name}</div>
-          <div className="delete-actions">
-            <button onClick={props.onCancel} type="button">
-              {props.t.cancel}
-            </button>
-            <button className="danger-button" onClick={props.onConfirm} type="button">
-              {props.t.deleteAction}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Meta(props: { label: string; value: string }) {
-  return (
-    <div className="meta-row">
-      <span>{props.label}</span>
-      <strong>{props.value}</strong>
-    </div>
-  );
-}
-
-function Pagination(props: {
-  label: string;
-  onPageChange: (page: number) => void;
-  page: number;
-  pageCount: number;
-  t: (typeof TEXT)[Lang];
-}) {
-  const pageCount = Math.max(1, props.pageCount);
-  const page = Math.min(Math.max(1, props.page), pageCount);
-  const canPrevious = page > 1;
-  const canNext = page < pageCount;
-  const pageLabel = props.t.pageCount
-    .replace("{page}", String(page))
-    .replace("{pages}", String(pageCount));
-  return (
-    <nav aria-label={props.label} className="pagination">
-      <button aria-label={props.t.firstPage} disabled={!canPrevious} onClick={() => props.onPageChange(1)} type="button"><ChevronsLeft size={13} /></button>
-      <button aria-label={props.t.previousPage} disabled={!canPrevious} onClick={() => props.onPageChange(page - 1)} type="button"><ChevronLeft size={13} /></button>
-      <span>{pageLabel}</span>
-      <button aria-label={props.t.nextPage} disabled={!canNext} onClick={() => props.onPageChange(page + 1)} type="button"><ChevronRight size={13} /></button>
-      <button aria-label={props.t.lastPage} disabled={!canNext} onClick={() => props.onPageChange(pageCount)} type="button"><ChevronsRight size={13} /></button>
-    </nav>
-  );
-}
-
-function GoogleMark() {
-  return (
-    <svg aria-hidden="true" height="20" viewBox="0 0 48 48" width="20">
-      <path d="M24 9.5c3.4 0 6.4 1.17 8.78 3.47l6.56-6.56C35.37 2.7 30.2.5 24 .5 14.63.5 6.56 5.88 2.63 13.7l7.63 5.92C12.07 13.65 17.6 9.5 24 9.5z" fill="#EA4335" />
-      <path d="M46.5 24.5c0-1.57-.14-3.08-.4-4.5H24v8.52h12.64c-.55 2.95-2.2 5.45-4.68 7.13l7.24 5.61c4.23-3.9 7.3-9.65 7.3-16.76z" fill="#4285F4" />
-      <path d="M10.26 28.38A14.55 14.55 0 019.5 24c0-1.52.26-3 .76-4.38L2.63 13.7A23.46 23.46 0 00.5 24c0 3.7.89 7.2 2.47 10.3l7.29-5.92z" fill="#FBBC05" />
-      <path d="M24 47.5c6.2 0 11.4-2.04 15.2-6.24l-7.24-5.61c-2 1.34-4.57 2.13-7.96 2.13-6.4 0-11.93-4.15-13.74-10l-7.29 5.92C6.91 42.12 14.87 47.5 24 47.5z" fill="#34A853" />
-    </svg>
-  );
-}
-
-function useStoredState<T>(
-  key: string,
-  initialValue: T,
-  options: { defer?: boolean; normalize?: (value: T) => T } = {},
-): [T, Dispatch<SetStateAction<T>>] {
-  const [value, setValue] = useState<T>(() => {
-    try {
-      const stored = localStorage.getItem(key);
-      const parsed = stored ? (JSON.parse(stored) as T) : initialValue;
-      return options.normalize ? options.normalize(parsed) : parsed;
-    } catch {
-      return initialValue;
-    }
-  });
-
-  useEffect(() => {
-    const serialized = JSON.stringify(value);
-    if (!options.defer) {
-      localStorage.setItem(key, serialized);
-      return;
-    }
-    const timeout = window.setTimeout(() => {
-      localStorage.setItem(key, serialized);
-    }, 120);
-    return () => window.clearTimeout(timeout);
-  }, [key, value]);
-
-  return [value, setValue];
 }

@@ -8,10 +8,13 @@ const appMenuRust = readFileSync(resolve(appRoot, "src-tauri", "src", "app_menu.
 const registryRust = readFileSync(resolve(appRoot, "src-tauri", "src", "registry.rs"), "utf8");
 const mainRust = readFileSync(resolve(appRoot, "src-tauri", "src", "main.rs"), "utf8");
 const app = readFileSync(resolve(appRoot, "src", "App.tsx"), "utf8");
+const appMenu = readFileSync(resolve(appRoot, "src", "app-menu.tsx"), "utf8");
 const commandTask = readFileSync(resolve(appRoot, "src", "command-task.ts"), "utf8");
 const data = readFileSync(resolve(appRoot, "src", "data.ts"), "utf8");
 const display = readFileSync(resolve(appRoot, "src", "display.tsx"), "utf8");
+const responsivePageSize = readFileSync(resolve(appRoot, "src", "responsive-page-size.ts"), "utf8");
 const registryClient = readFileSync(resolve(appRoot, "src", "registry-client.ts"), "utf8");
+const titlebar = readFileSync(resolve(appRoot, "src", "titlebar.tsx"), "utf8");
 const styles = readFileSync(resolve(appRoot, "src", "styles.css"), "utf8");
 const tauriConfig = JSON.parse(readFileSync(resolve(appRoot, "src-tauri", "tauri.conf.json"), "utf8"));
 const windowsIcon = readFileSync(resolve(appRoot, "src-tauri", "icons", "icon.ico"));
@@ -70,9 +73,10 @@ const desktopCatalogUsesLiveRegistry =
   !data.includes("export const DOCKS") &&
   !data.includes("DOCKS.find");
 const desktopCatalogUsesResponsivePaging =
-  app.includes("function useResponsivePageSizes") &&
-  app.includes("catalogPageLimitForViewport(window.innerWidth, window.innerHeight)") &&
-  app.includes("versionPageLimitForViewport(window.innerWidth, window.innerHeight)") &&
+  app.includes('import { useResponsivePageSizes } from "./responsive-page-size"') &&
+  responsivePageSize.includes("function catalogPageLimitForViewport") &&
+  responsivePageSize.includes("function versionPageLimitForViewport") &&
+  responsivePageSize.includes("window.innerWidth, window.innerHeight") &&
   registryClient.includes('invoke<RegistryDockSearchResponse>("opendock_catalog",') &&
   registryClient.includes("page,") &&
   registryClient.includes("limit,") &&
@@ -140,11 +144,11 @@ const commandProgressBridge =
   app.includes('listen<OpenDockCommandProgress>("opendock-command-progress"') &&
   app.includes("applyCommandProgressToTask(progress)");
 const noUpdateProgressDoesNotDuplicatePopupRows =
-  app.includes("function isNoUpdateProgress") &&
+  commandTask.includes("function isNoUpdateProgress") &&
   app.includes("const suppressProgressRow = isNoUpdateProgress(progress)") &&
   app.includes("step: suppressProgressRow ? current.step : progress.message") &&
   app.includes("!suppressProgressRow &&") &&
-  app.includes('progress.message === "No OpenDock dock updates available."');
+  commandTask.includes('progress.message === "No OpenDock dock updates available."');
 const commandFailureProgressDoesNotDuplicatePopupRows =
   commandTask.includes("function commandRowsContainMessage") &&
   app.includes("!commandRowsContainMessage(currentRows, result.message)") &&
@@ -172,9 +176,9 @@ const logStorageIsCapped =
   app.includes("result.lines.slice(-MAX_STORED_LOGS)") &&
   app.includes("current.length - (MAX_STORED_LOGS - 1)");
 const titlebarUsesNativeDragFallback =
-  app.includes("getCurrentWindow().startDragging()") &&
-  app.includes("function isInteractiveTitlebarTarget") &&
-  app.includes("onMouseDown={startDrag}");
+  titlebar.includes("getCurrentWindow().startDragging()") &&
+  titlebar.includes("function isInteractiveTitlebarTarget") &&
+  titlebar.includes("onMouseDown={startDrag}");
 const authFailuresAreVisible =
   app.includes("const [authMessage, setAuthMessage]") &&
   app.includes("commandFailureMessage(result, t.signInFailed)") &&
@@ -190,19 +194,19 @@ const compiledCliCanStart = cli.includes("(import.meta as ImportMeta & { main?: 
 const macosOpenUsesAbsolutePath =
   rust.includes('Command::new("/usr/bin/open")') || rust.includes('command_without_window("/usr/bin/open")');
 const desktopAppMenuUsesNativeCommands =
-  app.includes('type OpenMenu = "" | "app" | "lang" | "account" | "sort"') &&
-  app.includes("function appMenuGroups") &&
-  app.includes("<AppMenu") &&
-  app.includes('props.openMenu === "app"') &&
+  titlebar.includes('export type OpenMenu = "" | "app" | "lang" | "account" | "sort"') &&
+  appMenu.includes("function appMenuGroups") &&
+  titlebar.includes("<AppMenu") &&
+  titlebar.includes('props.openMenu === "app"') &&
   app.includes("onAppMenuCommand") &&
   app.includes("await handleNativeMenu(id)");
 const desktopAppMenuHiddenOnMac =
-  app.includes("const isMac = props.windowControlPlatform === \"macos\"") &&
-  app.includes("{!isMac ? (") &&
-  app.includes("<AppMenu");
+  titlebar.includes("const isMac = props.windowControlPlatform === \"macos\"") &&
+  titlebar.includes("{!isMac ? (") &&
+  titlebar.includes("<AppMenu");
 const desktopAppMenuUsesSingleActiveFlyout =
-  app.includes("const [activeGroupKey, setActiveGroupKey]") &&
-  app.includes("app-menu-group ${activeGroupKey === group.key ? \"active\" : \"\"}") &&
+  appMenu.includes("const [activeGroupKey, setActiveGroupKey]") &&
+  appMenu.includes("app-menu-group ${activeGroupKey === group.key ? \"active\" : \"\"}") &&
   styles.includes(".app-menu-group.active > .app-menu-flyout") &&
   !styles.includes(".app-menu-group:hover > .app-menu-flyout") &&
   !styles.includes(".app-menu-group:focus-within > .app-menu-flyout");

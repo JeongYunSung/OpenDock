@@ -4,7 +4,10 @@ import type {
   OpenDockChangeReport,
   OpenDockChangeResult,
   OpenDockCommandLine,
+  OpenDockCommandProgress,
   OpenDockCommandResult,
+  OpenDockOutdatedReport,
+  OpenDockOutdatedResult,
   TEXT,
 } from "./data";
 
@@ -180,6 +183,49 @@ export function statusLabel(status: CommandTaskStatus, t: (typeof TEXT)[Lang]) {
   if (status === "cancelled") return t.taskCancelled;
   if (status === "cancelling") return t.taskCancelling;
   return t.taskWorking;
+}
+
+export function openDockChangeResult(
+  value: OpenDockCommandResult["json"],
+): OpenDockChangeResult | null {
+  if (!value || !("operation" in value)) return null;
+  return value;
+}
+
+function isNoUpdateChangeResult(result: OpenDockChangeResult | null) {
+  return result?.success === true && result.operation === "update" && result.reports.length === 0;
+}
+
+export function isNoUpdateProgress(progress: OpenDockCommandProgress) {
+  return (
+    progress.operation === "update" &&
+    progress.phase === "complete" &&
+    progress.level.toUpperCase() === "OK" &&
+    progress.message === "No OpenDock dock updates available."
+  );
+}
+
+export function successStepForChangeResult(
+  result: OpenDockChangeResult | null,
+  fallback: string,
+  t: (typeof TEXT)[Lang],
+) {
+  return isNoUpdateChangeResult(result) ? t.noUpdatesAvailable : fallback;
+}
+
+function openDockOutdatedResult(
+  value: OpenDockCommandResult["json"],
+): OpenDockOutdatedResult | null {
+  if (!value || !("updatesAvailable" in value)) return null;
+  return value;
+}
+
+export function outdatedReportsByDockId(
+  value: OpenDockCommandResult["json"],
+): Record<string, OpenDockOutdatedReport> {
+  const result = openDockOutdatedResult(value);
+  if (!result?.success) return {};
+  return Object.fromEntries(result.reports.map((report) => [report.dockId, report]));
 }
 
 function parseOpenDockHistoryLine(message: string): AppLog | null {

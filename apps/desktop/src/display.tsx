@@ -112,7 +112,7 @@ export function DockIcon(props: { dock: Dock; size?: "small" | "large" }) {
   const label = props.dock.displayName ?? props.dock.short ?? props.dock.id;
 
   return (
-    <div className={className} style={{ background: props.dock.grad }}>
+    <div className={className} style={{ background: props.dock.gradient }}>
       <img
         alt={hasRegistryLogo ? `${label} logo` : "OpenDock logo"}
         src={imageUrl ?? logoSrc}

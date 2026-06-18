@@ -22,15 +22,15 @@ export interface Dock {
   owner?: string;
   name?: string;
   displayName?: string;
-  grad: string;
+  gradient: string;
   desc: string;
-  tagA: string;
-  tagB: string;
-  more: string;
-  dl: string;
+  primaryTag: string;
+  secondaryTag: string;
+  extraTagCount: string;
+  downloadLabel: string;
   downloads?: number;
   stars?: number;
-  updatedRank: number;
+  fallbackSortRank: number;
   updatedAt?: string;
   version: string;
   size: string;
@@ -43,7 +43,7 @@ export interface Dock {
   official?: boolean;
   platforms?: string[];
   tags: string[];
-  modes: string[];
+  searchTerms: string[];
   versions?: DockVersion[];
 }
 
@@ -97,7 +97,7 @@ export interface RegistryDockVersionsResponse {
   total?: number;
 }
 
-export interface RegistryDockVersionGroup {
+interface RegistryDockVersionGroup {
   version: string;
   status?: string;
   summary?: string | null;
@@ -105,7 +105,7 @@ export interface RegistryDockVersionGroup {
   platforms?: RegistryDockVersionItem[];
 }
 
-export interface RegistryDockVersionItem {
+interface RegistryDockVersionItem {
   version: string;
   platform?: string;
   approved?: boolean;
@@ -277,7 +277,7 @@ export interface OpenDockChangeReport {
   version: string;
 }
 
-export interface OpenDockChangeSummary {
+interface OpenDockChangeSummary {
   created: string[];
   deleted: string[];
   reviewRequired: string[];
@@ -285,7 +285,7 @@ export interface OpenDockChangeSummary {
   updated: string[];
 }
 
-export interface OpenDockFileChanges {
+interface OpenDockFileChanges {
   created: string[];
   deleted: string[];
   reviewRequired: string[];
@@ -685,15 +685,15 @@ export function normalizeRegistryDock(summary: RegistryDockSummary, index = 0): 
     owner: summary.owner,
     name: summary.name,
     displayName: summary.displayName,
-    grad: dockGradient(index),
+    gradient: dockGradient(index),
     desc: summary.summary,
-    tagA: tags[0] ?? "dock",
-    tagB: tags[1] ?? "workspace",
-    more: String(Math.max(tags.length - 2, 0)),
-    dl: String(summary.downloads ?? 0),
+    primaryTag: tags[0] ?? "dock",
+    secondaryTag: tags[1] ?? "workspace",
+    extraTagCount: String(Math.max(tags.length - 2, 0)),
+    downloadLabel: String(summary.downloads ?? 0),
     downloads: summary.downloads ?? 0,
     stars: summary.stars ?? 0,
-    updatedRank: Math.max(1, 999 - index),
+    fallbackSortRank: Math.max(1, 999 - index),
     updatedAt: summary.updatedAt,
     version: summary.latestVersion,
     size: "-",
@@ -705,7 +705,7 @@ export function normalizeRegistryDock(summary: RegistryDockSummary, index = 0): 
     official: summary.official,
     platforms: summary.platforms ?? [],
     tags,
-    modes: tags.length > 0 ? tags.slice(0, 5) : ["install"]
+    searchTerms: tags.length > 0 ? tags.slice(0, 5) : ["install"]
   };
 }
 
@@ -720,7 +720,7 @@ export function mergeRegistryDockDetail(base: Dock, detail: RegistryDockDetail, 
     versions,
     version: detail.latestVersion ?? base.version,
     tags: detail.tags ?? base.tags,
-    modes: (detail.tags ?? base.tags).slice(0, 5),
+    searchTerms: (detail.tags ?? base.tags).slice(0, 5),
     platforms: detail.platforms ?? base.platforms,
     publisher: detail.publisher?.nickname ?? detail.owner ?? base.publisher,
     official: detail.official,
@@ -728,7 +728,7 @@ export function mergeRegistryDockDetail(base: Dock, detail: RegistryDockDetail, 
     updatedAt: detail.updatedAt ?? base.updatedAt,
     downloads: detail.downloads ?? base.downloads,
     stars: detail.stars ?? base.stars ?? 0,
-    dl: String(detail.downloads ?? base.downloads ?? base.dl)
+    downloadLabel: String(detail.downloads ?? base.downloads ?? base.downloadLabel)
   };
 }
 
@@ -828,15 +828,15 @@ export function dockFromInstalledRecord(record: InstalledDockRecord, fallbackInd
     fullId: record.id,
     owner: record.id.split("/")[0] || "opendock",
     name: short,
-    grad: dockGradient(fallbackIndex),
+    gradient: dockGradient(fallbackIndex),
     desc: record.name ?? `${record.id}@${record.version}`,
-    tagA: record.platform ?? "dock",
-    tagB: "installed",
-    more: "0",
-    dl: "0",
+    primaryTag: record.platform ?? "dock",
+    secondaryTag: "installed",
+    extraTagCount: "0",
+    downloadLabel: "0",
     downloads: 0,
     stars: 0,
-    updatedRank: fallbackIndex,
+    fallbackSortRank: fallbackIndex,
     version: record.version,
     size: `${record.files?.length ?? 0} files`,
     checksum: record.checksum ?? "-",
@@ -846,7 +846,7 @@ export function dockFromInstalledRecord(record: InstalledDockRecord, fallbackInd
     official: true,
     platforms: record.platform ? [record.platform] : [],
     tags: [record.platform ?? "dock", "installed"],
-    modes: ["install"]
+    searchTerms: ["install"]
   };
 }
 
