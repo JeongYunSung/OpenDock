@@ -1,8 +1,5 @@
-import {
-  type InstalledDockUpdateCheck,
-  installedDockListCommandResult,
-  printJson,
-} from "./change-output.js";
+import { printJson } from "./change-events.js";
+import { type InstalledDockUpdateCheck, installedDockListCommandResult } from "./change-output.js";
 import { resolveCliPlatform } from "./cli-options.js";
 import { DockRef } from "./core/domain/manifest.js";
 import { type InstalledDockRecord, OpenDockStateStore } from "./core/domain/state-store.js";

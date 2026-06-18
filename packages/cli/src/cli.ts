@@ -8,27 +8,29 @@ import { bootstrapMac, bootstrapWindows } from "./bootstrap.js";
 import { performBrowserLogin, selectAuthProvider } from "./browser-auth.js";
 import {
   changeCommandOutputMode,
-  changeCommandResult,
   createChangeEventReporter,
-  errorMessage,
+  optionalDockEventDetails,
+  printJson,
+  runMaybeQuiet,
+  runMaybeQuietAsync,
+  runtimeProgressReporter,
+  updateNestedProgressPercent,
+  updateProgressPercent,
+} from "./change-events.js";
+import {
+  changeCommandResult,
   formatFileCount,
   formatFileSummary,
   handleChangeCommandError,
   installChangeReport,
   type JsonDockChangeReport,
-  optionalDockEventDetails,
   plainInstallFileSummary,
   printFileChanges,
-  printJson,
-  runMaybeQuiet,
-  runMaybeQuietAsync,
-  runtimeProgressReporter,
   totalFileChanges,
   uninstallChangeReport,
   updateCheckCommandResult,
-  updateNestedProgressPercent,
-  updateProgressPercent,
 } from "./change-output.js";
+import { recordCommandFailure, recordCommandLog } from "./cli-command-log.js";
 import {
   deployOptionValue,
   dockIdFromReference,
@@ -50,15 +52,15 @@ import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
 import { DockInstaller } from "./core/app/dock-installer.js";
 import { DockRef, manifestForRef, parseManifestFile } from "./core/domain/manifest.js";
 import { OpenDockStateStore } from "./core/domain/state-store.js";
+import { validateDeployCommands } from "./deploy-command-policy.js";
 import {
   createDeployArchive,
   readDeployLogo,
   readDeployReadme,
   resolveDeployManifest,
-  validateDeployCommands,
 } from "./deploy-package.js";
 import { checkInstalledDockUpdates } from "./installed-dock-updates.js";
-import { appendRunLog, type RunStatus, readProjectLogs } from "./logging.js";
+import { readProjectLogs } from "./logging.js";
 import {
   OpenDockRegistryClient,
   RegistryRequestError,
@@ -126,6 +128,7 @@ export async function run(argv = process.argv): Promise<void> {
           version: report.version,
         });
         recordCommandLog(
+          process.cwd(),
           "install",
           "Success",
           `${report.dockId}@${report.version} installed (${plainInstallFileSummary(report)})`,
@@ -150,7 +153,7 @@ export async function run(argv = process.argv): Promise<void> {
         );
         printFileChanges(report);
       } catch (error) {
-        recordCommandFailure("install", error, dockId);
+        recordCommandFailure(process.cwd(), "install", error, dockId);
         handleChangeCommandError("install", error, options.json === true, events);
       }
     });
@@ -185,6 +188,7 @@ export async function run(argv = process.argv): Promise<void> {
         const updateTargets = updateChecks.filter((check) => check.updateAvailable);
         if (updateTargets.length === 0) {
           recordCommandLog(
+            process.cwd(),
             "update",
             "Skipped",
             `no updates available for ${installedDocks.length} installed dock(s)`,
@@ -285,6 +289,7 @@ export async function run(argv = process.argv): Promise<void> {
           printFileChanges(report);
         }
         recordCommandLog(
+          process.cwd(),
           "update",
           "Success",
           `updated ${changeReports.length} dock(s): ${changeReports
@@ -304,7 +309,7 @@ export async function run(argv = process.argv): Promise<void> {
           printJson(result);
         }
       } catch (error) {
-        recordCommandFailure("update", error);
+        recordCommandFailure(process.cwd(), "update", error);
         handleChangeCommandError("update", error, options.json === true, events);
       }
     });
@@ -338,6 +343,7 @@ export async function run(argv = process.argv): Promise<void> {
           version: report.version,
         });
         recordCommandLog(
+          process.cwd(),
           "uninstall",
           "Success",
           `${report.dockId}@${report.version} uninstalled (${report.filesDeleted} files deleted, ${report.filesUpdated} files updated)`,
@@ -364,7 +370,7 @@ export async function run(argv = process.argv): Promise<void> {
           )})`,
         );
       } catch (error) {
-        recordCommandFailure("uninstall", error, dockId);
+        recordCommandFailure(process.cwd(), "uninstall", error, dockId);
         handleChangeCommandError("uninstall", error, options.json === true, events);
       }
     });
@@ -388,13 +394,14 @@ export async function run(argv = process.argv): Promise<void> {
         );
         dockId = report.dockId;
         recordCommandLog(
+          process.cwd(),
           "run",
           "Success",
           `ran ${report.command} from ${report.dockId}@${report.version}`,
           report.dockId,
         );
       } catch (error) {
-        recordCommandFailure("run", error, dockId);
+        recordCommandFailure(process.cwd(), "run", error, dockId);
         throw error;
       }
     });
@@ -414,13 +421,14 @@ export async function run(argv = process.argv): Promise<void> {
         }
         await printDoctor(process.cwd(), options.platform, dockId);
         recordCommandLog(
+          process.cwd(),
           "doctor",
           "Success",
           dockId === undefined ? "doctor completed" : `doctor completed for ${dockId}`,
           dockId,
         );
       } catch (error) {
-        recordCommandFailure("doctor", error, dockId);
+        recordCommandFailure(process.cwd(), "doctor", error, dockId);
         throw error;
       }
     });
@@ -434,6 +442,7 @@ export async function run(argv = process.argv): Promise<void> {
         printInstalledDocks(process.cwd(), options.json === true);
         const docks = readInstalledDocks(process.cwd()) ?? [];
         recordCommandLog(
+          process.cwd(),
           "list",
           docks.length === 0 ? "Skipped" : "Success",
           docks.length === 0
@@ -441,7 +450,7 @@ export async function run(argv = process.argv): Promise<void> {
             : `listed ${docks.length} installed dock(s)`,
         );
       } catch (error) {
-        recordCommandFailure("list", error);
+        recordCommandFailure(process.cwd(), "list", error);
         throw error;
       }
     });
@@ -457,7 +466,12 @@ export async function run(argv = process.argv): Promise<void> {
           options.platform === undefined ? undefined : resolveCliPlatform(options.platform);
         const docks = readInstalledDocks(process.cwd());
         if (docks === undefined || docks.length === 0) {
-          recordCommandLog("outdated", "Skipped", "no docks installed in this project");
+          recordCommandLog(
+            process.cwd(),
+            "outdated",
+            "Skipped",
+            "no docks installed in this project",
+          );
           if (options.json === true) {
             printJson(updateCheckCommandResult([]));
           } else {
@@ -468,6 +482,7 @@ export async function run(argv = process.argv): Promise<void> {
         const updateChecks = await checkInstalledDockUpdates(docks, platformOverride);
         const updates = updateChecks.filter((check) => check.updateAvailable);
         recordCommandLog(
+          process.cwd(),
           "outdated",
           updates.length === 0 ? "Skipped" : "Success",
           updates.length === 0
@@ -480,7 +495,7 @@ export async function run(argv = process.argv): Promise<void> {
         }
         printUpdateChecks(process.cwd(), updateChecks);
       } catch (error) {
-        recordCommandFailure("outdated", error);
+        recordCommandFailure(process.cwd(), "outdated", error);
         throw error;
       }
     });
@@ -493,7 +508,7 @@ export async function run(argv = process.argv): Promise<void> {
         const logs = readProjectLogs(process.cwd());
         if (logs.length === 0) {
           console.log(terminalStyle.dim("No OpenDock logs for this project."));
-          recordCommandLog("log", "Skipped", "no logs for this project");
+          recordCommandLog(process.cwd(), "log", "Skipped", "no logs for this project");
           return;
         }
         for (const log of logs.slice(-20)) {
@@ -503,9 +518,14 @@ export async function run(argv = process.argv): Promise<void> {
             )} ${log.message}`,
           );
         }
-        recordCommandLog("log", "Success", `displayed ${Math.min(logs.length, 20)} log(s)`);
+        recordCommandLog(
+          process.cwd(),
+          "log",
+          "Success",
+          `displayed ${Math.min(logs.length, 20)} log(s)`,
+        );
       } catch (error) {
-        recordCommandFailure("log", error);
+        recordCommandFailure(process.cwd(), "log", error);
         throw error;
       }
     });
@@ -518,9 +538,9 @@ export async function run(argv = process.argv): Promise<void> {
         console.log(`opendock ${VERSION}`);
         console.log(`schema ${SCHEMA_VERSION}`);
         console.log(`registry ${DEFAULT_REGISTRY_URL}`);
-        recordCommandLog("version", "Success", `opendock ${VERSION}`);
+        recordCommandLog(process.cwd(), "version", "Success", `opendock ${VERSION}`);
       } catch (error) {
-        recordCommandFailure("version", error);
+        recordCommandFailure(process.cwd(), "version", error);
         throw error;
       }
     });
@@ -533,9 +553,9 @@ export async function run(argv = process.argv): Promise<void> {
     .action(async (options: { yes?: boolean }) => {
       try {
         await bootstrapMac({ assumeYes: options.yes === true });
-        recordCommandLog("bootstrap mac", "Success", "mac bootstrap completed");
+        recordCommandLog(process.cwd(), "bootstrap mac", "Success", "mac bootstrap completed");
       } catch (error) {
-        recordCommandFailure("bootstrap mac", error);
+        recordCommandFailure(process.cwd(), "bootstrap mac", error);
         throw error;
       }
     });
@@ -547,9 +567,14 @@ export async function run(argv = process.argv): Promise<void> {
     .action(async (options: { yes?: boolean }) => {
       try {
         await bootstrapWindows({ assumeYes: options.yes === true });
-        recordCommandLog("bootstrap windows", "Success", "windows bootstrap completed");
+        recordCommandLog(
+          process.cwd(),
+          "bootstrap windows",
+          "Success",
+          "windows bootstrap completed",
+        );
       } catch (error) {
-        recordCommandFailure("bootstrap windows", error);
+        recordCommandFailure(process.cwd(), "bootstrap windows", error);
         throw error;
       }
     });
@@ -566,7 +591,7 @@ export async function run(argv = process.argv): Promise<void> {
         if (options.token) {
           await tokenStore.saveToken(options.token);
           console.log(terminalStyle.success("Logged in to OpenDock Registry."));
-          recordCommandLog("auth login", "Success", "stored provided auth token");
+          recordCommandLog(process.cwd(), "auth login", "Success", "stored provided auth token");
           return;
         }
         const provider =
@@ -574,9 +599,14 @@ export async function run(argv = process.argv): Promise<void> {
             ? await selectAuthProvider()
             : parseAuthProvider(options.provider);
         await performBrowserLogin({ tokenStore, provider });
-        recordCommandLog("auth login", "Success", `browser login completed with ${provider}`);
+        recordCommandLog(
+          process.cwd(),
+          "auth login",
+          "Success",
+          `browser login completed with ${provider}`,
+        );
       } catch (error) {
-        recordCommandFailure("auth login", error);
+        recordCommandFailure(process.cwd(), "auth login", error);
         throw error;
       }
     });
@@ -588,14 +618,14 @@ export async function run(argv = process.argv): Promise<void> {
         const token = new TokenStore().loadToken();
         if (!token) {
           console.log(terminalStyle.warning("Not logged in."));
-          recordCommandLog("auth status", "Skipped", "not logged in");
+          recordCommandLog(process.cwd(), "auth status", "Skipped", "not logged in");
           return;
         }
         const user = await new OpenDockRegistryClient().currentUser(token);
         console.log(`${terminalStyle.success("Logged in as")} ${terminalStyle.bold(user.email)}.`);
-        recordCommandLog("auth status", "Success", `logged in as ${user.email}`);
+        recordCommandLog(process.cwd(), "auth status", "Success", `logged in as ${user.email}`);
       } catch (error) {
-        recordCommandFailure("auth status", error);
+        recordCommandFailure(process.cwd(), "auth status", error);
         throw error;
       }
     });
@@ -618,12 +648,13 @@ export async function run(argv = process.argv): Promise<void> {
         tokenStore.clearToken();
         console.log(terminalStyle.success("Logged out of OpenDock Registry."));
         recordCommandLog(
+          process.cwd(),
           "auth logout",
           token ? "Success" : "Skipped",
           token ? "logged out of registry" : "no local auth token to clear",
         );
       } catch (error) {
-        recordCommandFailure("auth logout", error);
+        recordCommandFailure(process.cwd(), "auth logout", error);
         throw error;
       }
     });
@@ -673,6 +704,7 @@ export async function run(argv = process.argv): Promise<void> {
         };
         const response = await submitDockWithLogin(client, new TokenStore(), request);
         recordCommandLog(
+          process.cwd(),
           "deploy",
           "Success",
           `${dockRef.toString()} ${releasePlatform} submitted for review: ${response.id} (${response.status})`,
@@ -686,29 +718,12 @@ export async function run(argv = process.argv): Promise<void> {
           )} (${formatStatus(response.status)})`,
         );
       } catch (error) {
-        recordCommandFailure("deploy", error, dockId);
+        recordCommandFailure(process.cwd(), "deploy", error, dockId);
         throw error;
       }
     });
 
   await program.parseAsync(normalizeCliArgv(argv), { from: "user" });
-}
-
-function recordCommandLog(
-  command: string,
-  status: RunStatus,
-  message: string,
-  dockId?: string,
-): void {
-  try {
-    appendRunLog(process.cwd(), command, dockId, status, message);
-  } catch {
-    // Logging should never make the requested command fail.
-  }
-}
-
-function recordCommandFailure(command: string, error: unknown, dockId?: string): void {
-  recordCommandLog(command, "Failure", errorMessage(error), dockId);
 }
 
 async function submitDockWithLogin(
