@@ -7,14 +7,18 @@ const rust = readFileSync(resolve(appRoot, "src-tauri", "src", "lib.rs"), "utf8"
 const appMenuRust = readFileSync(resolve(appRoot, "src-tauri", "src", "app_menu.rs"), "utf8");
 const registryRust = readFileSync(resolve(appRoot, "src-tauri", "src", "registry.rs"), "utf8");
 const mainRust = readFileSync(resolve(appRoot, "src-tauri", "src", "main.rs"), "utf8");
+const accountPanel = readFileSync(resolve(appRoot, "src", "account-panel.tsx"), "utf8");
 const app = readFileSync(resolve(appRoot, "src", "App.tsx"), "utf8");
 const appMenu = readFileSync(resolve(appRoot, "src", "app-menu.tsx"), "utf8");
 const commandTask = readFileSync(resolve(appRoot, "src", "command-task.ts"), "utf8");
 const data = readFileSync(resolve(appRoot, "src", "data.ts"), "utf8");
+const desktopUi = readFileSync(resolve(appRoot, "src", "desktop-ui.tsx"), "utf8");
 const display = readFileSync(resolve(appRoot, "src", "display.tsx"), "utf8");
+const dockPanels = readFileSync(resolve(appRoot, "src", "dock-panels.tsx"), "utf8");
 const responsivePageSize = readFileSync(resolve(appRoot, "src", "responsive-page-size.ts"), "utf8");
 const registryClient = readFileSync(resolve(appRoot, "src", "registry-client.ts"), "utf8");
 const titlebar = readFileSync(resolve(appRoot, "src", "titlebar.tsx"), "utf8");
+const workspaceShell = readFileSync(resolve(appRoot, "src", "workspace-shell.tsx"), "utf8");
 const styles = readFileSync(resolve(appRoot, "src", "styles.css"), "utf8");
 const tauriConfig = JSON.parse(readFileSync(resolve(appRoot, "src-tauri", "tauri.conf.json"), "utf8"));
 const windowsIcon = readFileSync(resolve(appRoot, "src-tauri", "icons", "icon.ico"));
@@ -93,8 +97,8 @@ const desktopVersionsUseResponsivePaging =
 const desktopUsesRegistryStars =
   data.includes("stars: summary.stars ?? 0") &&
   data.includes('export type SortMode = "downloads" | "stars" | "recent" | "name"') &&
-  app.includes("props.t.sortStars") &&
-  app.includes("function StarButton") &&
+  dockPanels.includes("props.t.sortStars") &&
+  desktopUi.includes("function StarButton") &&
   registryClient.includes('invoke<DockStarStatusResponse>("opendock_star_status", { ids })') &&
   rust.includes("async fn opendock_star_status") &&
   rust.includes("/v1/me/stars/status") &&
@@ -104,7 +108,7 @@ const desktopMyDocksUsesPaging =
   data.includes("export interface MyDocksCounts") &&
   registryClient.includes('invoke<MyDocksResponse>("opendock_my_docks", { page, limit })') &&
   app.includes("myDocksPageCount") &&
-  app.includes("accountStatsFor(props.myDocksCounts, props.myStarredDocks.length)") &&
+  accountPanel.includes("accountStatsFor(props.myDocksCounts, props.myStarredDocks.length)") &&
   rust.includes("async fn opendock_my_docks(page: Option<u32>, limit: Option<u32>)") &&
   rust.includes("DEFAULT_ACCOUNT_PAGE_LIMIT") &&
   rust.includes("MAX_ACCOUNT_PAGE_LIMIT");
@@ -117,8 +121,8 @@ const dockIconUsesOpenDockLogoFallback =
 const desktopInstalledSearchExists =
   app.includes('useStoredState("opendock.installedSearchQuery", "")') &&
   app.includes("function matchesInstalledSearch") &&
-  app.includes("props.t.installedSearch") &&
-  app.includes("noInstalledSearchTitle");
+  dockPanels.includes("props.t.installedSearch") &&
+  dockPanels.includes("noInstalledSearchTitle");
 const desktopStartsWithoutSampleLogs = data.includes("export const BASE_LOGS: AppLog[] = []");
 const detailMergeUsesRegistryLatestVersion = data.includes("version: detail.latestVersion ?? base.version");
 const installRefreshesDockBeforeResolvingRef = (() => {
@@ -182,7 +186,7 @@ const titlebarUsesNativeDragFallback =
 const authFailuresAreVisible =
   app.includes("const [authMessage, setAuthMessage]") &&
   app.includes("commandFailureMessage(result, t.signInFailed)") &&
-  app.includes("className=\"signin-status\"");
+  workspaceShell.includes("className=\"signin-status\"");
 const sidecarBuildsStandalone =
   prepareSidecars.includes('"--compile"') &&
   prepareSidecars.includes("assertStandaloneSidecar") &&

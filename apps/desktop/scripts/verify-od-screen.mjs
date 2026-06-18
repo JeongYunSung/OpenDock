@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,6 +24,7 @@ try {
   if (!(await isReachable(appUrl))) {
     server = spawn("bun", ["run", "dev:web"], {
       cwd: appRoot,
+      detached: process.platform !== "win32",
       env: { ...process.env, BROWSER: "none" },
       stdio: ["ignore", "pipe", "pipe"]
     });
@@ -54,6 +55,7 @@ async function runViewportFlow(viewport) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
   try {
+    await installRegistryFixtures(page);
     await page.goto(appUrl, { waitUntil: "domcontentloaded" });
     await page.evaluate(() => localStorage.clear());
     await page.reload({ waitUntil: "domcontentloaded" });
@@ -399,6 +401,7 @@ async function assertWindowsAppMenuFlyoutDoesNotOverlap(viewport) {
   });
   const page = await context.newPage();
   try {
+    await installRegistryFixtures(page);
     await page.goto(appUrl, { waitUntil: "domcontentloaded" });
     await page.evaluate(() => localStorage.clear());
     await page.reload({ waitUntil: "domcontentloaded" });
@@ -544,6 +547,185 @@ async function assertCommandPaletteEscapeClosesWithoutInputFocus(page) {
   await assertVisible(page.locator(".command-palette"), "command palette after reopen");
   await page.mouse.click(20, 60);
   await page.waitForFunction(() => !document.querySelector(".command-palette"));
+}
+
+async function installRegistryFixtures(page) {
+  await page.route("**/registry/v1/docks**", async (route) => {
+    const requestUrl = new URL(route.request().url());
+    const registryPath = requestUrl.pathname.replace(/^\/registry/, "");
+    const response = registryFixtureFor(registryPath, requestUrl.searchParams);
+    if (!response) {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill(response);
+  });
+}
+
+function registryFixtureFor(path, searchParams) {
+  if (path.endsWith("/logo")) {
+    return {
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGOSHzRgAAAAABJRU5ErkJggg==",
+        "base64"
+      ),
+      contentType: "image/png",
+    };
+  }
+
+  if (path === "/v1/docks") {
+    const query = (searchParams.get("query") ?? "").trim().toLowerCase();
+    const sort = searchParams.get("sort") ?? "downloads";
+    const page = Number(searchParams.get("page") ?? "1");
+    const limit = Number(searchParams.get("limit") ?? "12");
+    const filtered = registryDockSummaries()
+      .filter((dock) => {
+        if (!query) return true;
+        return [dock.id, dock.name, dock.summary, ...(dock.tags ?? [])].join(" ").toLowerCase().includes(query);
+      })
+      .sort((left, right) => compareRegistryDocks(left, right, sort));
+    const start = Math.max(0, (page - 1) * limit);
+    return jsonResponse({ items: filtered.slice(start, start + limit), page, limit, total: filtered.length });
+  }
+
+  const versionsMatch = /^\/v1\/docks\/([^/]+)\/([^/]+)\/versions$/.exec(path);
+  if (versionsMatch) {
+    const id = `${versionsMatch[1]}/${versionsMatch[2]}`;
+    const page = Number(searchParams.get("page") ?? "1");
+    const limit = Number(searchParams.get("limit") ?? "6");
+    const items = registryVersionFixtures(id);
+    const start = Math.max(0, (page - 1) * limit);
+    return jsonResponse({ id, items: items.slice(start, start + limit), page, limit, total: items.length });
+  }
+
+  const detailMatch = /^\/v1\/docks\/([^/]+)\/([^/]+)$/.exec(path);
+  if (detailMatch) {
+    const id = `${detailMatch[1]}/${detailMatch[2]}`;
+    const summary = registryDockSummaries().find((dock) => dock.id === id);
+    if (!summary) return jsonResponse({ message: `fixture dock ${id} not found` }, 404);
+    return jsonResponse({
+      ...summary,
+      description: summary.summary,
+      readmeMarkdown: registryReadmeFixture(id),
+      links: {
+        install: `opendock install ${id}@${summary.latestVersion}`,
+        versions: `https://registry.opendock.app/v1/docks/${id}/versions`,
+      },
+    });
+  }
+
+  return null;
+}
+
+function registryDockSummaries() {
+  return [
+    registryDock("backend-ultrawork", "Backend quality gate for API contracts, validation, authentication, migrations, logging, and service safety.", ["api", "backend", "harness", "security", "ultrawork"], 31, 12),
+    registryDock("designer-ai", "Design workspace setup with prompts, UX review notes, and reusable product design guidance.", ["design", "ux", "figma"], 28, 9),
+    registryDock("frontend-ai", "Frontend setup for UI implementation, responsive checks, accessibility, and review workflows.", ["frontend", "ui", "accessibility"], 24, 11),
+    registryDock("workspace-agent", "Shared agent instructions and conventions for AI-assisted project work.", ["ai-agent", "starter"], 19, 7),
+    registryDock("mcp-safe", "MCP safety notes and review checks for tool-enabled agent workspaces.", ["mcp", "security"], 13, 5),
+    registryDock("writer-ai", "Documentation writing and review setup for user-facing guides.", ["docs", "writing"], 11, 4),
+  ];
+}
+
+function registryDock(name, summary, tags, downloads, stars) {
+  return {
+    id: `opendock/${name}`,
+    owner: "opendock",
+    name,
+    displayName: name,
+    summary,
+    official: true,
+    publisher: { nickname: "opendock", official: true },
+    logo: {
+      url: `https://registry.opendock.app/v1/docks/opendock/${name}/logo`,
+      contentType: "image/png",
+      sizeBytes: 68,
+      storageBackend: "fixture",
+    },
+    platforms: ["macos", "windows"],
+    latestVersion: "1.1.0",
+    downloads,
+    stars,
+    updatedAt: "2026-06-17T06:02:50Z",
+    tags,
+  };
+}
+
+function registryReadmeFixture(id) {
+  if (id === "opendock/backend-ultrawork") {
+    return [
+      "# Backend Ultrawork",
+      "",
+      "Backend quality gate for API contracts, validation, authentication, migrations, logging, and service safety.",
+      "",
+      "## What It Checks",
+      "",
+      "- Formatter, lint, test, and build must be available for backend services.",
+      "- Request bodies must be validated before use.",
+      "- Authenticated endpoints need explicit guards.",
+      "- Hardcoded secrets and sensitive logging are blocked.",
+      "- Database migrations should be dry-runnable and rollback-aware.",
+      "- OpenAPI or schema documentation should not drift from routes.",
+      "",
+      "Use this dock when the workspace needs a focused backend quality gate.",
+    ].join("\n");
+  }
+  return [
+    `# ${id.split("/").at(-1)}`,
+    "",
+    "A reviewed OpenDock fixture used by desktop visual verification.",
+    "",
+    "## Included",
+    "",
+    "- Setup files",
+    "- Review prompts",
+    "- Doctor checks",
+  ].join("\n");
+}
+
+function registryVersionFixtures(id) {
+  return ["1.1.0", "1.0.0", "0.9.0"].map((version, index) => ({
+    version,
+    status: "approved",
+    summary: `${id} ${version}`,
+    updatedAt: `2026-06-${17 - index}T06:02:50Z`,
+    platforms: [
+      {
+        version,
+        platform: "macos",
+        approved: true,
+        status: "approved",
+        checksum: `sha256:${version.replaceAll(".", "")}macos`,
+        downloadCount: 3 - index,
+        archive: { sizeBytes: 12000 + index },
+      },
+      {
+        version,
+        platform: "windows",
+        approved: true,
+        status: "approved",
+        checksum: `sha256:${version.replaceAll(".", "")}windows`,
+        downloadCount: 2 - index,
+        archive: { sizeBytes: 13000 + index },
+      },
+    ],
+  }));
+}
+
+function compareRegistryDocks(left, right, sort) {
+  if (sort === "name") {
+    if (left.name === "backend-ultrawork") return -1;
+    if (right.name === "backend-ultrawork") return 1;
+    return left.name.localeCompare(right.name);
+  }
+  if (sort === "stars") return right.stars - left.stars || left.name.localeCompare(right.name);
+  if (sort === "updated") return right.updatedAt.localeCompare(left.updatedAt) || left.name.localeCompare(right.name);
+  return right.downloads - left.downloads || left.name.localeCompare(right.name);
+}
+
+function jsonResponse(value, status = 200) {
+  return { body: JSON.stringify(value), contentType: "application/json", status };
 }
 
 function catalogPageLimitForViewport(width, height) {
@@ -736,47 +918,21 @@ function resolveChromeExecutable() {
 async function terminateServer(child) {
   if (!child.pid) return;
   if (process.platform === "win32") {
-    spawnSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+    child.kill("SIGTERM");
+    await new Promise((resolveStop) => setTimeout(resolveStop, 300));
+    child.kill("SIGKILL");
     return;
   }
 
-  const pids = collectProcessTree(child.pid).reverse();
-  for (const pid of pids) {
-    try {
-      process.kill(pid, "SIGTERM");
-    } catch {
-      // The process may already be gone.
-    }
+  try {
+    process.kill(-child.pid, "SIGTERM");
+  } catch {
+    // The process group may already be gone.
   }
   await new Promise((resolveStop) => setTimeout(resolveStop, 300));
-  for (const pid of pids) {
-    try {
-      process.kill(pid, 0);
-      process.kill(pid, "SIGKILL");
-    } catch {
-      // Already stopped.
-    }
+  try {
+    process.kill(-child.pid, "SIGKILL");
+  } catch {
+    // Already stopped.
   }
-}
-
-function collectProcessTree(rootPid) {
-  const children = new Map();
-  const output = spawnSync("ps", ["-eo", "pid=,ppid="], { encoding: "utf8" }).stdout ?? "";
-  for (const line of output.split("\n")) {
-    const [pidText, parentText] = line.trim().split(/\s+/);
-    const pid = Number(pidText);
-    const parent = Number(parentText);
-    if (!Number.isFinite(pid) || !Number.isFinite(parent)) continue;
-    const list = children.get(parent) ?? [];
-    list.push(pid);
-    children.set(parent, list);
-  }
-
-  const collected = [];
-  const visit = (pid) => {
-    collected.push(pid);
-    for (const childPid of children.get(pid) ?? []) visit(childPid);
-  };
-  visit(rootPid);
-  return collected;
 }

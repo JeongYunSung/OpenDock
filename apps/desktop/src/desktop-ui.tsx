@@ -1,5 +1,6 @@
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { type Lang, TEXT } from "./data";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Star } from "lucide-react";
+import type { ReactNode } from "react";
+import { dockFullId, type Dock, type Lang, TEXT } from "./data";
 
 export function StatRow(props: { label: string; value: number }) {
   return (
@@ -60,5 +61,42 @@ export function GoogleMark() {
       <path d="M10.26 28.38A14.55 14.55 0 019.5 24c0-1.52.26-3 .76-4.38L2.63 13.7A23.46 23.46 0 00.5 24c0 3.7.89 7.2 2.47 10.3l7.29-5.92z" fill="#FBBC05" />
       <path d="M24 47.5c6.2 0 11.4-2.04 15.2-6.24l-7.24-5.61c-2 1.34-4.57 2.13-7.96 2.13-6.4 0-11.93-4.15-13.74-10l-7.29 5.92C6.91 42.12 14.87 47.5 24 47.5z" fill="#34A853" />
     </svg>
+  );
+}
+
+export function DockMetric(props: { count: string | number; icon: ReactNode; label: string }) {
+  return (
+    <span aria-label={`${props.count} ${props.label}`} className="dock-metric" title={`${props.count} ${props.label}`}>
+      {props.icon}
+      <span>{props.count}</span>
+    </span>
+  );
+}
+
+export function StarButton(props: {
+  busy?: boolean;
+  count: number;
+  dock: Dock;
+  onToggle: (dock: Dock) => void;
+  starred: boolean;
+  t: (typeof TEXT)[Lang];
+}) {
+  const label = `${props.starred ? props.t.unstarAction : props.t.starAction}: ${dockFullId(props.dock)}`;
+  return (
+    <button
+      aria-label={label}
+      className={`star-button ${props.starred ? "starred" : ""}`}
+      disabled={props.busy}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        props.onToggle(props.dock);
+      }}
+      title={label}
+      type="button"
+    >
+      <Star fill={props.starred ? "currentColor" : "none"} size={13} />
+      <span>{props.count}</span>
+    </button>
   );
 }
