@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const rust = readFileSync(resolve(appRoot, "src-tauri", "src", "lib.rs"), "utf8");
+const appMenuRust = readFileSync(resolve(appRoot, "src-tauri", "src", "app_menu.rs"), "utf8");
+const registryRust = readFileSync(resolve(appRoot, "src-tauri", "src", "registry.rs"), "utf8");
 const mainRust = readFileSync(resolve(appRoot, "src-tauri", "src", "main.rs"), "utf8");
 const app = readFileSync(resolve(appRoot, "src", "App.tsx"), "utf8");
 const commandTask = readFileSync(resolve(appRoot, "src", "command-task.ts"), "utf8");
@@ -19,7 +21,7 @@ const defaultCapability = JSON.parse(
   readFileSync(resolve(appRoot, "src-tauri", "capabilities", "default.json"), "utf8")
 );
 
-const menuIds = unique([...rust.matchAll(/MenuItem::with_id\(\s*app,\s*"([^"]+)"/g)].map((match) => match[1]));
+const menuIds = unique([...appMenuRust.matchAll(/MenuItem::with_id\(\s*app,\s*"([^"]+)"/g)].map((match) => match[1]));
 const frontendMenuCases = unique(
   [...extractFunctionBody(app, "async function handleNativeMenu").matchAll(/case "([^"]+)":/g)].map(
     (match) => match[1]
@@ -58,8 +60,8 @@ const appParsesHistoricalLogLines =
   commandTask.includes("function parseOpenDockHistoryLine") &&
   app.includes("setLogs(result.lines.slice(-MAX_STORED_LOGS).map(commandLineLogEntry))");
 const registryRequestsBypassCache =
-  rust.includes("reqwest::header::CACHE_CONTROL") &&
-  rust.includes("reqwest::header::PRAGMA") &&
+  registryRust.includes("reqwest::header::CACHE_CONTROL") &&
+  registryRust.includes("reqwest::header::PRAGMA") &&
   registryClient.includes('cache: "no-store"');
 const desktopCatalogUsesLiveRegistry =
   app.includes("const [catalogDocks, setCatalogDocks] = useState<Dock[]>([])") &&
@@ -383,6 +385,7 @@ function extractGenerateHandlerCommands(source) {
     .slice(bodyStart, end)
     .split(",")
     .map((entry) => entry.trim())
+    .map((entry) => entry.split("::").at(-1))
     .filter(Boolean);
 }
 

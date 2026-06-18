@@ -1,4 +1,3 @@
-use base64::{engine::general_purpose, Engine as _};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -11,43 +10,22 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
-use tauri::{Emitter, Manager, Runtime};
+use tauri::{Emitter, Manager};
 
-const DEFAULT_REGISTRY_URL: &str = "https://registry.opendock.app";
-const DEFAULT_CATALOG_PAGE_LIMIT: u32 = 12;
-const MAX_CATALOG_PAGE_LIMIT: u32 = 60;
-const DEFAULT_VERSION_PAGE_LIMIT: u32 = 6;
-const MAX_VERSION_PAGE_LIMIT: u32 = 30;
-const DEFAULT_ACCOUNT_PAGE_LIMIT: u32 = 6;
-const MAX_ACCOUNT_PAGE_LIMIT: u32 = 60;
-const MAX_REGISTRY_ASSET_BYTES: usize = 2 * 1024 * 1024;
+mod app_menu;
+mod project_state;
+mod registry;
+
+use app_menu::build_app_menu;
+use registry::{
+    bounded_limit, bounded_page, load_auth_token, registry_asset_data_url, registry_base,
+    request_registry_json, request_registry_json_with_auth, DEFAULT_ACCOUNT_PAGE_LIMIT,
+    DEFAULT_CATALOG_PAGE_LIMIT, DEFAULT_VERSION_PAGE_LIMIT, MAX_ACCOUNT_PAGE_LIMIT,
+    MAX_CATALOG_PAGE_LIMIT, MAX_VERSION_PAGE_LIMIT,
+};
 
 #[derive(Default)]
 struct RunningCommands(Mutex<HashMap<String, u32>>);
-
-#[derive(Serialize)]
-struct ProjectFolder {
-    name: String,
-    folder_name: String,
-    path: String,
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-struct AppProject {
-    id: String,
-    name: String,
-    folder_name: String,
-    path: String,
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct DesktopAppState {
-    projects: Vec<AppProject>,
-    active_project_id: String,
-}
 
 #[derive(Serialize)]
 struct OpenDockCommandResult {
@@ -131,75 +109,6 @@ struct OpenDockListResult {
 struct ShortcutFileResult {
     path: String,
     contents: String,
-}
-
-#[tauri::command]
-fn pick_project_folder() -> Option<ProjectFolder> {
-    let path = rfd::FileDialog::new()
-        .set_title("Choose OpenDock project")
-        .pick_folder()?;
-    let folder_name = path.file_name()?.to_string_lossy().to_string();
-    Some(ProjectFolder {
-        name: folder_name.clone(),
-        folder_name,
-        path: path.to_string_lossy().to_string(),
-    })
-}
-
-#[tauri::command]
-fn create_blank_project(index: u32) -> Result<ProjectFolder, String> {
-    let home = home_dir().ok_or_else(|| "home directory not found".to_string())?;
-    let base = home.join("OpenDock Projects");
-    fs::create_dir_all(&base).map_err(|error| format!("failed to create project root: {error}"))?;
-
-    let normalized_index = index.max(1);
-    let preferred = format!("empty-project-{normalized_index}");
-    let path = unique_project_path(&base, &preferred);
-    fs::create_dir_all(&path)
-        .map_err(|error| format!("failed to create project folder: {error}"))?;
-    let folder_name = file_name(&path)?;
-    Ok(ProjectFolder {
-        name: format!("Empty Project {normalized_index}"),
-        folder_name,
-        path: path.to_string_lossy().to_string(),
-    })
-}
-
-#[tauri::command]
-fn opendock_load_app_state() -> Result<DesktopAppState, String> {
-    let path = app_state_path()?;
-    if !path.exists() {
-        return Ok(DesktopAppState {
-            projects: Vec::new(),
-            active_project_id: String::new(),
-        });
-    }
-    let raw =
-        fs::read_to_string(&path).map_err(|error| format!("failed to read app state: {error}"))?;
-    let state = serde_json::from_str::<DesktopAppState>(&raw)
-        .map_err(|error| format!("failed to parse app state: {error}"))?;
-    let projects = sanitize_projects(state.projects);
-    Ok(DesktopAppState {
-        active_project_id: resolve_active_project_id(&projects, &state.active_project_id),
-        projects,
-    })
-}
-
-#[tauri::command]
-fn opendock_save_app_state(state: DesktopAppState) -> Result<(), String> {
-    let path = app_state_path()?;
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent)
-            .map_err(|error| format!("failed to create app state dir: {error}"))?;
-    }
-    let projects = sanitize_projects(state.projects);
-    let sanitized = DesktopAppState {
-        active_project_id: resolve_active_project_id(&projects, &state.active_project_id),
-        projects,
-    };
-    let raw = serde_json::to_string_pretty(&sanitized)
-        .map_err(|error| format!("failed to encode app state: {error}"))?;
-    fs::write(&path, raw).map_err(|error| format!("failed to write app state: {error}"))
 }
 
 #[tauri::command]
@@ -482,64 +391,7 @@ async fn opendock_unstar_dock(dock_id: String) -> Result<Value, String> {
 
 #[tauri::command]
 async fn opendock_registry_asset_data_url(url: String) -> Result<String, String> {
-    let url = validate_registry_asset_url(&url)?;
-    let response = reqwest::Client::new()
-        .get(url.clone())
-        .header(reqwest::header::ACCEPT, "image/*")
-        .header(reqwest::header::CACHE_CONTROL, "no-cache, no-store")
-        .header(reqwest::header::PRAGMA, "no-cache")
-        .send()
-        .await
-        .map_err(|error| format!("failed to request registry asset: {error}"))?;
-    registry_asset_response_to_data_url(response, &url).await
-}
-
-async fn registry_asset_response_to_data_url(
-    mut response: reqwest::Response,
-    url: &reqwest::Url,
-) -> Result<String, String> {
-    let status = response.status();
-    if !status.is_success() {
-        return Err(format!("registry asset returned {status} for {url}"));
-    }
-    let content_type = response
-        .headers()
-        .get(reqwest::header::CONTENT_TYPE)
-        .and_then(|value| value.to_str().ok())
-        .map(str::trim)
-        .filter(|value| value.starts_with("image/"))
-        .ok_or_else(|| "registry asset is not an image".to_string())?
-        .to_string();
-
-    if response
-        .content_length()
-        .is_some_and(|length| length > MAX_REGISTRY_ASSET_BYTES as u64)
-    {
-        return Err("registry asset is too large".to_string());
-    }
-
-    let mut bytes = Vec::with_capacity(response.content_length().unwrap_or(0) as usize);
-    while let Some(chunk) = response
-        .chunk()
-        .await
-        .map_err(|error| format!("failed to read registry asset: {error}"))?
-    {
-        append_registry_asset_chunk(&mut bytes, &chunk)?;
-    }
-
-    Ok(format!(
-        "data:{content_type};base64,{}",
-        general_purpose::STANDARD.encode(bytes)
-    ))
-}
-
-fn append_registry_asset_chunk(bytes: &mut Vec<u8>, chunk: &[u8]) -> Result<(), String> {
-    let remaining = MAX_REGISTRY_ASSET_BYTES.saturating_sub(bytes.len());
-    if chunk.len() > remaining {
-        return Err("registry asset is too large".to_string());
-    }
-    bytes.extend_from_slice(chunk);
-    Ok(())
+    registry_asset_data_url(&url).await
 }
 
 #[tauri::command]
@@ -646,10 +498,10 @@ pub fn run() {
             let _ = app.emit("opendock-menu", id);
         })
         .invoke_handler(tauri::generate_handler![
-            pick_project_folder,
-            create_blank_project,
-            opendock_load_app_state,
-            opendock_save_app_state,
+            project_state::pick_project_folder,
+            project_state::create_blank_project,
+            project_state::opendock_load_app_state,
+            project_state::opendock_save_app_state,
             opendock_install,
             opendock_update,
             opendock_outdated,
@@ -678,392 +530,6 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running OpenDock");
-}
-
-fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<R>> {
-    let quit = MenuItem::with_id(app, "app:quit", "Quit OpenDock", true, Some("CmdOrCtrl+Q"))?;
-    let app_menu = Submenu::with_items(app, "OpenDock", true, &[&quit])?;
-
-    let new_project =
-        MenuItem::with_id(app, "file:new-project", "New Project", true, None::<&str>)?;
-    let add_existing = MenuItem::with_id(
-        app,
-        "file:add-existing-project",
-        "Add Existing Project",
-        true,
-        None::<&str>,
-    )?;
-    let file_menu = Submenu::with_items(app, "File", true, &[&new_project, &add_existing])?;
-
-    let rename_project = MenuItem::with_id(
-        app,
-        "edit:rename-project",
-        "Rename Project",
-        true,
-        None::<&str>,
-    )?;
-    let copy_project_path = MenuItem::with_id(
-        app,
-        "edit:copy-project-path",
-        "Copy Project Path",
-        true,
-        Some("CmdOrCtrl+Shift+C"),
-    )?;
-    let import_shortcuts = MenuItem::with_id(
-        app,
-        "edit:import-shortcuts",
-        "Import Shortcuts...",
-        true,
-        None::<&str>,
-    )?;
-    let export_shortcuts = MenuItem::with_id(
-        app,
-        "edit:export-shortcuts",
-        "Export Shortcuts...",
-        true,
-        None::<&str>,
-    )?;
-    let edit_sep = PredefinedMenuItem::separator(app)?;
-    let select_all = PredefinedMenuItem::select_all(app, None)?;
-    let edit_menu = Submenu::with_items(
-        app,
-        "Edit",
-        true,
-        &[
-            &rename_project,
-            &copy_project_path,
-            &import_shortcuts,
-            &export_shortcuts,
-            &edit_sep,
-            &select_all,
-        ],
-    )?;
-
-    let explore_docks =
-        MenuItem::with_id(app, "view:explore", "Explore Docks", true, None::<&str>)?;
-    let installed_docks =
-        MenuItem::with_id(app, "view:installed", "Installed Docks", true, None::<&str>)?;
-    let logs = MenuItem::with_id(app, "view:logs", "Logs", true, None::<&str>)?;
-    let toggle_sidebar = MenuItem::with_id(
-        app,
-        "view:toggle-sidebar",
-        "Toggle Sidebar",
-        true,
-        Some("CmdOrCtrl+B"),
-    )?;
-    let view_menu = Submenu::with_items(
-        app,
-        "View",
-        true,
-        &[&explore_docks, &installed_docks, &logs, &toggle_sidebar],
-    )?;
-
-    let run_doctor = MenuItem::with_id(
-        app,
-        "project:run-doctor",
-        "Run Doctor",
-        true,
-        Some("CmdOrCtrl+D"),
-    )?;
-    let update_docks = MenuItem::with_id(
-        app,
-        "project:update-docks",
-        "Update Docks",
-        true,
-        None::<&str>,
-    )?;
-    let open_folder = MenuItem::with_id(
-        app,
-        "project:open-folder",
-        "Open Project Folder",
-        true,
-        None::<&str>,
-    )?;
-    let reveal_folder = MenuItem::with_id(
-        app,
-        "project:reveal-folder",
-        "Reveal in Finder / Explorer",
-        true,
-        None::<&str>,
-    )?;
-    let remove_project = MenuItem::with_id(
-        app,
-        "project:remove-from-opendock",
-        "Remove from OpenDock",
-        true,
-        None::<&str>,
-    )?;
-    let project_menu = Submenu::with_items(
-        app,
-        "Project",
-        true,
-        &[
-            &run_doctor,
-            &update_docks,
-            &open_folder,
-            &reveal_folder,
-            &remove_project,
-        ],
-    )?;
-
-    let install_dock = MenuItem::with_id(app, "dock:install", "Install Dock", true, None::<&str>)?;
-    let delete_dock = MenuItem::with_id(app, "dock:delete", "Delete Dock", true, None::<&str>)?;
-    let refresh_registry = MenuItem::with_id(
-        app,
-        "dock:refresh-registry",
-        "Refresh Registry",
-        true,
-        None::<&str>,
-    )?;
-    let open_dock_detail = MenuItem::with_id(
-        app,
-        "dock:open-detail",
-        "Open Dock Detail",
-        true,
-        None::<&str>,
-    )?;
-    let dock_menu = Submenu::with_items(
-        app,
-        "Dock",
-        true,
-        &[
-            &install_dock,
-            &delete_dock,
-            &refresh_registry,
-            &open_dock_detail,
-        ],
-    )?;
-
-    let minimize = PredefinedMenuItem::minimize(app, None)?;
-    let zoom = PredefinedMenuItem::maximize(app, None)?;
-    let reload_window = MenuItem::with_id(
-        app,
-        "window:reload",
-        "Reload Window",
-        true,
-        Some("CmdOrCtrl+Shift+R"),
-    )?;
-    let window_menu =
-        Submenu::with_items(app, "Window", true, &[&minimize, &zoom, &reload_window])?;
-
-    let docs = MenuItem::with_id(app, "help:docs", "OpenDock Docs", true, None::<&str>)?;
-    let cli_commands = MenuItem::with_id(
-        app,
-        "help:cli-commands",
-        "View CLI Commands",
-        true,
-        None::<&str>,
-    )?;
-    let troubleshooting = MenuItem::with_id(
-        app,
-        "help:troubleshooting",
-        "Troubleshooting",
-        true,
-        None::<&str>,
-    )?;
-    let help_menu =
-        Submenu::with_items(app, "Help", true, &[&docs, &cli_commands, &troubleshooting])?;
-
-    Menu::with_items(
-        app,
-        &[
-            &app_menu,
-            &file_menu,
-            &edit_menu,
-            &view_menu,
-            &project_menu,
-            &dock_menu,
-            &window_menu,
-            &help_menu,
-        ],
-    )
-}
-
-async fn request_registry_json(url: reqwest::Url) -> Result<Value, String> {
-    let response = reqwest::Client::new()
-        .get(url.clone())
-        .header(reqwest::header::ACCEPT, "application/json")
-        .header(reqwest::header::CACHE_CONTROL, "no-cache, no-store")
-        .header(reqwest::header::PRAGMA, "no-cache")
-        .send()
-        .await
-        .map_err(|error| format!("failed to request registry: {error}"))?;
-    let status = response.status();
-    if !status.is_success() {
-        let text = response.text().await.unwrap_or_default();
-        let detail = text.trim();
-        if detail.is_empty() {
-            return Err(format!("registry returned {status} for {url}"));
-        }
-        return Err(format!("registry returned {status} for {url}: {detail}"));
-    }
-    response
-        .json::<Value>()
-        .await
-        .map_err(|error| format!("failed to parse registry response: {error}"))
-}
-
-async fn request_registry_json_with_auth(
-    method: Method,
-    url: reqwest::Url,
-    token: &str,
-) -> Result<Value, String> {
-    let response = reqwest::Client::new()
-        .request(method, url.clone())
-        .bearer_auth(token)
-        .header(reqwest::header::ACCEPT, "application/json")
-        .header(reqwest::header::CACHE_CONTROL, "no-cache, no-store")
-        .header(reqwest::header::PRAGMA, "no-cache")
-        .send()
-        .await
-        .map_err(|error| format!("failed to request registry: {error}"))?;
-    let status = response.status();
-    if !status.is_success() {
-        let text = response.text().await.unwrap_or_default();
-        let detail = text.trim();
-        if detail.is_empty() {
-            return Err(format!("registry returned {status} for {url}"));
-        }
-        return Err(format!("registry returned {status} for {url}: {detail}"));
-    }
-    response
-        .json::<Value>()
-        .await
-        .map_err(|error| format!("failed to parse registry response: {error}"))
-}
-
-fn registry_base() -> String {
-    env::var("OPENDOCK_REGISTRY_URL")
-        .ok()
-        .map(|value| value.trim().trim_end_matches('/').to_string())
-        .filter(|value| !value.is_empty())
-        .unwrap_or_else(|| DEFAULT_REGISTRY_URL.to_string())
-}
-
-fn bounded_page(page: Option<u32>) -> String {
-    page.unwrap_or(1).max(1).to_string()
-}
-
-fn bounded_limit(limit: Option<u32>, default_limit: u32, max_limit: u32) -> String {
-    limit
-        .unwrap_or(default_limit)
-        .clamp(1, max_limit)
-        .to_string()
-}
-
-fn load_auth_token() -> Result<String, String> {
-    let path = auth_token_path()?;
-    let token = fs::read_to_string(&path)
-        .map_err(|_| "OpenDock auth token was not found. Run opendock auth login.".to_string())?
-        .trim()
-        .to_string();
-    if token.is_empty() {
-        return Err("OpenDock auth token is empty. Run opendock auth login.".to_string());
-    }
-    Ok(token)
-}
-
-fn auth_token_path() -> Result<PathBuf, String> {
-    Ok(cli_data_dir()?.join("auth-token"))
-}
-
-fn cli_data_dir() -> Result<PathBuf, String> {
-    if cfg!(target_os = "windows") {
-        if let Some(appdata) = env::var_os("APPDATA") {
-            return Ok(PathBuf::from(appdata).join("OpenDock"));
-        }
-    }
-
-    let home = home_dir().ok_or_else(|| "home directory not found".to_string())?;
-    if cfg!(target_os = "macos") {
-        Ok(home
-            .join("Library")
-            .join("Application Support")
-            .join("OpenDock"))
-    } else {
-        Ok(home.join(".local").join("share").join("OpenDock"))
-    }
-}
-
-fn validate_registry_asset_url(value: &str) -> Result<reqwest::Url, String> {
-    let url = reqwest::Url::parse(value.trim())
-        .map_err(|error| format!("invalid registry asset URL: {error}"))?;
-    let registry = reqwest::Url::parse(&registry_base())
-        .map_err(|error| format!("invalid registry URL: {error}"))?;
-    let same_origin = url.scheme() == registry.scheme()
-        && url.host_str() == registry.host_str()
-        && url.port_or_known_default() == registry.port_or_known_default();
-    if !same_origin {
-        return Err("registry asset URL must use the configured registry origin".to_string());
-    }
-    let path = url.path();
-    if !path.starts_with("/v1/docks/") || !path.ends_with("/logo") {
-        return Err("registry asset URL must point to a dock logo".to_string());
-    }
-    Ok(url)
-}
-
-fn app_state_path() -> Result<PathBuf, String> {
-    let data_dir = app_data_dir()?;
-    Ok(data_dir.join("state.json"))
-}
-
-fn app_data_dir() -> Result<PathBuf, String> {
-    if let Ok(path) = env::var("OPENDOCK_APP_DATA_DIR") {
-        let trimmed = path.trim();
-        if !trimmed.is_empty() {
-            return Ok(PathBuf::from(trimmed));
-        }
-    }
-
-    if cfg!(target_os = "windows") {
-        if let Some(appdata) = env::var_os("APPDATA") {
-            return Ok(PathBuf::from(appdata).join("OpenDock"));
-        }
-    }
-
-    let home = home_dir().ok_or_else(|| "home directory not found".to_string())?;
-    if cfg!(target_os = "macos") {
-        Ok(home
-            .join("Library")
-            .join("Application Support")
-            .join("OpenDock"))
-    } else {
-        Ok(home.join(".local").join("share").join("OpenDock"))
-    }
-}
-
-fn sanitize_projects(projects: Vec<AppProject>) -> Vec<AppProject> {
-    let mut sanitized = Vec::new();
-    for project in projects {
-        if project.id.trim().is_empty()
-            || project.name.trim().is_empty()
-            || project.path.trim().is_empty()
-        {
-            continue;
-        }
-        if sanitized
-            .iter()
-            .any(|existing: &AppProject| existing.id == project.id || existing.path == project.path)
-        {
-            continue;
-        }
-        sanitized.push(project);
-    }
-    sanitized
-}
-
-fn resolve_active_project_id(projects: &[AppProject], active_project_id: &str) -> String {
-    if projects
-        .iter()
-        .any(|project| project.id == active_project_id)
-    {
-        return active_project_id.to_string();
-    }
-    projects
-        .first()
-        .map(|project| project.id.clone())
-        .unwrap_or_default()
 }
 
 fn parse_auth_email(stdout: &str) -> Option<String> {
@@ -1670,43 +1136,9 @@ fn infer_level(line: &str, success: bool) -> &'static str {
     }
 }
 
-fn home_dir() -> Option<PathBuf> {
-    env::var_os("HOME")
-        .map(PathBuf::from)
-        .or_else(|| env::var_os("USERPROFILE").map(PathBuf::from))
-}
-
-fn unique_project_path(base: &Path, preferred: &str) -> PathBuf {
-    let candidate = base.join(preferred);
-    if !candidate.exists() {
-        return candidate;
-    }
-    for index in 2..1000 {
-        let candidate = base.join(format!("{preferred} {index}"));
-        if !candidate.exists() {
-            return candidate;
-        }
-    }
-    base.join(format!("{preferred} {}", chrono_free_timestamp()))
-}
-
-fn chrono_free_timestamp() -> String {
-    match std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH) {
-        Ok(duration) => duration.as_secs().to_string(),
-        Err(_) => "0".to_string(),
-    }
-}
-
-fn file_name(path: &Path) -> Result<String, String> {
-    path.file_name()
-        .map(|name| name.to_string_lossy().to_string())
-        .ok_or_else(|| "folder name not found".to_string())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::net::TcpListener;
 
     #[test]
     fn event_stream_result_does_not_emit_empty_stream_message() {
@@ -1752,49 +1184,5 @@ mod tests {
         assert_eq!(progress.command_id.as_deref(), Some("cmd-1"));
         assert_eq!(progress.dock_id.as_deref(), Some("test/designer"));
         assert_eq!(progress.percent, 62.0);
-    }
-
-    #[test]
-    fn registry_asset_chunk_limit_rejects_before_extending_buffer() {
-        let mut bytes = vec![0; MAX_REGISTRY_ASSET_BYTES];
-
-        let error = append_registry_asset_chunk(&mut bytes, &[1]).expect_err("oversized chunk");
-
-        assert_eq!(error, "registry asset is too large");
-        assert_eq!(bytes.len(), MAX_REGISTRY_ASSET_BYTES);
-    }
-
-    #[test]
-    fn registry_asset_response_rejects_oversized_content_length_before_body_read() {
-        let listener = TcpListener::bind("127.0.0.1:0").expect("bind test server");
-        let address = listener.local_addr().expect("test server address");
-        let response = format!(
-            "HTTP/1.1 200 OK\r\nContent-Type: image/png\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
-            MAX_REGISTRY_ASSET_BYTES + 1
-        );
-        let server = std::thread::spawn(move || {
-            let (mut stream, _) = listener.accept().expect("accept request");
-            let mut request = [0; 1024];
-            let _ = std::io::Read::read(&mut stream, &mut request);
-            std::io::Write::write_all(&mut stream, response.as_bytes())
-                .expect("write response headers");
-        });
-        let url = reqwest::Url::parse(&format!("http://{address}/v1/docks/test/logo"))
-            .expect("test logo URL");
-
-        let result = tauri::async_runtime::block_on(async {
-            let response = reqwest::Client::new()
-                .get(url.clone())
-                .send()
-                .await
-                .expect("registry asset response");
-            registry_asset_response_to_data_url(response, &url).await
-        });
-
-        server.join().expect("server thread");
-        assert_eq!(
-            result.expect_err("oversized asset"),
-            "registry asset is too large"
-        );
     }
 }
