@@ -14,6 +14,7 @@ const appMenu = readFileSync(resolve(appRoot, "src", "app-menu.tsx"), "utf8");
 const commandLog = readFileSync(resolve(appRoot, "src", "command-log.ts"), "utf8");
 const commandTask = readFileSync(resolve(appRoot, "src", "command-task.ts"), "utf8");
 const data = readFileSync(resolve(appRoot, "src", "data.ts"), "utf8");
+const dockData = readFileSync(resolve(appRoot, "src", "dock-data.ts"), "utf8");
 const desktopUi = readFileSync(resolve(appRoot, "src", "desktop-ui.tsx"), "utf8");
 const display = readFileSync(resolve(appRoot, "src", "display.tsx"), "utf8");
 const dockPanels = readFileSync(resolve(appRoot, "src", "dock-panels.tsx"), "utf8");
@@ -77,7 +78,8 @@ const registryRequestsBypassCache =
 const desktopCatalogUsesLiveRegistry =
   app.includes("const [catalogDocks, setCatalogDocks] = useState<Dock[]>([])") &&
   app.includes("requestCatalog(sortMode, searchQuery, catalogPage, catalogPageSize)") &&
-  data.includes("export function normalizeRegistryDock") &&
+  (data.includes("export function normalizeRegistryDock") ||
+    dockData.includes("export function normalizeRegistryDock")) &&
   !data.includes("export const DOCKS") &&
   !data.includes("DOCKS.find");
 const desktopCatalogUsesResponsivePaging =
@@ -99,7 +101,8 @@ const desktopVersionsUseResponsivePaging =
   rust.includes("DEFAULT_VERSION_PAGE_LIMIT") &&
   rust.includes("MAX_VERSION_PAGE_LIMIT");
 const desktopUsesRegistryStars =
-  data.includes("stars: summary.stars ?? 0") &&
+  (data.includes("stars: summary.stars ?? 0") ||
+    dockData.includes("stars: summary.stars ?? 0")) &&
   data.includes('export type SortMode = "downloads" | "stars" | "recent" | "name"') &&
   dockPanels.includes("props.t.sortStars") &&
   desktopUi.includes("function StarButton") &&
@@ -128,7 +131,9 @@ const desktopInstalledSearchExists =
   dockPanels.includes("props.t.installedSearch") &&
   dockPanels.includes("noInstalledSearchTitle");
 const desktopStartsWithoutSampleLogs = data.includes("export const BASE_LOGS: AppLog[] = []");
-const detailMergeUsesRegistryLatestVersion = data.includes("version: detail.latestVersion ?? base.version");
+const detailMergeUsesRegistryLatestVersion =
+  data.includes("version: detail.latestVersion ?? base.version") ||
+  dockData.includes("version: detail.latestVersion ?? base.version");
 const installRefreshesDockBeforeResolvingRef = (() => {
   const installBody = extractFunctionBody(app, "async function installDock");
   const refreshIndex = installBody.indexOf("await refreshDockDetail(dock)");
