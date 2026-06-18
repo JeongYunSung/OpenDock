@@ -81,8 +81,31 @@ export function isTaskForTarget(
   return isTaskActive(task) && task?.kind === kind && task.target.startsWith(target);
 }
 
-export function commandTaskId(kind: CommandTaskKind) {
+function commandTaskId(kind: CommandTaskKind) {
   return `opendock-${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function createCommandTask(
+  kind: CommandTaskKind,
+  target: string,
+  waitingStep: string,
+  projectPath?: string,
+): CommandTask {
+  return {
+    forceRetry: null,
+    forceRetryUsed: false,
+    id: commandTaskId(kind),
+    kind,
+    ...(projectPath === undefined ? {} : { projectPath }),
+    target,
+    progress: 8,
+    status: "running",
+    step: waitingStep,
+    lines: 0,
+    rows: [{ time: nowTime(), level: "RUN", color: "var(--info)", message: target }],
+    startedAt: nowTime(),
+    updatedAt: nowTime(),
+  };
 }
 
 export function commandTaskTitle(kind: CommandTaskKind, t: (typeof TEXT)[Lang]) {
@@ -92,14 +115,14 @@ export function commandTaskTitle(kind: CommandTaskKind, t: (typeof TEXT)[Lang]) 
   return t.taskDoctor;
 }
 
-export function nextCommandProgress(task: CommandTask, line: OpenDockCommandLine) {
+function nextCommandProgress(task: CommandTask, line: OpenDockCommandLine) {
   const normalizedLevel = line.level.toUpperCase();
   const bump =
     normalizedLevel === "OK" ? 18 : normalizedLevel === "RUN" ? 12 : normalizedLevel === "ERR" ? 8 : 7;
   return Math.min(92, Math.max(task.progress + bump, 12));
 }
 
-export function commandTaskLevel(status: CommandTaskStatus) {
+function commandTaskLevel(status: CommandTaskStatus) {
   if (status === "success") return "OK";
   if (status === "error") return "ERR";
   if (status === "cancelled" || status === "cancelling") return "WARN";
@@ -110,6 +133,143 @@ export function commandRowsContainMessage(rows: CommandTaskRow[], message: strin
   const normalized = normalizeCommandRowMessage(message);
   if (!normalized) return true;
   return rows.some((row) => normalizeCommandRowMessage(row.message) === normalized);
+}
+
+export function applyCommandLineToRunningTask(
+  current: CommandTask | null,
+  line: OpenDockCommandLine,
+): CommandTask | null {
+  if (!current || current.status !== "running") return current;
+  const level = line.level.toUpperCase();
+  return {
+    ...current,
+    progress: nextCommandProgress(current, line),
+    step: line.message,
+    lines: current.lines + 1,
+    rows: [
+      { time: nowTime(), level, color: logColor(level), message: line.message },
+      ...current.rows,
+    ].slice(0, 20),
+    updatedAt: nowTime(),
+  };
+}
+
+export function applyCommandProgressToRunningTask(
+  current: CommandTask | null,
+  progress: OpenDockCommandProgress,
+): CommandTask | null {
+  if (!current || current.status !== "running") return current;
+  if (progress.commandId && progress.commandId !== current.id) return current;
+  const level = progress.level.toUpperCase();
+  const percent = Number.isFinite(progress.percent)
+    ? Math.max(current.progress, Math.min(100, progress.percent))
+    : current.progress;
+  const row = { time: nowTime(), level, color: logColor(level), message: progress.message };
+  const suppressProgressRow = isNoUpdateProgress(progress);
+  const shouldAddRow =
+    !suppressProgressRow &&
+    (current.rows[0]?.message !== progress.message || current.rows[0]?.level !== level);
+  return {
+    ...current,
+    progress: percent,
+    step: suppressProgressRow ? current.step : progress.message,
+    lines: current.lines + 1,
+    rows: shouldAddRow ? [row, ...current.rows].slice(0, 20) : current.rows,
+    updatedAt: nowTime(),
+  };
+}
+
+export function finishCommandTaskState(
+  current: CommandTask | null,
+  commandId: string,
+  status: Exclude<CommandTaskStatus, "running" | "cancelling">,
+  step: string,
+  options: { forceRetry?: CommandForceRetry | null } = {},
+): CommandTask | null {
+  if (!current || current.id !== commandId) return current;
+  const hasSpecificError = status === "error" && current.rows.some((row) => row.level === "ERR" && row.message !== step);
+  const nextRows =
+    current.step === step || hasSpecificError
+      ? current.rows
+      : [
+          { time: nowTime(), level: commandTaskLevel(status), color: logColor(commandTaskLevel(status)), message: step },
+          ...current.rows,
+        ].slice(0, 20);
+  return {
+    ...current,
+    forceRetry: options.forceRetry === undefined ? current.forceRetry : options.forceRetry,
+    progress: status === "success" ? 100 : current.progress,
+    status,
+    step,
+    rows: nextRows,
+    updatedAt: nowTime(),
+  };
+}
+
+export function markCommandTaskCancelling(
+  current: CommandTask | null,
+  commandId: string,
+  step: string,
+): CommandTask | null {
+  if (!current || current.id !== commandId) return current;
+  return {
+    ...current,
+    status: "cancelling",
+    step,
+    rows: [
+      { time: nowTime(), level: "WARN", color: "var(--warning)", message: step },
+      ...current.rows,
+    ].slice(0, 20),
+    updatedAt: nowTime(),
+  };
+}
+
+export function markCommandTaskForceRetrying(
+  current: CommandTask | null,
+  commandId: string,
+  step: string,
+): CommandTask | null {
+  if (!current || current.id !== commandId) return current;
+  return {
+    ...current,
+    forceRetry: null,
+    forceRetryUsed: true,
+    progress: 12,
+    status: "running",
+    step,
+    rows: [
+      { time: nowTime(), level: "WARN", color: logColor("WARN"), message: step },
+      ...current.rows,
+    ].slice(0, 20),
+    updatedAt: nowTime(),
+  };
+}
+
+export function appendCommandTaskRows(
+  current: CommandTask | null,
+  commandId: string,
+  rows: CommandTaskRow[],
+): CommandTask | null {
+  if (!current || current.id !== commandId || rows.length === 0) return current;
+  return {
+    ...current,
+    rows: [...rows, ...current.rows].slice(0, 20),
+    updatedAt: nowTime(),
+  };
+}
+
+export function commandForceRetryFor(
+  task: CommandTask,
+  result: OpenDockChangeResult | null,
+): CommandForceRetry | null {
+  if (!result?.forceable || task.forceRetryUsed) return null;
+  if (task.kind === "update") {
+    return { kind: "update", projectPath: task.projectPath ?? task.target };
+  }
+  if (task.kind === "delete" && task.projectPath) {
+    return { dockId: task.target, kind: "delete", projectPath: task.projectPath };
+  }
+  return null;
 }
 
 export function commandFailureMessage(result: OpenDockCommandResult, fallback: string) {
@@ -177,14 +337,6 @@ export function commandResultRows(
   return rows;
 }
 
-export function statusLabel(status: CommandTaskStatus, t: (typeof TEXT)[Lang]) {
-  if (status === "success") return t.taskCompleted;
-  if (status === "error") return t.taskFailed;
-  if (status === "cancelled") return t.taskCancelled;
-  if (status === "cancelling") return t.taskCancelling;
-  return t.taskWorking;
-}
-
 export function openDockChangeResult(
   value: OpenDockCommandResult["json"],
 ): OpenDockChangeResult | null {
@@ -196,7 +348,7 @@ function isNoUpdateChangeResult(result: OpenDockChangeResult | null) {
   return result?.success === true && result.operation === "update" && result.reports.length === 0;
 }
 
-export function isNoUpdateProgress(progress: OpenDockCommandProgress) {
+function isNoUpdateProgress(progress: OpenDockCommandProgress) {
   return (
     progress.operation === "update" &&
     progress.phase === "complete" &&

@@ -15,6 +15,7 @@ const data = readFileSync(resolve(appRoot, "src", "data.ts"), "utf8");
 const desktopUi = readFileSync(resolve(appRoot, "src", "desktop-ui.tsx"), "utf8");
 const display = readFileSync(resolve(appRoot, "src", "display.tsx"), "utf8");
 const dockPanels = readFileSync(resolve(appRoot, "src", "dock-panels.tsx"), "utf8");
+const dockWorkspaceModel = readFileSync(resolve(appRoot, "src", "dock-workspace-model.ts"), "utf8");
 const responsivePageSize = readFileSync(resolve(appRoot, "src", "responsive-page-size.ts"), "utf8");
 const registryClient = readFileSync(resolve(appRoot, "src", "registry-client.ts"), "utf8");
 const titlebar = readFileSync(resolve(appRoot, "src", "titlebar.tsx"), "utf8");
@@ -120,7 +121,7 @@ const dockIconUsesOpenDockLogoFallback =
   !display.includes("<Zap");
 const desktopInstalledSearchExists =
   app.includes('useStoredState("opendock.installedSearchQuery", "")') &&
-  app.includes("function matchesInstalledSearch") &&
+  dockWorkspaceModel.includes("function matchesInstalledSearch") &&
   dockPanels.includes("props.t.installedSearch") &&
   dockPanels.includes("noInstalledSearchTitle");
 const desktopStartsWithoutSampleLogs = data.includes("export const BASE_LOGS: AppLog[] = []");
@@ -149,14 +150,14 @@ const commandProgressBridge =
   app.includes("applyCommandProgressToTask(progress)");
 const noUpdateProgressDoesNotDuplicatePopupRows =
   commandTask.includes("function isNoUpdateProgress") &&
-  app.includes("const suppressProgressRow = isNoUpdateProgress(progress)") &&
-  app.includes("step: suppressProgressRow ? current.step : progress.message") &&
-  app.includes("!suppressProgressRow &&") &&
+  commandTask.includes("const suppressProgressRow = isNoUpdateProgress(progress)") &&
+  commandTask.includes("step: suppressProgressRow ? current.step : progress.message") &&
+  commandTask.includes("!suppressProgressRow &&") &&
   commandTask.includes('progress.message === "No OpenDock dock updates available."');
 const commandFailureProgressDoesNotDuplicatePopupRows =
   commandTask.includes("function commandRowsContainMessage") &&
   app.includes("!commandRowsContainMessage(currentRows, result.message)") &&
-  app.includes("const hasSpecificError = status === \"error\"") &&
+  commandTask.includes("const hasSpecificError = status === \"error\"") &&
   rust.includes("should_emit_empty_stream_message(&stdout, &stderr)") &&
   rust.includes("stdout.trim().is_empty() && stderr.trim().is_empty()");
 const blockingCliCommandsUseBackgroundRuntime = [

@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { type Dock, type Lang, TEXT, dockFullId } from "./data";
+import { type Dock, type Lang, dockFullId } from "./data";
 import { loadRegistryAssetUrl } from "./registry-client";
 
 export const logoSrc = "/opendock-logo.png";

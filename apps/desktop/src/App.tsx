@@ -11,9 +11,7 @@ import {
 } from "react";
 import {
   BASE_LOGS,
-  dockFromInstalledRecord,
   dockFullId,
-  dockShortId,
   mergeRegistryDockDetail,
   normalizeRegistryDock,
   normalizeRegistryVersions,
@@ -42,20 +40,23 @@ import {
 } from "./data";
 import {
   commandFailureMessage,
+  appendCommandTaskRows,
+  applyCommandLineToRunningTask,
+  applyCommandProgressToRunningTask,
   commandLineLogEntry,
+  commandForceRetryFor,
   commandResultRows,
   commandRowsContainMessage,
-  commandTaskId,
-  commandTaskLevel,
+  createCommandTask,
+  finishCommandTaskState,
   isAuthStatusLine,
-  isNoUpdateProgress,
   isTaskActive,
   logColor,
-  nextCommandProgress,
+  markCommandTaskCancelling,
+  markCommandTaskForceRetrying,
   nowTime,
   openDockChangeResult,
   outdatedReportsByDockId,
-  statusLabel,
   successStepForChangeResult,
   waitForCommandPopupPaint,
   type CommandForceRetry,
@@ -74,14 +75,13 @@ import {
   requestSetDockStar,
   requestStarStatus,
 } from "./registry-client";
-import { findDockByKey, installedAtLabel } from "./display";
+import { findDockByKey } from "./display";
 import {
   CatalogEmptyState,
   DetailPanel,
   ExplorePanel,
   InstalledPanel,
   LogsPanel,
-  type InstalledDockRow,
 } from "./dock-panels";
 import { CommandPaletteDialog, CommandProgressDialog, ProjectSwitcherDialog } from "./app-dialogs";
 import { ProjectEmpty, ProjectLoading, ProjectSidebar, SignInScreen } from "./workspace-shell";
@@ -104,13 +104,19 @@ import { useResponsivePageSizes } from "./responsive-page-size";
 import { chooseShortcutFileFromBrowser, downloadShortcutFile, type ShortcutFileResult } from "./shortcut-file";
 import { isTauriRuntime } from "./tauri-runtime";
 import { useStoredState } from "./use-stored-state";
-import {
-  detectWindowControlPlatform,
-  type WindowControlPlatform,
-} from "./app-menu";
+import { detectWindowControlPlatform } from "./app-menu";
 import { ACCOUNT_PAGE_LIMIT, AccountPanel } from "./account-panel";
 import { ProjectAddModal, ProjectDeleteModal, ProjectRenameModal } from "./project-modals";
 import { Titlebar, type OpenMenu } from "./titlebar";
+import {
+  buildInstalledFallbackDocks,
+  installedDockRows,
+  installedDockStateMap,
+  matchesInstalledSearch,
+  resolveActiveProjectId,
+  sortCatalogDocks,
+  type InstalledDockRow,
+} from "./dock-workspace-model";
 
 const MAX_STORED_LOGS = 400;
 
@@ -124,30 +130,6 @@ function shouldIgnoreGlobalShortcut(event: KeyboardEvent) {
     target.tagName === "TEXTAREA" ||
     target.tagName === "SELECT";
   return editable && !event.metaKey && !event.ctrlKey;
-}
-
-function matchesInstalledSearch(dock: InstalledDockRow, query: string) {
-  const normalized = query.trim().toLowerCase();
-  if (!normalized) return true;
-  return [
-    dockFullId(dock),
-    dock.short,
-    dock.displayName,
-    dock.owner,
-    dock.publisher,
-    dock.desc,
-    dock.version,
-    dock.latestVersion,
-    ...dock.tags,
-    ...dock.searchTerms
-  ]
-    .filter(Boolean)
-    .some((value) => String(value).toLowerCase().includes(normalized));
-}
-
-function resolveActiveProjectId(projects: Project[], activeProjectId: string) {
-  if (projects.some((project) => project.id === activeProjectId)) return activeProjectId;
-  return projects[0]?.id ?? "";
 }
 
 export function App() {
@@ -224,7 +206,7 @@ export function App() {
   const registryDocks = catalogDocks;
   const visibleDocks = registryDocks;
   const installedFallbackDocks = useMemo(
-    () => installedRecords.map((record, index) => dockFromInstalledRecord(record, index)),
+    () => buildInstalledFallbackDocks(installedRecords),
     [installedRecords]
   );
   const allKnownDocks = useMemo(
@@ -245,44 +227,24 @@ export function App() {
     [detail, detailVersion]
   );
   const activeInstalledDocks = useMemo(
-    () =>
-      projectStateLoaded
-        ? Object.fromEntries(installedRecords.map((record) => [record.id, true]))
-        : installedDocks,
+    () => installedDockStateMap(projectStateLoaded, installedRecords, installedDocks),
     [projectStateLoaded, installedRecords, installedDocks]
   );
   const sortedDocks = useMemo(
-    () =>
-      [...visibleDocks].sort((a, b) => {
-        if (sortMode === "name") return a.short.localeCompare(b.short);
-        if (sortMode === "stars") return (b.stars ?? 0) - (a.stars ?? 0) || a.short.localeCompare(b.short);
-        if (sortMode === "recent") {
-          const byDate = new Date(b.updatedAt ?? "").getTime() - new Date(a.updatedAt ?? "").getTime();
-          return Number.isNaN(byDate) || byDate === 0 ? b.fallbackSortRank - a.fallbackSortRank : byDate;
-        }
-        return (b.downloads ?? Number(b.downloadLabel)) - (a.downloads ?? Number(a.downloadLabel));
-      }),
+    () => sortCatalogDocks(visibleDocks, sortMode),
     [visibleDocks, sortMode]
   );
   const installedRows: InstalledDockRow[] = useMemo(
     () =>
-      projectStateLoaded
-        ? installedRecords.map((record, index) => ({
-            ...(findDockByKey(allKnownDocks, record.id) ?? dockFromInstalledRecord(record, index)),
-            version: record.version,
-            checksum: record.checksum ?? findDockByKey(registryDocks, record.id)?.checksum ?? "-",
-            installedAt: installedAtLabel(lang),
-            latestVersion: outdatedReportsById[record.id]?.latestVersion,
-            updateAvailable: outdatedReportsById[record.id]?.status === "outdated",
-            updatePlatform: outdatedReportsById[record.id]?.platform
-          }))
-        : registryDocks
-            .filter((dock) => activeInstalledDocks[dockFullId(dock)] || activeInstalledDocks[dock.id])
-            .map((dock) => ({
-              ...dock,
-              installedAt: installedAtLabel(lang),
-              updateAvailable: false
-            })),
+      installedDockRows({
+        activeInstalledDocks,
+        allKnownDocks,
+        installedRecords,
+        lang,
+        outdatedReportsById,
+        projectStateLoaded,
+        registryDocks,
+      }),
     [projectStateLoaded, installedRecords, allKnownDocks, registryDocks, lang, outdatedReportsById, activeInstalledDocks]
   );
   const updateAvailableCount = useMemo(
@@ -1090,64 +1052,17 @@ export function App() {
   }
 
   function beginCommandTask(kind: CommandTaskKind, target: string, projectPath?: string) {
-    const task: CommandTask = {
-      forceRetry: null,
-      forceRetryUsed: false,
-      id: commandTaskId(kind),
-      kind,
-      ...(projectPath === undefined ? {} : { projectPath }),
-      target,
-      progress: 8,
-      status: "running",
-      step: t.taskWaiting,
-      lines: 0,
-      rows: [{ time: nowTime(), level: "RUN", color: "var(--info)", message: target }],
-      startedAt: nowTime(),
-      updatedAt: nowTime()
-    };
+    const task = createCommandTask(kind, target, t.taskWaiting, projectPath);
     setCommandTask(task);
     return task.id;
   }
 
   function applyCommandLineToTask(line: OpenDockCommandLine) {
-    setCommandTask((current) => {
-      if (!current || current.status !== "running") return current;
-      return {
-        ...current,
-        progress: nextCommandProgress(current, line),
-        step: line.message,
-        lines: current.lines + 1,
-        rows: [
-          { time: nowTime(), level: line.level.toUpperCase(), color: logColor(line.level.toUpperCase()), message: line.message },
-          ...current.rows
-        ].slice(0, 20),
-        updatedAt: nowTime()
-      };
-    });
+    setCommandTask((current) => applyCommandLineToRunningTask(current, line));
   }
 
   function applyCommandProgressToTask(progress: OpenDockCommandProgress) {
-    setCommandTask((current) => {
-      if (!current || current.status !== "running") return current;
-      if (progress.commandId && progress.commandId !== current.id) return current;
-      const level = progress.level.toUpperCase();
-      const percent = Number.isFinite(progress.percent)
-        ? Math.max(current.progress, Math.min(100, progress.percent))
-        : current.progress;
-      const row = { time: nowTime(), level, color: logColor(level), message: progress.message };
-      const suppressProgressRow = isNoUpdateProgress(progress);
-      const shouldAddRow =
-        !suppressProgressRow &&
-        (current.rows[0]?.message !== progress.message || current.rows[0]?.level !== level);
-      return {
-        ...current,
-        progress: percent,
-        step: suppressProgressRow ? current.step : progress.message,
-        lines: current.lines + 1,
-        rows: shouldAddRow ? [row, ...current.rows].slice(0, 20) : current.rows,
-        updatedAt: nowTime()
-      };
-    });
+    setCommandTask((current) => applyCommandProgressToRunningTask(current, progress));
   }
 
   function finishCommandTask(
@@ -1156,44 +1071,13 @@ export function App() {
     step: string,
     options: { forceRetry?: CommandForceRetry | null } = {}
   ) {
-    setCommandTask((current) => {
-      if (!current || current.id !== commandId) return current;
-      const hasSpecificError = status === "error" && current.rows.some((row) => row.level === "ERR" && row.message !== step);
-      const nextRows =
-        current.step === step || hasSpecificError
-          ? current.rows
-          : [
-              { time: nowTime(), level: commandTaskLevel(status), color: logColor(commandTaskLevel(status)), message: step },
-              ...current.rows
-            ].slice(0, 20);
-      return {
-        ...current,
-        forceRetry: options.forceRetry === undefined ? current.forceRetry : options.forceRetry,
-        progress: status === "success" ? 100 : current.progress,
-        status,
-        step,
-        rows: nextRows,
-        updatedAt: nowTime()
-      };
-    });
+    setCommandTask((current) => finishCommandTaskState(current, commandId, status, step, options));
   }
 
   async function cancelCommandTask() {
     const task = commandTaskRef.current;
     if (!task || !isTaskActive(task)) return;
-    setCommandTask((current) => {
-      if (!current || current.id !== task.id) return current;
-      return {
-        ...current,
-        status: "cancelling",
-        step: t.taskCancelling,
-        rows: [
-          { time: nowTime(), level: "WARN", color: "var(--warning)", message: t.taskCancelling },
-          ...current.rows
-        ].slice(0, 20),
-        updatedAt: nowTime()
-      };
-    });
+    setCommandTask((current) => markCommandTaskCancelling(current, task.id, t.taskCancelling));
     appendLog("WARN", "var(--warning)", `cancel ${task.target}`);
     if (!isTauriRuntime()) {
       finishCommandTask(task.id, "cancelled", t.taskCancelled);
@@ -1210,22 +1094,7 @@ export function App() {
     const task = commandTaskRef.current;
     const retry = task?.forceRetry;
     if (!task || !retry || isTaskActive(task)) return;
-    setCommandTask((current) => {
-      if (!current || current.id !== task.id) return current;
-      return {
-        ...current,
-        forceRetry: null,
-        forceRetryUsed: true,
-        progress: 12,
-        status: "running",
-        step: t.forceRetryLog,
-        rows: [
-          { time: nowTime(), level: "WARN", color: logColor("WARN"), message: t.forceRetryLog },
-          ...current.rows
-        ].slice(0, 20),
-        updatedAt: nowTime()
-      };
-    });
+    setCommandTask((current) => markCommandTaskForceRetrying(current, task.id, t.forceRetryLog));
     appendLog("WARN", "var(--warning)", `${retry.kind === "update" ? "force update" : "force uninstall"} ${retry.dockId ?? retry.projectPath}`);
     await waitForCommandPopupPaint();
 
@@ -1295,14 +1164,7 @@ export function App() {
     if (!result) return;
     const rows = commandResultRows(result, t);
     if (rows.length === 0) return;
-    setCommandTask((current) => {
-      if (!current || current.id !== commandId) return current;
-      return {
-        ...current,
-        rows: [...rows, ...current.rows].slice(0, 20),
-        updatedAt: nowTime()
-      };
-    });
+    setCommandTask((current) => appendCommandTaskRows(current, commandId, rows));
   }
 
   function appendCommandFailureLog(commandId: string, result: OpenDockChangeResult | null) {
@@ -1316,25 +1178,7 @@ export function App() {
       rows.push({ time: nowTime(), level: "WARN", color: logColor("WARN"), message: t.forceRetryWarning });
     }
     if (rows.length === 0) return;
-    setCommandTask((current) => {
-      if (!current || current.id !== commandId) return current;
-      return {
-        ...current,
-        rows: [...rows, ...current.rows].slice(0, 20),
-        updatedAt: nowTime()
-      };
-    });
-  }
-
-  function commandForceRetryFor(task: CommandTask, result: OpenDockChangeResult | null): CommandForceRetry | null {
-    if (!result?.forceable || task.forceRetryUsed) return null;
-    if (task.kind === "update") {
-      return { kind: "update", projectPath: task.projectPath ?? task.target };
-    }
-    if (task.kind === "delete" && task.projectPath) {
-      return { dockId: task.target, kind: "delete", projectPath: task.projectPath };
-    }
-    return null;
+    setCommandTask((current) => appendCommandTaskRows(current, commandId, rows));
   }
 
   function closeCommandProgress() {

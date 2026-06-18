@@ -2,25 +2,18 @@ import { ArrowLeft, ChevronDown, ChevronLeft, Copy, Download, Eye, RefreshCw, Se
 import { useEffect, useRef } from "react";
 import { isTaskActive, isTaskForTarget, type CommandTask } from "./command-task";
 import { dockFullId, type AppLog, type Dock, type DockVersion, type Lang, type Project, type TEXT } from "./data";
+import type { InstalledDockRow } from "./dock-workspace-model";
 import {
   DockIcon,
   KeyboardButton,
   badgeSrc,
   formatDateLabel,
-  installedAtLabel,
   platformLabel,
   versionStatusClass,
   versionStatusLabel,
 } from "./display";
 import { DockMetric, Pagination, StarButton } from "./desktop-ui";
 import { ReadmePanel } from "./readme-panel";
-
-export type InstalledDockRow = Dock & {
-  installedAt: string;
-  latestVersion?: string;
-  updateAvailable?: boolean;
-  updatePlatform?: string;
-};
 
 export function ExplorePanel(props: {
   catalogPage: number;

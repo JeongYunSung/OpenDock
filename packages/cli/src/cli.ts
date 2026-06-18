@@ -14,9 +14,7 @@ import {
   formatFileCount,
   formatFileSummary,
   handleChangeCommandError,
-  type InstalledDockUpdateCheck,
   installChangeReport,
-  installedDockListCommandResult,
   type JsonDockChangeReport,
   optionalDockEventDetails,
   plainInstallFileSummary,
@@ -31,11 +29,27 @@ import {
   updateNestedProgressPercent,
   updateProgressPercent,
 } from "./change-output.js";
+import {
+  deployOptionValue,
+  dockIdFromReference,
+  normalizeCliArgv,
+  parseAuthProvider,
+  parseDeployRef,
+  parseInstalledDockId,
+  parseInstallRef,
+  resolveCliPlatform,
+  resolveDeployPlatform,
+} from "./cli-options.js";
+import {
+  printDoctor,
+  printInstalledDocks,
+  printUpdateChecks,
+  readInstalledDocks,
+} from "./cli-project-output.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
 import { DockInstaller } from "./core/app/dock-installer.js";
 import { DockRef, manifestForRef, parseManifestFile } from "./core/domain/manifest.js";
-import { type InstalledDockRecord, OpenDockStateStore } from "./core/domain/state-store.js";
-import { TaskRunner } from "./core/runtime/task-runner.js";
+import { OpenDockStateStore } from "./core/domain/state-store.js";
 import {
   createDeployArchive,
   readDeployLogo,
@@ -43,23 +57,14 @@ import {
   resolveDeployManifest,
   validateDeployCommands,
 } from "./deploy-package.js";
+import { checkInstalledDockUpdates } from "./installed-dock-updates.js";
 import { appendRunLog, type RunStatus, readProjectLogs } from "./logging.js";
 import {
-  detectPlatform,
-  isOpenDockPlatform,
-  type OpenDockPlatform,
-  parsePlatform,
-} from "./platform.js";
-import {
-  type AuthProvider,
-  type DockVersionResponse,
   OpenDockRegistryClient,
   RegistryRequestError,
   type SubmissionRequest,
   type SubmissionResponse,
 } from "./registry.js";
-import { verifyReleaseSignature } from "./release-signature.js";
-import { resolveDock } from "./resolver.js";
 import {
   formatDockVersion,
   formatListPlatform,
@@ -689,86 +694,6 @@ export async function run(argv = process.argv): Promise<void> {
   await program.parseAsync(normalizeCliArgv(argv), { from: "user" });
 }
 
-const cliCommandNames = new Set([
-  "auth",
-  "bootstrap",
-  "deploy",
-  "doctor",
-  "install",
-  "list",
-  "log",
-  "outdated",
-  "run",
-  "uninstall",
-  "update",
-  "version",
-]);
-
-function normalizeCliArgv(argv: string[]): string[] {
-  const first = basename(argv[0] ?? "");
-  const second = basename(argv[1] ?? "");
-  if (first === "bun" || first === "node") {
-    return cliCommandNames.has(argv[1] ?? "") ? argv.slice(1) : argv.slice(2);
-  }
-  if (first === "opendock" || second === "opendock" || second === "cli.ts") {
-    return argv.slice(second === "opendock" || second === "cli.ts" ? 2 : 1);
-  }
-  return argv;
-}
-
-function parseDeployRef(value: string): DockRef {
-  if (!value.includes("@")) {
-    throw new Error(
-      "deploy reference must use owner/name@version with an exact version identifier, e.g. opendock/oma@1.0.0",
-    );
-  }
-  const dockRef = DockRef.parse(value);
-  return dockRef;
-}
-
-function deployOptionValue(
-  parsedValue: string | undefined,
-  argv: string[],
-  optionName: "--file" | "--platform",
-): string | undefined {
-  const equalsPrefix = `${optionName}=`;
-  for (const [index, token] of argv.entries()) {
-    if (token === optionName) {
-      return argv[index + 1] ?? parsedValue;
-    }
-    if (token.startsWith(equalsPrefix)) {
-      return token.slice(equalsPrefix.length);
-    }
-  }
-  return parsedValue;
-}
-
-function parseInstallRef(value: string): DockRef {
-  if (!value.includes("@")) {
-    throw new Error(
-      "install reference must use owner/name@version with an exact version identifier, e.g. opendock/codex@1.0.0",
-    );
-  }
-  return DockRef.parse(value);
-}
-
-function parseInstalledDockId(value: string): string {
-  const parts = value.trim().split("/");
-  if (parts.length !== 2 || !parts[0] || !parts[1]) {
-    throw new Error("dock id must be in owner/name form");
-  }
-  return `${parts[0]}/${parts[1]}`;
-}
-
-function dockIdFromReference(value: string): string | undefined {
-  try {
-    const [id] = value.trim().split("@");
-    return parseInstalledDockId(id ?? "");
-  } catch {
-    return undefined;
-  }
-}
-
 function recordCommandLog(
   command: string,
   status: RunStatus,
@@ -784,197 +709,6 @@ function recordCommandLog(
 
 function recordCommandFailure(command: string, error: unknown, dockId?: string): void {
   recordCommandLog(command, "Failure", errorMessage(error), dockId);
-}
-
-function parseAuthProvider(value: string): AuthProvider {
-  const normalized = value.trim().toLowerCase();
-  if (normalized === "google" || normalized === "github") {
-    return normalized;
-  }
-  throw new Error("auth provider must be google or github");
-}
-
-async function resolveLatestDockVersion(
-  dockId: string,
-  platform: OpenDockPlatform,
-): Promise<DockVersionResponse> {
-  const [owner, name, extra] = dockId.split("/");
-  if (!owner || !name || extra !== undefined) {
-    throw new Error(`invalid dock id in lock file: ${dockId}`);
-  }
-  const metadata = await new OpenDockRegistryClient().resolveDockVersion(
-    owner,
-    name,
-    "latest",
-    platform,
-  );
-  if (metadata.id !== dockId) {
-    throw new Error(`registry returned dock id \`${metadata.id}\` for installed \`${dockId}\``);
-  }
-  if (!metadata.approved) {
-    throw new Error(`dock \`${dockId}@latest\` is not approved by OpenDock Registry`);
-  }
-  if (metadata.platform !== undefined && metadata.platform !== platform) {
-    throw new Error(
-      `registry returned ${metadata.platform} artifact for requested platform \`${platform}\``,
-    );
-  }
-  const releasePlatform = metadata.platform ?? platform;
-  if (!isOpenDockPlatform(releasePlatform)) {
-    throw new Error(`registry returned unsupported platform \`${releasePlatform}\``);
-  }
-  verifyReleaseSignature(
-    {
-      id: metadata.id,
-      version: metadata.version,
-      platform: releasePlatform,
-      checksum: metadata.checksum,
-    },
-    metadata.signature,
-  );
-  return metadata;
-}
-
-function lockedDockVersionSelector(dock: { requested?: string; version: string }): string {
-  const requested = dock.requested?.trim();
-  if (requested !== undefined && requested !== "" && requested !== "latest") {
-    return requested;
-  }
-  return dock.version;
-}
-
-async function checkInstalledDockUpdates(
-  docks: InstalledDockRecord[],
-  platformOverride: OpenDockPlatform | undefined,
-): Promise<InstalledDockUpdateCheck[]> {
-  return Promise.all(
-    docks.map(async (dock) => {
-      const platform = platformOverride ?? resolveCliPlatform(dock.platform);
-      const latest = await resolveLatestDockVersion(dock.id, platform);
-      return {
-        dock,
-        latestVersion: latest.version,
-        platform,
-        updateAvailable: latest.version !== dock.version,
-      };
-    }),
-  );
-}
-
-function readInstalledDocks(cwd: string): InstalledDockRecord[] | undefined {
-  const store = new OpenDockStateStore(cwd);
-  if (!store.hasState()) {
-    return undefined;
-  }
-  return store.readLock().docks;
-}
-
-function printInstalledDocks(cwd: string, json = false): void {
-  if (json) {
-    printJson(installedDockListCommandResult(cwd));
-    return;
-  }
-
-  const docks = readInstalledDocks(cwd);
-  if (docks === undefined) {
-    console.log(terminalStyle.dim("No OpenDock docks installed in this project."));
-    return;
-  }
-
-  if (docks.length === 0) {
-    console.log(terminalStyle.dim("No OpenDock docks installed in this project."));
-    return;
-  }
-
-  console.log(terminalStyle.bold("OpenDock Docks"));
-  console.log(`${terminalStyle.dim("Project:")} ${cwd}`);
-  console.log(`${terminalStyle.bold("Installed")}:`);
-  for (const dock of docks) {
-    console.log(formatInstalledDockLine(dock));
-  }
-}
-
-function formatInstalledDockLine(dock: InstalledDockRecord): string {
-  const requested = dock.requested?.trim();
-  const requestedSuffix =
-    requested !== undefined && requested !== "" && requested !== dock.version
-      ? `, requested ${requested}`
-      : "";
-  return `${terminalStyle.dim("-")} ${formatDockVersion(dock.id, dock.version)} ${formatListPlatform(
-    dock.platform,
-  )} (${terminalStyle.info(formatManagedFileCount(dock.files.length))}${requestedSuffix})`;
-}
-
-function printUpdateChecks(cwd: string, updateChecks: InstalledDockUpdateCheck[]): void {
-  const updates = updateChecks.filter((check) => check.updateAvailable);
-  console.log(terminalStyle.bold("OpenDock Updates"));
-  console.log(`${terminalStyle.dim("Project:")} ${cwd}`);
-  if (updates.length === 0) {
-    console.log(terminalStyle.success("No OpenDock dock updates available."));
-    return;
-  }
-
-  console.log(`${terminalStyle.bold("Updates")}:`);
-  for (const check of updates) {
-    console.log(formatUpdateCheckLine(check));
-  }
-
-  const current = updateChecks.filter((check) => !check.updateAvailable);
-  if (current.length > 0) {
-    console.log(`${terminalStyle.bold("Current")}:`);
-    for (const check of current) {
-      console.log(formatCurrentCheckLine(check));
-    }
-  }
-}
-
-function formatUpdateCheckLine(check: InstalledDockUpdateCheck): string {
-  return `${formatStepSymbol("~")} ${terminalStyle.bold(check.dock.id)}: ${terminalStyle.dim(
-    check.dock.version,
-  )} ${formatStepSymbol("->")} ${terminalStyle.dim(check.latestVersion)} ${formatListPlatform(
-    check.platform,
-  )}`;
-}
-
-function formatCurrentCheckLine(check: InstalledDockUpdateCheck): string {
-  return `${formatStepSymbol("✓")} ${formatDockVersion(
-    check.dock.id,
-    check.dock.version,
-  )} ${formatListPlatform(check.platform)}`;
-}
-
-function formatManagedFileCount(count: number): string {
-  return `${count} ${count === 1 ? "file" : "files"}`;
-}
-
-function resolveCliPlatform(value: string | undefined): OpenDockPlatform {
-  return value === undefined ? detectPlatform() : parsePlatform(value);
-}
-
-function resolveDeployPlatform(
-  value: string | undefined,
-  manifestPath: string | undefined,
-): OpenDockPlatform {
-  return value === undefined
-    ? inferDeployPlatformFromManifestPath(manifestPath)
-    : parsePlatform(value);
-}
-
-function inferDeployPlatformFromManifestPath(manifestPath: string | undefined): OpenDockPlatform {
-  if (manifestPath === undefined) {
-    return detectPlatform();
-  }
-  const tokens = new Set(basename(manifestPath).toLowerCase().split("."));
-  if (tokens.has("macos") || tokens.has("mac") || tokens.has("darwin")) {
-    return "macos";
-  }
-  if (tokens.has("windows") || tokens.has("win") || tokens.has("win32")) {
-    return "windows";
-  }
-  if (tokens.has("linux")) {
-    return "linux";
-  }
-  return detectPlatform();
 }
 
 async function submitDockWithLogin(
@@ -1004,71 +738,6 @@ async function loadOrLoginToken(
     return token;
   }
   return (await performBrowserLogin({ client, tokenStore })).token;
-}
-
-async function printDoctor(cwd: string, platformOverride?: string, dockId?: string): Promise<void> {
-  console.log(terminalStyle.bold("OpenDock Doctor"));
-  console.log(`${terminalStyle.dim("Project:")} ${cwd}`);
-
-  const store = new OpenDockStateStore(cwd);
-  if (store.hasState()) {
-    console.log(`Status: ${formatStatus("Ready")}`);
-    console.log(`${terminalStyle.bold("Checks")}:`);
-    console.log(`${formatStepSymbol("✓")} .opendock/project.yml`);
-    console.log(`${formatStepSymbol("✓")} .opendock/dock.lock.yml`);
-    const lock = store.readLock();
-    const selectedDocks =
-      dockId === undefined ? lock.docks : lock.docks.filter((dock) => dock.id === dockId);
-    if (dockId !== undefined && selectedDocks.length === 0) {
-      throw new Error(`dock \`${dockId}\` is not installed in this project`);
-    }
-    for (const dock of selectedDocks) {
-      const platform = resolveCliPlatform(platformOverride ?? dock.platform);
-      console.log(
-        `${formatStepSymbol("✓")} ${formatDockVersion(dock.id, dock.version)} ${formatListPlatform(platform)}`,
-      );
-      await printDockDoctorChecks(
-        cwd,
-        DockRef.parse(`${dock.id}@${lockedDockVersionSelector(dock)}`),
-        platform,
-      );
-    }
-  } else {
-    console.log(`Status: ${formatStatus("Not installed")}`);
-    console.log(`${terminalStyle.bold("Checks")}:`);
-    console.log(`${formatStepSymbol("!")} .opendock/project.yml missing`);
-    console.log(`${formatStepSymbol("!")} .opendock/dock.lock.yml missing`);
-    if (dockId !== undefined) {
-      throw new Error(`dock \`${dockId}\` is not installed in this project`);
-    }
-  }
-}
-
-async function printDockDoctorChecks(
-  cwd: string,
-  dockRef: DockRef,
-  platform: OpenDockPlatform,
-): Promise<void> {
-  try {
-    const resolved = await resolveDock(dockRef, platform);
-    const reports = new TaskRunner().run(resolved.manifest, {
-      projectDir: cwd,
-      dockId: resolved.manifest.id,
-      phase: "doctor",
-      platform,
-    }).reports;
-    for (const report of reports) {
-      const symbol = report.status === "Failed" ? formatStepSymbol("!") : formatStepSymbol("✓");
-      const suffix = report.message ? ` (${report.message})` : "";
-      console.log(`${symbol} ${report.id}${suffix}`);
-    }
-  } catch (error) {
-    console.log(
-      `${formatStepSymbol("!")} ${terminalStyle.bold(
-        dockRef.id(),
-      )} doctor checks unavailable: ${(error as Error).message}`,
-    );
-  }
 }
 
 if (isMainModule()) {

@@ -671,7 +671,7 @@ export function dockFullId(dock: Pick<Dock, "id" | "fullId" | "owner">) {
   return dock.fullId ?? `${dock.owner ?? "opendock"}/${dock.id}`;
 }
 
-export function dockShortId(id: string) {
+function dockShortId(id: string) {
   return id.includes("/") ? id.split("/").at(-1) ?? id : id;
 }
 
