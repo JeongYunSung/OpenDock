@@ -36,6 +36,7 @@ const authController = readSrc("use-auth-controller.ts");
 const dockCommandController = readSrc("use-dock-command-controller.ts");
 const projectController = readSrc("use-project-controller.ts");
 const projectRuntimeController = readSrc("use-project-runtime-controller.ts");
+const productUpdateController = readSrc("use-product-update-controller.ts");
 const nativeEventBridge = readSrc("use-native-event-bridge.ts");
 const navigationController = readSrc("use-navigation-controller.ts");
 const responsivePageSize = readSrc("responsive-page-size.ts");
@@ -72,6 +73,7 @@ const frontendRuntimeSources = [
   navigationController,
   projectController,
   projectRuntimeController,
+  productUpdateController,
   shortcutController,
 ].join("\n");
 const invokedCommands = unique([...frontendRuntimeSources.matchAll(/invoke(?:<[^>]+>)?\("([^"]+)"/g)].map((match) => match[1]));

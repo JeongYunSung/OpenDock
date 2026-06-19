@@ -32,6 +32,7 @@ import { useNavigationController } from "./use-navigation-controller";
 import { usePaginationGuards } from "./use-pagination-guards";
 import { useProjectController } from "./use-project-controller";
 import { useProjectRuntimeController } from "./use-project-runtime-controller";
+import { useProductUpdateController } from "./use-product-update-controller";
 import { useShortcutController } from "./use-shortcut-controller";
 import { Titlebar, type OpenMenu } from "./titlebar";
 import { ACCOUNT_PAGE_LIMIT, Workspace } from "./workspace-view";
@@ -264,6 +265,12 @@ export function App() {
     t,
   });
   const {
+    openProductRelease,
+    productUpdate,
+  } = useProductUpdateController({
+    appendLog,
+  });
+  const {
     handleNativeMenu,
     openDockDetail,
     runAppMenuCommand,
@@ -379,6 +386,7 @@ export function App() {
         onLang={() => setOpenMenu((current) => (current === "lang" ? "" : "lang"))}
         onLogout={logout}
         onOpenProfile={() => setMainView("account")}
+        onOpenProductUpdate={() => void openProductRelease()}
         onSetEnglish={() => {
           setLang("en");
           setOpenMenu("");
@@ -389,6 +397,7 @@ export function App() {
         }}
         onTheme={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
         openMenu={openMenu}
+        productUpdate={productUpdate}
         projectPathLabel={projectPathLabel}
         t={t}
         windowControlPlatform={windowControlPlatform}

@@ -123,6 +123,7 @@ OpenDock is distributed as an npm package and can be installed with Bun or npm.
 ```bash
 bun install -g opendock
 opendock version
+opendock version --check
 ```
 
 For macOS docks that use Homebrew, bootstrap the host once if Homebrew is not
@@ -165,6 +166,7 @@ bin/opendock version
 | `opendock doctor owner/name` | Check only one installed dock. |
 | `opendock log` | Show recent command history for the current project. |
 | `opendock version` | Print CLI, schema, and Registry details. |
+| `opendock version --check` | Check GitHub Releases for a newer OpenDock CLI/app version. |
 | `opendock bootstrap mac` | Verify or install Homebrew on macOS. |
 | `opendock bootstrap windows` | Verify WinGet or open Microsoft App Installer on Windows. |
 | `opendock auth login` | Log in to OpenDock Registry for deploy. |

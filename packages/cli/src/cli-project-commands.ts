@@ -13,6 +13,7 @@ import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
 import { OpenDockStateStore } from "./core/domain/state-store.js";
 import { checkInstalledDockUpdates } from "./installed-dock-updates.js";
 import { readProjectLogs } from "./logging.js";
+import { checkProductUpdate, type ProductUpdateCheck } from "./product-update.js";
 import { formatStatus, terminalStyle } from "./terminal-style.js";
 import { runVerifiedCommand } from "./verified-command.js";
 
@@ -175,15 +176,61 @@ export function registerProjectCommands(program: Command): void {
   program
     .command("version")
     .description("Show CLI, schema, and registry information.")
-    .action(() => {
+    .option("--check", "Check GitHub Releases for the latest OpenDock version")
+    .option("--json", "Print machine-readable version information")
+    .action(async (options: { check?: boolean; json?: boolean }) => {
       try {
-        console.log(`opendock ${VERSION}`);
-        console.log(`schema ${SCHEMA_VERSION}`);
-        console.log(`registry ${DEFAULT_REGISTRY_URL}`);
-        recordCommandLog(process.cwd(), "version", "Success", `opendock ${VERSION}`);
+        const update = options.check === true ? await checkProductUpdate() : null;
+        if (options.json === true) {
+          printJson(versionCommandResult(update));
+        } else {
+          printVersion(update);
+        }
+        recordCommandLog(
+          process.cwd(),
+          "version",
+          "Success",
+          update?.updateAvailable === true
+            ? `OpenDock ${update.currentVersion} can update to ${update.latestVersion}`
+            : `opendock ${VERSION}`,
+        );
       } catch (error) {
         recordCommandFailure(process.cwd(), "version", error);
         throw error;
       }
     });
+}
+
+function printVersion(update: ProductUpdateCheck | null): void {
+  console.log(`opendock ${VERSION}`);
+  console.log(`schema ${SCHEMA_VERSION}`);
+  console.log(`registry ${DEFAULT_REGISTRY_URL}`);
+  if (update === null) {
+    return;
+  }
+  console.log(`latest ${update.latestVersion}`);
+  if (update.updateAvailable) {
+    console.log(
+      terminalStyle.warning(`update available ${update.currentVersion} -> ${update.latestVersion}`),
+    );
+    console.log(`${terminalStyle.dim("release")} ${update.releaseUrl}`);
+    console.log(`${terminalStyle.dim("install")} bun install -g opendock@${update.latestVersion}`);
+  } else {
+    console.log(terminalStyle.success("OpenDock is up to date."));
+  }
+}
+
+function versionCommandResult(update: ProductUpdateCheck | null): unknown {
+  return {
+    opendock: 1,
+    type: "result",
+    operation: "version",
+    success: true,
+    result: {
+      registry: DEFAULT_REGISTRY_URL,
+      schema: SCHEMA_VERSION,
+      version: VERSION,
+      ...(update === null ? {} : { update }),
+    },
+  };
 }

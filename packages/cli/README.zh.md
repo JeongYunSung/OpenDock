@@ -68,6 +68,7 @@ OpenDock 不是 terminal replacement，也不是通用 script runner。它是用
 ```bash
 bun install -g opendock
 opendock version
+opendock version --check
 ```
 
 如果 macOS dock 需要 Homebrew，而系统还没有 Homebrew，请先 bootstrap：
@@ -97,6 +98,7 @@ opendock bootstrap windows
 | `opendock doctor` | 检查项目状态和 dock 的检查 step. |
 | `opendock log` | 显示当前项目最近的命令日志. |
 | `opendock version` | 显示 CLI, schema 和 Registry 信息. |
+| `opendock version --check` | 通过 GitHub Releases 检查新的 OpenDock CLI/app 版本. |
 | `opendock bootstrap mac` | 在 macOS 上检查或安装 Homebrew. |
 | `opendock bootstrap windows` | 在 Windows 上检查 WinGet 或打开 Microsoft App Installer. |
 | `opendock auth login` | 为 deploy 登录 Registry. |

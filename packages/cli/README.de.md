@@ -73,6 +73,7 @@ kleines Tool, um wiederholbares KI-Setup zu installieren und zu verwalten.
 ```bash
 bun install -g opendock
 opendock version
+opendock version --check
 ```
 
 Wenn ein macOS dock Homebrew verwendet und Homebrew fehlt, führe zuerst aus:
@@ -102,6 +103,7 @@ opendock bootstrap windows
 | `opendock doctor` | Prüft den Projektzustand und die Diagnose-steps jedes docks. |
 | `opendock log` | Zeigt aktuelle Befehlslogs für das Projekt. |
 | `opendock version` | Zeigt Informationen zu CLI, schema und Registry. |
+| `opendock version --check` | Prüft über GitHub Releases, ob eine neue OpenDock CLI/app-Version verfügbar ist. |
 | `opendock bootstrap mac` | Prüft oder installiert Homebrew auf macOS. |
 | `opendock bootstrap windows` | Prüft WinGet oder öffnet Microsoft App Installer auf Windows. |
 | `opendock auth login` | Login bei Registry für deploy. |

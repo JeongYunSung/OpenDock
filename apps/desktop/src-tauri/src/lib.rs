@@ -6,6 +6,7 @@ use tauri::Emitter;
 mod app_menu;
 mod command_output;
 mod opendock_runner;
+mod product_update;
 mod project_state;
 mod registry;
 mod shortcut_files;
@@ -16,6 +17,7 @@ use opendock_runner::{
     run_opendock_streaming_blocking, terminate_process, validate_dock_id, validate_dock_ref,
     OpenDockCommandResult, RunningCommands,
 };
+use product_update::{check_product_update, ProductUpdateCheck};
 use registry::{
     bounded_limit, bounded_page, load_auth_token, registry_asset_data_url, registry_base,
     request_registry_json, request_registry_json_with_auth, DEFAULT_ACCOUNT_PAGE_LIMIT,
@@ -215,6 +217,11 @@ async fn opendock_auth_logout() -> Result<OpenDockCommandResult, String> {
 }
 
 #[tauri::command]
+async fn opendock_app_update_check() -> Result<ProductUpdateCheck, String> {
+    check_product_update().await
+}
+
+#[tauri::command]
 async fn opendock_catalog(
     sort: Option<String>,
     query: Option<String>,
@@ -389,6 +396,7 @@ fn open_external_url(url: String) -> Result<(), String> {
         "https://opendock.app",
         "https://hub.opendock.app",
         "https://registry.opendock.app",
+        "https://github.com/JeongYunSung/OpenDock/releases",
     ];
     if !allowed
         .iter()
@@ -428,6 +436,7 @@ pub fn run() {
             opendock_auth_status,
             opendock_auth_session,
             opendock_auth_logout,
+            opendock_app_update_check,
             opendock_catalog,
             opendock_dock_detail,
             opendock_dock_versions,

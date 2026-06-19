@@ -434,6 +434,9 @@ doctor: []
 `opendock update`는 이 조회 결과에서 업데이트 대상이 하나라도 있을
 때만 실제 update를 실행합니다.
 
+`opendock version --check`는 GitHub Releases 기준으로 OpenDock CLI/app 자체의
+새 버전이 있는지 확인합니다. 이것은 dock update와 별도입니다.
+
 ### step 필드
 
 | 필드 | 필수 | 설명 |

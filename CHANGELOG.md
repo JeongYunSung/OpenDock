@@ -7,6 +7,18 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.35 - 2026-06-19
+
+### CLI
+
+- Add `opendock version --check` to check GitHub Releases for newer OpenDock
+  versions.
+
+### Desktop App
+
+- Check GitHub Releases on startup and show a titlebar badge when a newer
+  OpenDock release is available.
+
 ## 0.1.34 - 2026-06-17
 
 ### CLI

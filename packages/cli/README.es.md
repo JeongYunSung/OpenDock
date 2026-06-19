@@ -72,6 +72,7 @@ herramienta pequeña para instalar y gestionar setup de IA repetible.
 ```bash
 bun install -g opendock
 opendock version
+opendock version --check
 ```
 
 Si un dock de macOS usa Homebrew y todavía no está disponible, ejecuta:
@@ -101,6 +102,7 @@ opendock bootstrap windows
 | `opendock doctor` | Comprueba el estado del proyecto y los steps de revisión de cada dock. |
 | `opendock log` | Muestra los logs recientes de comandos para el proyecto actual. |
 | `opendock version` | Muestra información de CLI, schema y Registry. |
+| `opendock version --check` | Comprueba en GitHub Releases si hay una nueva versión de OpenDock CLI/app. |
 | `opendock bootstrap mac` | Verifica o instala Homebrew en macOS. |
 | `opendock bootstrap windows` | Verifica WinGet o abre Microsoft App Installer en Windows. |
 | `opendock auth login` | Inicia sesión en Registry para deploy. |

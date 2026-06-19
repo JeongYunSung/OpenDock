@@ -1,7 +1,7 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Check, ChevronDown, Globe2, LogOut, Moon, Sun, UserRound } from "lucide-react";
+import { Check, ChevronDown, Globe2, LogOut, Moon, RefreshCw, Sun, UserRound } from "lucide-react";
 import type { MouseEvent } from "react";
-import { type Lang, TEXT } from "./data";
+import { type Lang, type ProductUpdateState, TEXT } from "./data";
 import { logoSrc } from "./display";
 import { isTauriRuntime } from "./tauri-runtime";
 import {
@@ -23,10 +23,12 @@ export function Titlebar(props: {
   onLang: () => void;
   onLogout: () => void;
   onOpenProfile: () => void;
+  onOpenProductUpdate: () => void;
   onSetEnglish: () => void;
   onSetKorean: () => void;
   onTheme: () => void;
   openMenu: OpenMenu;
+  productUpdate: ProductUpdateState;
   projectPathLabel: string;
   t: (typeof TEXT)[Lang];
   windowControlPlatform: WindowControlPlatform;
@@ -70,6 +72,18 @@ export function Titlebar(props: {
         <code>{props.projectPathLabel}</code>
       </div>
       <div className="titlebar-actions">
+        {props.productUpdate.status === "available" && props.productUpdate.check ? (
+          <button
+            aria-label={props.t.appUpdateOpenRelease.replace("{version}", props.productUpdate.check.latestVersion)}
+            className="product-update-button"
+            onClick={props.onOpenProductUpdate}
+            title={props.t.appUpdateOpenRelease.replace("{version}", props.productUpdate.check.latestVersion)}
+            type="button"
+          >
+            <RefreshCw size={13} />
+            <span>{props.t.appUpdateAvailable.replace("{version}", props.productUpdate.check.latestVersion)}</span>
+          </button>
+        ) : null}
         <div className="menu-anchor">
           <button className="control-button" onClick={props.onLang} type="button">
             <Globe2 size={14} />

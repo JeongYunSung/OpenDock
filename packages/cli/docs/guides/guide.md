@@ -127,6 +127,9 @@ Use `opendock outdated` to check installed docks before updating. `opendock
 update` only runs when at least one installed dock has a newer approved Registry
 release.
 
+Use `opendock version --check` to check whether GitHub Releases has a newer
+OpenDock CLI/app version. This is separate from dock updates.
+
 Accepted references:
 
 ```text

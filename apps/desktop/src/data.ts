@@ -207,6 +207,20 @@ export interface ProjectFolder {
   path: string;
 }
 
+export interface ProductUpdateCheck {
+  currentVersion: string;
+  latestVersion: string;
+  name?: string | null;
+  publishedAt?: string | null;
+  releaseUrl: string;
+  updateAvailable: boolean;
+}
+
+export interface ProductUpdateState {
+  check: ProductUpdateCheck | null;
+  status: "available" | "checking" | "current" | "failed" | "idle";
+}
+
 export interface OpenDockCommandLine {
   level: "INFO" | "OK" | "RUN" | "WARN" | "ERR" | string;
   message: string;
