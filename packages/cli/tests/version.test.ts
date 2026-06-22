@@ -64,7 +64,7 @@ describe("OpenDock version metadata", () => {
         requests.push(String(url));
         return new Response(
           JSON.stringify({
-            html_url: "https://github.com/JeongYunSung/OpenDock/releases/tag/v0.1.35",
+            html_url: "https://github.com/JeongYunSung/OpenDockReleases/releases/tag/v0.1.35",
             name: "OpenDock 0.1.35",
             published_at: "2026-06-19T00:00:00Z",
             tag_name: "v0.1.35",
@@ -80,7 +80,7 @@ describe("OpenDock version metadata", () => {
       latestVersion: "0.1.35",
       name: "OpenDock 0.1.35",
       publishedAt: "2026-06-19T00:00:00Z",
-      releaseUrl: "https://github.com/JeongYunSung/OpenDock/releases/tag/v0.1.35",
+      releaseUrl: "https://github.com/JeongYunSung/OpenDockReleases/releases/tag/v0.1.35",
       updateAvailable: true,
     });
   });

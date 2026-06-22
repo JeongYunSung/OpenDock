@@ -101,7 +101,7 @@ opendock bootstrap windows
 | `opendock doctor` | project state と dock の確認 step を実行. |
 | `opendock log` | current project の最近の command log を表示. |
 | `opendock version` | CLI, schema, Registry 情報を表示. |
-| `opendock version --check` | GitHub Releases で新しい OpenDock CLI/app version を確認. |
+| `opendock version --check` | OpenDock の public release channel で新しい CLI/app version を確認. |
 | `opendock bootstrap mac` | macOS で Homebrew を確認またはインストール. |
 | `opendock bootstrap windows` | Windows で WinGet を確認または Microsoft App Installer を開く. |
 | `opendock auth login` | deploy のため Registry に login. |

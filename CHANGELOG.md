@@ -7,16 +7,30 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.36 - 2026-06-22
+
+### CLI
+
+- Move `opendock version --check` to the public `JeongYunSung/OpenDockReleases`
+  release channel.
+
+### Desktop App
+
+- Check the public `JeongYunSung/OpenDockReleases` release channel for new
+  desktop versions.
+- Prepare desktop release uploads for both the source repository and the public
+  release repository.
+
 ## 0.1.35 - 2026-06-19
 
 ### CLI
 
-- Add `opendock version --check` to check GitHub Releases for newer OpenDock
+- Add `opendock version --check` to check OpenDock's release channel for newer
   versions.
 
 ### Desktop App
 
-- Check GitHub Releases on startup and show a titlebar badge when a newer
+- Check the release channel on startup and show a titlebar badge when a newer
   OpenDock release is available.
 
 ## 0.1.34 - 2026-06-17

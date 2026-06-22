@@ -165,7 +165,7 @@ bin/opendock version
 | `opendock doctor` | Check the project state and each installed dock's check steps. |
 | `opendock log` | Show recent command history for the current project. |
 | `opendock version` | Print CLI, schema, and Registry details. |
-| `opendock version --check` | Check GitHub Releases for a newer OpenDock CLI/app version. |
+| `opendock version --check` | Check OpenDock's public release channel for a newer CLI/app version. |
 | `opendock bootstrap mac` | Verify or install Homebrew on macOS. |
 | `opendock bootstrap windows` | Verify WinGet or open Microsoft App Installer on Windows. |
 | `opendock auth login` | Log in to OpenDock Registry for deploy. |

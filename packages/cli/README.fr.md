@@ -102,7 +102,7 @@ opendock bootstrap windows
 | `opendock doctor` | Vérifie l'état du projet et les steps de diagnostic de chaque dock. |
 | `opendock log` | Affiche les logs de commandes récents du projet courant. |
 | `opendock version` | Affiche les informations CLI, schema et Registry. |
-| `opendock version --check` | Vérifie dans GitHub Releases si une nouvelle version OpenDock CLI/app existe. |
+| `opendock version --check` | Vérifie le canal public des releases OpenDock pour une nouvelle version CLI/app. |
 | `opendock bootstrap mac` | Vérifie ou installe Homebrew sur macOS. |
 | `opendock bootstrap windows` | Vérifie WinGet ou ouvre Microsoft App Installer sur Windows. |
 | `opendock auth login` | Connexion Registry pour deploy. |

@@ -3,7 +3,7 @@ use std::env;
 
 const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 const GITHUB_LATEST_RELEASE_URL: &str =
-    "https://api.github.com/repos/JeongYunSung/OpenDock/releases/latest";
+    "https://api.github.com/repos/JeongYunSung/OpenDockReleases/releases/latest";
 
 #[derive(Deserialize)]
 struct GitHubRelease {

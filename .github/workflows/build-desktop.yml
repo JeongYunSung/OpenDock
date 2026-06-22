@@ -58,6 +58,64 @@ jobs:
         with:
           files: |
             apps/desktop/src-tauri/target/release/bundle/dmg/*.dmg
-            apps/desktop/src-tauri/target/release/bundle/macos/*.app
             apps/desktop/src-tauri/target/release/bundle/msi/*.msi
             apps/desktop/src-tauri/target/release/bundle/nsis/*.exe
+
+      - name: Upload public release assets
+        if: github.event_name == 'release'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_RELEASES_TOKEN || secrets.GH_PACKAGES_TOKEN || github.token }}
+          RELEASE_REPOSITORY: JeongYunSung/OpenDockReleases
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TITLE: ${{ github.event.release.name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
+        run: |
+          set -euo pipefail
+
+          release_title="${RELEASE_TITLE:-$RELEASE_TAG}"
+          notes_file="$(mktemp)"
+          printf '%s\n' "$RELEASE_BODY" > "$notes_file"
+
+          release_flags=()
+          if [ "$RELEASE_PRERELEASE" = "true" ]; then
+            release_flags+=(--prerelease)
+          else
+            release_flags+=(--latest)
+          fi
+
+          if gh release view "$RELEASE_TAG" --repo "$RELEASE_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" \
+              --repo "$RELEASE_REPOSITORY" \
+              --title "$release_title" \
+              --notes-file "$notes_file" \
+              "${release_flags[@]}"
+          else
+            gh release create "$RELEASE_TAG" \
+              --repo "$RELEASE_REPOSITORY" \
+              --title "$release_title" \
+              --notes-file "$notes_file" \
+              "${release_flags[@]}" \
+              || gh release edit "$RELEASE_TAG" \
+                --repo "$RELEASE_REPOSITORY" \
+                --title "$release_title" \
+                --notes-file "$notes_file" \
+                "${release_flags[@]}"
+          fi
+
+          shopt -s nullglob
+          assets=(
+            apps/desktop/src-tauri/target/release/bundle/dmg/*.dmg
+            apps/desktop/src-tauri/target/release/bundle/msi/*.msi
+            apps/desktop/src-tauri/target/release/bundle/nsis/*.exe
+          )
+          if [ "${#assets[@]}" -eq 0 ]; then
+            echo "::error::No desktop release assets were produced."
+            exit 1
+          fi
+
+          gh release upload "$RELEASE_TAG" \
+            --repo "$RELEASE_REPOSITORY" \
+            --clobber \
+            "${assets[@]}"

@@ -1,7 +1,7 @@
 import { VERSION } from "./constants.js";
 
 export const PRODUCT_RELEASE_OWNER = "JeongYunSung";
-export const PRODUCT_RELEASE_REPO = "OpenDock";
+export const PRODUCT_RELEASE_REPO = "OpenDockReleases";
 export const PRODUCT_RELEASE_LATEST_URL = `https://api.github.com/repos/${PRODUCT_RELEASE_OWNER}/${PRODUCT_RELEASE_REPO}/releases/latest`;
 
 export interface ProductUpdateCheck {

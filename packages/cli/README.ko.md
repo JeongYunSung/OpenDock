@@ -161,7 +161,7 @@ bin/opendock version
 | `opendock doctor` | 프로젝트 상태와 설치된 dock의 점검 step을 실행합니다. |
 | `opendock log` | 현재 프로젝트의 최근 명령 실행 기록을 보여줍니다. |
 | `opendock version` | CLI, schema, Registry 정보를 출력합니다. |
-| `opendock version --check` | GitHub Releases 기준으로 새 OpenDock CLI/app 버전이 있는지 확인합니다. |
+| `opendock version --check` | OpenDock public release channel 기준으로 새 CLI/app 버전이 있는지 확인합니다. |
 | `opendock bootstrap mac` | macOS에서 Homebrew를 확인하거나 설치합니다. |
 | `opendock bootstrap windows` | Windows에서 WinGet을 확인하거나 Microsoft App Installer를 엽니다. |
 | `opendock auth login` | deploy를 위해 OpenDock Registry에 로그인합니다. |

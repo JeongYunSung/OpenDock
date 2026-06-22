@@ -176,7 +176,7 @@ export function registerProjectCommands(program: Command): void {
   program
     .command("version")
     .description("Show CLI, schema, and registry information.")
-    .option("--check", "Check GitHub Releases for the latest OpenDock version")
+    .option("--check", "Check OpenDock's public release channel for the latest OpenDock version")
     .option("--json", "Print machine-readable version information")
     .action(async (options: { check?: boolean; json?: boolean }) => {
       try {

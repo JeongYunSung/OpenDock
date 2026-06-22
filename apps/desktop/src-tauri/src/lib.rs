@@ -396,7 +396,7 @@ fn open_external_url(url: String) -> Result<(), String> {
         "https://opendock.app",
         "https://hub.opendock.app",
         "https://registry.opendock.app",
-        "https://github.com/JeongYunSung/OpenDock/releases",
+        "https://github.com/JeongYunSung/OpenDockReleases/releases",
     ];
     if !allowed
         .iter()
