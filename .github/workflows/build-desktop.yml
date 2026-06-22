@@ -39,6 +39,9 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build desktop app
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: bun run build:desktop
 
       - name: Upload workflow artifact
@@ -48,8 +51,12 @@ jobs:
           path: |
             apps/desktop/src-tauri/target/release/bundle/dmg/*.dmg
             apps/desktop/src-tauri/target/release/bundle/macos/*.app
+            apps/desktop/src-tauri/target/release/bundle/macos/*.app.tar.gz
+            apps/desktop/src-tauri/target/release/bundle/macos/*.app.tar.gz.sig
             apps/desktop/src-tauri/target/release/bundle/msi/*.msi
+            apps/desktop/src-tauri/target/release/bundle/msi/*.msi.sig
             apps/desktop/src-tauri/target/release/bundle/nsis/*.exe
+            apps/desktop/src-tauri/target/release/bundle/nsis/*.exe.sig
           if-no-files-found: error
 
       - name: Upload release assets
@@ -58,8 +65,12 @@ jobs:
         with:
           files: |
             apps/desktop/src-tauri/target/release/bundle/dmg/*.dmg
+            apps/desktop/src-tauri/target/release/bundle/macos/*.app.tar.gz
+            apps/desktop/src-tauri/target/release/bundle/macos/*.app.tar.gz.sig
             apps/desktop/src-tauri/target/release/bundle/msi/*.msi
+            apps/desktop/src-tauri/target/release/bundle/msi/*.msi.sig
             apps/desktop/src-tauri/target/release/bundle/nsis/*.exe
+            apps/desktop/src-tauri/target/release/bundle/nsis/*.exe.sig
 
       - name: Upload public release assets
         if: github.event_name == 'release'
@@ -107,8 +118,12 @@ jobs:
           shopt -s nullglob
           assets=(
             apps/desktop/src-tauri/target/release/bundle/dmg/*.dmg
+            apps/desktop/src-tauri/target/release/bundle/macos/*.app.tar.gz
+            apps/desktop/src-tauri/target/release/bundle/macos/*.app.tar.gz.sig
             apps/desktop/src-tauri/target/release/bundle/msi/*.msi
+            apps/desktop/src-tauri/target/release/bundle/msi/*.msi.sig
             apps/desktop/src-tauri/target/release/bundle/nsis/*.exe
+            apps/desktop/src-tauri/target/release/bundle/nsis/*.exe.sig
           )
           if [ "${#assets[@]}" -eq 0 ]; then
             echo "::error::No desktop release assets were produced."
@@ -119,3 +134,83 @@ jobs:
             --repo "$RELEASE_REPOSITORY" \
             --clobber \
             "${assets[@]}"
+
+  publish-updater-manifest:
+    name: Publish updater manifest
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download desktop artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: opendock-desktop-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create latest.json
+        env:
+          PUBLIC_RELEASE_REPOSITORY: JeongYunSung/OpenDockReleases
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_PUBLISHED_AT: ${{ github.event.release.published_at }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          python3 <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path("release-assets")
+          tag = os.environ["RELEASE_TAG"]
+          version = tag.removeprefix("v").removeprefix("V")
+          base_url = f"https://github.com/{os.environ['PUBLIC_RELEASE_REPOSITORY']}/releases/download/{tag}"
+          platforms = {}
+
+          def first(pattern):
+              matches = sorted(root.rglob(pattern))
+              return matches[0] if matches else None
+
+          def add_platform(key, asset):
+              signature = Path(f"{asset}.sig")
+              if not signature.exists():
+                  raise SystemExit(f"missing updater signature for {asset.name}")
+              platforms[key] = {
+                  "signature": signature.read_text(encoding="utf-8").strip(),
+                  "url": f"{base_url}/{asset.name}",
+              }
+
+          mac_tar = first("*.app.tar.gz")
+          if mac_tar is not None:
+              add_platform("darwin-aarch64", mac_tar)
+              add_platform("darwin-aarch64-app", mac_tar)
+
+          nsis = first("*setup.exe") or first("*.exe")
+          if nsis is not None:
+              add_platform("windows-x86_64", nsis)
+              add_platform("windows-x86_64-nsis", nsis)
+
+          msi = first("*.msi")
+          if msi is not None:
+              add_platform("windows-x86_64-msi", msi)
+
+          if not platforms:
+              raise SystemExit("no updater platforms were found")
+
+          manifest = {
+              "version": version,
+              "notes": os.environ.get("RELEASE_BODY") or "",
+              "pub_date": os.environ.get("RELEASE_PUBLISHED_AT") or None,
+              "platforms": platforms,
+          }
+          Path("latest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload latest.json
+        env:
+          GH_TOKEN: ${{ secrets.GH_RELEASES_TOKEN || secrets.GH_PACKAGES_TOKEN || github.token }}
+          PUBLIC_RELEASE_REPOSITORY: JeongYunSung/OpenDockReleases
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" latest.json --repo "${{ github.repository }}" --clobber
+          gh release upload "$RELEASE_TAG" latest.json --repo "$PUBLIC_RELEASE_REPOSITORY" --clobber
