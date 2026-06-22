@@ -176,6 +176,8 @@ export const TEXT = {
     menuRemoveProject: "OpenDock에서 제거",
     menuRefreshRegistry: "Registry 새로고침",
     menuReloadWindow: "창 새로고침",
+    menuCurrentVersion: "OpenDock {version}",
+    menuCheckForUpdates: "업데이트 확인",
     menuDocs: "OpenDock 문서",
     menuCliCommands: "CLI 명령 보기",
     menuTroubleshooting: "문제 해결"
@@ -357,6 +359,8 @@ export const TEXT = {
     menuRemoveProject: "Remove from OpenDock",
     menuRefreshRegistry: "Refresh Registry",
     menuReloadWindow: "Reload window",
+    menuCurrentVersion: "OpenDock {version}",
+    menuCheckForUpdates: "Check for updates",
     menuDocs: "OpenDock Docs",
     menuCliCommands: "View commands",
     menuTroubleshooting: "Troubleshooting"

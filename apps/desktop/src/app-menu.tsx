@@ -12,7 +12,7 @@ export function detectWindowControlPlatform(): WindowControlPlatform {
   return platform.includes("mac") ? "macos" : "windows";
 }
 
-export function appMenuGroups(t: (typeof TEXT)[Lang]): AppMenuGroup[] {
+export function appMenuGroups(t: (typeof TEXT)[Lang], appVersion: string): AppMenuGroup[] {
   return [
     {
       key: "file",
@@ -74,6 +74,9 @@ export function appMenuGroups(t: (typeof TEXT)[Lang]): AppMenuGroup[] {
       key: "help",
       label: t.menuHelp,
       items: [
+        { id: "help:current-version", label: t.menuCurrentVersion.replace("{version}", appVersion || "...") },
+        { id: "help:check-for-updates", label: t.menuCheckForUpdates },
+        { type: "separator" },
         { id: "help:docs", label: t.menuDocs },
         { id: "help:cli-commands", label: t.menuCliCommands },
         { id: "help:troubleshooting", label: t.menuTroubleshooting },

@@ -7,6 +7,7 @@ import { isTauriRuntime } from "./tauri-runtime";
 
 interface NavigationControllerOptions {
   activeProject: Project | undefined;
+  appVersion: string;
   addExistingProjectFromFolder: () => Promise<void>;
   appendLog: (level: string, color: string, message: string) => void;
   createBlankProject: () => Promise<void>;
@@ -15,6 +16,7 @@ interface NavigationControllerOptions {
   detailKey: string;
   dockView: DockView;
   exportShortcuts: () => Promise<void>;
+  checkProductUpdate: () => Promise<void>;
   importShortcuts: () => Promise<void>;
   installDock: (dock: Dock) => Promise<void>;
   openDeleteProject: (project: Project) => void;
@@ -170,6 +172,12 @@ export function useNavigationController(options: NavigationControllerOptions) {
       case "help:docs":
       case "help:cli-commands":
         await openOpenDockUrl("https://opendock.app/docs");
+        break;
+      case "help:current-version":
+        options.appendLog("INFO", "var(--text-2)", `OpenDock ${options.appVersion || "unknown"}`);
+        break;
+      case "help:check-for-updates":
+        await options.checkProductUpdate();
         break;
       case "help:troubleshooting":
         await openOpenDockUrl("https://opendock.app/install");

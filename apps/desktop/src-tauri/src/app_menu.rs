@@ -2,6 +2,7 @@ use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::Runtime;
 
 pub(crate) fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<R>> {
+    let version_label = format!("OpenDock {}", env!("CARGO_PKG_VERSION"));
     let quit = MenuItem::with_id(app, "app:quit", "Quit OpenDock", true, Some("CmdOrCtrl+Q"))?;
     let app_menu = Submenu::with_items(app, "OpenDock", true, &[&quit])?;
 
@@ -168,6 +169,21 @@ pub(crate) fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Re
         Submenu::with_items(app, "Window", true, &[&minimize, &zoom, &reload_window])?;
 
     let docs = MenuItem::with_id(app, "help:docs", "OpenDock Docs", true, None::<&str>)?;
+    let current_version = MenuItem::with_id(
+        app,
+        "help:current-version",
+        version_label,
+        true,
+        None::<&str>,
+    )?;
+    let check_for_updates = MenuItem::with_id(
+        app,
+        "help:check-for-updates",
+        "Check for Updates...",
+        true,
+        None::<&str>,
+    )?;
+    let help_sep = PredefinedMenuItem::separator(app)?;
     let cli_commands = MenuItem::with_id(
         app,
         "help:cli-commands",
@@ -182,8 +198,19 @@ pub(crate) fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Re
         true,
         None::<&str>,
     )?;
-    let help_menu =
-        Submenu::with_items(app, "Help", true, &[&docs, &cli_commands, &troubleshooting])?;
+    let help_menu = Submenu::with_items(
+        app,
+        "Help",
+        true,
+        &[
+            &current_version,
+            &check_for_updates,
+            &help_sep,
+            &docs,
+            &cli_commands,
+            &troubleshooting,
+        ],
+    )?;
 
     Menu::with_items(
         app,

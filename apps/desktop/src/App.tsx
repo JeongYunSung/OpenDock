@@ -1,7 +1,9 @@
 import {
+  useEffect,
   useMemo,
   useState,
 } from "react";
+import { getVersion } from "@tauri-apps/api/app";
 import {
   BASE_LOGS,
   type AppLog,
@@ -42,6 +44,7 @@ export function App() {
   const [lang, setLang] = useStoredState<Lang>("opendock.lang", "ko");
   const t = TEXT[lang];
   const [loggedIn, setLoggedIn] = useStoredState("opendock.loggedIn", false);
+  const [appVersion, setAppVersion] = useState("");
   const [authProvider, setAuthProvider] = useStoredState("opendock.authProvider", "");
   const [openMenu, setOpenMenu] = useState<OpenMenu>("");
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -265,11 +268,13 @@ export function App() {
     t,
   });
   const {
+    checkProductUpdate,
     openProductRelease,
     productUpdate,
   } = useProductUpdateController({
     appendLog,
   });
+  const currentAppVersion = appVersion || productUpdate.check?.currentVersion || "";
   const {
     handleNativeMenu,
     openDockDetail,
@@ -280,6 +285,7 @@ export function App() {
     setMainView,
   } = useNavigationController({
     activeProject,
+    appVersion: currentAppVersion,
     addExistingProjectFromFolder,
     appendLog,
     createBlankProject,
@@ -288,6 +294,7 @@ export function App() {
     detailKey,
     dockView,
     exportShortcuts,
+    checkProductUpdate,
     importShortcuts,
     installDock,
     openDeleteProject,
@@ -351,6 +358,21 @@ export function App() {
     setProjects,
   });
 
+  useEffect(() => {
+    if (!isTauriRuntime()) return;
+    let cancelled = false;
+    void getVersion()
+      .then((version) => {
+        if (!cancelled) setAppVersion(version);
+      })
+      .catch((error) => {
+        appendLog("WARN", "var(--warning)", `OpenDock version check failed · ${error instanceof Error ? error.message : String(error)}`);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   usePaginationGuards({
     catalogPage,
     catalogPageCount,
@@ -378,6 +400,7 @@ export function App() {
     <div className="app-root" data-lang={lang} data-theme={theme}>
       <Titlebar
         accountName={accountMenuName}
+        appVersion={currentAppVersion}
         lang={lang}
         loggedIn={loggedIn}
         onAccount={() => setOpenMenu((current) => (current === "account" ? "" : "account"))}

@@ -15,6 +15,7 @@ export type OpenMenu = "" | "app" | "lang" | "account" | "sort";
 
 export function Titlebar(props: {
   accountName: string;
+  appVersion: string;
   lang: Lang;
   loggedIn: boolean;
   onAccount: () => void;
@@ -59,7 +60,7 @@ export function Titlebar(props: {
       ) : null}
       {!isMac ? (
         <AppMenu
-          groups={appMenuGroups(props.t)}
+          groups={appMenuGroups(props.t, props.appVersion)}
           onCommand={props.onAppMenuCommand}
           onToggle={props.onAppMenu}
           open={props.openMenu === "app"}
