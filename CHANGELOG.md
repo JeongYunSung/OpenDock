@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.37 - 2026-06-22
+
+### Desktop App
+
+- Add Help menu items for the current OpenDock version and a manual update
+  check.
+
 ## 0.1.36 - 2026-06-22
 
 ### CLI
