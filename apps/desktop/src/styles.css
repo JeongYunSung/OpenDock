@@ -229,6 +229,15 @@ input:focus-visible,
   background: var(--surface-3);
 }
 
+.product-update-button:disabled {
+  cursor: default;
+  opacity: 0.86;
+}
+
+.product-update-button.installing svg {
+  animation: spin 900ms linear infinite;
+}
+
 .app-notice {
   --notice-color: var(--info);
   position: fixed;

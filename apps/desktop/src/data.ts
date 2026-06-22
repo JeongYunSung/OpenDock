@@ -208,6 +208,7 @@ export interface ProjectFolder {
 }
 
 export interface ProductUpdateCheck {
+  autoUpdateAvailable: boolean;
   currentVersion: string;
   latestVersion: string;
   name?: string | null;
@@ -218,7 +219,7 @@ export interface ProductUpdateCheck {
 
 export interface ProductUpdateState {
   check: ProductUpdateCheck | null;
-  status: "available" | "checking" | "current" | "failed" | "idle";
+  status: "available" | "checking" | "current" | "failed" | "idle" | "installing";
 }
 
 export interface OpenDockCommandLine {

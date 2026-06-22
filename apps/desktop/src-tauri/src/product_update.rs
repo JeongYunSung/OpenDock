@@ -1,9 +1,13 @@
 use serde::{Deserialize, Serialize};
 use std::env;
+use tauri::{AppHandle, Emitter};
+use tauri_plugin_updater::UpdaterExt;
 
 const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 const GITHUB_LATEST_RELEASE_URL: &str =
     "https://api.github.com/repos/JeongYunSung/OpenDockReleases/releases/latest";
+const PUBLIC_RELEASE_LATEST_URL: &str =
+    "https://github.com/JeongYunSung/OpenDockReleases/releases/latest";
 
 #[derive(Deserialize)]
 struct GitHubRelease {
@@ -16,6 +20,7 @@ struct GitHubRelease {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ProductUpdateCheck {
+    auto_update_available: bool,
     current_version: String,
     latest_version: String,
     name: Option<String>,
@@ -24,7 +29,122 @@ pub(crate) struct ProductUpdateCheck {
     update_available: bool,
 }
 
-pub(crate) async fn check_product_update() -> Result<ProductUpdateCheck, String> {
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct ProductUpdateInstallResult {
+    latest_version: String,
+    restart_requested: bool,
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ProductUpdateProgress {
+    content_length: Option<u64>,
+    downloaded_bytes: u64,
+    latest_version: String,
+    phase: &'static str,
+}
+
+pub(crate) async fn check_product_update(app: AppHandle) -> Result<ProductUpdateCheck, String> {
+    match check_tauri_update(&app).await {
+        Ok(Some(update)) => Ok(update),
+        Ok(None) => check_github_product_update().await,
+        Err(updater_error) => match check_github_product_update().await {
+            Ok(update) => Ok(update),
+            Err(github_error) => Err(format!("{updater_error}; {github_error}")),
+        },
+    }
+}
+
+pub(crate) async fn install_product_update(
+    app: AppHandle,
+) -> Result<ProductUpdateInstallResult, String> {
+    let updater = app
+        .updater()
+        .map_err(|error| format!("failed to prepare OpenDock updater: {error}"))?;
+    let update = updater
+        .check()
+        .await
+        .map_err(|error| format!("failed to check OpenDock updater metadata: {error}"))?
+        .ok_or_else(|| "OpenDock is already up to date".to_string())?;
+
+    let latest_version = update.version.clone();
+    let _ = app.emit(
+        "opendock-product-update-progress",
+        ProductUpdateProgress {
+            content_length: None,
+            downloaded_bytes: 0,
+            latest_version: latest_version.clone(),
+            phase: "starting",
+        },
+    );
+
+    let mut downloaded_bytes = 0_u64;
+    let progress_app = app.clone();
+    let progress_version = latest_version.clone();
+    let finish_app = app.clone();
+    let finish_version = latest_version.clone();
+    update
+        .download_and_install(
+            move |chunk_length, content_length| {
+                downloaded_bytes = downloaded_bytes.saturating_add(chunk_length as u64);
+                let _ = progress_app.emit(
+                    "opendock-product-update-progress",
+                    ProductUpdateProgress {
+                        content_length,
+                        downloaded_bytes,
+                        latest_version: progress_version.clone(),
+                        phase: "downloading",
+                    },
+                );
+            },
+            move || {
+                let _ = finish_app.emit(
+                    "opendock-product-update-progress",
+                    ProductUpdateProgress {
+                        content_length: None,
+                        downloaded_bytes: 0,
+                        latest_version: finish_version.clone(),
+                        phase: "installing",
+                    },
+                );
+            },
+        )
+        .await
+        .map_err(|error| format!("failed to install OpenDock update: {error}"))?;
+
+    let _ = app.emit(
+        "opendock-product-update-progress",
+        ProductUpdateProgress {
+            content_length: None,
+            downloaded_bytes: 0,
+            latest_version: latest_version.clone(),
+            phase: "restarting",
+        },
+    );
+    app.restart();
+}
+
+async fn check_tauri_update(app: &AppHandle) -> Result<Option<ProductUpdateCheck>, String> {
+    let updater = app
+        .updater()
+        .map_err(|error| format!("failed to prepare OpenDock updater: {error}"))?;
+    let update = updater
+        .check()
+        .await
+        .map_err(|error| format!("failed to check OpenDock updater metadata: {error}"))?;
+    Ok(update.map(|update| ProductUpdateCheck {
+        auto_update_available: true,
+        current_version: normalize_release_version(&update.current_version),
+        latest_version: normalize_release_version(&update.version),
+        name: Some(format!("OpenDock {}", update.version)),
+        published_at: update.date.map(|date| date.to_string()),
+        release_url: PUBLIC_RELEASE_LATEST_URL.to_string(),
+        update_available: true,
+    }))
+}
+
+async fn check_github_product_update() -> Result<ProductUpdateCheck, String> {
     let client = reqwest::Client::builder()
         .user_agent(format!("OpenDock/{CURRENT_VERSION}"))
         .build()
@@ -51,6 +171,7 @@ pub(crate) async fn check_product_update() -> Result<ProductUpdateCheck, String>
     let current_version = normalize_release_version(CURRENT_VERSION);
     let latest_version = normalize_release_version(&release.tag_name);
     Ok(ProductUpdateCheck {
+        auto_update_available: false,
         update_available: is_version_newer(&latest_version, &current_version),
         current_version,
         latest_version,

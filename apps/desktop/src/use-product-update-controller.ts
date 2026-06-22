@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AppNoticeKind } from "./app-notice";
 import type { ProductUpdateCheck, ProductUpdateState } from "./data";
@@ -9,11 +10,22 @@ interface ProductUpdateControllerOptions {
   messages: {
     available: (currentVersion: string, latestVersion: string) => string;
     checking: string;
+    downloading: (latestVersion: string, percent: number | null) => string;
     desktopOnly: string;
     failed: (message: string) => string;
+    installing: (latestVersion: string) => string;
+    openReleaseFallback: string;
+    restarting: string;
     upToDate: (currentVersion: string) => string;
   };
   showNotice: (kind: AppNoticeKind, message: string) => void;
+}
+
+interface ProductUpdateProgress {
+  contentLength?: number | null;
+  downloadedBytes: number;
+  latestVersion: string;
+  phase: "downloading" | "installing" | "restarting" | "starting" | string;
 }
 
 const initialProductUpdateState: ProductUpdateState = {
@@ -24,6 +36,7 @@ const initialProductUpdateState: ProductUpdateState = {
 export function useProductUpdateController(options: ProductUpdateControllerOptions) {
   const appendLogRef = useRef(options.appendLog);
   const messagesRef = useRef(options.messages);
+  const productUpdateRef = useRef<ProductUpdateState>(initialProductUpdateState);
   const showNoticeRef = useRef(options.showNotice);
   const [productUpdate, setProductUpdate] = useState<ProductUpdateState>(initialProductUpdateState);
 
@@ -32,6 +45,10 @@ export function useProductUpdateController(options: ProductUpdateControllerOptio
     messagesRef.current = options.messages;
     showNoticeRef.current = options.showNotice;
   }, [options.appendLog, options.messages, options.showNotice]);
+
+  useEffect(() => {
+    productUpdateRef.current = productUpdate;
+  }, [productUpdate]);
 
   const checkProductUpdate = useCallback(async (checkOptions: { cancelled?: () => boolean; silentStart?: boolean } = {}) => {
     const silent = checkOptions.silentStart === true;
@@ -93,24 +110,94 @@ export function useProductUpdateController(options: ProductUpdateControllerOptio
     };
   }, [checkProductUpdate]);
 
+  useEffect(() => {
+    if (!isTauriRuntime()) return;
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+    void listen<ProductUpdateProgress>("opendock-product-update-progress", (event) => {
+      const progress = event.payload;
+      setProductUpdate((current) => ({ ...current, status: "installing" }));
+      if (progress.phase === "downloading") {
+        const percent = progress.contentLength
+          ? Math.min(100, Math.round((progress.downloadedBytes / progress.contentLength) * 100))
+          : null;
+        showNoticeRef.current("info", messagesRef.current.downloading(progress.latestVersion, percent));
+      } else if (progress.phase === "installing") {
+        showNoticeRef.current("info", messagesRef.current.installing(progress.latestVersion));
+      } else if (progress.phase === "restarting") {
+        showNoticeRef.current("success", messagesRef.current.restarting);
+      }
+    }).then((dispose) => {
+      if (disposed) {
+        dispose();
+        return;
+      }
+      unlisten = dispose;
+    });
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, []);
+
+  const openReleaseUrl = useCallback(async (releaseUrl: string) => {
+    if (!isTauriRuntime()) {
+      window.open(releaseUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+    await invoke("open_external_url", { url: releaseUrl });
+  }, []);
+
   const openProductRelease = useCallback(async () => {
     const releaseUrl = productUpdate.check?.releaseUrl;
     if (!releaseUrl) {
       return;
     }
-    if (!isTauriRuntime()) {
-      window.open(releaseUrl, "_blank", "noopener,noreferrer");
-      return;
-    }
     try {
-      await invoke("open_external_url", { url: releaseUrl });
+      await openReleaseUrl(releaseUrl);
     } catch (error) {
       appendLogRef.current("WARN", "var(--warning)", errorMessage(error));
     }
-  }, [productUpdate.check?.releaseUrl]);
+  }, [openReleaseUrl, productUpdate.check?.releaseUrl]);
+
+  const installProductUpdate = useCallback(async () => {
+    const check = productUpdateRef.current.check;
+    if (!check) {
+      await checkProductUpdate();
+      return;
+    }
+    if (!check.updateAvailable) {
+      showNoticeRef.current("success", messagesRef.current.upToDate(check.currentVersion));
+      return;
+    }
+    if (!check.autoUpdateAvailable) {
+      const message = messagesRef.current.openReleaseFallback;
+      appendLogRef.current("INFO", "var(--text-2)", message);
+      showNoticeRef.current("info", message);
+      try {
+        await openReleaseUrl(check.releaseUrl);
+      } catch (error) {
+        appendLogRef.current("WARN", "var(--warning)", errorMessage(error));
+      }
+      return;
+    }
+
+    setProductUpdate((current) => ({ ...current, status: "installing" }));
+    appendLogRef.current("RUN", "var(--info)", `install OpenDock ${check.latestVersion}`);
+    showNoticeRef.current("info", messagesRef.current.installing(check.latestVersion));
+    try {
+      await invoke("opendock_app_update_install");
+    } catch (error) {
+      setProductUpdate((current) => ({ ...current, status: current.check?.updateAvailable ? "available" : "failed" }));
+      const message = messagesRef.current.failed(errorMessage(error));
+      appendLogRef.current("WARN", "var(--warning)", message);
+      showNoticeRef.current("warning", message);
+    }
+  }, [checkProductUpdate, openReleaseUrl]);
 
   return {
     checkProductUpdate,
+    installProductUpdate,
     openProductRelease,
     productUpdate,
   };

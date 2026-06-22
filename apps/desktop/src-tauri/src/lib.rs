@@ -17,7 +17,9 @@ use opendock_runner::{
     run_opendock_streaming_blocking, terminate_process, validate_dock_id, validate_dock_ref,
     OpenDockCommandResult, RunningCommands,
 };
-use product_update::{check_product_update, ProductUpdateCheck};
+use product_update::{
+    check_product_update, install_product_update, ProductUpdateCheck, ProductUpdateInstallResult,
+};
 use registry::{
     bounded_limit, bounded_page, load_auth_token, registry_asset_data_url, registry_base,
     request_registry_json, request_registry_json_with_auth, DEFAULT_ACCOUNT_PAGE_LIMIT,
@@ -217,8 +219,15 @@ async fn opendock_auth_logout() -> Result<OpenDockCommandResult, String> {
 }
 
 #[tauri::command]
-async fn opendock_app_update_check() -> Result<ProductUpdateCheck, String> {
-    check_product_update().await
+async fn opendock_app_update_check(app: tauri::AppHandle) -> Result<ProductUpdateCheck, String> {
+    check_product_update(app).await
+}
+
+#[tauri::command]
+async fn opendock_app_update_install(
+    app: tauri::AppHandle,
+) -> Result<ProductUpdateInstallResult, String> {
+    install_product_update(app).await
 }
 
 #[tauri::command]
@@ -410,6 +419,7 @@ fn open_external_url(url: String) -> Result<(), String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(RunningCommands::default())
         .menu(build_app_menu)
         .on_menu_event(|app, event| {
@@ -437,6 +447,7 @@ pub fn run() {
             opendock_auth_session,
             opendock_auth_logout,
             opendock_app_update_check,
+            opendock_app_update_install,
             opendock_catalog,
             opendock_dock_detail,
             opendock_dock_versions,

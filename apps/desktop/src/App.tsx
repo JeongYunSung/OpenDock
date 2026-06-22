@@ -271,15 +271,23 @@ export function App() {
   });
   const {
     checkProductUpdate,
-    openProductRelease,
+    installProductUpdate,
     productUpdate,
   } = useProductUpdateController({
     appendLog,
     messages: {
       available: (_currentVersion, latestVersion) => t.appUpdateAvailableNotice.replace("{version}", latestVersion),
       checking: t.appUpdateChecking,
+      downloading: (latestVersion, percent) =>
+        t.appUpdateDownloading
+          .replace("{version}", latestVersion)
+          .replace("{percent}", percent === null ? "" : `${percent}%`)
+          .trim(),
       desktopOnly: t.appUpdateDesktopOnly,
       failed: (message) => t.appUpdateCheckFailed.replace("{message}", message),
+      installing: (latestVersion) => t.appUpdateInstalling.replace("{version}", latestVersion),
+      openReleaseFallback: t.appUpdateOpenReleaseFallback,
+      restarting: t.appUpdateRestarting,
       upToDate: (currentVersion) => t.appUpdateUpToDate.replace("{version}", currentVersion || t.unavailable),
     },
     showNotice: showAppNotice,
@@ -429,7 +437,7 @@ export function App() {
         onLang={() => setOpenMenu((current) => (current === "lang" ? "" : "lang"))}
         onLogout={logout}
         onOpenProfile={() => setMainView("account")}
-        onOpenProductUpdate={() => void openProductRelease()}
+        onOpenProductUpdate={() => void installProductUpdate()}
         onSetEnglish={() => {
           setLang("en");
           setOpenMenu("");

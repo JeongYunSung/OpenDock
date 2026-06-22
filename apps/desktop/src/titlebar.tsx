@@ -40,6 +40,9 @@ export function Titlebar(props: {
     onMaximize: () => void handleWindow("maximize"),
     onMinimize: () => void handleWindow("minimize"),
   };
+  const productUpdateLabel = productUpdateButtonLabel(props.productUpdate, props.t);
+  const productUpdateTitle = productUpdateButtonTitle(props.productUpdate, props.t);
+  const productUpdateDisabled = props.productUpdate.status === "installing";
   const startDrag = (event: MouseEvent<HTMLElement>) => {
     if (event.button !== 0 || event.detail > 1 || isInteractiveTitlebarTarget(event.target)) return;
     if (!isTauriRuntime()) return;
@@ -73,16 +76,17 @@ export function Titlebar(props: {
         <code>{props.projectPathLabel}</code>
       </div>
       <div className="titlebar-actions">
-        {props.productUpdate.status === "available" && props.productUpdate.check ? (
+        {(props.productUpdate.status === "available" || props.productUpdate.status === "installing") && props.productUpdate.check ? (
           <button
-            aria-label={props.t.appUpdateOpenRelease.replace("{version}", props.productUpdate.check.latestVersion)}
-            className="product-update-button"
+            aria-label={productUpdateTitle}
+            className={`product-update-button ${productUpdateDisabled ? "installing" : ""}`}
+            disabled={productUpdateDisabled}
             onClick={props.onOpenProductUpdate}
-            title={props.t.appUpdateOpenRelease.replace("{version}", props.productUpdate.check.latestVersion)}
+            title={productUpdateTitle}
             type="button"
           >
             <RefreshCw size={13} />
-            <span>{props.t.appUpdateAvailable.replace("{version}", props.productUpdate.check.latestVersion)}</span>
+            <span>{productUpdateLabel}</span>
           </button>
         ) : null}
         <div className="menu-anchor">
@@ -137,6 +141,20 @@ export function Titlebar(props: {
       </div>
     </header>
   );
+}
+
+function productUpdateButtonLabel(productUpdate: ProductUpdateState, t: (typeof TEXT)[Lang]) {
+  const latestVersion = productUpdate.check?.latestVersion ?? "";
+  if (productUpdate.status === "installing") return t.appUpdateInstalling.replace("{version}", latestVersion);
+  if (productUpdate.check?.autoUpdateAvailable) return t.appUpdateInstallAction.replace("{version}", latestVersion);
+  return t.appUpdateAvailable.replace("{version}", latestVersion);
+}
+
+function productUpdateButtonTitle(productUpdate: ProductUpdateState, t: (typeof TEXT)[Lang]) {
+  const latestVersion = productUpdate.check?.latestVersion ?? "";
+  if (productUpdate.status === "installing") return t.appUpdateInstalling.replace("{version}", latestVersion);
+  if (productUpdate.check?.autoUpdateAvailable) return t.appUpdateInstallAction.replace("{version}", latestVersion);
+  return t.appUpdateOpenRelease.replace("{version}", latestVersion);
 }
 
 async function handleWindow(action: "minimize" | "maximize" | "close") {

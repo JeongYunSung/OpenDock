@@ -30,6 +30,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": "all",
     "icon": [
       "icons/32x32.png",
@@ -49,5 +50,16 @@
     "externalBin": [
       "binaries/opendock"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlDNjIwNjBGRTBGQ0ZCOTAKUldTUSsvemdEd1ppbk9OWUIrNUs1K1pRMUFhRHhjZkcxUzRJTGtEME1YMkhVTnhrZ1lGK0VLMGwK",
+      "endpoints": [
+        "https://github.com/JeongYunSung/OpenDockReleases/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }
