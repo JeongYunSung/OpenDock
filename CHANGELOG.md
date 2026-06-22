@@ -7,6 +7,16 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.38 - 2026-06-22
+
+### Desktop App
+
+- Show clear feedback when manually checking for OpenDock updates.
+- Install signed OpenDock app updates in place when updater artifacts are
+  available, with a release-page fallback for older releases.
+- Publish signed updater artifacts and `latest.json` from the desktop release
+  workflow.
+
 ## 0.1.37 - 2026-06-22
 
 ### Desktop App
