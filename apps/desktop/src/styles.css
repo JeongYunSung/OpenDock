@@ -229,6 +229,75 @@ input:focus-visible,
   background: var(--surface-3);
 }
 
+.app-notice {
+  --notice-color: var(--info);
+  position: fixed;
+  top: 58px;
+  right: 16px;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: min(420px, calc(100vw - 32px));
+  border: 1px solid color-mix(in srgb, var(--notice-color) 36%, var(--border));
+  border-radius: 8px;
+  padding: 10px 10px 10px 12px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface) 92%, var(--notice-color));
+  box-shadow: var(--shadow-md);
+  animation: app-notice-in 160ms ease-out;
+}
+
+.app-notice-success {
+  --notice-color: var(--success);
+}
+
+.app-notice-warning {
+  --notice-color: var(--warning);
+}
+
+.app-notice > svg {
+  flex: 0 0 auto;
+  color: var(--notice-color);
+}
+
+.app-notice span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.app-notice button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-2);
+  background: transparent;
+  cursor: pointer;
+}
+
+.app-notice button:hover {
+  color: var(--text);
+  background: var(--surface-3);
+}
+
+@keyframes app-notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .desktop-frame {
   width: 100%;
   height: calc(100% - 46px);

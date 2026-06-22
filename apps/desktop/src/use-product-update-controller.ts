@@ -1,10 +1,19 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { AppNoticeKind } from "./app-notice";
 import type { ProductUpdateCheck, ProductUpdateState } from "./data";
 import { isTauriRuntime } from "./tauri-runtime";
 
 interface ProductUpdateControllerOptions {
   appendLog: (level: string, color: string, message: string) => void;
+  messages: {
+    available: (currentVersion: string, latestVersion: string) => string;
+    checking: string;
+    desktopOnly: string;
+    failed: (message: string) => string;
+    upToDate: (currentVersion: string) => string;
+  };
+  showNotice: (kind: AppNoticeKind, message: string) => void;
 }
 
 const initialProductUpdateState: ProductUpdateState = {
@@ -14,19 +23,30 @@ const initialProductUpdateState: ProductUpdateState = {
 
 export function useProductUpdateController(options: ProductUpdateControllerOptions) {
   const appendLogRef = useRef(options.appendLog);
+  const messagesRef = useRef(options.messages);
+  const showNoticeRef = useRef(options.showNotice);
   const [productUpdate, setProductUpdate] = useState<ProductUpdateState>(initialProductUpdateState);
 
   useEffect(() => {
     appendLogRef.current = options.appendLog;
-  }, [options.appendLog]);
+    messagesRef.current = options.messages;
+    showNoticeRef.current = options.showNotice;
+  }, [options.appendLog, options.messages, options.showNotice]);
 
   const checkProductUpdate = useCallback(async (checkOptions: { cancelled?: () => boolean; silentStart?: boolean } = {}) => {
+    const silent = checkOptions.silentStart === true;
     if (!isTauriRuntime()) {
-      appendLogRef.current("INFO", "var(--text-2)", "OpenDock update check is available in the desktop app.");
+      if (!silent) {
+        const message = messagesRef.current.desktopOnly;
+        appendLogRef.current("INFO", "var(--text-2)", message);
+        showNoticeRef.current("info", message);
+      }
       return;
     }
-    if (!checkOptions.silentStart) {
-      appendLogRef.current("INFO", "var(--text-2)", "Checking OpenDock updates...");
+    if (!silent) {
+      const message = messagesRef.current.checking;
+      appendLogRef.current("INFO", "var(--text-2)", message);
+      showNoticeRef.current("info", message);
     }
     setProductUpdate((current) => ({ ...current, status: "checking" }));
     try {
@@ -38,19 +58,27 @@ export function useProductUpdateController(options: ProductUpdateControllerOptio
         check,
         status: check.updateAvailable ? "available" : "current",
       });
-      appendLogRef.current(
-        check.updateAvailable ? "WARN" : "OK",
-        check.updateAvailable ? "var(--warning)" : "var(--success)",
-        check.updateAvailable
-          ? `OpenDock update available · ${check.currentVersion} -> ${check.latestVersion}`
-          : `OpenDock is up to date · ${check.currentVersion}`,
-      );
+      if (!silent) {
+        const message = check.updateAvailable
+          ? messagesRef.current.available(check.currentVersion, check.latestVersion)
+          : messagesRef.current.upToDate(check.currentVersion);
+        appendLogRef.current(
+          check.updateAvailable ? "WARN" : "OK",
+          check.updateAvailable ? "var(--warning)" : "var(--success)",
+          message,
+        );
+        showNoticeRef.current(check.updateAvailable ? "warning" : "success", message);
+      }
     } catch (error) {
       if (checkOptions.cancelled?.()) {
         return;
       }
       setProductUpdate({ check: null, status: "failed" });
-      appendLogRef.current("WARN", "var(--warning)", `OpenDock update check failed · ${errorMessage(error)}`);
+      if (!silent) {
+        const message = messagesRef.current.failed(errorMessage(error));
+        appendLogRef.current("WARN", "var(--warning)", message);
+        showNoticeRef.current("warning", message);
+      }
     }
   }, []);
 

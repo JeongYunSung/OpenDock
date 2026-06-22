@@ -17,6 +17,7 @@ import {
   appendStoredLog,
   normalizeStoredLogs,
 } from "./command-log";
+import { AppNotice, type AppNoticeKind, type AppNoticeState } from "./app-notice";
 import { AppOverlays } from "./app-overlays";
 import { ProjectEmpty, ProjectLoading, SignInScreen } from "./workspace-shell";
 import { useResponsivePageSizes } from "./responsive-page-size";
@@ -45,6 +46,7 @@ export function App() {
   const t = TEXT[lang];
   const [loggedIn, setLoggedIn] = useStoredState("opendock.loggedIn", false);
   const [appVersion, setAppVersion] = useState("");
+  const [appNotice, setAppNotice] = useState<AppNoticeState | null>(null);
   const [authProvider, setAuthProvider] = useStoredState("opendock.authProvider", "");
   const [openMenu, setOpenMenu] = useState<OpenMenu>("");
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -273,6 +275,14 @@ export function App() {
     productUpdate,
   } = useProductUpdateController({
     appendLog,
+    messages: {
+      available: (_currentVersion, latestVersion) => t.appUpdateAvailableNotice.replace("{version}", latestVersion),
+      checking: t.appUpdateChecking,
+      desktopOnly: t.appUpdateDesktopOnly,
+      failed: (message) => t.appUpdateCheckFailed.replace("{message}", message),
+      upToDate: (currentVersion) => t.appUpdateUpToDate.replace("{version}", currentVersion || t.unavailable),
+    },
+    showNotice: showAppNotice,
   });
   const currentAppVersion = appVersion || productUpdate.check?.currentVersion || "";
   const {
@@ -373,6 +383,12 @@ export function App() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!appNotice) return;
+    const timeout = window.setTimeout(() => setAppNotice(null), 4200);
+    return () => window.clearTimeout(timeout);
+  }, [appNotice]);
+
   usePaginationGuards({
     catalogPage,
     catalogPageCount,
@@ -394,6 +410,10 @@ export function App() {
 
   function appendLog(level: string, color: string, message: string) {
     setLogs((current) => appendStoredLog(current, level, color, message));
+  }
+
+  function showAppNotice(kind: AppNoticeKind, message: string) {
+    setAppNotice({ id: Date.now(), kind, message });
   }
 
   return (
@@ -425,6 +445,8 @@ export function App() {
         t={t}
         windowControlPlatform={windowControlPlatform}
       />
+
+      {appNotice ? <AppNotice key={appNotice.id} closeLabel={t.close} notice={appNotice} onClose={() => setAppNotice(null)} /> : null}
 
       {overlayOpen ? <button aria-label={t.close} className="menu-overlay" onClick={() => setOpenMenu("")} type="button" /> : null}
 
