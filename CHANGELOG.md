@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.40 - 2026-06-23
+
+### Desktop App
+
+- Keep the OpenDock app update progress notice stable while download
+  percentages change, preventing repeated notice remount animations.
+
 ## 0.1.39 - 2026-06-23
 
 ### CLI
