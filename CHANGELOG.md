@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.42 - 2026-06-23
+
+### Desktop App
+
+- Prevent long project names from overlapping rename and delete controls in the
+  project sidebar.
+
 ## 0.1.41 - 2026-06-23
 
 ### CLI
