@@ -94,7 +94,6 @@ opendock bootstrap windows
 | `opendock update` | 仅在有更新时应用新的已审核版本. |
 | `opendock update --force` | 即使 managed content 被本地修改，也以 dock version 为准. |
 | `opendock uninstall owner/name` | 移除一个 dock 及其管理的项目文件. |
-| `opendock run check --dock owner/name` | 运行 dock 安装的命名 helper 或 check。 |
 | `opendock doctor` | 检查项目状态和 dock 的检查 step. |
 | `opendock log` | 显示当前项目最近的命令日志. |
 | `opendock version` | 显示 CLI, schema 和 Registry 信息. |
@@ -108,7 +107,6 @@ opendock bootstrap windows
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | 提交 macOS 用版本文件。 |
 | `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | 提交 Windows 用版本文件。 |
 | `opendock <command> --help` | 查看某个命令的选项和用法. |
-| `opendock help run` | 按命令名称查看 help. |
 
 dock reference 必须包含准确的 version。
 
@@ -167,31 +165,6 @@ permission:
   - oma link claude codex
   - codex --version
 ```
-
-## Run Commands
-
-`install`, `update`, `doctor` tasks 由 OpenDock 在安装和检查时执行。
-`commands` 是安装后给 docs、skills、workflows 或 harness 调用的命名 helper 或 check。
-
-如果 dock 提供 helper 或 harness，安装后的说明应通过 OpenDock 调用它。
-
-```yaml
-files:
-  - from: files/.opendock/harness/owner__name/check.mjs
-    to: .opendock/harness/owner__name/check.mjs
-
-commands:
-  check:
-    description: Run the dock quality gate.
-    file: .opendock/harness/owner__name/check.mjs
-    runner: node
-```
-
-```bash
-opendock run check --dock owner/name
-```
-
-建议在安装后的 agent docs 中使用 `opendock run`，这样 helper 会和安装它的 dock 保持关联。
 
 ## Example Docks
 

@@ -274,7 +274,6 @@ describe("platform regression coverage", () => {
       summary: "",
       tags: [],
       permission: ["mkdir -p common-output"],
-      commands: {},
       requires: { runtimes: {} },
       files: [],
       tasks: {
@@ -308,7 +307,6 @@ describe("platform regression coverage", () => {
       summary: "",
       tags: [],
       permission: [],
-      commands: {},
       requires: { runtimes: {} },
       files: [],
       tasks: {
@@ -501,7 +499,6 @@ function platformManifest(): DockManifest {
     summary: "",
     tags: [],
     permission: ["mkdir -p before"],
-    commands: {},
     requires: { runtimes: {} },
     files: [],
     tasks: {

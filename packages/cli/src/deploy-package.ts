@@ -15,7 +15,6 @@ import { tmpdir } from "node:os";
 import { basename, dirname, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { c as createTar } from "tar";
 import type { DockManifest } from "./core/domain/manifest.js";
-import { validateDeployCommandText } from "./deploy-command-policy.js";
 import type { OpenDockPlatform } from "./platform.js";
 import type { SubmissionLogoRequest, SubmissionRequest } from "./registry.js";
 
@@ -62,7 +61,6 @@ export async function createDeployArchive(
   manifestSourceName = "dock.yml",
 ): Promise<SubmissionRequest["archive"]> {
   const entries = collectDeployArchiveEntries(projectDir, manifest);
-  validateDeployCommandText(projectDir, manifest, entries, manifestText);
   const temp = mkdtempSync(join(tmpdir(), "opendock-deploy-"));
   const stage = join(temp, "stage");
   const archivePath = join(temp, "dock.tgz");

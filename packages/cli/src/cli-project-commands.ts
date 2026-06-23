@@ -1,8 +1,8 @@
-import { Command } from "commander";
+import type { Command } from "commander";
 import { printJson } from "./change-events.js";
 import { updateCheckCommandResult } from "./change-output.js";
 import { recordCommandFailure, recordCommandLog } from "./cli-command-log.js";
-import { dockIdFromReference, parseInstalledDockId, resolveCliPlatform } from "./cli-options.js";
+import { dockIdFromReference, resolveCliPlatform } from "./cli-options.js";
 import {
   printDoctor,
   printInstalledDocks,
@@ -10,46 +10,12 @@ import {
   readInstalledDocks,
 } from "./cli-project-output.js";
 import { DEFAULT_REGISTRY_URL, SCHEMA_VERSION, VERSION } from "./constants.js";
-import { OpenDockStateStore } from "./core/domain/state-store.js";
 import { checkInstalledDockUpdates } from "./installed-dock-updates.js";
 import { readProjectLogs } from "./logging.js";
 import { checkProductUpdate, type ProductUpdateCheck } from "./product-update.js";
 import { formatStatus, terminalStyle } from "./terminal-style.js";
-import { runVerifiedCommand } from "./verified-command.js";
 
 export function registerProjectCommands(program: Command): void {
-  const runCommand = new Command("run")
-    .description("Run a named helper or check installed by a dock.")
-    .argument("<command>", "Command name declared in dock.yml")
-    .option("--dock <dock>", "Installed dock id to run from when command names overlap")
-    .action(async (command: string, options: { dock?: string }) => {
-      let dockId = options.dock === undefined ? undefined : dockIdFromReference(options.dock);
-      try {
-        const store = new OpenDockStateStore(process.cwd());
-        if (!store.hasState()) {
-          throw new Error(".opendock/dock.lock.yml missing");
-        }
-        const report = await runVerifiedCommand(
-          process.cwd(),
-          command,
-          store.readLock().docks,
-          options.dock === undefined ? {} : { dockId: parseInstalledDockId(options.dock) },
-        );
-        dockId = report.dockId;
-        recordCommandLog(
-          process.cwd(),
-          "run",
-          "Success",
-          `ran ${report.command} from ${report.dockId}@${report.version}`,
-          report.dockId,
-        );
-      } catch (error) {
-        recordCommandFailure(process.cwd(), "run", error, dockId);
-        throw error;
-      }
-    });
-  program.addCommand(runCommand);
-
   program
     .command("doctor")
     .argument("[dock]", "Installed dock id to diagnose, e.g. opendock/oma")

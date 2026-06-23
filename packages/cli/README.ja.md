@@ -97,7 +97,6 @@ opendock bootstrap windows
 | `opendock update` | 更新できる dock があるときだけ新しいレビュー済み version を適用. |
 | `opendock update --force` | OpenDock-managed content が編集されていても dock version を優先. |
 | `opendock uninstall owner/name` | 1つの dock と、その dock が管理する project files を削除. |
-| `opendock run check --dock owner/name` | dockがインストールした名前付きhelperやcheckを実行します。 |
 | `opendock doctor` | project state と dock の確認 step を実行. |
 | `opendock log` | current project の最近の command log を表示. |
 | `opendock version` | CLI, schema, Registry 情報を表示. |
@@ -111,7 +110,6 @@ opendock bootstrap windows
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | macOS 用の version file を提出. |
 | `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Windows 用の version file を提出. |
 | `opendock <command> --help` | 特定commandのoptionsと使い方を表示. |
-| `opendock help run` | command名でhelpを表示. |
 
 dock reference には正確な version が必要です。
 
@@ -171,31 +169,6 @@ permission:
   - oma link claude codex
   - codex --version
 ```
-
-## Run Commands
-
-`install`, `update`, and `doctor` tasks run while OpenDock installs, updates, or checks a dock.
-`commands` are named helpers or checks that installed docs, skills, workflows, or harnesses can call later.
-
-When a dock ships a helper or harness, installed instructions should call it through OpenDock.
-
-```yaml
-files:
-  - from: files/.opendock/harness/owner__name/check.mjs
-    to: .opendock/harness/owner__name/check.mjs
-
-commands:
-  check:
-    description: Run the dock quality gate.
-    file: .opendock/harness/owner__name/check.mjs
-    runner: node
-```
-
-```bash
-opendock run check --dock owner/name
-```
-
-Prefer `opendock run` in installed agent docs so the helper stays tied to the dock that installed it.
 
 ## Example Docks
 

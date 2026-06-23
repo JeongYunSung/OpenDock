@@ -88,25 +88,16 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ### CLI
 
-- Show `opendock run` in the top-level help output.
-- Keep `opendock <command> --help` and `opendock help run` documented and
-  covered by regression tests.
+- Keep `opendock <command> --help` documented and covered by regression tests.
 
 ### Docs
 
 - Add command-specific help examples to README, guides, and site docs.
-- Add `opendock run` to the install guide's project-management command list.
 
 ## 0.1.30 - 2026-06-16
 
 ### CLI
 
-- Add `opendock run <command> --dock owner/name` for commands declared by
-  installed docks.
-- Store declared commands in `.opendock/dock.lock.yml` so installed projects can
-  list and run dock-owned helpers.
-- Validate deploy content so declared command files are called through
-  `opendock run` instead of direct runtime invocations.
 - Fix deploy argument handling for platform-specific manifest files.
 
 ### Desktop App
@@ -116,13 +107,12 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ### Docs
 
-- Document dock `commands`, `opendock run`, and the task/command split across
-  README, guides, and site docs.
+- Update README, guides, and site docs for the current manifest task model.
 
 ### Tests
 
-- Add regression coverage for verified command execution, lock tampering,
-  deploy validation, shortcut config handling, and command palette closing.
+- Add regression coverage for shortcut config handling and command palette
+  closing.
 
 ## 0.1.29 - 2026-06-16
 

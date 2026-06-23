@@ -95,7 +95,6 @@ stay outside the OpenDock block.
 | `requires` | no | Runtime requirements prepared before tasks run. |
 | `workdir` | no | Files that prepare the private dock workdir before tasks run. |
 | `files` | no | File or directory mappings applied to the project root. |
-| `commands` | no | Named helpers or checks that installed docs, skills, or harnesses can run later with `opendock run`. |
 | `install` | no | Tasks for first install and initial generation. |
 | `update` | no | Tasks for refresh and maintenance. |
 | `doctor` | no | Health checks that do not modify the project. |
@@ -118,9 +117,9 @@ needs a machine-readable change report.
 Use `opendock <command> --help` to see the options for one command. For example:
 
 ```bash
-opendock run --help
+opendock install --help
+opendock doctor --help
 opendock auth login --help
-opendock help run
 ```
 
 Use `opendock outdated` to check installed docks before updating. `opendock
@@ -297,50 +296,6 @@ doctor:
 Tasks run top to bottom. `check` makes a step idempotent. `doctor` should report
 state and avoid changing the project.
 
-## Commands
-
-Tasks run while OpenDock installs, updates, or checks a dock. `commands` are for
-later, after the dock has installed its files. Use them when a dock includes a
-helper, check, or harness that people or agents should call by name through
-`opendock run`.
-
-```yaml
-files:
-  - from: files/.opendock/harness/opendock__design-ultrawork/check.mjs
-    to: .opendock/harness/opendock__design-ultrawork/check.mjs
-
-commands:
-  check:
-    description: Run the design quality gate.
-    file: .opendock/harness/opendock__design-ultrawork/check.mjs
-    runner: node
-```
-
-Installed instructions should call the command by name instead of hard-coding
-the helper path:
-
-```bash
-opendock run check --dock opendock/design-ultrawork
-```
-
-Prefer `opendock run` in `AGENTS.md`, `CLAUDE.md`, skills, workflows, and README
-files. Avoid runtime-specific file paths; they are harder for users and agents
-to recognize as part of the installed dock.
-
-Supported runners:
-
-| Runner | File extensions |
-|---|---|
-| `bun` | `.cjs`, `.js`, `.mjs`, `.ts` |
-| `node` | `.cjs`, `.js`, `.mjs` |
-| `powershell` | `.ps1` |
-| `python`, `python3` | `.py` |
-| `sh` | `.sh` |
-
-The command file must be installed through `files`, not only generated from a
-task export. That keeps the command visible in the manifest and makes the same
-`opendock run` call work for humans, agents, docs, and workflows.
-
 ## Workdir Files And Export
 
 Use `workdir: dock` when an external tool generates files. OpenDock runs the
@@ -498,13 +453,6 @@ Tasks:
 3. Long-running tasks use `timeout_ms`.
 4. Task commands avoid shell operators and stay as one command per step.
 5. External generators use `workdir: dock` and `export`.
-
-Commands:
-
-1. Harnesses and helper scripts are declared under `commands`.
-2. Installed agent docs use `opendock run <command> --dock owner/name`.
-3. Command files are installed through `files`.
-4. Direct runtime calls into `.opendock/` are not used in installed docs.
 
 Release:
 

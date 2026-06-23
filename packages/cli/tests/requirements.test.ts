@@ -310,7 +310,6 @@ function omaManifest(): DockManifest {
     summary: "",
     tags: [],
     permission: ["oma -y install"],
-    commands: {},
     requires: {
       runtimes: {
         bun: ">=1.3.0",

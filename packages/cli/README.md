@@ -160,7 +160,6 @@ bin/opendock version
 | `opendock update` | Apply newer reviewed versions when installed docks have updates. |
 | `opendock update --force` | Update even when OpenDock-managed content was edited locally. |
 | `opendock uninstall owner/name` | Remove one installed dock and the project files it manages. |
-| `opendock run check --dock owner/name` | Run a named helper or check installed by a dock. |
 | `opendock install/update/uninstall --json` | Print a machine-readable change report. |
 | `opendock doctor` | Check the project state and every installed dock's check steps. |
 | `opendock doctor owner/name` | Check only one installed dock. |
@@ -176,7 +175,6 @@ bin/opendock version
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Submit a macOS version file. |
 | `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Submit a Windows version file. |
 | `opendock <command> --help` | Show options and usage for a specific command. |
-| `opendock help run` | Show help for a command by name. |
 
 Dock references require an exact version.
 
@@ -220,14 +218,6 @@ tags:
 files:
   - from: files/AGENTS.md
     to: AGENTS.md
-  - from: files/.opendock/harness/owner__name/check.mjs
-    to: .opendock/harness/owner__name/check.mjs
-
-commands:
-  check:
-    description: Run the dock quality gate.
-    file: .opendock/harness/owner__name/check.mjs
-    runner: node
 
 requires:
   runtimes:
@@ -379,37 +369,7 @@ install:
 
 This lets OpenDock cooperate with external tools such as `oma`, `omx`, or other
 AI setup generators, while still requiring the manifest to name the exact
-commands and while tracking the files that reach the project root.
-
-## Run Commands
-
-Tasks run while OpenDock installs, updates, or checks a dock. `commands` are for
-later, after the dock has installed its files. Use them when a dock includes a
-helper, check, or harness that people or agents should call by name.
-
-```yaml
-files:
-  - from: files/.opendock/harness/owner__name/check.mjs
-    to: .opendock/harness/owner__name/check.mjs
-
-commands:
-  check:
-    description: Run the dock quality gate.
-    file: .opendock/harness/owner__name/check.mjs
-    runner: node
-```
-
-Then `AGENTS.md`, `CLAUDE.md`, skills, workflows, and other installed
-instructions can call the helper without knowing its runtime path:
-
-```bash
-opendock run check --dock owner/name
-```
-
-Prefer `opendock run` in installed instructions instead of documenting a
-runtime-specific file path. That keeps the helper tied to the dock that
-installed it and lets OpenDock show a consistent command in docs, logs, and
-support notes.
+task steps and exported files that reach the project root.
 
 ## Example Docks
 

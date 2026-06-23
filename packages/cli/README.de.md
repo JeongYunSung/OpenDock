@@ -99,7 +99,6 @@ opendock bootstrap windows
 | `opendock update` | Wendet neuere geprüfte Versionen an, wenn Updates vorhanden sind. |
 | `opendock update --force` | Bevorzugt die dock-Version trotz lokaler Änderungen an managed content. |
 | `opendock uninstall owner/name` | Entfernt einen dock und die von ihm verwalteten Projektdateien. |
-| `opendock run check --dock owner/name` | Führt einen benannten helper oder check aus, den ein dock installiert hat. |
 | `opendock doctor` | Prüft den Projektzustand und die Diagnose-steps jedes docks. |
 | `opendock log` | Zeigt aktuelle Befehlslogs für das Projekt. |
 | `opendock version` | Zeigt Informationen zu CLI, schema und Registry. |
@@ -113,7 +112,6 @@ opendock bootstrap windows
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Reicht eine Versionsdatei für macOS ein. |
 | `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Reicht eine Versionsdatei für Windows ein. |
 | `opendock <command> --help` | Zeigt Optionen und Nutzung für einen bestimmten Befehl. |
-| `opendock help run` | Zeigt help für einen Befehl per Namen. |
 
 dock references benötigen eine exakte Version.
 
@@ -174,31 +172,6 @@ permission:
   - oma link claude codex
   - codex --version
 ```
-
-## Run Commands
-
-`install`, `update`, and `doctor` tasks run while OpenDock installs, updates, or checks a dock.
-`commands` are named helpers or checks that installed docs, skills, workflows, or harnesses can call later.
-
-When a dock ships a helper or harness, installed instructions should call it through OpenDock.
-
-```yaml
-files:
-  - from: files/.opendock/harness/owner__name/check.mjs
-    to: .opendock/harness/owner__name/check.mjs
-
-commands:
-  check:
-    description: Run the dock quality gate.
-    file: .opendock/harness/owner__name/check.mjs
-    runner: node
-```
-
-```bash
-opendock run check --dock owner/name
-```
-
-Prefer `opendock run` in installed agent docs so the helper stays tied to the dock that installed it.
 
 ## Example Docks
 

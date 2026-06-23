@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import YAML from "yaml";
 import { z } from "zod";
 import { isOpenDockPlatform } from "../../platform.js";
-import { commandRunnerNames } from "./command-runners.js";
 import { isSupportedRuntimeName } from "./runtime-names.js";
 import { includesShellOperator } from "./shell-operators.js";
 
@@ -165,25 +164,6 @@ const tagsSchema = z
   })
   .default([]);
 
-const commandNameSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(64)
-  .regex(/^[a-z][a-z0-9-]*$/, "command names must be lowercase slugs");
-
-const commandRunnerSchema = z.enum(commandRunnerNames);
-
-const commandSpecSchema = z
-  .object({
-    description: z.string().max(240).optional(),
-    file: z.string(),
-    runner: commandRunnerSchema,
-  })
-  .strict();
-
-const commandsSchema = z.record(commandNameSchema, commandSpecSchema).default({});
-
 const permissionSchema = z
   .array(
     z
@@ -213,7 +193,6 @@ const manifestSchema = z
     logo: z.string().optional(),
     tags: tagsSchema,
     permission: permissionSchema,
-    commands: commandsSchema,
     requires: requiresSchema,
     workdir: workdirSpecSchema,
     files: z.array(fileSpecSchema).default([]),
@@ -237,7 +216,6 @@ type WorkdirSpec = z.infer<typeof workdirSpecSchema>;
 type Tasks = z.infer<typeof tasksSchema>;
 export type TaskPhase = keyof Tasks;
 export type TaskStep = z.infer<typeof taskStepSchema>;
-export type CommandSpec = z.infer<typeof commandSpecSchema>;
 type ParsedDockManifest = z.infer<typeof manifestSchema>;
 export type DockManifest = Omit<ParsedDockManifest, "workdir"> & { workdir?: WorkdirSpec };
 

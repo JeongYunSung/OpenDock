@@ -285,7 +285,6 @@ describe("security regression coverage", () => {
       summary: "",
       tags: [],
       permission: ["mkdir -p generated"],
-      commands: {},
       requires: { runtimes: {} },
       files: [],
       tasks: {
@@ -341,7 +340,6 @@ describe("security regression coverage", () => {
       summary: "",
       tags: [],
       permission: [],
-      commands: {},
       requires: { runtimes: {} },
       files: [],
       tasks: {

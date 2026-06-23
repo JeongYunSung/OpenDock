@@ -98,7 +98,6 @@ opendock bootstrap windows
 | `opendock update` | Applique les versions revues plus récentes quand des mises à jour existent. |
 | `opendock update --force` | Privilégie la version du dock malgré des modifications locales gérées. |
 | `opendock uninstall owner/name` | Supprime un dock et les fichiers projet qu'il gère. |
-| `opendock run check --dock owner/name` | Exécute un helper ou check nommé installé par un dock. |
 | `opendock doctor` | Vérifie l'état du projet et les steps de diagnostic de chaque dock. |
 | `opendock log` | Affiche les logs de commandes récents du projet courant. |
 | `opendock version` | Affiche les informations CLI, schema et Registry. |
@@ -112,7 +111,6 @@ opendock bootstrap windows
 | `opendock deploy owner/name@1.0.0 --platform macos --file dock.macos.yml` | Soumet un fichier de version pour macOS. |
 | `opendock deploy owner/name@1.0.0 --platform windows --file dock.windows.yml` | Soumet un fichier de version pour Windows. |
 | `opendock <command> --help` | Affiche les options et l'utilisation d'une commande précise. |
-| `opendock help run` | Affiche l'aide d'une commande par son nom. |
 
 Les références de dock exigent une version exacte.
 
@@ -173,31 +171,6 @@ permission:
   - oma link claude codex
   - codex --version
 ```
-
-## Run Commands
-
-`install`, `update`, and `doctor` tasks run while OpenDock installs, updates, or checks a dock.
-`commands` are named helpers or checks that installed docs, skills, workflows, or harnesses can call later.
-
-When a dock ships a helper or harness, installed instructions should call it through OpenDock.
-
-```yaml
-files:
-  - from: files/.opendock/harness/owner__name/check.mjs
-    to: .opendock/harness/owner__name/check.mjs
-
-commands:
-  check:
-    description: Run the dock quality gate.
-    file: .opendock/harness/owner__name/check.mjs
-    runner: node
-```
-
-```bash
-opendock run check --dock owner/name
-```
-
-Prefer `opendock run` in installed agent docs so the helper stays tied to the dock that installed it.
 
 ## Example Docks
 

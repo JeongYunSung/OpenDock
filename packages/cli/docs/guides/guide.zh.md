@@ -62,7 +62,6 @@ files:
 | `permission` | 精确允许 `run` / `check` 中默认策略之外的命令。 |
 | `requires` | Runtime requirements. |
 | `files` | 应用到 project root 的文件或目录. |
-| `commands` | Named helpers or checks for `opendock run`. |
 | `install` | Tasks for first install and initial generation. |
 | `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
@@ -79,9 +78,9 @@ opendock deploy opendock/codex@1.0.0
 使用 `opendock <command> --help` 查看某个命令的选项。
 
 ```bash
-opendock run --help
+opendock install --help
+opendock doctor --help
 opendock auth login --help
-opendock help run
 ```
 
 `owner/name` 和 `owner/name@latest` 会被拒绝。请使用明确版本。
@@ -134,33 +133,6 @@ permission:
   - oma link claude codex
   - codex --version
 ```
-
-## Commands
-
-Tasks are run by OpenDock during `install`, `update`, and `doctor`.
-`commands` are named helpers or checks that installed docs, skills, workflows, or harnesses can call later with `opendock run`.
-
-```yaml
-files:
-  - from: files/.opendock/harness/owner__name/check.mjs
-    to: .opendock/harness/owner__name/check.mjs
-
-commands:
-  check:
-    description: Run the dock quality gate.
-    file: .opendock/harness/owner__name/check.mjs
-    runner: node
-```
-
-Installed instructions should call:
-
-```bash
-opendock run check --dock owner/name
-```
-
-Prefer `opendock run` in installed agent docs so the helper stays tied to the dock that installed it.
-
-Supported runners: `bun`, `node`, `powershell`, `python`, `python3`, `sh`.
 
 ## Workdir Files And Export
 

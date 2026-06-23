@@ -174,7 +174,6 @@ doctor:
 | `permission` | 선택 | 기본 정책 밖의 `run`/`check` command를 정확한 형태로 허용합니다. |
 | `requires` | 선택 | dock 실행 전에 준비할 runtime requirement입니다. |
 | `files` | 선택 | 프로젝트 root로 적용할 파일 또는 디렉터리 mapping입니다. |
-| `commands` | 선택 | 설치 후 문서, skill, workflow, harness가 `opendock run`으로 호출할 helper나 check입니다. |
 | `install` | 선택 | 최초 install과 초기 생성 작업 task입니다. |
 | `update` | 선택 | refresh와 유지보수 작업 task입니다. |
 | `doctor` | 선택 | 프로젝트를 수정하지 않는 상태 점검 task입니다. |
@@ -192,9 +191,9 @@ opendock deploy opendock/codex@1.0.0
 특정 명령의 옵션은 `opendock <command> --help`로 확인합니다.
 
 ```bash
-opendock run --help
+opendock install --help
+opendock doctor --help
 opendock auth login --help
-opendock help run
 ```
 
 허용되는 id 형태:
@@ -488,48 +487,6 @@ doctor:
     check: node --version
     version: ">=22.0.0"
 ```
-
-## commands
-
-`install`, `update`, `doctor`는 OpenDock이 설치, 업데이트, 점검 중에 실행하는
-task입니다. `commands`는 설치가 끝난 뒤 사람이거나 agent가 이름으로 호출할 수 있는
-helper, check, harness입니다.
-
-```yaml
-files:
-  - from: files/.opendock/harness/opendock__design-ultrawork/check.mjs
-    to: .opendock/harness/opendock__design-ultrawork/check.mjs
-
-commands:
-  check:
-    description: Run the design quality gate.
-    file: .opendock/harness/opendock__design-ultrawork/check.mjs
-    runner: node
-```
-
-설치된 agent 문서에서는 runtime path를 직접 적지 말고 command 이름으로 실행합니다.
-
-```bash
-opendock run check --dock opendock/design-ultrawork
-```
-
-`AGENTS.md`, `CLAUDE.md`, skill, workflow, README에는 runtime-specific file path보다
-`opendock run`을 적는 것이 좋습니다.
-이렇게 하면 사용자, agent, 문서, log가 같은 command 이름을 공유할 수 있습니다.
-
-지원 runner:
-
-| runner | file extension |
-|---|---|
-| `bun` | `.cjs`, `.js`, `.mjs`, `.ts` |
-| `node` | `.cjs`, `.js`, `.mjs` |
-| `powershell` | `.ps1` |
-| `python`, `python3` | `.py` |
-| `sh` | `.sh` |
-
-command file은 `files`를 통해 설치되어야 합니다. task export로만 생성된 파일은
-command로 선언하지 마세요. manifest에 보이는 파일이어야 사용자와 agent가 같은
-`opendock run` 호출을 재사용할 수 있습니다.
 
 ## workdir.files와 export
 

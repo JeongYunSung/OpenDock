@@ -55,14 +55,6 @@ export function installedDockRecordFor(options: {
     platform: options.platform,
     workdir: relative(options.projectDir, options.workdir).replaceAll("\\", "/"),
     files: options.fileSummary.records,
-    commands: Object.entries(options.manifest.commands)
-      .sort(([left], [right]) => left.localeCompare(right))
-      .map(([name, command]) => ({
-        name,
-        file: command.file,
-        runner: command.runner,
-        ...(command.description === undefined ? {} : { description: command.description }),
-      })),
   };
 }
 
