@@ -125,9 +125,9 @@ export async function assertRegisteredProjectSkipsChooser(page) {
       JSON.stringify([
         {
           id: "project-existing",
-          name: "research",
-          folderName: "research",
-          path: "/Users/jys/Workspace/side/research"
+          name: "bigs-pay-backend-spring-with-long-service-name",
+          folderName: "bigs-pay-backend-spring-with-long-service-name",
+          path: "/Users/jys/Workspace/side/bigs-pay-backend-spring-with-long-service-name"
         }
       ])
     );
@@ -135,11 +135,43 @@ export async function assertRegisteredProjectSkipsChooser(page) {
   });
   await page.reload({ waitUntil: "domcontentloaded" });
   await assertWorkspaceList(page);
+  await assertProjectRowActionsStayClear(page);
   const chooserVisible = await page.getByRole("heading", { name: "프로젝트를 선택하세요" }).isVisible().catch(() => false);
   if (chooserVisible) {
     throw new Error("registered projects should skip the create-or-add project chooser");
   }
   await page.waitForFunction(() => localStorage.getItem("opendock.activeProjectId") === JSON.stringify("project-existing"));
+}
+
+export async function assertProjectRowActionsStayClear(page) {
+  const metrics = await page.locator(".project-row.active").evaluate((row) => {
+    const copy = row.querySelector(".project-row-copy");
+    const actions = row.querySelector(".project-row-actions");
+    const buttons = row.querySelectorAll(".project-row-actions .icon-button");
+    if (!copy || !actions || buttons.length < 2) return null;
+
+    const copyRect = copy.getBoundingClientRect();
+    const actionsRect = actions.getBoundingClientRect();
+    const renameRect = buttons[0].getBoundingClientRect();
+    const deleteRect = buttons[1].getBoundingClientRect();
+
+    return {
+      copyRight: copyRect.right,
+      actionsLeft: actionsRect.left,
+      renameCenterY: renameRect.top + renameRect.height / 2,
+      deleteCenterY: deleteRect.top + deleteRect.height / 2
+    };
+  });
+
+  if (!metrics) {
+    throw new Error("project row should render text and action controls");
+  }
+  if (metrics.copyRight > metrics.actionsLeft - 4) {
+    throw new Error(`project row text overlaps action controls: ${JSON.stringify(metrics)}`);
+  }
+  if (Math.abs(metrics.renameCenterY - metrics.deleteCenterY) > 1) {
+    throw new Error(`project row action controls should be vertically aligned: ${JSON.stringify(metrics)}`);
+  }
 }
 
 export async function assertProjectDeleteFlow(page) {

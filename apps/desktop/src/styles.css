@@ -954,11 +954,12 @@ input:focus-visible,
 
 .project-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 26px 26px;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   border: 1px solid transparent;
   border-radius: 8px;
+  padding-right: 5px;
 }
 
 .project-row.active {
@@ -966,11 +967,12 @@ input:focus-visible,
   border-color: var(--accent-border);
 }
 
-.project-row > button:first-child {
+.project-row-main {
   min-width: 0;
   display: flex;
   align-items: center;
   gap: 9px;
+  overflow: hidden;
   border: 0;
   padding: 9px 0 9px 10px;
   color: var(--text-2);
@@ -979,7 +981,29 @@ input:focus-visible,
   cursor: pointer;
 }
 
-.project-row.active > button:first-child {
+.project-row-main > svg {
+  flex: none;
+}
+
+.project-row-copy {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.project-row-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.project-row-actions .icon-button {
+  flex: none;
+}
+
+.project-row.active .project-row-main {
   color: var(--text);
 }
 

@@ -113,19 +113,21 @@ export function ProjectSidebar(props: {
             const active = project.id === props.activeProject.id;
             return (
               <div className={`project-row ${active ? "active" : ""}`} key={project.id}>
-                <button onClick={() => props.onSelect(project.id)} type="button">
+                <button className="project-row-main" onClick={() => props.onSelect(project.id)} type="button">
                   <Folder size={16} />
-                  <span>
+                  <span className="project-row-copy">
                     <strong>{project.name}</strong>
                     <small>{project.folderName}</small>
                   </span>
                 </button>
-                <IconButton label={props.t.renameProjectTitle} onClick={() => props.onRename(project)}>
-                  <Pencil size={13} />
-                </IconButton>
-                <IconButton className="danger" label={props.t.deleteProjectTitle} onClick={() => props.onRemove(project)}>
-                  <X size={13} />
-                </IconButton>
+                <div className="project-row-actions">
+                  <IconButton label={props.t.renameProjectTitle} onClick={() => props.onRename(project)}>
+                    <Pencil size={13} />
+                  </IconButton>
+                  <IconButton className="danger" label={props.t.deleteProjectTitle} onClick={() => props.onRemove(project)}>
+                    <X size={13} />
+                  </IconButton>
+                </div>
               </div>
             );
           })}
