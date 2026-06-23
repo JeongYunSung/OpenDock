@@ -145,23 +145,41 @@ export function opendockCommandPath(
     return pathValue;
   }
 
+  const existingEntries = pathValue ? pathValue.split(delimiter) : [];
+  if (platform === "darwin") {
+    return uniquePathEntries([
+      ...macosUserPathEntries(existingEntries),
+      ...macosHomebrewPathEntries,
+      ...macosSystemPathEntries,
+      ...(env.HOME ? [join(env.HOME, ".bun", "bin"), join(env.HOME, ".local", "bin")] : []),
+      ...(env.BUN_INSTALL ? [join(env.BUN_INSTALL, "bin")] : []),
+    ]).join(delimiter);
+  }
+
   return uniquePathEntries([
-    ...(pathValue ? pathValue.split(delimiter) : []),
-    ...(platform === "darwin"
-      ? [
-          "/opt/homebrew/bin",
-          "/opt/homebrew/sbin",
-          "/usr/local/bin",
-          "/usr/local/sbin",
-          "/usr/bin",
-          "/bin",
-          "/usr/sbin",
-          "/sbin",
-        ]
-      : ["/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"]),
+    ...existingEntries,
+    "/usr/local/bin",
+    "/usr/bin",
+    "/bin",
+    "/usr/sbin",
+    "/sbin",
     ...(env.HOME ? [join(env.HOME, ".bun", "bin"), join(env.HOME, ".local", "bin")] : []),
     ...(env.BUN_INSTALL ? [join(env.BUN_INSTALL, "bin")] : []),
   ]).join(delimiter);
+}
+
+const macosHomebrewPathEntries = [
+  "/opt/homebrew/bin",
+  "/opt/homebrew/sbin",
+  "/usr/local/bin",
+  "/usr/local/sbin",
+];
+
+const macosSystemPathEntries = ["/usr/bin", "/bin", "/usr/sbin", "/sbin"];
+
+function macosUserPathEntries(entries: string[]): string[] {
+  const managed = new Set([...macosHomebrewPathEntries, ...macosSystemPathEntries]);
+  return entries.filter((entry) => !managed.has(entry));
 }
 
 function minimalEnvironment(): NodeJS.ProcessEnv {

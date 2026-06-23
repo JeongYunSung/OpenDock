@@ -408,16 +408,29 @@ describe("platform regression coverage", () => {
     });
 
     expect(commandPath?.split(":")).toEqual([
-      "/usr/bin",
-      "/bin",
       "/opt/homebrew/bin",
       "/opt/homebrew/sbin",
       "/usr/local/bin",
       "/usr/local/sbin",
+      "/usr/bin",
+      "/bin",
       "/usr/sbin",
       "/sbin",
       "/Users/test/.bun/bin",
       "/Users/test/.local/bin",
+    ]);
+  });
+
+  it("keeps explicit user macOS PATH entries ahead of managed tool locations", () => {
+    const commandPath = opendockCommandPath("/tmp/opendock-bin:/usr/bin:/bin", "darwin", {
+      HOME: "/Users/test",
+    });
+
+    expect(commandPath?.split(":").slice(0, 4)).toEqual([
+      "/tmp/opendock-bin",
+      "/opt/homebrew/bin",
+      "/opt/homebrew/sbin",
+      "/usr/local/bin",
     ]);
   });
 
