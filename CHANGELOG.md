@@ -7,6 +7,20 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.41 - 2026-06-23
+
+### CLI
+
+- Remove dock-level command helpers from the manifest schema, lock file, deploy
+  archive validation, and project command surface.
+- Keep install, update, doctor, and task execution as the supported dock
+  automation model.
+
+### Docs
+
+- Remove command-helper guidance from README, guide documents, and site docs so
+  the docs match the current manifest format.
+
 ## 0.1.40 - 2026-06-23
 
 ### Desktop App
