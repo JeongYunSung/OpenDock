@@ -6,6 +6,11 @@ export interface AppNoticeState {
   id: number;
   kind: AppNoticeKind;
   message: string;
+  stableKey?: string;
+}
+
+export interface AppNoticeOptions {
+  stableKey?: string;
 }
 
 export function AppNotice(props: {

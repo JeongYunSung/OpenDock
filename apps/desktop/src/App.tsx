@@ -1,6 +1,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { getVersion } from "@tauri-apps/api/app";
@@ -17,7 +18,7 @@ import {
   appendStoredLog,
   normalizeStoredLogs,
 } from "./command-log";
-import { AppNotice, type AppNoticeKind, type AppNoticeState } from "./app-notice";
+import { AppNotice, type AppNoticeKind, type AppNoticeOptions, type AppNoticeState } from "./app-notice";
 import { AppOverlays } from "./app-overlays";
 import { ProjectEmpty, ProjectLoading, SignInScreen } from "./workspace-shell";
 import { useResponsivePageSizes } from "./responsive-page-size";
@@ -47,6 +48,7 @@ export function App() {
   const [loggedIn, setLoggedIn] = useStoredState("opendock.loggedIn", false);
   const [appVersion, setAppVersion] = useState("");
   const [appNotice, setAppNotice] = useState<AppNoticeState | null>(null);
+  const appNoticeIdRef = useRef(0);
   const [authProvider, setAuthProvider] = useStoredState("opendock.authProvider", "");
   const [openMenu, setOpenMenu] = useState<OpenMenu>("");
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -420,8 +422,14 @@ export function App() {
     setLogs((current) => appendStoredLog(current, level, color, message));
   }
 
-  function showAppNotice(kind: AppNoticeKind, message: string) {
-    setAppNotice({ id: Date.now(), kind, message });
+  function showAppNotice(kind: AppNoticeKind, message: string, options: AppNoticeOptions = {}) {
+    setAppNotice((current) => {
+      if (options.stableKey && current?.stableKey === options.stableKey) {
+        if (current.kind === kind && current.message === message) return current;
+        return { ...current, kind, message };
+      }
+      return { id: appNoticeIdRef.current++, kind, message, stableKey: options.stableKey };
+    });
   }
 
   return (

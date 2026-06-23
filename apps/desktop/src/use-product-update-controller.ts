@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { AppNoticeKind } from "./app-notice";
+import type { AppNoticeKind, AppNoticeOptions } from "./app-notice";
 import type { ProductUpdateCheck, ProductUpdateState } from "./data";
 import { isTauriRuntime } from "./tauri-runtime";
 
@@ -18,7 +18,7 @@ interface ProductUpdateControllerOptions {
     restarting: string;
     upToDate: (currentVersion: string) => string;
   };
-  showNotice: (kind: AppNoticeKind, message: string) => void;
+  showNotice: (kind: AppNoticeKind, message: string, options?: AppNoticeOptions) => void;
 }
 
 interface ProductUpdateProgress {
@@ -32,6 +32,8 @@ const initialProductUpdateState: ProductUpdateState = {
   check: null,
   status: "idle",
 };
+
+const productUpdateNotice = { stableKey: "product-update-progress" };
 
 export function useProductUpdateController(options: ProductUpdateControllerOptions) {
   const appendLogRef = useRef(options.appendLog);
@@ -121,9 +123,9 @@ export function useProductUpdateController(options: ProductUpdateControllerOptio
         const percent = progress.contentLength
           ? Math.min(100, Math.round((progress.downloadedBytes / progress.contentLength) * 100))
           : null;
-        showNoticeRef.current("info", messagesRef.current.downloading(progress.latestVersion, percent));
+        showNoticeRef.current("info", messagesRef.current.downloading(progress.latestVersion, percent), productUpdateNotice);
       } else if (progress.phase === "installing") {
-        showNoticeRef.current("info", messagesRef.current.installing(progress.latestVersion));
+        showNoticeRef.current("info", messagesRef.current.installing(progress.latestVersion), productUpdateNotice);
       } else if (progress.phase === "restarting") {
         showNoticeRef.current("success", messagesRef.current.restarting);
       }
@@ -184,7 +186,7 @@ export function useProductUpdateController(options: ProductUpdateControllerOptio
 
     setProductUpdate((current) => ({ ...current, status: "installing" }));
     appendLogRef.current("RUN", "var(--info)", `install OpenDock ${check.latestVersion}`);
-    showNoticeRef.current("info", messagesRef.current.installing(check.latestVersion));
+    showNoticeRef.current("info", messagesRef.current.installing(check.latestVersion), productUpdateNotice);
     try {
       await invoke("opendock_app_update_install");
     } catch (error) {
