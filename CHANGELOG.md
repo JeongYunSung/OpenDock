@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.39 - 2026-06-23
+
+### CLI
+
+- Preserve explicit user macOS `PATH` entries ahead of OpenDock-managed tool
+  locations while keeping Homebrew and system paths in a stable order.
+
 ## 0.1.38 - 2026-06-22
 
 ### Desktop App
