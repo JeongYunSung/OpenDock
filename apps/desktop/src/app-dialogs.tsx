@@ -51,7 +51,7 @@ function CommandProgressCard(props: {
         <div className="command-progress-title-wrap">
           <div>
             <span className="command-progress-dot" />
-            <strong id="command-progress-title">{commandTaskTitle(props.commandTask.kind, props.t)}</strong>
+            <strong id="command-progress-title">{commandTaskTitle(props.commandTask, props.t)}</strong>
           </div>
           <p>{props.commandTask.step}</p>
         </div>

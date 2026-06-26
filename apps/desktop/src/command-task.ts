@@ -77,11 +77,26 @@ export function createCommandTask(
   };
 }
 
-export function commandTaskTitle(kind: CommandTaskKind, t: (typeof TEXT)[Lang]) {
+export function commandTaskTitle(task: CommandTask, t: (typeof TEXT)[Lang]) {
+  if (task.status === "success") return completedCommandTaskTitle(task.kind, t);
+  if (task.status === "error") return t.taskFailed;
+  if (task.status === "cancelled") return t.taskCancelled;
+  if (task.status === "cancelling") return t.taskCancelling;
+  return runningCommandTaskTitle(task.kind, t);
+}
+
+function runningCommandTaskTitle(kind: CommandTaskKind, t: (typeof TEXT)[Lang]) {
   if (kind === "install") return t.taskInstalling;
   if (kind === "update") return t.taskUpdating;
   if (kind === "delete") return t.taskDeleting;
   return t.taskDoctor;
+}
+
+function completedCommandTaskTitle(kind: CommandTaskKind, t: (typeof TEXT)[Lang]) {
+  if (kind === "install") return t.taskInstallCompleted;
+  if (kind === "update") return t.taskUpdateCompleted;
+  if (kind === "delete") return t.taskDeleteCompleted;
+  return t.taskDoctorCompleted;
 }
 
 function nextCommandProgress(task: CommandTask, line: OpenDockCommandLine) {

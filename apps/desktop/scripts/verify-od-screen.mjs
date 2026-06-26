@@ -209,6 +209,7 @@ async function runViewportFlow(viewport) {
     await assertVisible(page.locator(".command-progress-overlay .command-progress"), "command progress popup after install");
     await assertVisible(page.locator(".command-progress-overlay .command-progress-bar"), "command progress popup bar after install");
     await assertVisible(page.locator(".command-progress-log", { hasText: "추가됨" }), "install change log");
+    await assertVisible(page.locator("#command-progress-title", { hasText: "설치 완료" }), "install completed title");
     const inlineProgressCount = await page.locator(".detail-panel > .command-progress").count();
     if (inlineProgressCount !== 0) {
       throw new Error("command progress must render as a popup, not inline inside the detail panel");
@@ -294,10 +295,12 @@ async function runViewportFlow(viewport) {
     await assertVisible(page.locator(".installed-panel"), "installed screen stays visible after update all");
     await assertVisible(page.locator(".command-progress-overlay .command-progress"), "command progress popup after update all");
     await assertVisible(page.locator(".command-progress-log", { hasText: "수정됨" }), "update change log");
+    await assertVisible(page.locator("#command-progress-title", { hasText: "업데이트 완료" }), "update completed title");
     await page.locator(".command-progress-overlay").getByRole("button", { name: "닫기" }).click();
     await page.locator(".installed-actions").getByRole("button", { name: /삭제/ }).click();
     await assertVisible(page.locator(".command-progress-overlay .command-progress"), "command progress popup after delete");
     await assertVisible(page.locator(".command-progress-log", { hasText: "삭제됨" }), "delete change log");
+    await assertVisible(page.locator("#command-progress-title", { hasText: "삭제 완료" }), "delete completed title");
     await page.locator(".command-progress-overlay").getByRole("button", { name: "닫기" }).click();
     await page.getByRole("button", { name: "로그" }).click();
     await assertVisible(page.locator(".log-shell"), "project logs panel");
