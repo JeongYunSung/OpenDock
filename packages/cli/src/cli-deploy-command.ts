@@ -10,6 +10,7 @@ import {
   resolveDeployPlatform,
 } from "./cli-options.js";
 import { manifestForRef, parseManifestFile } from "./core/domain/manifest.js";
+import { validateManifestTaskCommands } from "./core/runtime/task-command-validation.js";
 import {
   createDeployArchive,
   readDeployLogo,
@@ -43,6 +44,7 @@ export function registerDeployCommand(program: Command, argv: string[]): void {
         const deployRoot = dirname(manifestPath);
         const manifest = readFileSync(manifestPath, "utf8");
         const parsedManifest = manifestForRef(parseManifestFile(manifestPath), dockRef);
+        validateManifestTaskCommands(parsedManifest, releasePlatform);
         const readmeMarkdown = readDeployReadme(deployRoot, parsedManifest);
         const logo = readDeployLogo(deployRoot, parsedManifest);
         const archive = await createDeployArchive(

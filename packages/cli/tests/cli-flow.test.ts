@@ -1343,6 +1343,39 @@ describe("opendock TypeScript CLI", () => {
     }
   });
 
+  it("rejects unsafe task commands during deploy before registry submission", async () => {
+    const dockRoot = tempDir();
+    writeFileSync(
+      join(dockRoot, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        id: "test/unsafe-doctor",
+        summary: "Unsafe doctor dock",
+        doctor: [
+          {
+            id: "bad-check",
+            check: "test -f AGENTS.md && test -f README.md",
+          },
+        ],
+      }),
+    );
+
+    const previousFetch = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      throw new Error("deploy should not reach registry");
+    }) as typeof fetch;
+
+    try {
+      await withCwd(dockRoot, async () => {
+        await expect(
+          runCli(["bun", "opendock", "deploy", "test/unsafe-doctor@1.0.0"]),
+        ).rejects.toThrow(/invalid doctor step `bad-check` check: .*shell operators/);
+      });
+    } finally {
+      globalThis.fetch = previousFetch;
+    }
+  });
+
   it("submits platform-specific deploy manifests as dock.yml archives", async () => {
     const dockRoot = tempDir();
     const extractRoot = tempDir();
