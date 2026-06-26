@@ -7,6 +7,17 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.43 - 2026-06-26
+
+### CLI
+
+- Reject unsafe dock task commands during deploy before a dock is submitted to
+  the Registry for review.
+
+### Desktop App
+
+- Show completed command titles clearly in app dialogs and command task output.
+
 ## 0.1.42 - 2026-06-23
 
 ### Desktop App
