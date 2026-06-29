@@ -7,6 +7,21 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.44 - 2026-06-30
+
+### CLI
+
+- Keep `outdated` and `update` working when one installed dock cannot be
+  resolved from the Registry, reporting that dock as unavailable while
+  continuing with the rest.
+- Continue applying available dock updates when another update target fails,
+  preserving successful partial updates.
+
+### Desktop App
+
+- Refresh installed dock state after update failures so already-applied
+  versions are reflected without a manual refresh.
+
 ## 0.1.43 - 2026-06-26
 
 ### CLI
