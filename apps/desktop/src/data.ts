@@ -264,6 +264,7 @@ export interface OpenDockOutdatedResult {
   success: boolean;
   summary: {
     current: string[];
+    failed?: string[];
     outdated: string[];
   };
   updatesAvailable: boolean;
@@ -272,8 +273,9 @@ export interface OpenDockOutdatedResult {
 export interface OpenDockOutdatedReport {
   currentVersion: string;
   dockId: string;
-  latestVersion: string;
-  platform: string;
+  latestVersion?: string;
+  message?: string;
+  platform?: string;
   status: "current" | "outdated" | string;
 }
 

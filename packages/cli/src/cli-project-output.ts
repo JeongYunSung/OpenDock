@@ -50,23 +50,35 @@ export function printInstalledDocks(cwd: string, json = false): void {
 
 export function printUpdateChecks(cwd: string, updateChecks: InstalledDockUpdateCheck[]): void {
   const updates = updateChecks.filter((check) => check.updateAvailable);
+  const failed = updateChecks.filter((check) => check.error !== undefined);
   console.log(terminalStyle.bold("OpenDock Updates"));
   console.log(`${terminalStyle.dim("Project:")} ${cwd}`);
-  if (updates.length === 0) {
+  if (updates.length === 0 && failed.length === 0) {
     console.log(terminalStyle.success("No OpenDock dock updates available."));
     return;
   }
 
-  console.log(`${terminalStyle.bold("Updates")}:`);
-  for (const check of updates) {
-    console.log(formatUpdateCheckLine(check));
+  if (updates.length > 0) {
+    console.log(`${terminalStyle.bold("Updates")}:`);
+    for (const check of updates) {
+      console.log(formatUpdateCheckLine(check));
+    }
   }
 
-  const current = updateChecks.filter((check) => !check.updateAvailable);
+  const current = updateChecks.filter(
+    (check) => !check.updateAvailable && check.error === undefined,
+  );
   if (current.length > 0) {
     console.log(`${terminalStyle.bold("Current")}:`);
     for (const check of current) {
       console.log(formatCurrentCheckLine(check));
+    }
+  }
+
+  if (failed.length > 0) {
+    console.log(`${terminalStyle.bold("Unavailable")}:`);
+    for (const check of failed) {
+      console.log(formatFailedCheckLine(check));
     }
   }
 }
@@ -127,8 +139,8 @@ function formatInstalledDockLine(dock: InstalledDockRecord): string {
 function formatUpdateCheckLine(check: InstalledDockUpdateCheck): string {
   return `${formatStepSymbol("~")} ${terminalStyle.bold(check.dock.id)}: ${terminalStyle.dim(
     check.dock.version,
-  )} ${formatStepSymbol("->")} ${terminalStyle.dim(check.latestVersion)} ${formatListPlatform(
-    check.platform,
+  )} ${formatStepSymbol("->")} ${terminalStyle.dim(check.latestVersion ?? "unknown")} ${formatCheckPlatform(
+    check,
   )}`;
 }
 
@@ -136,7 +148,17 @@ function formatCurrentCheckLine(check: InstalledDockUpdateCheck): string {
   return `${formatStepSymbol("✓")} ${formatDockVersion(
     check.dock.id,
     check.dock.version,
-  )} ${formatListPlatform(check.platform)}`;
+  )} ${formatCheckPlatform(check)}`;
+}
+
+function formatFailedCheckLine(check: InstalledDockUpdateCheck): string {
+  return `${formatStepSymbol("!")} ${terminalStyle.bold(check.dock.id)}: ${terminalStyle.dim(
+    check.error ?? "update check unavailable",
+  )}`;
+}
+
+function formatCheckPlatform(check: InstalledDockUpdateCheck): string {
+  return check.platform === undefined ? "" : formatListPlatform(check.platform);
 }
 
 function formatManagedFileCount(count: number): string {

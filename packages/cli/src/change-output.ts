@@ -14,17 +14,19 @@ type JsonCommandErrorCode = "command_failed" | "managed_file_modified";
 
 export interface InstalledDockUpdateCheck {
   dock: InstalledDockRecord;
-  latestVersion: string;
-  platform: OpenDockPlatform;
+  error?: string;
+  latestVersion?: string;
+  platform?: OpenDockPlatform;
   updateAvailable: boolean;
 }
 
 interface JsonDockUpdateCheckReport {
   currentVersion: string;
   dockId: string;
-  latestVersion: string;
-  platform: OpenDockPlatform;
-  status: "current" | "outdated";
+  latestVersion?: string;
+  message?: string;
+  platform?: OpenDockPlatform;
+  status: "current" | "failed" | "outdated";
 }
 
 interface JsonUpdateCheckCommandResult {
@@ -32,6 +34,7 @@ interface JsonUpdateCheckCommandResult {
   success: true;
   summary: {
     current: string[];
+    failed: string[];
     outdated: string[];
   };
   updatesAvailable: boolean;
@@ -106,9 +109,15 @@ export function updateCheckCommandResult(
   const reports = updateChecks.map((check) => ({
     currentVersion: check.dock.version,
     dockId: check.dock.id,
-    latestVersion: check.latestVersion,
-    platform: check.platform,
-    status: check.updateAvailable ? ("outdated" as const) : ("current" as const),
+    ...(check.latestVersion === undefined ? {} : { latestVersion: check.latestVersion }),
+    ...(check.error === undefined ? {} : { message: check.error }),
+    ...(check.platform === undefined ? {} : { platform: check.platform }),
+    status:
+      check.error !== undefined
+        ? ("failed" as const)
+        : check.updateAvailable
+          ? ("outdated" as const)
+          : ("current" as const),
   }));
   return {
     reports,
@@ -117,6 +126,7 @@ export function updateCheckCommandResult(
       current: reports
         .filter((report) => report.status === "current")
         .map((report) => report.dockId),
+      failed: reports.filter((report) => report.status === "failed").map((report) => report.dockId),
       outdated: reports
         .filter((report) => report.status === "outdated")
         .map((report) => report.dockId),

@@ -113,6 +113,20 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
         return next;
       });
     } catch (error) {
+      if (retry.kind === "update") {
+        await options
+          .refreshProjectState(
+            options.projects.find((project) => project.path === retry.projectPath) ?? options.activeProject,
+            { silent: true },
+          )
+          .catch((refreshError) => {
+            options.appendLog(
+              "WARN",
+              "var(--warning)",
+              refreshError instanceof Error ? refreshError.message : String(refreshError),
+            );
+          });
+      }
       options.appendLog("ERR", "var(--danger)", error instanceof Error ? error.message : String(error));
       options.finishCommandTask(task.id, "error", options.t.taskFailed, { forceRetry: null });
     }
@@ -131,6 +145,13 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
         });
         options.finishCommandResult(commandId, result, options.t.taskCompleted);
       } catch (error) {
+        await options.refreshProjectState(project, { silent: true }).catch((refreshError) => {
+          options.appendLog(
+            "WARN",
+            "var(--warning)",
+            refreshError instanceof Error ? refreshError.message : String(refreshError),
+          );
+        });
         options.appendLog("ERR", "var(--danger)", error instanceof Error ? error.message : String(error));
         options.finishCommandTask(commandId, "error", options.t.taskFailed);
       }

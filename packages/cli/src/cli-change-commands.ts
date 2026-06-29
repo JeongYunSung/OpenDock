@@ -19,22 +19,26 @@ import {
 import {
   changeCommandResult,
   handleChangeCommandError,
+  type InstalledDockUpdateCheck,
   installChangeReport,
   type JsonDockChangeReport,
   totalFileChanges,
   uninstallChangeReport,
 } from "./change-output.js";
 import { recordCommandFailure, recordCommandLog } from "./cli-command-log.js";
+import { errorMessage } from "./cli-errors.js";
 import {
   dockIdFromReference,
   parseInstalledDockId,
   parseInstallRef,
   resolveCliPlatform,
 } from "./cli-options.js";
+import type { InstallReport } from "./core/app/dock-install-report.js";
 import { DockInstaller } from "./core/app/dock-installer.js";
 import { DockRef } from "./core/domain/manifest.js";
 import { OpenDockStateStore } from "./core/domain/state-store.js";
 import { checkInstalledDockUpdates } from "./installed-dock-updates.js";
+import type { OpenDockPlatform } from "./platform.js";
 import {
   formatDockVersion,
   formatPlatformName,
@@ -143,13 +147,27 @@ export function registerChangeCommands(program: Command): void {
           total: installedDocks.length,
         });
         const updateChecks = await checkInstalledDockUpdates(installedDocks, platformOverride);
-        const updateTargets = updateChecks.filter((check) => check.updateAvailable);
+        const failedChecks = updateChecks.filter((check) => check.error !== undefined);
+        if (failedChecks.length > 0) {
+          events.progress(
+            "check-warning",
+            `${failedChecks.length} installed dock update check(s) unavailable`,
+            30,
+            {
+              level: "WARN",
+              total: failedChecks.length,
+            },
+          );
+        }
+        const updateTargets = updateChecks.filter(isResolvedUpdateTarget);
         if (updateTargets.length === 0) {
           recordCommandLog(
             process.cwd(),
             "update",
             "Skipped",
-            `no updates available for ${installedDocks.length} installed dock(s)`,
+            `no updates available for ${installedDocks.length - failedChecks.length} checked dock(s)${
+              failedChecks.length === 0 ? "" : `, ${failedChecks.length} unavailable`
+            }`,
           );
           const result = changeCommandResult("update", []);
           events.progress("complete", "No OpenDock dock updates available.", 100, {
@@ -163,11 +181,19 @@ export function registerChangeCommands(program: Command): void {
           if (options.json === true) {
             printJson(result);
           } else {
+            if (failedChecks.length > 0) {
+              console.log(
+                terminalStyle.warning(
+                  `${failedChecks.length} installed dock update check(s) unavailable.`,
+                ),
+              );
+            }
             console.log(terminalStyle.success("No OpenDock dock updates available."));
           }
           return;
         }
         const changeReports: JsonDockChangeReport[] = [];
+        const updateFailures: Array<{ dockId: string; error: unknown }> = [];
         events.progress("plan", `Found ${updateTargets.length} update(s)`, 36, {
           current: 0,
           total: updateTargets.length,
@@ -187,20 +213,45 @@ export function registerChangeCommands(program: Command): void {
               version: updateTarget.latestVersion,
             },
           );
-          const report = await runMaybeQuietAsync(outputMode.machine, () =>
-            installer.install({
-              dockRef,
-              force: options.force === true,
-              live: !outputMode.machine,
-              projectDir: process.cwd(),
-              progress: runtimeProgressReporter(events, (percent) =>
-                updateNestedProgressPercent(index, updateTargets.length, percent),
-              ),
-              runTasks: true,
-              phase: "update",
-              platform: updateTarget.platform,
-            }),
-          );
+          let report: InstallReport;
+          try {
+            report = await runMaybeQuietAsync(outputMode.machine, () =>
+              installer.install({
+                dockRef,
+                force: options.force === true,
+                live: !outputMode.machine,
+                projectDir: process.cwd(),
+                progress: runtimeProgressReporter(events, (percent) =>
+                  updateNestedProgressPercent(index, updateTargets.length, percent),
+                ),
+                runTasks: true,
+                phase: "update",
+                platform: updateTarget.platform,
+              }),
+            );
+          } catch (error) {
+            updateFailures.push({ dockId: dock.id, error });
+            events.progress(
+              "target-error",
+              `Failed update ${dock.id}: ${errorMessage(error)}`,
+              updateProgressPercent(index, updateTargets.length, 0.98),
+              {
+                current,
+                dockId: dock.id,
+                level: "ERR",
+                total: updateTargets.length,
+                version: updateTarget.latestVersion,
+              },
+            );
+            if (!outputMode.machine) {
+              console.log(
+                `${terminalStyle.warning("Skipped")} ${terminalStyle.bold(
+                  dock.id,
+                )}: ${errorMessage(error)}`,
+              );
+            }
+            continue;
+          }
           changeReports.push(
             installChangeReport(report, {
               fromVersion: dock.version,
@@ -245,13 +296,16 @@ export function registerChangeCommands(program: Command): void {
           }
           printFileChanges(report);
         }
+        if (changeReports.length === 0 && updateFailures.length > 0) {
+          throw updateFailures[0]?.error;
+        }
         recordCommandLog(
           process.cwd(),
           "update",
           "Success",
           `updated ${changeReports.length} dock(s): ${changeReports
             .map((report) => `${report.dockId}@${report.version}`)
-            .join(", ")}`,
+            .join(", ")}${updateFailures.length === 0 ? "" : `, ${updateFailures.length} failed`}`,
         );
         events.progress("record", `Recorded ${changeReports.length} update(s)`, 94, {
           level: "OK",
@@ -331,4 +385,18 @@ export function registerChangeCommands(program: Command): void {
         handleChangeCommandError("uninstall", error, options.json === true, events);
       }
     });
+}
+
+type ResolvedUpdateTarget = InstalledDockUpdateCheck & {
+  latestVersion: string;
+  platform: OpenDockPlatform;
+};
+
+function isResolvedUpdateTarget(check: InstalledDockUpdateCheck): check is ResolvedUpdateTarget {
+  return (
+    check.updateAvailable &&
+    check.error === undefined &&
+    check.latestVersion !== undefined &&
+    check.platform !== undefined
+  );
 }

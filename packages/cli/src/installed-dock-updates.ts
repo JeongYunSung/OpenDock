@@ -1,4 +1,5 @@
 import type { InstalledDockUpdateCheck } from "./change-output.js";
+import { errorMessage } from "./cli-errors.js";
 import { resolveCliPlatform } from "./cli-options.js";
 import type { InstalledDockRecord } from "./core/domain/state-store.js";
 import { isOpenDockPlatform, type OpenDockPlatform } from "./platform.js";
@@ -60,14 +61,24 @@ export async function checkInstalledDockUpdates(
 ): Promise<InstalledDockUpdateCheck[]> {
   return Promise.all(
     docks.map(async (dock) => {
-      const platform = platformOverride ?? resolveCliPlatform(dock.platform);
-      const latest = await resolveLatestDockVersion(dock.id, platform);
-      return {
-        dock,
-        latestVersion: latest.version,
-        platform,
-        updateAvailable: latest.version !== dock.version,
-      };
+      let platform: OpenDockPlatform | undefined;
+      try {
+        platform = platformOverride ?? resolveCliPlatform(dock.platform);
+        const latest = await resolveLatestDockVersion(dock.id, platform);
+        return {
+          dock,
+          latestVersion: latest.version,
+          platform,
+          updateAvailable: latest.version !== dock.version,
+        };
+      } catch (error) {
+        return {
+          dock,
+          error: errorMessage(error),
+          ...(platform === undefined ? {} : { platform }),
+          updateAvailable: false,
+        };
+      }
     }),
   );
 }

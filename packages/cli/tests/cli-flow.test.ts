@@ -1227,6 +1227,82 @@ describe("opendock TypeScript CLI", () => {
     ).toBe(false);
   });
 
+  it("continues installed dock update checks when one Registry lookup fails", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+    });
+    writeDock(docks, "test", "designer", "1.0.1", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent v2\n" }],
+    });
+    writeDock(docks, "test", "frontend", "1.2.0", {
+      files: [{ path: "FRONTEND.md", content: "# Frontend\n" }],
+    });
+    writeDock(docks, "test", "missing", "1.0.0", {
+      files: [{ path: "MISSING.md", content: "# Missing\n" }],
+    });
+
+    for (const dockRef of [
+      DockRef.parse("test/designer@1.0.0"),
+      DockRef.parse("test/frontend@1.2.0"),
+      DockRef.parse("test/missing@1.0.0"),
+    ]) {
+      await install({
+        dockRef,
+        projectDir: project,
+        phase: "install",
+        platform: "macos",
+        runTasks: true,
+        resolve: localResolver(docks),
+      });
+    }
+
+    const registry = mockRegistry([
+      {
+        archive: await createDockArchive(docks, "test", "designer", "1.0.1"),
+        id: "test/designer",
+        latest: true,
+        platform: "macos",
+        version: "1.0.1",
+      },
+      {
+        id: "test/frontend",
+        latest: true,
+        platform: "macos",
+        version: "1.2.0",
+      },
+    ]);
+
+    try {
+      const outdatedLogs = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "outdated"])),
+      );
+      expect(outdatedLogs).toContain("Updates:");
+      expect(outdatedLogs).toContain("~ test/designer: 1.0.0 -> 1.0.1 [macos]");
+      expect(outdatedLogs).toContain("Current:");
+      expect(outdatedLogs).toContain("✓ test/frontend@1.2.0 [macos]");
+      expect(outdatedLogs).toContain("Unavailable:");
+      expect(outdatedLogs.some((line) => line.startsWith("! test/missing:"))).toBe(true);
+
+      await withCwd(project, () => captureConsole(() => runCli(["bun", "opendock", "update"])));
+    } finally {
+      registry.restore();
+    }
+
+    expect(installedDocks(project)).toMatchObject([
+      { id: "test/designer", version: "1.0.1" },
+      { id: "test/frontend", version: "1.2.0" },
+      { id: "test/missing", version: "1.0.0" },
+    ]);
+    expect(readFileSync(join(project, "AGENTS.md"), "utf8")).toContain("# Designer Agent v2");
+    expect(
+      registry.requestedUrls.some(
+        (url) => url.includes("test/missing") && url.includes("download"),
+      ),
+    ).toBe(false);
+  });
+
   it("skips update when no installed dock has a newer Registry release", async () => {
     const docks = tempDir();
     const project = tempDir();

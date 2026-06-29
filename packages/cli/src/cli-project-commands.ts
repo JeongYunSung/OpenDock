@@ -90,13 +90,19 @@ export function registerProjectCommands(program: Command): void {
         }
         const updateChecks = await checkInstalledDockUpdates(docks, platformOverride);
         const updates = updateChecks.filter((check) => check.updateAvailable);
+        const failed = updateChecks.filter((check) => check.error !== undefined);
+        const checkedCount = updateChecks.length - failed.length;
         recordCommandLog(
           process.cwd(),
           "outdated",
           updates.length === 0 ? "Skipped" : "Success",
           updates.length === 0
-            ? `no updates available for ${updateChecks.length} installed dock(s)`
-            : `found ${updates.length} update(s) for ${updateChecks.length} installed dock(s)`,
+            ? `no updates available for ${checkedCount} checked dock(s)${
+                failed.length === 0 ? "" : `, ${failed.length} unavailable`
+              }`
+            : `found ${updates.length} update(s) for ${checkedCount} checked dock(s)${
+                failed.length === 0 ? "" : `, ${failed.length} unavailable`
+              }`,
         );
         if (options.json === true) {
           printJson(updateCheckCommandResult(updateChecks));
