@@ -1,7 +1,7 @@
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tauri::Emitter;
+use tauri::{Emitter, Manager};
 
 mod app_menu;
 mod command_output;
@@ -411,6 +411,9 @@ fn open_external_url(url: String) -> Result<(), String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            focus_existing_main_window(app);
+        }))
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(RunningCommands::default())
         .menu(build_app_menu)
@@ -457,6 +460,14 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running OpenDock");
+}
+
+fn focus_existing_main_window(app: &tauri::AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+    }
 }
 
 fn parse_auth_email(stdout: &str) -> Option<String> {

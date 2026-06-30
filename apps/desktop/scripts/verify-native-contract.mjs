@@ -13,6 +13,7 @@ const readTauriSrc = (file) => readTauri("src", file);
 const readJson = (...parts) => JSON.parse(readAppText(...parts));
 
 const rust = readTauriSrc("lib.rs");
+const cargoToml = readTauri("Cargo.toml");
 const appMenuRust = readTauriSrc("app_menu.rs");
 const commandOutputRust = readTauriSrc("command_output.rs");
 const opendockRunnerRust = readTauriSrc("opendock_runner.rs");
@@ -282,6 +283,13 @@ const appUpdateStopsRunningSidecars =
   opendockRunnerRust.includes("pub(crate) fn terminate_all_running_commands") &&
   productUpdateRust.includes("stop_running_commands_before_update(&app)?") &&
   productUpdateRust.includes("stop_running_commands_before_update(&finish_cleanup_app)");
+const appUsesSingleInstance =
+  cargoToml.includes("tauri-plugin-single-instance") &&
+  rust.includes("tauri_plugin_single_instance::init") &&
+  rust.includes("focus_existing_main_window") &&
+  rust.includes('app.get_webview_window("main")') &&
+  rust.includes("window.unminimize()") &&
+  rust.includes("window.set_focus()");
 
 const failures = [
   ...unhandledMenuIds.map((id) => `menu id is not handled in the navigation controller: ${id}`),
@@ -391,6 +399,7 @@ const failures = [
   ...(!appUpdateStopsRunningSidecars
     ? ["app update must stop running OpenDock sidecars before invoking the Windows installer"]
     : []),
+  ...(!appUsesSingleInstance ? ["desktop app must enforce a single process instance and refocus the main window"] : []),
   ...(forbiddenTitlebarDragCss
     ? ["CSS app-region drag is forbidden; use data-tauri-drag-region on the dedicated drag target instead"]
     : [])
