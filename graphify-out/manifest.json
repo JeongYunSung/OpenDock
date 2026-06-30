@@ -435,8 +435,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/browser-auth.ts": {
-    "mtime": 1781665795.5518053,
-    "ast_hash": "65ea98531648e362fcaaf9ade1507e58",
+    "mtime": 1782807453.8369343,
+    "ast_hash": "dce645988aba4f1b8419fbfa8c10ad98",
     "semantic_hash": ""
   },
   "packages/cli/src/change-events.ts": {
@@ -705,8 +705,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/security-regression.test.ts": {
-    "mtime": 1782193886.8314078,
-    "ast_hash": "26b9ee7382c77c212f0c4d5f7cb56fe6",
+    "mtime": 1782807410.6881316,
+    "ast_hash": "b307210dbb37ca15c434ba638afa7be6",
     "semantic_hash": ""
   },
   "packages/cli/tests/terminal-style.test.ts": {

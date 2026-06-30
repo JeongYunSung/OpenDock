@@ -70,6 +70,45 @@ describe("security regression coverage", () => {
     expect(readFileSync(join(tokenRoot, "auth-token"), "utf8")).toBe("test-token");
   });
 
+  it("normalizes registry browser login URLs before opening them", async () => {
+    const tokenRoot = tempDir();
+    let redirectUri = "";
+    let openedUrl = "";
+
+    await performBrowserLogin({
+      client: {
+        async startCliLogin(nextRedirectUri: string) {
+          redirectUri = nextRedirectUri;
+          return {
+            authUrl:
+              "https://registry.opendock.test/login?scope=openid email profile&response_type=code",
+            expiresAt: "soon",
+          };
+        },
+        async exchangeCliCode(code: string) {
+          expect(code).toBe("good-code");
+          return {
+            token: "test-token",
+            expiresAt: "later",
+            user: { id: "user-1", email: "user@example.com" },
+          };
+        },
+      },
+      openBrowser: async (url) => {
+        openedUrl = url;
+        const response = await fetch(`${redirectUri}&code=good-code`);
+        expect(response.status).toBe(200);
+      },
+      timeoutMs: 1_000,
+      tokenStore: new TokenStore(tokenRoot),
+      write: () => undefined,
+    });
+
+    expect(openedUrl).toContain("scope=openid%20email%20profile");
+    expect(openedUrl).toContain("response_type=code");
+    expect(openedUrl).not.toContain(" ");
+  });
+
   it("rejects browser login callbacks with the wrong state before exchanging codes", async () => {
     const tokenRoot = tempDir();
     let redirectUri = "";

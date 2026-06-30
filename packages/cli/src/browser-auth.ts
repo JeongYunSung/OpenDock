@@ -69,12 +69,12 @@ export async function performBrowserLogin(
 
   try {
     const login = await client.startCliLogin(redirectUri, provider);
-    assertSafeBrowserUrl(login.authUrl);
+    const authUrl = safeBrowserUrl(login.authUrl);
     write("Opening browser for OpenDock login.");
-    write(`Open this URL if the browser does not open: ${login.authUrl}`);
+    write(`Open this URL if the browser does not open: ${authUrl}`);
     write("Waiting for login... press Enter to check again.");
     try {
-      await openBrowser(login.authUrl);
+      await openBrowser(authUrl);
     } catch {
       write("Browser did not open automatically. Continue with the URL above.");
     }
@@ -181,8 +181,8 @@ function renderAuthProviderPrompt(
 }
 
 async function openSystemBrowser(url: string): Promise<void> {
-  assertSafeBrowserUrl(url);
-  const { command, args } = browserOpenCommand(url);
+  const authUrl = safeBrowserUrl(url);
+  const { command, args } = browserOpenCommand(authUrl);
 
   const child = spawn(command, args, { detached: true, stdio: "ignore", windowsHide: true });
   await once(child, "spawn");
@@ -268,7 +268,7 @@ async function startCallbackServer(timeoutMs = loginTimeoutMs): Promise<{
   };
 }
 
-function assertSafeBrowserUrl(value: string): void {
+function safeBrowserUrl(value: string): string {
   let url: URL;
   try {
     url = new URL(value);
@@ -276,17 +276,15 @@ function assertSafeBrowserUrl(value: string): void {
     throw new Error("Registry returned an invalid browser login URL");
   }
   if (url.protocol === "https:") {
-    return;
+    return url.toString();
   }
   if (url.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) {
-    return;
+    return url.toString();
   }
   if (url.protocol === "http:") {
     throw new Error("Registry returned an insecure browser login URL");
   }
-  if (url.protocol !== "https:" && url.protocol !== "http:") {
-    throw new Error(`Registry returned an unsupported browser login URL scheme: ${url.protocol}`);
-  }
+  throw new Error(`Registry returned an unsupported browser login URL scheme: ${url.protocol}`);
 }
 
 function maybeCreateReadline(
