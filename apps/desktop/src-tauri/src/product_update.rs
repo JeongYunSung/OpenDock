@@ -3,6 +3,9 @@ use std::env;
 use tauri::{AppHandle, Emitter};
 use tauri_plugin_updater::UpdaterExt;
 
+#[cfg(target_os = "windows")]
+use crate::opendock_runner::terminate_all_running_commands;
+
 const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 const GITHUB_LATEST_RELEASE_URL: &str =
     "https://api.github.com/repos/JeongYunSung/OpenDockReleases/releases/latest";
@@ -79,10 +82,13 @@ pub(crate) async fn install_product_update(
         },
     );
 
+    stop_running_commands_before_update(&app)?;
+
     let mut downloaded_bytes = 0_u64;
     let progress_app = app.clone();
     let progress_version = latest_version.clone();
     let finish_app = app.clone();
+    let finish_cleanup_app = app.clone();
     let finish_version = latest_version.clone();
     update
         .download_and_install(
@@ -108,6 +114,7 @@ pub(crate) async fn install_product_update(
                         phase: "installing",
                     },
                 );
+                let _ = stop_running_commands_before_update(&finish_cleanup_app);
             },
         )
         .await
@@ -123,6 +130,16 @@ pub(crate) async fn install_product_update(
         },
     );
     app.restart();
+}
+
+#[cfg(target_os = "windows")]
+fn stop_running_commands_before_update(app: &AppHandle) -> Result<(), String> {
+    terminate_all_running_commands(app)
+}
+
+#[cfg(not(target_os = "windows"))]
+fn stop_running_commands_before_update(_app: &AppHandle) -> Result<(), String> {
+    Ok(())
 }
 
 async fn check_tauri_update(app: &AppHandle) -> Result<Option<ProductUpdateCheck>, String> {

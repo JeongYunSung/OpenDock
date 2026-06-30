@@ -1,6 +1,6 @@
 use serde::Serialize;
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::env;
 use std::ffi::OsStr;
 use std::fs;
@@ -18,7 +18,40 @@ use crate::command_output::{
 };
 
 #[derive(Default)]
-pub(crate) struct RunningCommands(pub(crate) Mutex<HashMap<String, u32>>);
+pub(crate) struct RunningCommands(Mutex<RunningCommandState>);
+
+#[derive(Default)]
+pub(crate) struct RunningCommandState {
+    by_command: HashMap<String, u32>,
+    pids: HashSet<u32>,
+}
+
+impl RunningCommandState {
+    fn register(&mut self, command_id: Option<&str>, pid: u32) {
+        self.pids.insert(pid);
+        if let Some(command_id) = command_id {
+            self.by_command.insert(command_id.to_string(), pid);
+        }
+    }
+
+    fn remove_command(&mut self, command_id: &str) -> Option<u32> {
+        let pid = self.by_command.remove(command_id)?;
+        self.pids.remove(&pid);
+        Some(pid)
+    }
+
+    fn unregister_pid(&mut self, pid: u32) {
+        self.pids.remove(&pid);
+        self.by_command.retain(|_, current_pid| *current_pid != pid);
+    }
+
+    #[cfg(any(target_os = "windows", test))]
+    fn drain_pids(&mut self) -> Vec<u32> {
+        let pids = self.pids.drain().collect::<Vec<_>>();
+        self.by_command.clear();
+        pids
+    }
+}
 
 #[derive(Serialize)]
 pub(crate) struct OpenDockCommandResult {
@@ -211,8 +244,10 @@ fn run_opendock_streaming(
     let mut child = command
         .spawn()
         .map_err(|error| format!("failed to run opendock: {error}"))?;
-    if let Some(command_id) = command_id {
-        register_running_command(app, command_id, child.id())?;
+    let child_pid = child.id();
+    if let Err(error) = register_running_command(app, command_id, child_pid) {
+        let _ = terminate_process(child_pid);
+        return Err(error);
     }
 
     let lines = Arc::new(Mutex::new(Vec::<OpenDockCommandLine>::new()));
@@ -244,9 +279,7 @@ fn run_opendock_streaming(
     let status = child
         .wait()
         .map_err(|error| format!("failed to wait for opendock: {error}"))?;
-    if let Some(command_id) = command_id {
-        unregister_running_command(app, command_id);
-    }
+    unregister_running_command(app, child_pid);
 
     if let Some(handle) = stdout_thread {
         let _ = handle.join();
@@ -331,7 +364,7 @@ fn spawn_command_reader<R: Read + Send + 'static>(
 
 fn register_running_command(
     app: &tauri::AppHandle,
-    command_id: &str,
+    command_id: Option<&str>,
     pid: u32,
 ) -> Result<(), String> {
     let state = app.state::<RunningCommands>();
@@ -339,13 +372,54 @@ fn register_running_command(
         .0
         .lock()
         .map_err(|_| "failed to lock running commands".to_string())?;
-    commands.insert(command_id.to_string(), pid);
+    commands.register(command_id, pid);
     Ok(())
 }
 
-fn unregister_running_command(app: &tauri::AppHandle, command_id: &str) {
+fn unregister_running_command(app: &tauri::AppHandle, pid: u32) {
     if let Ok(mut commands) = app.state::<RunningCommands>().0.lock() {
-        commands.remove(command_id);
+        commands.unregister_pid(pid);
+    }
+}
+
+pub(crate) fn take_running_command_pid(
+    state: &tauri::State<'_, RunningCommands>,
+    command_id: &str,
+) -> Result<u32, String> {
+    let mut commands = state
+        .0
+        .lock()
+        .map_err(|_| "failed to lock running commands".to_string())?;
+    commands
+        .remove_command(command_id)
+        .ok_or_else(|| "running command was not found".to_string())
+}
+
+#[cfg(target_os = "windows")]
+pub(crate) fn terminate_all_running_commands(app: &tauri::AppHandle) -> Result<(), String> {
+    let pids = {
+        let state = app.state::<RunningCommands>();
+        let mut commands = state
+            .0
+            .lock()
+            .map_err(|_| "failed to lock running commands".to_string())?;
+        commands.drain_pids()
+    };
+
+    let mut failures = Vec::new();
+    for pid in pids {
+        if let Err(error) = terminate_process(pid) {
+            failures.push(format!("{pid}: {error}"));
+        }
+    }
+
+    if failures.is_empty() {
+        Ok(())
+    } else {
+        Err(format!(
+            "failed to stop running OpenDock commands: {}",
+            failures.join("; ")
+        ))
     }
 }
 
@@ -472,6 +546,34 @@ fn sidecar_target_suffix() -> &'static str {
 #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
 fn sidecar_target_suffix() -> &'static str {
     "aarch64-unknown-linux-gnu"
+}
+
+#[cfg(test)]
+mod tests {
+    use super::RunningCommandState;
+
+    #[test]
+    fn tracks_commands_without_command_ids_for_update_cleanup() {
+        let mut state = RunningCommandState::default();
+
+        state.register(None, 100);
+        state.register(Some("install-1"), 200);
+
+        assert_eq!(state.remove_command("install-1"), Some(200));
+        assert_eq!(state.drain_pids(), vec![100]);
+        assert!(state.drain_pids().is_empty());
+    }
+
+    #[test]
+    fn unregistering_pid_clears_command_mapping() {
+        let mut state = RunningCommandState::default();
+
+        state.register(Some("update-1"), 300);
+        state.unregister_pid(300);
+
+        assert_eq!(state.remove_command("update-1"), None);
+        assert!(state.drain_pids().is_empty());
+    }
 }
 
 fn is_dock_name_char(value: char) -> bool {

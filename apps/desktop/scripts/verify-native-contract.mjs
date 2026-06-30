@@ -16,6 +16,7 @@ const rust = readTauriSrc("lib.rs");
 const appMenuRust = readTauriSrc("app_menu.rs");
 const commandOutputRust = readTauriSrc("command_output.rs");
 const opendockRunnerRust = readTauriSrc("opendock_runner.rs");
+const productUpdateRust = readTauriSrc("product_update.rs");
 const registryRust = readTauriSrc("registry.rs");
 const mainRust = readTauriSrc("main.rs");
 const accountPanel = readSrc("account-panel.tsx");
@@ -274,6 +275,13 @@ const windowsChildCommandsHideConsole =
   !opendockRunnerRust.includes("Command::new(\"taskkill\")") &&
   !opendockRunnerRust.includes("Command::new(\"explorer\")") &&
   !opendockRunnerRust.includes("Command::new(\"opendock\")");
+const appUpdateStopsRunningSidecars =
+  opendockRunnerRust.includes("struct RunningCommandState") &&
+  opendockRunnerRust.includes("pids: HashSet<u32>") &&
+  opendockRunnerRust.includes("fn drain_pids(&mut self) -> Vec<u32>") &&
+  opendockRunnerRust.includes("pub(crate) fn terminate_all_running_commands") &&
+  productUpdateRust.includes("stop_running_commands_before_update(&app)?") &&
+  productUpdateRust.includes("stop_running_commands_before_update(&finish_cleanup_app)");
 
 const failures = [
   ...unhandledMenuIds.map((id) => `menu id is not handled in the navigation controller: ${id}`),
@@ -380,6 +388,9 @@ const failures = [
     : []),
   ...(!windowsReleaseAppHidesConsole ? ["Windows release app must hide the launcher console window"] : []),
   ...(!windowsChildCommandsHideConsole ? ["Windows child commands must use CREATE_NO_WINDOW"] : []),
+  ...(!appUpdateStopsRunningSidecars
+    ? ["app update must stop running OpenDock sidecars before invoking the Windows installer"]
+    : []),
   ...(forbiddenTitlebarDragCss
     ? ["CSS app-region drag is forbidden; use data-tauri-drag-region on the dedicated drag target instead"]
     : [])

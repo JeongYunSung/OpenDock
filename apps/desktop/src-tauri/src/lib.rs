@@ -14,8 +14,8 @@ mod shortcut_files;
 use app_menu::build_app_menu;
 use opendock_runner::{
     canonical_project_dir, command_failure_message, open_path, open_value, run_opendock_blocking,
-    run_opendock_streaming_blocking, terminate_process, validate_dock_id, validate_dock_ref,
-    OpenDockCommandResult, RunningCommands,
+    run_opendock_streaming_blocking, take_running_command_pid, terminate_process, validate_dock_id,
+    validate_dock_ref, OpenDockCommandResult, RunningCommands,
 };
 use product_update::{
     check_product_update, install_product_update, ProductUpdateCheck, ProductUpdateInstallResult,
@@ -160,15 +160,7 @@ fn opendock_cancel_command(
     state: tauri::State<'_, RunningCommands>,
     command_id: String,
 ) -> Result<(), String> {
-    let pid = {
-        let mut commands = state
-            .0
-            .lock()
-            .map_err(|_| "failed to lock running commands".to_string())?;
-        commands
-            .remove(&command_id)
-            .ok_or_else(|| "running command was not found".to_string())?
-    };
+    let pid = take_running_command_pid(&state, &command_id)?;
     terminate_process(pid)
 }
 
