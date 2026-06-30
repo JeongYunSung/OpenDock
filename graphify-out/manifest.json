@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-native-contract.mjs": {
-    "mtime": 1781879393.4714658,
-    "ast_hash": "a07de7f4564b6a71edbce234556dbfe3",
+    "mtime": 1782820074.803625,
+    "ast_hash": "75476426cf01bf607ef71cc76b33c628",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-od-assertions.mjs": {
@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/lib.rs": {
-    "mtime": 1782193421.1137753,
-    "ast_hash": "6478eec359b3e9e3a522109ee61a6757",
+    "mtime": 1782820060.7681508,
+    "ast_hash": "c096367876f16ef6544fec2e159fbf89",
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/main.rs": {
@@ -95,13 +95,13 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/opendock_runner.rs": {
-    "mtime": 1782809923.6351442,
-    "ast_hash": "b6d4d19e865ff30abaa989ca9f40334c",
+    "mtime": 1782819438.28939,
+    "ast_hash": "4ffed6a37baa7c0c06031bbbd7c89bca",
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/product_update.rs": {
-    "mtime": 1782134787.4808238,
-    "ast_hash": "b4b2a10ab71d2cd74a1bd7e16803d1b0",
+    "mtime": 1782819328.2893329,
+    "ast_hash": "225d8386ce1ec6e59f7a4623463a11ff",
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/project_state.rs": {
@@ -435,8 +435,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/browser-auth.ts": {
-    "mtime": 1782807453.8369343,
-    "ast_hash": "dce645988aba4f1b8419fbfa8c10ad98",
+    "mtime": 1782819858.271652,
+    "ast_hash": "0ec269c850421dfb4fc98c6200923280",
     "semantic_hash": ""
   },
   "packages/cli/src/change-events.ts": {
@@ -705,8 +705,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/security-regression.test.ts": {
-    "mtime": 1782807410.6881316,
-    "ast_hash": "b307210dbb37ca15c434ba638afa7be6",
+    "mtime": 1782819868.3233154,
+    "ast_hash": "c51fda324f9d25b0a760b09f7a9b7e5d",
     "semantic_hash": ""
   },
   "packages/cli/tests/terminal-style.test.ts": {
