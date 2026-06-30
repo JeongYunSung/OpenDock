@@ -184,7 +184,7 @@ export function dockFromInstalledRecord(record: InstalledDockRecord, fallbackInd
     size: `${record.files?.length ?? 0} files`,
     checksum: record.checksum ?? "-",
     readmeTitle: record.name ?? short,
-    readmeIntro: `${record.id} is installed in this project.`,
+    readmeIntro: `${record.id} is installed in this workspace.`,
     publisher: record.id.split("/")[0] || "opendock",
     official: true,
     platforms: record.platform ? [record.platform] : [],

@@ -25,7 +25,7 @@ export function useProjectController(options: ProjectControllerOptions) {
   const blankProjectCreatingRef = useRef(false);
 
   function registerProject(name: string, folderName: string, path: string) {
-    const cleanFolderName = (folderName || name || "selected-project").trim();
+    const cleanFolderName = (folderName || name || "selected-workspace").trim();
     const cleanName = (name || cleanFolderName).trim();
     const project = {
       id: `project-${Date.now()}-${Math.round(Math.random() * 1000)}`,
@@ -56,8 +56,9 @@ export function useProjectController(options: ProjectControllerOptions) {
           // Fall through to the preview-mode in-memory project.
         }
       }
-      const folderName = `empty-project-${next}`;
-      registerProject(`Empty Project ${next}`, folderName, `~/.opendock/project/${folderName}`);
+      const folderName = next === 1 ? "untitled-workspace" : `untitled-workspace-${next}`;
+      const workspaceName = next === 1 ? "Untitled Workspace" : `Untitled Workspace ${next}`;
+      registerProject(workspaceName, folderName, `~/Documents/OpenDock/${folderName}`);
       setEmptyProjectIndex((current) => current + 1);
     } finally {
       blankProjectCreatingRef.current = false;
@@ -78,7 +79,7 @@ export function useProjectController(options: ProjectControllerOptions) {
     try {
       if (window.showDirectoryPicker) {
         const handle = await window.showDirectoryPicker();
-        const folderName = handle.name || "selected-project";
+        const folderName = handle.name || "selected-workspace";
         registerProject(folderName, folderName, `~/work/${folderName}`);
         return;
       }
@@ -94,7 +95,7 @@ export function useProjectController(options: ProjectControllerOptions) {
       "change",
       () => {
         const file = input.files?.[0] as (File & { webkitRelativePath?: string }) | undefined;
-        const root = file?.webkitRelativePath?.split("/")[0] || file?.name || "selected-project";
+        const root = file?.webkitRelativePath?.split("/")[0] || file?.name || "selected-workspace";
         registerProject(root, root, `~/work/${root}`);
         input.remove();
       },
@@ -180,7 +181,7 @@ export function useProjectController(options: ProjectControllerOptions) {
     } else {
       options.setOpenMenu("");
     }
-    options.appendLog("OK", "var(--success)", `removed project · ${project.folderName}`);
+    options.appendLog("OK", "var(--success)", `removed workspace · ${project.folderName}`);
   }
 
   return {

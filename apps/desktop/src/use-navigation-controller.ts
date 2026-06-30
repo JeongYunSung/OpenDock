@@ -221,9 +221,9 @@ export function useNavigationController(options: NavigationControllerOptions) {
     if (!project) return;
     try {
       await navigator.clipboard.writeText(project.path);
-      options.appendLog("OK", "var(--success)", `copied project path · ${project.folderName}`);
+      options.appendLog("OK", "var(--success)", `copied workspace path · ${project.folderName}`);
     } catch {
-      options.appendLog("WARN", "var(--warning)", "project path copy failed");
+      options.appendLog("WARN", "var(--warning)", "workspace path copy failed");
     }
   }
 

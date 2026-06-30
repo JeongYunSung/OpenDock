@@ -29,7 +29,7 @@ pub(crate) struct DesktopAppState {
 #[tauri::command]
 pub(crate) fn pick_project_folder() -> Option<ProjectFolder> {
     let path = rfd::FileDialog::new()
-        .set_title("Choose OpenDock project")
+        .set_title("Choose OpenDock workspace")
         .pick_folder()?;
     let folder_name = path.file_name()?.to_string_lossy().to_string();
     Some(ProjectFolder {
@@ -41,18 +41,22 @@ pub(crate) fn pick_project_folder() -> Option<ProjectFolder> {
 
 #[tauri::command]
 pub(crate) fn create_blank_project(index: u32) -> Result<ProjectFolder, String> {
-    let home = home_dir().ok_or_else(|| "home directory not found".to_string())?;
-    let base = home.join("OpenDock Projects");
-    fs::create_dir_all(&base).map_err(|error| format!("failed to create project root: {error}"))?;
+    let base = default_workspace_root()?;
+    fs::create_dir_all(&base)
+        .map_err(|error| format!("failed to create workspace root: {error}"))?;
 
     let normalized_index = index.max(1);
-    let preferred = format!("empty-project-{normalized_index}");
+    let preferred = if normalized_index == 1 {
+        "untitled-workspace".to_string()
+    } else {
+        format!("untitled-workspace-{normalized_index}")
+    };
     let path = unique_project_path(&base, &preferred);
     fs::create_dir_all(&path)
-        .map_err(|error| format!("failed to create project folder: {error}"))?;
+        .map_err(|error| format!("failed to create workspace folder: {error}"))?;
     let folder_name = file_name(&path)?;
     Ok(ProjectFolder {
-        name: format!("Empty Project {normalized_index}"),
+        name: workspace_display_name(normalized_index),
         folder_name,
         path: path.to_string_lossy().to_string(),
     })
@@ -159,9 +163,27 @@ fn resolve_active_project_id(projects: &[AppProject], active_project_id: &str) -
 }
 
 fn home_dir() -> Option<PathBuf> {
+    if cfg!(target_os = "windows") {
+        return env::var_os("USERPROFILE")
+            .map(PathBuf::from)
+            .or_else(|| env::var_os("HOME").map(PathBuf::from));
+    }
     env::var_os("HOME")
         .map(PathBuf::from)
         .or_else(|| env::var_os("USERPROFILE").map(PathBuf::from))
+}
+
+fn default_workspace_root() -> Result<PathBuf, String> {
+    let home = home_dir().ok_or_else(|| "home directory not found".to_string())?;
+    Ok(home.join("Documents").join("OpenDock"))
+}
+
+fn workspace_display_name(index: u32) -> String {
+    if index == 1 {
+        "Untitled Workspace".to_string()
+    } else {
+        format!("Untitled Workspace {index}")
+    }
 }
 
 fn unique_project_path(base: &Path, preferred: &str) -> PathBuf {
@@ -170,12 +192,12 @@ fn unique_project_path(base: &Path, preferred: &str) -> PathBuf {
         return candidate;
     }
     for index in 2..1000 {
-        let candidate = base.join(format!("{preferred} {index}"));
+        let candidate = base.join(format!("{preferred}-{index}"));
         if !candidate.exists() {
             return candidate;
         }
     }
-    base.join(format!("{preferred} {}", chrono_free_timestamp()))
+    base.join(format!("{preferred}-{}", chrono_free_timestamp()))
 }
 
 fn chrono_free_timestamp() -> String {

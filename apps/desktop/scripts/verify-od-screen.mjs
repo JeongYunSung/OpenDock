@@ -87,8 +87,8 @@ async function runViewportFlow(viewport) {
     await assertVisible(page.getByRole("heading", { name: "로그인" }), "signed-out login screen after registered-project check");
     await page.getByRole("button", { name: /Google로 계속/ }).click();
 
-    await assertVisible(page.getByRole("heading", { name: "프로젝트를 선택하세요" }), "empty project screen");
-    await page.getByRole("button", { name: /새 프로젝트 만들기/ }).first().click();
+    await assertVisible(page.getByRole("heading", { name: "워크스페이스를 선택하세요" }), "empty workspace screen");
+    await page.getByRole("button", { name: /새 워크스페이스 만들기/ }).first().click();
 
     await assertWorkspaceList(page);
     await assertNoHorizontalOverflow(page, "workspace list", viewport);
@@ -340,16 +340,16 @@ async function runViewportFlow(viewport) {
     await assertWorkspaceList(page);
 
     await page.locator(".project-sidebar-head .icon-button").last().click();
-    await assertVisible(page.getByRole("heading", { name: "프로젝트 추가" }), "project add modal");
-    await page.locator(".modal").getByRole("button", { name: /새 프로젝트 만들기/ }).click();
+    await assertVisible(page.getByRole("heading", { name: "워크스페이스 추가" }), "workspace add modal");
+    await page.locator(".modal").getByRole("button", { name: /새 워크스페이스 만들기/ }).click();
     await page.waitForFunction(() => document.querySelectorAll(".project-row").length === 2);
     await assertWorkspaceList(page);
     const activeProjectAfterAdd = await page.locator(".project-row.active strong").innerText();
-    if (activeProjectAfterAdd !== "Empty Project 2") {
+    if (activeProjectAfterAdd !== "Untitled Workspace 2") {
       throw new Error(`newly added project should be active, got ${activeProjectAfterAdd}`);
     }
     const storedProjectsAfterAdd = await page.evaluate(() => JSON.parse(localStorage.getItem("opendock.projects") ?? "[]"));
-    if (storedProjectsAfterAdd[1]?.folderName !== "empty-project-2") {
+    if (storedProjectsAfterAdd[1]?.folderName !== "untitled-workspace-2") {
       throw new Error(`blank project folder name should be an English slug, got ${JSON.stringify(storedProjectsAfterAdd)}`);
     }
     await page.getByRole("searchbox", { name: "Dock 검색" }).fill("frontend");
@@ -363,16 +363,16 @@ async function runViewportFlow(viewport) {
     }
 
     await page.locator(".project-sidebar-head .icon-button").last().click();
-    await assertVisible(page.getByRole("heading", { name: "프로젝트 추가" }), "project add modal reopened");
+    await assertVisible(page.getByRole("heading", { name: "워크스페이스 추가" }), "workspace add modal reopened");
     await page.getByRole("button", { name: "닫기", exact: true }).click();
 
     const originalProjectName = await page.locator(".project-row strong").first().innerText();
     await page.locator(".project-row .icon-button").first().click();
-    await assertVisible(page.getByRole("heading", { name: "프로젝트 이름 변경" }), "project rename modal");
-    await page.getByRole("textbox", { name: "프로젝트 이름" }).fill("임시 이름");
+    await assertVisible(page.getByRole("heading", { name: "워크스페이스 이름 변경" }), "workspace rename modal");
+    await page.getByRole("textbox", { name: "워크스페이스 이름" }).fill("임시 이름");
     await page.getByRole("button", { name: "취소" }).click();
     await page.locator(".project-row .icon-button").first().click();
-    const reopenedRenameValue = await page.getByRole("textbox", { name: "프로젝트 이름" }).inputValue();
+    const reopenedRenameValue = await page.getByRole("textbox", { name: "워크스페이스 이름" }).inputValue();
     if (reopenedRenameValue !== originalProjectName) {
       throw new Error(`rename cancel leaked draft value: ${reopenedRenameValue}`);
     }
@@ -385,8 +385,8 @@ async function runViewportFlow(viewport) {
     const storedProjectsAfterLogout = await page.evaluate(() => JSON.parse(localStorage.getItem("opendock.projects") ?? "[]"));
     if (
       storedProjectsAfterLogout.length !== 1 ||
-      storedProjectsAfterLogout[0]?.name !== "Empty Project 2" ||
-      storedProjectsAfterLogout[0]?.folderName !== "empty-project-2"
+      storedProjectsAfterLogout[0]?.name !== "Untitled Workspace 2" ||
+      storedProjectsAfterLogout[0]?.folderName !== "untitled-workspace-2"
     ) {
       throw new Error(`logout must keep registered projects, got ${JSON.stringify(storedProjectsAfterLogout)}`);
     }
@@ -397,7 +397,7 @@ async function runViewportFlow(viewport) {
 
     await page.getByRole("button", { name: /GitHub로 계속/ }).click();
     await assertWorkspaceList(page);
-    const chooserVisibleAfterRelogin = await page.getByRole("heading", { name: "프로젝트를 선택하세요" }).isVisible().catch(() => false);
+    const chooserVisibleAfterRelogin = await page.getByRole("heading", { name: "워크스페이스를 선택하세요" }).isVisible().catch(() => false);
     if (chooserVisibleAfterRelogin) {
       throw new Error("re-login after logout should restore existing projects without the project chooser");
     }

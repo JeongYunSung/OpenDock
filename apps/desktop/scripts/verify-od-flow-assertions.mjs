@@ -136,7 +136,7 @@ export async function assertRegisteredProjectSkipsChooser(page) {
   await page.reload({ waitUntil: "domcontentloaded" });
   await assertWorkspaceList(page);
   await assertProjectRowActionsStayClear(page);
-  const chooserVisible = await page.getByRole("heading", { name: "프로젝트를 선택하세요" }).isVisible().catch(() => false);
+  const chooserVisible = await page.getByRole("heading", { name: "워크스페이스를 선택하세요" }).isVisible().catch(() => false);
   if (chooserVisible) {
     throw new Error("registered projects should skip the create-or-add project chooser");
   }
@@ -182,8 +182,8 @@ export async function assertProjectDeleteFlow(page) {
 
   await page.locator(".project-row").first().locator(".icon-button").nth(1).click();
   await assertVisible(page.getByRole("heading", { name: "정말로 삭제하시겠습니까?" }), "project delete confirmation");
-  await assertVisible(page.locator(".modal", { hasText: "실제 폴더와 경로는 삭제되지 않습니다." }), "project delete safety copy");
-  await assertVisible(page.locator(".delete-project-name", { hasText: "Empty Project 1" }), "project name in delete modal");
+  await assertVisible(page.locator(".modal", { hasText: "실제 폴더와 경로는 삭제되지 않습니다." }), "workspace delete safety copy");
+  await assertVisible(page.locator(".delete-project-name", { hasText: "Untitled Workspace" }), "workspace name in delete modal");
   await page.locator(".modal").getByRole("button", { name: "취소" }).click();
   const countAfterCancel = await page.locator(".project-row").count();
   if (countAfterCancel !== initialCount) {
@@ -194,25 +194,25 @@ export async function assertProjectDeleteFlow(page) {
   await page.locator(".modal").getByRole("button", { name: "삭제" }).click();
   await page.waitForFunction(() => document.querySelectorAll(".project-row").length === 1);
   const remainingProject = await page.locator(".project-row strong").first().innerText();
-  if (remainingProject !== "Empty Project 2") {
+  if (remainingProject !== "Untitled Workspace 2") {
     throw new Error(`delete should remove only the selected project and activate the remaining project, got ${remainingProject}`);
   }
   const storedProjects = await page.evaluate(() => JSON.parse(localStorage.getItem("opendock.projects") ?? "[]"));
   if (
     storedProjects.length !== 1 ||
-    storedProjects[0]?.name !== "Empty Project 2" ||
-    storedProjects[0]?.folderName !== "empty-project-2"
+    storedProjects[0]?.name !== "Untitled Workspace 2" ||
+    storedProjects[0]?.folderName !== "untitled-workspace-2"
   ) {
     throw new Error(`delete should update only stored project registration, got ${JSON.stringify(storedProjects)}`);
   }
-  const chooserVisible = await page.getByRole("heading", { name: "프로젝트를 선택하세요" }).isVisible().catch(() => false);
+  const chooserVisible = await page.getByRole("heading", { name: "워크스페이스를 선택하세요" }).isVisible().catch(() => false);
   if (chooserVisible) {
     throw new Error("deleting one project while another remains should not show the project chooser");
   }
 }
 
 export async function assertWorkspaceList(page) {
-  await assertVisible(page.getByRole("heading", { name: "프로젝트에 맞는 dock 찾기" }), "dock explore list");
+  await assertVisible(page.getByRole("heading", { name: "워크스페이스에 맞는 dock 찾기" }), "dock explore list");
   await assertVisible(page.getByRole("button", { name: "탐색" }), "explore tab");
   await assertVisible(page.getByRole("button", { name: "설치됨" }), "installed tab");
   await assertVisible(page.getByRole("button", { name: "로그" }), "logs tab");

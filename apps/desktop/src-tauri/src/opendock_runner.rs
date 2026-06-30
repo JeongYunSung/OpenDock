@@ -125,12 +125,12 @@ pub(crate) fn open_value(value: &str) -> Result<(), String> {
 pub(crate) fn canonical_project_dir(project_dir: &str) -> Result<PathBuf, String> {
     let path = PathBuf::from(project_dir);
     if !path.is_absolute() {
-        return Err("project path must be absolute".to_string());
+        return Err("workspace path must be absolute".to_string());
     }
     let canonical = fs::canonicalize(&path)
-        .map_err(|error| format!("failed to resolve project path: {error}"))?;
+        .map_err(|error| format!("failed to resolve workspace path: {error}"))?;
     if !canonical.is_dir() {
-        return Err("project path must be a directory".to_string());
+        return Err("workspace path must be a directory".to_string());
     }
     Ok(canonical)
 }

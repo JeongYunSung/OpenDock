@@ -7,11 +7,11 @@ pub(crate) fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Re
     let app_menu = Submenu::with_items(app, "OpenDock", true, &[&quit])?;
 
     let new_project =
-        MenuItem::with_id(app, "file:new-project", "New Project", true, None::<&str>)?;
+        MenuItem::with_id(app, "file:new-project", "New Workspace", true, None::<&str>)?;
     let add_existing = MenuItem::with_id(
         app,
         "file:add-existing-project",
-        "Add Existing Project",
+        "Add Existing Workspace",
         true,
         None::<&str>,
     )?;
@@ -20,14 +20,14 @@ pub(crate) fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Re
     let rename_project = MenuItem::with_id(
         app,
         "edit:rename-project",
-        "Rename Project",
+        "Rename Workspace",
         true,
         None::<&str>,
     )?;
     let copy_project_path = MenuItem::with_id(
         app,
         "edit:copy-project-path",
-        "Copy Project Path",
+        "Copy Workspace Path",
         true,
         Some("CmdOrCtrl+Shift+C"),
     )?;
@@ -97,7 +97,7 @@ pub(crate) fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Re
     let open_folder = MenuItem::with_id(
         app,
         "project:open-folder",
-        "Open Project Folder",
+        "Open Workspace Folder",
         true,
         None::<&str>,
     )?;
@@ -117,7 +117,7 @@ pub(crate) fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Re
     )?;
     let project_menu = Submenu::with_items(
         app,
-        "Project",
+        "Workspace",
         true,
         &[
             &run_doctor,

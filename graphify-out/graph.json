@@ -1810,7 +1810,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "schemas_desktop_schema",
-      "community": 72,
+      "community": 90,
       "norm_label": "desktop-schema.json"
     },
     {
@@ -1820,7 +1820,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "schemas_desktop_schema_schema",
-      "community": 72,
+      "community": 90,
       "norm_label": "$schema"
     },
     {
@@ -1830,7 +1830,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "schemas_desktop_schema_title",
-      "community": 72,
+      "community": 90,
       "norm_label": "title"
     },
     {
@@ -1840,7 +1840,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "schemas_desktop_schema_description",
-      "community": 72,
+      "community": 90,
       "norm_label": "description"
     },
     {
@@ -1850,7 +1850,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "schemas_desktop_schema_anyof",
-      "community": 72,
+      "community": 90,
       "norm_label": "anyof"
     },
     {
@@ -1950,7 +1950,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "schemas_desktop_schema_properties_description",
-      "community": 347,
+      "community": 84,
       "norm_label": "description"
     },
     {
@@ -1960,7 +1960,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "schemas_desktop_schema_description_description",
-      "community": 347,
+      "community": 84,
       "norm_label": "description"
     },
     {
@@ -1970,7 +1970,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "schemas_desktop_schema_description_default",
-      "community": 347,
+      "community": 84,
       "norm_label": "default"
     },
     {
@@ -1980,7 +1980,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "schemas_desktop_schema_description_type",
-      "community": 347,
+      "community": 84,
       "norm_label": "type"
     },
     {
@@ -2020,7 +2020,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "schemas_desktop_schema_properties_local",
-      "community": 84,
+      "community": 347,
       "norm_label": "local"
     },
     {
@@ -2030,7 +2030,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "schemas_desktop_schema_local_description",
-      "community": 84,
+      "community": 347,
       "norm_label": "description"
     },
     {
@@ -2040,7 +2040,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "schemas_desktop_schema_local_default",
-      "community": 84,
+      "community": 347,
       "norm_label": "default"
     },
     {
@@ -2050,7 +2050,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "schemas_desktop_schema_local_type",
-      "community": 84,
+      "community": 347,
       "norm_label": "type"
     },
     {
@@ -2390,7 +2390,7 @@
       "source_location": "L2251",
       "_origin": "ast",
       "id": "schemas_desktop_schema_definitions_value",
-      "community": 348,
+      "community": 72,
       "norm_label": "value"
     },
     {
@@ -2400,7 +2400,7 @@
       "source_location": "L2252",
       "_origin": "ast",
       "id": "schemas_desktop_schema_value_description",
-      "community": 348,
+      "community": 72,
       "norm_label": "description"
     },
     {
@@ -2410,7 +2410,7 @@
       "source_location": "L2253",
       "_origin": "ast",
       "id": "schemas_desktop_schema_value_anyof",
-      "community": 348,
+      "community": 72,
       "norm_label": "anyof"
     },
     {
@@ -4627,7 +4627,7 @@
       "label": "opendock_load_app_state()",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L62",
+      "source_location": "L66",
       "_origin": "ast",
       "id": "src_project_state_opendock_load_app_state",
       "community": 31,
@@ -4637,7 +4637,7 @@
       "label": "opendock_save_app_state()",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L82",
+      "source_location": "L86",
       "_origin": "ast",
       "id": "src_project_state_opendock_save_app_state",
       "community": 31,
@@ -4647,7 +4647,7 @@
       "label": "app_state_path()",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L98",
+      "source_location": "L102",
       "_origin": "ast",
       "id": "src_project_state_app_state_path",
       "community": 31,
@@ -4657,7 +4657,7 @@
       "label": "PathBuf",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L98",
+      "source_location": "L102",
       "_origin": "ast",
       "id": "apps_desktop_src_tauri_src_project_state_rs_pathbuf",
       "community": 31,
@@ -4667,7 +4667,7 @@
       "label": "app_data_dir()",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L103",
+      "source_location": "L107",
       "_origin": "ast",
       "id": "src_project_state_app_data_dir",
       "community": 31,
@@ -4677,7 +4677,7 @@
       "label": "sanitize_projects()",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L128",
+      "source_location": "L132",
       "_origin": "ast",
       "id": "src_project_state_sanitize_projects",
       "community": 31,
@@ -4687,7 +4687,7 @@
       "label": "resolve_active_project_id()",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L148",
+      "source_location": "L152",
       "_origin": "ast",
       "id": "src_project_state_resolve_active_project_id",
       "community": 31,
@@ -4697,17 +4697,37 @@
       "label": "home_dir()",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L161",
+      "source_location": "L165",
       "_origin": "ast",
       "id": "src_project_state_home_dir",
       "community": 31,
       "norm_label": "home_dir()"
     },
     {
+      "label": "default_workspace_root()",
+      "file_type": "code",
+      "source_file": "apps/desktop/src-tauri/src/project_state.rs",
+      "source_location": "L176",
+      "_origin": "ast",
+      "id": "src_project_state_default_workspace_root",
+      "community": 31,
+      "norm_label": "default_workspace_root()"
+    },
+    {
+      "label": "workspace_display_name()",
+      "file_type": "code",
+      "source_file": "apps/desktop/src-tauri/src/project_state.rs",
+      "source_location": "L181",
+      "_origin": "ast",
+      "id": "src_project_state_workspace_display_name",
+      "community": 31,
+      "norm_label": "workspace_display_name()"
+    },
+    {
       "label": "unique_project_path()",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L167",
+      "source_location": "L189",
       "_origin": "ast",
       "id": "src_project_state_unique_project_path",
       "community": 31,
@@ -4717,7 +4737,7 @@
       "label": "Path",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L167",
+      "source_location": "L189",
       "_origin": "ast",
       "id": "apps_desktop_src_tauri_src_project_state_rs_path",
       "community": 31,
@@ -4727,7 +4747,7 @@
       "label": "chrono_free_timestamp()",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L181",
+      "source_location": "L203",
       "_origin": "ast",
       "id": "src_project_state_chrono_free_timestamp",
       "community": 31,
@@ -4737,7 +4757,7 @@
       "label": "file_name()",
       "file_type": "code",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
-      "source_location": "L188",
+      "source_location": "L210",
       "_origin": "ast",
       "id": "src_project_state_file_name",
       "community": 31,
@@ -5890,7 +5910,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_command_log_commandfailuremessage",
-      "community": 9,
+      "community": 2,
       "norm_label": "commandfailuremessage()"
     },
     {
@@ -5900,7 +5920,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_command_log_isauthstatusline",
-      "community": 29,
+      "community": 2,
       "norm_label": "isauthstatusline()"
     },
     {
@@ -5910,7 +5930,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "src_command_log_waitforcommandpopuppaint",
-      "community": 90,
+      "community": 14,
       "norm_label": "waitforcommandpopuppaint()"
     },
     {
@@ -6140,7 +6160,7 @@
       "source_location": "L193",
       "_origin": "ast",
       "id": "src_command_task_markcommandtaskcancelling",
-      "community": 90,
+      "community": 2,
       "norm_label": "markcommandtaskcancelling()"
     },
     {
@@ -6190,7 +6210,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_data",
-      "community": 66,
+      "community": 14,
       "norm_label": "data.ts"
     },
     {
@@ -6210,7 +6230,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "src_data_theme",
-      "community": 66,
+      "community": 9,
       "norm_label": "theme"
     },
     {
@@ -6220,7 +6240,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_data_dockview",
-      "community": 90,
+      "community": 14,
       "norm_label": "dockview"
     },
     {
@@ -6230,7 +6250,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_data_sortmode",
-      "community": 14,
+      "community": 3,
       "norm_label": "sortmode"
     },
     {
@@ -6240,7 +6260,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_data_project",
-      "community": 66,
+      "community": 14,
       "norm_label": "project"
     },
     {
@@ -6250,7 +6270,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_data_desktopappstate",
-      "community": 66,
+      "community": 14,
       "norm_label": "desktopappstate"
     },
     {
@@ -6260,7 +6280,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_data_dock",
-      "community": 90,
+      "community": 14,
       "norm_label": "dock"
     },
     {
@@ -6280,7 +6300,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_data_registrydocksummary",
-      "community": 66,
+      "community": 80,
       "norm_label": "registrydocksummary"
     },
     {
@@ -6290,7 +6310,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_data_registrydockdetail",
-      "community": 66,
+      "community": 80,
       "norm_label": "registrydockdetail"
     },
     {
@@ -6320,7 +6340,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "src_data_registrydockversiongroup",
-      "community": 66,
+      "community": 80,
       "norm_label": "registrydockversiongroup"
     },
     {
@@ -6330,7 +6350,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "src_data_registrydockversionitem",
-      "community": 66,
+      "community": 80,
       "norm_label": "registrydockversionitem"
     },
     {
@@ -6400,7 +6420,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "src_data_projectstateresult",
-      "community": 2,
+      "community": 14,
       "norm_label": "projectstateresult"
     },
     {
@@ -6450,7 +6470,7 @@
       "source_location": "L225",
       "_origin": "ast",
       "id": "src_data_opendockcommandline",
-      "community": 29,
+      "community": 2,
       "norm_label": "opendockcommandline"
     },
     {
@@ -6460,7 +6480,7 @@
       "source_location": "L230",
       "_origin": "ast",
       "id": "src_data_opendockcommandprogress",
-      "community": 29,
+      "community": 2,
       "norm_label": "opendockcommandprogress"
     },
     {
@@ -6470,7 +6490,7 @@
       "source_location": "L243",
       "_origin": "ast",
       "id": "src_data_opendockcommandresult",
-      "community": 90,
+      "community": 14,
       "norm_label": "opendockcommandresult"
     },
     {
@@ -6520,7 +6540,7 @@
       "source_location": "L297",
       "_origin": "ast",
       "id": "src_data_opendockchangesummary",
-      "community": 66,
+      "community": 14,
       "norm_label": "opendockchangesummary"
     },
     {
@@ -6530,7 +6550,7 @@
       "source_location": "L305",
       "_origin": "ast",
       "id": "src_data_opendockfilechanges",
-      "community": 66,
+      "community": 14,
       "norm_label": "opendockfilechanges"
     },
     {
@@ -6540,7 +6560,7 @@
       "source_location": "L312",
       "_origin": "ast",
       "id": "src_data_authsession",
-      "community": 66,
+      "community": 14,
       "norm_label": "authsession"
     },
     {
@@ -6550,7 +6570,7 @@
       "source_location": "L319",
       "_origin": "ast",
       "id": "src_data_applog",
-      "community": 2,
+      "community": 14,
       "norm_label": "applog"
     },
     {
@@ -6560,7 +6580,7 @@
       "source_location": "L328",
       "_origin": "ast",
       "id": "src_data_base_logs",
-      "community": 66,
+      "community": 9,
       "norm_label": "base_logs"
     },
     {
@@ -6570,7 +6590,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_desktop_text",
-      "community": 8,
+      "community": 29,
       "norm_label": "desktop-text.ts"
     },
     {
@@ -6580,7 +6600,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_desktop_text_text",
-      "community": 8,
+      "community": 29,
       "norm_label": "text"
     },
     {
@@ -6750,7 +6770,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_dock_data",
-      "community": 66,
+      "community": 80,
       "norm_label": "dock-data.ts"
     },
     {
@@ -6770,7 +6790,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_dock_data_dockshortid",
-      "community": 66,
+      "community": 80,
       "norm_label": "dockshortid()"
     },
     {
@@ -6780,7 +6800,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_dock_data_normalizeregistrydock",
-      "community": 66,
+      "community": 80,
       "norm_label": "normalizeregistrydock()"
     },
     {
@@ -6790,7 +6810,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_dock_data_mergeregistrydockdetail",
-      "community": 66,
+      "community": 80,
       "norm_label": "mergeregistrydockdetail()"
     },
     {
@@ -6800,7 +6820,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "src_dock_data_normalizeregistryversions",
-      "community": 66,
+      "community": 80,
       "norm_label": "normalizeregistryversions()"
     },
     {
@@ -6810,7 +6830,7 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "src_dock_data_isregistrydockversiongroup",
-      "community": 66,
+      "community": 80,
       "norm_label": "isregistrydockversiongroup()"
     },
     {
@@ -6820,7 +6840,7 @@
       "source_location": "L138",
       "_origin": "ast",
       "id": "src_dock_data_isnonemptystring",
-      "community": 66,
+      "community": 80,
       "norm_label": "isnonemptystring()"
     },
     {
@@ -6830,7 +6850,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "src_dock_data_normalizeversionstatus",
-      "community": 66,
+      "community": 80,
       "norm_label": "normalizeversionstatus()"
     },
     {
@@ -6840,7 +6860,7 @@
       "source_location": "L148",
       "_origin": "ast",
       "id": "src_dock_data_versionstatuspriority",
-      "community": 66,
+      "community": 80,
       "norm_label": "versionstatuspriority()"
     },
     {
@@ -6850,7 +6870,7 @@
       "source_location": "L166",
       "_origin": "ast",
       "id": "src_dock_data_dockfrominstalledrecord",
-      "community": 66,
+      "community": 80,
       "norm_label": "dockfrominstalledrecord()"
     },
     {
@@ -6860,7 +6880,7 @@
       "source_location": "L196",
       "_origin": "ast",
       "id": "src_dock_data_dockgradient",
-      "community": 66,
+      "community": 80,
       "norm_label": "dockgradient()"
     },
     {
@@ -6870,7 +6890,7 @@
       "source_location": "L206",
       "_origin": "ast",
       "id": "src_dock_data_firstmarkdownparagraph",
-      "community": 66,
+      "community": 80,
       "norm_label": "firstmarkdownparagraph()"
     },
     {
@@ -6880,7 +6900,7 @@
       "source_location": "L214",
       "_origin": "ast",
       "id": "src_dock_data_formatbytes",
-      "community": 66,
+      "community": 80,
       "norm_label": "formatbytes()"
     },
     {
@@ -6960,7 +6980,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_dock_workspace_model_installeddockrow",
-      "community": 90,
+      "community": 14,
       "norm_label": "installeddockrow"
     },
     {
@@ -7050,7 +7070,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_keyboard_events",
-      "community": 29,
+      "community": 2,
       "norm_label": "keyboard-events.ts"
     },
     {
@@ -7060,7 +7080,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_keyboard_events_shouldignoreglobalshortcut",
-      "community": 29,
+      "community": 2,
       "norm_label": "shouldignoreglobalshortcut()"
     },
     {
@@ -7070,7 +7090,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_logs_panel",
-      "community": 8,
+      "community": 14,
       "norm_label": "logs-panel.tsx"
     },
     {
@@ -7120,7 +7140,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_preview_change_result",
-      "community": 90,
+      "community": 14,
       "norm_label": "preview-change-result.ts"
     },
     {
@@ -7130,7 +7150,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_preview_change_result_previewchangeresult",
-      "community": 90,
+      "community": 14,
       "norm_label": "previewchangeresult()"
     },
     {
@@ -7540,7 +7560,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_shortcuts_shortcutcommandid",
-      "community": 29,
+      "community": 2,
       "norm_label": "shortcutcommandid"
     },
     {
@@ -7560,7 +7580,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_shortcuts_shortcutbinding",
-      "community": 29,
+      "community": 7,
       "norm_label": "shortcutbinding"
     },
     {
@@ -7870,7 +7890,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_tauri_runtime",
-      "community": 9,
+      "community": 14,
       "norm_label": "tauri-runtime.ts"
     },
     {
@@ -7900,7 +7920,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_titlebar_openmenu",
-      "community": 90,
+      "community": 14,
       "norm_label": "openmenu"
     },
     {
@@ -7990,7 +8010,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_auth_controller",
-      "community": 9,
+      "community": 14,
       "norm_label": "use-auth-controller.ts"
     },
     {
@@ -8000,7 +8020,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_use_auth_controller_authprovider",
-      "community": 9,
+      "community": 14,
       "norm_label": "authprovider"
     },
     {
@@ -8010,7 +8030,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_use_auth_controller_authcontrolleroptions",
-      "community": 9,
+      "community": 14,
       "norm_label": "authcontrolleroptions"
     },
     {
@@ -8040,7 +8060,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_use_catalog_controller_catalogcontrolleroptions",
-      "community": 14,
+      "community": 3,
       "norm_label": "catalogcontrolleroptions"
     },
     {
@@ -8050,7 +8070,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_use_catalog_controller_detailcontrolleroptions",
-      "community": 90,
+      "community": 14,
       "norm_label": "detailcontrolleroptions"
     },
     {
@@ -8110,7 +8130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_desktop_state_sync",
-      "community": 66,
+      "community": 14,
       "norm_label": "use-desktop-state-sync.ts"
     },
     {
@@ -8120,7 +8140,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_use_desktop_state_sync_desktopstatesyncoptions",
-      "community": 66,
+      "community": 14,
       "norm_label": "desktopstatesyncoptions"
     },
     {
@@ -8140,7 +8160,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_dock_command_controller",
-      "community": 90,
+      "community": 14,
       "norm_label": "use-dock-command-controller.ts"
     },
     {
@@ -8150,7 +8170,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_use_dock_command_controller_dockcommandcontrolleroptions",
-      "community": 90,
+      "community": 14,
       "norm_label": "dockcommandcontrolleroptions"
     },
     {
@@ -8200,7 +8220,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_native_event_bridge",
-      "community": 29,
+      "community": 2,
       "norm_label": "use-native-event-bridge.ts"
     },
     {
@@ -8210,7 +8230,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_use_native_event_bridge_nativeeventbridgeoptions",
-      "community": 29,
+      "community": 2,
       "norm_label": "nativeeventbridgeoptions"
     },
     {
@@ -8230,7 +8250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_navigation_controller",
-      "community": 90,
+      "community": 14,
       "norm_label": "use-navigation-controller.ts"
     },
     {
@@ -8240,7 +8260,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_use_navigation_controller_navigationcontrolleroptions",
-      "community": 90,
+      "community": 14,
       "norm_label": "navigationcontrolleroptions"
     },
     {
@@ -8260,7 +8280,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_pagination_guards",
-      "community": 14,
+      "community": 3,
       "norm_label": "use-pagination-guards.ts"
     },
     {
@@ -8270,7 +8290,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_use_pagination_guards_paginationguardoptions",
-      "community": 14,
+      "community": 3,
       "norm_label": "paginationguardoptions"
     },
     {
@@ -8390,7 +8410,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_project_runtime_controller",
-      "community": 2,
+      "community": 14,
       "norm_label": "use-project-runtime-controller.ts"
     },
     {
@@ -8400,7 +8420,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_use_project_runtime_controller_projectruntimecontrolleroptions",
-      "community": 2,
+      "community": 14,
       "norm_label": "projectruntimecontrolleroptions"
     },
     {
@@ -9600,7 +9620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_auth",
-      "community": 80,
+      "community": 20,
       "norm_label": "auth.ts"
     },
     {
@@ -10250,7 +10270,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_change_output_installeddockupdatecheck",
-      "community": 22,
+      "community": 5,
       "norm_label": "installeddockupdatecheck"
     },
     {
@@ -10300,7 +10320,7 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "src_change_output_jsondockchangereport",
-      "community": 22,
+      "community": 5,
       "norm_label": "jsondockchangereport"
     },
     {
@@ -10450,7 +10470,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_auth_commands",
-      "community": 80,
+      "community": 20,
       "norm_label": "cli-auth-commands.ts"
     },
     {
@@ -10470,7 +10490,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_bootstrap_commands",
-      "community": 80,
+      "community": 20,
       "norm_label": "cli-bootstrap-commands.ts"
     },
     {
@@ -10540,7 +10560,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_command_log",
-      "community": 80,
+      "community": 20,
       "norm_label": "cli-command-log.ts"
     },
     {
@@ -10550,7 +10570,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_cli_command_log_recordcommandlog",
-      "community": 80,
+      "community": 20,
       "norm_label": "recordcommandlog()"
     },
     {
@@ -10560,7 +10580,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_cli_command_log_recordcommandfailure",
-      "community": 80,
+      "community": 20,
       "norm_label": "recordcommandfailure()"
     },
     {
@@ -10690,7 +10710,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "src_cli_options_parseauthprovider",
-      "community": 80,
+      "community": 20,
       "norm_label": "parseauthprovider()"
     },
     {
@@ -10700,7 +10720,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_cli_options_resolvecliplatform",
-      "community": 20,
+      "community": 27,
       "norm_label": "resolvecliplatform()"
     },
     {
@@ -10940,7 +10960,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "app_dock_install_report_filechangedetails",
-      "community": 22,
+      "community": 5,
       "norm_label": "filechangedetails"
     },
     {
@@ -11140,7 +11160,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "domain_manifest_dockref",
-      "community": 6,
+      "community": 19,
       "norm_label": "dockref"
     },
     {
@@ -11150,7 +11170,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "domain_manifest_dockref_constructor",
-      "community": 6,
+      "community": 19,
       "norm_label": ".constructor()"
     },
     {
@@ -11170,7 +11190,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "domain_manifest_dockref_id",
-      "community": 6,
+      "community": 19,
       "norm_label": ".id()"
     },
     {
@@ -11180,7 +11200,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "domain_manifest_dockref_requested",
-      "community": 6,
+      "community": 19,
       "norm_label": ".requested()"
     },
     {
@@ -11190,7 +11210,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "domain_manifest_dockref_tostring",
-      "community": 6,
+      "community": 19,
       "norm_label": ".tostring()"
     },
     {
@@ -11370,7 +11390,7 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "domain_manifest_taskphase",
-      "community": 22,
+      "community": 11,
       "norm_label": "taskphase"
     },
     {
@@ -11400,7 +11420,7 @@
       "source_location": "L220",
       "_origin": "ast",
       "id": "domain_manifest_dockmanifest",
-      "community": 11,
+      "community": 93,
       "norm_label": "dockmanifest"
     },
     {
@@ -11470,7 +11490,7 @@
       "source_location": "L289",
       "_origin": "ast",
       "id": "domain_manifest_parsemanifestfile",
-      "community": 6,
+      "community": 36,
       "norm_label": "parsemanifestfile()"
     },
     {
@@ -11480,7 +11500,7 @@
       "source_location": "L293",
       "_origin": "ast",
       "id": "domain_manifest_validatemanifestfor",
-      "community": 19,
+      "community": 36,
       "norm_label": "validatemanifestfor()"
     },
     {
@@ -11490,7 +11510,7 @@
       "source_location": "L307",
       "_origin": "ast",
       "id": "domain_manifest_manifestforref",
-      "community": 19,
+      "community": 36,
       "norm_label": "manifestforref()"
     },
     {
@@ -11510,7 +11530,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_runtime_names",
-      "community": 318,
+      "community": 6,
       "norm_label": "runtime-names.ts"
     },
     {
@@ -11520,7 +11540,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_runtime_names_supportedruntimenames",
-      "community": 318,
+      "community": 6,
       "norm_label": "supportedruntimenames"
     },
     {
@@ -11530,7 +11550,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "domain_runtime_names_supportedruntimename",
-      "community": 318,
+      "community": 6,
       "norm_label": "supportedruntimename"
     },
     {
@@ -11540,7 +11560,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "domain_runtime_names_supportedruntimenameset",
-      "community": 318,
+      "community": 6,
       "norm_label": "supportedruntimenameset"
     },
     {
@@ -11550,7 +11570,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "domain_runtime_names_issupportedruntimename",
-      "community": 318,
+      "community": 6,
       "norm_label": "issupportedruntimename()"
     },
     {
@@ -11560,7 +11580,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_shell_operators",
-      "community": 16,
+      "community": 314,
       "norm_label": "shell-operators.ts"
     },
     {
@@ -11570,7 +11590,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_shell_operators_blockedshelltokens",
-      "community": 16,
+      "community": 314,
       "norm_label": "blockedshelltokens"
     },
     {
@@ -11580,7 +11600,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "domain_shell_operators_commandseparatortokens",
-      "community": 16,
+      "community": 314,
       "norm_label": "commandseparatortokens"
     },
     {
@@ -11590,7 +11610,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "domain_shell_operators_includesshelloperator",
-      "community": 16,
+      "community": 314,
       "norm_label": "includesshelloperator()"
     },
     {
@@ -11600,7 +11620,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "domain_shell_operators_isshellcommandseparator",
-      "community": 16,
+      "community": 314,
       "norm_label": "isshellcommandseparator()"
     },
     {
@@ -11610,7 +11630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_state_store",
-      "community": 22,
+      "community": 0,
       "norm_label": "state-store.ts"
     },
     {
@@ -11640,7 +11660,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "domain_state_store_installeddockrecord",
-      "community": 22,
+      "community": 5,
       "norm_label": "installeddockrecord"
     },
     {
@@ -11650,7 +11670,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "domain_state_store_projectstate",
-      "community": 22,
+      "community": 0,
       "norm_label": "projectstate"
     },
     {
@@ -11660,7 +11680,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "domain_state_store_lockstate",
-      "community": 22,
+      "community": 0,
       "norm_label": "lockstate"
     },
     {
@@ -12590,7 +12610,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "runtime_command_policy_splitcommand",
-      "community": 16,
+      "community": 93,
       "norm_label": "splitcommand()"
     },
     {
@@ -12600,7 +12620,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "runtime_command_policy_rejectshellmetacharacters",
-      "community": 16,
+      "community": 314,
       "norm_label": "rejectshellmetacharacters()"
     },
     {
@@ -12830,7 +12850,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "runtime_command_runner_commandrunner_run",
-      "community": 16,
+      "community": 314,
       "norm_label": ".run()"
     },
     {
@@ -13010,7 +13030,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "runtime_progress_progressreporter",
-      "community": 22,
+      "community": 11,
       "norm_label": "progressreporter"
     },
     {
@@ -13040,7 +13060,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementcontext",
-      "community": 22,
+      "community": 11,
       "norm_label": "requirementcontext"
     },
     {
@@ -13130,7 +13150,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_runtime_requirements",
-      "community": 318,
+      "community": 22,
       "norm_label": "runtime-requirements.ts"
     },
     {
@@ -13140,7 +13160,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "runtime_runtime_requirements_runtimedefinition",
-      "community": 318,
+      "community": 22,
       "norm_label": "runtimedefinition"
     },
     {
@@ -13150,7 +13170,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "runtime_runtime_requirements_runtimedefinitions",
-      "community": 318,
+      "community": 22,
       "norm_label": "runtimedefinitions"
     },
     {
@@ -13190,7 +13210,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_task_command_validation",
-      "community": 16,
+      "community": 93,
       "norm_label": "task-command-validation.ts"
     },
     {
@@ -13200,7 +13220,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "runtime_task_command_validation_taskphases",
-      "community": 16,
+      "community": 93,
       "norm_label": "taskphases"
     },
     {
@@ -13210,7 +13230,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "runtime_task_command_validation_commandfields",
-      "community": 16,
+      "community": 93,
       "norm_label": "commandfields"
     },
     {
@@ -13220,7 +13240,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "runtime_task_command_validation_validatemanifesttaskcommands",
-      "community": 16,
+      "community": 93,
       "norm_label": "validatemanifesttaskcommands()"
     },
     {
@@ -13230,7 +13250,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "runtime_task_command_validation_validatetaskstepcommands",
-      "community": 16,
+      "community": 93,
       "norm_label": "validatetaskstepcommands()"
     },
     {
@@ -13260,7 +13280,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "runtime_task_runner_taskcontext",
-      "community": 22,
+      "community": 11,
       "norm_label": "taskcontext"
     },
     {
@@ -13390,7 +13410,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_task_selection",
-      "community": 11,
+      "community": 93,
       "norm_label": "task-selection.ts"
     },
     {
@@ -13400,7 +13420,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "runtime_task_selection_assertmanifestsupportsplatform",
-      "community": 11,
+      "community": 93,
       "norm_label": "assertmanifestsupportsplatform()"
     },
     {
@@ -13410,7 +13430,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "runtime_task_selection_selecttasksteps",
-      "community": 16,
+      "community": 93,
       "norm_label": "selecttasksteps()"
     },
     {
@@ -13420,7 +13440,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "runtime_task_selection_collectmanifestplatforms",
-      "community": 11,
+      "community": 93,
       "norm_label": "collectmanifestplatforms()"
     },
     {
@@ -13610,7 +13630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_installed_dock_updates",
-      "community": 22,
+      "community": 5,
       "norm_label": "installed-dock-updates.ts"
     },
     {
@@ -13620,7 +13640,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_installed_dock_updates_resolvelatestdockversion",
-      "community": 19,
+      "community": 5,
       "norm_label": "resolvelatestdockversion()"
     },
     {
@@ -13640,7 +13660,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_installed_dock_updates_checkinstalleddockupdates",
-      "community": 27,
+      "community": 5,
       "norm_label": "checkinstalleddockupdates()"
     },
     {
@@ -13650,7 +13670,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_logging",
-      "community": 80,
+      "community": 20,
       "norm_label": "logging.ts"
     },
     {
@@ -13660,7 +13680,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_logging_runstatus",
-      "community": 80,
+      "community": 20,
       "norm_label": "runstatus"
     },
     {
@@ -13670,7 +13690,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_logging_runlog",
-      "community": 80,
+      "community": 20,
       "norm_label": "runlog"
     },
     {
@@ -13680,7 +13700,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_logging_appendrunlog",
-      "community": 80,
+      "community": 20,
       "norm_label": "appendrunlog()"
     },
     {
@@ -13690,7 +13710,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_logging_readprojectlogs",
-      "community": 80,
+      "community": 20,
       "norm_label": "readprojectlogs()"
     },
     {
@@ -13700,7 +13720,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_logging_projectlogpath",
-      "community": 80,
+      "community": 20,
       "norm_label": "projectlogpath()"
     },
     {
@@ -13710,7 +13730,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_logging_canonicalprojectpath",
-      "community": 80,
+      "community": 20,
       "norm_label": "canonicalprojectpath()"
     },
     {
@@ -13720,7 +13740,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_paths",
-      "community": 80,
+      "community": 20,
       "norm_label": "paths.ts"
     },
     {
@@ -13730,7 +13750,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_paths_dataroot",
-      "community": 80,
+      "community": 20,
       "norm_label": "dataroot()"
     },
     {
@@ -13780,7 +13800,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_platform_detectplatform",
-      "community": 11,
+      "community": 314,
       "norm_label": "detectplatform()"
     },
     {
@@ -13800,7 +13820,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_platform_isopendockplatform",
-      "community": 19,
+      "community": 5,
       "norm_label": "isopendockplatform()"
     },
     {
@@ -13920,7 +13940,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_registry_dockversionresponse",
-      "community": 22,
+      "community": 5,
       "norm_label": "dockversionresponse"
     },
     {
@@ -13980,7 +14000,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_registry_submissionrequest",
-      "community": 21,
+      "community": 25,
       "norm_label": "submissionrequest"
     },
     {
@@ -14010,7 +14030,7 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "src_registry_submissionresponse",
-      "community": 21,
+      "community": 25,
       "norm_label": "submissionresponse"
     },
     {
@@ -14440,7 +14460,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_terminal_style",
-      "community": 44,
+      "community": 27,
       "norm_label": "terminal-style.ts"
     },
     {
@@ -14450,7 +14470,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_terminal_style_terminalstream",
-      "community": 44,
+      "community": 27,
       "norm_label": "terminalstream"
     },
     {
@@ -14460,7 +14480,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_terminal_style_stylename",
-      "community": 44,
+      "community": 27,
       "norm_label": "stylename"
     },
     {
@@ -14470,7 +14490,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_terminal_style_styles",
-      "community": 44,
+      "community": 27,
       "norm_label": "styles"
     },
     {
@@ -14480,7 +14500,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_terminal_style_supportsterminalcolor",
-      "community": 44,
+      "community": 27,
       "norm_label": "supportsterminalcolor()"
     },
     {
@@ -14490,7 +14510,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_terminal_style_paint",
-      "community": 44,
+      "community": 27,
       "norm_label": "paint()"
     },
     {
@@ -14500,7 +14520,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_terminal_style_terminalstyle",
-      "community": 44,
+      "community": 20,
       "norm_label": "terminalstyle"
     },
     {
@@ -14530,7 +14550,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_terminal_style_formatplatformname",
-      "community": 44,
+      "community": 27,
       "norm_label": "formatplatformname()"
     },
     {
@@ -14660,7 +14680,7 @@
       "source_location": "L1738",
       "_origin": "ast",
       "id": "tests_cli_flow_test_localresolver",
-      "community": 6,
+      "community": 36,
       "norm_label": "localresolver()"
     },
     {
@@ -14980,7 +15000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_examples_test",
-      "community": 6,
+      "community": 318,
       "norm_label": "examples.test.ts"
     },
     {
@@ -14990,7 +15010,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "tests_examples_test_examplesroot",
-      "community": 6,
+      "community": 318,
       "norm_label": "examplesroot"
     },
     {
@@ -15000,7 +15020,7 @@
       "source_location": "L153",
       "_origin": "ast",
       "id": "tests_examples_test_examplenames",
-      "community": 6,
+      "community": 318,
       "norm_label": "examplenames()"
     },
     {
@@ -15010,7 +15030,7 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "tests_examples_test_workspaceexamplenames",
-      "community": 6,
+      "community": 318,
       "norm_label": "workspaceexamplenames()"
     },
     {
@@ -15020,7 +15040,7 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "tests_examples_test_commandsfor",
-      "community": 6,
+      "community": 318,
       "norm_label": "commandsfor()"
     },
     {
@@ -15030,7 +15050,7 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "tests_examples_test_commandfor",
-      "community": 6,
+      "community": 318,
       "norm_label": "commandfor()"
     },
     {
@@ -15040,7 +15060,7 @@
       "source_location": "L177",
       "_origin": "ast",
       "id": "tests_examples_test_powershelltestpath",
-      "community": 6,
+      "community": 318,
       "norm_label": "powershelltestpath()"
     },
     {
@@ -15110,7 +15130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_platform_regression_test",
-      "community": 314,
+      "community": 312,
       "norm_label": "platform-regression.test.ts"
     },
     {
@@ -15120,7 +15140,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "tests_platform_regression_test_temproots",
-      "community": 314,
+      "community": 312,
       "norm_label": "temproots"
     },
     {
@@ -15130,7 +15150,7 @@
       "source_location": "L495",
       "_origin": "ast",
       "id": "tests_platform_regression_test_platformmanifest",
-      "community": 314,
+      "community": 312,
       "norm_label": "platformmanifest()"
     },
     {
@@ -15140,7 +15160,7 @@
       "source_location": "L516",
       "_origin": "ast",
       "id": "tests_platform_regression_test_platformruntimestep",
-      "community": 314,
+      "community": 312,
       "norm_label": "platformruntimestep()"
     },
     {
@@ -15150,7 +15170,7 @@
       "source_location": "L531",
       "_origin": "ast",
       "id": "tests_platform_regression_test_tempdir",
-      "community": 314,
+      "community": 312,
       "norm_label": "tempdir()"
     },
     {
@@ -15160,7 +15180,7 @@
       "source_location": "L537",
       "_origin": "ast",
       "id": "tests_platform_regression_test_writefakeplatformcommand",
-      "community": 314,
+      "community": 312,
       "norm_label": "writefakeplatformcommand()"
     },
     {
@@ -15170,7 +15190,7 @@
       "source_location": "L552",
       "_origin": "ast",
       "id": "tests_platform_regression_test_writedock",
-      "community": 314,
+      "community": 312,
       "norm_label": "writedock()"
     },
     {
@@ -15180,7 +15200,7 @@
       "source_location": "L600",
       "_origin": "ast",
       "id": "tests_platform_regression_test_createdockarchive",
-      "community": 314,
+      "community": 312,
       "norm_label": "createdockarchive()"
     },
     {
@@ -15190,7 +15210,7 @@
       "source_location": "L619",
       "_origin": "ast",
       "id": "tests_platform_regression_test_sha256",
-      "community": 314,
+      "community": 312,
       "norm_label": "sha256()"
     },
     {
@@ -15200,7 +15220,7 @@
       "source_location": "L623",
       "_origin": "ast",
       "id": "tests_platform_regression_test_localresolver",
-      "community": 6,
+      "community": 36,
       "norm_label": "localresolver()"
     },
     {
@@ -15210,7 +15230,7 @@
       "source_location": "L637",
       "_origin": "ast",
       "id": "tests_platform_regression_test_installeddocks",
-      "community": 314,
+      "community": 312,
       "norm_label": "installeddocks()"
     },
     {
@@ -15220,7 +15240,7 @@
       "source_location": "L641",
       "_origin": "ast",
       "id": "tests_platform_regression_test_withenv",
-      "community": 314,
+      "community": 312,
       "norm_label": "withenv()"
     },
     {
@@ -15260,7 +15280,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_requirements_test",
-      "community": 6,
+      "community": 36,
       "norm_label": "requirements.test.ts"
     },
     {
@@ -15270,7 +15290,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "tests_requirements_test_temproots",
-      "community": 6,
+      "community": 36,
       "norm_label": "temproots"
     },
     {
@@ -15280,7 +15300,7 @@
       "source_location": "L306",
       "_origin": "ast",
       "id": "tests_requirements_test_omamanifest",
-      "community": 6,
+      "community": 36,
       "norm_label": "omamanifest()"
     },
     {
@@ -15290,7 +15310,7 @@
       "source_location": "L343",
       "_origin": "ast",
       "id": "tests_requirements_test_tempdir",
-      "community": 6,
+      "community": 36,
       "norm_label": "tempdir()"
     },
     {
@@ -15300,7 +15320,7 @@
       "source_location": "L349",
       "_origin": "ast",
       "id": "tests_requirements_test_capturemanifesterror",
-      "community": 6,
+      "community": 36,
       "norm_label": "capturemanifesterror()"
     },
     {
@@ -15310,7 +15330,7 @@
       "source_location": "L358",
       "_origin": "ast",
       "id": "tests_requirements_test_writefakebun",
-      "community": 6,
+      "community": 36,
       "norm_label": "writefakebun()"
     },
     {
@@ -15320,7 +15340,7 @@
       "source_location": "L393",
       "_origin": "ast",
       "id": "tests_requirements_test_writeexecutable",
-      "community": 6,
+      "community": 36,
       "norm_label": "writeexecutable()"
     },
     {
@@ -15330,7 +15350,7 @@
       "source_location": "L398",
       "_origin": "ast",
       "id": "tests_requirements_test_withenv",
-      "community": 6,
+      "community": 36,
       "norm_label": "withenv()"
     },
     {
@@ -15340,7 +15360,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_security_regression_test",
-      "community": 21,
+      "community": 19,
       "norm_label": "security-regression.test.ts"
     },
     {
@@ -15350,7 +15370,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "tests_security_regression_test_temproots",
-      "community": 21,
+      "community": 19,
       "norm_label": "temproots"
     },
     {
@@ -15360,7 +15380,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "tests_security_regression_test_startclilogin",
-      "community": 21,
+      "community": 19,
       "norm_label": "startclilogin()"
     },
     {
@@ -15370,7 +15390,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "tests_security_regression_test_exchangeclicode",
-      "community": 21,
+      "community": 19,
       "norm_label": "exchangeclicode()"
     },
     {
@@ -15380,7 +15400,7 @@
       "source_location": "L523",
       "_origin": "ast",
       "id": "tests_security_regression_test_tempdir",
-      "community": 21,
+      "community": 19,
       "norm_label": "tempdir()"
     },
     {
@@ -15390,7 +15410,7 @@
       "source_location": "L529",
       "_origin": "ast",
       "id": "tests_security_regression_test_createmanydirectoryarchive",
-      "community": 21,
+      "community": 19,
       "norm_label": "createmanydirectoryarchive()"
     },
     {
@@ -15400,7 +15420,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_terminal_style_test",
-      "community": 44,
+      "community": 27,
       "norm_label": "terminal-style.test.ts"
     },
     {
@@ -15410,7 +15430,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "tests_terminal_style_test_restoreenv",
-      "community": 44,
+      "community": 27,
       "norm_label": "restoreenv()"
     },
     {
@@ -36946,7 +36966,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "review rails, pr structure, and secret-scan defaults for ai-generated changes.",
       "id": "opendock__agent_safety_dock_macos_file"
@@ -36960,7 +36980,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "review rails, pr structure, and secret-scan defaults for ai-generated changes.",
       "id": "opendock__agent_safety_dock_windows_file"
@@ -37408,7 +37428,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 93,
+      "community": 49,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "ui, ux, product design, design system, figma workflow, and review templates.",
       "id": "opendock__designer_ai_dock_macos_file"
@@ -37422,7 +37442,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 93,
+      "community": 49,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "ui, ux, product design, design system, figma workflow, and review templates.",
       "id": "opendock__designer_ai_dock_windows_file"
@@ -37842,7 +37862,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 95,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "security-first mcp inventory, config examples, and review checklists.",
       "id": "opendock__mcp_safe_dock_macos_file"
@@ -37856,7 +37876,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 95,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "security-first mcp inventory, config examples, and review checklists.",
       "id": "opendock__mcp_safe_dock_windows_file"
@@ -37926,7 +37946,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 373,
+      "community": 95,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile architecture, ui patterns, release readiness, and testing guidance.",
       "id": "opendock__mobile_ai_dock_macos_file"
@@ -37940,7 +37960,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 373,
+      "community": 95,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile architecture, ui patterns, release readiness, and testing guidance.",
       "id": "opendock__mobile_ai_dock_windows_file"
@@ -38066,7 +38086,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 24,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "oh my agent setup with opendock-managed install, update, and uninstall.",
       "id": "opendock__oma_dock_macos_file"
@@ -38080,7 +38100,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 24,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "oh my agent setup with opendock-managed install, update, and uninstall.",
       "id": "opendock__oma_dock_windows_file"
@@ -38108,7 +38128,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 93,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "prd, user story, roadmap, release note, and decision template workspace.",
       "id": "opendock__product_manager_dock_macos_file"
@@ -38122,7 +38142,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 93,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "prd, user story, roadmap, release note, and decision template workspace.",
       "id": "opendock__product_manager_dock_windows_file"
@@ -38332,7 +38352,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "repository context packaging, architecture mapping, and change-risk prompts.",
       "id": "opendock__repo_context_dock_macos_file"
@@ -38346,7 +38366,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "repository context packaging, architecture mapping, and change-risk prompts.",
       "id": "opendock__repo_context_dock_windows_file"
@@ -38472,7 +38492,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 312,
+      "community": 49,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "portfolio case study templates for problem, process, decision rationale, and impact.",
       "id": "opendock__ui_case_study_dock_macos_file"
@@ -38486,7 +38506,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 312,
+      "community": 49,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "portfolio case study templates for problem, process, decision rationale, and impact.",
       "id": "opendock__ui_case_study_dock_windows_file"
@@ -40460,7 +40480,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 373,
+      "community": 95,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile quality gate for flutter, react native, swift, android, permissions, accessibility, release readiness, and runtime safety.",
       "id": "opendock_repo__mobile_ultrawork_dock_macos_file"
@@ -40474,7 +40494,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 373,
+      "community": 95,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile quality gate for flutter, react native, swift, android, permissions, accessibility, release readiness, and runtime safety.",
       "id": "opendock_repo__mobile_ultrawork_dock_windows_file"
@@ -41482,7 +41502,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "tag: safety",
       "id": "opendock_tag_safety"
@@ -41496,7 +41516,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "tag: review",
       "id": "opendock_tag_review"
@@ -41510,7 +41530,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "tag: git",
       "id": "opendock_tag_git"
@@ -41524,7 +41544,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "tag: quality",
       "id": "opendock_tag_quality"
@@ -41538,7 +41558,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 24,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: automation",
       "id": "opendock_tag_automation"
@@ -41804,7 +41824,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 93,
+      "community": 49,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: ux",
       "id": "opendock_tag_ux"
@@ -41818,7 +41838,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 93,
+      "community": 49,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: figma",
       "id": "opendock_tag_figma"
@@ -41832,7 +41852,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 93,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: product",
       "id": "opendock_tag_product"
@@ -42112,7 +42132,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 95,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "tag: security",
       "id": "opendock_tag_security"
@@ -42126,7 +42146,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 95,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "tag: config",
       "id": "opendock_tag_config"
@@ -42140,7 +42160,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 373,
+      "community": 95,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: mobile",
       "id": "opendock_tag_mobile"
@@ -42154,7 +42174,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 373,
+      "community": 95,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: ios",
       "id": "opendock_tag_ios"
@@ -42168,7 +42188,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 373,
+      "community": 95,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: android",
       "id": "opendock_tag_android"
@@ -42238,7 +42258,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 24,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: oma",
       "id": "opendock_tag_oma"
@@ -42252,7 +42272,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 24,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: oh-my-agent",
       "id": "opendock_tag_oh_my_agent"
@@ -42266,7 +42286,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 93,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: prd",
       "id": "opendock_tag_prd"
@@ -42280,7 +42300,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 93,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: roadmap",
       "id": "opendock_tag_roadmap"
@@ -42294,7 +42314,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 93,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: planning",
       "id": "opendock_tag_planning"
@@ -42392,7 +42412,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "tag: repository",
       "id": "opendock_tag_repository"
@@ -42406,7 +42426,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "tag: context",
       "id": "opendock_tag_context"
@@ -42476,7 +42496,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 312,
+      "community": 49,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: portfolio",
       "id": "opendock_tag_portfolio"
@@ -42490,7 +42510,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 312,
+      "community": 49,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: case-study",
       "id": "opendock_tag_case_study"
@@ -42504,7 +42524,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 312,
+      "community": 49,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: impact",
       "id": "opendock_tag_impact"
@@ -42812,7 +42832,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 373,
+      "community": 95,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: flutter",
       "id": "opendock_tag_flutter"
@@ -51207,6 +51227,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
+      "source_location": "L171",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_project_state",
+      "target": "src_project_state_default_workspace_root"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/desktop/src-tauri/src/project_state.rs",
       "source_location": "L24",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -51304,6 +51334,16 @@
       "target": "src_project_state_unique_project_path"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/desktop/src-tauri/src/project_state.rs",
+      "source_location": "L176",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_project_state",
+      "target": "src_project_state_workspace_display_name"
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
@@ -51395,6 +51435,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
+      "source_location": "L171",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "confidence_score": 1.0,
+      "source": "src_project_state_default_workspace_root",
+      "target": "apps_desktop_src_tauri_src_project_state_rs_string"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/desktop/src-tauri/src/project_state.rs",
       "source_location": "L26",
       "weight": 1.0,
       "context": "field",
@@ -51444,6 +51495,17 @@
       "context": "return_type",
       "confidence_score": 1.0,
       "source": "src_project_state_resolve_active_project_id",
+      "target": "apps_desktop_src_tauri_src_project_state_rs_string"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/desktop/src-tauri/src/project_state.rs",
+      "source_location": "L176",
+      "weight": 1.0,
+      "context": "return_type",
+      "confidence_score": 1.0,
+      "source": "src_project_state_workspace_display_name",
       "target": "apps_desktop_src_tauri_src_project_state_rs_string"
     },
     {
@@ -51572,6 +51634,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
+      "source_location": "L44",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_project_state_create_blank_project",
+      "target": "src_project_state_default_workspace_root"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/desktop/src-tauri/src/project_state.rs",
       "source_location": "L53",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -51601,6 +51674,17 @@
       "target": "src_project_state_unique_project_path"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/desktop/src-tauri/src/project_state.rs",
+      "source_location": "L59",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_project_state_create_blank_project",
+      "target": "src_project_state_workspace_display_name"
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
@@ -51620,6 +51704,17 @@
       "context": "return_type",
       "confidence_score": 1.0,
       "source": "src_project_state_app_state_path",
+      "target": "apps_desktop_src_tauri_src_project_state_rs_result"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/desktop/src-tauri/src/project_state.rs",
+      "source_location": "L171",
+      "weight": 1.0,
+      "context": "return_type",
+      "confidence_score": 1.0,
+      "source": "src_project_state_default_workspace_root",
       "target": "apps_desktop_src_tauri_src_project_state_rs_result"
     },
     {
@@ -51758,6 +51853,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "apps/desktop/src-tauri/src/project_state.rs",
+      "source_location": "L171",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "confidence_score": 1.0,
+      "source": "src_project_state_default_workspace_root",
+      "target": "apps_desktop_src_tauri_src_project_state_rs_pathbuf"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/desktop/src-tauri/src/project_state.rs",
       "source_location": "L161",
       "weight": 1.0,
       "context": "generic_arg",
@@ -51785,6 +51891,17 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_project_state_app_data_dir",
+      "target": "src_project_state_home_dir"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/desktop/src-tauri/src/project_state.rs",
+      "source_location": "L172",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_project_state_default_workspace_root",
       "target": "src_project_state_home_dir"
     },
     {
@@ -64569,9 +64686,9 @@
       "source_file": "packages/cli/src/browser-auth.ts",
       "source_location": "L271",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_browser_auth",
-      "target": "src_browser_auth_safebrowserurl",
-      "confidence_score": 1.0
+      "target": "src_browser_auth_safebrowserurl"
     },
     {
       "relation": "contains",
@@ -64710,9 +64827,9 @@
       "source_file": "packages/cli/src/browser-auth.ts",
       "source_location": "L72",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_browser_auth_performbrowserlogin",
-      "target": "src_browser_auth_safebrowserurl",
-      "confidence_score": 1.0
+      "target": "src_browser_auth_safebrowserurl"
     },
     {
       "relation": "calls",
@@ -64820,9 +64937,9 @@
       "source_file": "packages/cli/src/browser-auth.ts",
       "source_location": "L184",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_browser_auth_opensystembrowser",
-      "target": "src_browser_auth_safebrowserurl",
-      "confidence_score": 1.0
+      "target": "src_browser_auth_safebrowserurl"
     },
     {
       "relation": "imports",
@@ -103058,5 +103175,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4652626bc08615f3a273f1d25a8add0f7d00ecc2"
+  "built_at_commit": "e8c4e836984ca3957412227e4bd9726e18dd7615"
 }

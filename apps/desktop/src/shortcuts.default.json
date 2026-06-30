@@ -16,12 +16,12 @@
     },
     "project.new": {
       "label": {
-        "ko": "새 프로젝트",
-        "en": "New Project"
+        "ko": "새 워크스페이스",
+        "en": "New Workspace"
       },
       "description": {
-        "ko": "빈 프로젝트를 만듭니다.",
-        "en": "Create an empty project."
+        "ko": "빈 워크스페이스를 만듭니다.",
+        "en": "Create an empty workspace."
       },
       "mac": "Command+N",
       "windows": "Ctrl+N",
@@ -29,12 +29,12 @@
     },
     "project.open": {
       "label": {
-        "ko": "기존 프로젝트 추가",
-        "en": "Add Existing Project"
+        "ko": "기존 워크스페이스 추가",
+        "en": "Add Existing Workspace"
       },
       "description": {
-        "ko": "로컬 폴더를 프로젝트로 추가합니다.",
-        "en": "Add a local folder as a project."
+        "ko": "로컬 폴더를 워크스페이스로 추가합니다.",
+        "en": "Add a local folder as a workspace."
       },
       "mac": "Command+O",
       "windows": "Ctrl+O",
@@ -42,12 +42,12 @@
     },
     "project.switch": {
       "label": {
-        "ko": "프로젝트 전환",
-        "en": "Switch Project"
+        "ko": "워크스페이스 전환",
+        "en": "Switch Workspace"
       },
       "description": {
-        "ko": "등록된 프로젝트 목록을 엽니다.",
-        "en": "Open the registered project switcher."
+        "ko": "등록된 워크스페이스 목록을 엽니다.",
+        "en": "Open the registered workspace switcher."
       },
       "mac": "Command+Shift+O",
       "windows": "Ctrl+Shift+O",
@@ -85,8 +85,8 @@
         "en": "Logs"
       },
       "description": {
-        "ko": "프로젝트 로그 화면으로 이동합니다.",
-        "en": "Go to the project Logs view."
+        "ko": "워크스페이스 로그 화면으로 이동합니다.",
+        "en": "Go to the workspace Logs view."
       },
       "mac": "Command+3",
       "windows": "Ctrl+3",
@@ -98,8 +98,8 @@
         "en": "Update All"
       },
       "description": {
-        "ko": "현재 프로젝트의 dock을 업데이트합니다.",
-        "en": "Update docks in the active project."
+        "ko": "현재 워크스페이스의 dock을 업데이트합니다.",
+        "en": "Update docks in the active workspace."
       },
       "mac": "Command+U",
       "windows": "Ctrl+U",

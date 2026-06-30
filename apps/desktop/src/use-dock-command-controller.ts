@@ -191,7 +191,7 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
 
   async function installDock(dock: Dock) {
     if (!options.activeProject) {
-      options.appendLog("WARN", "var(--warning)", "select a project before installing a dock");
+      options.appendLog("WARN", "var(--warning)", "select a workspace before installing a dock");
       return;
     }
     const dockId = dockFullId(dock);
@@ -228,7 +228,7 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
 
   async function deleteDock(dock: Dock) {
     if (!options.activeProject) {
-      options.appendLog("WARN", "var(--warning)", "select a project before deleting a dock");
+      options.appendLog("WARN", "var(--warning)", "select a workspace before deleting a dock");
       return;
     }
     const dockId = dockFullId(dock);
@@ -251,7 +251,7 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
       }
     } else {
       options.appendLog("INFO", "var(--text-2)", `uninstall ${dockId}`);
-      options.appendLog("OK", "var(--success)", "dock removed from project");
+      options.appendLog("OK", "var(--success)", "dock removed from workspace");
       options.appendCommandResultLog(commandId, previewChangeResult("uninstall", dockId, options.installedRows, dock));
       options.finishCommandTask(commandId, "success", options.t.taskCompleted);
     }
