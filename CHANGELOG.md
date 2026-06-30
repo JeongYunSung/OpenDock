@@ -7,6 +7,20 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.46 - 2026-06-30
+
+### CLI
+
+- Open OAuth login URLs through the Windows URL handler to keep provider query
+  parameters intact.
+
+### Desktop App
+
+- Stop running OpenDock sidecars before Windows app updates start so the
+  installer can replace bundled executables cleanly.
+- Keep OpenDock single-instance on desktop and refocus the existing main window
+  when the app is launched again.
+
 ## 0.1.45 - 2026-06-30
 
 ### CI
