@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.45 - 2026-06-30
+
+### CI
+
+- Keep the desktop workflow artifact handoff used to build the Tauri updater
+  manifest from signed platform bundles.
+
 ## 0.1.44 - 2026-06-30
 
 ### CLI
