@@ -433,11 +433,12 @@ describe("security regression coverage", () => {
   });
 
   it("uses a shell-free Windows browser opener for auth URLs", () => {
-    const url = "https://registry.opendock.app/login?next=1&provider=github";
+    const url =
+      "https://accounts.google.com/o/oauth2/v2/auth?client_id=test&redirect_uri=https%3A%2F%2Fregistry.opendock.app%2Fv1%2Fauth%2Fgoogle%2Fcallback&scope=openid%20email%20profile&response_type=code";
 
     expect(browserOpenCommand(url, "win32")).toEqual({
-      command: "explorer.exe",
-      args: [url],
+      command: "rundll32.exe",
+      args: ["url.dll,FileProtocolHandler", url],
     });
   });
 

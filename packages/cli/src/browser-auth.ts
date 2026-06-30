@@ -193,9 +193,14 @@ export function browserOpenCommand(
   url: string,
   platform: NodeJS.Platform = process.platform,
 ): { command: string; args: string[] } {
+  if (platform === "win32") {
+    return {
+      command: "rundll32.exe",
+      args: ["url.dll,FileProtocolHandler", url],
+    };
+  }
   return {
-    command:
-      platform === "darwin" ? "/usr/bin/open" : platform === "win32" ? "explorer.exe" : "xdg-open",
+    command: platform === "darwin" ? "/usr/bin/open" : "xdg-open",
     args: [url],
   };
 }
