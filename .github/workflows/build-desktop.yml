@@ -205,3 +205,42 @@ jobs:
           set -euo pipefail
           gh release upload "$RELEASE_TAG" latest.json --repo "${{ github.repository }}" --clobber
           gh release upload "$RELEASE_TAG" latest.json --repo "$PUBLIC_RELEASE_REPOSITORY" --clobber
+
+  cleanup-temporary-artifacts:
+    name: Clean temporary workflow artifacts
+    needs:
+      - build
+      - publish-updater-manifest
+    if: ${{ always() && github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Delete Actions artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          artifacts="$(gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" \
+            --jq '.artifacts[]? | select(.expired == false) | [.id, .name] | @tsv')"
+
+          if [ -z "$artifacts" ]; then
+            echo "No temporary workflow artifacts to delete."
+            exit 0
+          fi
+
+          count=0
+          while IFS=$'\t' read -r artifact_id artifact_name; do
+            if [ -z "$artifact_id" ]; then
+              continue
+            fi
+
+            echo "Deleting temporary workflow artifact: ${artifact_name} (${artifact_id})"
+            gh api --method DELETE "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}"
+            count=$((count + 1))
+          done <<< "$artifacts"
+
+          echo "Deleted ${count} temporary workflow artifact(s)."
