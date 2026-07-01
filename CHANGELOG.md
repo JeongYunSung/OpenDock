@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.50 - 2026-07-01
+
+### Desktop App
+
+- Keep app content clickable after closing desktop menus so dock cards and
+  detail controls do not get blocked by stale menu state.
+
 ## 0.1.49 - 2026-07-01
 
 ### Desktop App
