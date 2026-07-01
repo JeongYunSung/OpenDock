@@ -19,7 +19,7 @@ import {
   versionStatusClass,
   versionStatusLabel,
 } from "./display";
-import { DockMetric, Pagination, PanelLoadingState, StarButton } from "./desktop-ui";
+import { DockMetric, Pagination, SkeletonBlock, SkeletonSpinner, StarButton } from "./desktop-ui";
 import { ReadmePanel } from "./readme-panel";
 
 export function ExplorePanel(props: {
@@ -79,7 +79,7 @@ export function ExplorePanel(props: {
         </div>
       </div>
       {props.loading ? (
-        <PanelLoadingState label={props.t.loadingDocks} />
+        <ExploreLoadingState label={props.t.loadingDocks} />
       ) : props.sortedDocks.length > 0 ? (
         <>
           <div className="dock-grid">
@@ -109,6 +109,46 @@ export function ExplorePanel(props: {
       ) : (
         <CatalogEmptyState t={props.t} />
       )}
+    </div>
+  );
+}
+
+function ExploreLoadingState(props: { label: string }) {
+  return (
+    <div aria-live="polite" className="dock-grid dock-grid-loading" role="status">
+      <span className="sr-only">{props.label}</span>
+      {Array.from({ length: 6 }, (_, index) => (
+        <div className="dock-card dock-card-skeleton" key={index}>
+          <div className="dock-card-head">
+            <div className="dock-icon skeleton-icon">
+              <SkeletonSpinner />
+            </div>
+            <div className="skeleton-stack">
+              <SkeletonBlock className="skeleton-line title" />
+              <SkeletonBlock className="skeleton-line caption" />
+            </div>
+          </div>
+          <div className="skeleton-copy">
+            <SkeletonBlock className="skeleton-line" />
+            <SkeletonBlock className="skeleton-line short" />
+          </div>
+          <div className="tag-wrap">
+            <SkeletonBlock className="skeleton-chip" />
+            <SkeletonBlock className="skeleton-chip compact" />
+            <SkeletonBlock className="skeleton-chip tiny" />
+          </div>
+          <div className="card-foot">
+            <div>
+              <SkeletonBlock className="skeleton-platform" />
+              <SkeletonBlock className="skeleton-platform compact" />
+            </div>
+            <div className="dock-metrics">
+              <SkeletonBlock className="skeleton-metric" />
+              <SkeletonBlock className="skeleton-metric compact" />
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -174,6 +214,50 @@ function DockCard(props: {
         </div>
       </div>
     </KeyboardButton>
+  );
+}
+
+export function DetailLoadingState(props: { label: string }) {
+  return (
+    <div aria-live="polite" className="panel detail-panel detail-loading-panel" role="status">
+      <span className="sr-only">{props.label}</span>
+      <div className="detail-sticky-header">
+        <div className="detail-hero">
+          <SkeletonBlock className="skeleton-back-button" />
+          <div className="detail-identity">
+            <div className="dock-icon small skeleton-icon">
+              <SkeletonSpinner />
+            </div>
+            <div className="detail-copy">
+              <SkeletonBlock className="skeleton-line breadcrumb" />
+              <SkeletonBlock className="skeleton-line detail-title" />
+              <div className="detail-meta">
+                <SkeletonBlock className="skeleton-line meta" />
+                <SkeletonBlock className="skeleton-line meta compact" />
+              </div>
+            </div>
+          </div>
+          <div className="detail-action">
+            <SkeletonBlock className="skeleton-button" />
+          </div>
+        </div>
+        <div className="detail-tabs detail-tabs-skeleton">
+          <SkeletonBlock className="skeleton-tab" />
+          <SkeletonBlock className="skeleton-tab compact" />
+        </div>
+      </div>
+      <div className="readme-panel">
+        <div className="readme-card readme-card-skeleton">
+          <SkeletonBlock className="skeleton-line readme-title" />
+          <SkeletonBlock className="skeleton-line" />
+          <SkeletonBlock className="skeleton-line" />
+          <SkeletonBlock className="skeleton-line medium" />
+          <SkeletonBlock className="skeleton-line readme-subtitle" />
+          <SkeletonBlock className="skeleton-line" />
+          <SkeletonBlock className="skeleton-line short" />
+        </div>
+      </div>
+    </div>
   );
 }
 

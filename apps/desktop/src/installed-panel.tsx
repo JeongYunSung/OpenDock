@@ -2,7 +2,7 @@ import { Eye, RefreshCw, Search, Trash2 } from "lucide-react";
 import { isTaskActive, isTaskForTarget, type CommandTask } from "./command-task";
 import { dockFullId, type Dock, type Lang, type Project, type TEXT } from "./data";
 import type { InstalledDockRow } from "./dock-workspace-model";
-import { PanelLoadingState } from "./desktop-ui";
+import { SkeletonBlock, SkeletonSpinner } from "./desktop-ui";
 import { DockIcon } from "./display";
 
 export function InstalledPanel(props: {
@@ -50,7 +50,7 @@ export function InstalledPanel(props: {
         ) : null}
       </div>
       {props.loading ? (
-        <PanelLoadingState label={props.t.loadingInstalledDocks} />
+        <InstalledLoadingState label={props.t.loadingInstalledDocks} t={props.t} />
       ) : props.installedTotalCount > 0 && props.installedRows.length > 0 ? (
         <div className="installed-table">
           <div className="installed-head">
@@ -114,6 +114,41 @@ export function InstalledPanel(props: {
           <p>{props.t.noInstalledSub}</p>
         </div>
       )}
+    </div>
+  );
+}
+
+function InstalledLoadingState(props: { label: string; t: (typeof TEXT)[Lang] }) {
+  return (
+    <div aria-live="polite" className="installed-table installed-table-skeleton" role="status">
+      <span className="sr-only">{props.label}</span>
+      <div className="installed-head">
+        <span>{props.t.dock}</span>
+        <span>{props.t.version}</span>
+        <span>{props.t.status}</span>
+        <span>{props.t.action}</span>
+      </div>
+      <div className="installed-table-scroll">
+        {Array.from({ length: 5 }, (_, index) => (
+          <div className="installed-row installed-row-skeleton" key={index}>
+            <div className="installed-dock">
+              <div className="dock-icon small skeleton-icon">
+                <SkeletonSpinner />
+              </div>
+              <div className="skeleton-stack">
+                <SkeletonBlock className="skeleton-line title" />
+                <SkeletonBlock className="skeleton-line caption" />
+              </div>
+            </div>
+            <SkeletonBlock className="skeleton-line version" />
+            <SkeletonBlock className="skeleton-status" />
+            <div className="skeleton-actions">
+              <SkeletonBlock className="skeleton-action" />
+              <SkeletonBlock className="skeleton-action" />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

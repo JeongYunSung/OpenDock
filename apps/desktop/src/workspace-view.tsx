@@ -12,9 +12,8 @@ import type {
   SortMode,
   TEXT,
 } from "./data";
-import { CatalogEmptyState, DetailPanel, ExplorePanel } from "./dock-panels";
+import { CatalogEmptyState, DetailLoadingState, DetailPanel, ExplorePanel } from "./dock-panels";
 import type { InstalledDockRow } from "./dock-workspace-model";
-import { PanelLoadingState } from "./desktop-ui";
 import { InstalledPanel } from "./installed-panel";
 import { LogsPanel } from "./logs-panel";
 import type { ShortcutBinding, ShortcutCommandId, ShortcutPlatform } from "./shortcuts";
@@ -139,7 +138,7 @@ export function Workspace(props: {
 
         {props.dockView === "list" ? <ExplorePanel {...props} loading={props.catalogLoading} /> : null}
         {props.dockView === "detail" ? (
-          props.detailLoading ? <PanelLoadingState label={props.t.loadingDockDetail} /> : props.detail ? <DetailPanel {...props} detail={props.detail} /> : <CatalogEmptyState t={props.t} />
+          props.detailLoading ? <DetailLoadingState label={props.t.loadingDockDetail} /> : props.detail ? <DetailPanel {...props} detail={props.detail} /> : <CatalogEmptyState t={props.t} />
         ) : null}
         {props.dockView === "installed" ? <InstalledPanel {...props} loading={props.installedLoading} /> : null}
         {props.dockView === "logs" ? <LogsPanel activeProject={props.activeProject} logs={props.logs} t={props.t} /> : null}

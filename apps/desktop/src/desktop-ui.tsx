@@ -62,6 +62,14 @@ export function PanelLoadingState(props: { label: string }) {
   );
 }
 
+export function SkeletonBlock(props: { className?: string }) {
+  return <span aria-hidden="true" className={["skeleton-block", props.className].filter(Boolean).join(" ")} />;
+}
+
+export function SkeletonSpinner(props: { className?: string }) {
+  return <span aria-hidden="true" className={["button-spinner", "skeleton-spinner", props.className].filter(Boolean).join(" ")} />;
+}
+
 export function GoogleMark() {
   return (
     <svg aria-hidden="true" height="20" viewBox="0 0 48 48" width="20">

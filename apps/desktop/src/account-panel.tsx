@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { accountStatsFor, dockFromMyDock, myDockReviewGroup, myDockStatusLabel } from "./account-model";
 import { dockFullId, type Dock, type Lang, type MyDock, type MyDocksCounts, type TEXT } from "./data";
 import { DockIcon, badgeSrc } from "./display";
-import { DockMetric, Pagination, PanelLoadingState, StatRow } from "./desktop-ui";
+import { DockMetric, Pagination, SkeletonBlock, SkeletonSpinner, StatRow } from "./desktop-ui";
 
 export const ACCOUNT_PAGE_LIMIT = 6;
 
@@ -118,9 +118,11 @@ export function AccountPanel(props: {
           ) : null}
           {accountTab === "docks" ? (
             <section className="account-list-panel">
-              <div className="account-range">{myDocksStart}-{myDocksEnd} / {props.myDocksTotal}</div>
+              <div className="account-range">
+                {props.myDocksLoading ? <SkeletonBlock className="skeleton-range" /> : `${myDocksStart}-${myDocksEnd} / ${props.myDocksTotal}`}
+              </div>
               {props.myDocksLoading ? (
-                <PanelLoadingState label={props.t.loadingMyDocks} />
+                <AccountListLoadingState label={props.t.loadingMyDocks} variant="status" />
               ) : props.myDocks.length > 0 ? (
                 <div className="starred-dock-list">
                   {props.myDocks.map((dock) => (
@@ -150,9 +152,11 @@ export function AccountPanel(props: {
           ) : null}
           {accountTab === "stars" ? (
             <section className="account-list-panel">
-              <div className="account-range">{starredStart}-{starredEnd} / {props.myStarredDocks.length}</div>
+              <div className="account-range">
+                {props.myStarsLoading ? <SkeletonBlock className="skeleton-range" /> : `${starredStart}-${starredEnd} / ${props.myStarredDocks.length}`}
+              </div>
               {props.myStarsLoading ? (
-                <PanelLoadingState label={props.t.loadingStarredDocks} />
+                <AccountListLoadingState label={props.t.loadingStarredDocks} variant="metric" />
               ) : props.myStarredDocks.length > 0 ? (
                 <div className="starred-dock-list">
                   {props.myStarredDocks.map((dock) => (
@@ -173,6 +177,26 @@ export function AccountPanel(props: {
           ) : null}
         </section>
       </div>
+    </div>
+  );
+}
+
+function AccountListLoadingState(props: { label: string; variant: "metric" | "status" }) {
+  return (
+    <div aria-live="polite" className="starred-dock-list account-list-loading" role="status">
+      <span className="sr-only">{props.label}</span>
+      {Array.from({ length: 4 }, (_, index) => (
+        <div className="account-row-skeleton" key={index}>
+          <div className="dock-icon small skeleton-icon">
+            <SkeletonSpinner />
+          </div>
+          <span className="skeleton-stack">
+            <SkeletonBlock className="skeleton-line title" />
+            <SkeletonBlock className="skeleton-line caption" />
+          </span>
+          {props.variant === "status" ? <SkeletonBlock className="skeleton-chip status" /> : <SkeletonBlock className="skeleton-metric" />}
+        </div>
+      ))}
     </div>
   );
 }
