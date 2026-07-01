@@ -2180,7 +2180,7 @@ input:focus-visible,
 }
 
 .log-shell {
-  overflow: hidden;
+  overflow: clip;
 }
 
 .installed-toolbar {
@@ -2537,14 +2537,17 @@ input:focus-visible,
   align-content: start;
   gap: 8px;
   overflow: auto;
+  scrollbar-gutter: stable both-edges;
   padding-right: 4px;
 }
 
 .command-progress-log p {
   display: grid;
-  grid-template-columns: 68px 38px minmax(0, 1fr);
+  grid-template-columns: 68px 38px max-content;
   gap: 10px;
   align-items: center;
+  width: max-content;
+  min-width: 100%;
   margin: 0;
   color: var(--text-2);
   font: 650 11px/1.5 var(--font-mono);
@@ -2559,11 +2562,10 @@ input:focus-visible,
 }
 
 .command-progress-log em {
-  min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   font-style: normal;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-overflow: clip;
+  white-space: pre;
 }
 
 .command-progress-foot {
@@ -2632,6 +2634,7 @@ input:focus-visible,
 
 .log-lines {
   overflow: auto;
+  scrollbar-gutter: stable both-edges;
   max-height: min(420px, calc(100vh - 330px));
   min-height: 246px;
   padding: 16px;
@@ -2645,7 +2648,7 @@ input:focus-visible,
   grid-template-columns: 72px 48px max-content;
   gap: 12px;
   width: max-content;
-  min-width: 100%;
+  min-width: max(100%, 720px);
 }
 
 .log-tail-anchor {
