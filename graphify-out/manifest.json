@@ -1,7 +1,7 @@
 {
   "apps/desktop/package.json": {
-    "mtime": 1782908440.2768002,
-    "ast_hash": "e077d5b71f0e905f66526c45b25cf38e",
+    "mtime": 1782910354.9827516,
+    "ast_hash": "d1e150ef17d60d24f269583bb63cb7ce",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/browser-test-runtime.mjs": {
@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/tauri.conf.json": {
-    "mtime": 1782908440.2770693,
-    "ast_hash": "61a63c2ec0eff9a908b2f6da551fefe4",
+    "mtime": 1782910354.9831872,
+    "ast_hash": "231a60d1af6bbc257c1b52a027483172",
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "packages/cli/package.json": {
-    "mtime": 1782908440.2763414,
-    "ast_hash": "b68566fbdd0340402dc6fb38270088f9",
+    "mtime": 1782910354.9824908,
+    "ast_hash": "de3dadbdd237b8492335b5b175b087d2",
     "semantic_hash": ""
   },
   "packages/cli/scripts/build.ts": {
