@@ -113,6 +113,13 @@ input:focus-visible,
   --unavailable: var(--dark-unavailable);
   --info: var(--dark-info);
   --star: #facc15;
+  --theme-toggle-bg: #20252a;
+  --theme-toggle-border: #30373d;
+  --theme-toggle-icon: #98a3ad;
+  --theme-toggle-ink: #f4f7f8;
+  --theme-toggle-knob: #f4f7f8;
+  --theme-toggle-primary: #2aa198;
+  --theme-toggle-select-bg: #171a1d;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
@@ -149,6 +156,13 @@ input:focus-visible,
   --unavailable: var(--light-unavailable);
   --info: var(--light-info);
   --star: #ca8a04;
+  --theme-toggle-bg: #e2e8f0;
+  --theme-toggle-border: #cbd5e1;
+  --theme-toggle-icon: #64748b;
+  --theme-toggle-ink: #0f172a;
+  --theme-toggle-knob: #ffffff;
+  --theme-toggle-primary: #0f766e;
+  --theme-toggle-select-bg: #ffffff;
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.07);
   --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.1);
   --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.14);
@@ -533,34 +547,78 @@ input:focus-visible,
 
 .theme-switch {
   position: relative;
-  display: flex;
+  min-height: 44px;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  width: 46px;
-  height: 24px;
-  border: 1px solid var(--border-strong);
+  gap: 8px;
+  border: 1px solid var(--theme-toggle-border);
   border-radius: 999px;
-  padding: 0 6px;
-  color: var(--text-3);
-  background: var(--surface-2);
+  padding: 4px;
+  background: var(--theme-toggle-select-bg);
+  color: var(--theme-toggle-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 720;
   cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
 }
 
-.theme-switch span {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
+.theme-switch:hover {
+  border-color: var(--theme-toggle-primary);
+}
+
+.theme-switch:focus-visible {
+  outline: 2px solid rgba(15, 118, 110, 0.24);
+  outline-offset: 2px;
+}
+
+.theme-switch-track {
+  position: relative;
+  width: 58px;
+  height: 34px;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  justify-items: center;
+  border: 1px solid var(--theme-toggle-border);
   border-radius: 999px;
-  background: var(--surface);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  transform: translateX(21px);
-  transition: transform 0.22s ease;
+  background: var(--theme-toggle-bg);
 }
 
-.app-root[data-theme="light"] .theme-switch span {
-  transform: translateX(0);
+.theme-switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--theme-toggle-knob);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
+  transition: transform 180ms ease;
+  transform: translateX(24px);
+}
+
+.app-root[data-theme="light"] .theme-switch-knob {
+  transform: none;
+}
+
+.theme-switch .theme-icon {
+  position: relative;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  display: block;
+  color: var(--theme-toggle-icon);
+}
+
+.theme-switch .theme-sun {
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.theme-switch .theme-moon {
+  border-radius: 50%;
+  box-shadow: inset -4px 0 0 currentColor;
 }
 
 .window-controls {

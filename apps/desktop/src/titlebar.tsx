@@ -1,5 +1,5 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Check, ChevronDown, Globe2, LogOut, Moon, RefreshCw, Sun, UserRound } from "lucide-react";
+import { Check, ChevronDown, Globe2, LogOut, RefreshCw, UserRound } from "lucide-react";
 import type { MouseEvent } from "react";
 import { type Lang, type ProductUpdateState, TEXT } from "./data";
 import { logoSrc } from "./display";
@@ -107,9 +107,11 @@ export function Titlebar(props: {
           ) : null}
         </div>
         <button aria-label={props.t.toggleTheme} className="theme-switch" onClick={props.onTheme} type="button">
-          <Sun size={11} />
-          <Moon size={11} />
-          <span />
+          <span className="theme-switch-track" aria-hidden="true">
+            <span className="theme-icon theme-sun" />
+            <span className="theme-icon theme-moon" />
+            <span className="theme-switch-knob" />
+          </span>
         </button>
         {props.loggedIn ? (
           <div className="menu-anchor">
