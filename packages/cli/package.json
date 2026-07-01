@@ -13,12 +13,15 @@
     "docs",
     "examples",
     "CHANGELOG.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
     "README.md",
     "README.*.md"
   ],
   "scripts": {
     "dev": "bun run src/cli.ts",
     "build": "bun run scripts/build.ts",
+    "generate:licenses": "cd ../.. && bun run generate:licenses",
     "prepare:github-package": "bun run scripts/prepare-github-package.ts",
     "test": "vitest run --testTimeout 15000",
     "typecheck": "tsc --noEmit",

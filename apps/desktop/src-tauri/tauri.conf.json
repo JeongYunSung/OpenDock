@@ -47,6 +47,10 @@
         "uninstallerIcon": "icons/icon.ico"
       }
     },
+    "resources": [
+      "../LICENSE",
+      "../THIRD_PARTY_NOTICES.md"
+    ],
     "externalBin": [
       "binaries/opendock"
     ]

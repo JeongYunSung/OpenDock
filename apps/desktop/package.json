@@ -3,8 +3,10 @@
   "version": "0.1.46",
   "private": true,
   "type": "module",
+  "license": "MIT",
   "scripts": {
     "dev": "tauri dev",
+    "generate:licenses": "cd ../.. && bun run generate:licenses",
     "prepare:sidecars": "bun scripts/prepare-sidecars.mjs",
     "dev:web": "vite --host 127.0.0.1 --port 1420",
     "build": "tauri build",

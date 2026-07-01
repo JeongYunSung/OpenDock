@@ -2,11 +2,13 @@
   "name": "opendock-monorepo",
   "private": true,
   "type": "module",
+  "license": "MIT",
   "workspaces": [
     "packages/cli",
     "apps/desktop"
   ],
   "scripts": {
+    "generate:licenses": "node scripts/generate-license-notices.mjs",
     "dev:cli": "cd packages/cli && bun run dev",
     "build:cli": "cd packages/cli && bun run build",
     "check:cli": "cd packages/cli && bun run check",

@@ -41,6 +41,8 @@ cpSync(join(packageDir, "bin", "opendock"), join(outputDir, "bin", "opendock"));
 cpSync(join(packageDir, "docs"), join(outputDir, "docs"), { recursive: true });
 cpSync(join(packageDir, "examples"), join(outputDir, "examples"), { recursive: true });
 cpSync(join(repoRoot, "CHANGELOG.md"), join(outputDir, "CHANGELOG.md"));
+cpSync(join(packageDir, "LICENSE"), join(outputDir, "LICENSE"));
+cpSync(join(packageDir, "THIRD_PARTY_NOTICES.md"), join(outputDir, "THIRD_PARTY_NOTICES.md"));
 
 for (const file of readdirSync(packageDir)) {
   if (file === "README.md" || /^README\.[a-z]{2}\.md$/.test(file)) {
@@ -63,6 +65,8 @@ const publishPackage = {
     "docs",
     "examples",
     "CHANGELOG.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
     "README.md",
     "README.*.md",
   ],
