@@ -15,6 +15,8 @@ version declared in `package.json`; they do not auto-increment versions.
   fails, instead of clearing the current workspace state.
 - Keep the catalog list visible when a Registry refresh temporarily fails for
   the same search and paging request.
+- Preserve compatible outdated-status results when the project refresh can read
+  installed docks but the Registry update check temporarily fails.
 
 ## 0.1.52 - 2026-07-01
 

@@ -53,7 +53,7 @@ export function useProjectRuntimeController(options: ProjectRuntimeControllerOpt
           const outdated = await invoke<OpenDockCommandResult>("opendock_outdated", { projectDir: project.path });
           setOutdatedReportsById(outdatedReportsByDockId(outdated.json));
         } catch (error) {
-          setOutdatedReportsById({});
+          setOutdatedReportsById((current) => preserveCompatibleOutdatedReports(current, records));
           options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
         }
       } catch (error) {
@@ -129,4 +129,14 @@ export function useProjectRuntimeController(options: ProjectRuntimeControllerOpt
     refreshProjectState,
     resetProjectRuntime,
   };
+}
+
+function preserveCompatibleOutdatedReports(
+  current: Record<string, OpenDockOutdatedReport>,
+  records: InstalledDockRecord[],
+) {
+  const installedVersions = new Map(records.map((record) => [record.id, record.version]));
+  return Object.fromEntries(
+    Object.entries(current).filter(([dockId, report]) => installedVersions.get(dockId) === report.currentVersion),
+  );
 }
