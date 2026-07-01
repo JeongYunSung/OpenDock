@@ -7,6 +7,15 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.54 - 2026-07-01
+
+### Desktop App
+
+- Ignore stale async responses across catalog, account, project, update, and
+  command flows so older requests cannot overwrite the current screen state.
+- Guard project creation and folder picking against duplicate in-flight actions,
+  and avoid duplicate project registrations for the same path.
+
 ## 0.1.53 - 2026-07-01
 
 ### Desktop App
