@@ -14,6 +14,7 @@ import type {
 import { isTauriRuntime } from "./tauri-runtime";
 
 const REGISTRY_ORIGIN = "https://registry.opendock.app";
+const REGISTRY_REQUEST_TIMEOUT_MS = 20_000;
 const registryAssetCache = new Map<string, string | null>();
 const registryAssetRequests = new Map<string, Promise<string | null>>();
 
@@ -156,15 +157,35 @@ async function requestRegistryJson<T>(path: string, params: Record<string, strin
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value);
   }
-  const response = await fetch(url, {
-    cache: "no-store",
-    headers: { accept: "application/json", "cache-control": "no-cache" },
-  });
+  const response = await fetchRegistryJson(url);
   if (!response.ok) {
     const detail = (await response.text()).trim();
     throw new Error(`registry returned ${response.status} for ${url.pathname}${detail ? `: ${detail}` : ""}`);
   }
   return response.json() as Promise<T>;
+}
+
+async function fetchRegistryJson(url: URL) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), REGISTRY_REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(url, {
+      cache: "no-store",
+      headers: { accept: "application/json", "cache-control": "no-cache" },
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw new Error(`registry request timed out after ${REGISTRY_REQUEST_TIMEOUT_MS}ms for ${url.pathname}`);
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === "AbortError";
 }
 
 function resolveRegistryAssetUrl(url?: string | null) {

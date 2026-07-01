@@ -3,6 +3,7 @@ use serde_json::Value;
 use std::env;
 use std::fs;
 use std::path::PathBuf;
+use std::time::Duration;
 
 pub(crate) const DEFAULT_CATALOG_PAGE_LIMIT: u32 = 12;
 pub(crate) const MAX_CATALOG_PAGE_LIMIT: u32 = 60;
@@ -13,9 +14,13 @@ pub(crate) const MAX_ACCOUNT_PAGE_LIMIT: u32 = 60;
 
 const DEFAULT_REGISTRY_URL: &str = "https://registry.opendock.app";
 const MAX_REGISTRY_ASSET_BYTES: usize = 2 * 1024 * 1024;
+#[cfg(not(test))]
+const REGISTRY_REQUEST_TIMEOUT: Duration = Duration::from_secs(20);
+#[cfg(test)]
+const REGISTRY_REQUEST_TIMEOUT: Duration = Duration::from_millis(100);
 
 pub(crate) async fn request_registry_json(url: reqwest::Url) -> Result<Value, String> {
-    let response = reqwest::Client::new()
+    let response = registry_client()?
         .get(url.clone())
         .header(reqwest::header::ACCEPT, "application/json")
         .header(reqwest::header::CACHE_CONTROL, "no-cache, no-store")
@@ -31,7 +36,7 @@ pub(crate) async fn request_registry_json_with_auth(
     url: reqwest::Url,
     token: &str,
 ) -> Result<Value, String> {
-    let response = reqwest::Client::new()
+    let response = registry_client()?
         .request(method, url.clone())
         .bearer_auth(token)
         .header(reqwest::header::ACCEPT, "application/json")
@@ -49,7 +54,7 @@ pub(crate) async fn request_registry_json_with_auth_body(
     token: &str,
     body: Value,
 ) -> Result<Value, String> {
-    let response = reqwest::Client::new()
+    let response = registry_client()?
         .request(method, url.clone())
         .bearer_auth(token)
         .header(reqwest::header::ACCEPT, "application/json")
@@ -60,6 +65,13 @@ pub(crate) async fn request_registry_json_with_auth_body(
         .await
         .map_err(|error| format!("failed to request registry: {error}"))?;
     parse_registry_json_response(response, &url).await
+}
+
+fn registry_client() -> Result<reqwest::Client, String> {
+    reqwest::Client::builder()
+        .timeout(REGISTRY_REQUEST_TIMEOUT)
+        .build()
+        .map_err(|error| format!("failed to create registry client: {error}"))
 }
 
 async fn parse_registry_json_response(
@@ -136,7 +148,7 @@ fn cli_data_dir() -> Result<PathBuf, String> {
 
 pub(crate) async fn registry_asset_data_url(value: &str) -> Result<String, String> {
     let url = validate_registry_asset_url(value)?;
-    let response = reqwest::Client::new()
+    let response = registry_client()?
         .get(url.clone())
         .header(reqwest::header::ACCEPT, "image/*")
         .header(reqwest::header::CACHE_CONTROL, "no-cache, no-store")
@@ -265,6 +277,32 @@ mod tests {
         assert_eq!(
             result.expect_err("oversized asset"),
             "registry asset is too large"
+        );
+    }
+
+    #[test]
+    fn registry_json_request_times_out_when_server_does_not_respond() {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind test server");
+        let address = listener.local_addr().expect("test server address");
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("accept request");
+            let mut request = [0; 1024];
+            let _ = std::io::Read::read(&mut stream, &mut request);
+            std::thread::sleep(Duration::from_millis(300));
+        });
+        let url =
+            reqwest::Url::parse(&format!("http://{address}/v1/docks")).expect("test registry URL");
+
+        let started = std::time::Instant::now();
+        let result = tauri::async_runtime::block_on(request_registry_json(url));
+        let elapsed = started.elapsed();
+
+        server.join().expect("server thread");
+        let error = result.expect_err("hanging registry request should time out");
+        assert!(error.starts_with("failed to request registry:"));
+        assert!(
+            elapsed < Duration::from_millis(250),
+            "request returned after server closed instead of timing out: {elapsed:?}; {error}"
         );
     }
 }
