@@ -7,6 +7,15 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.49 - 2026-07-01
+
+### Desktop App
+
+- Sync Registry publisher verification, account display names, and account
+  avatars across catalog cards, detail pages, titlebar, and account views.
+- Strengthen desktop contract verification so Registry profile and publisher
+  metadata drift is caught before release.
+
 ## 0.1.48 - 2026-07-01
 
 ### Desktop App
