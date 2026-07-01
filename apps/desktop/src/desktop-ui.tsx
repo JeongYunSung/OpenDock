@@ -53,6 +53,15 @@ export function Pagination(props: {
   );
 }
 
+export function PanelLoadingState(props: { label: string }) {
+  return (
+    <div aria-live="polite" className="panel-loading" role="status">
+      <span aria-hidden="true" className="button-spinner" />
+      <strong>{props.label}</strong>
+    </div>
+  );
+}
+
 export function GoogleMark() {
   return (
     <svg aria-hidden="true" height="20" viewBox="0 0 48 48" width="20">

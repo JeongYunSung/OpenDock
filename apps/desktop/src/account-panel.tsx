@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { accountStatsFor, dockFromMyDock, myDockReviewGroup, myDockStatusLabel } from "./account-model";
 import { dockFullId, type Dock, type Lang, type MyDock, type MyDocksCounts, type TEXT } from "./data";
 import { DockIcon, badgeSrc } from "./display";
-import { DockMetric, Pagination, StatRow } from "./desktop-ui";
+import { DockMetric, Pagination, PanelLoadingState, StatRow } from "./desktop-ui";
 
 export const ACCOUNT_PAGE_LIMIT = 6;
 
@@ -15,10 +15,12 @@ export function AccountPanel(props: {
   lang: Lang;
   myDocks: MyDock[];
   myDocksCounts: MyDocksCounts;
+  myDocksLoading: boolean;
   myDocksPage: number;
   myDocksPageCount: number;
   myDocksTotal: number;
   myStarredDocks: Dock[];
+  myStarsLoading: boolean;
   nickname: string;
   profileSaving: boolean;
   onBack: () => void;
@@ -117,7 +119,9 @@ export function AccountPanel(props: {
           {accountTab === "docks" ? (
             <section className="account-list-panel">
               <div className="account-range">{myDocksStart}-{myDocksEnd} / {props.myDocksTotal}</div>
-              {props.myDocks.length > 0 ? (
+              {props.myDocksLoading ? (
+                <PanelLoadingState label={props.t.loadingMyDocks} />
+              ) : props.myDocks.length > 0 ? (
                 <div className="starred-dock-list">
                   {props.myDocks.map((dock) => (
                     <button key={dock.id} onClick={() => props.onOpenDetail(dock.id)} type="button">
@@ -147,7 +151,9 @@ export function AccountPanel(props: {
           {accountTab === "stars" ? (
             <section className="account-list-panel">
               <div className="account-range">{starredStart}-{starredEnd} / {props.myStarredDocks.length}</div>
-              {props.myStarredDocks.length > 0 ? (
+              {props.myStarsLoading ? (
+                <PanelLoadingState label={props.t.loadingStarredDocks} />
+              ) : props.myStarredDocks.length > 0 ? (
                 <div className="starred-dock-list">
                   {props.myStarredDocks.map((dock) => (
                     <button key={dockFullId(dock)} onClick={() => props.onOpenDetail(dockFullId(dock))} type="button">

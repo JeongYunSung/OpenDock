@@ -19,7 +19,7 @@ import {
   versionStatusClass,
   versionStatusLabel,
 } from "./display";
-import { DockMetric, Pagination, StarButton } from "./desktop-ui";
+import { DockMetric, Pagination, PanelLoadingState, StarButton } from "./desktop-ui";
 import { ReadmePanel } from "./readme-panel";
 
 export function ExplorePanel(props: {
@@ -38,6 +38,7 @@ export function ExplorePanel(props: {
   starredDockIds: Record<string, boolean>;
   starUpdatingId: string;
   t: (typeof TEXT)[Lang];
+  loading: boolean;
 }) {
   const sortLabels = {
     downloads: props.t.sortDownloads,
@@ -77,7 +78,9 @@ export function ExplorePanel(props: {
           ) : null}
         </div>
       </div>
-      {props.sortedDocks.length > 0 ? (
+      {props.loading ? (
+        <PanelLoadingState label={props.t.loadingDocks} />
+      ) : props.sortedDocks.length > 0 ? (
         <>
           <div className="dock-grid">
             {props.sortedDocks.map((dock) => {

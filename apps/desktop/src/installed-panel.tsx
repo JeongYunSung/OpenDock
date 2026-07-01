@@ -2,6 +2,7 @@ import { Eye, RefreshCw, Search, Trash2 } from "lucide-react";
 import { isTaskActive, isTaskForTarget, type CommandTask } from "./command-task";
 import { dockFullId, type Dock, type Lang, type Project, type TEXT } from "./data";
 import type { InstalledDockRow } from "./dock-workspace-model";
+import { PanelLoadingState } from "./desktop-ui";
 import { DockIcon } from "./display";
 
 export function InstalledPanel(props: {
@@ -10,6 +11,7 @@ export function InstalledPanel(props: {
   installedRows: InstalledDockRow[];
   installedSearchQuery: string;
   installedTotalCount: number;
+  loading: boolean;
   onDeleteDock: (dock: Dock) => void;
   onOpenDetail: (dockId: string) => void;
   onSetInstalledSearchQuery: (query: string) => void;
@@ -47,7 +49,9 @@ export function InstalledPanel(props: {
           </div>
         ) : null}
       </div>
-      {props.installedTotalCount > 0 && props.installedRows.length > 0 ? (
+      {props.loading ? (
+        <PanelLoadingState label={props.t.loadingInstalledDocks} />
+      ) : props.installedTotalCount > 0 && props.installedRows.length > 0 ? (
         <div className="installed-table">
           <div className="installed-head">
             <span>{props.t.dock}</span>

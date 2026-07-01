@@ -33,19 +33,30 @@ interface DetailControllerOptions {
 export function useCatalogController(options: CatalogControllerOptions) {
   const [catalogDocks, setCatalogDocks] = useState<Dock[]>([]);
   const [catalogTotal, setCatalogTotal] = useState(0);
+  const [loadedCatalogRequestKey, setLoadedCatalogRequestKey] = useState<string | null>(null);
+  const [failedCatalogRequestKey, setFailedCatalogRequestKey] = useState<string | null>(null);
+  const [pendingCatalogRequestKey, setPendingCatalogRequestKey] = useState<string | null>(null);
   const currentCatalogRequestKey = catalogRequestKey(options);
   const currentCatalogRequestKeyRef = useRef(currentCatalogRequestKey);
   const loadedCatalogRequestKeyRef = useRef<string | null>(null);
   currentCatalogRequestKeyRef.current = currentCatalogRequestKey;
+  const catalogLoading =
+    pendingCatalogRequestKey === currentCatalogRequestKey ||
+    (loadedCatalogRequestKey !== currentCatalogRequestKey && failedCatalogRequestKey !== currentCatalogRequestKey);
 
   useEffect(() => {
     let cancelled = false;
     const requestKey = currentCatalogRequestKey;
+    setPendingCatalogRequestKey(requestKey);
+    setFailedCatalogRequestKey((current) => (current === requestKey ? null : current));
     void requestCatalog(options.sortMode, options.searchQuery, options.catalogPage, options.catalogPageSize)
       .then((response) => {
         if (cancelled || currentCatalogRequestKeyRef.current !== requestKey) return;
         const nextDocks = response.items.map((item, index) => normalizeRegistryDock(item, index));
         loadedCatalogRequestKeyRef.current = requestKey;
+        setLoadedCatalogRequestKey(requestKey);
+        setFailedCatalogRequestKey(null);
+        setPendingCatalogRequestKey(null);
         setCatalogDocks(nextDocks);
         setCatalogTotal(response.total ?? nextDocks.length);
       })
@@ -53,6 +64,8 @@ export function useCatalogController(options: CatalogControllerOptions) {
         if (!cancelled) {
           if (currentCatalogRequestKeyRef.current !== requestKey) return;
           const message = error instanceof Error ? error.message : String(error);
+          setFailedCatalogRequestKey(requestKey);
+          setPendingCatalogRequestKey(null);
           if (loadedCatalogRequestKeyRef.current !== requestKey) {
             setCatalogDocks([]);
             setCatalogTotal(0);
@@ -67,17 +80,24 @@ export function useCatalogController(options: CatalogControllerOptions) {
 
   async function refreshCatalogFromRegistry() {
     const requestKey = currentCatalogRequestKey;
+    setPendingCatalogRequestKey(requestKey);
+    setFailedCatalogRequestKey((current) => (current === requestKey ? null : current));
     try {
       const response = await requestCatalog(options.sortMode, options.searchQuery, options.catalogPage, options.catalogPageSize);
       if (currentCatalogRequestKeyRef.current !== requestKey) return;
       const nextDocks = response.items.map((item, index) => normalizeRegistryDock(item, index));
       loadedCatalogRequestKeyRef.current = requestKey;
+      setLoadedCatalogRequestKey(requestKey);
+      setFailedCatalogRequestKey(null);
+      setPendingCatalogRequestKey(null);
       setCatalogDocks(nextDocks);
       setCatalogTotal(response.total ?? nextDocks.length);
       options.appendLog("OK", "var(--success)", "registry refreshed · registry.opendock.app");
     } catch (error) {
       if (currentCatalogRequestKeyRef.current !== requestKey) return;
       const message = error instanceof Error ? error.message : String(error);
+      setFailedCatalogRequestKey(requestKey);
+      setPendingCatalogRequestKey(null);
       if (loadedCatalogRequestKeyRef.current !== requestKey) {
         setCatalogDocks([]);
         setCatalogTotal(0);
@@ -88,6 +108,7 @@ export function useCatalogController(options: CatalogControllerOptions) {
 
   return {
     catalogDocks,
+    catalogLoading,
     catalogTotal,
     refreshCatalogFromRegistry,
     setCatalogDocks,
@@ -106,27 +127,46 @@ function catalogRequestKey(options: CatalogControllerOptions) {
 export function useDockDetailController(options: DetailControllerOptions) {
   const [dockDetails, setDockDetails] = useState<Record<string, Dock>>({});
   const [versionTotal, setVersionTotal] = useState(0);
+  const [loadedDetailRequestKey, setLoadedDetailRequestKey] = useState<string | null>(null);
+  const [failedDetailRequestKey, setFailedDetailRequestKey] = useState<string | null>(null);
+  const [pendingDetailRequestKey, setPendingDetailRequestKey] = useState<string | null>(null);
+  const currentDetailRequestKey = detailRequestKey(options);
+  const currentDetailRequestKeyRef = useRef(currentDetailRequestKey);
   const activeDetailKeyRef = useRef(options.dockView === "detail" ? options.detailKey : "");
+  currentDetailRequestKeyRef.current = currentDetailRequestKey;
   activeDetailKeyRef.current = options.dockView === "detail" ? options.detailKey : "";
+  const detailLoading = Boolean(
+    currentDetailRequestKey &&
+      (pendingDetailRequestKey === currentDetailRequestKey ||
+        (loadedDetailRequestKey !== currentDetailRequestKey && failedDetailRequestKey !== currentDetailRequestKey)),
+  );
 
   useEffect(() => {
     if (!options.baseDetail || options.dockView !== "detail") return;
     let cancelled = false;
+    const requestKey = currentDetailRequestKey;
+    setPendingDetailRequestKey(requestKey);
+    setFailedDetailRequestKey((current) => (current === requestKey ? null : current));
     const load = async () => {
       try {
         const [detailResponse, versionsResponse] = await Promise.all([
           requestDockDetail(dockFullId(options.baseDetail!)),
           requestDockVersions(dockFullId(options.baseDetail!), options.versionPage, options.versionPageSize),
         ]);
-        if (cancelled) return;
+        if (cancelled || currentDetailRequestKeyRef.current !== requestKey) return;
         const versions = normalizeRegistryVersions(versionsResponse);
         setVersionTotal(versionsResponse.total ?? versions.length);
+        setLoadedDetailRequestKey(requestKey);
+        setFailedDetailRequestKey(null);
+        setPendingDetailRequestKey(null);
         setDockDetails((current) => ({
           ...current,
           [options.detailKey]: mergeRegistryDockDetail(options.baseDetail!, detailResponse, versions),
         }));
       } catch (error) {
-        if (!cancelled) {
+        if (!cancelled && currentDetailRequestKeyRef.current === requestKey) {
+          setFailedDetailRequestKey(requestKey);
+          setPendingDetailRequestKey(null);
           options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
         }
       }
@@ -160,10 +200,20 @@ export function useDockDetailController(options: DetailControllerOptions) {
   }
 
   return {
+    detailLoading,
     dockDetails,
     refreshDockDetail,
     setDockDetails,
     setVersionTotal,
     versionTotal,
   };
+}
+
+function detailRequestKey(options: DetailControllerOptions) {
+  if (!options.baseDetail || options.dockView !== "detail" || !options.detailKey) return "";
+  return JSON.stringify({
+    dock: options.detailKey,
+    limit: options.versionPageSize,
+    page: options.versionPage,
+  });
 }

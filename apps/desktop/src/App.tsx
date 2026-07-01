@@ -95,6 +95,7 @@ export function App() {
   const versionPageSize = responsivePageSizes.versions;
   const {
     catalogDocks,
+    catalogLoading,
     catalogTotal,
     refreshCatalogFromRegistry,
     setCatalogDocks,
@@ -189,6 +190,7 @@ export function App() {
     sortMode,
   });
   const {
+    detailLoading,
     dockDetails,
     refreshDockDetail,
     setDockDetails,
@@ -216,9 +218,11 @@ export function App() {
   const {
     myDocks,
     myDocksCounts,
+    myDocksLoading,
     myDocksPage,
     myDocksTotal,
     myStarredDocks,
+    myStarsLoading,
     resetAccountDocks,
     setMyDocksPage,
     starredDockIds,
@@ -575,11 +579,14 @@ export function App() {
             activeProject={activeProject}
             catalogPage={catalogPage}
             catalogPageCount={catalogPageCount}
+            catalogLoading={catalogLoading}
             detail={detail}
+            detailLoading={detailLoading}
             detailTab={detailTab}
             detailVersion={selectedDetailVersion}
             dockView={dockView}
             installedDocks={activeInstalledDocks}
+            installedLoading={isTauriRuntime() && !projectStateLoaded}
             installedRows={filteredInstalledRows}
             installedSearchQuery={installedSearchQuery}
             installedTotalCount={installedRows.length}
@@ -587,10 +594,12 @@ export function App() {
             logs={logs}
             myDocks={myDocks}
             myDocksCounts={myDocksCounts}
+            myDocksLoading={myDocksLoading}
             myDocksPage={myDocksPage}
             myDocksPageCount={myDocksPageCount}
             myDocksTotal={myDocksTotal}
             myStarredDocks={myStarredDocks}
+            myStarsLoading={myStarsLoading}
             accountAvatarUrl={accountAvatarUrl}
             accountDisplayName={accountDisplayName}
             nickname={nickname}

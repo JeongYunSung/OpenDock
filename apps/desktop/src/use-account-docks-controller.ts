@@ -34,6 +34,8 @@ export function useAccountDocksController(options: AccountDocksControllerOptions
   const [myDocksTotal, setMyDocksTotal] = useState(0);
   const [myDocksCounts, setMyDocksCounts] = useState<MyDocksCounts>(() => emptyMyDocksCounts());
   const [myStarredDocks, setMyStarredDocks] = useState<Dock[]>([]);
+  const [myDocksLoading, setMyDocksLoading] = useState(false);
+  const [myStarsLoading, setMyStarsLoading] = useState(false);
   const loggedInRef = useRef(options.loggedIn);
   const myDocksRequestRef = useRef(0);
   const myStarsRequestRef = useRef(0);
@@ -84,6 +86,7 @@ export function useAccountDocksController(options: AccountDocksControllerOptions
 
   async function refreshMyStars() {
     const requestId = ++myStarsRequestRef.current;
+    setMyStarsLoading(true);
     try {
       const response = await requestMyStars();
       if (!isCurrentAccountRequest(loggedInRef, myStarsRequestRef, requestId)) return;
@@ -96,11 +99,14 @@ export function useAccountDocksController(options: AccountDocksControllerOptions
     } catch (error) {
       if (!isCurrentAccountRequest(loggedInRef, myStarsRequestRef, requestId)) return;
       options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
+    } finally {
+      if (isCurrentAccountRequest(loggedInRef, myStarsRequestRef, requestId)) setMyStarsLoading(false);
     }
   }
 
   async function refreshMyDocks(page: number) {
     const requestId = ++myDocksRequestRef.current;
+    setMyDocksLoading(true);
     try {
       const response = await requestMyDocks(page, options.pageSize);
       if (!isCurrentAccountRequest(loggedInRef, myDocksRequestRef, requestId)) return;
@@ -111,6 +117,8 @@ export function useAccountDocksController(options: AccountDocksControllerOptions
     } catch (error) {
       if (!isCurrentAccountRequest(loggedInRef, myDocksRequestRef, requestId)) return;
       options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
+    } finally {
+      if (isCurrentAccountRequest(loggedInRef, myDocksRequestRef, requestId)) setMyDocksLoading(false);
     }
   }
 
@@ -160,14 +168,18 @@ export function useAccountDocksController(options: AccountDocksControllerOptions
     setMyDocksTotal(0);
     setMyDocksCounts(emptyMyDocksCounts());
     setMyStarredDocks([]);
+    setMyDocksLoading(false);
+    setMyStarsLoading(false);
   }
 
   return {
     myDocks,
     myDocksCounts,
+    myDocksLoading,
     myDocksPage,
     myDocksTotal,
     myStarredDocks,
+    myStarsLoading,
     resetAccountDocks,
     setMyDocksPage,
     starredDockIds,

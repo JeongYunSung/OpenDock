@@ -14,6 +14,7 @@ import type {
 } from "./data";
 import { CatalogEmptyState, DetailPanel, ExplorePanel } from "./dock-panels";
 import type { InstalledDockRow } from "./dock-workspace-model";
+import { PanelLoadingState } from "./desktop-ui";
 import { InstalledPanel } from "./installed-panel";
 import { LogsPanel } from "./logs-panel";
 import type { ShortcutBinding, ShortcutCommandId, ShortcutPlatform } from "./shortcuts";
@@ -36,6 +37,9 @@ export function Workspace(props: {
   detailVersion: DockVersion | null;
   dockView: DockView;
   installedDocks: Record<string, boolean>;
+  catalogLoading: boolean;
+  detailLoading: boolean;
+  installedLoading: boolean;
   installedRows: InstalledDockRow[];
   installedSearchQuery: string;
   installedTotalCount: number;
@@ -43,10 +47,12 @@ export function Workspace(props: {
   logs: AppLog[];
   myDocks: MyDock[];
   myDocksCounts: MyDocksCounts;
+  myDocksLoading: boolean;
   myDocksPage: number;
   myDocksPageCount: number;
   myDocksTotal: number;
   myStarredDocks: Dock[];
+  myStarsLoading: boolean;
   nickname: string;
   profileSaving: boolean;
   onAddExisting: () => void;
@@ -131,11 +137,11 @@ export function Workspace(props: {
           </nav>
         ) : null}
 
-        {props.dockView === "list" ? <ExplorePanel {...props} /> : null}
+        {props.dockView === "list" ? <ExplorePanel {...props} loading={props.catalogLoading} /> : null}
         {props.dockView === "detail" ? (
-          props.detail ? <DetailPanel {...props} detail={props.detail} /> : <CatalogEmptyState t={props.t} />
+          props.detailLoading ? <PanelLoadingState label={props.t.loadingDockDetail} /> : props.detail ? <DetailPanel {...props} detail={props.detail} /> : <CatalogEmptyState t={props.t} />
         ) : null}
-        {props.dockView === "installed" ? <InstalledPanel {...props} /> : null}
+        {props.dockView === "installed" ? <InstalledPanel {...props} loading={props.installedLoading} /> : null}
         {props.dockView === "logs" ? <LogsPanel activeProject={props.activeProject} logs={props.logs} t={props.t} /> : null}
         {props.dockView === "account" ? (
           <AccountPanel
@@ -146,10 +152,12 @@ export function Workspace(props: {
             lang={props.lang}
             myDocks={props.myDocks}
             myDocksCounts={props.myDocksCounts}
+            myDocksLoading={props.myDocksLoading}
             myDocksPage={props.myDocksPage}
             myDocksPageCount={props.myDocksPageCount}
             myDocksTotal={props.myDocksTotal}
             myStarredDocks={props.myStarredDocks}
+            myStarsLoading={props.myStarsLoading}
             nickname={props.nickname}
             profileSaving={props.profileSaving}
             onBack={props.onBack}
