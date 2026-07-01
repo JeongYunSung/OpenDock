@@ -7,6 +7,18 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.55 - 2026-07-01
+
+### CLI
+
+- Keep large dock command result payloads out of live event output while still
+  recording the full result for project logs and desktop follow-up reads.
+
+### Desktop App
+
+- Read oversized command results from their stored output file so install,
+  update, and uninstall summaries stay reliable for large docks.
+
 ## 0.1.54 - 2026-07-01
 
 ### Desktop App
