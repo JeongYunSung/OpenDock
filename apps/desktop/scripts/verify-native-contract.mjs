@@ -325,6 +325,11 @@ const appUsesSingleInstance =
   rust.includes('app.get_webview_window("main")') &&
   rust.includes("window.unminimize()") &&
   rust.includes("window.set_focus()");
+const appFocusesMainWindowOnStartup =
+  rust.includes(".setup(|app|") &&
+  rust.includes("focus_existing_main_window(app.handle())");
+const macosInactiveWindowClicksReachWebview =
+  tauriConfig.app?.windows?.some((window) => window.acceptFirstMouse === true) === true;
 
 const failures = [
   ...unhandledMenuIds.map((id) => `menu id is not handled in the navigation controller: ${id}`),
@@ -444,6 +449,12 @@ const failures = [
     ? ["app update must stop running OpenDock sidecars before invoking the Windows installer"]
     : []),
   ...(!appUsesSingleInstance ? ["desktop app must enforce a single process instance and refocus the main window"] : []),
+  ...(!appFocusesMainWindowOnStartup
+    ? ["desktop app must focus the main window on startup so updater restarts do not require an activation click"]
+    : []),
+  ...(!macosInactiveWindowClicksReachWebview
+    ? ["macOS window must set acceptFirstMouse so the first inactive-window click reaches the webview"]
+    : []),
   ...(forbiddenTitlebarDragCss
     ? ["CSS app-region drag is forbidden; use data-tauri-drag-region on the dedicated drag target instead"]
     : [])

@@ -442,6 +442,10 @@ pub fn run() {
         }))
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(RunningCommands::default())
+        .setup(|app| {
+            focus_existing_main_window(app.handle());
+            Ok(())
+        })
         .menu(build_app_menu)
         .on_menu_event(|app, event| {
             let id = event.id().as_ref();

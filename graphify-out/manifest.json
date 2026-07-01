@@ -1,7 +1,7 @@
 {
   "apps/desktop/package.json": {
-    "mtime": 1782884135.565738,
-    "ast_hash": "3482dabc413193197550647306f3d37b",
+    "mtime": 1782889360.2781737,
+    "ast_hash": "24a2300bbff5bcc2fb37c0b1097eee7f",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/browser-test-runtime.mjs": {
@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-native-contract.mjs": {
-    "mtime": 1782887132.5894713,
-    "ast_hash": "df6b835e34542a443c72a51299156a81",
+    "mtime": 1782891050.2819674,
+    "ast_hash": "e1ce88e970b832c774ee6853324f970a",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-od-assertions.mjs": {
@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/lib.rs": {
-    "mtime": 1782869997.5018866,
-    "ast_hash": "e9f3d6c870accff60dfe9ba0d2d3e26b",
+    "mtime": 1782891019.079575,
+    "ast_hash": "a5d8ebcd2bf3085db57ee1536d1ec86a",
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/main.rs": {
@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/tauri.conf.json": {
-    "mtime": 1782884135.5658891,
-    "ast_hash": "3081ad92702e656c31254447f88b6760",
+    "mtime": 1782891008.763209,
+    "ast_hash": "68c824621281157f0b89d5029ada9f61",
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "packages/cli/package.json": {
-    "mtime": 1782884135.5653477,
-    "ast_hash": "2d84eed6b73e0eb7fab5ddfbf62f81b6",
+    "mtime": 1782889360.2777696,
+    "ast_hash": "aa92a8904c870d6dc26393df40cef0b0",
     "semantic_hash": ""
   },
   "packages/cli/scripts/build.ts": {
@@ -505,8 +505,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/constants.ts": {
-    "mtime": 1782884135.565549,
-    "ast_hash": "0968b074ac8775b63895fd41bf7eef96",
+    "mtime": 1782889360.2779808,
+    "ast_hash": "47f51328758f7a93b4c88d4e23996b1c",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-install-report.ts": {
@@ -740,8 +740,8 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1782884135.5647683,
-    "ast_hash": "8aae6912604f6d242e839ddffade1ed6",
+    "mtime": 1782889360.2772822,
+    "ast_hash": "14f6ceed5ac4def3425d8e61553d7aa3",
     "semantic_hash": ""
   },
   "README.md": {
