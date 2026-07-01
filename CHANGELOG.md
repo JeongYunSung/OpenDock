@@ -7,6 +7,14 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.57 - 2026-07-02
+
+### Desktop App
+
+- Keep views gated while catalog, account, project, and installed dock data are
+  loading so partial state does not flash on screen.
+- Show full log timestamps and keep long log lines easier to inspect.
+
 ## 0.1.56 - 2026-07-01
 
 ### Desktop App
