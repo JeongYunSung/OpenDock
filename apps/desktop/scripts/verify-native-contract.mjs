@@ -176,6 +176,14 @@ const desktopAccountProfileSyncsWithRegistry =
   accountPanel.includes("const showAvatar = Boolean(props.accountAvatarUrl && !avatarFailed)") &&
   accountPanel.includes("<strong>{profileName}</strong>") &&
   !accountPanel.includes("<strong>opendock</strong>");
+const titlebarAvatarContentIsCentered =
+  styles.includes(".avatar-button") &&
+  styles.includes("flex: 0 0 28px;") &&
+  styles.includes("padding: 0;") &&
+  styles.includes("line-height: 1;") &&
+  styles.includes(".avatar-button img") &&
+  styles.includes("display: block;") &&
+  styles.includes("object-position: center;");
 const dockIconUsesOpenDockLogoFallback =
   display.includes("const imageUrl = hasRegistryLogo ? logoUrl : logoSrc") &&
   display.includes('"fallback-logo"') &&
@@ -359,6 +367,9 @@ const failures = [
     : []),
   ...(!desktopAccountProfileSyncsWithRegistry
     ? ["desktop account profile must load and save nickname through registry profile APIs"]
+    : []),
+  ...(!titlebarAvatarContentIsCentered
+    ? ["titlebar account avatar must remove button padding and center avatar content"]
     : []),
   ...(!dockIconUsesOpenDockLogoFallback
     ? ["dock icons must use the OpenDock logo while registry logos are loading or unavailable"]

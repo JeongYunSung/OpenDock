@@ -524,25 +524,34 @@ input:focus-visible,
 }
 
 .avatar-button {
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  flex: 0 0 28px;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   width: 28px;
   height: 28px;
+  padding: 0;
   border: 1px solid var(--accent-border);
   border-radius: 999px;
   color: var(--accent);
   background: var(--accent-soft);
+  appearance: none;
   cursor: pointer;
   font-weight: 800;
   font-size: 12px;
+  line-height: 1;
+  text-align: center;
 }
 
 .avatar-button img {
+  display: block;
+  flex: 0 0 100%;
   width: 100%;
   height: 100%;
   border-radius: inherit;
   object-fit: cover;
+  object-position: center;
 }
 
 .theme-switch {
