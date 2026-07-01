@@ -7,6 +7,22 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.53 - 2026-07-01
+
+### Desktop App
+
+- Keep the installed docks list visible when a project refresh temporarily
+  fails, instead of clearing the current workspace state.
+- Keep the catalog list visible when a Registry refresh temporarily fails for
+  the same search and paging request.
+
+## 0.1.52 - 2026-07-01
+
+### Desktop App
+
+- Keep clicks responsive after the desktop update restart flow hands control
+  back to the app.
+
 ## 0.1.51 - 2026-07-01
 
 ### Desktop App
