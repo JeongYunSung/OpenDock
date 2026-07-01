@@ -135,8 +135,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/account-panel.tsx": {
-    "mtime": 1782919166.2458177,
-    "ast_hash": "c03e47a739ca578e89ab32ee1aa19b9f",
+    "mtime": 1782922261.634017,
+    "ast_hash": "06e8f659711ff913c9182d5c414857f5",
     "semantic_hash": ""
   },
   "apps/desktop/src/app-dialogs.tsx": {
@@ -185,8 +185,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/desktop-ui.tsx": {
-    "mtime": 1782919166.242875,
-    "ast_hash": "e4979b8eab3d9cf3e5833afdef21961e",
+    "mtime": 1782922208.7492554,
+    "ast_hash": "ce969af27a446454a0548d461e5d38fa",
     "semantic_hash": ""
   },
   "apps/desktop/src/display.tsx": {
@@ -200,8 +200,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/dock-panels.tsx": {
-    "mtime": 1782919166.2441974,
-    "ast_hash": "e9bd0e6697ff89f10c50091dd2539106",
+    "mtime": 1782922231.03283,
+    "ast_hash": "6b9b85b1989a1682b930f8324c65b77c",
     "semantic_hash": ""
   },
   "apps/desktop/src/dock-workspace-model.ts": {
@@ -210,8 +210,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/installed-panel.tsx": {
-    "mtime": 1782919166.244582,
-    "ast_hash": "c79a3ad3302e36fb895f9fce930da9da",
+    "mtime": 1782922245.4883754,
+    "ast_hash": "c255d17e69d3c7e2ad94f3d488f275fa",
     "semantic_hash": ""
   },
   "apps/desktop/src/keyboard-events.ts": {
@@ -370,8 +370,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/workspace-view.tsx": {
-    "mtime": 1782919198.7291653,
-    "ast_hash": "a56e4e33ab01049466825bb2ed958b81",
+    "mtime": 1782922271.1678123,
+    "ast_hash": "7058563465eb37d93dad28f09e3c5727",
     "semantic_hash": ""
   },
   "apps/desktop/tsconfig.json": {
