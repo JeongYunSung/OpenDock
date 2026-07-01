@@ -110,8 +110,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/registry.rs": {
-    "mtime": 1782869978.5383048,
-    "ast_hash": "f5b905e2c8ffa7bc0ce1181455b6ac58",
+    "mtime": 1782924138.5999002,
+    "ast_hash": "4de56261ad1f36e96679afc88ccdc2b4",
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/shortcut_files.rs": {
@@ -250,8 +250,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/registry-client.ts": {
-    "mtime": 1782881022.0145113,
-    "ast_hash": "680d3f3e76f51aaa3445ea904b7199ca",
+    "mtime": 1782924077.0434904,
+    "ast_hash": "9767cdcf9155aea8c621dd24d8d48d2e",
     "semantic_hash": ""
   },
   "apps/desktop/src/responsive-page-size.ts": {
