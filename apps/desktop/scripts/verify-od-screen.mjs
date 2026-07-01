@@ -94,6 +94,7 @@ async function runViewportFlow(viewport) {
     await assertNoHorizontalOverflow(page, "workspace list", viewport);
     await assertSidebarToggle(page);
     await assertSortMenu(page);
+    await assertDockTabsSwitchWithMenuOverlay(page);
     await assertCommandPaletteEscapeClosesWithoutInputFocus(page);
 
     const catalogStatusCount = await page.locator(".catalog-status").count();
@@ -407,6 +408,19 @@ async function runViewportFlow(viewport) {
   } finally {
     await context.close();
   }
+}
+
+async function assertDockTabsSwitchWithMenuOverlay(page) {
+  await page.locator(".sort-button").click();
+  await assertVisible(page.locator(".sort-menu"), "sort menu before dock tab switch");
+  await page.getByRole("button", { name: "설치됨" }).click({ timeout: 1000 });
+  await assertVisible(page.locator(".installed-panel"), "installed panel after one tab click with menu overlay open");
+  const sortMenuVisible = await page.locator(".sort-menu").isVisible().catch(() => false);
+  if (sortMenuVisible) {
+    throw new Error("dock tab switch should close the open sort menu");
+  }
+  await page.getByRole("button", { name: "탐색" }).click();
+  await assertWorkspaceList(page);
 }
 
 async function assertWindowsAppMenuFlyoutDoesNotOverlap(viewport) {

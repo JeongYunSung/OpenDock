@@ -1082,6 +1082,8 @@ input:focus-visible,
 }
 
 .dock-tabs {
+  position: relative;
+  z-index: 31;
   display: flex;
   gap: 24px;
   padding: 14px 26px 0;
