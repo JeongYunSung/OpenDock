@@ -116,6 +116,13 @@ const desktopCatalogUsesLiveRegistry =
     dockData.includes("export function normalizeRegistryDock")) &&
   !data.includes("export const DOCKS") &&
   !data.includes("DOCKS.find");
+const catalogRefreshPreservesSameRequestOnFailure =
+  catalogController.includes("const loadedCatalogRequestKeyRef = useRef<string | null>(null)") &&
+  catalogController.includes("const requestKey = catalogRequestKey(options)") &&
+  catalogController.includes("loadedCatalogRequestKeyRef.current = requestKey") &&
+  catalogController.includes("if (loadedCatalogRequestKeyRef.current !== requestKey)") &&
+  catalogController.includes("function catalogRequestKey(options: CatalogControllerOptions)") &&
+  catalogController.includes("query: options.searchQuery.trim()");
 const desktopCatalogUsesResponsivePaging =
   app.includes('import { useResponsivePageSizes } from "./responsive-page-size"') &&
   responsivePageSize.includes("function catalogPageLimitForViewport") &&
@@ -364,6 +371,9 @@ const failures = [
     : []),
   ...(!desktopCatalogUsesLiveRegistry
     ? ["desktop catalog must use live registry responses instead of static dock fixtures"]
+    : []),
+  ...(!catalogRefreshPreservesSameRequestOnFailure
+    ? ["catalog refresh failures must preserve the current request's loaded docks"]
     : []),
   ...(!desktopCatalogUsesResponsivePaging
     ? ["desktop catalog must send responsive page/limit values to registry"]

@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import {
   dockFullId,
   mergeRegistryDockDetail,
@@ -33,21 +33,26 @@ interface DetailControllerOptions {
 export function useCatalogController(options: CatalogControllerOptions) {
   const [catalogDocks, setCatalogDocks] = useState<Dock[]>([]);
   const [catalogTotal, setCatalogTotal] = useState(0);
+  const loadedCatalogRequestKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    const requestKey = catalogRequestKey(options);
     void requestCatalog(options.sortMode, options.searchQuery, options.catalogPage, options.catalogPageSize)
       .then((response) => {
         if (cancelled) return;
         const nextDocks = response.items.map((item, index) => normalizeRegistryDock(item, index));
+        loadedCatalogRequestKeyRef.current = requestKey;
         setCatalogDocks(nextDocks);
         setCatalogTotal(response.total ?? nextDocks.length);
       })
       .catch((error) => {
         if (!cancelled) {
           const message = error instanceof Error ? error.message : String(error);
-          setCatalogDocks([]);
-          setCatalogTotal(0);
+          if (loadedCatalogRequestKeyRef.current !== requestKey) {
+            setCatalogDocks([]);
+            setCatalogTotal(0);
+          }
           options.appendLog("WARN", "var(--warning)", message);
         }
       });
@@ -57,16 +62,20 @@ export function useCatalogController(options: CatalogControllerOptions) {
   }, [options.searchQuery, options.sortMode, options.catalogPage, options.catalogPageSize]);
 
   async function refreshCatalogFromRegistry() {
+    const requestKey = catalogRequestKey(options);
     try {
       const response = await requestCatalog(options.sortMode, options.searchQuery, options.catalogPage, options.catalogPageSize);
       const nextDocks = response.items.map((item, index) => normalizeRegistryDock(item, index));
+      loadedCatalogRequestKeyRef.current = requestKey;
       setCatalogDocks(nextDocks);
       setCatalogTotal(response.total ?? nextDocks.length);
       options.appendLog("OK", "var(--success)", "registry refreshed · registry.opendock.app");
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      setCatalogDocks([]);
-      setCatalogTotal(0);
+      if (loadedCatalogRequestKeyRef.current !== requestKey) {
+        setCatalogDocks([]);
+        setCatalogTotal(0);
+      }
       options.appendLog("WARN", "var(--warning)", message);
     }
   }
@@ -77,6 +86,15 @@ export function useCatalogController(options: CatalogControllerOptions) {
     refreshCatalogFromRegistry,
     setCatalogDocks,
   };
+}
+
+function catalogRequestKey(options: CatalogControllerOptions) {
+  return JSON.stringify({
+    limit: options.catalogPageSize,
+    page: options.catalogPage,
+    query: options.searchQuery.trim(),
+    sort: options.sortMode,
+  });
 }
 
 export function useDockDetailController(options: DetailControllerOptions) {
