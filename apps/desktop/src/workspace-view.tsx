@@ -25,6 +25,7 @@ export { ACCOUNT_PAGE_LIMIT };
 export function Workspace(props: {
   activeProject: Project;
   accountEmail: string;
+  accountOfficial: boolean;
   catalogPage: number;
   catalogPageCount: number;
   commandTask: CommandTask | null;
@@ -138,6 +139,7 @@ export function Workspace(props: {
         {props.dockView === "account" ? (
           <AccountPanel
             accountEmail={props.accountEmail}
+            accountOfficial={props.accountOfficial}
             lang={props.lang}
             myDocks={props.myDocks}
             myDocksCounts={props.myDocksCounts}

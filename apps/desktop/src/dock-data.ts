@@ -11,7 +11,17 @@ import type {
 import { platformLabel } from "./platform-label";
 
 export function dockFullId(dock: Pick<Dock, "id" | "fullId" | "owner">) {
-  return dock.fullId ?? `${dock.owner ?? "opendock"}/${dock.id}`;
+  if (dock.fullId) return dock.fullId;
+  return dock.owner ? `${dock.owner}/${dock.id}` : dock.id;
+}
+
+export function dockOwnerFromId(id?: string | null) {
+  if (!id?.includes("/")) return undefined;
+  return id.split("/")[0] || undefined;
+}
+
+export function dockPublisherLabel(dock: Pick<Dock, "id" | "fullId" | "owner" | "publisher">) {
+  return dock.publisher ?? dock.owner ?? dockOwnerFromId(dock.fullId) ?? dockOwnerFromId(dock.id);
 }
 
 function dockShortId(id: string) {
@@ -165,11 +175,12 @@ function versionStatusPriority(status?: string) {
 
 export function dockFromInstalledRecord(record: InstalledDockRecord, fallbackIndex = 0): Dock {
   const short = dockShortId(record.id);
+  const owner = dockOwnerFromId(record.id);
   return {
     id: short,
     short,
     fullId: record.id,
-    owner: record.id.split("/")[0] || "opendock",
+    owner,
     name: short,
     gradient: dockGradient(fallbackIndex),
     desc: record.name ?? `${record.id}@${record.version}`,
@@ -185,8 +196,8 @@ export function dockFromInstalledRecord(record: InstalledDockRecord, fallbackInd
     checksum: record.checksum ?? "-",
     readmeTitle: record.name ?? short,
     readmeIntro: `${record.id} is installed in this workspace.`,
-    publisher: record.id.split("/")[0] || "opendock",
-    official: true,
+    publisher: owner,
+    official: false,
     platforms: record.platform ? [record.platform] : [],
     tags: [record.platform ?? "dock", "installed"],
     searchTerms: ["install"]

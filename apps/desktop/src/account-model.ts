@@ -1,4 +1,4 @@
-import { type Dock, type Lang, type MyDock, type MyDocksCounts, TEXT } from "./data";
+import { dockOwnerFromId, type Dock, type Lang, type MyDock, type MyDocksCounts, TEXT } from "./data";
 
 export type MyDockReviewGroup = "approved" | "pending" | "rejected" | "unavailable";
 
@@ -31,11 +31,12 @@ export function myDockStatusLabel(status: MyDockReviewGroup, t: (typeof TEXT)[La
 
 export function dockFromMyDock(dock: MyDock): Dock {
   const reviewGroup = myDockReviewGroup(dock);
+  const owner = dock.owner ?? dockOwnerFromId(dock.id);
   return {
     id: dock.name,
     short: dock.name,
     fullId: dock.id,
-    owner: dock.owner ?? dock.id.split("/")[0] ?? "opendock",
+    owner,
     name: dock.name,
     displayName: dock.displayName ?? dock.name,
     gradient: "linear-gradient(135deg,var(--dock-backend-a),var(--dock-backend-b) 55%,var(--dock-backend-c))",
@@ -54,7 +55,7 @@ export function dockFromMyDock(dock: MyDock): Dock {
     readmeTitle: dock.displayName ?? dock.name,
     readmeIntro: dock.summary ?? "",
     logoUrl: dock.logo?.url ?? null,
-    publisher: dock.owner ?? "opendock",
+    publisher: owner,
     official: dock.official,
     platforms: dock.versions?.map((version) => version.platform).filter(Boolean) ?? [],
     tags: [reviewGroup, dock.hidden ? "hidden" : "submitted"],

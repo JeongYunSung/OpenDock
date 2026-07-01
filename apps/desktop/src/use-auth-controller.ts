@@ -13,6 +13,7 @@ interface AuthControllerOptions {
   resetProjectDialogs: () => void;
   resetProjectRuntime: () => void;
   setAccountEmail: Dispatch<SetStateAction<string>>;
+  setAccountOfficial: Dispatch<SetStateAction<boolean>>;
   setAuthProvider: Dispatch<SetStateAction<string>>;
   setInstalledDocks: Dispatch<SetStateAction<Record<string, boolean>>>;
   setLoggedIn: Dispatch<SetStateAction<boolean>>;
@@ -63,6 +64,7 @@ export function useAuthController(options: AuthControllerOptions) {
     options.setLoggedIn(false);
     options.setAuthProvider("");
     options.setAccountEmail("");
+    options.setAccountOfficial(false);
     options.resetProjectDialogs();
     options.setProjectSidebarCollapsed(false);
     options.setInstalledDocks({});

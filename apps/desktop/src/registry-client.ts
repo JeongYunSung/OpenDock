@@ -95,7 +95,7 @@ export async function requestUpdateAccountProfile(nickname: string) {
       email: "hello@opendock.app",
       displayName: null,
       nickname: normalized,
-      official: true,
+      official: false,
       avatarUrl: null,
       hostedDomain: null,
     } satisfies AccountProfile;

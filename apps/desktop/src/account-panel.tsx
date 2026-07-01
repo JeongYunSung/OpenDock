@@ -9,6 +9,7 @@ export const ACCOUNT_PAGE_LIMIT = 6;
 
 export function AccountPanel(props: {
   accountEmail: string;
+  accountOfficial: boolean;
   lang: Lang;
   myDocks: MyDock[];
   myDocksCounts: MyDocksCounts;
@@ -27,6 +28,8 @@ export function AccountPanel(props: {
   const [draftNickname, setDraftNickname] = useState(props.nickname);
   const [accountTab, setAccountTab] = useState<"profile" | "docks" | "stars">("profile");
   const accountStats = accountStatsFor(props.myDocksCounts, props.myStarredDocks.length);
+  const profileName = props.nickname || props.accountEmail || props.t.opendockAccount;
+  const profileInitial = profileName.trim().charAt(0).toUpperCase() || "?";
   const myDocksStart =
     props.myDocksTotal === 0 || props.myDocks.length === 0 ? 0 : (props.myDocksPage - 1) * ACCOUNT_PAGE_LIMIT + 1;
   const myDocksEnd = myDocksStart === 0 ? 0 : Math.min(props.myDocksTotal, myDocksStart + props.myDocks.length - 1);
@@ -47,10 +50,10 @@ export function AccountPanel(props: {
       </div>
       <div className="account-layout">
         <aside className="profile-card" aria-label={props.t.accountProfile}>
-          <div className="profile-avatar">O</div>
+          <div className="profile-avatar">{profileInitial}</div>
           <div>
-            <strong>{props.nickname}</strong>
-            <img alt="official badge" src={badgeSrc} />
+            <strong>{profileName}</strong>
+            {props.accountOfficial ? <img alt="official badge" src={badgeSrc} /> : null}
           </div>
           <p>{props.accountEmail}</p>
           <div className="profile-stats">

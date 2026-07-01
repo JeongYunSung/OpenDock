@@ -337,4 +337,12 @@ export { TEXT } from "./desktop-text";
 
 export const BASE_LOGS: AppLog[] = [];
 
-export { dockFromInstalledRecord, dockFullId, mergeRegistryDockDetail, normalizeRegistryDock, normalizeRegistryVersions } from "./dock-data";
+export {
+  dockFromInstalledRecord,
+  dockFullId,
+  dockOwnerFromId,
+  dockPublisherLabel,
+  mergeRegistryDockDetail,
+  normalizeRegistryDock,
+  normalizeRegistryVersions,
+} from "./dock-data";

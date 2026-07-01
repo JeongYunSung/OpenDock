@@ -1,6 +1,6 @@
 import { ArrowLeft, ChevronDown, ChevronLeft, Download, Search } from "lucide-react";
 import { isTaskActive, type CommandTask } from "./command-task";
-import { dockFullId, type Dock, type DockVersion, type Lang, type TEXT } from "./data";
+import { dockFullId, dockOwnerFromId, dockPublisherLabel, type Dock, type DockVersion, type Lang, type TEXT } from "./data";
 import {
   DockIcon,
   KeyboardButton,
@@ -119,6 +119,7 @@ function DockCard(props: {
   t: (typeof TEXT)[Lang];
 }) {
   const platforms = props.dock.platforms?.length ? props.dock.platforms : ["macos", "windows"];
+  const publisher = dockPublisherLabel(props.dock);
   return (
     <KeyboardButton ariaLabel={`${props.t.openDetail}: ${dockFullId(props.dock)}`} className="dock-card" onOpen={props.onOpen}>
       <div className="dock-card-head">
@@ -127,10 +128,12 @@ function DockCard(props: {
           <div className="dock-title">
             <strong>{props.dock.short}</strong>
           </div>
-          <small className="dock-publisher-line">
-            {props.t.by} {props.dock.publisher ?? props.dock.owner ?? "opendock"}
-            {props.dock.official === false ? null : <img alt="official badge" src={badgeSrc} />}
-          </small>
+          {publisher ? (
+            <small className="dock-publisher-line">
+              {props.t.by} {publisher}
+              {props.dock.official ? <img alt="official badge" src={badgeSrc} /> : null}
+            </small>
+          ) : null}
         </div>
       </div>
       <p>{props.dock.desc}</p>
@@ -182,7 +185,8 @@ export function DetailPanel(props: {
 }) {
   const fullId = dockFullId(props.detail);
   const installed = Boolean(props.installedDocks[fullId] || props.installedDocks[props.detail.id]);
-  const publisher = props.detail.publisher ?? props.detail.owner ?? "opendock";
+  const owner = props.detail.owner ?? dockOwnerFromId(fullId);
+  const publisher = dockPublisherLabel(props.detail);
   const taskActive = isTaskActive(props.commandTask);
   return (
     <div className="panel detail-panel">
@@ -196,12 +200,19 @@ export function DetailPanel(props: {
           <div className="detail-identity">
             <DockIcon dock={props.detail} size="small" />
             <div className="detail-copy">
-              <div className="detail-breadcrumb">{props.t.explore} / {props.detail.owner ?? "opendock"}</div>
+              <div className="detail-breadcrumb">{props.t.explore}{owner ? ` / ${owner}` : ""}</div>
               <div className="detail-title-row">
                 <h1>{fullId}</h1>
               </div>
               <div className="detail-meta">
-                {props.t.by} {publisher} {props.detail.official === false ? null : <img alt="official badge" src={badgeSrc} />} <span>·</span> {props.t.updated} {formatDateLabel(props.detail.updatedAt)}
+                {publisher ? (
+                  <>
+                    {props.t.by} {publisher}
+                    {props.detail.official ? <img alt="official badge" src={badgeSrc} /> : null}
+                    <span>·</span>
+                  </>
+                ) : null}
+                {props.t.updated} {formatDateLabel(props.detail.updatedAt)}
                 <span>·</span>
                 <StarButton
                   busy={props.starUpdatingId === fullId}

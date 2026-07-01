@@ -80,8 +80,9 @@ export function App() {
     finishCommandTask,
     setCommandTask,
   } = useCommandTaskController(t);
-  const [nickname, setNickname] = useStoredState("opendock.nickname", "opendock");
+  const [nickname, setNickname] = useStoredState("opendock.nickname", "");
   const [accountEmail, setAccountEmail] = useStoredState("opendock.accountEmail", "");
+  const [accountOfficial, setAccountOfficial] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [appStateLoaded, setAppStateLoaded] = useState(!isTauriRuntime());
   const responsivePageSizes = useResponsivePageSizes();
@@ -206,7 +207,7 @@ export function App() {
   const catalogPageCount = Math.max(1, Math.ceil(Math.max(catalogTotal, sortedDocks.length) / catalogPageSize));
   const versionPageCount = Math.max(1, Math.ceil(Math.max(versionTotal, detail?.versions?.length ?? 0) / versionPageSize));
   const overlayOpen = openMenu !== "";
-  const accountMenuName = authProvider === "github" ? t.githubAccount : accountEmail || t.opendockAccount;
+  const accountMenuName = nickname || accountEmail || (authProvider === "github" ? t.githubAccount : t.opendockAccount);
   const showAppLoading = isTauriRuntime() && !appStateLoaded;
   const {
     myDocks,
@@ -242,6 +243,7 @@ export function App() {
     resetProjectDialogs,
     resetProjectRuntime,
     setAccountEmail,
+    setAccountOfficial,
     setAuthProvider,
     setInstalledDocks,
     setLoggedIn,
@@ -386,6 +388,7 @@ export function App() {
         if (cancelled || !profile) return;
         setNickname(profile.nickname);
         setAccountEmail(profile.email);
+        setAccountOfficial(profile.official);
       })
       .catch((error) => {
         if (!cancelled) {
@@ -456,6 +459,7 @@ export function App() {
     if (!normalized) return;
     if (!isTauriRuntime()) {
       setNickname(normalized);
+      setAccountOfficial(false);
       return;
     }
     setProfileSaving(true);
@@ -463,6 +467,7 @@ export function App() {
       const profile = await requestUpdateAccountProfile(normalized);
       setNickname(profile.nickname);
       setAccountEmail(profile.email);
+      setAccountOfficial(profile.official);
       appendLog("OK", "var(--success)", t.profileSaved);
       showAppNotice("success", t.profileSaved);
     } catch (error) {
@@ -545,6 +550,7 @@ export function App() {
             nickname={nickname}
             profileSaving={profileSaving}
             accountEmail={accountEmail}
+            accountOfficial={accountOfficial}
             commandTask={commandTask}
             onAddExisting={() => void addExistingProjectFromFolder()}
             onBack={() => setMainView("list")}

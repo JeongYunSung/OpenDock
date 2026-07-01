@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Folder, FolderOpen, Github, Pencil, Plus, X } from "lucide-react";
-import type { Dock, DockVersion, Lang, Project, TEXT } from "./data";
+import { dockPublisherLabel, type Dock, type DockVersion, type Lang, type Project, type TEXT } from "./data";
 import { IconButton, logoSrc, formatDateLabel, platformLabel, versionStatusLabel } from "./display";
 import { GoogleMark, Meta } from "./desktop-ui";
 
@@ -151,7 +151,7 @@ function DetailSidebar(props: { detail: Dock; detailTab: "readme" | "versions"; 
           <Meta label={props.t.downloads} value={props.detail.downloadLabel} />
           <Meta label={props.t.stars} value={String(props.detail.stars ?? 0)} />
           <Meta label={props.t.updated} value={formatDateLabel(props.detail.updatedAt)} />
-          <Meta label={props.t.publisher} value={props.detail.publisher ?? props.detail.owner ?? "opendock"} />
+          <Meta label={props.t.publisher} value={dockPublisherLabel(props.detail) ?? "-"} />
           <h4>{props.t.tags}</h4>
           <div className="tag-wrap">{props.detail.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
           <h4>{props.t.supportedPlatforms}</h4>
