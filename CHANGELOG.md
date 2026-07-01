@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.51 - 2026-07-01
+
+### Desktop App
+
+- Center the titlebar account avatar so profile images and initials fit cleanly
+  inside the circular button.
+
 ## 0.1.50 - 2026-07-01
 
 ### Desktop App
