@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/lib.rs": {
-    "mtime": 1782896269.7811916,
-    "ast_hash": "9b08fb37e24eaab15154c53b687e5f6e",
+    "mtime": 1782908106.7997763,
+    "ast_hash": "6b4931c6fe011c954e01aaa986873989",
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/main.rs": {
@@ -160,8 +160,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/command-change-result.ts": {
-    "mtime": 1781758086.122158,
-    "ast_hash": "1e902b6643e6e5ea7bd144e1498d63bd",
+    "mtime": 1782908136.6895628,
+    "ast_hash": "6428882fdb09dde8f79393dc77926a97",
     "semantic_hash": ""
   },
   "apps/desktop/src/command-log.ts": {
@@ -175,8 +175,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/data.ts": {
-    "mtime": 1782895869.986431,
-    "ast_hash": "50682e595bf73bfccff0e2f22318616c",
+    "mtime": 1782908126.73389,
+    "ast_hash": "ee2fd30821c79540b7fdae2c73464e59",
     "semantic_hash": ""
   },
   "apps/desktop/src/desktop-text.ts": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/dock-data.ts": {
-    "mtime": 1782882965.0547383,
-    "ast_hash": "78e23c27e465b0bd934e53abcbefe58d",
+    "mtime": 1782907983.723366,
+    "ast_hash": "f43f420c4ae2ce725f0516ceecc14a32",
     "semantic_hash": ""
   },
   "apps/desktop/src/dock-panels.tsx": {
@@ -440,8 +440,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/change-events.ts": {
-    "mtime": 1781756928.6904066,
-    "ast_hash": "d4fd7b1a5e23c8ae9a1d9d095f9f3448",
+    "mtime": 1782907462.9961789,
+    "ast_hash": "0cc580dc74f5ec7e64577455d5c3f2bd",
     "semantic_hash": ""
   },
   "packages/cli/src/change-file-output.ts": {
@@ -450,8 +450,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/change-output.ts": {
-    "mtime": 1782748318.3369231,
-    "ast_hash": "68613d1b446a5630e340c602f6a1942b",
+    "mtime": 1782908073.2531502,
+    "ast_hash": "1c5eb67574930a539addadb1aedc7981",
     "semantic_hash": ""
   },
   "packages/cli/src/cli-auth-commands.ts": {
@@ -465,8 +465,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/cli-change-commands.ts": {
-    "mtime": 1782748383.4600382,
-    "ast_hash": "ca0618a4a9835d1db8e8b7582d7562e5",
+    "mtime": 1782908097.2244883,
+    "ast_hash": "7f98c5b276f80400291864a73f69a145",
     "semantic_hash": ""
   },
   "packages/cli/src/cli-command-log.ts": {
@@ -490,13 +490,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/cli-project-commands.ts": {
-    "mtime": 1782748112.261774,
-    "ast_hash": "0cf4052e85814162e68489cb41a9d4b2",
+    "mtime": 1782907965.3328435,
+    "ast_hash": "c21982cc62eaa64a77a61f1f65b73118",
     "semantic_hash": ""
   },
   "packages/cli/src/cli-project-output.ts": {
-    "mtime": 1782748324.2776866,
-    "ast_hash": "0a50d1611789637a68039bc83e088315",
+    "mtime": 1782907958.7497637,
+    "ast_hash": "df9c899c6cc8c56244a141719026ca86",
     "semantic_hash": ""
   },
   "packages/cli/src/cli.ts": {
@@ -670,8 +670,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-flow.test.ts": {
-    "mtime": 1782748331.9723442,
-    "ast_hash": "71086bc030cf40aad5f70e6188837e71",
+    "mtime": 1782908151.0722737,
+    "ast_hash": "933f99e326f411d9fa53fde3f5150f29",
     "semantic_hash": ""
   },
   "packages/cli/tests/examples-cleanup.test.ts": {

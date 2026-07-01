@@ -1,4 +1,7 @@
+import { writeSync } from "node:fs";
 import type { RuntimeProgressEvent } from "./core/runtime/progress.js";
+
+const nativeConsoleLog = console.log;
 
 export interface ChangeCommandOutputMode {
   machine: boolean;
@@ -139,7 +142,41 @@ export function runMaybeQuiet<T>(quiet: boolean, fn: () => T): T {
 }
 
 export function printJson(value: unknown): void {
-  console.log(JSON.stringify(value));
+  const json = JSON.stringify(value);
+  if (console.log !== nativeConsoleLog) {
+    console.log(json);
+    return;
+  }
+  writeAllSync(`${json}\n`);
+}
+
+function writeAllSync(value: string): void {
+  const buffer = Buffer.from(value);
+  let offset = 0;
+  while (offset < buffer.length) {
+    try {
+      const written = writeSync(1, buffer, offset, buffer.length - offset);
+      if (written <= 0) {
+        throw new Error("failed to write JSON output");
+      }
+      offset += written;
+    } catch (error) {
+      if (isRetryableStdoutWriteError(error)) {
+        sleepSync(1);
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
+function isRetryableStdoutWriteError(error: unknown): boolean {
+  const code = (error as NodeJS.ErrnoException).code;
+  return code === "EAGAIN" || code === "EWOULDBLOCK" || code === "EINTR";
+}
+
+function sleepSync(milliseconds: number): void {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
 }
 
 function relayRuntimeProgress(

@@ -49,8 +49,12 @@ interface JsonInstalledDockReport {
   version: string;
 }
 
+type JsonInstalledDockSummary = Omit<InstalledDockRecord, "files"> & {
+  fileCount: number;
+};
+
 interface JsonInstalledDockListCommandResult {
-  docks: InstalledDockRecord[];
+  docks: Array<InstalledDockRecord | JsonInstalledDockSummary>;
   hasState: boolean;
   lockPath: string;
   operation: "list";
@@ -82,6 +86,7 @@ interface JsonChangeCommandResult {
   operation: JsonChangeOperation;
   reports: JsonDockChangeReport[];
   summary: JsonChangeSummary;
+  summaryCounts?: JsonChangeSummaryCounts;
   success: true;
 }
 
@@ -101,6 +106,14 @@ interface JsonChangeSummary {
   reviewRequired: string[];
   unchanged: string[];
   updated: string[];
+}
+
+interface JsonChangeSummaryCounts {
+  created: number;
+  deleted: number;
+  reviewRequired: number;
+  unchanged: number;
+  updated: number;
 }
 
 export function updateCheckCommandResult(
@@ -135,7 +148,10 @@ export function updateCheckCommandResult(
   };
 }
 
-export function installedDockListCommandResult(cwd: string): JsonInstalledDockListCommandResult {
+export function installedDockListCommandResult(
+  cwd: string,
+  options: { summary?: boolean } = {},
+): JsonInstalledDockListCommandResult {
   const store = new OpenDockStateStore(cwd);
   const hasState = store.hasState();
   const docks = hasState ? store.readLock().docks : [];
@@ -148,7 +164,7 @@ export function installedDockListCommandResult(cwd: string): JsonInstalledDockLi
     version: dock.version,
   }));
   return {
-    docks,
+    docks: options.summary === true ? docks.map(installedDockSummary) : docks,
     hasState,
     lockPath: store.lockPath(),
     operation: "list",
@@ -159,6 +175,14 @@ export function installedDockListCommandResult(cwd: string): JsonInstalledDockLi
     summary: {
       installed: reports.map((report) => report.dockId),
     },
+  };
+}
+
+function installedDockSummary(dock: InstalledDockRecord): JsonInstalledDockSummary {
+  const { files, ...summary } = dock;
+  return {
+    ...summary,
+    fileCount: files.length,
   };
 }
 
@@ -210,20 +234,75 @@ export function uninstallChangeReport(
 export function changeCommandResult(
   operation: JsonChangeOperation,
   reports: JsonDockChangeReport[],
+  options: { summary?: boolean } = {},
 ): JsonChangeCommandResult {
+  const summary = changeSummary(reports);
+  if (options.summary === true) {
+    const maxVisibleItems = 24;
+    return {
+      operation,
+      reports: reports.map((report) => compactChangeReport(report, maxVisibleItems)),
+      summary: compactChangeSummary(summary, maxVisibleItems),
+      summaryCounts: changeSummaryCounts(reports),
+      success: true,
+    };
+  }
   return {
     operation,
     reports,
-    summary: {
-      created: uniqueFlatMap(reports, (report) => report.fileChanges.created),
-      deleted: uniqueFlatMap(reports, (report) => report.fileChanges.deleted),
-      reviewRequired: uniqueFlatMap(reports, (report) => report.fileChanges.reviewRequired),
-      unchanged: reports
-        .filter((report) => report.status === "unchanged")
-        .map((report) => report.dockId),
-      updated: uniqueFlatMap(reports, (report) => report.fileChanges.updated),
-    },
+    summary,
     success: true,
+  };
+}
+
+function changeSummary(reports: JsonDockChangeReport[]): JsonChangeSummary {
+  return {
+    created: uniqueFlatMap(reports, (report) => report.fileChanges.created),
+    deleted: uniqueFlatMap(reports, (report) => report.fileChanges.deleted),
+    reviewRequired: uniqueFlatMap(reports, (report) => report.fileChanges.reviewRequired),
+    unchanged: reports
+      .filter((report) => report.status === "unchanged")
+      .map((report) => report.dockId),
+    updated: uniqueFlatMap(reports, (report) => report.fileChanges.updated),
+  };
+}
+
+function changeSummaryCounts(reports: JsonDockChangeReport[]): JsonChangeSummaryCounts {
+  const summary = changeSummary(reports);
+  return {
+    created: summary.created.length,
+    deleted: summary.deleted.length,
+    reviewRequired: summary.reviewRequired.length,
+    unchanged: summary.unchanged.length,
+    updated: summary.updated.length,
+  };
+}
+
+function compactChangeSummary(
+  summary: JsonChangeSummary,
+  maxVisibleItems: number,
+): JsonChangeSummary {
+  return {
+    created: summary.created.slice(0, maxVisibleItems),
+    deleted: summary.deleted.slice(0, maxVisibleItems),
+    reviewRequired: summary.reviewRequired.slice(0, maxVisibleItems),
+    unchanged: summary.unchanged.slice(0, maxVisibleItems),
+    updated: summary.updated.slice(0, maxVisibleItems),
+  };
+}
+
+function compactChangeReport(
+  report: JsonDockChangeReport,
+  maxVisibleItems: number,
+): JsonDockChangeReport {
+  return {
+    ...report,
+    fileChanges: {
+      created: report.fileChanges.created.slice(0, maxVisibleItems),
+      deleted: report.fileChanges.deleted.slice(0, maxVisibleItems),
+      reviewRequired: report.fileChanges.reviewRequired.slice(0, maxVisibleItems),
+      updated: report.fileChanges.updated.slice(0, maxVisibleItems),
+    },
   };
 }
 

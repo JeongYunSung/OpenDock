@@ -45,6 +45,7 @@ struct ProjectStateResult {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 struct InstalledDock {
     id: String,
     name: Option<String>,
@@ -54,6 +55,7 @@ struct InstalledDock {
     signature: Option<String>,
     platform: Option<String>,
     workdir: Option<String>,
+    file_count: Option<usize>,
     files: Option<Vec<AppliedFile>>,
 }
 
@@ -85,7 +87,12 @@ async fn opendock_install(
     run_opendock_streaming_blocking(
         app,
         Some(project_dir),
-        vec!["install".to_string(), dock_ref, "--events".to_string()],
+        vec![
+            "install".to_string(),
+            dock_ref,
+            "--events".to_string(),
+            "--summary".to_string(),
+        ],
         command_id,
     )
     .await
@@ -102,10 +109,15 @@ async fn opendock_update(
         vec![
             "update".to_string(),
             "--events".to_string(),
+            "--summary".to_string(),
             "--force".to_string(),
         ]
     } else {
-        vec!["update".to_string(), "--events".to_string()]
+        vec![
+            "update".to_string(),
+            "--events".to_string(),
+            "--summary".to_string(),
+        ]
     };
     run_opendock_streaming_blocking(app, Some(project_dir), args, command_id).await
 }
@@ -128,7 +140,12 @@ async fn opendock_uninstall(
     force: Option<bool>,
 ) -> Result<OpenDockCommandResult, String> {
     validate_dock_id(&dock_id)?;
-    let mut args = vec!["uninstall".to_string(), dock_id, "--events".to_string()];
+    let mut args = vec![
+        "uninstall".to_string(),
+        dock_id,
+        "--events".to_string(),
+        "--summary".to_string(),
+    ];
     if force.unwrap_or(false) {
         args.push("--force".to_string());
     }
@@ -392,7 +409,11 @@ async fn opendock_registry_asset_data_url(url: String) -> Result<String, String>
 async fn opendock_project_state(project_dir: String) -> Result<ProjectStateResult, String> {
     let result = run_opendock_blocking(
         Some(project_dir),
-        vec!["list".to_string(), "--json".to_string()],
+        vec![
+            "list".to_string(),
+            "--json".to_string(),
+            "--summary".to_string(),
+        ],
     )
     .await?;
     if !result.success {

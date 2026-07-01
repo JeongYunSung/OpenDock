@@ -23,9 +23,13 @@ export function readInstalledDocks(cwd: string): InstalledDockRecord[] | undefin
   return store.readLock().docks;
 }
 
-export function printInstalledDocks(cwd: string, json = false): void {
+export function printInstalledDocks(
+  cwd: string,
+  json = false,
+  options: { summary?: boolean } = {},
+): void {
   if (json) {
-    printJson(installedDockListCommandResult(cwd));
+    printJson(installedDockListCommandResult(cwd, { summary: options.summary === true }));
     return;
   }
 

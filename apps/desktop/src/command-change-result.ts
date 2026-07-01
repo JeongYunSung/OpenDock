@@ -100,35 +100,37 @@ function commandResultGroups(result: OpenDockChangeResult, t: (typeof TEXT)[Lang
       : result.reports.filter((report) => report.status === "unchanged").map((report) => report.dockId);
   return [
     {
-      count: result.summary.created.length,
+      count: result.summaryCounts?.created ?? result.summary.created.length,
       items: result.summary.created,
       key: "created",
       label: t.resultAdded,
       symbol: "+",
     },
     {
-      count: versionChanges.length + result.summary.updated.length,
+      count:
+        versionChanges.length +
+        (result.summaryCounts?.updated ?? result.summary.updated.length),
       items: [...versionChanges, ...result.summary.updated],
       key: "updated",
       label: t.resultChanged,
       symbol: "~",
     },
     {
-      count: result.summary.deleted.length,
+      count: result.summaryCounts?.deleted ?? result.summary.deleted.length,
       items: result.summary.deleted,
       key: "deleted",
       label: t.resultDeleted,
       symbol: "-",
     },
     {
-      count: result.summary.reviewRequired.length,
+      count: result.summaryCounts?.reviewRequired ?? result.summary.reviewRequired.length,
       items: result.summary.reviewRequired,
       key: "reviewRequired",
       label: t.resultReviewRequired,
       symbol: "!",
     },
     {
-      count: unchanged.length,
+      count: result.summaryCounts?.unchanged ?? unchanged.length,
       items: unchanged,
       key: "unchanged",
       label: t.resultNoChanges,

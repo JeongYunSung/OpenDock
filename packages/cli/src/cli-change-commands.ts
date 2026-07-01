@@ -51,6 +51,7 @@ interface ChangeCommandOptions {
   force?: boolean;
   json?: boolean;
   platform?: string;
+  summary?: boolean;
 }
 
 export function registerChangeCommands(program: Command): void {
@@ -63,6 +64,7 @@ export function registerChangeCommands(program: Command): void {
     .option("--platform <platform>", "Target platform: macos, windows, or linux")
     .option("--json", "Print a machine-readable change report")
     .option("--events", "Print machine-readable progress events")
+    .option("--summary", "Omit exhaustive per-file paths from machine output")
     .action(async (dock: string, options: ChangeCommandOptions) => {
       let dockId = dockIdFromReference(dock);
       const outputMode = changeCommandOutputMode(options);
@@ -96,9 +98,11 @@ export function registerChangeCommands(program: Command): void {
           `${report.dockId}@${report.version} installed (${plainInstallFileSummary(report)})`,
           report.dockId,
         );
-        const result = changeCommandResult("install", [
-          installChangeReport(report, { operation: "install", status: "installed" }),
-        ]);
+        const result = changeCommandResult(
+          "install",
+          [installChangeReport(report, { operation: "install", status: "installed" })],
+          { summary: options.summary === true },
+        );
         events.result(result);
         if (options.events === true) {
           return;
@@ -127,6 +131,7 @@ export function registerChangeCommands(program: Command): void {
     .option("--platform <platform>", "Override the platform recorded in .opendock/dock.lock.yml")
     .option("--json", "Print a machine-readable change report")
     .option("--events", "Print machine-readable progress events")
+    .option("--summary", "Omit exhaustive per-file paths from machine output")
     .action(async (options: ChangeCommandOptions) => {
       const outputMode = changeCommandOutputMode(options);
       const events = createChangeEventReporter("update", options.events === true);
@@ -169,7 +174,7 @@ export function registerChangeCommands(program: Command): void {
               failedChecks.length === 0 ? "" : `, ${failedChecks.length} unavailable`
             }`,
           );
-          const result = changeCommandResult("update", []);
+          const result = changeCommandResult("update", [], { summary: options.summary === true });
           events.progress("complete", "No OpenDock dock updates available.", 100, {
             level: "OK",
             total: 0,
@@ -311,7 +316,9 @@ export function registerChangeCommands(program: Command): void {
           level: "OK",
           total: changeReports.length,
         });
-        const result = changeCommandResult("update", changeReports);
+        const result = changeCommandResult("update", changeReports, {
+          summary: options.summary === true,
+        });
         events.result(result);
         if (options.events === true) {
           return;
@@ -332,59 +339,67 @@ export function registerChangeCommands(program: Command): void {
     .option("--force", "Remove OpenDock-managed files even when edited managed files are detected")
     .option("--json", "Print a machine-readable change report")
     .option("--events", "Print machine-readable progress events")
-    .action((dock: string, options: Pick<ChangeCommandOptions, "events" | "force" | "json">) => {
-      let dockId = dockIdFromReference(dock);
-      const outputMode = changeCommandOutputMode(options);
-      const events = createChangeEventReporter("uninstall", options.events === true);
-      try {
-        events.progress("prepare", "Preparing uninstall", 8, optionalDockEventDetails(dockId));
-        const parsedDockId = parseInstalledDockId(dock);
-        dockId = parsedDockId;
-        const report = runMaybeQuiet(outputMode.machine, () =>
-          installer.uninstall({
-            dockId: parsedDockId,
-            force: options.force === true,
-            progress: runtimeProgressReporter(events),
-            projectDir: process.cwd(),
-          }),
-        );
-        events.progress("record", `Recording uninstall ${report.dockId}@${report.version}`, 96, {
-          dockId: report.dockId,
-          level: "OK",
-          version: report.version,
-        });
-        recordCommandLog(
-          process.cwd(),
-          "uninstall",
-          "Success",
-          `${report.dockId}@${report.version} uninstalled (${report.filesDeleted} files deleted, ${report.filesUpdated} files updated)`,
-          report.dockId,
-        );
-        const result = changeCommandResult("uninstall", [
-          uninstallChangeReport(report, { operation: "uninstall", status: "uninstalled" }),
-        ]);
-        events.result(result);
-        if (options.events === true) {
-          return;
-        }
-        if (options.json === true) {
-          printJson(result);
-          return;
-        }
-        console.log(
-          `${terminalStyle.success("Uninstalled")} ${terminalStyle.bold(
+    .option("--summary", "Omit exhaustive per-file paths from machine output")
+    .action(
+      (
+        dock: string,
+        options: Pick<ChangeCommandOptions, "events" | "force" | "json" | "summary">,
+      ) => {
+        let dockId = dockIdFromReference(dock);
+        const outputMode = changeCommandOutputMode(options);
+        const events = createChangeEventReporter("uninstall", options.events === true);
+        try {
+          events.progress("prepare", "Preparing uninstall", 8, optionalDockEventDetails(dockId));
+          const parsedDockId = parseInstalledDockId(dock);
+          dockId = parsedDockId;
+          const report = runMaybeQuiet(outputMode.machine, () =>
+            installer.uninstall({
+              dockId: parsedDockId,
+              force: options.force === true,
+              progress: runtimeProgressReporter(events),
+              projectDir: process.cwd(),
+            }),
+          );
+          events.progress("record", `Recording uninstall ${report.dockId}@${report.version}`, 96, {
+            dockId: report.dockId,
+            level: "OK",
+            version: report.version,
+          });
+          recordCommandLog(
+            process.cwd(),
+            "uninstall",
+            "Success",
+            `${report.dockId}@${report.version} uninstalled (${report.filesDeleted} files deleted, ${report.filesUpdated} files updated)`,
             report.dockId,
-          )} (${formatFileCount(report.filesDeleted, "files deleted", "deleted")}, ${formatFileCount(
-            report.filesUpdated,
-            "files updated",
-            "updated",
-          )})`,
-        );
-      } catch (error) {
-        recordCommandFailure(process.cwd(), "uninstall", error, dockId);
-        handleChangeCommandError("uninstall", error, options.json === true, events);
-      }
-    });
+          );
+          const result = changeCommandResult(
+            "uninstall",
+            [uninstallChangeReport(report, { operation: "uninstall", status: "uninstalled" })],
+            { summary: options.summary === true },
+          );
+          events.result(result);
+          if (options.events === true) {
+            return;
+          }
+          if (options.json === true) {
+            printJson(result);
+            return;
+          }
+          console.log(
+            `${terminalStyle.success("Uninstalled")} ${terminalStyle.bold(
+              report.dockId,
+            )} (${formatFileCount(report.filesDeleted, "files deleted", "deleted")}, ${formatFileCount(
+              report.filesUpdated,
+              "files updated",
+              "updated",
+            )})`,
+          );
+        } catch (error) {
+          recordCommandFailure(process.cwd(), "uninstall", error, dockId);
+          handleChangeCommandError("uninstall", error, options.json === true, events);
+        }
+      },
+    );
 }
 
 type ResolvedUpdateTarget = InstalledDockUpdateCheck & {

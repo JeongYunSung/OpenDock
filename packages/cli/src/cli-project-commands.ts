@@ -46,9 +46,12 @@ export function registerProjectCommands(program: Command): void {
     .command("list")
     .description("Show docks installed in the current directory.")
     .option("--json", "Print a machine-readable installed dock list")
-    .action((options: { json?: boolean }) => {
+    .option("--summary", "Omit per-file records from JSON output")
+    .action((options: { json?: boolean; summary?: boolean }) => {
       try {
-        printInstalledDocks(process.cwd(), options.json === true);
+        printInstalledDocks(process.cwd(), options.json === true, {
+          summary: options.summary === true,
+        });
         const docks = readInstalledDocks(process.cwd()) ?? [];
         recordCommandLog(
           process.cwd(),

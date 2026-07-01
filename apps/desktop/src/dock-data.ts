@@ -198,7 +198,7 @@ export function dockFromInstalledRecord(record: InstalledDockRecord, fallbackInd
     stars: 0,
     fallbackSortRank: fallbackIndex,
     version: record.version,
-    size: `${record.files?.length ?? 0} files`,
+    size: `${record.fileCount ?? record.files?.length ?? 0} files`,
     checksum: record.checksum ?? "-",
     readmeTitle: record.name ?? short,
     readmeIntro: `${record.id} is installed in this workspace.`,

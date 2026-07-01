@@ -987,6 +987,93 @@ describe("opendock TypeScript CLI", () => {
     ]);
   });
 
+  it("prints large installed dock JSON without truncating piped stdout", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "large", "1.0.0", {
+      files: Array.from({ length: 700 }, (_, index) => ({
+        path: `generated/file-${String(index).padStart(4, "0")}.txt`,
+        content: `file ${index}\n`,
+      })),
+    });
+
+    await install({
+      dockRef: DockRef.parse("test/large@1.0.0"),
+      projectDir: project,
+      phase: "install",
+      platform: "macos",
+      runTasks: true,
+      resolve: localResolver(docks),
+    });
+
+    const result = spawnSync("bun", [join(process.cwd(), "src/cli.ts"), "list", "--json"], {
+      cwd: project,
+      encoding: "utf8",
+      env: { ...process.env, NO_COLOR: "1" },
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.stdout.length).toBeGreaterThan(65_536);
+    const listJson = JSON.parse(result.stdout);
+    expect(listJson.docks).toHaveLength(1);
+    expect(listJson.docks[0]).toMatchObject({
+      id: "test/large",
+      version: "1.0.0",
+    });
+    expect(listJson.reports).toEqual([
+      {
+        dockId: "test/large",
+        fileCount: 700,
+        platform: "macos",
+        requested: "1.0.0",
+        status: "installed",
+        version: "1.0.0",
+      },
+    ]);
+
+    const summaryResult = spawnSync(
+      "bun",
+      [join(process.cwd(), "src/cli.ts"), "list", "--json", "--summary"],
+      {
+        cwd: project,
+        encoding: "utf8",
+        env: { ...process.env, NO_COLOR: "1" },
+      },
+    );
+
+    expect(summaryResult.status).toBe(0);
+    expect(summaryResult.stdout.length).toBeLessThan(20_000);
+    const summaryJson = JSON.parse(summaryResult.stdout);
+    expect(summaryJson.docks[0]).toMatchObject({
+      fileCount: 700,
+      id: "test/large",
+      version: "1.0.0",
+    });
+    expect(summaryJson.docks[0].files).toBeUndefined();
+
+    const uninstallResult = spawnSync(
+      "bun",
+      [join(process.cwd(), "src/cli.ts"), "uninstall", "test/large", "--json", "--summary"],
+      {
+        cwd: project,
+        encoding: "utf8",
+        env: { ...process.env, NO_COLOR: "1" },
+      },
+    );
+
+    expect(uninstallResult.status).toBe(0);
+    expect(uninstallResult.stdout.length).toBeLessThan(20_000);
+    const uninstallJson = JSON.parse(uninstallResult.stdout);
+    expect(uninstallJson.reports[0]).toMatchObject({
+      dockId: "test/large",
+      filesDeleted: 700,
+      version: "1.0.0",
+    });
+    expect(uninstallJson.reports[0].fileChanges.deleted).toHaveLength(24);
+    expect(uninstallJson.summary.deleted).toHaveLength(24);
+    expect(uninstallJson.summaryCounts.deleted).toBe(700);
+  });
+
   it("prints an empty list message when the current directory has no OpenDock state", async () => {
     const project = tempDir();
     const logs = await withCwd(project, () =>

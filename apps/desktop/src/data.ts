@@ -209,6 +209,7 @@ export interface InstalledDockRecord {
   signature?: string;
   platform?: string;
   workdir?: string;
+  fileCount?: number;
   files?: Array<{ path: string; mode?: string; checksum?: string }>;
 }
 
@@ -269,6 +270,7 @@ export interface OpenDockChangeResult {
   reports: OpenDockChangeReport[];
   success: boolean;
   summary: OpenDockChangeSummary;
+  summaryCounts?: OpenDockChangeSummaryCounts;
 }
 
 export interface OpenDockOutdatedResult {
@@ -312,6 +314,14 @@ interface OpenDockChangeSummary {
   reviewRequired: string[];
   unchanged: string[];
   updated: string[];
+}
+
+interface OpenDockChangeSummaryCounts {
+  created: number;
+  deleted: number;
+  reviewRequired: number;
+  unchanged: number;
+  updated: number;
 }
 
 interface OpenDockFileChanges {
