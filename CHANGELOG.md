@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.59 - 2026-07-02
+
+### Desktop App
+
+- Add Registry request timeouts so catalog, detail, account, and logo loading
+  states fail cleanly instead of staying in loading when the network stalls.
+
 ## 0.1.58 - 2026-07-02
 
 ### Desktop App
