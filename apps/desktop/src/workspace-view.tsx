@@ -24,6 +24,8 @@ export { ACCOUNT_PAGE_LIMIT };
 
 export function Workspace(props: {
   activeProject: Project;
+  accountAvatarUrl: string | null;
+  accountDisplayName: string;
   accountEmail: string;
   accountOfficial: boolean;
   catalogPage: number;
@@ -138,6 +140,8 @@ export function Workspace(props: {
         {props.dockView === "logs" ? <LogsPanel activeProject={props.activeProject} logs={props.logs} t={props.t} /> : null}
         {props.dockView === "account" ? (
           <AccountPanel
+            accountAvatarUrl={props.accountAvatarUrl}
+            accountDisplayName={props.accountDisplayName}
             accountEmail={props.accountEmail}
             accountOfficial={props.accountOfficial}
             lang={props.lang}

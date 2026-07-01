@@ -12,6 +12,8 @@ interface AuthControllerOptions {
   resetDockWorkspaceView: () => void;
   resetProjectDialogs: () => void;
   resetProjectRuntime: () => void;
+  setAccountAvatarUrl: Dispatch<SetStateAction<string | null>>;
+  setAccountDisplayName: Dispatch<SetStateAction<string>>;
   setAccountEmail: Dispatch<SetStateAction<string>>;
   setAccountOfficial: Dispatch<SetStateAction<boolean>>;
   setAuthProvider: Dispatch<SetStateAction<string>>;
@@ -63,6 +65,8 @@ export function useAuthController(options: AuthControllerOptions) {
     }
     options.setLoggedIn(false);
     options.setAuthProvider("");
+    options.setAccountAvatarUrl(null);
+    options.setAccountDisplayName("");
     options.setAccountEmail("");
     options.setAccountOfficial(false);
     options.resetProjectDialogs();

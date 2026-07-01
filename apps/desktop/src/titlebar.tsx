@@ -1,6 +1,7 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Check, ChevronDown, Globe2, LogOut, RefreshCw, UserRound } from "lucide-react";
 import type { MouseEvent } from "react";
+import { useEffect, useState } from "react";
 import { type Lang, type ProductUpdateState, TEXT } from "./data";
 import { logoSrc } from "./display";
 import { isTauriRuntime } from "./tauri-runtime";
@@ -14,6 +15,7 @@ import {
 export type OpenMenu = "" | "app" | "lang" | "account" | "sort";
 
 export function Titlebar(props: {
+  accountAvatarUrl: string | null;
   accountName: string;
   appVersion: string;
   lang: Lang;
@@ -34,6 +36,7 @@ export function Titlebar(props: {
   t: (typeof TEXT)[Lang];
   windowControlPlatform: WindowControlPlatform;
 }) {
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const isMac = props.windowControlPlatform === "macos";
   const windowControls = {
     onClose: () => void handleWindow("close"),
@@ -43,6 +46,13 @@ export function Titlebar(props: {
   const productUpdateLabel = productUpdateButtonLabel(props.productUpdate, props.t);
   const productUpdateTitle = productUpdateButtonTitle(props.productUpdate, props.t);
   const productUpdateDisabled = props.productUpdate.status === "installing";
+  const accountInitial = props.accountName.trim().charAt(0).toUpperCase() || "?";
+  const showAccountAvatar = Boolean(props.accountAvatarUrl && !avatarFailed);
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [props.accountAvatarUrl]);
+
   const startDrag = (event: MouseEvent<HTMLElement>) => {
     if (event.button !== 0 || event.detail > 1 || isInteractiveTitlebarTarget(event.target)) return;
     if (!isTauriRuntime()) return;
@@ -115,8 +125,17 @@ export function Titlebar(props: {
         </button>
         {props.loggedIn ? (
           <div className="menu-anchor">
-            <button className="avatar-button" onClick={props.onAccount} type="button">
-              O
+            <button aria-label={props.accountName} className="avatar-button" onClick={props.onAccount} title={props.accountName} type="button">
+              {showAccountAvatar ? (
+                <img
+                  alt=""
+                  src={props.accountAvatarUrl!}
+                  onError={() => setAvatarFailed(true)}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                accountInitial
+              )}
             </button>
             {props.openMenu === "account" ? (
               <div className="dropdown-menu account-menu">

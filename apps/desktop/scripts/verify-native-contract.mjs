@@ -139,6 +139,8 @@ const desktopVersionsUseResponsivePaging =
 const desktopUsesRegistryStars =
   (data.includes("stars: summary.stars ?? 0") ||
     dockData.includes("stars: summary.stars ?? 0")) &&
+  dockData.includes("publisherOfficial: summary.publisher?.official ?? summary.official") &&
+  dockPanels.includes("dockPublisherOfficial(props.dock)") &&
   data.includes('export type SortMode = "downloads" | "stars" | "recent" | "name"') &&
   dockPanels.includes("props.t.sortStars") &&
   desktopUi.includes("function StarButton") &&
@@ -165,7 +167,13 @@ const desktopAccountProfileSyncsWithRegistry =
   rust.includes("request_registry_json_with_auth_body") &&
   app.includes("requestAccountProfile") &&
   app.includes("requestUpdateAccountProfile") &&
-  accountPanel.includes("const profileName = props.nickname || props.accountEmail || props.t.opendockAccount") &&
+  app.includes("setAccountDisplayName(profile.displayName ?? \"\")") &&
+  app.includes("setAccountAvatarUrl(profile.avatarUrl ?? null)") &&
+  titlebar.includes("accountAvatarUrl: string | null") &&
+  titlebar.includes("const showAccountAvatar = Boolean(props.accountAvatarUrl && !avatarFailed)") &&
+  accountPanel.includes("accountDisplayName: string") &&
+  accountPanel.includes("const profileName = props.nickname || props.accountDisplayName || props.accountEmail || props.t.opendockAccount") &&
+  accountPanel.includes("const showAvatar = Boolean(props.accountAvatarUrl && !avatarFailed)") &&
   accountPanel.includes("<strong>{profileName}</strong>") &&
   !accountPanel.includes("<strong>opendock</strong>");
 const dockIconUsesOpenDockLogoFallback =

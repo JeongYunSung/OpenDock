@@ -40,6 +40,7 @@ export interface Dock {
   readmeMarkdown?: string | null;
   logoUrl?: string | null;
   publisher?: string;
+  publisherOfficial?: boolean;
   official?: boolean;
   platforms?: string[];
   tags: string[];
@@ -342,6 +343,7 @@ export {
   dockFullId,
   dockOwnerFromId,
   dockPublisherLabel,
+  dockPublisherOfficial,
   mergeRegistryDockDetail,
   normalizeRegistryDock,
   normalizeRegistryVersions,

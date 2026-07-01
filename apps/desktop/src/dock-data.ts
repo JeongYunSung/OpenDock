@@ -24,6 +24,10 @@ export function dockPublisherLabel(dock: Pick<Dock, "id" | "fullId" | "owner" | 
   return dock.publisher ?? dock.owner ?? dockOwnerFromId(dock.fullId) ?? dockOwnerFromId(dock.id);
 }
 
+export function dockPublisherOfficial(dock: Pick<Dock, "official" | "publisherOfficial">) {
+  return dock.publisherOfficial ?? dock.official ?? false;
+}
+
 function dockShortId(id: string) {
   return id.includes("/") ? id.split("/").at(-1) ?? id : id;
 }
@@ -55,6 +59,7 @@ export function normalizeRegistryDock(summary: RegistryDockSummary, index = 0): 
     readmeIntro: summary.summary,
     logoUrl,
     publisher: summary.publisher?.nickname ?? summary.owner,
+    publisherOfficial: summary.publisher?.official ?? summary.official,
     official: summary.official,
     platforms: summary.platforms ?? [],
     tags,
@@ -76,6 +81,7 @@ export function mergeRegistryDockDetail(base: Dock, detail: RegistryDockDetail, 
     searchTerms: (detail.tags ?? base.tags).slice(0, 5),
     platforms: detail.platforms ?? base.platforms,
     publisher: detail.publisher?.nickname ?? detail.owner ?? base.publisher,
+    publisherOfficial: detail.publisher?.official ?? detail.official ?? base.publisherOfficial,
     official: detail.official,
     logoUrl: detail.logo?.url ?? base.logoUrl ?? null,
     updatedAt: detail.updatedAt ?? base.updatedAt,
@@ -197,6 +203,7 @@ export function dockFromInstalledRecord(record: InstalledDockRecord, fallbackInd
     readmeTitle: record.name ?? short,
     readmeIntro: `${record.id} is installed in this workspace.`,
     publisher: owner,
+    publisherOfficial: false,
     official: false,
     platforms: record.platform ? [record.platform] : [],
     tags: [record.platform ?? "dock", "installed"],

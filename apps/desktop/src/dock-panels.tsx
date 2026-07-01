@@ -1,6 +1,15 @@
 import { ArrowLeft, ChevronDown, ChevronLeft, Download, Search } from "lucide-react";
 import { isTaskActive, type CommandTask } from "./command-task";
-import { dockFullId, dockOwnerFromId, dockPublisherLabel, type Dock, type DockVersion, type Lang, type TEXT } from "./data";
+import {
+  dockFullId,
+  dockOwnerFromId,
+  dockPublisherLabel,
+  dockPublisherOfficial,
+  type Dock,
+  type DockVersion,
+  type Lang,
+  type TEXT,
+} from "./data";
 import {
   DockIcon,
   KeyboardButton,
@@ -120,6 +129,7 @@ function DockCard(props: {
 }) {
   const platforms = props.dock.platforms?.length ? props.dock.platforms : ["macos", "windows"];
   const publisher = dockPublisherLabel(props.dock);
+  const publisherOfficial = dockPublisherOfficial(props.dock);
   return (
     <KeyboardButton ariaLabel={`${props.t.openDetail}: ${dockFullId(props.dock)}`} className="dock-card" onOpen={props.onOpen}>
       <div className="dock-card-head">
@@ -131,7 +141,7 @@ function DockCard(props: {
           {publisher ? (
             <small className="dock-publisher-line">
               {props.t.by} {publisher}
-              {props.dock.official ? <img alt="official badge" src={badgeSrc} /> : null}
+              {publisherOfficial ? <img alt="official badge" src={badgeSrc} /> : null}
             </small>
           ) : null}
         </div>
@@ -187,6 +197,7 @@ export function DetailPanel(props: {
   const installed = Boolean(props.installedDocks[fullId] || props.installedDocks[props.detail.id]);
   const owner = props.detail.owner ?? dockOwnerFromId(fullId);
   const publisher = dockPublisherLabel(props.detail);
+  const publisherOfficial = dockPublisherOfficial(props.detail);
   const taskActive = isTaskActive(props.commandTask);
   return (
     <div className="panel detail-panel">
@@ -208,7 +219,7 @@ export function DetailPanel(props: {
                 {publisher ? (
                   <>
                     {props.t.by} {publisher}
-                    {props.detail.official ? <img alt="official badge" src={badgeSrc} /> : null}
+                    {publisherOfficial ? <img alt="official badge" src={badgeSrc} /> : null}
                     <span>·</span>
                   </>
                 ) : null}

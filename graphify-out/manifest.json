@@ -1,7 +1,7 @@
 {
   "apps/desktop/package.json": {
-    "mtime": 1782879418.6070762,
-    "ast_hash": "fc01fa63bba8aec1e803e59d798b9562",
+    "mtime": 1782881642.2400246,
+    "ast_hash": "8422a68b2ed35c1649246ee4fe3d9bcf",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/browser-test-runtime.mjs": {
@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-native-contract.mjs": {
-    "mtime": 1782870079.138795,
-    "ast_hash": "64d469a31953fa0a9071c9e54b7877b3",
+    "mtime": 1782883352.7708993,
+    "ast_hash": "0336d857204ca55a3025dcbdd720f124",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-od-assertions.mjs": {
@@ -120,23 +120,23 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/tauri.conf.json": {
-    "mtime": 1782879418.6073525,
-    "ast_hash": "462d77da9f104f31a96f608c9a7f0b57",
+    "mtime": 1782881642.2402613,
+    "ast_hash": "1e49ce6bed3739f0c1ec1ef76e0ff12f",
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
-    "mtime": 1782881216.6475658,
-    "ast_hash": "9c67c89b7bed6ac0786fd18ce9250e68",
+    "mtime": 1782883171.6530457,
+    "ast_hash": "1c63c7656337d99ccb2b3c90c4c7a659",
     "semantic_hash": ""
   },
   "apps/desktop/src/account-model.ts": {
-    "mtime": 1782881022.0128798,
-    "ast_hash": "e5d78233f659679dc8bf7fe1bc9112a0",
+    "mtime": 1782882977.139285,
+    "ast_hash": "37c2b73fc4fe2fba37ba0f6834adb5f4",
     "semantic_hash": ""
   },
   "apps/desktop/src/account-panel.tsx": {
-    "mtime": 1782881205.8165166,
-    "ast_hash": "2cb2e6b4ecac78b9edbe0b1b14513ced",
+    "mtime": 1782883255.3926983,
+    "ast_hash": "c01a7596014683efac0bf7ecd93bbce2",
     "semantic_hash": ""
   },
   "apps/desktop/src/app-dialogs.tsx": {
@@ -175,8 +175,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/data.ts": {
-    "mtime": 1782881022.0120203,
-    "ast_hash": "d367ce745cb098b2e06f55bcde75efca",
+    "mtime": 1782882970.4629498,
+    "ast_hash": "f8b2c3435f032d4add11d6df3c76145a",
     "semantic_hash": ""
   },
   "apps/desktop/src/desktop-text.ts": {
@@ -195,13 +195,13 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/dock-data.ts": {
-    "mtime": 1782881022.011517,
-    "ast_hash": "de4e38aa51f456e45c8682f5f5ae18eb",
+    "mtime": 1782882965.0547383,
+    "ast_hash": "78e23c27e465b0bd934e53abcbefe58d",
     "semantic_hash": ""
   },
   "apps/desktop/src/dock-panels.tsx": {
-    "mtime": 1782881191.5188072,
-    "ast_hash": "c3332c3f03a7d823d8192fe9705b6c94",
+    "mtime": 1782882987.7356,
+    "ast_hash": "bc355187a780643f7db68681a4a6971c",
     "semantic_hash": ""
   },
   "apps/desktop/src/dock-workspace-model.ts": {
@@ -280,8 +280,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/titlebar.tsx": {
-    "mtime": 1782878380.0877843,
-    "ast_hash": "f48308f4afdf9df4772bc732f7b13609",
+    "mtime": 1782883214.4332974,
+    "ast_hash": "812818a0bdf3fd609658e370e5ab7cc7",
     "semantic_hash": ""
   },
   "apps/desktop/src/use-account-docks-controller.ts": {
@@ -290,8 +290,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/use-auth-controller.ts": {
-    "mtime": 1782881222.3815536,
-    "ast_hash": "8840444d40c1b3271bd312ee44af4824",
+    "mtime": 1782883180.7957737,
+    "ast_hash": "12c6d0568282297081f723dc35951f55",
     "semantic_hash": ""
   },
   "apps/desktop/src/use-catalog-controller.ts": {
@@ -370,8 +370,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/workspace-view.tsx": {
-    "mtime": 1782881022.0139742,
-    "ast_hash": "f741e82acf7c53785f411750b1509b61",
+    "mtime": 1782883188.2133625,
+    "ast_hash": "ab18250e2968a217cf8cb0fc3cf33f87",
     "semantic_hash": ""
   },
   "apps/desktop/tsconfig.json": {
@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "packages/cli/package.json": {
-    "mtime": 1782879418.6064563,
-    "ast_hash": "59f3954a39c69ada7b4fbe8c9dc0f4c7",
+    "mtime": 1782881642.2396443,
+    "ast_hash": "111300dcd2f9fba3d0f917f2bbdd3fe1",
     "semantic_hash": ""
   },
   "packages/cli/scripts/build.ts": {
@@ -505,8 +505,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/constants.ts": {
-    "mtime": 1782879418.6068864,
-    "ast_hash": "07940784c5d2d6c8def327aef8331b0e",
+    "mtime": 1782881642.2398643,
+    "ast_hash": "d1206769adfa014b871409e1a10686b3",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-install-report.ts": {
@@ -730,8 +730,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/build-desktop.yml": {
-    "mtime": 1782816366.3649275,
-    "ast_hash": "361c80d4553967242bab916d23709319",
+    "mtime": 1782882895.442346,
+    "ast_hash": "a0a40882c5f4ee7ea4dd4eff5078a8f0",
     "semantic_hash": ""
   },
   ".github/workflows/publish-github-package.yml": {
@@ -740,8 +740,8 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1782879418.608884,
-    "ast_hash": "cadcb8b57910f163d65dcf33a542f01c",
+    "mtime": 1782881642.2413998,
+    "ast_hash": "5a9d033d7444db73ca8092a856a8d457",
     "semantic_hash": ""
   },
   "README.md": {
@@ -2622,6 +2622,11 @@
   "packages/cli/THIRD_PARTY_NOTICES.md": {
     "mtime": 1782869483.7708545,
     "ast_hash": "732e3fa3ef3346eea3c6734a906bc788",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/desktop-release-workflow.test.ts": {
+    "mtime": 1782882932.4767115,
+    "ast_hash": "c67bc50c2fc93b8961f1b090c9c3158c",
     "semantic_hash": ""
   }
 }

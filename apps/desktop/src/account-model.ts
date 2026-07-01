@@ -56,6 +56,7 @@ export function dockFromMyDock(dock: MyDock): Dock {
     readmeIntro: dock.summary ?? "",
     logoUrl: dock.logo?.url ?? null,
     publisher: owner,
+    publisherOfficial: dock.official,
     official: dock.official,
     platforms: dock.versions?.map((version) => version.platform).filter(Boolean) ?? [],
     tags: [reviewGroup, dock.hidden ? "hidden" : "submitted"],

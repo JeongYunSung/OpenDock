@@ -82,6 +82,8 @@ export function App() {
   } = useCommandTaskController(t);
   const [nickname, setNickname] = useStoredState("opendock.nickname", "");
   const [accountEmail, setAccountEmail] = useStoredState("opendock.accountEmail", "");
+  const [accountDisplayName, setAccountDisplayName] = useState("");
+  const [accountAvatarUrl, setAccountAvatarUrl] = useState<string | null>(null);
   const [accountOfficial, setAccountOfficial] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [appStateLoaded, setAppStateLoaded] = useState(!isTauriRuntime());
@@ -207,7 +209,7 @@ export function App() {
   const catalogPageCount = Math.max(1, Math.ceil(Math.max(catalogTotal, sortedDocks.length) / catalogPageSize));
   const versionPageCount = Math.max(1, Math.ceil(Math.max(versionTotal, detail?.versions?.length ?? 0) / versionPageSize));
   const overlayOpen = openMenu !== "";
-  const accountMenuName = nickname || accountEmail || (authProvider === "github" ? t.githubAccount : t.opendockAccount);
+  const accountMenuName = nickname || accountDisplayName || accountEmail || (authProvider === "github" ? t.githubAccount : t.opendockAccount);
   const showAppLoading = isTauriRuntime() && !appStateLoaded;
   const {
     myDocks,
@@ -242,6 +244,8 @@ export function App() {
     resetDockWorkspaceView,
     resetProjectDialogs,
     resetProjectRuntime,
+    setAccountAvatarUrl,
+    setAccountDisplayName,
     setAccountEmail,
     setAccountOfficial,
     setAuthProvider,
@@ -388,6 +392,8 @@ export function App() {
         if (cancelled || !profile) return;
         setNickname(profile.nickname);
         setAccountEmail(profile.email);
+        setAccountDisplayName(profile.displayName ?? "");
+        setAccountAvatarUrl(profile.avatarUrl ?? null);
         setAccountOfficial(profile.official);
       })
       .catch((error) => {
@@ -459,6 +465,8 @@ export function App() {
     if (!normalized) return;
     if (!isTauriRuntime()) {
       setNickname(normalized);
+      setAccountDisplayName("");
+      setAccountAvatarUrl(null);
       setAccountOfficial(false);
       return;
     }
@@ -467,6 +475,8 @@ export function App() {
       const profile = await requestUpdateAccountProfile(normalized);
       setNickname(profile.nickname);
       setAccountEmail(profile.email);
+      setAccountDisplayName(profile.displayName ?? "");
+      setAccountAvatarUrl(profile.avatarUrl ?? null);
       setAccountOfficial(profile.official);
       appendLog("OK", "var(--success)", t.profileSaved);
       showAppNotice("success", t.profileSaved);
@@ -482,6 +492,7 @@ export function App() {
   return (
     <div className="app-root" data-lang={lang} data-theme={theme}>
       <Titlebar
+        accountAvatarUrl={accountAvatarUrl}
         accountName={accountMenuName}
         appVersion={currentAppVersion}
         lang={lang}
@@ -547,6 +558,8 @@ export function App() {
             myDocksPageCount={myDocksPageCount}
             myDocksTotal={myDocksTotal}
             myStarredDocks={myStarredDocks}
+            accountAvatarUrl={accountAvatarUrl}
+            accountDisplayName={accountDisplayName}
             nickname={nickname}
             profileSaving={profileSaving}
             accountEmail={accountEmail}

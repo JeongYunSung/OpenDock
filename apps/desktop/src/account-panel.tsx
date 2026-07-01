@@ -8,6 +8,8 @@ import { DockMetric, Pagination, StatRow } from "./desktop-ui";
 export const ACCOUNT_PAGE_LIMIT = 6;
 
 export function AccountPanel(props: {
+  accountAvatarUrl: string | null;
+  accountDisplayName: string;
   accountEmail: string;
   accountOfficial: boolean;
   lang: Lang;
@@ -27,16 +29,24 @@ export function AccountPanel(props: {
 }) {
   const [draftNickname, setDraftNickname] = useState(props.nickname);
   const [accountTab, setAccountTab] = useState<"profile" | "docks" | "stars">("profile");
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const accountStats = accountStatsFor(props.myDocksCounts, props.myStarredDocks.length);
-  const profileName = props.nickname || props.accountEmail || props.t.opendockAccount;
+  const profileName = props.nickname || props.accountDisplayName || props.accountEmail || props.t.opendockAccount;
   const profileInitial = profileName.trim().charAt(0).toUpperCase() || "?";
+  const showAvatar = Boolean(props.accountAvatarUrl && !avatarFailed);
   const myDocksStart =
     props.myDocksTotal === 0 || props.myDocks.length === 0 ? 0 : (props.myDocksPage - 1) * ACCOUNT_PAGE_LIMIT + 1;
   const myDocksEnd = myDocksStart === 0 ? 0 : Math.min(props.myDocksTotal, myDocksStart + props.myDocks.length - 1);
+  const starredStart = props.myStarredDocks.length === 0 ? 0 : 1;
+  const starredEnd = props.myStarredDocks.length;
 
   useEffect(() => {
     setDraftNickname(props.nickname);
   }, [props.nickname]);
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [props.accountAvatarUrl]);
 
   return (
     <div className="panel account-panel">
@@ -50,7 +60,18 @@ export function AccountPanel(props: {
       </div>
       <div className="account-layout">
         <aside className="profile-card" aria-label={props.t.accountProfile}>
-          <div className="profile-avatar">{profileInitial}</div>
+          <div className={`profile-avatar ${showAvatar ? "has-image" : ""}`}>
+            {showAvatar ? (
+              <img
+                alt={`${profileName} avatar`}
+                src={props.accountAvatarUrl!}
+                onError={() => setAvatarFailed(true)}
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              profileInitial
+            )}
+          </div>
           <div>
             <strong>{profileName}</strong>
             {props.accountOfficial ? <img alt="official badge" src={badgeSrc} /> : null}
@@ -125,7 +146,7 @@ export function AccountPanel(props: {
           ) : null}
           {accountTab === "stars" ? (
             <section className="account-list-panel">
-              <div className="account-range">0-0 / {props.myStarredDocks.length}</div>
+              <div className="account-range">{starredStart}-{starredEnd} / {props.myStarredDocks.length}</div>
               {props.myStarredDocks.length > 0 ? (
                 <div className="starred-dock-list">
                   {props.myStarredDocks.map((dock) => (
