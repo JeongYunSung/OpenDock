@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
 import {
   dockFullId,
   normalizeRegistryDock,
@@ -34,6 +34,11 @@ export function useAccountDocksController(options: AccountDocksControllerOptions
   const [myDocksTotal, setMyDocksTotal] = useState(0);
   const [myDocksCounts, setMyDocksCounts] = useState<MyDocksCounts>(() => emptyMyDocksCounts());
   const [myStarredDocks, setMyStarredDocks] = useState<Dock[]>([]);
+  const loggedInRef = useRef(options.loggedIn);
+  const myDocksRequestRef = useRef(0);
+  const myStarsRequestRef = useRef(0);
+  const starUpdatingRef = useRef("");
+  loggedInRef.current = options.loggedIn;
 
   useEffect(() => {
     if (!options.loggedIn) {
@@ -75,11 +80,13 @@ export function useAccountDocksController(options: AccountDocksControllerOptions
   useEffect(() => {
     if (!options.loggedIn) return;
     void refreshMyDocks(myDocksPage);
-  }, [options.loggedIn, myDocksPage]);
+  }, [options.loggedIn, myDocksPage, options.pageSize]);
 
   async function refreshMyStars() {
+    const requestId = ++myStarsRequestRef.current;
     try {
       const response = await requestMyStars();
+      if (!isCurrentAccountRequest(loggedInRef, myStarsRequestRef, requestId)) return;
       const docks = (response.items ?? []).map((item, index) => normalizeRegistryDock(item.dock, index));
       setMyStarredDocks(docks);
       setStarredDockIds((current) => ({
@@ -87,38 +94,45 @@ export function useAccountDocksController(options: AccountDocksControllerOptions
         ...Object.fromEntries(docks.map((dock) => [dockFullId(dock), true])),
       }));
     } catch (error) {
+      if (!isCurrentAccountRequest(loggedInRef, myStarsRequestRef, requestId)) return;
       options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
     }
   }
 
   async function refreshMyDocks(page: number) {
+    const requestId = ++myDocksRequestRef.current;
     try {
       const response = await requestMyDocks(page, options.pageSize);
+      if (!isCurrentAccountRequest(loggedInRef, myDocksRequestRef, requestId)) return;
       setMyDocks(response.items ?? []);
       setMyDocksTotal(response.total ?? response.items?.length ?? 0);
       setMyDocksCounts(response.counts ?? emptyMyDocksCounts());
       if (response.page && response.page !== page) setMyDocksPage(response.page);
     } catch (error) {
+      if (!isCurrentAccountRequest(loggedInRef, myDocksRequestRef, requestId)) return;
       options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
     }
   }
 
   async function toggleDockStar(dock: Dock) {
     const dockId = dockFullId(dock);
-    if (starUpdatingId) return;
+    if (starUpdatingRef.current) return;
     if (!options.loggedIn) {
       options.appendLog("WARN", "var(--warning)", options.signInToStar);
       return;
     }
     const nextStarred = !starredDockIds[dockId];
+    starUpdatingRef.current = dockId;
     setStarUpdatingId(dockId);
     try {
       const response = await requestSetDockStar(dockId, nextStarred);
+      if (!loggedInRef.current) return;
       applyDockStarResponse(response);
       await refreshMyStars();
     } catch (error) {
       options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
     } finally {
+      starUpdatingRef.current = "";
       setStarUpdatingId("");
     }
   }
@@ -138,6 +152,8 @@ export function useAccountDocksController(options: AccountDocksControllerOptions
   }
 
   function resetAccountDocks() {
+    myDocksRequestRef.current += 1;
+    myStarsRequestRef.current += 1;
     setStarredDockIds({});
     setMyDocks([]);
     setMyDocksPage(1);
@@ -158,4 +174,12 @@ export function useAccountDocksController(options: AccountDocksControllerOptions
     starUpdatingId,
     toggleDockStar,
   };
+}
+
+function isCurrentAccountRequest(
+  loggedInRef: MutableRefObject<boolean>,
+  requestRef: MutableRefObject<number>,
+  requestId: number,
+) {
+  return loggedInRef.current && requestRef.current === requestId;
 }

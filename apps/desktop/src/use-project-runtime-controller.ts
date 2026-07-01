@@ -26,7 +26,10 @@ export function useProjectRuntimeController(options: ProjectRuntimeControllerOpt
   const [installedRecords, setInstalledRecords] = useState<InstalledDockRecord[]>([]);
   const [outdatedReportsById, setOutdatedReportsById] = useState<Record<string, OpenDockOutdatedReport>>({});
   const [projectStateLoaded, setProjectStateLoaded] = useState(false);
+  const activeProjectPath = options.activeProject?.path ?? null;
+  const activeProjectPathRef = useRef<string | null>(activeProjectPath);
   const loadedProjectPathRef = useRef<string | null>(null);
+  activeProjectPathRef.current = activeProjectPath;
 
   const resetProjectRuntime = useCallback(() => {
     loadedProjectPathRef.current = null;
@@ -41,6 +44,7 @@ export function useProjectRuntimeController(options: ProjectRuntimeControllerOpt
       if (!refreshOptions.silent) setProjectStateLoaded(false);
       try {
         const state = await invoke<ProjectStateResult>("opendock_project_state", { projectDir: project.path });
+        if (activeProjectPathRef.current !== project.path) return;
         const records = state.docks ?? [];
         loadedProjectPathRef.current = project.path;
         setInstalledRecords(records);
@@ -51,12 +55,15 @@ export function useProjectRuntimeController(options: ProjectRuntimeControllerOpt
         }
         try {
           const outdated = await invoke<OpenDockCommandResult>("opendock_outdated", { projectDir: project.path });
+          if (activeProjectPathRef.current !== project.path) return;
           setOutdatedReportsById(outdatedReportsByDockId(outdated.json));
         } catch (error) {
+          if (activeProjectPathRef.current !== project.path) return;
           setOutdatedReportsById((current) => preserveCompatibleOutdatedReports(current, records));
           options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
         }
       } catch (error) {
+        if (activeProjectPathRef.current !== project.path) return;
         const canPreserveCurrentState = loadedProjectPathRef.current === project.path;
         if (!canPreserveCurrentState) {
           setInstalledRecords([]);
@@ -65,7 +72,7 @@ export function useProjectRuntimeController(options: ProjectRuntimeControllerOpt
         }
         options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
       } finally {
-        setProjectStateLoaded(true);
+        if (activeProjectPathRef.current === project.path) setProjectStateLoaded(true);
       }
     },
     [options.appendLog, options.setInstalledDocks],
@@ -76,8 +83,10 @@ export function useProjectRuntimeController(options: ProjectRuntimeControllerOpt
       if (!project || !isTauriRuntime()) return;
       try {
         const result = await invoke<OpenDockCommandResult>("opendock_log", { projectDir: project.path });
+        if (activeProjectPathRef.current !== project.path) return;
         options.setLogs(commandLinesToStoredLogs(result.lines));
       } catch (error) {
+        if (activeProjectPathRef.current !== project.path) return;
         options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
       }
     },

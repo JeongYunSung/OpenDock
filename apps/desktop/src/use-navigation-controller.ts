@@ -148,10 +148,10 @@ export function useNavigationController(options: NavigationControllerOptions) {
         if (options.activeProject) options.openDeleteProject(options.activeProject);
         break;
       case "dock:install":
-        if (options.detail) await options.installDock(options.detail);
+        if (options.detail && options.dockView === "detail") await options.installDock(options.detail);
         break;
       case "dock:delete":
-        if (options.detail) await options.deleteDock(options.detail);
+        if (options.detail && options.dockView === "detail") await options.deleteDock(options.detail);
         break;
       case "dock:refresh-registry":
         await options.refreshCatalogFromRegistry();

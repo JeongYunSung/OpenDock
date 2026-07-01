@@ -168,6 +168,7 @@ fn opendock_cancel_command(
 async fn opendock_auth_login(
     app: tauri::AppHandle,
     provider: String,
+    command_id: Option<String>,
 ) -> Result<OpenDockCommandResult, String> {
     let provider = match provider.as_str() {
         "gmail" | "google" => "google",
@@ -183,7 +184,7 @@ async fn opendock_auth_login(
             "--provider".to_string(),
             provider.to_string(),
         ],
-        None,
+        command_id,
     )
     .await
 }

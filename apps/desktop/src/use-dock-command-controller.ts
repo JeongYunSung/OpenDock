@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { useRef } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import {
   isTaskActive,
@@ -38,6 +39,13 @@ interface DockCommandControllerOptions {
 }
 
 export function useDockCommandController(options: DockCommandControllerOptions) {
+  const activeProjectPathRef = useRef(options.activeProject?.path ?? null);
+  activeProjectPathRef.current = options.activeProject?.path ?? null;
+
+  function hasActiveCommandTask() {
+    return isTaskActive(options.commandTaskRef.current);
+  }
+
   async function cancelCommandTask() {
     const task = options.commandTaskRef.current;
     if (!task || !isTaskActive(task)) return;
@@ -107,11 +115,13 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
       await options.refreshProjectState(
         options.projects.find((project) => project.path === retry.projectPath) ?? options.activeProject,
       );
-      options.setInstalledDocks((current) => {
-        const next = { ...current };
-        delete next[retry.dockId!];
-        return next;
-      });
+      if (activeProjectPathRef.current === retry.projectPath) {
+        options.setInstalledDocks((current) => {
+          const next = { ...current };
+          delete next[retry.dockId!];
+          return next;
+        });
+      }
     } catch (error) {
       if (retry.kind === "update") {
         await options
@@ -133,6 +143,7 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
   }
 
   async function runDoctor(project: Project | undefined) {
+    if (hasActiveCommandTask()) return;
     options.setDockView("logs");
     if (!project) return;
     const commandId = options.beginCommandTask("doctor", project.path, project.path);
@@ -163,6 +174,7 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
   }
 
   async function updateDocks(project: Project | undefined, commandOptions: { showLogs?: boolean } = { showLogs: true }) {
+    if (hasActiveCommandTask()) return;
     if (commandOptions.showLogs !== false) options.setDockView("logs");
     if (!project) return;
     const commandId = options.beginCommandTask("update", project.path, project.path);
@@ -190,12 +202,14 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
   }
 
   async function installDock(dock: Dock) {
-    if (!options.activeProject) {
+    if (hasActiveCommandTask()) return;
+    const targetProject = options.activeProject;
+    if (!targetProject) {
       options.appendLog("WARN", "var(--warning)", "select a workspace before installing a dock");
       return;
     }
     const dockId = dockFullId(dock);
-    const commandId = options.beginCommandTask("install", dockId, options.activeProject.path);
+    const commandId = options.beginCommandTask("install", dockId, targetProject.path);
     await waitForCommandPopupPaint();
     if (isTauriRuntime()) {
       try {
@@ -203,12 +217,12 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
         const dockRef = `${dockFullId(freshDock)}@${freshDock.version}`;
         options.appendLog("RUN", "var(--info)", `install ${dockRef}`);
         const result = await invoke<OpenDockCommandResult>("opendock_install", {
-          projectDir: options.activeProject.path,
+          projectDir: targetProject.path,
           dockRef,
           commandId,
         });
         if (!options.finishCommandResult(commandId, result, options.t.taskCompleted)) return;
-        await options.refreshProjectState(options.activeProject, { silent: true });
+        await options.refreshProjectState(targetProject, { silent: true });
       } catch (error) {
         options.appendLog("ERR", "var(--danger)", error instanceof Error ? error.message : String(error));
         options.finishCommandTask(commandId, "error", options.t.taskFailed);
@@ -223,27 +237,31 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
       options.appendCommandResultLog(commandId, previewChangeResult("install", dockFullId(dock), options.installedRows, dock));
       options.finishCommandTask(commandId, "success", options.t.taskCompleted);
     }
-    options.setInstalledDocks((current) => ({ ...current, [dockFullId(dock)]: true }));
+    if (activeProjectPathRef.current === targetProject.path) {
+      options.setInstalledDocks((current) => ({ ...current, [dockFullId(dock)]: true }));
+    }
   }
 
   async function deleteDock(dock: Dock) {
-    if (!options.activeProject) {
+    if (hasActiveCommandTask()) return;
+    const targetProject = options.activeProject;
+    if (!targetProject) {
       options.appendLog("WARN", "var(--warning)", "select a workspace before deleting a dock");
       return;
     }
     const dockId = dockFullId(dock);
-    const commandId = options.beginCommandTask("delete", dockId, options.activeProject.path);
+    const commandId = options.beginCommandTask("delete", dockId, targetProject.path);
     await waitForCommandPopupPaint();
     if (isTauriRuntime()) {
       try {
         options.appendLog("RUN", "var(--info)", `uninstall ${dockId}`);
         const result = await invoke<OpenDockCommandResult>("opendock_uninstall", {
-          projectDir: options.activeProject.path,
+          projectDir: targetProject.path,
           dockId,
           commandId,
         });
         if (!options.finishCommandResult(commandId, result, options.t.taskCompleted)) return;
-        await options.refreshProjectState(options.activeProject);
+        await options.refreshProjectState(targetProject);
       } catch (error) {
         options.appendLog("ERR", "var(--danger)", error instanceof Error ? error.message : String(error));
         options.finishCommandTask(commandId, "error", options.t.taskFailed);
@@ -255,12 +273,14 @@ export function useDockCommandController(options: DockCommandControllerOptions) 
       options.appendCommandResultLog(commandId, previewChangeResult("uninstall", dockId, options.installedRows, dock));
       options.finishCommandTask(commandId, "success", options.t.taskCompleted);
     }
-    options.setInstalledDocks((current) => {
-      const next = { ...current };
-      delete next[dockFullId(dock)];
-      delete next[dock.id];
-      return next;
-    });
+    if (activeProjectPathRef.current === targetProject.path) {
+      options.setInstalledDocks((current) => {
+        const next = { ...current };
+        delete next[dockFullId(dock)];
+        delete next[dock.id];
+        return next;
+      });
+    }
   }
 
   return {

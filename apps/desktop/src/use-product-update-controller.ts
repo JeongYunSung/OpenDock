@@ -37,6 +37,8 @@ const productUpdateNotice = { stableKey: "product-update-progress" };
 
 export function useProductUpdateController(options: ProductUpdateControllerOptions) {
   const appendLogRef = useRef(options.appendLog);
+  const checkRequestRef = useRef(0);
+  const installingProductUpdateRef = useRef(false);
   const messagesRef = useRef(options.messages);
   const productUpdateRef = useRef<ProductUpdateState>(initialProductUpdateState);
   const showNoticeRef = useRef(options.showNotice);
@@ -53,6 +55,8 @@ export function useProductUpdateController(options: ProductUpdateControllerOptio
   }, [productUpdate]);
 
   const checkProductUpdate = useCallback(async (checkOptions: { cancelled?: () => boolean; silentStart?: boolean } = {}) => {
+    if (installingProductUpdateRef.current) return;
+    const requestId = ++checkRequestRef.current;
     const silent = checkOptions.silentStart === true;
     if (!isTauriRuntime()) {
       if (!silent) {
@@ -70,7 +74,7 @@ export function useProductUpdateController(options: ProductUpdateControllerOptio
     setProductUpdate((current) => ({ ...current, status: "checking" }));
     try {
       const check = await invoke<ProductUpdateCheck>("opendock_app_update_check");
-      if (checkOptions.cancelled?.()) {
+      if (checkOptions.cancelled?.() || checkRequestRef.current !== requestId || installingProductUpdateRef.current) {
         return;
       }
       setProductUpdate({
@@ -89,7 +93,7 @@ export function useProductUpdateController(options: ProductUpdateControllerOptio
         showNoticeRef.current(check.updateAvailable ? "warning" : "success", message);
       }
     } catch (error) {
-      if (checkOptions.cancelled?.()) {
+      if (checkOptions.cancelled?.() || checkRequestRef.current !== requestId || installingProductUpdateRef.current) {
         return;
       }
       setProductUpdate({ check: null, status: "failed" });
@@ -163,6 +167,7 @@ export function useProductUpdateController(options: ProductUpdateControllerOptio
   }, [openReleaseUrl, productUpdate.check?.releaseUrl]);
 
   const installProductUpdate = useCallback(async () => {
+    if (installingProductUpdateRef.current) return;
     const check = productUpdateRef.current.check;
     if (!check) {
       await checkProductUpdate();
@@ -184,12 +189,14 @@ export function useProductUpdateController(options: ProductUpdateControllerOptio
       return;
     }
 
+    installingProductUpdateRef.current = true;
     setProductUpdate((current) => ({ ...current, status: "installing" }));
     appendLogRef.current("RUN", "var(--info)", `install OpenDock ${check.latestVersion}`);
     showNoticeRef.current("info", messagesRef.current.installing(check.latestVersion), productUpdateNotice);
     try {
       await invoke("opendock_app_update_install");
     } catch (error) {
+      installingProductUpdateRef.current = false;
       setProductUpdate((current) => ({ ...current, status: current.check?.updateAvailable ? "available" : "failed" }));
       const message = messagesRef.current.failed(errorMessage(error));
       appendLogRef.current("WARN", "var(--warning)", message);

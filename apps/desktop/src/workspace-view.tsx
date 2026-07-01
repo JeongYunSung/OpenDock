@@ -51,7 +51,6 @@ export function Workspace(props: {
   profileSaving: boolean;
   onAddExisting: () => void;
   onBack: () => void;
-  onCancelCommand: () => void;
   onCreate: () => void;
   onDeleteDock: (dock: Dock) => void;
   onInstallDock: (dock: Dock) => void;

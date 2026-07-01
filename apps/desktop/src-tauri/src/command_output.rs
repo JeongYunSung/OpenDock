@@ -2,7 +2,9 @@ use serde::Serialize;
 use serde_json::Value;
 
 #[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct OpenDockCommandLine {
+    pub(crate) command_id: Option<String>,
     pub(crate) level: String,
     pub(crate) message: String,
 }
@@ -29,18 +31,21 @@ pub(crate) fn command_lines(stdout: &str, stderr: &str, success: bool) -> Vec<Op
         .filter(|line| !line.trim().is_empty() && !is_command_json_line(line))
     {
         lines.push(OpenDockCommandLine {
+            command_id: None,
             level: infer_level(line, success).to_string(),
             message: line.to_string(),
         });
     }
     for line in stderr.lines().filter(|line| !line.trim().is_empty()) {
         lines.push(OpenDockCommandLine {
+            command_id: None,
             level: "ERR".to_string(),
             message: line.to_string(),
         });
     }
     if lines.is_empty() {
         lines.push(OpenDockCommandLine {
+            command_id: None,
             level: if success { "OK" } else { "ERR" }.to_string(),
             message: empty_stream_message(success),
         });

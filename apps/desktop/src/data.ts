@@ -234,6 +234,7 @@ export interface ProductUpdateState {
 }
 
 export interface OpenDockCommandLine {
+  commandId?: string | null;
   level: "INFO" | "OK" | "RUN" | "WARN" | "ERR" | string;
   message: string;
 }

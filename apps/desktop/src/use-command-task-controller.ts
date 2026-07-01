@@ -36,11 +36,9 @@ export function useCommandTaskController(t: (typeof TEXT)[Lang]) {
   const commandTaskRef = useRef<CommandTask | null>(null);
 
   function setCommandTask(next: NextCommandTask) {
-    setCommandTaskState((current) => {
-      const value = typeof next === "function" ? next(current) : next;
-      commandTaskRef.current = value;
-      return value;
-    });
+    const value = typeof next === "function" ? next(commandTaskRef.current) : next;
+    commandTaskRef.current = value;
+    setCommandTaskState(value);
   }
 
   function beginCommandTask(kind: CommandTaskKind, target: string, projectPath?: string) {

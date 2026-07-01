@@ -13,6 +13,7 @@ export function AppOverlays(props: {
   deleteProjectName: string;
   lang: Lang;
   onAddExistingProject: () => void;
+  onCancelCommand: () => void;
   onCloseCommandPalette: () => void;
   onCloseCommandProgress: () => void;
   onCloseProjectAdd: () => void;
@@ -68,6 +69,7 @@ export function AppOverlays(props: {
       {props.commandTask ? (
         <CommandProgressDialog
           commandTask={props.commandTask}
+          onCancel={props.onCancelCommand}
           onClose={props.onCloseCommandProgress}
           onForceRetryCommand={props.onForceRetryCommand}
           t={props.t}

@@ -124,6 +124,7 @@ export function applyCommandLineToRunningTask(
   line: OpenDockCommandLine,
 ): CommandTask | null {
   if (!current || current.status !== "running") return current;
+  if (line.commandId && line.commandId !== current.id) return current;
   const level = line.level.toUpperCase();
   return {
     ...current,

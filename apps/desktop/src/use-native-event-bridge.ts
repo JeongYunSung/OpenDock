@@ -11,6 +11,7 @@ interface NativeEventBridgeOptions {
   appendLog: (level: string, color: string, message: string) => void;
   applyCommandLineToTask: (line: OpenDockCommandLine) => void;
   applyCommandProgressToTask: (progress: OpenDockCommandProgress) => void;
+  authCommandIdRef: MutableRefObject<string | null>;
   commandTask: CommandTask | null;
   commandTaskRef: MutableRefObject<CommandTask | null>;
   handleNativeMenu: (id: string) => Promise<void> | void;
@@ -29,6 +30,7 @@ export function useNativeEventBridge(options: NativeEventBridgeOptions) {
     appendLog: options.appendLog,
     applyCommandLineToTask: options.applyCommandLineToTask,
     applyCommandProgressToTask: options.applyCommandProgressToTask,
+    authCommandIdRef: options.authCommandIdRef,
     commandTaskRef: options.commandTaskRef,
     setAuthMessage: options.setAuthMessage,
   });
@@ -42,6 +44,7 @@ export function useNativeEventBridge(options: NativeEventBridgeOptions) {
       appendLog: options.appendLog,
       applyCommandLineToTask: options.applyCommandLineToTask,
       applyCommandProgressToTask: options.applyCommandProgressToTask,
+      authCommandIdRef: options.authCommandIdRef,
       commandTaskRef: options.commandTaskRef,
       setAuthMessage: options.setAuthMessage,
     };
@@ -87,6 +90,7 @@ export function useNativeEventBridge(options: NativeEventBridgeOptions) {
     void listen<OpenDockCommandLine>("opendock-command-line", (event) => {
       const line = event.payload;
       const handlers = commandEventHandlersRef.current;
+      if (isStaleCommandLine(line, handlers.commandTaskRef, handlers.authCommandIdRef)) return;
       if (isAuthStatusLine(line.message)) handlers.setAuthMessage(line.message);
       handlers.appendLog(line.level, logColor(line.level), line.message);
       handlers.applyCommandLineToTask(line);
@@ -118,4 +122,13 @@ export function useNativeEventBridge(options: NativeEventBridgeOptions) {
       }
     };
   }, []);
+}
+
+function isStaleCommandLine(
+  line: OpenDockCommandLine,
+  commandTaskRef: MutableRefObject<CommandTask | null>,
+  authCommandIdRef: MutableRefObject<string | null>,
+) {
+  if (!line.commandId) return false;
+  return line.commandId !== commandTaskRef.current?.id && line.commandId !== authCommandIdRef.current;
 }

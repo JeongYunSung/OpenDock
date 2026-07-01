@@ -23,17 +23,30 @@ export function useProjectController(options: ProjectControllerOptions) {
   const [deleteProjectId, setDeleteProjectId] = useState("");
   const [deleteProjectName, setDeleteProjectName] = useState("");
   const blankProjectCreatingRef = useRef(false);
+  const existingProjectPickingRef = useRef(false);
+  const projectsRef = useRef(projects);
+  projectsRef.current = projects;
 
   function registerProject(name: string, folderName: string, path: string) {
     const cleanFolderName = (folderName || name || "selected-workspace").trim();
     const cleanName = (name || cleanFolderName).trim();
+    const existingProject = projectsRef.current.find((project) => project.path === path);
+    if (existingProject) {
+      setActiveProjectId(existingProject.id);
+      setProjectAddOpen(false);
+      setProjectRenameOpen(false);
+      setProjectDeleteOpen(false);
+      options.resetDockWorkspaceView();
+      return;
+    }
     const project = {
       id: `project-${Date.now()}-${Math.round(Math.random() * 1000)}`,
       name: cleanName,
       folderName: cleanFolderName,
       path,
     };
-    setProjects((current) => [...current, project]);
+    projectsRef.current = [...projectsRef.current, project];
+    setProjects(projectsRef.current);
     setActiveProjectId(project.id);
     setProjectAddOpen(false);
     setProjectRenameOpen(false);
@@ -66,44 +79,34 @@ export function useProjectController(options: ProjectControllerOptions) {
   }
 
   async function addExistingProjectFromFolder() {
-    if (isTauriRuntime()) {
-      try {
-        const folder = await invoke<ProjectFolder | null>("pick_project_folder");
-        if (folder) registerProject(folder.name, folder.folder_name, folder.path);
-        return;
-      } catch {
-        // Fall through to the browser-compatible picker for preview mode.
-      }
-    }
-
+    if (existingProjectPickingRef.current) return;
+    existingProjectPickingRef.current = true;
     try {
-      if (window.showDirectoryPicker) {
-        const handle = await window.showDirectoryPicker();
-        const folderName = handle.name || "selected-workspace";
-        registerProject(folderName, folderName, `~/work/${folderName}`);
-        return;
+      if (isTauriRuntime()) {
+        try {
+          const folder = await invoke<ProjectFolder | null>("pick_project_folder");
+          if (folder) registerProject(folder.name, folder.folder_name, folder.path);
+          return;
+        } catch {
+          // Fall through to the browser-compatible picker for preview mode.
+        }
       }
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-    }
 
-    const input = document.createElement("input");
-    input.type = "file";
-    input.multiple = true;
-    input.setAttribute("webkitdirectory", "true");
-    input.addEventListener(
-      "change",
-      () => {
-        const file = input.files?.[0] as (File & { webkitRelativePath?: string }) | undefined;
-        const root = file?.webkitRelativePath?.split("/")[0] || file?.name || "selected-workspace";
-        registerProject(root, root, `~/work/${root}`);
-        input.remove();
-      },
-      { once: true },
-    );
-    input.style.display = "none";
-    document.body.appendChild(input);
-    input.click();
+      try {
+        if (window.showDirectoryPicker) {
+          const handle = await window.showDirectoryPicker();
+          const folderName = handle.name || "selected-workspace";
+          registerProject(folderName, folderName, `~/work/${folderName}`);
+          return;
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+
+      await chooseFolderWithInputFallback((root) => registerProject(root, root, `~/work/${root}`));
+    } finally {
+      existingProjectPickingRef.current = false;
+    }
   }
 
   function openRenameProject(project: Project) {
@@ -125,7 +128,9 @@ export function useProjectController(options: ProjectControllerOptions) {
     event.preventDefault();
     const nextName = renameProjectName.trim();
     if (!nextName) return;
-    setProjects((current) => current.map((project) => (project.id === renameProjectId ? { ...project, name: nextName } : project)));
+    const nextProjects = projectsRef.current.map((project) => (project.id === renameProjectId ? { ...project, name: nextName } : project));
+    projectsRef.current = nextProjects;
+    setProjects(nextProjects);
     closeProjectRename();
   }
 
@@ -165,8 +170,9 @@ export function useProjectController(options: ProjectControllerOptions) {
 
   function removeProjectFromOpenDock(project: Project | undefined) {
     if (!project) return;
-    const nextProjects = projects.filter((item) => item.id !== project.id);
+    const nextProjects = projectsRef.current.filter((item) => item.id !== project.id);
     const wasActiveProject = activeProjectId === project.id;
+    projectsRef.current = nextProjects;
     setProjects(nextProjects);
     if (wasActiveProject) setActiveProjectId(nextProjects[0]?.id ?? "");
     setProjectAddOpen(false);
@@ -211,4 +217,40 @@ export function useProjectController(options: ProjectControllerOptions) {
     setProjectSidebarCollapsed,
     setRenameProjectName,
   };
+}
+
+function chooseFolderWithInputFallback(registerSelectedFolder: (root: string) => void) {
+  return new Promise<void>((resolve) => {
+    const input = document.createElement("input");
+    let resolved = false;
+    let focusTimeout: number | undefined;
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      if (focusTimeout !== undefined) window.clearTimeout(focusTimeout);
+      window.removeEventListener("focus", finishAfterFocus);
+      input.remove();
+      resolve();
+    };
+    const finishAfterFocus = () => {
+      focusTimeout = window.setTimeout(finish, 750);
+    };
+    input.type = "file";
+    input.multiple = true;
+    input.setAttribute("webkitdirectory", "true");
+    input.addEventListener(
+      "change",
+      () => {
+        const file = input.files?.[0] as (File & { webkitRelativePath?: string }) | undefined;
+        const root = file?.webkitRelativePath?.split("/")[0] || file?.name;
+        if (root) registerSelectedFolder(root);
+        finish();
+      },
+      { once: true },
+    );
+    input.style.display = "none";
+    document.body.appendChild(input);
+    window.addEventListener("focus", finishAfterFocus, { once: true });
+    input.click();
+  });
 }

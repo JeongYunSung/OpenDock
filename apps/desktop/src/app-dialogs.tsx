@@ -17,6 +17,7 @@ import {
 
 export function CommandProgressDialog(props: {
   commandTask: CommandTask;
+  onCancel: () => void;
   onClose: () => void;
   onForceRetryCommand: () => void;
   t: (typeof TEXT)[Lang];
@@ -26,6 +27,7 @@ export function CommandProgressDialog(props: {
       <div aria-labelledby="command-progress-title" aria-modal="true" className="command-progress-dialog" role="dialog">
         <CommandProgressCard
           commandTask={props.commandTask}
+          onCancel={props.onCancel}
           onClose={props.onClose}
           onForceRetryCommand={props.onForceRetryCommand}
           t={props.t}
@@ -37,11 +39,13 @@ export function CommandProgressDialog(props: {
 
 function CommandProgressCard(props: {
   commandTask: CommandTask;
+  onCancel: () => void;
   onClose: () => void;
   onForceRetryCommand: () => void;
   t: (typeof TEXT)[Lang];
 }) {
   const active = isTaskActive(props.commandTask);
+  const canCancel = props.commandTask.status === "running";
   const percent = `${Math.round(props.commandTask.progress)}%`;
   const rows = props.commandTask.rows.slice(0, 16);
   const forceRetry = !active ? props.commandTask.forceRetry : null;
@@ -78,21 +82,26 @@ function CommandProgressCard(props: {
           ))}
         </div>
       </div>
-      {!active ? (
-        <div className="command-progress-foot">
-          {forceRetry ? <span>{props.t.forceRetryWarning}</span> : null}
-          <div className="command-progress-actions">
-            {forceRetry ? (
-              <button className="danger-button compact" onClick={props.onForceRetryCommand} type="button">
-                {forceRetry.kind === "update" ? props.t.forceUpdateAction : props.t.forceDeleteAction}
-              </button>
-            ) : null}
+      <div className="command-progress-foot">
+        {forceRetry ? <span>{props.t.forceRetryWarning}</span> : null}
+        <div className="command-progress-actions">
+          {active ? (
+            <button className="secondary-button compact" disabled={!canCancel} onClick={props.onCancel} type="button">
+              {canCancel ? props.t.cancel : props.t.taskCancelling}
+            </button>
+          ) : null}
+          {forceRetry ? (
+            <button className="danger-button compact" onClick={props.onForceRetryCommand} type="button">
+              {forceRetry.kind === "update" ? props.t.forceUpdateAction : props.t.forceDeleteAction}
+            </button>
+          ) : null}
+          {!active ? (
             <button className="secondary-button compact" onClick={props.onClose} type="button">
               {props.t.close}
             </button>
-          </div>
+          ) : null}
         </div>
-      ) : null}
+      </div>
     </section>
   );
 }

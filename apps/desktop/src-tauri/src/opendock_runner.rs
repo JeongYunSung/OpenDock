@@ -302,6 +302,7 @@ fn run_opendock_streaming(
 
     if collected_lines.is_empty() && should_emit_empty_stream_message(&stdout, &stderr) {
         let payload = OpenDockCommandLine {
+            command_id: command_id.map(str::to_string),
             level: if success { "OK" } else { "ERR" }.to_string(),
             message: empty_stream_message(success),
         };
@@ -347,6 +348,7 @@ fn spawn_command_reader<R: Read + Send + 'static>(
                 continue;
             }
             let payload = OpenDockCommandLine {
+                command_id: command_id.clone(),
                 level: if is_stderr {
                     "ERR".to_string()
                 } else {

@@ -86,6 +86,9 @@ export function App() {
   const [accountAvatarUrl, setAccountAvatarUrl] = useState<string | null>(null);
   const [accountOfficial, setAccountOfficial] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
+  const accountProfileRequestRef = useRef(0);
+  const loggedInRef = useRef(loggedIn);
+  loggedInRef.current = loggedIn;
   const [appStateLoaded, setAppStateLoaded] = useState(!isTauriRuntime());
   const responsivePageSizes = useResponsivePageSizes();
   const catalogPageSize = responsivePageSizes.catalog;
@@ -235,6 +238,7 @@ export function App() {
   const {
     authMessage,
     authWorking,
+    authCommandIdRef,
     login,
     logout,
     setAuthMessage,
@@ -345,6 +349,7 @@ export function App() {
     appendLog,
     applyCommandLineToTask,
     applyCommandProgressToTask,
+    authCommandIdRef,
     commandTask,
     commandTaskRef,
     handleNativeMenu,
@@ -384,11 +389,19 @@ export function App() {
   });
 
   useEffect(() => {
+    if (!loggedIn) {
+      accountProfileRequestRef.current += 1;
+      setProfileSaving(false);
+    }
+  }, [loggedIn]);
+
+  useEffect(() => {
     if (!appStateLoaded || !loggedIn || !isTauriRuntime()) return;
     let cancelled = false;
+    const requestId = ++accountProfileRequestRef.current;
     void requestAccountProfile()
       .then((profile) => {
-        if (cancelled || !profile) return;
+        if (cancelled || !profile || accountProfileRequestRef.current !== requestId || !loggedInRef.current) return;
         setNickname(profile.nickname);
         setAccountEmail(profile.email);
         setAccountDisplayName(profile.displayName ?? "");
@@ -396,7 +409,7 @@ export function App() {
         setAccountOfficial(profile.official);
       })
       .catch((error) => {
-        if (!cancelled) {
+        if (!cancelled && accountProfileRequestRef.current === requestId && loggedInRef.current) {
           appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
         }
       });
@@ -490,8 +503,10 @@ export function App() {
       return;
     }
     setProfileSaving(true);
+    const requestId = ++accountProfileRequestRef.current;
     try {
       const profile = await requestUpdateAccountProfile(normalized);
+      if (accountProfileRequestRef.current !== requestId || !loggedInRef.current) return;
       setNickname(profile.nickname);
       setAccountEmail(profile.email);
       setAccountDisplayName(profile.displayName ?? "");
@@ -500,11 +515,12 @@ export function App() {
       appendLog("OK", "var(--success)", t.profileSaved);
       showAppNotice("success", t.profileSaved);
     } catch (error) {
+      if (accountProfileRequestRef.current !== requestId || !loggedInRef.current) return;
       const message = error instanceof Error ? error.message : String(error);
       appendLog("WARN", "var(--warning)", message);
       showAppNotice("warning", t.profileSaveFailed.replace("{message}", message));
     } finally {
-      setProfileSaving(false);
+      if (accountProfileRequestRef.current === requestId) setProfileSaving(false);
     }
   }
 
@@ -584,7 +600,6 @@ export function App() {
             commandTask={commandTask}
             onAddExisting={() => void addExistingProjectFromFolder()}
             onBack={() => setMainView("list")}
-            onCancelCommand={() => void cancelCommandTask()}
             onCreate={createBlankProject}
             onDeleteDock={deleteDock}
             onInstallDock={installDock}
@@ -672,6 +687,7 @@ export function App() {
         renameProjectName={renameProjectName}
         shortcutPlatform={shortcutPlatform}
         t={t}
+        onCancelCommand={() => void cancelCommandTask()}
       />
     </div>
   );

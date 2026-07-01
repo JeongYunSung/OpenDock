@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Lang, TEXT } from "./data";
 import { detectWindowControlPlatform } from "./app-menu";
 import { chooseShortcutFileFromBrowser, downloadShortcutFile, type ShortcutFileResult } from "./shortcut-file";
@@ -21,6 +21,7 @@ import { useStoredState } from "./use-stored-state";
 export function useShortcutController(lang: Lang, t: (typeof TEXT)[Lang]) {
   const [shortcutOverrides, setShortcutOverrides] = useStoredState<ShortcutOverrides>("opendock.shortcutOverrides", {});
   const [shortcutStatus, setShortcutStatus] = useState("");
+  const shortcutFileWorkingRef = useRef(false);
   const windowControlPlatform = detectWindowControlPlatform();
   const shortcutPlatform = shortcutPlatformForWindow(windowControlPlatform);
   const shortcutBindings = useMemo(
@@ -50,6 +51,8 @@ export function useShortcutController(lang: Lang, t: (typeof TEXT)[Lang]) {
   }
 
   async function importShortcuts() {
+    if (shortcutFileWorkingRef.current) return;
+    shortcutFileWorkingRef.current = true;
     try {
       const raw = isTauriRuntime()
         ? (await invoke<ShortcutFileResult | null>("opendock_import_shortcuts"))?.contents ?? null
@@ -60,10 +63,14 @@ export function useShortcutController(lang: Lang, t: (typeof TEXT)[Lang]) {
       setShortcutStatus(t.shortcutImportDone);
     } catch (error) {
       setShortcutStatus(error instanceof Error ? error.message : String(error));
+    } finally {
+      shortcutFileWorkingRef.current = false;
     }
   }
 
   async function exportShortcuts() {
+    if (shortcutFileWorkingRef.current) return;
+    shortcutFileWorkingRef.current = true;
     try {
       const contents = exportShortcutConfig(shortcutOverrides);
       if (isTauriRuntime()) {
@@ -75,6 +82,8 @@ export function useShortcutController(lang: Lang, t: (typeof TEXT)[Lang]) {
       setShortcutStatus(t.shortcutExportDone);
     } catch (error) {
       setShortcutStatus(error instanceof Error ? error.message : String(error));
+    } finally {
+      shortcutFileWorkingRef.current = false;
     }
   }
 

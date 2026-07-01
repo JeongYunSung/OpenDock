@@ -21,8 +21,10 @@ const productUpdateRust = readTauriSrc("product_update.rs");
 const registryRust = readTauriSrc("registry.rs");
 const mainRust = readTauriSrc("main.rs");
 const accountPanel = readSrc("account-panel.tsx");
+const accountDocksController = readSrc("use-account-docks-controller.ts");
 const app = readSrc("App.tsx");
 const appMenu = readSrc("app-menu.tsx");
+const appDialogs = readSrc("app-dialogs.tsx");
 const commandLog = readSrc("command-log.ts");
 const commandTask = readSrc("command-task.ts");
 const commandTaskController = readSrc("use-command-task-controller.ts");
@@ -39,12 +41,14 @@ const dockCommandController = readSrc("use-dock-command-controller.ts");
 const projectController = readSrc("use-project-controller.ts");
 const projectRuntimeController = readSrc("use-project-runtime-controller.ts");
 const productUpdateController = readSrc("use-product-update-controller.ts");
+const desktopStateSync = readSrc("use-desktop-state-sync.ts");
 const nativeEventBridge = readSrc("use-native-event-bridge.ts");
 const navigationController = readSrc("use-navigation-controller.ts");
 const responsivePageSize = readSrc("responsive-page-size.ts");
 const registryClient = readSrc("registry-client.ts");
 const shortcutController = readSrc("use-shortcut-controller.ts");
 const titlebar = readSrc("titlebar.tsx");
+const workspaceView = readSrc("workspace-view.tsx");
 const workspaceShell = readSrc("workspace-shell.tsx");
 const styles = readSrc("styles.css");
 const tauriConfig = readJson("src-tauri", "tauri.conf.json");
@@ -93,6 +97,16 @@ const blankProjectHasInFlightGuard =
   projectController.includes("if (blankProjectCreatingRef.current) return;") &&
   projectController.includes("blankProjectCreatingRef.current = true;") &&
   projectController.includes("blankProjectCreatingRef.current = false;");
+const existingProjectPickerHasInFlightGuard =
+  projectController.includes("if (existingProjectPickingRef.current) return;") &&
+  projectController.includes("existingProjectPickingRef.current = true;") &&
+  projectController.includes("existingProjectPickingRef.current = false;");
+const projectRegistrationDeduplicatesPaths =
+  projectController.includes("const projectsRef = useRef(projects)") &&
+  projectController.includes("const existingProject = projectsRef.current.find((project) => project.path === path)") &&
+  projectController.includes("setActiveProjectId(existingProject.id)") &&
+  projectController.includes("projectsRef.current = [...projectsRef.current, project]") &&
+  projectController.includes("setProjects(projectsRef.current)");
 const logCommandBody = extractFunctionBody(rust, "fn opendock_log");
 const logCommandIsNonStreaming =
   logCommandBody.includes("run_opendock_blocking") &&
@@ -118,11 +132,22 @@ const desktopCatalogUsesLiveRegistry =
   !data.includes("DOCKS.find");
 const catalogRefreshPreservesSameRequestOnFailure =
   catalogController.includes("const loadedCatalogRequestKeyRef = useRef<string | null>(null)") &&
-  catalogController.includes("const requestKey = catalogRequestKey(options)") &&
+  catalogController.includes("const currentCatalogRequestKey = catalogRequestKey(options)") &&
+  catalogController.includes("const requestKey = currentCatalogRequestKey") &&
   catalogController.includes("loadedCatalogRequestKeyRef.current = requestKey") &&
   catalogController.includes("if (loadedCatalogRequestKeyRef.current !== requestKey)") &&
   catalogController.includes("function catalogRequestKey(options: CatalogControllerOptions)") &&
   catalogController.includes("query: options.searchQuery.trim()");
+const catalogRefreshSkipsStaleResponses =
+  catalogController.includes("const currentCatalogRequestKeyRef = useRef(currentCatalogRequestKey)") &&
+  catalogController.includes("currentCatalogRequestKeyRef.current = currentCatalogRequestKey") &&
+  catalogController.includes("currentCatalogRequestKeyRef.current !== requestKey") &&
+  catalogController.includes("if (cancelled || currentCatalogRequestKeyRef.current !== requestKey) return;");
+const detailRefreshKeepsVersionTotalScoped =
+  catalogController.includes('const activeDetailKeyRef = useRef(options.dockView === "detail" ? options.detailKey : "")') &&
+  catalogController.includes("activeDetailKeyRef.current = options.dockView === \"detail\" ? options.detailKey : \"\"") &&
+  catalogController.includes("if (activeDetailKeyRef.current === dockId)") &&
+  catalogController.includes("setVersionTotal(versionsResponse.total ?? versions.length)");
 const desktopCatalogUsesResponsivePaging =
   app.includes('import { useResponsivePageSizes } from "./responsive-page-size"') &&
   responsivePageSize.includes("function catalogPageLimitForViewport") &&
@@ -164,6 +189,25 @@ const desktopMyDocksUsesPaging =
   rust.includes("async fn opendock_my_docks(page: Option<u32>, limit: Option<u32>)") &&
   rust.includes("DEFAULT_ACCOUNT_PAGE_LIMIT") &&
   rust.includes("MAX_ACCOUNT_PAGE_LIMIT");
+const accountDocksSkipsStaleResponses =
+  accountDocksController.includes("const loggedInRef = useRef(options.loggedIn)") &&
+  accountDocksController.includes("const myDocksRequestRef = useRef(0)") &&
+  accountDocksController.includes("const myStarsRequestRef = useRef(0)") &&
+  accountDocksController.includes("function isCurrentAccountRequest") &&
+  accountDocksController.includes("requestRef.current === requestId") &&
+  accountDocksController.includes("if (!isCurrentAccountRequest(loggedInRef, myDocksRequestRef, requestId)) return;") &&
+  accountDocksController.includes("if (!isCurrentAccountRequest(loggedInRef, myStarsRequestRef, requestId)) return;") &&
+  accountDocksController.includes("if (!loggedInRef.current) return;");
+const starToggleUsesSynchronousInFlightGuard =
+  accountDocksController.includes('const starUpdatingRef = useRef("")') &&
+  accountDocksController.includes("if (starUpdatingRef.current) return;") &&
+  accountDocksController.includes("starUpdatingRef.current = dockId") &&
+  accountDocksController.includes('starUpdatingRef.current = ""');
+const shortcutImportExportUsesSingleFileDialog =
+  shortcutController.includes("const shortcutFileWorkingRef = useRef(false)") &&
+  (shortcutController.match(/if \(shortcutFileWorkingRef\.current\) return;/g) ?? []).length >= 2 &&
+  (shortcutController.match(/shortcutFileWorkingRef\.current = true;/g) ?? []).length >= 2 &&
+  (shortcutController.match(/shortcutFileWorkingRef\.current = false;/g) ?? []).length >= 2;
 const desktopAccountProfileSyncsWithRegistry =
   data.includes("export interface AccountProfile") &&
   registryClient.includes('invoke<AccountProfile>("opendock_account_profile")') &&
@@ -183,6 +227,12 @@ const desktopAccountProfileSyncsWithRegistry =
   accountPanel.includes("const showAvatar = Boolean(props.accountAvatarUrl && !avatarFailed)") &&
   accountPanel.includes("<strong>{profileName}</strong>") &&
   !accountPanel.includes("<strong>opendock</strong>");
+const accountProfileSkipsStaleLogoutResponses =
+  app.includes("const accountProfileRequestRef = useRef(0)") &&
+  app.includes("const loggedInRef = useRef(loggedIn)") &&
+  app.includes("if (!loggedIn)") &&
+  app.includes("accountProfileRequestRef.current += 1") &&
+  app.includes("accountProfileRequestRef.current !== requestId || !loggedInRef.current");
 const titlebarAvatarContentIsCentered =
   styles.includes(".avatar-button") &&
   styles.includes("flex: 0 0 28px;") &&
@@ -191,6 +241,9 @@ const titlebarAvatarContentIsCentered =
   styles.includes(".avatar-button img") &&
   styles.includes("display: block;") &&
   styles.includes("object-position: center;");
+const missingDatesDoNotUseFakeFallback =
+  display.includes('if (!value) return "-";') &&
+  !display.includes("Jun 14, 2026");
 const dockIconUsesOpenDockLogoFallback =
   display.includes("const imageUrl = hasRegistryLogo ? logoUrl : logoSrc") &&
   display.includes('"fallback-logo"') &&
@@ -212,6 +265,28 @@ const installRefreshesDockBeforeResolvingRef = (() => {
   const refIndex = installBody.indexOf("const dockRef = `${dockFullId(freshDock)}@${freshDock.version}`");
   return refreshIndex !== -1 && refIndex !== -1 && refreshIndex < refIndex;
 })();
+const dockCommandFallbackStateScopedToActiveProject =
+  dockCommandController.includes("const activeProjectPathRef = useRef(options.activeProject?.path ?? null)") &&
+  dockCommandController.includes("activeProjectPathRef.current = options.activeProject?.path ?? null") &&
+  dockCommandController.includes("const targetProject = options.activeProject") &&
+  dockCommandController.includes("if (activeProjectPathRef.current === targetProject.path)") &&
+  dockCommandController.includes("if (activeProjectPathRef.current === retry.projectPath)");
+const commandTaskRefUpdatesSynchronously =
+  commandTaskController.includes('const value = typeof next === "function" ? next(commandTaskRef.current) : next;') &&
+  commandTaskController.includes("commandTaskRef.current = value;") &&
+  commandTaskController.includes("setCommandTaskState(value);") &&
+  !commandTaskController.includes("setCommandTaskState((current)");
+const dockCommandsRejectConcurrentStarts =
+  dockCommandController.includes("function hasActiveCommandTask()") &&
+  dockCommandController.includes("return isTaskActive(options.commandTaskRef.current)") &&
+  (dockCommandController.match(/if \(hasActiveCommandTask\(\)\) return;/g) ?? []).length >= 4;
+const desktopStateSavesAreSerialized =
+  desktopStateSync.includes("const pendingSaveStateRef = useRef<DesktopAppState | null>(null)") &&
+  desktopStateSync.includes("const savingStateRef = useRef(false)") &&
+  desktopStateSync.includes("while (pendingSaveStateRef.current)") &&
+  desktopStateSync.includes('await invoke("opendock_save_app_state", { state })') &&
+  desktopStateSync.includes("pendingSaveStateRef.current = state") &&
+  desktopStateSync.includes("void flushPendingSaveState()");
 const installedViewPollsProjectState =
   projectRuntimeController.includes('options.dockView !== "installed"') &&
   projectRuntimeController.includes("refreshInstalledProjectState") &&
@@ -224,6 +299,19 @@ const projectStateRefreshPreservesSameProjectOnFailure =
   projectRuntimeController.includes("if (!canPreserveCurrentState)") &&
   projectRuntimeController.includes("if (loadedProjectPathRef.current !== options.activeProject.path)") &&
   projectRuntimeController.includes("resetProjectRuntime();");
+const projectStateRefreshSkipsStaleProjectResponses =
+  projectRuntimeController.includes("const activeProjectPathRef = useRef<string | null>(activeProjectPath)") &&
+  projectRuntimeController.includes("activeProjectPathRef.current = activeProjectPath") &&
+  projectRuntimeController.includes("if (activeProjectPathRef.current !== project.path) return;") &&
+  projectRuntimeController.includes("if (activeProjectPathRef.current === project.path) setProjectStateLoaded(true)");
+const projectLogRefreshSkipsStaleProjectResponses =
+  projectRuntimeController.includes('invoke<OpenDockCommandResult>("opendock_log", { projectDir: project.path })') &&
+  projectRuntimeController.includes("if (activeProjectPathRef.current !== project.path) return;") &&
+  projectRuntimeController.includes("options.setLogs(commandLinesToStoredLogs(result.lines))");
+const outdatedRefreshPreservesCompatibleReportsOnFailure =
+  projectRuntimeController.includes("preserveCompatibleOutdatedReports(current, records)") &&
+  projectRuntimeController.includes("function preserveCompatibleOutdatedReports") &&
+  projectRuntimeController.includes("installedVersions.get(dockId) === report.currentVersion");
 const changeCommandsUseEvents =
   rust.includes('"install".to_string(),') &&
   rust.includes("dock_ref") &&
@@ -235,6 +323,20 @@ const commandProgressBridge =
   opendockRunnerRust.includes("command_progress_from_event_line") &&
   nativeEventBridge.includes('listen<OpenDockCommandProgress>("opendock-command-progress"') &&
   nativeEventBridge.includes("handlers.applyCommandProgressToTask(progress)");
+const commandLineEventsCarryAndFilterCommandIds =
+  commandOutputRust.includes("#[serde(rename_all = \"camelCase\")]") &&
+  commandOutputRust.includes("pub(crate) command_id: Option<String>") &&
+  opendockRunnerRust.includes("command_id: command_id.map(str::to_string)") &&
+  opendockRunnerRust.includes("command_id: command_id.clone()") &&
+  data.includes("commandId?: string | null") &&
+  commandTask.includes("if (line.commandId && line.commandId !== current.id) return current;");
+const commandLineEventsFilterGlobalStaleLines =
+  nativeEventBridge.includes("function isStaleCommandLine") &&
+  nativeEventBridge.includes("line.commandId !== commandTaskRef.current?.id") &&
+  nativeEventBridge.includes("line.commandId !== authCommandIdRef.current") &&
+  nativeEventBridge.includes("if (isStaleCommandLine(line, handlers.commandTaskRef, handlers.authCommandIdRef)) return;") &&
+  nativeEventBridge.indexOf("if (isStaleCommandLine(line, handlers.commandTaskRef, handlers.authCommandIdRef)) return;") <
+    nativeEventBridge.indexOf("handlers.appendLog(line.level, logColor(line.level), line.message)");
 const noUpdateProgressDoesNotDuplicatePopupRows =
   commandTask.includes("function isNoUpdateProgress") &&
   commandTask.includes("const suppressProgressRow = isNoUpdateProgress(progress)") &&
@@ -247,6 +349,15 @@ const commandFailureProgressDoesNotDuplicatePopupRows =
   commandTask.includes("const hasSpecificError = status === \"error\"") &&
   opendockRunnerRust.includes("should_emit_empty_stream_message(&stdout, &stderr)") &&
   commandOutputRust.includes("stdout.trim().is_empty() && stderr.trim().is_empty()");
+const commandProgressDialogCanCancelRunningCommands =
+  appDialogs.includes("onCancel: () => void") &&
+  appDialogs.includes('const canCancel = props.commandTask.status === "running"') &&
+  appDialogs.includes("disabled={!canCancel}") &&
+  appDialogs.includes("onClick={props.onCancel}") &&
+  appDialogs.includes("{!active ? (") &&
+  appDialogs.includes("onClick={props.onClose}") &&
+  app.includes("onCancelCommand={() => void cancelCommandTask()}") &&
+  !workspaceView.includes("onCancelCommand");
 const blockingCliCommandsUseBackgroundRuntime = [
   "opendock_install",
   "opendock_update",
@@ -275,6 +386,18 @@ const authFailuresAreVisible =
   authController.includes("const [authMessage, setAuthMessage]") &&
   authController.includes("commandFailureMessage(result, options.t.signInFailed)") &&
   workspaceShell.includes("className=\"signin-status\"");
+const authRequestsAreScopedAndCancelable =
+  authController.includes("const authCommandIdRef = useRef<string | null>(null)") &&
+  authController.includes("const authRequestRef = useRef(0)") &&
+  authController.includes("const authWorkingRef = useRef(false)") &&
+  authController.includes("if (authWorkingRef.current) return;") &&
+  authController.includes('invoke<OpenDockCommandResult>("opendock_auth_login", { provider, commandId })') &&
+  authController.includes('await invoke("opendock_cancel_command", { commandId })') &&
+  authController.includes("!session.loggedIn || !session.email") &&
+  rust.includes("command_id: Option<String>") &&
+  extractFunctionBody(rust, "fn opendock_auth_login").includes("command_id,") &&
+  app.includes("authCommandIdRef,") &&
+  nativeEventBridge.includes("authCommandIdRef: MutableRefObject<string | null>");
 const sidecarBuildsStandalone =
   prepareSidecars.includes('"--compile"') &&
   prepareSidecars.includes("assertStandaloneSidecar") &&
@@ -293,6 +416,9 @@ const desktopAppMenuUsesNativeCommands =
   titlebar.includes('props.openMenu === "app"') &&
   app.includes("onAppMenuCommand") &&
   navigationController.includes("await handleNativeMenu(id)");
+const nativeDockCommandsRequireDetailView =
+  navigationController.includes('if (options.detail && options.dockView === "detail") await options.installDock(options.detail);') &&
+  navigationController.includes('if (options.detail && options.dockView === "detail") await options.deleteDock(options.detail);');
 const menuOutsideClickDoesNotBlockTargetClicks =
   app.includes('document.addEventListener("pointerdown", closeOpenMenuFromOutside, true)') &&
   app.includes("function isOpenMenuTarget") &&
@@ -332,6 +458,16 @@ const appUpdateStopsRunningSidecars =
   opendockRunnerRust.includes("pub(crate) fn terminate_all_running_commands") &&
   productUpdateRust.includes("stop_running_commands_before_update(&app)?") &&
   productUpdateRust.includes("stop_running_commands_before_update(&finish_cleanup_app)");
+const productUpdateCheckSkipsStaleResponses =
+  productUpdateController.includes("const checkRequestRef = useRef(0)") &&
+  productUpdateController.includes("const requestId = ++checkRequestRef.current") &&
+  productUpdateController.includes("checkRequestRef.current !== requestId");
+const productUpdateInstallIsSingleFlight =
+  productUpdateController.includes("const installingProductUpdateRef = useRef(false)") &&
+  productUpdateController.includes("if (installingProductUpdateRef.current) return;") &&
+  productUpdateController.includes("installingProductUpdateRef.current = true") &&
+  productUpdateController.includes("installingProductUpdateRef.current = false") &&
+  productUpdateController.includes("checkRequestRef.current !== requestId || installingProductUpdateRef.current");
 const appUsesSingleInstance =
   cargoToml.includes("tauri-plugin-single-instance") &&
   rust.includes("tauri_plugin_single_instance::init") &&
@@ -360,6 +496,12 @@ const failures = [
   ...(!blankProjectHasInFlightGuard
     ? ["createBlankProject must keep an in-flight guard to prevent duplicate native menu project creation"]
     : []),
+  ...(!existingProjectPickerHasInFlightGuard
+    ? ["addExistingProjectFromFolder must keep an in-flight guard to prevent duplicate native folder pickers"]
+    : []),
+  ...(!projectRegistrationDeduplicatesPaths
+    ? ["project registration must activate an existing matching path instead of duplicating it"]
+    : []),
   ...(!logCommandIsNonStreaming
     ? ["opendock_log must load historical logs without emitting live command events"]
     : []),
@@ -375,6 +517,12 @@ const failures = [
   ...(!catalogRefreshPreservesSameRequestOnFailure
     ? ["catalog refresh failures must preserve the current request's loaded docks"]
     : []),
+  ...(!catalogRefreshSkipsStaleResponses
+    ? ["catalog refresh must skip stale responses after search, sort, page, or page-size changes"]
+    : []),
+  ...(!detailRefreshKeepsVersionTotalScoped
+    ? ["manual dock detail refresh must not overwrite version pagination for a different active detail"]
+    : []),
   ...(!desktopCatalogUsesResponsivePaging
     ? ["desktop catalog must send responsive page/limit values to registry"]
     : []),
@@ -387,11 +535,26 @@ const failures = [
   ...(!desktopMyDocksUsesPaging
     ? ["desktop account My Docks must use paginated registry responses and total counts"]
     : []),
+  ...(!accountDocksSkipsStaleResponses
+    ? ["desktop account docks and stars must ignore stale responses after logout or page changes"]
+    : []),
+  ...(!starToggleUsesSynchronousInFlightGuard
+    ? ["dock star toggles must use a synchronous in-flight guard to prevent duplicate rapid requests"]
+    : []),
+  ...(!shortcutImportExportUsesSingleFileDialog
+    ? ["shortcut import/export must be single-flight so native file dialogs cannot overlap"]
+    : []),
   ...(!desktopAccountProfileSyncsWithRegistry
     ? ["desktop account profile must load and save nickname through registry profile APIs"]
     : []),
+  ...(!accountProfileSkipsStaleLogoutResponses
+    ? ["desktop account profile requests must ignore stale responses after logout or newer profile requests"]
+    : []),
   ...(!titlebarAvatarContentIsCentered
     ? ["titlebar account avatar must remove button padding and center avatar content"]
+    : []),
+  ...(!missingDatesDoNotUseFakeFallback
+    ? ["missing registry dates must render as unavailable instead of a fake hard-coded date"]
     : []),
   ...(!dockIconUsesOpenDockLogoFallback
     ? ["dock icons must use the OpenDock logo while registry logos are loading or unavailable"]
@@ -408,11 +571,32 @@ const failures = [
   ...(!installRefreshesDockBeforeResolvingRef
     ? ["installDock must refresh registry detail before constructing the install reference"]
     : []),
+  ...(!dockCommandFallbackStateScopedToActiveProject
+    ? ["dock install/delete commands must only mutate fallback installed state for the still-active project"]
+    : []),
+  ...(!commandTaskRefUpdatesSynchronously
+    ? ["command task ref must update synchronously before React state renders to avoid dropped progress and duplicate starts"]
+    : []),
+  ...(!dockCommandsRejectConcurrentStarts
+    ? ["dock commands must reject new install/update/delete/doctor starts while another command is active"]
+    : []),
+  ...(!desktopStateSavesAreSerialized
+    ? ["desktop app state saves must be serialized so stale writes cannot overwrite newer project state"]
+    : []),
   ...(!installedViewPollsProjectState
     ? ["installed view must refresh project outdated state while visible and after update"]
     : []),
   ...(!projectStateRefreshPreservesSameProjectOnFailure
     ? ["project state refresh failures must preserve installed docks for the current workspace"]
+    : []),
+  ...(!projectStateRefreshSkipsStaleProjectResponses
+    ? ["project state refresh must ignore stale responses after active workspace changes"]
+    : []),
+  ...(!projectLogRefreshSkipsStaleProjectResponses
+    ? ["project log refresh must ignore stale responses after active workspace changes"]
+    : []),
+  ...(!outdatedRefreshPreservesCompatibleReportsOnFailure
+    ? ["outdated refresh failures must preserve compatible update reports"]
     : []),
   ...(!changeCommandsUseEvents
     ? ["install/update/uninstall app commands must use --events for structured progress"]
@@ -420,11 +604,20 @@ const failures = [
   ...(!commandProgressBridge
     ? ["desktop app must bridge opendock progress events into the command progress dialog"]
     : []),
+  ...(!commandLineEventsCarryAndFilterCommandIds
+    ? ["command line events must carry commandId and task updates must ignore lines from other commands"]
+    : []),
+  ...(!commandLineEventsFilterGlobalStaleLines
+    ? ["command line events with stale commandId must not update global logs or auth status text"]
+    : []),
   ...(!noUpdateProgressDoesNotDuplicatePopupRows
     ? ["no-update progress events must not duplicate final update result rows in the command popup"]
     : []),
   ...(!commandFailureProgressDoesNotDuplicatePopupRows
     ? ["failure progress events must not duplicate final command error rows in the command popup"]
+    : []),
+  ...(!commandProgressDialogCanCancelRunningCommands
+    ? ["command progress dialog must expose the running command cancel action and not leave an unused workspace prop"]
     : []),
   ...(!blockingCliCommandsUseBackgroundRuntime
     ? ["blocking OpenDock commands must run through the background runtime"]
@@ -435,6 +628,9 @@ const failures = [
     : []),
   ...(!authFailuresAreVisible
     ? ["auth login failures must be surfaced on the sign-in screen instead of being swallowed"]
+    : []),
+  ...(!authRequestsAreScopedAndCancelable
+    ? ["auth login must use scoped command ids, reject duplicate starts, validate session state, and cancel pending login on logout"]
     : []),
   ...(!sidecarBuildsStandalone
     ? ["desktop sidecar must be compiled as a standalone binary and reject bun shebang scripts"]
@@ -447,6 +643,9 @@ const failures = [
     : []),
   ...(!desktopAppMenuUsesNativeCommands
     ? ["desktop app menu must expose existing native menu commands through the titlebar"]
+    : []),
+  ...(!nativeDockCommandsRequireDetailView
+    ? ["native dock install/delete commands must only run while a dock detail view is active"]
     : []),
   ...(!menuOutsideClickDoesNotBlockTargetClicks
     ? ["open menus must close from document capture without rendering a full-screen overlay that swallows target clicks"]
@@ -467,6 +666,12 @@ const failures = [
   ...(!windowsChildCommandsHideConsole ? ["Windows child commands must use CREATE_NO_WINDOW"] : []),
   ...(!appUpdateStopsRunningSidecars
     ? ["app update must stop running OpenDock sidecars before invoking the Windows installer"]
+    : []),
+  ...(!productUpdateCheckSkipsStaleResponses
+    ? ["product update checks must ignore stale responses when automatic and manual checks overlap"]
+    : []),
+  ...(!productUpdateInstallIsSingleFlight
+    ? ["product update install must be single-flight and block stale update checks while installing"]
     : []),
   ...(!appUsesSingleInstance ? ["desktop app must enforce a single process instance and refocus the main window"] : []),
   ...(!appFocusesMainWindowOnStartup

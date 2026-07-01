@@ -35,7 +35,7 @@ export function findDockByKey(docks: Dock[], key: string) {
 }
 
 export function formatDateLabel(value?: string | null) {
-  if (!value) return "Jun 14, 2026";
+  if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });

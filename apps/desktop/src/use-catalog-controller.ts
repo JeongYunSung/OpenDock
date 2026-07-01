@@ -33,14 +33,17 @@ interface DetailControllerOptions {
 export function useCatalogController(options: CatalogControllerOptions) {
   const [catalogDocks, setCatalogDocks] = useState<Dock[]>([]);
   const [catalogTotal, setCatalogTotal] = useState(0);
+  const currentCatalogRequestKey = catalogRequestKey(options);
+  const currentCatalogRequestKeyRef = useRef(currentCatalogRequestKey);
   const loadedCatalogRequestKeyRef = useRef<string | null>(null);
+  currentCatalogRequestKeyRef.current = currentCatalogRequestKey;
 
   useEffect(() => {
     let cancelled = false;
-    const requestKey = catalogRequestKey(options);
+    const requestKey = currentCatalogRequestKey;
     void requestCatalog(options.sortMode, options.searchQuery, options.catalogPage, options.catalogPageSize)
       .then((response) => {
-        if (cancelled) return;
+        if (cancelled || currentCatalogRequestKeyRef.current !== requestKey) return;
         const nextDocks = response.items.map((item, index) => normalizeRegistryDock(item, index));
         loadedCatalogRequestKeyRef.current = requestKey;
         setCatalogDocks(nextDocks);
@@ -48,6 +51,7 @@ export function useCatalogController(options: CatalogControllerOptions) {
       })
       .catch((error) => {
         if (!cancelled) {
+          if (currentCatalogRequestKeyRef.current !== requestKey) return;
           const message = error instanceof Error ? error.message : String(error);
           if (loadedCatalogRequestKeyRef.current !== requestKey) {
             setCatalogDocks([]);
@@ -62,15 +66,17 @@ export function useCatalogController(options: CatalogControllerOptions) {
   }, [options.searchQuery, options.sortMode, options.catalogPage, options.catalogPageSize]);
 
   async function refreshCatalogFromRegistry() {
-    const requestKey = catalogRequestKey(options);
+    const requestKey = currentCatalogRequestKey;
     try {
       const response = await requestCatalog(options.sortMode, options.searchQuery, options.catalogPage, options.catalogPageSize);
+      if (currentCatalogRequestKeyRef.current !== requestKey) return;
       const nextDocks = response.items.map((item, index) => normalizeRegistryDock(item, index));
       loadedCatalogRequestKeyRef.current = requestKey;
       setCatalogDocks(nextDocks);
       setCatalogTotal(response.total ?? nextDocks.length);
       options.appendLog("OK", "var(--success)", "registry refreshed · registry.opendock.app");
     } catch (error) {
+      if (currentCatalogRequestKeyRef.current !== requestKey) return;
       const message = error instanceof Error ? error.message : String(error);
       if (loadedCatalogRequestKeyRef.current !== requestKey) {
         setCatalogDocks([]);
@@ -100,6 +106,8 @@ function catalogRequestKey(options: CatalogControllerOptions) {
 export function useDockDetailController(options: DetailControllerOptions) {
   const [dockDetails, setDockDetails] = useState<Record<string, Dock>>({});
   const [versionTotal, setVersionTotal] = useState(0);
+  const activeDetailKeyRef = useRef(options.dockView === "detail" ? options.detailKey : "");
+  activeDetailKeyRef.current = options.dockView === "detail" ? options.detailKey : "";
 
   useEffect(() => {
     if (!options.baseDetail || options.dockView !== "detail") return;
@@ -137,7 +145,9 @@ export function useDockDetailController(options: DetailControllerOptions) {
       requestDockVersions(dockId, 1, options.versionPageSize),
     ]);
     const versions = normalizeRegistryVersions(versionsResponse);
-    setVersionTotal(versionsResponse.total ?? versions.length);
+    if (activeDetailKeyRef.current === dockId) {
+      setVersionTotal(versionsResponse.total ?? versions.length);
+    }
     const freshDock = mergeRegistryDockDetail(base, detailResponse, versions);
     setDockDetails((current) => ({
       ...current,
