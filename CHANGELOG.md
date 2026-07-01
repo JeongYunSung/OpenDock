@@ -7,6 +7,20 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.47 - 2026-07-01
+
+### CLI
+
+- Include OpenDock license files and third-party notices in the distributed CLI
+  package.
+
+### Desktop App
+
+- Include OpenDock license files and third-party notices in desktop bundles.
+- Keep account profile state synchronized with the Registry after login changes.
+- Keep dock detail tabs clickable when the app menu is open.
+- Align the desktop theme toggle with the Registry visual treatment.
+
 ## 0.1.46 - 2026-06-30
 
 ### CLI
