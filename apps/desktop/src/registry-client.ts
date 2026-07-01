@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import type {
+  AccountProfile,
   DockStarResponse,
   DockStarStatusResponse,
   MyDocksCounts,
@@ -79,6 +80,27 @@ export async function requestMyDocks(page: number, limit: number) {
     } satisfies MyDocksResponse;
   }
   return invoke<MyDocksResponse>("opendock_my_docks", { page, limit });
+}
+
+export async function requestAccountProfile() {
+  if (!isTauriRuntime()) return null;
+  return invoke<AccountProfile>("opendock_account_profile");
+}
+
+export async function requestUpdateAccountProfile(nickname: string) {
+  const normalized = nickname.trim();
+  if (!isTauriRuntime()) {
+    return {
+      id: "browser-demo",
+      email: "hello@opendock.app",
+      displayName: null,
+      nickname: normalized,
+      official: true,
+      avatarUrl: null,
+      hostedDomain: null,
+    } satisfies AccountProfile;
+  }
+  return invoke<AccountProfile>("opendock_update_account_profile", { nickname: normalized });
 }
 
 export async function requestSetDockStar(dockId: string, starred: boolean) {

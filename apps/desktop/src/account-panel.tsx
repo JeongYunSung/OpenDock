@@ -17,6 +17,7 @@ export function AccountPanel(props: {
   myDocksTotal: number;
   myStarredDocks: Dock[];
   nickname: string;
+  profileSaving: boolean;
   onBack: () => void;
   onOpenDetail: (dockId: string) => void;
   onSaveNickname: (nickname: string) => void;
@@ -48,7 +49,7 @@ export function AccountPanel(props: {
         <aside className="profile-card" aria-label={props.t.accountProfile}>
           <div className="profile-avatar">O</div>
           <div>
-            <strong>opendock</strong>
+            <strong>{props.nickname}</strong>
             <img alt="official badge" src={badgeSrc} />
           </div>
           <p>{props.accountEmail}</p>
@@ -84,8 +85,8 @@ export function AccountPanel(props: {
                 <span>{props.t.nickname}</span>
                 <input onChange={(event) => setDraftNickname(event.target.value)} value={draftNickname} />
               </label>
-              <button onClick={() => props.onSaveNickname(draftNickname)} type="button">
-                {props.t.saveChanges}
+              <button disabled={props.profileSaving} onClick={() => props.onSaveNickname(draftNickname)} type="button">
+                {props.profileSaving ? props.t.saving : props.t.saveChanges}
               </button>
             </div>
           ) : null}

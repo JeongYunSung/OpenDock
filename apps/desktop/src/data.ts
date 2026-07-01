@@ -132,6 +132,16 @@ export interface DockStarStatusResponse {
   }>;
 }
 
+export interface AccountProfile {
+  id: string;
+  email: string;
+  displayName: string | null;
+  nickname: string;
+  official: boolean;
+  avatarUrl: string | null;
+  hostedDomain: string | null;
+}
+
 export interface MyStarsResponse {
   items: Array<{
     starredAt: string;

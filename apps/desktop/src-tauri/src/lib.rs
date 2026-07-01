@@ -22,9 +22,9 @@ use product_update::{
 };
 use registry::{
     bounded_limit, bounded_page, load_auth_token, registry_asset_data_url, registry_base,
-    request_registry_json, request_registry_json_with_auth, DEFAULT_ACCOUNT_PAGE_LIMIT,
-    DEFAULT_CATALOG_PAGE_LIMIT, DEFAULT_VERSION_PAGE_LIMIT, MAX_ACCOUNT_PAGE_LIMIT,
-    MAX_CATALOG_PAGE_LIMIT, MAX_VERSION_PAGE_LIMIT,
+    request_registry_json, request_registry_json_with_auth, request_registry_json_with_auth_body,
+    DEFAULT_ACCOUNT_PAGE_LIMIT, DEFAULT_CATALOG_PAGE_LIMIT, DEFAULT_VERSION_PAGE_LIMIT,
+    MAX_ACCOUNT_PAGE_LIMIT, MAX_CATALOG_PAGE_LIMIT, MAX_VERSION_PAGE_LIMIT,
 };
 
 #[derive(Serialize)]
@@ -339,6 +339,32 @@ async fn opendock_my_docks(page: Option<u32>, limit: Option<u32>) -> Result<Valu
 }
 
 #[tauri::command]
+async fn opendock_account_profile() -> Result<Value, String> {
+    let token = load_auth_token()?;
+    let url = reqwest::Url::parse(&format!("{}/v1/me/profile", registry_base()))
+        .map_err(|error| format!("invalid registry URL: {error}"))?;
+    request_registry_json_with_auth(Method::GET, url, &token).await
+}
+
+#[tauri::command]
+async fn opendock_update_account_profile(nickname: String) -> Result<Value, String> {
+    let nickname = nickname.trim();
+    if nickname.is_empty() {
+        return Err("nickname is required".to_string());
+    }
+    let token = load_auth_token()?;
+    let url = reqwest::Url::parse(&format!("{}/v1/me/profile", registry_base()))
+        .map_err(|error| format!("invalid registry URL: {error}"))?;
+    request_registry_json_with_auth_body(
+        Method::PATCH,
+        url,
+        &token,
+        serde_json::json!({ "nickname": nickname }),
+    )
+    .await
+}
+
+#[tauri::command]
 async fn opendock_star_dock(dock_id: String) -> Result<Value, String> {
     validate_dock_id(&dock_id)?;
     let token = load_auth_token()?;
@@ -449,6 +475,8 @@ pub fn run() {
             opendock_star_status,
             opendock_my_stars,
             opendock_my_docks,
+            opendock_account_profile,
+            opendock_update_account_profile,
             opendock_star_dock,
             opendock_unstar_dock,
             opendock_registry_asset_data_url,

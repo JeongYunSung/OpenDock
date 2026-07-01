@@ -31,7 +31,6 @@ interface NavigationControllerOptions {
   setDetailId: Dispatch<SetStateAction<string>>;
   setDetailTab: Dispatch<SetStateAction<"readme" | "versions">>;
   setDockView: Dispatch<SetStateAction<DockView>>;
-  setNickname: Dispatch<SetStateAction<string>>;
   setOpenMenu: Dispatch<SetStateAction<OpenMenu>>;
   setProjectSidebarCollapsed: Dispatch<SetStateAction<boolean>>;
   setProjectSwitcherOpen: Dispatch<SetStateAction<boolean>>;
@@ -101,12 +100,6 @@ export function useNavigationController(options: NavigationControllerOptions) {
       default:
         break;
     }
-  }
-
-  function saveNickname(nextNickname: string) {
-    const normalized = nextNickname.trim();
-    if (!normalized) return;
-    options.setNickname(normalized);
   }
 
   async function handleNativeMenu(id: string) {
@@ -232,7 +225,6 @@ export function useNavigationController(options: NavigationControllerOptions) {
     openDockDetail,
     runAppMenuCommand,
     runShortcutCommand,
-    saveNickname,
     selectProject,
     setMainView,
   };

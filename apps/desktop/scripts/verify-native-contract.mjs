@@ -155,6 +155,18 @@ const desktopMyDocksUsesPaging =
   rust.includes("async fn opendock_my_docks(page: Option<u32>, limit: Option<u32>)") &&
   rust.includes("DEFAULT_ACCOUNT_PAGE_LIMIT") &&
   rust.includes("MAX_ACCOUNT_PAGE_LIMIT");
+const desktopAccountProfileSyncsWithRegistry =
+  data.includes("export interface AccountProfile") &&
+  registryClient.includes('invoke<AccountProfile>("opendock_account_profile")') &&
+  registryClient.includes('invoke<AccountProfile>("opendock_update_account_profile"') &&
+  rust.includes("async fn opendock_account_profile()") &&
+  rust.includes("async fn opendock_update_account_profile(nickname: String)") &&
+  rust.includes("/v1/me/profile") &&
+  rust.includes("request_registry_json_with_auth_body") &&
+  app.includes("requestAccountProfile") &&
+  app.includes("requestUpdateAccountProfile") &&
+  accountPanel.includes("<strong>{props.nickname}</strong>") &&
+  !accountPanel.includes("<strong>opendock</strong>");
 const dockIconUsesOpenDockLogoFallback =
   display.includes("const imageUrl = hasRegistryLogo ? logoUrl : logoSrc") &&
   display.includes('"fallback-logo"') &&
@@ -329,6 +341,9 @@ const failures = [
     : []),
   ...(!desktopMyDocksUsesPaging
     ? ["desktop account My Docks must use paginated registry responses and total counts"]
+    : []),
+  ...(!desktopAccountProfileSyncsWithRegistry
+    ? ["desktop account profile must load and save nickname through registry profile APIs"]
     : []),
   ...(!dockIconUsesOpenDockLogoFallback
     ? ["dock icons must use the OpenDock logo while registry logos are loading or unavailable"]

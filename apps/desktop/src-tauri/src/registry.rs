@@ -43,6 +43,25 @@ pub(crate) async fn request_registry_json_with_auth(
     parse_registry_json_response(response, &url).await
 }
 
+pub(crate) async fn request_registry_json_with_auth_body(
+    method: reqwest::Method,
+    url: reqwest::Url,
+    token: &str,
+    body: Value,
+) -> Result<Value, String> {
+    let response = reqwest::Client::new()
+        .request(method, url.clone())
+        .bearer_auth(token)
+        .header(reqwest::header::ACCEPT, "application/json")
+        .header(reqwest::header::CACHE_CONTROL, "no-cache, no-store")
+        .header(reqwest::header::PRAGMA, "no-cache")
+        .json(&body)
+        .send()
+        .await
+        .map_err(|error| format!("failed to request registry: {error}"))?;
+    parse_registry_json_response(response, &url).await
+}
+
 async fn parse_registry_json_response(
     response: reqwest::Response,
     url: &reqwest::Url,

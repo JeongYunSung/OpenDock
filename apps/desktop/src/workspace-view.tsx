@@ -45,6 +45,7 @@ export function Workspace(props: {
   myDocksTotal: number;
   myStarredDocks: Dock[];
   nickname: string;
+  profileSaving: boolean;
   onAddExisting: () => void;
   onBack: () => void;
   onCancelCommand: () => void;
@@ -145,6 +146,7 @@ export function Workspace(props: {
             myDocksTotal={props.myDocksTotal}
             myStarredDocks={props.myStarredDocks}
             nickname={props.nickname}
+            profileSaving={props.profileSaving}
             onBack={props.onBack}
             onOpenDetail={props.onOpenDetail}
             onSaveNickname={props.onSaveNickname}

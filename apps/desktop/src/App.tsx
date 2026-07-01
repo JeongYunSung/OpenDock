@@ -22,6 +22,7 @@ import { AppNotice, type AppNoticeKind, type AppNoticeOptions, type AppNoticeSta
 import { AppOverlays } from "./app-overlays";
 import { ProjectEmpty, ProjectLoading, SignInScreen } from "./workspace-shell";
 import { useResponsivePageSizes } from "./responsive-page-size";
+import { requestAccountProfile, requestUpdateAccountProfile } from "./registry-client";
 import { isTauriRuntime } from "./tauri-runtime";
 import { useStoredState } from "./use-stored-state";
 import { useAccountDocksController } from "./use-account-docks-controller";
@@ -81,6 +82,7 @@ export function App() {
   } = useCommandTaskController(t);
   const [nickname, setNickname] = useStoredState("opendock.nickname", "opendock");
   const [accountEmail, setAccountEmail] = useStoredState("opendock.accountEmail", "");
+  const [profileSaving, setProfileSaving] = useState(false);
   const [appStateLoaded, setAppStateLoaded] = useState(!isTauriRuntime());
   const responsivePageSizes = useResponsivePageSizes();
   const catalogPageSize = responsivePageSizes.catalog;
@@ -300,7 +302,6 @@ export function App() {
     openDockDetail,
     runAppMenuCommand,
     runShortcutCommand,
-    saveNickname,
     selectProject,
     setMainView,
   } = useNavigationController({
@@ -329,7 +330,6 @@ export function App() {
     setDetailId,
     setDetailTab,
     setDockView,
-    setNickname,
     setOpenMenu,
     setProjectSidebarCollapsed,
     setProjectSwitcherOpen,
@@ -377,6 +377,25 @@ export function App() {
     setLoggedIn,
     setProjects,
   });
+
+  useEffect(() => {
+    if (!appStateLoaded || !loggedIn || !isTauriRuntime()) return;
+    let cancelled = false;
+    void requestAccountProfile()
+      .then((profile) => {
+        if (cancelled || !profile) return;
+        setNickname(profile.nickname);
+        setAccountEmail(profile.email);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [appStateLoaded, loggedIn]);
 
   useEffect(() => {
     if (!isTauriRuntime()) return;
@@ -430,6 +449,29 @@ export function App() {
       }
       return { id: appNoticeIdRef.current++, kind, message, stableKey: options.stableKey };
     });
+  }
+
+  async function saveNickname(nextNickname: string) {
+    const normalized = nextNickname.trim();
+    if (!normalized) return;
+    if (!isTauriRuntime()) {
+      setNickname(normalized);
+      return;
+    }
+    setProfileSaving(true);
+    try {
+      const profile = await requestUpdateAccountProfile(normalized);
+      setNickname(profile.nickname);
+      setAccountEmail(profile.email);
+      appendLog("OK", "var(--success)", t.profileSaved);
+      showAppNotice("success", t.profileSaved);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      appendLog("WARN", "var(--warning)", message);
+      showAppNotice("warning", t.profileSaveFailed.replace("{message}", message));
+    } finally {
+      setProfileSaving(false);
+    }
   }
 
   return (
@@ -501,6 +543,7 @@ export function App() {
             myDocksTotal={myDocksTotal}
             myStarredDocks={myStarredDocks}
             nickname={nickname}
+            profileSaving={profileSaving}
             accountEmail={accountEmail}
             commandTask={commandTask}
             onAddExisting={() => void addExistingProjectFromFolder()}
