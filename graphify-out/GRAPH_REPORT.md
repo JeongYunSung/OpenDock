@@ -1,16 +1,16 @@
 # Graph Report - opendock  (2026-07-01)
 
 ## Corpus Check
-- 439 files · ~188,829 words
+- 439 files · ~188,905 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4206 nodes · 5995 edges · 668 communities (369 shown, 299 thin omitted)
+- 4206 nodes · 5995 edges · 669 communities (370 shown, 299 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 63 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `79526f44`
+- Built from commit: `c8e812ad`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -436,6 +436,7 @@
 - [[_COMMUNITY_Community 423|Community 423]]
 - [[_COMMUNITY_Community 424|Community 424]]
 - [[_COMMUNITY_Community 425|Community 425]]
+- [[_COMMUNITY_Community 426|Community 426]]
 - [[_COMMUNITY_Community 443|Community 443]]
 - [[_COMMUNITY_Community 444|Community 444]]
 - [[_COMMUNITY_Community 462|Community 462]]
@@ -712,7 +713,7 @@
 - 1-file cycle: `apps/desktop/src-tauri/src/project_state.rs -> apps/desktop/src-tauri/src/project_state.rs`
 - 2-file cycle: `apps/desktop/src/data.ts -> apps/desktop/src/dock-data.ts -> apps/desktop/src/data.ts`
 
-## Communities (668 total, 299 thin omitted)
+## Communities (669 total, 299 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
@@ -739,8 +740,8 @@ Cohesion: 0.07
 Nodes (41): FileChangeDetails, InstalledDockRecord, LockState, ProjectState, changeCommandOutputMode, ChangeEventProgressDetails, ChangeEventReporter, createChangeEventReporter() (+33 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.05
-Nodes (32): DockRef, exportSpecSchema, fileSpecSchema, formatManifestReadError(), formatManifestSchemaError(), ManifestReader, manifestSchema, ParsedDockManifest (+24 more)
+Cohesion: 0.07
+Nodes (26): DockRef, exportSpecSchema, fileSpecSchema, formatManifestReadError(), formatManifestSchemaError(), ManifestReader, manifestSchema, ParsedDockManifest (+18 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.08
@@ -791,8 +792,8 @@ Cohesion: 0.06
 Nodes (30): bin, opendock, description, devDependencies, @biomejs/biome, commander, tar, @types/node (+22 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.09
-Nodes (30): assertVersionSatisfiesSelector(), manifestForRef(), validateManifestFor(), resolveLatestDockVersion(), cacheRoot(), isOpenDockPlatform(), ReleaseSignatureResponse, decodeBase64() (+22 more)
+Cohesion: 0.11
+Nodes (27): assertVersionSatisfiesSelector(), manifestForRef(), validateManifestFor(), resolveLatestDockVersion(), cacheRoot(), isOpenDockPlatform(), ReleaseSignatureResponse, decodeBase64() (+19 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.16
@@ -803,8 +804,8 @@ Cohesion: 0.25
 Nodes (5): repoRoot, Workflow, WorkflowJob, workflowPath, WorkflowStep
 
 ### Community 22 - "Community 22"
-Cohesion: 0.14
-Nodes (21): TaskPhase, TaskStep, safeDockDirectoryName(), combinedOutput(), CommandRunner, extractVersion(), failureMessage(), satisfiesVersion() (+13 more)
+Cohesion: 0.15
+Nodes (20): TaskPhase, TaskStep, combinedOutput(), CommandRunner, extractVersion(), failureMessage(), satisfiesVersion(), ProgressLevel (+12 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.12
@@ -819,8 +820,8 @@ Cohesion: 0.11
 Nodes (28): commandLinesToStoredLogs(), AppLog, AuthSession, BASE_LOGS, DesktopAppState, OpenDockChangeSummary, OpenDockFileChanges, Project (+20 more)
 
 ### Community 26 - "Community 26"
-Cohesion: 0.10
-Nodes (20): 0.1.0 - 2026-06-07, 0.1.11 - 2026-06-12, 0.1.12 - 2026-06-12, 0.1.1 - 2026-06-12, 0.1.2 - 2026-06-12, 0.1.37 - 2026-06-22, 0.1.38 - 2026-06-22, 0.1.42 - 2026-06-23 (+12 more)
+Cohesion: 0.11
+Nodes (19): 0.1.0 - 2026-06-07, 0.1.1 - 2026-06-12, 0.1.25 - 2026-06-15, 0.1.2 - 2026-06-12, 0.1.37 - 2026-06-22, 0.1.38 - 2026-06-22, 0.1.42 - 2026-06-23, 0.1.45 - 2026-06-30 (+11 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.15
@@ -847,8 +848,8 @@ Cohesion: 0.10
 Nodes (20): compilerOptions, allowJs, allowSyntheticDefaultImports, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, jsx, lib (+12 more)
 
 ### Community 33 - "Community 33"
-Cohesion: 0.11
-Nodes (11): chmod(), createDockArchive(), mockRegistry(), MockRegistryRelease, tempDir(), tempRoots, TestOpenDockEvent, writeFakeOma() (+3 more)
+Cohesion: 0.08
+Nodes (15): safeDockDirectoryName(), chmod(), createDockArchive(), mockRegistry(), MockRegistryRelease, tempDir(), tempRoots, TestOpenDockEvent (+7 more)
 
 ### Community 34 - "Community 34"
 Cohesion: 0.28
@@ -879,8 +880,8 @@ Cohesion: 0.12
 Nodes (17): Before You Write A Dock, Catalog Metadata, Checklist, Deploy, Dock Reference, Files, Host Bootstrap, Minimal Example (+9 more)
 
 ### Community 41 - "Community 41"
-Cohesion: 0.22
-Nodes (7): isSupportedRuntimeName(), SupportedRuntimeName, supportedRuntimeNames, supportedRuntimeNameSet, RuntimeDefinition, runtimeDefinitions, SUPPORTED_PLATFORMS
+Cohesion: 0.08
+Nodes (15): parseManifestFile(), localResolver(), exampleNames(), examplesRoot, workspaceExampleNames(), createDockArchive(), localResolver(), platformManifest() (+7 more)
 
 ### Community 43 - "Community 43"
 Cohesion: 0.14
@@ -979,8 +980,8 @@ Cohesion: 0.12
 Nodes (17): Checksum Managed Files, Command Reference, Contents, Development, Dock Format, Example Docks, File Ownership, How It Works (+9 more)
 
 ### Community 67 - "Community 67"
-Cohesion: 0.17
-Nodes (20): Campaign briefs, content calendars, SEO briefs, and ad experiment planning., Campaign briefs, content calendars, SEO briefs, and ad experiment planning., PRD, user story, roadmap, release note, and decision template workspace., PRD, user story, roadmap, release note, and decision template workspace., Business model, ICP, GTM, pricing, and founder strategy workspace., Business model, ICP, GTM, pricing, and founder strategy workspace., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes. (+12 more)
+Cohesion: 0.24
+Nodes (14): Campaign briefs, content calendars, SEO briefs, and ad experiment planning., Campaign briefs, content calendars, SEO briefs, and ad experiment planning., Business model, ICP, GTM, pricing, and founder strategy workspace., Business model, ICP, GTM, pricing, and founder strategy workspace., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes., Tag: business, Tag: campaign (+6 more)
 
 ### Community 68 - "Community 68"
 Cohesion: 0.14
@@ -999,8 +1000,8 @@ Cohesion: 0.15
 Nodes (13): AppMenu(), AppMenuGroup, appMenuGroups(), AppMenuItem, WindowControlPlatform, WindowControls(), commandFailureMessage(), TEXT (+5 more)
 
 ### Community 72 - "Community 72"
-Cohesion: 0.13
-Nodes (15): definitions, Identifier, Number, PermissionEntry, Target, Value, oneOf, anyOf (+7 more)
+Cohesion: 0.15
+Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
 
 ### Community 73 - "Community 73"
 Cohesion: 0.15
@@ -1047,8 +1048,8 @@ Cohesion: 0.29
 Nodes (14): assertDeployFileHasSingleLink(), assertInsideDeployRoot(), collectDeployArchiveEntries(), createDeployArchive(), expandDeployArchiveRoot(), listDeployDirectoryFiles(), logoContentType(), normalizeDeployPath() (+6 more)
 
 ### Community 84 - "Community 84"
-Cohesion: 0.18
-Nodes (11): description, properties, required, type, Capability, description, type, identifier (+3 more)
+Cohesion: 0.20
+Nodes (10): properties, type, default, description, type, identifier, local, remote (+2 more)
 
 ### Community 85 - "Community 85"
 Cohesion: 0.20
@@ -1611,8 +1612,8 @@ Cohesion: 0.29
 Nodes (6): Best For, First Run, Outcome, Pair With, Repo Context, What Gets Installed
 
 ### Community 225 - "Community 225"
-Cohesion: 0.25
-Nodes (19): UI, UX, product design, design system, Figma workflow, and review templates., UI, UX, product design, design system, Figma workflow, and review templates., React, Next.js, TypeScript, component, accessibility, and review guidance., React, Next.js, TypeScript, component, accessibility, and review guidance., Design implementation quality gate aligned to DESIGN.md plus hard UI checks., Design implementation quality gate aligned to DESIGN.md plus hard UI checks., Figma MCP quality gate aligned to DESIGN.md plus hard UI checks., Figma MCP quality gate aligned to DESIGN.md plus hard UI checks. (+11 more)
+Cohesion: 0.22
+Nodes (20): React, Next.js, TypeScript, component, accessibility, and review guidance., React, Next.js, TypeScript, component, accessibility, and review guidance., Portfolio case study templates for problem, process, decision rationale, and impact., Portfolio case study templates for problem, process, decision rationale, and impact., Design implementation quality gate aligned to DESIGN.md plus hard UI checks., Design implementation quality gate aligned to DESIGN.md plus hard UI checks., Figma MCP quality gate aligned to DESIGN.md plus hard UI checks., Figma MCP quality gate aligned to DESIGN.md plus hard UI checks. (+12 more)
 
 ### Community 226 - "Community 226"
 Cohesion: 0.67
@@ -1911,8 +1912,8 @@ Cohesion: 0.50
 Nodes (4): description, required, type, Capability
 
 ### Community 314 - "Community 314"
-Cohesion: 0.20
-Nodes (13): fileChangesFromSummary(), installedDockRecordFor(), InstallReport, installReportFor(), UninstallReport, uninstallReportFor(), DockInstaller, DockResolver (+5 more)
+Cohesion: 0.16
+Nodes (16): fileChangesFromSummary(), installedDockRecordFor(), InstallReport, installReportFor(), UninstallReport, uninstallReportFor(), DockInstaller, DockResolver (+8 more)
 
 ### Community 315 - "Community 315"
 Cohesion: 0.40
@@ -2039,8 +2040,8 @@ Cohesion: 0.50
 Nodes (3): Oh My Agent, Pair With, Use
 
 ### Community 346 - "Community 346"
-Cohesion: 0.60
-Nodes (5): Portfolio case study templates for problem, process, decision rationale, and impact., Portfolio case study templates for problem, process, decision rationale, and impact., Tag: case-study, Tag: impact, Tag: portfolio
+Cohesion: 0.31
+Nodes (10): UI, UX, product design, design system, Figma workflow, and review templates., UI, UX, product design, design system, Figma workflow, and review templates., PRD, user story, roadmap, release note, and decision template workspace., PRD, user story, roadmap, release note, and decision template workspace., Tag: figma, Tag: planning, Tag: prd, Tag: product (+2 more)
 
 ### Community 347 - "Community 347"
 Cohesion: 0.33
@@ -2055,8 +2056,8 @@ Cohesion: 0.50
 Nodes (4): default, description, type, description
 
 ### Community 350 - "Community 350"
-Cohesion: 0.11
-Nodes (18): commandEnvironment(), CommandResult, CommandRunOptions, compareVersions(), macosHomebrewPathEntries, macosSystemPathEntries, macosUserPathEntries(), minimalEnvironment() (+10 more)
+Cohesion: 0.21
+Nodes (13): commandEnvironment(), CommandResult, CommandRunOptions, compareVersions(), macosHomebrewPathEntries, macosSystemPathEntries, macosUserPathEntries(), minimalEnvironment() (+5 more)
 
 ### Community 351 - "Community 351"
 Cohesion: 0.14
@@ -2083,8 +2084,8 @@ Cohesion: 0.27
 Nodes (10): GitHubRelease, ProductUpdateCheck, checkProductUpdate(), compareVersionIdentifiers(), isRecord(), isVersionNewer(), normalizeReleaseVersion(), parseGitHubRelease() (+2 more)
 
 ### Community 357 - "Community 357"
-Cohesion: 0.67
-Nodes (3): 0.1.25 - 2026-06-15, Desktop App, Tests
+Cohesion: 0.50
+Nodes (4): 0.1.11 - 2026-06-12, 0.1.12 - 2026-06-12, Changed, Changed
 
 ### Community 358 - "Community 358"
 Cohesion: 0.36
@@ -2140,7 +2141,7 @@ Nodes (3): State, RunningCommands, opendock_cancel_command()
 
 ### Community 374 - "Community 374"
 Cohesion: 0.50
-Nodes (4): default, description, type, local
+Nodes (4): description, required, type, Capability
 
 ### Community 375 - "Community 375"
 Cohesion: 0.67
@@ -2170,6 +2171,10 @@ Nodes (3): 0.1.24 - 2026-06-15, Fixed, Tests
 Cohesion: 0.43
 Nodes (5): markdownToBlocks(), parseReadmeMarkdown(), ReadmeBlock, ReadmePanel(), stripInlineMarkdown()
 
+### Community 426 - "Community 426"
+Cohesion: 0.67
+Nodes (3): Identifier, description, oneOf
+
 ## Knowledge Gaps
 - **2243 isolated node(s):** `name`, `version`, `private`, `type`, `license` (+2238 more)
   These have ≤1 connection - possible missing edges or undocumented components.
@@ -2178,7 +2183,7 @@ Nodes (5): markdownToBlocks(), parseReadmeMarkdown(), ReadmeBlock, ReadmePanel()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `OpenDockPlatform` connect `Community 314` to `Community 33`, `Community 36`, `Community 5`, `Community 351`, `Community 41`, `Community 16`, `Community 83`, `Community 20`, `Community 19`, `Community 22`, `Community 95`, `Community 27`, `Community 350`, `Community 319`?**
+- **Why does `OpenDockPlatform` connect `Community 314` to `Community 33`, `Community 36`, `Community 5`, `Community 351`, `Community 16`, `Community 83`, `Community 20`, `Community 19`, `Community 22`, `Community 95`, `Community 27`, `Community 350`, `Community 319`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **Why does `OpenDock Guide` connect `Community 40` to `Community 98`, `Community 42`, `Community 75`, `Community 76`, `Community 77`, `Community 74`, `Community 13`, `Community 78`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._

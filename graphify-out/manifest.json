@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-native-contract.mjs": {
-    "mtime": 1782891050.2819674,
-    "ast_hash": "e1ce88e970b832c774ee6853324f970a",
+    "mtime": 1782893536.881518,
+    "ast_hash": "dc2ac81b84ab5c27cf2e75ff3079e57b",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-od-assertions.mjs": {
@@ -345,8 +345,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/use-project-runtime-controller.ts": {
-    "mtime": 1781763689.4368083,
-    "ast_hash": "d55d980f588ced6e1d20804e6f2a4633",
+    "mtime": 1782893520.8410003,
+    "ast_hash": "b06bbc7bda9b5f4cdf56fbc3c186311a",
     "semantic_hash": ""
   },
   "apps/desktop/src/use-shortcut-controller.ts": {

@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { useCallback, useEffect, useState, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
+import { useCallback, useEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
 import { outdatedReportsByDockId } from "./command-change-result";
 import { commandLinesToStoredLogs } from "./command-log";
 import { isTaskActive, type CommandTask } from "./command-task";
@@ -26,8 +26,10 @@ export function useProjectRuntimeController(options: ProjectRuntimeControllerOpt
   const [installedRecords, setInstalledRecords] = useState<InstalledDockRecord[]>([]);
   const [outdatedReportsById, setOutdatedReportsById] = useState<Record<string, OpenDockOutdatedReport>>({});
   const [projectStateLoaded, setProjectStateLoaded] = useState(false);
+  const loadedProjectPathRef = useRef<string | null>(null);
 
   const resetProjectRuntime = useCallback(() => {
+    loadedProjectPathRef.current = null;
     setInstalledRecords((current) => (current.length === 0 ? current : []));
     setOutdatedReportsById((current) => (Object.keys(current).length === 0 ? current : {}));
     setProjectStateLoaded(false);
@@ -40,6 +42,7 @@ export function useProjectRuntimeController(options: ProjectRuntimeControllerOpt
       try {
         const state = await invoke<ProjectStateResult>("opendock_project_state", { projectDir: project.path });
         const records = state.docks ?? [];
+        loadedProjectPathRef.current = project.path;
         setInstalledRecords(records);
         options.setInstalledDocks(Object.fromEntries(records.map((dock) => [dock.id, true])));
         if (records.length === 0) {
@@ -54,9 +57,12 @@ export function useProjectRuntimeController(options: ProjectRuntimeControllerOpt
           options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
         }
       } catch (error) {
-        setInstalledRecords([]);
-        options.setInstalledDocks({});
-        setOutdatedReportsById({});
+        const canPreserveCurrentState = loadedProjectPathRef.current === project.path;
+        if (!canPreserveCurrentState) {
+          setInstalledRecords([]);
+          options.setInstalledDocks({});
+          setOutdatedReportsById({});
+        }
         options.appendLog("WARN", "var(--warning)", error instanceof Error ? error.message : String(error));
       } finally {
         setProjectStateLoaded(true);
@@ -82,6 +88,9 @@ export function useProjectRuntimeController(options: ProjectRuntimeControllerOpt
     if (!options.activeProject || !isTauriRuntime()) {
       resetProjectRuntime();
       return;
+    }
+    if (loadedProjectPathRef.current !== options.activeProject.path) {
+      resetProjectRuntime();
     }
     void refreshProjectState(options.activeProject);
   }, [options.activeProject?.path]);

@@ -210,6 +210,13 @@ const installedViewPollsProjectState =
   projectRuntimeController.includes("refreshInstalledProjectState") &&
   projectRuntimeController.includes("window.setInterval(refreshInstalledProjectState, 5000)") &&
   projectRuntimeController.includes("await refreshProjectState(options.activeProject, { silent: true })");
+const projectStateRefreshPreservesSameProjectOnFailure =
+  projectRuntimeController.includes("const loadedProjectPathRef = useRef<string | null>(null)") &&
+  projectRuntimeController.includes("loadedProjectPathRef.current = project.path") &&
+  projectRuntimeController.includes("const canPreserveCurrentState = loadedProjectPathRef.current === project.path") &&
+  projectRuntimeController.includes("if (!canPreserveCurrentState)") &&
+  projectRuntimeController.includes("if (loadedProjectPathRef.current !== options.activeProject.path)") &&
+  projectRuntimeController.includes("resetProjectRuntime();");
 const changeCommandsUseEvents =
   rust.includes('"install".to_string(),') &&
   rust.includes("dock_ref") &&
@@ -393,6 +400,9 @@ const failures = [
     : []),
   ...(!installedViewPollsProjectState
     ? ["installed view must refresh project outdated state while visible and after update"]
+    : []),
+  ...(!projectStateRefreshPreservesSameProjectOnFailure
+    ? ["project state refresh failures must preserve installed docks for the current workspace"]
     : []),
   ...(!changeCommandsUseEvents
     ? ["install/update/uninstall app commands must use --events for structured progress"]
