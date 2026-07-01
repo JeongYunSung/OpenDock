@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.60 - 2026-07-02
+
+### Desktop App
+
+- Pin the macOS release runner so desktop DMG builds do not depend on the
+  moving `macos-latest` image.
+
 ## 0.1.59 - 2026-07-02
 
 ### Desktop App
