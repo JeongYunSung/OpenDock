@@ -208,7 +208,6 @@ export function App() {
   );
   const catalogPageCount = Math.max(1, Math.ceil(Math.max(catalogTotal, sortedDocks.length) / catalogPageSize));
   const versionPageCount = Math.max(1, Math.ceil(Math.max(versionTotal, detail?.versions?.length ?? 0) / versionPageSize));
-  const overlayOpen = openMenu !== "";
   const accountMenuName = nickname || accountDisplayName || accountEmail || (authProvider === "github" ? t.githubAccount : t.opendockAccount);
   const showAppLoading = isTauriRuntime() && !appStateLoaded;
   const {
@@ -427,6 +426,26 @@ export function App() {
     return () => window.clearTimeout(timeout);
   }, [appNotice]);
 
+  useEffect(() => {
+    if (!openMenu) return;
+
+    const closeOpenMenuFromOutside = (event: PointerEvent) => {
+      if (isOpenMenuTarget(event.target)) return;
+      setOpenMenu("");
+    };
+    const closeOpenMenuOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpenMenu("");
+    };
+
+    document.addEventListener("pointerdown", closeOpenMenuFromOutside, true);
+    document.addEventListener("keydown", closeOpenMenuOnEscape, true);
+    return () => {
+      document.removeEventListener("pointerdown", closeOpenMenuFromOutside, true);
+      document.removeEventListener("keydown", closeOpenMenuOnEscape, true);
+    };
+  }, [openMenu]);
+
   usePaginationGuards({
     catalogPage,
     catalogPageCount,
@@ -521,8 +540,6 @@ export function App() {
       />
 
       {appNotice ? <AppNotice key={appNotice.id} closeLabel={t.close} notice={appNotice} onClose={() => setAppNotice(null)} /> : null}
-
-      {overlayOpen ? <button aria-label={t.close} className="menu-overlay" onClick={() => setOpenMenu("")} type="button" /> : null}
 
       <main className="desktop-frame">
         {showAppLoading ? (
@@ -658,4 +675,9 @@ export function App() {
       />
     </div>
   );
+}
+
+function isOpenMenuTarget(target: EventTarget | null) {
+  const element = target instanceof Element ? target : null;
+  return Boolean(element?.closest(".menu-anchor,.app-menu-anchor,.dropdown-menu,.app-menu-panel,.app-menu-flyout"));
 }

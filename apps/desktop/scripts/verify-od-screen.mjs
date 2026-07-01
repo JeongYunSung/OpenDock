@@ -94,7 +94,7 @@ async function runViewportFlow(viewport) {
     await assertNoHorizontalOverflow(page, "workspace list", viewport);
     await assertSidebarToggle(page);
     await assertSortMenu(page);
-    await assertDockTabsSwitchWithMenuOverlay(page);
+    await assertClicksPassThroughOpenMenus(page);
     await assertCommandPaletteEscapeClosesWithoutInputFocus(page);
 
     const catalogStatusCount = await page.locator(".catalog-status").count();
@@ -410,7 +410,7 @@ async function runViewportFlow(viewport) {
   }
 }
 
-async function assertDockTabsSwitchWithMenuOverlay(page) {
+async function assertClicksPassThroughOpenMenus(page) {
   await page.locator(".sort-button").click();
   await assertVisible(page.locator(".sort-menu"), "sort menu before dock tab switch");
   await page.getByRole("button", { name: "설치됨" }).click({ timeout: 1000 });
@@ -419,6 +419,30 @@ async function assertDockTabsSwitchWithMenuOverlay(page) {
   if (sortMenuVisible) {
     throw new Error("dock tab switch should close the open sort menu");
   }
+  await page.getByRole("button", { name: "탐색" }).click();
+  await assertWorkspaceList(page);
+
+  await page.locator(".sort-button").click();
+  await assertVisible(page.locator(".sort-menu"), "sort menu before dock card click");
+  await page.locator(".dock-card").first().click({ timeout: 1000 });
+  await assertVisible(page.locator(".detail-panel"), "detail panel after one card click with menu open");
+  const sortMenuAfterCardClick = await page.locator(".sort-menu").isVisible().catch(() => false);
+  if (sortMenuAfterCardClick) {
+    throw new Error("dock card click should close the open sort menu");
+  }
+
+  await page.locator(".control-button").click();
+  await assertVisible(page.locator(".dropdown-menu.compact"), "language menu before detail tab click");
+  await page.getByRole("button", { name: "Versions" }).click({ timeout: 1000 });
+  await assertOneVisible(
+    [page.locator(".versions-list"), page.locator(".empty-state", { hasText: "이 dock에서 확인할 수 있는 버전이 없습니다" })],
+    "versions panel after one detail tab click with menu open"
+  );
+  const languageMenuAfterTabClick = await page.locator(".dropdown-menu.compact").isVisible().catch(() => false);
+  if (languageMenuAfterTabClick) {
+    throw new Error("detail tab click should close the open language menu");
+  }
+
   await page.getByRole("button", { name: "탐색" }).click();
   await assertWorkspaceList(page);
 }

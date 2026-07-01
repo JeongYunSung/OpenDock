@@ -271,6 +271,12 @@ const desktopAppMenuUsesNativeCommands =
   titlebar.includes('props.openMenu === "app"') &&
   app.includes("onAppMenuCommand") &&
   navigationController.includes("await handleNativeMenu(id)");
+const menuOutsideClickDoesNotBlockTargetClicks =
+  app.includes('document.addEventListener("pointerdown", closeOpenMenuFromOutside, true)') &&
+  app.includes("function isOpenMenuTarget") &&
+  app.includes(".menu-anchor,.app-menu-anchor,.dropdown-menu,.app-menu-panel,.app-menu-flyout") &&
+  !app.includes("className=\"menu-overlay\"") &&
+  !styles.includes(".menu-overlay");
 const desktopAppMenuHiddenOnMac =
   titlebar.includes("const isMac = props.windowControlPlatform === \"macos\"") &&
   titlebar.includes("{!isMac ? (") &&
@@ -405,6 +411,9 @@ const failures = [
     : []),
   ...(!desktopAppMenuUsesNativeCommands
     ? ["desktop app menu must expose existing native menu commands through the titlebar"]
+    : []),
+  ...(!menuOutsideClickDoesNotBlockTargetClicks
+    ? ["open menus must close from document capture without rendering a full-screen overlay that swallows target clicks"]
     : []),
   ...(!desktopAppMenuHiddenOnMac
     ? ["desktop app menu must be hidden on macOS and visible on non-macOS titlebars"]

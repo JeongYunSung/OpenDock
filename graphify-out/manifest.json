@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-native-contract.mjs": {
-    "mtime": 1782883352.7708993,
-    "ast_hash": "0336d857204ca55a3025dcbdd720f124",
+    "mtime": 1782887132.5894713,
+    "ast_hash": "df6b835e34542a443c72a51299156a81",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-od-assertions.mjs": {
@@ -35,8 +35,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-od-screen.mjs": {
-    "mtime": 1782870497.9770186,
-    "ast_hash": "deb688920a04a3f3a907f455d6ef5da9",
+    "mtime": 1782887162.2701206,
+    "ast_hash": "2e37e0ed422a5aaca5ab05df51757c44",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-shortcuts.mjs": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
-    "mtime": 1782883171.6530457,
-    "ast_hash": "1c63c7656337d99ccb2b3c90c4c7a659",
+    "mtime": 1782887109.2029483,
+    "ast_hash": "61843b65ed8f673defa943df395aba8f",
     "semantic_hash": ""
   },
   "apps/desktop/src/account-model.ts": {
