@@ -7,6 +7,14 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.58 - 2026-07-02
+
+### Desktop App
+
+- Preserve dock list, detail, installed dock, and account list layouts during
+  loading with skeleton states instead of replacing panels with a standalone
+  spinner.
+
 ## 0.1.57 - 2026-07-02
 
 ### Desktop App
