@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.48 - 2026-07-01
+
+### Desktop App
+
+- Load account badges from the Registry API so dock cards and account views
+  show publisher verification state from live data.
+
 ## 0.1.47 - 2026-07-01
 
 ### CLI

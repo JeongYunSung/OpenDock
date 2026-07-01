@@ -165,7 +165,8 @@ const desktopAccountProfileSyncsWithRegistry =
   rust.includes("request_registry_json_with_auth_body") &&
   app.includes("requestAccountProfile") &&
   app.includes("requestUpdateAccountProfile") &&
-  accountPanel.includes("<strong>{props.nickname}</strong>") &&
+  accountPanel.includes("const profileName = props.nickname || props.accountEmail || props.t.opendockAccount") &&
+  accountPanel.includes("<strong>{profileName}</strong>") &&
   !accountPanel.includes("<strong>opendock</strong>");
 const dockIconUsesOpenDockLogoFallback =
   display.includes("const imageUrl = hasRegistryLogo ? logoUrl : logoSrc") &&
