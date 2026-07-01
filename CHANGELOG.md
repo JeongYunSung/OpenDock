@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.56 - 2026-07-01
+
+### Desktop App
+
+- Allow horizontal scrolling in log output areas so long command lines remain
+  readable without awkward wrapping.
+
 ## 0.1.55 - 2026-07-01
 
 ### CLI
