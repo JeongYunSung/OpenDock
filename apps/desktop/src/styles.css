@@ -2567,7 +2567,7 @@ input:focus-visible,
 
 .command-progress-log p {
   display: grid;
-  grid-template-columns: 68px 38px max-content;
+  grid-template-columns: 20ch 38px max-content;
   gap: 10px;
   align-items: center;
   width: max-content;
@@ -2579,6 +2579,7 @@ input:focus-visible,
 
 .command-progress-log span {
   color: var(--text-3);
+  white-space: nowrap;
 }
 
 .command-progress-log b {
@@ -2669,7 +2670,7 @@ input:focus-visible,
 
 .log-line {
   display: grid;
-  grid-template-columns: 72px 48px max-content;
+  grid-template-columns: 20ch 48px max-content;
   gap: 12px;
   width: max-content;
   min-width: max(100%, 720px);
@@ -2683,6 +2684,7 @@ input:focus-visible,
 
 .log-lines span {
   color: var(--neutral-400);
+  white-space: nowrap;
 }
 
 .log-lines p {

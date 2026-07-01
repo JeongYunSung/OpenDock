@@ -115,6 +115,7 @@ const logCommandIsNonStreaming =
 const appParsesHistoricalLogLines =
   commandLog.includes("function parseOpenDockHistoryLine") &&
   commandLog.includes("function formatHistoryTime") &&
+  commandLog.includes("function formatLogTime") &&
   commandLog.includes("function commandLinesToStoredLogs") &&
   projectRuntimeController.includes("options.setLogs(commandLinesToStoredLogs(result.lines))");
 const registryRequestsBypassCache =
@@ -378,6 +379,17 @@ const logStorageIsCapped =
   commandLog.includes("const MAX_STORED_LOGS = 400") &&
   commandLog.includes("lines.slice(-MAX_STORED_LOGS)") &&
   commandLog.includes("current.length - (MAX_STORED_LOGS - 1)");
+const logTimestampsDoNotWrap =
+  styles.includes("grid-template-columns: 20ch 48px max-content;") &&
+  styles.includes("grid-template-columns: 20ch 38px max-content;") &&
+  styles.includes(".log-lines span {\n  color: var(--neutral-400);\n  white-space: nowrap;") &&
+  styles.includes(".command-progress-log span {\n  color: var(--text-3);\n  white-space: nowrap;");
+const logTimestampsAlwaysIncludeFullDate =
+  commandLog.includes("return formatLogTime(new Date());") &&
+  commandLog.includes("return formatLogTime(date);") &&
+  commandLog.includes("date.getFullYear()") &&
+  commandLog.includes("date.getSeconds()") &&
+  !commandLog.includes("sameDay");
 const titlebarUsesNativeDragFallback =
   titlebar.includes("getCurrentWindow().startDragging()") &&
   titlebar.includes("function isInteractiveTitlebarTarget") &&
@@ -623,6 +635,8 @@ const failures = [
     ? ["blocking OpenDock commands must run through the background runtime"]
     : []),
   ...(!logStorageIsCapped ? ["app logs must be capped before rendering and persisting"] : []),
+  ...(!logTimestampsDoNotWrap ? ["app log timestamps must not wrap when historical dates are shown"] : []),
+  ...(!logTimestampsAlwaysIncludeFullDate ? ["app log timestamps must always include year, date, and time"] : []),
   ...(!titlebarUsesNativeDragFallback
     ? ["custom titlebar must call startDragging with an interactive-target guard for packaged apps"]
     : []),

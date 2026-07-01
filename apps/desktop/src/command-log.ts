@@ -3,7 +3,7 @@ import type { AppLog, OpenDockCommandLine, OpenDockCommandResult } from "./data"
 const MAX_STORED_LOGS = 400;
 
 export function nowTime() {
-  return new Date().toLocaleTimeString("en-GB", { hour12: false }).slice(0, 8);
+  return formatLogTime(new Date());
 }
 
 export function logColor(level: string) {
@@ -99,11 +99,13 @@ function logLevelForHistoryStatus(status: string) {
 function formatHistoryTime(isoTime: string) {
   const date = new Date(isoTime);
   if (Number.isNaN(date.getTime())) return nowTime();
-  const today = new Date();
-  const sameDay =
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate();
-  if (sameDay) return date.toLocaleTimeString("en-GB", { hour12: false }).slice(0, 8);
-  return `${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  return formatLogTime(date);
+}
+
+function formatLogTime(date: Date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-") + ` ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}`;
 }
