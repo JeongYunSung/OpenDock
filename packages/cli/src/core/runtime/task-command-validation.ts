@@ -2,6 +2,7 @@ import type { OpenDockPlatform } from "../../platform.js";
 import type { DockManifest, TaskPhase, TaskStep } from "../domain/manifest.js";
 import { ensureAllowed, rejectShellMetacharacters, splitCommand } from "./command-policy.js";
 import { assertManifestSupportsPlatform, selectTaskSteps } from "./task-selection.js";
+import { toolCommandPermissions } from "./tool-runner.js";
 
 const taskPhases: TaskPhase[] = ["install", "update", "doctor"];
 const commandFields = ["check", "run"] as const;
@@ -14,7 +15,10 @@ export function validateManifestTaskCommands(
 
   for (const phase of taskPhases) {
     for (const step of selectTaskSteps(manifest.tasks[phase] ?? [], platform)) {
-      validateTaskStepCommands(phase, step, platform, manifest.permission);
+      validateTaskStepCommands(phase, step, platform, [
+        ...manifest.permission,
+        ...toolCommandPermissions(manifest),
+      ]);
     }
   }
 }

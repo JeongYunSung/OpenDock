@@ -7,7 +7,6 @@ const safeIdentifierPattern = /^[A-Za-z0-9._:@/=-]+$/;
 const powershellTestPathPattern =
   /^if \(Test-Path -LiteralPath ([A-Za-z0-9._/@-]+)\) \{ exit 0 \} else \{ exit 1 \}$/;
 const blockedPackageRunnerFlags = new Set(["--package", "-p", "--eval", "-e", "--call", "-c"]);
-const pipAllowedFlags = new Set(["--user", "--upgrade", "-U"]);
 const wingetAllowedFlags = new Set([
   "--accept-package-agreements",
   "--accept-source-agreements",
@@ -90,6 +89,10 @@ export function ensureAllowed(
   platform: OpenDockPlatform,
   permissions: string[],
 ): void {
+  const blockedReason = blockedCommandReason(program, args);
+  if (blockedReason) {
+    throw new Error(blockedReason);
+  }
   if (isPermissionAllowed(program, args, permissions)) {
     return;
   }
@@ -165,17 +168,9 @@ function isAllowedCommandShape(program: string, args: string[]): boolean {
   return false;
 }
 
-function isSafePackageManagerCommand(program: string, args: string[]): boolean {
+function isSafePackageManagerCommand(_program: string, args: string[]): boolean {
   if (isExact(args, ["--version"])) {
     return true;
-  }
-  if (program === "pnpm" && args[0] === "add") {
-    const packages = packageArgs(args.slice(1));
-    return hasGlobalFlag(args) && packages.length > 0 && packages.every(isSafePackageName);
-  }
-  if ((args[0] === "install" || args[0] === "update") && hasGlobalFlag(args)) {
-    const packages = packageArgs(args.slice(1));
-    return packages.length > 0 && packages.every(isSafePackageName);
   }
   return false;
 }
@@ -184,34 +179,21 @@ function isSafePipCommand(args: string[]): boolean {
   if (isExact(args, ["--version"]) || isExact(args, ["-V"])) {
     return true;
   }
-  if (args[0] !== "install") {
-    return false;
-  }
-  const packages = args.slice(1).filter((arg) => !pipAllowedFlags.has(arg));
-  return packages.length > 0 && packages.every(isSafePackageName);
+  return false;
 }
 
 function isSafePipxCommand(args: string[]): boolean {
   if (isExact(args, ["--version"])) {
     return true;
   }
-  return (
-    ["install", "upgrade"].includes(args[0] ?? "") &&
-    args.length >= 2 &&
-    args.slice(1).every(isSafePackageName)
-  );
+  return false;
 }
 
 function isSafeUvCommand(args: string[]): boolean {
   if (isExact(args, ["--version"])) {
     return true;
   }
-  return (
-    args.length >= 3 &&
-    args[0] === "tool" &&
-    ["install", "upgrade"].includes(args[1] ?? "") &&
-    args.slice(2).every(isSafePackageName)
-  );
+  return false;
 }
 
 function isSafePackageRunnerCommand(args: string[]): boolean {
@@ -261,8 +243,29 @@ function hasGlobalFlag(args: string[]): boolean {
   return args.includes("--global") || args.includes("-g");
 }
 
-function packageArgs(args: string[]): string[] {
-  return args.filter((arg) => arg !== "--global" && arg !== "-g");
+function blockedCommandReason(program: string, args: string[]): string | undefined {
+  if ((program === "npm" || program === "bun" || program === "pnpm") && hasGlobalFlag(args)) {
+    return "global package installs are not allowed in dock task commands; declare project-local `tools` instead";
+  }
+  if (program === "pnpm" && args[0] === "add" && hasGlobalFlag(args)) {
+    return "global package installs are not allowed in dock task commands; declare project-local `tools` instead";
+  }
+  if ((program === "pip" || program === "pip3") && args[0] === "install") {
+    return "pip installs are not allowed in dock task commands; declare project-local `tools` instead";
+  }
+  if (program === "pipx" && ["install", "upgrade"].includes(args[0] ?? "")) {
+    return "pipx tool installs are not allowed in dock task commands; declare project-local `tools` instead";
+  }
+  if (program === "uv" && args[0] === "tool" && ["install", "upgrade"].includes(args[1] ?? "")) {
+    return "uv tool installs are not allowed in dock task commands; declare project-local `tools` instead";
+  }
+  if (
+    (program === "brew" || program === "winget") &&
+    ["install", "upgrade"].includes(args[0] ?? "")
+  ) {
+    return "system package installs are not allowed in dock task commands; use OpenDock bootstrap or project-local runtimes";
+  }
+  return undefined;
 }
 
 function isExact(args: string[], expected: string[]): boolean {

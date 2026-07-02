@@ -26,6 +26,7 @@ import type { FileCandidate } from "../src/core/files/file-candidate.js";
 import { FilePlan } from "../src/core/files/file-plan.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
 import { CommandRunner } from "../src/core/runtime/command-runner.js";
+import { validateManifestTaskCommands } from "../src/core/runtime/task-command-validation.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
 import { resolveDock } from "../src/resolver.js";
 import { testReleaseSignature } from "./release-signature-helper.js";
@@ -314,6 +315,60 @@ describe("security regression coverage", () => {
         platform: "macos",
       }),
     ).toThrow("not allowed");
+  });
+
+  it("blocks global or system installs even when exact permissions are declared", () => {
+    const project = tempDir();
+    const runner = new CommandRunner();
+
+    for (const [command, platform] of [
+      ["npm install --global @openai/codex", "macos"],
+      ["bun install -g oh-my-agent", "macos"],
+      ["pnpm add -g @anthropic-ai/claude-code", "macos"],
+      ["pip install some-tool", "macos"],
+      ["pipx install some-tool", "macos"],
+      ["uv tool install some-tool", "macos"],
+      ["brew install node", "macos"],
+      [
+        "winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements",
+        "windows",
+      ],
+    ] as const) {
+      expect(() =>
+        runner.run(command, {
+          cwd: project,
+          permissions: [command],
+          platform,
+        }),
+      ).toThrow(/not allowed|install/);
+    }
+  });
+
+  it("blocks global installs during manifest task validation for deploy", () => {
+    const manifest: DockManifest = {
+      opendock: 1,
+      id: "test/global-install",
+      summary: "",
+      tags: [],
+      permission: ["npm install --global @openai/codex"],
+      requires: { runtimes: {} },
+      files: [],
+      tasks: {
+        install: [
+          {
+            id: "install-codex",
+            platforms: {},
+            run: "npm install --global @openai/codex",
+          },
+        ],
+        update: [],
+        doctor: [],
+      },
+    };
+
+    expect(() => validateManifestTaskCommands(manifest, "macos")).toThrow(
+      "global package installs are not allowed",
+    );
   });
 
   it("rejects shell operators in doctor checks even when permissions are declared", () => {

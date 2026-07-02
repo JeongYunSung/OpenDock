@@ -190,7 +190,7 @@ describe("requires regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        permission: ["oma -y install", "oma link claude codex"],
+        permissions: ["oma -y install", "oma link claude codex"],
       }),
     );
 
@@ -199,19 +199,106 @@ describe("requires regression coverage", () => {
     expect(manifest.permission).toEqual(["oma -y install", "oma link claude codex"]);
   });
 
+  it("rejects manifests that mix legacy permission and permissions", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        permission: ["oma -y install"],
+        permissions: ["oma -y update"],
+      }),
+    );
+
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
+      "use `permissions`, not both `permission` and `permissions`",
+    );
+  });
+
   it("rejects shell operators in dock.yml permissions", () => {
     const root = tempDir();
     writeFileSync(
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        permission: ["oma -y install && rm -rf ."],
+        permissions: ["oma -y install && rm -rf ."],
       }),
     );
 
     const error = captureManifestError(join(root, "dock.yml"));
 
     expect(error.message).toContain("shell operators are not allowed in permission command");
+  });
+
+  it("parses project-local tool declarations from dock.yml", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        tools: {
+          codex: {
+            manager: "npm",
+            package: "@openai/codex",
+            version: "latest",
+            commands: ["codex"],
+          },
+        },
+      }),
+    );
+
+    const manifest = parseManifestFile(join(root, "dock.yml"));
+
+    expect(manifest.tools?.codex).toEqual({
+      manager: "npm",
+      package: "@openai/codex",
+      version: "latest",
+      commands: ["codex"],
+    });
+  });
+
+  it("rejects unsafe or conflicting tool declarations", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        tools: {
+          first: {
+            manager: "npm",
+            package: "@openai/codex@latest",
+            commands: ["codex"],
+          },
+        },
+      }),
+    );
+
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
+      "tool package must be a safe package name without a version",
+    );
+
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        tools: {
+          first: {
+            manager: "npm",
+            package: "@openai/codex",
+            commands: ["codex"],
+          },
+          second: {
+            manager: "bun",
+            package: "other-tool",
+            commands: ["codex"],
+          },
+        },
+      }),
+    );
+
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
+      "tool command `codex` is provided by both `first` and `second`",
+    );
   });
 
   it("rejects legacy lifecycle field with compatibility guidance", () => {
@@ -254,7 +341,7 @@ describe("requires regression coverage", () => {
     );
   });
 
-  it("runs package manager installs as ordinary task steps before generated outputs", async () => {
+  it("installs declared tools before generated outputs", async () => {
     const project = tempDir();
     const bin = tempDir();
     const log = join(project, "commands.log");
@@ -272,13 +359,13 @@ describe("requires regression coverage", () => {
 
     expect(result.reports.map((report) => `${report.id}:${report.status}`)).toEqual([
       "require-runtime-bun:Ready",
-      "install-oma:Ran",
+      "require-tool-oma:Ready",
       "apply-oma:Ran",
     ]);
     expect(result.exports.map((candidate) => candidate.path)).toEqual(
       expect.arrayContaining(["AGENTS.md", "CLAUDE.md", ".codex/agents/reviewer.toml"]),
     );
-    expect(readFileSync(log, "utf8")).toContain("bun:install --global oh-my-agent@latest");
+    expect(readFileSync(log, "utf8")).toContain("bun:add oh-my-agent@8.52.9");
     expect(readFileSync(log, "utf8")).toContain("oma:-y install");
     expect(
       readFileSync(
@@ -315,14 +402,17 @@ function omaManifest(): DockManifest {
         bun: ">=1.3.0",
       },
     },
+    tools: {
+      oma: {
+        manager: "bun",
+        package: "oh-my-agent",
+        version: "8.52.9",
+        commands: ["oma"],
+      },
+    },
     files: [],
     tasks: {
       install: [
-        {
-          id: "install-oma",
-          run: "bun install --global oh-my-agent@latest",
-          platforms: {},
-        },
         {
           id: "apply-oma",
           run: "oma -y install",
@@ -365,8 +455,9 @@ if [ "$1" = "--version" ]; then
   printf '1.3.11\\n'
   exit 0
 fi
-if [ "$1" = "install" ]; then
-  /bin/cat > "${bin}/oma" <<'EOF'
+	if [ "$1" = "add" ]; then
+	  mkdir -p node_modules/.bin
+	  /bin/cat > node_modules/.bin/oma <<'EOF'
 #!/bin/sh
 set -eu
 printf 'oma:%s\\n' "$*" >> "${log}"
@@ -382,7 +473,7 @@ if [ "$1" = "doctor" ]; then
 fi
 exit 1
 EOF
-  /bin/chmod +x "${bin}/oma"
+	  /bin/chmod +x node_modules/.bin/oma
   exit 0
 fi
 exit 1

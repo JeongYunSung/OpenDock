@@ -7,13 +7,21 @@ tags:
   - oh-my-agent
   - ai-agent
   - automation
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
   - oma doctor
 requires:
   runtimes:
     bun: ">=1.3.0"
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: latest
+    commands:
+      - oma
+      - oh-my-agent
 workdir:
   files:
     - from: workdir/oma-config.yaml
@@ -24,9 +32,6 @@ files:
   - from: files/PROMPTS.md
     to: PROMPTS.md
 install:
-  - id: install-oma
-    run: bun install --global oh-my-agent@latest
-    timeout_ms: 600000
   - id: apply-oma
     check: test -f .codex/skills/oma-brainstorm/SKILL.md
     run: oma -y install
@@ -55,9 +60,6 @@ install:
         - "**/.DS_Store"
     timeout_ms: 600000
 update:
-  - id: update-oma-package
-    run: bun install --global oh-my-agent@latest
-    timeout_ms: 600000
   - id: update-oma
     run: oma -y install
     workdir: dock

@@ -95,6 +95,71 @@ const requiresSchema = z
   .strict()
   .default({ runtimes: {} });
 
+const packageManagerSchema = z.enum(["npm", "bun", "pnpm", "pip", "pip3"]);
+
+const safePackageNamePattern = /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+$/;
+const safeCommandNamePattern = /^[A-Za-z0-9._-]+$/;
+
+const toolSpecSchema = z
+  .object({
+    manager: packageManagerSchema,
+    package: z
+      .string()
+      .trim()
+      .min(1)
+      .max(160)
+      .regex(safePackageNamePattern, "tool package must be a safe package name without a version"),
+    version: z.string().trim().min(1).max(80).default("latest"),
+    commands: z
+      .array(
+        z
+          .string()
+          .trim()
+          .min(1)
+          .max(80)
+          .regex(safeCommandNamePattern, "tool command must be a safe command name"),
+      )
+      .min(1)
+      .max(8)
+      .superRefine((commands, context) => {
+        const seen = new Set<string>();
+        for (const [index, command] of commands.entries()) {
+          if (seen.has(command)) {
+            context.addIssue({
+              code: "custom",
+              message: `duplicate tool command \`${command}\``,
+              path: [index],
+            });
+          }
+          seen.add(command);
+        }
+      }),
+  })
+  .strict();
+
+const toolsSchema = z
+  .record(
+    z.string().regex(/^[A-Za-z0-9._-]+$/, "tool name must be a safe identifier"),
+    toolSpecSchema,
+  )
+  .default({})
+  .superRefine((tools, context) => {
+    const commands = new Map<string, string>();
+    for (const [toolName, tool] of Object.entries(tools)) {
+      for (const command of tool.commands) {
+        const existing = commands.get(command);
+        if (existing !== undefined) {
+          context.addIssue({
+            code: "custom",
+            message: `tool command \`${command}\` is provided by both \`${existing}\` and \`${toolName}\``,
+            path: [toolName, "commands"],
+          });
+        }
+        commands.set(command, toolName);
+      }
+    }
+  });
+
 const exportSpecSchema = z.object({
   include: z.array(z.string()).default([]),
   exclude: z.array(z.string()).default([]),
@@ -164,7 +229,7 @@ const tagsSchema = z
   })
   .default([]);
 
-const permissionSchema = z
+const permissionListSchema = z
   .array(
     z
       .string()
@@ -180,8 +245,7 @@ const permissionSchema = z
         }
       }),
   )
-  .max(32)
-  .default([]);
+  .max(32);
 
 const manifestSchema = z
   .object({
@@ -192,8 +256,10 @@ const manifestSchema = z
     readme: z.string().optional(),
     logo: z.string().optional(),
     tags: tagsSchema,
-    permission: permissionSchema,
+    permission: permissionListSchema.optional(),
+    permissions: permissionListSchema.optional(),
     requires: requiresSchema,
+    tools: toolsSchema,
     workdir: workdirSpecSchema,
     files: z.array(fileSpecSchema).default([]),
     install: phaseTasksSchema.optional(),
@@ -201,9 +267,19 @@ const manifestSchema = z
     doctor: phaseTasksSchema.optional(),
   })
   .strict()
-  .transform(({ install, update, doctor, id, ...manifest }) => ({
+  .superRefine((manifest, context) => {
+    if (manifest.permission !== undefined && manifest.permissions !== undefined) {
+      context.addIssue({
+        code: "custom",
+        message: "use `permissions`, not both `permission` and `permissions`",
+        path: ["permissions"],
+      });
+    }
+  })
+  .transform(({ install, update, doctor, id, permission, permissions, ...manifest }) => ({
     ...manifest,
     id: id ?? "",
+    permission: permissions ?? permission ?? [],
     tasks: {
       install: install ?? [],
       update: update ?? [],
@@ -212,12 +288,16 @@ const manifestSchema = z
   }));
 
 export type FileSpec = z.infer<typeof fileSpecSchema>;
+export type ToolSpec = z.infer<typeof toolSpecSchema>;
 type WorkdirSpec = z.infer<typeof workdirSpecSchema>;
 type Tasks = z.infer<typeof tasksSchema>;
 export type TaskPhase = keyof Tasks;
 export type TaskStep = z.infer<typeof taskStepSchema>;
 type ParsedDockManifest = z.infer<typeof manifestSchema>;
-export type DockManifest = Omit<ParsedDockManifest, "workdir"> & { workdir?: WorkdirSpec };
+export type DockManifest = Omit<ParsedDockManifest, "tools" | "workdir"> & {
+  tools?: Record<string, ToolSpec>;
+  workdir?: WorkdirSpec;
+};
 
 class ManifestReader {
   read(path: string): DockManifest {

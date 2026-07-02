@@ -220,7 +220,7 @@ describe("platform regression coverage", () => {
       "install-runtime:Ran",
       "after:Ready",
     ]);
-    expect(readFileSync(log, "utf8")).toBe("brew:install node\n");
+    expect(readFileSync(log, "utf8")).toBe("brew:--version\n");
     expect(existsSync(join(project, "runtime-ready"))).toBe(true);
     expect(existsSync(join(project, "winget-ran"))).toBe(false);
   });
@@ -249,9 +249,7 @@ describe("platform regression coverage", () => {
       "install-runtime:Ran",
       "after:Ready",
     ]);
-    expect(readFileSync(log, "utf8")).toBe(
-      "winget:install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements\n",
-    );
+    expect(readFileSync(log, "utf8")).toBe("winget:--version\n");
     expect(existsSync(join(project, "runtime-ready"))).toBe(true);
     expect(existsSync(join(project, "brew-ran"))).toBe(false);
 
@@ -477,13 +475,7 @@ describe("platform regression coverage", () => {
       });
     });
 
-    expect(readFileSync(log, "utf8")).toBe(
-      [
-        "winget:install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements",
-        "winget:install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements",
-        "",
-      ].join("\n"),
-    );
+    expect(readFileSync(log, "utf8")).toBe(["winget:--version", "winget:--version", ""].join("\n"));
     expect(installedDocks(project)[0]).toMatchObject({
       id: "test/tool",
       platform: "windows",
@@ -519,10 +511,10 @@ function platformRuntimeStep(id: string) {
     check: "test -f runtime-ready",
     platforms: {
       macos: {
-        run: "brew install node",
+        run: "brew --version",
       },
       windows: {
-        run: "winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements",
+        run: "winget --version",
       },
     },
   };
@@ -580,7 +572,7 @@ function writeDock(
       summary: "",
       readme: "DOCK.md",
       logo: "logo.png",
-      permission: options.permission ?? [],
+      permissions: options.permission ?? [],
       files: (options.files ?? []).map((file) => ({
         from: `files/${file.path}`,
         to: file.path,

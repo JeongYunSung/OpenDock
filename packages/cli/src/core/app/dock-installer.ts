@@ -1,5 +1,5 @@
-import { rmSync } from "node:fs";
-import { relative } from "node:path";
+import { existsSync, rmSync } from "node:fs";
+import { join, relative } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
 import type { ResolvedDock } from "../../resolver.js";
 import { resolveDock } from "../../resolver.js";
@@ -13,6 +13,7 @@ import { FileCandidateCollector } from "../files/file-candidate.js";
 import { FilePlan } from "../files/file-plan.js";
 import { pruneEmptyDirectoryChain } from "../files/path-utils.js";
 import { WorkdirSeeder } from "../files/workdir-seeder.js";
+import { removeProjectCommandShim } from "../runtime/command-shim.js";
 import {
   type ProgressReporter,
   type RuntimeProgressEvent,
@@ -167,7 +168,7 @@ export class DockInstaller {
                 ),
               }),
         })
-      : { reports: [], exports: [] };
+      : { reports: [], exports: [], runtimes: [], tools: [] };
     this.progress(options.progress, {
       dockId: resolved.manifest.id,
       level: "OK",
@@ -231,7 +232,9 @@ export class DockInstaller {
         platform,
         projectDir: options.projectDir,
         requested: options.dockRef.requested(),
+        runtimes: taskResult.runtimes,
         signature: resolved.signature,
+        tools: taskResult.tools,
         version: resolved.version,
         workdir: this.taskRunner.dockWorkdir(options.projectDir, resolved.manifest.id),
       }),
@@ -305,6 +308,9 @@ export class DockInstaller {
       force: true,
     });
     pruneEmptyDirectoryChain(options.projectDir, relative(options.projectDir, workdir));
+    this.removeDockTools(options.projectDir, dock);
+    this.removeUnusedRuntimeShims(options.projectDir, dock, store);
+    pruneEmptyDirectoryChain(options.projectDir, ".opendock/bin");
     this.progress(options.progress, {
       dockId: dock.id,
       message: `Removing ${dock.id} from lockfile`,
@@ -350,6 +356,64 @@ export class DockInstaller {
         to: file.to,
       })),
     );
+  }
+
+  private removeDockTools(
+    projectDir: string,
+    dock: {
+      id: string;
+      platform: OpenDockPlatform;
+      tools: Array<{ commands: string[]; name: string; path: string }>;
+    },
+  ): void {
+    for (const tool of dock.tools) {
+      for (const command of tool.commands) {
+        removeProjectCommandShim({
+          command,
+          owner: { dockId: dock.id, kind: "tool", name: tool.name },
+          platform: dock.platform,
+          projectDir,
+        });
+      }
+      const path = join(projectDir, tool.path);
+      rmSync(path, { recursive: true, force: true });
+      pruneEmptyDirectoryChain(projectDir, relative(projectDir, path));
+    }
+  }
+
+  private removeUnusedRuntimeShims(
+    projectDir: string,
+    dock: {
+      id: string;
+      platform: OpenDockPlatform;
+      runtimes: Array<{ commands: string[]; name: string; path: string }>;
+    },
+    store: OpenDockStateStore,
+  ): void {
+    const otherDocks = store.readLock().docks.filter((candidate) => candidate.id !== dock.id);
+    for (const runtime of dock.runtimes) {
+      const stillUsed = otherDocks.some((candidate) =>
+        candidate.runtimes.some(
+          (other) => other.name === runtime.name && other.path === runtime.path,
+        ),
+      );
+      if (stillUsed) {
+        continue;
+      }
+      for (const command of runtime.commands) {
+        removeProjectCommandShim({
+          command,
+          owner: { dockId: dock.id, kind: "runtime", name: runtime.name },
+          platform: dock.platform,
+          projectDir,
+        });
+      }
+      const path = join(projectDir, runtime.path);
+      if (existsSync(path)) {
+        rmSync(path, { recursive: true, force: true });
+        pruneEmptyDirectoryChain(projectDir, relative(projectDir, path));
+      }
+    }
   }
 
   private progress(reporter: ProgressReporter | undefined, event: RuntimeProgressEvent): void {

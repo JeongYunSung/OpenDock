@@ -25,7 +25,26 @@ export interface InstalledDockRecord {
   signature: string;
   platform: OpenDockPlatform;
   workdir: string;
+  runtimes: InstalledRuntimeRecord[];
+  tools: InstalledToolRecord[];
   files: AppliedFileRecord[];
+}
+
+export interface InstalledRuntimeRecord {
+  name: string;
+  requested: string;
+  version: string;
+  path: string;
+  commands: string[];
+}
+
+export interface InstalledToolRecord {
+  name: string;
+  manager: string;
+  package: string;
+  version: string;
+  commands: string[];
+  path: string;
 }
 
 interface ProjectState {
@@ -68,7 +87,7 @@ export class OpenDockStateStore {
     const parsed = YAML.parse(readFileSync(this.lockPath(), "utf8")) as Partial<LockState>;
     return {
       schema: parsed.schema ?? LOCK_SCHEMA_VERSION,
-      docks: Array.isArray(parsed.docks) ? parsed.docks : [],
+      docks: Array.isArray(parsed.docks) ? parsed.docks.map(normalizeInstalledDockRecord) : [],
     };
   }
 
@@ -132,6 +151,15 @@ export class OpenDockStateStore {
       }
     }
   }
+}
+
+function normalizeInstalledDockRecord(dock: InstalledDockRecord): InstalledDockRecord {
+  return {
+    ...dock,
+    files: Array.isArray(dock.files) ? dock.files : [],
+    runtimes: Array.isArray(dock.runtimes) ? dock.runtimes : [],
+    tools: Array.isArray(dock.tools) ? dock.tools : [],
+  };
 }
 
 function lstatIfPresent(path: string): ReturnType<typeof lstatSync> | undefined {

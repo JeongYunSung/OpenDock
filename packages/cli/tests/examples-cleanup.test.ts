@@ -342,9 +342,13 @@ case "$*" in
   --version)
     printf '1.3.11\\n'
     ;;
-  install\\ --global\\ oh-my-agent@latest)
-    exit 0
-    ;;
+	  add\\ oh-my-agent@latest)
+	    mkdir -p node_modules/.bin
+	    cp "${bin}/oma" node_modules/.bin/oma
+	    cp "${bin}/oma" node_modules/.bin/oh-my-agent
+	    chmod +x node_modules/.bin/oma node_modules/.bin/oh-my-agent
+	    exit 0
+	    ;;
   *)
     exit 1
     ;;

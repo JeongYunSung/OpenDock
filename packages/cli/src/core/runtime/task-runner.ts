@@ -12,13 +12,17 @@ import {
   satisfiesVersion,
 } from "./command-runner.js";
 import { type ProgressReporter, reportProgress } from "./progress.js";
-import { RequirementRunner } from "./requirement-runner.js";
+import { projectCommandPathEntries } from "./project-layout.js";
+import { RequirementRunner, type RuntimeRecord } from "./requirement-runner.js";
 import { type StepReport, stepProgressPercent } from "./step-report.js";
 import { assertManifestSupportsPlatform, selectTaskSteps } from "./task-selection.js";
+import { type ToolRecord, ToolRunner, toolCommandPermissions } from "./tool-runner.js";
 
 export interface TaskRunResult {
   reports: StepReport[];
   exports: FileCandidate[];
+  runtimes: RuntimeRecord[];
+  tools: ToolRecord[];
 }
 
 export interface TaskContext {
@@ -37,12 +41,21 @@ export class TaskRunner {
     private readonly commandRunner = new CommandRunner(),
     private readonly collector = new FileCandidateCollector(),
     private readonly requirementRunner = new RequirementRunner(commandRunner),
+    private readonly toolRunner = new ToolRunner(commandRunner),
   ) {}
 
   run(manifest: DockManifest, context: TaskContext): TaskRunResult {
     const platform = context.platform ?? detectPlatform();
     assertManifestSupportsPlatform(manifest, platform);
-    const requirementReports = this.requirementRunner.run(manifest, {
+    const requirementResult = this.requirementRunner.run(manifest, {
+      dockId: context.dockId,
+      phase: context.phase,
+      platform,
+      projectDir: context.projectDir,
+      ...(context.live === undefined ? {} : { live: context.live }),
+      ...(context.progress === undefined ? {} : { progress: context.progress }),
+    });
+    const toolResult = this.toolRunner.run(manifest, {
       dockId: context.dockId,
       phase: context.phase,
       platform,
@@ -63,11 +76,21 @@ export class TaskRunner {
       ...(context.dockId === undefined ? {} : { dockId: context.dockId }),
     });
     if (context.phase === "doctor") {
-      const result = this.runDoctorSteps(steps, context, platform, manifest.permission);
-      return { reports: [...requirementReports, ...result.reports], exports: result.exports };
+      const result = this.runDoctorSteps(steps, context, platform, taskPermissions(manifest));
+      return {
+        reports: [...requirementResult.reports, ...toolResult.reports, ...result.reports],
+        exports: result.exports,
+        runtimes: requirementResult.runtimes,
+        tools: toolResult.tools,
+      };
     }
-    const result = this.runSetupSteps(steps, context, platform, manifest.permission);
-    return { reports: [...requirementReports, ...result.reports], exports: result.exports };
+    const result = this.runSetupSteps(steps, context, platform, taskPermissions(manifest));
+    return {
+      reports: [...requirementResult.reports, ...toolResult.reports, ...result.reports],
+      exports: result.exports,
+      runtimes: requirementResult.runtimes,
+      tools: toolResult.tools,
+    };
   }
 
   dockWorkdir(projectDir: string, dockId: string): string {
@@ -88,7 +111,7 @@ export class TaskRunner {
       const cwd = this.resolveWorkdir(step, context.projectDir, context.dockId);
       this.progress(context, step, "task-check", `Checking ${step.id}`, current, total, 0.12);
       const checkResult = step.check
-        ? this.evaluateStepCheck(step, cwd, platform, permissions)
+        ? this.evaluateStepCheck(step, cwd, context.projectDir, platform, permissions)
         : { passed: false };
       if (checkResult.passed) {
         this.finishSetupStep(reports, exports, context, step, cwd, current, total, {
@@ -110,6 +133,7 @@ export class TaskRunner {
         const runOptions = {
           cwd,
           live: context.live ?? true,
+          pathEntries: projectCommandPathEntries(context.projectDir),
           platform,
           permissions,
           ...(step.timeout_ms === undefined ? {} : { timeoutMs: step.timeout_ms }),
@@ -133,7 +157,13 @@ export class TaskRunner {
         }
         if (step.check) {
           this.progress(context, step, "task-verify", `Verifying ${step.id}`, current, total, 0.75);
-          const postRunCheck = this.evaluateStepCheck(step, cwd, platform, permissions);
+          const postRunCheck = this.evaluateStepCheck(
+            step,
+            cwd,
+            context.projectDir,
+            platform,
+            permissions,
+          );
           if (!postRunCheck.passed) {
             const report: StepReport = { id: step.id, name: stepName(step), status: "Failed" };
             if (postRunCheck.message) {
@@ -164,7 +194,7 @@ export class TaskRunner {
         });
       }
     }
-    return { reports, exports };
+    return { reports, exports, runtimes: [], tools: [] };
   }
 
   private finishSetupStep(
@@ -236,6 +266,7 @@ export class TaskRunner {
       const result = this.commandRunner.run(command, {
         cwd,
         missingAsFailure: true,
+        pathEntries: projectCommandPathEntries(context.projectDir),
         platform,
         permissions,
         timeoutMs: step.timeout_ms ?? defaultDoctorTimeoutMs,
@@ -267,7 +298,7 @@ export class TaskRunner {
 
       reports.push({ id: step.id, name: stepName(step), status: "Ready" });
     }
-    return { reports, exports: [] };
+    return { reports, exports: [], runtimes: [], tools: [] };
   }
 
   private resolveWorkdir(step: TaskStep, projectDir: string, dockId: string): string {
@@ -286,6 +317,7 @@ export class TaskRunner {
   private evaluateStepCheck(
     step: TaskStep,
     cwd: string,
+    projectDir: string,
     platform: OpenDockPlatform,
     permissions: string[],
   ): { passed: boolean; message?: string } {
@@ -295,6 +327,7 @@ export class TaskRunner {
     const result = this.commandRunner.run(step.check, {
       cwd,
       missingAsFailure: true,
+      pathEntries: projectCommandPathEntries(projectDir),
       platform,
       permissions,
       ...(step.timeout_ms === undefined ? {} : { timeoutMs: step.timeout_ms }),
@@ -326,4 +359,8 @@ export class TaskRunner {
 
 function stepName(step: TaskStep): string {
   return step.name ?? step.id;
+}
+
+function taskPermissions(manifest: DockManifest): string[] {
+  return [...manifest.permission, ...toolCommandPermissions(manifest)];
 }

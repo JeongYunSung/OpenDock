@@ -6,20 +6,17 @@ tags:
   - claude-code
   - tool
   - ai-agent
-permission:
-  - claude --version
 requires:
   runtimes:
     node: ">=22.0.0"
     npm: ">=10.0.0"
-install:
-  - id: install-claude-code
-    run: npm install --global @anthropic-ai/claude-code@latest
-    timeout_ms: 600000
-update:
-  - id: update-claude-code
-    run: npm install --global @anthropic-ai/claude-code@latest
-    timeout_ms: 600000
+tools:
+  claude-code:
+    manager: npm
+    package: "@anthropic-ai/claude-code"
+    version: latest
+    commands:
+      - claude
 doctor:
   - id: check-claude-code
     run: claude --version

@@ -3,7 +3,9 @@ import type { OpenDockPlatform } from "../../platform.js";
 import type { DockManifest } from "../domain/manifest.js";
 import type { InstalledDockRecord } from "../domain/state-store.js";
 import type { FileApplySummary } from "../files/file-plan.js";
+import type { RuntimeRecord } from "../runtime/requirement-runner.js";
 import type { StepReport } from "../runtime/step-report.js";
+import type { ToolRecord } from "../runtime/tool-runner.js";
 
 export interface FileChangeDetails {
   created: string[];
@@ -41,7 +43,9 @@ export function installedDockRecordFor(options: {
   platform: OpenDockPlatform;
   projectDir: string;
   requested: string;
+  runtimes: RuntimeRecord[];
   signature: string;
+  tools: ToolRecord[];
   version: string;
   workdir: string;
 }): InstalledDockRecord {
@@ -54,6 +58,8 @@ export function installedDockRecordFor(options: {
     signature: options.signature,
     platform: options.platform,
     workdir: relative(options.projectDir, options.workdir).replaceAll("\\", "/"),
+    runtimes: options.runtimes,
+    tools: options.tools,
     files: options.fileSummary.records,
   };
 }
