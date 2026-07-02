@@ -260,8 +260,9 @@ tools:
 
 Runtime commands and tool commands are exposed through `.opendock/bin` while
 OpenDock runs install, update, and doctor steps. Docks should not use global
-package install commands such as `npm install --global ...` or
-`bun install --global ...`.
+or local package install/update commands such as `npm install ...`,
+`bun add ...`, `pip install ...`, or `brew install ...`; declare project-local
+`tools` instead.
 
 `readme`, `logo`, and `tags` are Registry catalog metadata. They help people
 understand and filter a dock in Hub, but they are not installed into a project
@@ -306,21 +307,32 @@ Platform-specific defaults:
 | `windows` | `powershell`, `winget` |
 | `linux` | none |
 
-Anything outside that default set, or outside the allowed command shape for that
-tool, must be declared in top-level `permissions`. Commands declared by `tools`
-automatically allow simple version checks such as `codex --version`.
+Anything outside that default set must first be declared under `tools.commands`.
+`permissions` can then allow exact task command shapes for that declared tool.
+`permissions` can also allow exact non-standard shapes for OpenDock default
+commands. Commands declared by `tools` automatically allow simple version checks
+such as `codex --version`.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
-  - codex --version
 ```
 
 `permissions` is exact. `oma -y install` does not allow `oma install` or
-`oma -y update`. Shell operators such as `|`, `&&`, `||`, `;`, backticks, `$(`,
-`>`, and `<` are rejected in `run`, `check`, and `permissions`. Global package
-installs are rejected; use `tools` instead.
+`oma -y update`. A non-default command such as `oma` is rejected unless it is
+declared in `tools.commands`. Shell operators such as `|`, `&&`, `||`, `;`,
+backticks, `$(`, `>`, and `<` are rejected in `run`, `check`, and
+`permissions`. Package install/update commands are rejected in tasks; use
+`tools` instead.
 
 ## File Ownership
 
@@ -360,6 +372,14 @@ outputs.
 Use `workdir.files` when a generator needs input files before a task runs.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
@@ -390,8 +410,8 @@ install:
 
 - `workdir: root` runs in the project root.
 - `workdir: dock` runs in `.opendock/workdirs/<dock>/`.
-- Non-default task commands such as `oma -y install` must be declared exactly in
-  top-level `permissions`.
+- Non-default task commands such as `oma -y install` must use a command declared
+  in `tools.commands` and must be listed exactly in top-level `permissions`.
 - `workdir.files` copies dock archive files into the private dock workdir before
   tasks run.
 - `export.include/exclude` selects generated files from the dock workdir.

@@ -293,7 +293,7 @@ python3
 ## tools
 
 `tools`는 OpenDock이 프로젝트 안에 설치하고 추적할 CLI package입니다. 예를 들어
-Codex, Claude Code, OMA처럼 command를 제공하는 패키지는 task에서 global install하지
+Codex, Claude Code, OMA처럼 command를 제공하는 패키지는 task에서 직접 설치하지
 말고 `tools`로 선언합니다.
 
 ```yaml
@@ -315,7 +315,7 @@ tools:
 
 - `requires`는 runtime을 확인하고 project-local command로 준비하는 영역입니다.
 - CLI package 설치는 `tools`로 선언합니다.
-- `npm install --global ...`, `bun install --global ...`, `pipx install ...` 같은 global install은 dock task에서 거부됩니다.
+- `npm install ...`, `bun add ...`, `pip install ...`, `pipx install ...`, `brew install ...` 같은 package 설치/update 명령은 dock task에서 거부됩니다.
 - root에 적용할 파일은 `files` 또는 step의 `export`로 선언해야 합니다.
 - raw shell, pipe, redirect는 `requires`에서도 허용되지 않습니다.
 - 설치된 CLI를 실행해야 한다면 `tools.commands`에 command를 선언하고 `install`, `update`, `doctor` task에서 사용합니다.
@@ -507,6 +507,14 @@ OpenDock의 task 실행 위치는 두 가지입니다.
 workdir에 먼저 넣을 수 있습니다.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
@@ -550,9 +558,10 @@ install:
 | `workdir.files` | `.opendock/workdirs/<dock>/` | install/update task 실행 전 복사 |
 | `export` | 프로젝트 root | `workdir: dock` task 실행 후 수집 |
 
-이 구조 덕분에 `oma`, `omx`, `npx ... install` 같은 외부 generator와 협력하면서도
-프로젝트 root에 들어온 최종 파일은 OpenDock이 추적할 수 있습니다. 단, `oma -y install`
-처럼 기본 정책 밖의 command는 top-level `permissions`에 정확히 선언해야 합니다.
+이 구조 덕분에 `oma`, `omx` 같은 외부 generator와 협력하면서도 프로젝트 root에 들어온
+최종 파일은 OpenDock이 추적할 수 있습니다. 단, `oma -y install`처럼 기본 정책 밖의
+command는 `tools.commands`에 command를 선언하고 top-level `permissions`에 정확한
+실행 형태를 선언해야 합니다.
 
 ## platform artifact
 
@@ -618,8 +627,8 @@ semver를 출력하는 명령을 `check`로 사용하세요.
 
 OpenDock은 `requires`와 task에 shell script를 그대로 넘기지
 않습니다. `run`/`check` 문자열을 분리한 뒤 allowlist와 shape 검사를 통과한
-프로그램만 실행합니다. 기본 정책 밖의 command는 top-level `permissions`에 정확한
-형태로 선언해야 합니다.
+프로그램만 실행합니다. 기본 정책 밖의 command는 먼저 `tools.commands`에 선언되어야
+하고, 실제 실행할 정확한 형태는 top-level `permissions`에 선언해야 합니다.
 
 현재 공통 허용 프로그램:
 
@@ -655,15 +664,23 @@ script 실행용으로는 사용할 수 없습니다.
 기본 정책 밖의 command 예시:
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
-  - codex --version
 ```
 
 `permissions`는 정확히 일치해야 합니다. `oma -y install`을 허용해도 `oma install`,
 `oma -y update`, `oma doctor`는 자동으로 허용되지 않습니다. 필요한 형태를 각각
-명시하세요.
+명시하세요. 단, `oma`처럼 기본 정책 밖의 command는 먼저 `tools.commands`에 있어야
+합니다.
 
 차단되는 shell operator:
 
@@ -924,7 +941,8 @@ manifest:
 1. `opendock: 1`을 선언했는가?
 2. dock id와 release version을 `dock.yml`이 아니라 install/deploy 명령에서 정했는가?
 3. `readme`와 `logo`가 dock root 안의 실제 파일인가?
-4. 기본 정책 밖의 `run`/`check` command를 `permissions`에 정확히 선언했는가?
+4. 기본 정책 밖의 `run`/`check` command를 `tools.commands`에 선언하고
+   `permissions`에 정확히 선언했는가?
 
 requires:
 

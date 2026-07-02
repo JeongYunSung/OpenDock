@@ -61,7 +61,7 @@ files:
 | `readme` | Markdown pour la page de détail du catalog. |
 | `logo` | Image logo du catalog. |
 | `tags` | Labels lowercase pour la recherche et les filtres Hub. |
-| `permissions` | Autorise exactement les commandes `run` / `check` hors politique par défaut. |
+| `permissions` | Autorise des formes exactes de task pour les commandes par défaut ou déclarées dans tools. |
 | `requires` | Runtime requirements. |
 | `tools` | CLI packages installed and tracked under `.opendock/tools/`. |
 | `files` | Fichiers ou dossiers appliqués au project root. |
@@ -133,13 +133,20 @@ le projet.
 
 ## Task Command Permission
 
-OpenDock ne transmet pas `run` ni `check` directement à un shell. La politique par défaut autorise seulement `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Sur macOS, `brew` est aussi autorisé; sur Windows, `powershell` et `winget`. Toute autre commande, comme `oma`, `codex`, `claude`, `omx` ou `mkdir`, doit être déclarée exactement dans le champ top-level `permissions`. Les opérateurs `|`, `&&`, `||`, `;`, backticks, `$(`, `>` et `<` sont rejetés dans `permissions`, `run` et `check`.
+OpenDock ne transmet pas `run` ni `check` directement à un shell. La politique par défaut autorise seulement `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Sur macOS, `brew` est aussi autorisé; sur Windows, `powershell` et `winget`. Les commandes hors politique par défaut doivent d’abord être déclarées dans `tools.commands`; ensuite `permissions` autorise la forme exacte du task. Les opérateurs `|`, `&&`, `||`, `;`, backticks, `$(`, `>` et `<` sont rejetés dans `permissions`, `run` et `check`.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
-  - codex --version
 ```
 
 ## Workdir Files And Export
@@ -149,6 +156,14 @@ son exécution. Utilisez ensuite `workdir: dock` et exportez uniquement les
 fichiers qu'OpenDock doit gérer dans le projet.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex

@@ -92,7 +92,7 @@ stay outside the OpenDock block.
 | `readme` | no | Markdown file submitted as catalog detail content. |
 | `logo` | no | Catalog logo image path. |
 | `tags` | no | Lowercase catalog labels for Hub search and filtering. |
-| `permissions` | no | Exact non-default task commands allowed in `run` and `check`. |
+| `permissions` | no | Exact task command shapes allowed for default commands or declared tool commands. |
 | `requires` | no | Runtime requirements prepared before tasks run. |
 | `tools` | no | CLI packages installed and tracked under `.opendock/tools/`. |
 | `workdir` | no | Files that prepare the private dock workdir before tasks run. |
@@ -210,10 +210,10 @@ tools:
       - oh-my-agent
 ```
 
-Use `tools` instead of task commands such as `npm install --global ...`,
-`bun install --global ...`, `pipx install ...`, or `uv tool install ...`.
-OpenDock rejects those global install shapes even when they appear in
-`permissions`.
+Use `tools` instead of task commands such as `npm install ...`, `bun add ...`,
+`pip install ...`, `pipx install ...`, `uv tool install ...`, or
+`brew install ...`. OpenDock rejects package install/update task commands even
+when they appear in `permissions`.
 
 ## Task Command Permission
 
@@ -247,25 +247,35 @@ Platform-specific defaults:
 | `windows` | `powershell`, `winget` |
 | `linux` | none |
 
-Commands outside this default policy must be declared in top-level
-`permissions` with the exact shape OpenDock should allow. Commands declared by
-`tools` automatically allow simple version checks such as `codex --version`.
+Commands outside this default policy must first be declared in `tools.commands`.
+Then top-level `permissions` can allow the exact task command shape OpenDock
+should run. `permissions` can also allow exact non-standard shapes for OpenDock
+default commands. Commands declared by `tools` automatically allow simple
+version checks such as `codex --version`.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
-  - codex --version
 ```
 
 `permissions` is exact. `oma -y install` does not allow `oma install`,
-`oma -y update`, or another `oma` command. Shell operators are still rejected in
-`permissions`, `run`, and `check`: `|`, `&&`, `||`, `;`, backticks, `$(`, `>`,
-and `<`.
+`oma -y update`, or another `oma` command. A non-default command such as `oma`
+is rejected unless it is declared in `tools.commands`. Shell operators are still
+rejected in `permissions`, `run`, and `check`: `|`, `&&`, `||`, `;`, backticks,
+`$(`, `>`, and `<`.
 
-Use `permissions` for app-specific CLIs such as `oma`, `omx`, `hermes`, or any
-project-specific helper. Use `tools` for installing CLI packages; do not hide
-global installs inside task steps.
+Use `tools` for app-specific CLIs such as `oma`, `omx`, `hermes`, or any
+project-specific helper that OpenDock should install and track. Use
+`permissions` only for the exact command shapes those tools may run.
 
 ## Host Bootstrap
 
@@ -326,6 +336,14 @@ step in the private dock workdir and exports only declared outputs. Use
 `workdir.files` when that tool needs input files before it runs.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
@@ -460,7 +478,8 @@ Manifest:
 2. The dock id and release version are in the OpenDock command reference, not in
    `dock.yml`.
 3. `readme` and `logo` point to real files inside the dock directory.
-4. Non-default `run` and `check` commands are declared exactly in `permissions`.
+4. Non-default `run` and `check` commands use `tools.commands` and are declared
+   exactly in `permissions`.
 
 Files:
 

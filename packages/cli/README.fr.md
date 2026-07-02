@@ -164,13 +164,20 @@ fichiers d'entrée avant son exécution. Utilisez `files` pour les fichiers à
 
 ## Task Command Permission
 
-Les tasks `run` et `check` d'OpenDock utilisent une petite politique par défaut : `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Sur macOS, `brew` est aussi autorisé; sur Windows, `powershell` et `winget`. Toute autre commande, comme `oma`, `codex`, `claude`, `omx` ou `mkdir`, doit être déclarée exactement dans le champ top-level `permissions`. Les opérateurs `|`, `&&`, `||`, `;`, backticks, `$(`, `>` et `<` sont rejetés dans `permissions`, `run` et `check`.
+Les tasks `run` et `check` d'OpenDock utilisent une petite politique par défaut : `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Sur macOS, `brew` est aussi autorisé; sur Windows, `powershell` et `winget`. Les commandes hors politique par défaut doivent d’abord être déclarées dans `tools.commands`; ensuite `permissions` autorise la forme exacte du task. Les opérateurs `|`, `&&`, `||`, `;`, backticks, `$(`, `>` et `<` sont rejetés dans `permissions`, `run` et `check`.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
-  - codex --version
 ```
 
 ## Example Docks

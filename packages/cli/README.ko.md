@@ -278,6 +278,14 @@ top-level `install`, `update`, `doctor`에 둡니다.
 workdir에 먼저 넣을 수 있습니다.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
 
@@ -308,17 +316,25 @@ install:
 
 이 구조는 `oma`, `omx` 또는 다른 AI setup generator와 협력하면서도 프로젝트
 root에 들어온 최종 파일을 OpenDock이 추적할 수 있게 해줍니다. `oma -y install`처럼
-기본 정책 밖의 command는 top-level `permissions`에 정확히 선언해야 합니다.
+기본 정책 밖의 command는 먼저 `tools.commands`에 선언하고, 실행할 정확한 형태를
+top-level `permissions`에 적어야 합니다.
 
 ## Task Command Permission
 
-OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. `oma`, `codex`, `claude`, `omx`, `mkdir` 같은 command는 top-level `permissions`에 정확히 선언해야 합니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permissions`, `run`, `check`에서 거부됩니다.
+OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. `oma`, `codex`, `claude`, `omx` 같은 command는 `tools.commands`에 선언된 경우에만 `permissions`로 실행 형태를 열 수 있습니다. `mkdir`처럼 OpenDock 기본 command도 아니고 `tools.commands`도 아닌 command는 거부됩니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permissions`, `run`, `check`에서 거부됩니다. `npm install`, `bun add`, `pip install`, `brew install` 같은 package 설치/update 명령은 task에서 거부되며 `tools`나 bootstrap으로 처리해야 합니다.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
-  - codex --version
 ```
 
 ## Example Docks

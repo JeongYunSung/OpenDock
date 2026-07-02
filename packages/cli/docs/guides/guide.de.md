@@ -62,7 +62,7 @@ files:
 | `readme` | Markdown für die catalog detail page. |
 | `logo` | Logo image für den catalog. |
 | `tags` | Lowercase catalog labels für Hub-Suche und Filter. |
-| `permissions` | Erlaubt exakt angegebene `run` / `check` Commands außerhalb der Standard-Policy. |
+| `permissions` | Erlaubt exakte Task-Formen für Standard-Commands oder deklarierte Tool-Commands. |
 | `requires` | Runtime requirements. |
 | `tools` | CLI packages installed and tracked under `.opendock/tools/`. |
 | `files` | Dateien oder Ordner für den project root. |
@@ -134,13 +134,20 @@ nicht verändern.
 
 ## Task Command Permission
 
-OpenDock gibt `run` und `check` nicht direkt an eine Shell weiter. Die Standard-Policy erlaubt nur `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Andere Commands wie `oma`, `codex`, `claude`, `omx` oder `mkdir` müssen exakt im top-level Feld `permissions` stehen. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt.
+OpenDock gibt `run` und `check` nicht direkt an eine Shell weiter. Die Standard-Policy erlaubt nur `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Commands außerhalb der Standard-Policy müssen zuerst in `tools.commands` stehen; danach erlaubt `permissions` die exakte Task-Form. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
-  - codex --version
 ```
 
 ## Workdir Files And Export
@@ -150,6 +157,14 @@ Nutze danach `workdir: dock` und exportiere nur die Dateien, die OpenDock im
 Projekt verwalten soll.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex

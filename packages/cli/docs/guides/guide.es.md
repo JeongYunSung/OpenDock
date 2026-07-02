@@ -62,7 +62,7 @@ files:
 | `readme` | Markdown para la página de detalle del catalog. |
 | `logo` | Imagen de logo del catalog. |
 | `tags` | Labels lowercase para búsqueda y filtros en Hub. |
-| `permissions` | Permite de forma exacta comandos de `run` / `check` fuera de la política por defecto. |
+| `permissions` | Permite formas exactas de task para commands por defecto o declarados en tools. |
 | `requires` | Requisitos de runtime. |
 | `tools` | CLI packages installed and tracked under `.opendock/tools/`. |
 | `files` | Archivos o directorios aplicados al project root. |
@@ -134,13 +134,20 @@ modificar el proyecto.
 
 ## Task Command Permission
 
-OpenDock no pasa `run` ni `check` directamente a una shell. La política por defecto solo permite `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Cualquier otro comando, como `oma`, `codex`, `claude`, `omx` o `mkdir`, debe declararse exactamente en el campo top-level `permissions`. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`.
+OpenDock no pasa `run` ni `check` directamente a una shell. La política por defecto solo permite `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Los commands fuera de la política por defecto deben declararse primero en `tools.commands`; luego `permissions` permite la forma exacta del task. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
-  - codex --version
 ```
 
 ## Workdir Files And Export
@@ -150,6 +157,14 @@ ejecutarse. Luego usa `workdir: dock` y exporta solo los archivos que OpenDock
 debe gestionar en el proyecto.
 
 ```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: "8.52.9"
+    commands:
+      - oma
+
 permissions:
   - oma -y install
   - oma link claude codex
