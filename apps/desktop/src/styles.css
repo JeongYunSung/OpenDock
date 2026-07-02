@@ -2360,6 +2360,18 @@ input:focus-visible,
   overflow: hidden;
 }
 
+.logs-panel {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.logs-panel h1,
+.logs-panel > p {
+  flex: none;
+}
+
 .installed-table,
 .log-shell {
   margin-top: 20px;
@@ -2384,6 +2396,10 @@ input:focus-visible,
 }
 
 .log-shell {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
   overflow: clip;
 }
 
@@ -2851,6 +2867,7 @@ input:focus-visible,
 
 .log-head {
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -2888,10 +2905,11 @@ input:focus-visible,
 }
 
 .log-lines {
+  min-height: 0;
+  flex: 1;
   overflow: auto;
   scrollbar-gutter: stable both-edges;
-  max-height: min(420px, calc(100vh - 330px));
-  min-height: 246px;
+  max-height: none;
   padding: 16px;
   color: var(--neutral-100);
   background: var(--neutral-950);

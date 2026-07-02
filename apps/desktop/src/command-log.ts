@@ -1,6 +1,6 @@
 import type { AppLog, OpenDockCommandLine, OpenDockCommandResult } from "./data";
 
-const MAX_STORED_LOGS = 400;
+const MAX_STORED_LOGS = 5000;
 
 export function nowTime() {
   return formatLogTime(new Date());

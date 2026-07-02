@@ -376,9 +376,14 @@ const blockingCliCommandsUseBackgroundRuntime = [
   return body.includes("run_opendock_blocking") || body.includes("run_opendock_streaming_blocking");
 });
 const logStorageIsCapped =
-  commandLog.includes("const MAX_STORED_LOGS = 400") &&
+  commandLog.includes("const MAX_STORED_LOGS = 5000") &&
   commandLog.includes("lines.slice(-MAX_STORED_LOGS)") &&
   commandLog.includes("current.length - (MAX_STORED_LOGS - 1)");
+const logPanelUsesAvailableHeight =
+  styles.includes(".logs-panel {\n  display: flex;\n  min-height: 0;\n  flex-direction: column;\n  overflow: hidden;") &&
+  styles.includes(".log-shell {\n  display: flex;\n  min-height: 0;\n  flex: 1;\n  flex-direction: column;\n  overflow: clip;") &&
+  styles.includes(".log-lines {\n  min-height: 0;\n  flex: 1;\n  overflow: auto;") &&
+  styles.includes("max-height: none;");
 const logTimestampsDoNotWrap =
   styles.includes("grid-template-columns: 20ch 48px max-content;") &&
   styles.includes("grid-template-columns: 20ch 38px max-content;") &&
@@ -635,6 +640,7 @@ const failures = [
     ? ["blocking OpenDock commands must run through the background runtime"]
     : []),
   ...(!logStorageIsCapped ? ["app logs must be capped before rendering and persisting"] : []),
+  ...(!logPanelUsesAvailableHeight ? ["app logs panel must fill and shrink with available panel height"] : []),
   ...(!logTimestampsDoNotWrap ? ["app log timestamps must not wrap when historical dates are shown"] : []),
   ...(!logTimestampsAlwaysIncludeFullDate ? ["app log timestamps must always include year, date, and time"] : []),
   ...(!titlebarUsesNativeDragFallback
