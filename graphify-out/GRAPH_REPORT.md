@@ -1,7 +1,7 @@
 # Graph Report - opendock  (2026-07-02)
 
 ## Corpus Check
-- 451 files · ~213,189 words
+- 451 files · ~213,242 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `10fa0459`
+- Built from commit: `01e2387e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -761,7 +761,7 @@ Nodes (34): Client, App(), AppNotice(), AppNoticeKind, AppNoticeOptions, AppNoti
 
 ### Community 10 - "Community 10"
 Cohesion: 0.09
-Nodes (46): State, AppHandle, Option, Path, PathBuf, R, Result, State (+38 more)
+Nodes (47): State, AppHandle, Option, Path, PathBuf, R, Result, State (+39 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.11
@@ -840,8 +840,8 @@ Cohesion: 0.12
 Nodes (26): registerAuthCommands(), registerBootstrapCommands(), registerChangeCommands(), recordCommandFailure(), recordCommandLog(), registerDeployCommand(), cliCommandNames, deployOptionValue() (+18 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.20
-Nodes (18): Option, String, Value, Vec, command_json_from_value(), command_lines(), command_progress_from_event_line(), empty_stream_message() (+10 more)
+Cohesion: 0.21
+Nodes (17): Option, String, Value, Vec, command_json_from_value(), command_lines(), command_progress_from_event_line(), empty_stream_message() (+9 more)
 
 ### Community 31 - "Community 31"
 Cohesion: 0.26
@@ -1008,8 +1008,8 @@ Cohesion: 0.15
 Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
 
 ### Community 73 - "Community 73"
-Cohesion: 0.13
-Nodes (14): anyOf, definitions, Number, PermissionEntry, Target, description, anyOf, description (+6 more)
+Cohesion: 0.15
+Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
 
 ### Community 74 - "Community 74"
 Cohesion: 0.17
@@ -1053,7 +1053,7 @@ Nodes (10): discoverExampleDocks(), ExampleDock, installedDocks(), installedReco
 
 ### Community 84 - "Community 84"
 Cohesion: 0.20
-Nodes (10): properties, default, description, type, type, description, identifier, remote (+2 more)
+Nodes (10): properties, type, default, description, type, identifier, local, remote (+2 more)
 
 ### Community 85 - "Community 85"
 Cohesion: 0.20
@@ -2100,8 +2100,8 @@ Cohesion: 0.67
 Nodes (3): 0.1.18 - 2026-06-15, Added, Tests
 
 ### Community 360 - "Community 360"
-Cohesion: 0.50
-Nodes (4): default, description, type, local
+Cohesion: 0.40
+Nodes (4): anyOf, description, $schema, title
 
 ### Community 361 - "Community 361"
 Cohesion: 0.29
@@ -2116,8 +2116,8 @@ Cohesion: 0.67
 Nodes (3): 0.1.27 - 2026-06-16, Desktop App, Tests
 
 ### Community 364 - "Community 364"
-Cohesion: 0.67
-Nodes (3): Value, anyOf, description
+Cohesion: 0.50
+Nodes (4): default, description, type, description
 
 ### Community 366 - "Community 366"
 Cohesion: 0.40

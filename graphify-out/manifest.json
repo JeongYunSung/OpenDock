@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-native-contract.mjs": {
-    "mtime": 1782919810.5953233,
-    "ast_hash": "0b3a195900b5f21cbfaa3605b0821ed9",
+    "mtime": 1782981083.9072237,
+    "ast_hash": "c91f71472f7eeedb7985e8dfa443b8f7",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-od-assertions.mjs": {
@@ -165,8 +165,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/command-log.ts": {
-    "mtime": 1782919810.5942206,
-    "ast_hash": "0cc3cd41544427b16e043dbf668775d0",
+    "mtime": 1782981083.9060729,
+    "ast_hash": "664141d40c6518249706bec53cf86f25",
     "semantic_hash": ""
   },
   "apps/desktop/src/command-task.ts": {
