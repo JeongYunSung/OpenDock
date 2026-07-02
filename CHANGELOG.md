@@ -7,6 +7,17 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.2.2 - 2026-07-02
+
+### CLI
+
+- Manage `uv` as the Python runtime installer and remove the old bootstrap
+  command path.
+
+### Desktop App
+
+- Prepare the desktop app release metadata for OpenDock `0.2.2`.
+
 ## 0.2.1 - 2026-07-02
 
 ### Desktop App
