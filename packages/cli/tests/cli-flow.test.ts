@@ -8,6 +8,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -534,6 +535,56 @@ describe("opendock TypeScript CLI", () => {
     expect(agents).not.toContain("dock=test/designer");
     expect(existsSync(join(project, "DESIGN.md"))).toBe(false);
     expect(installedDocks(project).map((dock) => dock.id)).toEqual(["test/oma"]);
+  });
+
+  it("restores a shared runtime shim when uninstalling one of multiple runtime docks", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const home = realpathSync(tempDir());
+    const node22Bin = tempDir();
+    const node24Bin = tempDir();
+    writeFakeVersionCommand(node22Bin, "node", "v22.12.0");
+    writeFakeVersionCommand(node24Bin, "node", "v24.1.0");
+    writeDock(docks, "test", "node22", "1.0.0", {
+      requires: { runtimes: { node: ">=22.0.0 <23.0.0" } },
+    });
+    writeDock(docks, "test", "node24", "1.0.0", {
+      requires: { runtimes: { node: ">=24.0.0 <25.0.0" } },
+    });
+
+    await withEnv({ HOME: home, PATH: `${node22Bin}:${process.env.PATH ?? ""}` }, () =>
+      install({
+        dockRef: DockRef.parse("test/node22@1.0.0"),
+        projectDir: project,
+        phase: "install",
+        runTasks: true,
+        resolve: localResolver(docks),
+      }),
+    );
+    await withEnv({ HOME: home, PATH: `${node24Bin}:${process.env.PATH ?? ""}` }, () =>
+      install({
+        dockRef: DockRef.parse("test/node24@1.0.0"),
+        projectDir: project,
+        phase: "install",
+        runTasks: true,
+        resolve: localResolver(docks),
+      }),
+    );
+
+    const shimPath = join(project, ".opendock", "bin", "node");
+    expect(readFileSync(shimPath, "utf8")).toContain(
+      join(home, ".opendock", "runtimes", "node", "24.1.0", "bin", "node"),
+    );
+
+    uninstall({ dockId: "test/node24", projectDir: project });
+    const restoredShim = readFileSync(shimPath, "utf8");
+    expect(restoredShim).toContain(
+      join(home, ".opendock", "runtimes", "node", "22.12.0", "bin", "node"),
+    );
+    expect(restoredShim).not.toContain("24.1.0");
+
+    uninstall({ dockId: "test/node22", projectDir: project });
+    expect(existsSync(shimPath)).toBe(false);
   });
 
   it("prunes empty parent directories after uninstalling managed files", async () => {
@@ -1777,6 +1828,7 @@ function writeDock(
     files?: Array<{ path: string; content: string }>;
     workdirFiles?: Array<{ path: string; to: string; content: string }>;
     permission?: string[];
+    requires?: { runtimes?: Record<string, string> };
     tools?: Record<string, unknown>;
     tasks?: {
       install?: unknown[];
@@ -1805,6 +1857,7 @@ function writeDock(
     readme: "DOCK.md",
     logo: "logo.png",
     permission: options.permission ?? [],
+    requires: options.requires ?? { runtimes: {} },
     tools: options.tools ?? {},
     files: (options.files ?? []).map((file) => ({
       from: `files/${file.path}`,
@@ -2035,6 +2088,19 @@ exit 1
 
 function chmod(path: string): void {
   chmodSync(path, 0o755);
+}
+
+function writeFakeVersionCommand(bin: string, command: string, version: string): void {
+  mkdirSync(bin, { recursive: true });
+  const path = join(bin, command);
+  writeFileSync(
+    path,
+    `#!/bin/sh
+set -eu
+printf '${version}\\n'
+`,
+  );
+  chmod(path);
 }
 
 async function withEnv<T>(env: NodeJS.ProcessEnv, fn: () => Promise<T>): Promise<T> {

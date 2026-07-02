@@ -1,3 +1,5 @@
+import { realpathSync } from "node:fs";
+import { homedir } from "node:os";
 import { delimiter, join, relative } from "node:path";
 import { safeDockDirectoryName } from "../files/path-utils.js";
 
@@ -5,12 +7,12 @@ export function projectBinDir(projectDir: string): string {
   return join(projectDir, ".opendock", "bin");
 }
 
-export function projectToolchainsDir(projectDir: string): string {
-  return join(projectDir, ".opendock", "toolchains");
+export function sharedRuntimeRoot(): string {
+  return join(realpathSync(process.env.HOME ?? homedir()), ".opendock", "runtimes");
 }
 
-export function runtimeBinDir(projectDir: string, runtime: string, version: string): string {
-  return join(projectToolchainsDir(projectDir), runtime, version, "bin");
+export function sharedRuntimeBinDir(runtime: string, version: string): string {
+  return join(sharedRuntimeRoot(), safeRuntimeSegment(runtime), safeRuntimeSegment(version), "bin");
 }
 
 export function projectToolsDir(projectDir: string): string {
@@ -49,4 +51,8 @@ function uniquePathEntries(entries: string[]): string[] {
     result.push(entry);
   }
   return result;
+}
+
+function safeRuntimeSegment(value: string): string {
+  return value.replaceAll(/[^A-Za-z0-9._+-]/g, "_");
 }

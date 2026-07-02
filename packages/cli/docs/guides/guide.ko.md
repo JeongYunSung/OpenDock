@@ -258,9 +258,9 @@ tags:
 ## requires
 
 `requires`는 dock을 실행하기 전에 필요한 runtime을 선언합니다. OpenDock은
-install/update/doctor 전에 runtime을 확인하고, 프로젝트 안의 `.opendock/toolchains/`와
-`.opendock/bin/`을 통해 project-local command로 준비합니다. dock task가 runtime을
-전역 설치하지 않습니다.
+install/update/doctor 전에 runtime을 확인하고, `~/.opendock/runtimes/<runtime>/<version>/bin`
+아래 versioned runtime wrapper를 등록한 뒤 project의 `.opendock/bin/` shim으로
+노출합니다. dock task가 runtime을 전역 또는 dock별로 설치하지 않습니다.
 
 ```yaml
 requires:

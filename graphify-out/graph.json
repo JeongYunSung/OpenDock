@@ -2570,7 +2570,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "schemas_macos_schema",
-      "community": 356,
+      "community": 73,
       "norm_label": "macos-schema.json"
     },
     {
@@ -2580,7 +2580,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "schemas_macos_schema_schema",
-      "community": 356,
+      "community": 73,
       "norm_label": "$schema"
     },
     {
@@ -2590,7 +2590,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "schemas_macos_schema_title",
-      "community": 356,
+      "community": 73,
       "norm_label": "title"
     },
     {
@@ -2600,7 +2600,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "schemas_macos_schema_description",
-      "community": 356,
+      "community": 73,
       "norm_label": "description"
     },
     {
@@ -2610,7 +2610,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "schemas_macos_schema_anyof",
-      "community": 356,
+      "community": 73,
       "norm_label": "anyof"
     },
     {
@@ -3150,7 +3150,7 @@
       "source_location": "L2251",
       "_origin": "ast",
       "id": "schemas_macos_schema_definitions_value",
-      "community": 73,
+      "community": 424,
       "norm_label": "value"
     },
     {
@@ -3160,7 +3160,7 @@
       "source_location": "L2252",
       "_origin": "ast",
       "id": "schemas_macos_schema_value_description",
-      "community": 73,
+      "community": 424,
       "norm_label": "description"
     },
     {
@@ -3170,7 +3170,7 @@
       "source_location": "L2253",
       "_origin": "ast",
       "id": "schemas_macos_schema_value_anyof",
-      "community": 73,
+      "community": 424,
       "norm_label": "anyof"
     },
     {
@@ -10240,7 +10240,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_auth_tokenstore",
-      "community": 360,
+      "community": 319,
       "norm_label": "tokenstore"
     },
     {
@@ -10250,7 +10250,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_auth_tokenstore_constructor",
-      "community": 360,
+      "community": 319,
       "norm_label": ".constructor()"
     },
     {
@@ -10260,7 +10260,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_auth_tokenstore_savetoken",
-      "community": 360,
+      "community": 319,
       "norm_label": ".savetoken()"
     },
     {
@@ -10270,7 +10270,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_auth_tokenstore_loadtoken",
-      "community": 360,
+      "community": 319,
       "norm_label": ".loadtoken()"
     },
     {
@@ -10280,7 +10280,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_auth_tokenstore_cleartoken",
-      "community": 360,
+      "community": 319,
       "norm_label": ".cleartoken()"
     },
     {
@@ -10290,7 +10290,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "src_auth_tokenstore_tokenpath",
-      "community": 360,
+      "community": 319,
       "norm_label": ".tokenpath()"
     },
     {
@@ -10650,7 +10650,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_change_events_changeeventreporter",
-      "community": 5,
+      "community": 19,
       "norm_label": "changeeventreporter"
     },
     {
@@ -10870,7 +10870,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_change_output",
-      "community": 5,
+      "community": 19,
       "norm_label": "change-output.ts"
     },
     {
@@ -10880,7 +10880,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_change_output_jsonchangeoperation",
-      "community": 5,
+      "community": 19,
       "norm_label": "jsonchangeoperation"
     },
     {
@@ -10890,7 +10890,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_change_output_jsonchangestatus",
-      "community": 5,
+      "community": 19,
       "norm_label": "jsonchangestatus"
     },
     {
@@ -10900,7 +10900,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_change_output_jsoncommanderrorcode",
-      "community": 5,
+      "community": 19,
       "norm_label": "jsoncommanderrorcode"
     },
     {
@@ -10910,7 +10910,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_change_output_installeddockupdatecheck",
-      "community": 5,
+      "community": 19,
       "norm_label": "installeddockupdatecheck"
     },
     {
@@ -10920,7 +10920,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_change_output_jsondockupdatecheckreport",
-      "community": 25,
+      "community": 19,
       "norm_label": "jsondockupdatecheckreport"
     },
     {
@@ -10930,7 +10930,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_change_output_jsonupdatecheckcommandresult",
-      "community": 5,
+      "community": 19,
       "norm_label": "jsonupdatecheckcommandresult"
     },
     {
@@ -10940,7 +10940,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_change_output_jsoninstalleddockreport",
-      "community": 25,
+      "community": 19,
       "norm_label": "jsoninstalleddockreport"
     },
     {
@@ -10950,7 +10950,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "src_change_output_jsoninstalleddocksummary",
-      "community": 5,
+      "community": 19,
       "norm_label": "jsoninstalleddocksummary"
     },
     {
@@ -10960,7 +10960,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "src_change_output_jsoninstalleddocklistcommandresult",
-      "community": 5,
+      "community": 19,
       "norm_label": "jsoninstalleddocklistcommandresult"
     },
     {
@@ -10970,7 +10970,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "src_change_output_jsondockchangereport",
-      "community": 5,
+      "community": 19,
       "norm_label": "jsondockchangereport"
     },
     {
@@ -10980,7 +10980,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "src_change_output_jsonchangecommandresult",
-      "community": 5,
+      "community": 19,
       "norm_label": "jsonchangecommandresult"
     },
     {
@@ -10990,7 +10990,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_change_output_jsonchangecommandfailureresult",
-      "community": 5,
+      "community": 19,
       "norm_label": "jsonchangecommandfailureresult"
     },
     {
@@ -11000,7 +11000,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "src_change_output_jsonchangesummary",
-      "community": 5,
+      "community": 19,
       "norm_label": "jsonchangesummary"
     },
     {
@@ -11010,7 +11010,7 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "src_change_output_jsonchangesummarycounts",
-      "community": 5,
+      "community": 19,
       "norm_label": "jsonchangesummarycounts"
     },
     {
@@ -11040,7 +11040,7 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "src_change_output_installeddocksummary",
-      "community": 5,
+      "community": 19,
       "norm_label": "installeddocksummary()"
     },
     {
@@ -11050,7 +11050,7 @@
       "source_location": "L189",
       "_origin": "ast",
       "id": "src_change_output_installchangereport",
-      "community": 5,
+      "community": 19,
       "norm_label": "installchangereport()"
     },
     {
@@ -11060,7 +11060,7 @@
       "source_location": "L213",
       "_origin": "ast",
       "id": "src_change_output_uninstallchangereport",
-      "community": 5,
+      "community": 19,
       "norm_label": "uninstallchangereport()"
     },
     {
@@ -11070,7 +11070,7 @@
       "source_location": "L234",
       "_origin": "ast",
       "id": "src_change_output_changecommandresult",
-      "community": 5,
+      "community": 19,
       "norm_label": "changecommandresult()"
     },
     {
@@ -11080,7 +11080,7 @@
       "source_location": "L258",
       "_origin": "ast",
       "id": "src_change_output_changesummary",
-      "community": 5,
+      "community": 19,
       "norm_label": "changesummary()"
     },
     {
@@ -11090,7 +11090,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "src_change_output_changesummarycounts",
-      "community": 5,
+      "community": 19,
       "norm_label": "changesummarycounts()"
     },
     {
@@ -11100,7 +11100,7 @@
       "source_location": "L281",
       "_origin": "ast",
       "id": "src_change_output_compactchangesummary",
-      "community": 5,
+      "community": 19,
       "norm_label": "compactchangesummary()"
     },
     {
@@ -11110,7 +11110,7 @@
       "source_location": "L294",
       "_origin": "ast",
       "id": "src_change_output_compactchangereport",
-      "community": 5,
+      "community": 19,
       "norm_label": "compactchangereport()"
     },
     {
@@ -11120,7 +11120,7 @@
       "source_location": "L309",
       "_origin": "ast",
       "id": "src_change_output_changecommandfailureresult",
-      "community": 5,
+      "community": 19,
       "norm_label": "changecommandfailureresult()"
     },
     {
@@ -11130,7 +11130,7 @@
       "source_location": "L325",
       "_origin": "ast",
       "id": "src_change_output_emptychangesummary",
-      "community": 5,
+      "community": 19,
       "norm_label": "emptychangesummary()"
     },
     {
@@ -11150,7 +11150,7 @@
       "source_location": "L354",
       "_origin": "ast",
       "id": "src_change_output_isforceablemanagedfileerror",
-      "community": 5,
+      "community": 19,
       "norm_label": "isforceablemanagedfileerror()"
     },
     {
@@ -11160,7 +11160,7 @@
       "source_location": "L365",
       "_origin": "ast",
       "id": "src_change_output_totalfilechanges",
-      "community": 5,
+      "community": 19,
       "norm_label": "totalfilechanges()"
     },
     {
@@ -11170,7 +11170,7 @@
       "source_location": "L374",
       "_origin": "ast",
       "id": "src_change_output_uniqueflatmap",
-      "community": 5,
+      "community": 19,
       "norm_label": "uniqueflatmap()"
     },
     {
@@ -11180,7 +11180,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_auth_commands",
-      "community": 27,
+      "community": 20,
       "norm_label": "cli-auth-commands.ts"
     },
     {
@@ -11190,7 +11190,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_cli_auth_commands_registerauthcommands",
-      "community": 27,
+      "community": 20,
       "norm_label": "registerauthcommands()"
     },
     {
@@ -11200,7 +11200,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_bootstrap_commands",
-      "community": 27,
+      "community": 20,
       "norm_label": "cli-bootstrap-commands.ts"
     },
     {
@@ -11210,7 +11210,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_cli_bootstrap_commands_registerbootstrapcommands",
-      "community": 27,
+      "community": 20,
       "norm_label": "registerbootstrapcommands()"
     },
     {
@@ -11240,7 +11240,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "src_cli_change_commands_registerchangecommands",
-      "community": 27,
+      "community": 20,
       "norm_label": "registerchangecommands()"
     },
     {
@@ -11270,7 +11270,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_command_log",
-      "community": 27,
+      "community": 20,
       "norm_label": "cli-command-log.ts"
     },
     {
@@ -11280,7 +11280,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_cli_command_log_recordcommandlog",
-      "community": 27,
+      "community": 20,
       "norm_label": "recordcommandlog()"
     },
     {
@@ -11290,7 +11290,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_cli_command_log_recordcommandfailure",
-      "community": 27,
+      "community": 20,
       "norm_label": "recordcommandfailure()"
     },
     {
@@ -11300,7 +11300,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_deploy_command",
-      "community": 27,
+      "community": 20,
       "norm_label": "cli-deploy-command.ts"
     },
     {
@@ -11310,7 +11310,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_cli_deploy_command_registerdeploycommand",
-      "community": 27,
+      "community": 20,
       "norm_label": "registerdeploycommand()"
     },
     {
@@ -11320,7 +11320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_errors",
-      "community": 5,
+      "community": 20,
       "norm_label": "cli-errors.ts"
     },
     {
@@ -11330,7 +11330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_errors_errormessage",
-      "community": 5,
+      "community": 20,
       "norm_label": "errormessage()"
     },
     {
@@ -11340,7 +11340,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_options",
-      "community": 27,
+      "community": 93,
       "norm_label": "cli-options.ts"
     },
     {
@@ -11350,7 +11350,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_cli_options_clicommandnames",
-      "community": 27,
+      "community": 93,
       "norm_label": "clicommandnames"
     },
     {
@@ -11360,7 +11360,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_cli_options_normalizecliargv",
-      "community": 27,
+      "community": 20,
       "norm_label": "normalizecliargv()"
     },
     {
@@ -11370,7 +11370,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_cli_options_parsedeployref",
-      "community": 27,
+      "community": 93,
       "norm_label": "parsedeployref()"
     },
     {
@@ -11380,7 +11380,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_cli_options_deployoptionvalue",
-      "community": 27,
+      "community": 93,
       "norm_label": "deployoptionvalue()"
     },
     {
@@ -11390,7 +11390,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_cli_options_parseinstallref",
-      "community": 27,
+      "community": 93,
       "norm_label": "parseinstallref()"
     },
     {
@@ -11400,7 +11400,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_cli_options_parseinstalleddockid",
-      "community": 27,
+      "community": 93,
       "norm_label": "parseinstalleddockid()"
     },
     {
@@ -11410,7 +11410,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "src_cli_options_dockidfromreference",
-      "community": 27,
+      "community": 93,
       "norm_label": "dockidfromreference()"
     },
     {
@@ -11420,7 +11420,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "src_cli_options_parseauthprovider",
-      "community": 27,
+      "community": 93,
       "norm_label": "parseauthprovider()"
     },
     {
@@ -11440,7 +11440,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "src_cli_options_resolvedeployplatform",
-      "community": 27,
+      "community": 93,
       "norm_label": "resolvedeployplatform()"
     },
     {
@@ -11450,7 +11450,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "src_cli_options_inferdeployplatformfrommanifestpath",
-      "community": 27,
+      "community": 93,
       "norm_label": "inferdeployplatformfrommanifestpath()"
     },
     {
@@ -11470,7 +11470,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_cli_project_commands_registerprojectcommands",
-      "community": 27,
+      "community": 20,
       "norm_label": "registerprojectcommands()"
     },
     {
@@ -11620,7 +11620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli",
-      "community": 27,
+      "community": 20,
       "norm_label": "cli.ts"
     },
     {
@@ -11630,7 +11630,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_cli_run",
-      "community": 27,
+      "community": 20,
       "norm_label": "run()"
     },
     {
@@ -11640,7 +11640,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_cli_ismainmodule",
-      "community": 27,
+      "community": 20,
       "norm_label": "ismainmodule()"
     },
     {
@@ -11660,7 +11660,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_dock_install_report",
-      "community": 29,
+      "community": 25,
       "norm_label": "dock-install-report.ts"
     },
     {
@@ -11670,7 +11670,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "app_dock_install_report_filechangedetails",
-      "community": 5,
+      "community": 19,
       "norm_label": "filechangedetails"
     },
     {
@@ -11680,7 +11680,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "app_dock_install_report_installreport",
-      "community": 29,
+      "community": 25,
       "norm_label": "installreport"
     },
     {
@@ -11747,37 +11747,57 @@
       "label": "DockResolver",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L31",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "app_dock_installer_dockresolver",
       "community": 25,
       "norm_label": "dockresolver"
     },
     {
+      "label": "replacementRuntime()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "app_dock_installer_replacementruntime",
+      "community": 25,
+      "norm_label": "replacementruntime()"
+    },
+    {
+      "label": "runtimeCommandTarget()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "app_dock_installer_runtimecommandtarget",
+      "community": 25,
+      "norm_label": "runtimecommandtarget()"
+    },
+    {
       "label": "InstallOptions",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L36",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "app_dock_installer_installoptions",
-      "community": 25,
+      "community": 70,
       "norm_label": "installoptions"
     },
     {
       "label": "UninstallOptions",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L48",
+      "source_location": "L76",
       "_origin": "ast",
       "id": "app_dock_installer_uninstalloptions",
-      "community": 25,
+      "community": 70,
       "norm_label": "uninstalloptions"
     },
     {
       "label": "DockInstaller",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L55",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller",
       "community": 25,
@@ -11787,7 +11807,7 @@
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L56",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_constructor",
       "community": 25,
@@ -11797,7 +11817,7 @@
       "label": ".install()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L62",
+      "source_location": "L90",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_install",
       "community": 25,
@@ -11807,7 +11827,7 @@
       "label": ".uninstall()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L260",
+      "source_location": "L288",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_uninstall",
       "community": 25,
@@ -11817,7 +11837,7 @@
       "label": ".collectManifestFiles()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L338",
+      "source_location": "L366",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_collectmanifestfiles",
       "community": 25,
@@ -11827,7 +11847,7 @@
       "label": ".seedWorkdir()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L350",
+      "source_location": "L378",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_seedworkdir",
       "community": 25,
@@ -11837,7 +11857,7 @@
       "label": ".removeDockTools()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L361",
+      "source_location": "L389",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_removedocktools",
       "community": 25,
@@ -11847,7 +11867,7 @@
       "label": ".removeUnusedRuntimeShims()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L384",
+      "source_location": "L412",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_removeunusedruntimeshims",
       "community": 25,
@@ -11857,7 +11877,7 @@
       "label": ".progress()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L419",
+      "source_location": "L460",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_progress",
       "community": 25,
@@ -11867,7 +11887,7 @@
       "label": ".nestedProgress()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L426",
+      "source_location": "L467",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_nestedprogress",
       "community": 25,
@@ -12130,7 +12150,7 @@
       "source_location": "L291",
       "_origin": "ast",
       "id": "domain_manifest_toolspec",
-      "community": 29,
+      "community": 70,
       "norm_label": "toolspec"
     },
     {
@@ -12160,7 +12180,7 @@
       "source_location": "L294",
       "_origin": "ast",
       "id": "domain_manifest_taskphase",
-      "community": 25,
+      "community": 70,
       "norm_label": "taskphase"
     },
     {
@@ -12190,7 +12210,7 @@
       "source_location": "L297",
       "_origin": "ast",
       "id": "domain_manifest_dockmanifest",
-      "community": 29,
+      "community": 44,
       "norm_label": "dockmanifest"
     },
     {
@@ -12270,7 +12290,7 @@
       "source_location": "L373",
       "_origin": "ast",
       "id": "domain_manifest_validatemanifestfor",
-      "community": 313,
+      "community": 90,
       "norm_label": "validatemanifestfor()"
     },
     {
@@ -12300,7 +12320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_runtime_names",
-      "community": 313,
+      "community": 346,
       "norm_label": "runtime-names.ts"
     },
     {
@@ -12310,7 +12330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_runtime_names_supportedruntimenames",
-      "community": 313,
+      "community": 346,
       "norm_label": "supportedruntimenames"
     },
     {
@@ -12320,7 +12340,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "domain_runtime_names_supportedruntimename",
-      "community": 313,
+      "community": 346,
       "norm_label": "supportedruntimename"
     },
     {
@@ -12330,7 +12350,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "domain_runtime_names_supportedruntimenameset",
-      "community": 313,
+      "community": 346,
       "norm_label": "supportedruntimenameset"
     },
     {
@@ -12340,7 +12360,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "domain_runtime_names_issupportedruntimename",
-      "community": 313,
+      "community": 346,
       "norm_label": "issupportedruntimename()"
     },
     {
@@ -12400,7 +12420,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_state_store",
-      "community": 19,
+      "community": 25,
       "norm_label": "state-store.ts"
     },
     {
@@ -12430,7 +12450,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "domain_state_store_installeddockrecord",
-      "community": 5,
+      "community": 19,
       "norm_label": "installeddockrecord"
     },
     {
@@ -12440,44 +12460,44 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "domain_state_store_installedruntimerecord",
-      "community": 19,
+      "community": 25,
       "norm_label": "installedruntimerecord"
     },
     {
       "label": "InstalledToolRecord",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L41",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "domain_state_store_installedtoolrecord",
-      "community": 19,
+      "community": 25,
       "norm_label": "installedtoolrecord"
     },
     {
       "label": "ProjectState",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L50",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "domain_state_store_projectstate",
-      "community": 19,
+      "community": 25,
       "norm_label": "projectstate"
     },
     {
       "label": "LockState",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L62",
+      "source_location": "L63",
       "_origin": "ast",
       "id": "domain_state_store_lockstate",
-      "community": 19,
+      "community": 25,
       "norm_label": "lockstate"
     },
     {
       "label": "OpenDockStateStore",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L67",
+      "source_location": "L68",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore",
       "community": 23,
@@ -12487,7 +12507,7 @@
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L68",
+      "source_location": "L69",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_constructor",
       "community": 23,
@@ -12497,7 +12517,7 @@
       "label": ".opendockDir()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L70",
+      "source_location": "L71",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_opendockdir",
       "community": 23,
@@ -12507,7 +12527,7 @@
       "label": ".projectPath()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L74",
+      "source_location": "L75",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_projectpath",
       "community": 23,
@@ -12517,7 +12537,7 @@
       "label": ".lockPath()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L78",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_lockpath",
       "community": 23,
@@ -12527,7 +12547,7 @@
       "label": ".readLock()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L82",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_readlock",
       "community": 23,
@@ -12537,7 +12557,7 @@
       "label": ".hasState()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L94",
+      "source_location": "L95",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_hasstate",
       "community": 23,
@@ -12547,7 +12567,7 @@
       "label": ".findDock()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L99",
+      "source_location": "L100",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_finddock",
       "community": 23,
@@ -12557,7 +12577,7 @@
       "label": ".saveDock()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L103",
+      "source_location": "L104",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_savedock",
       "community": 23,
@@ -12567,7 +12587,7 @@
       "label": ".removeDock()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L110",
+      "source_location": "L111",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_removedock",
       "community": 23,
@@ -12577,7 +12597,7 @@
       "label": ".write()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L118",
+      "source_location": "L119",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_write",
       "community": 23,
@@ -12587,7 +12607,7 @@
       "label": ".assertStatePathsSafe()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L139",
+      "source_location": "L140",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_assertstatepathssafe",
       "community": 23,
@@ -12597,20 +12617,20 @@
       "label": "normalizeInstalledDockRecord()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L156",
+      "source_location": "L157",
       "_origin": "ast",
       "id": "domain_state_store_normalizeinstalleddockrecord",
-      "community": 19,
+      "community": 25,
       "norm_label": "normalizeinstalleddockrecord()"
     },
     {
       "label": "lstatIfPresent()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L165",
+      "source_location": "L166",
       "_origin": "ast",
       "id": "domain_state_store_lstatifpresent",
-      "community": 23,
+      "community": 25,
       "norm_label": "lstatifpresent()"
     },
     {
@@ -13170,7 +13190,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "files_path_utils_ensurerealdirectorypath",
-      "community": 29,
+      "community": 346,
       "norm_label": "ensurerealdirectorypath()"
     },
     {
@@ -13260,7 +13280,7 @@
       "source_location": "L253",
       "_origin": "ast",
       "id": "files_path_utils_safedockdirectoryname",
-      "community": 346,
+      "community": 352,
       "norm_label": "safedockdirectoryname()"
     },
     {
@@ -13400,7 +13420,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "runtime_command_policy_splitcommand",
-      "community": 352,
+      "community": 44,
       "norm_label": "splitcommand()"
     },
     {
@@ -13410,7 +13430,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "runtime_command_policy_rejectshellmetacharacters",
-      "community": 352,
+      "community": 44,
       "norm_label": "rejectshellmetacharacters()"
     },
     {
@@ -13420,7 +13440,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "runtime_command_policy_isdefaultcommandprogram",
-      "community": 16,
+      "community": 44,
       "norm_label": "isdefaultcommandprogram()"
     },
     {
@@ -13430,7 +13450,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "runtime_command_policy_ensureallowed",
-      "community": 16,
+      "community": 44,
       "norm_label": "ensureallowed()"
     },
     {
@@ -13440,7 +13460,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "runtime_command_policy_ispermissionallowed",
-      "community": 16,
+      "community": 44,
       "norm_label": "ispermissionallowed()"
     },
     {
@@ -13590,7 +13610,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_command_runner",
-      "community": 29,
+      "community": 352,
       "norm_label": "command-runner.ts"
     },
     {
@@ -13600,7 +13620,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "runtime_command_runner_commandresult",
-      "community": 29,
+      "community": 352,
       "norm_label": "commandresult"
     },
     {
@@ -13610,7 +13630,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "runtime_command_runner_commandrunoptions",
-      "community": 29,
+      "community": 352,
       "norm_label": "commandrunoptions"
     },
     {
@@ -13620,7 +13640,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "runtime_command_runner_commandrunner",
-      "community": 29,
+      "community": 44,
       "norm_label": "commandrunner"
     },
     {
@@ -13630,7 +13650,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "runtime_command_runner_commandrunner_run",
-      "community": 352,
+      "community": 44,
       "norm_label": ".run()"
     },
     {
@@ -13680,7 +13700,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "runtime_command_runner_compareversions",
-      "community": 29,
+      "community": 352,
       "norm_label": "compareversions()"
     },
     {
@@ -13690,7 +13710,7 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "runtime_command_runner_parseversion",
-      "community": 29,
+      "community": 352,
       "norm_label": "parseversion()"
     },
     {
@@ -13700,7 +13720,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "runtime_command_runner_commandenvironment",
-      "community": 29,
+      "community": 352,
       "norm_label": "commandenvironment()"
     },
     {
@@ -13710,7 +13730,7 @@
       "source_location": "L148",
       "_origin": "ast",
       "id": "runtime_command_runner_opendockcommandpath",
-      "community": 29,
+      "community": 352,
       "norm_label": "opendockcommandpath()"
     },
     {
@@ -13720,7 +13740,7 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "runtime_command_runner_macoshomebrewpathentries",
-      "community": 29,
+      "community": 352,
       "norm_label": "macoshomebrewpathentries"
     },
     {
@@ -13730,7 +13750,7 @@
       "source_location": "L187",
       "_origin": "ast",
       "id": "runtime_command_runner_macossystempathentries",
-      "community": 29,
+      "community": 352,
       "norm_label": "macossystempathentries"
     },
     {
@@ -13740,7 +13760,7 @@
       "source_location": "L189",
       "_origin": "ast",
       "id": "runtime_command_runner_macosuserpathentries",
-      "community": 29,
+      "community": 352,
       "norm_label": "macosuserpathentries()"
     },
     {
@@ -13750,7 +13770,7 @@
       "source_location": "L194",
       "_origin": "ast",
       "id": "runtime_command_runner_minimalenvironment",
-      "community": 29,
+      "community": 352,
       "norm_label": "minimalenvironment()"
     },
     {
@@ -13760,7 +13780,7 @@
       "source_location": "L228",
       "_origin": "ast",
       "id": "runtime_command_runner_uniquepathentries",
-      "community": 29,
+      "community": 352,
       "norm_label": "uniquepathentries()"
     },
     {
@@ -13770,7 +13790,7 @@
       "source_location": "L241",
       "_origin": "ast",
       "id": "runtime_command_runner_withoutvoltanodeimagebin",
-      "community": 29,
+      "community": 352,
       "norm_label": "withoutvoltanodeimagebin()"
     },
     {
@@ -13880,7 +13900,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_progress",
-      "community": 25,
+      "community": 70,
       "norm_label": "progress.ts"
     },
     {
@@ -13890,7 +13910,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_progress_progresslevel",
-      "community": 25,
+      "community": 70,
       "norm_label": "progresslevel"
     },
     {
@@ -13910,7 +13930,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "runtime_progress_progressreporter",
-      "community": 25,
+      "community": 70,
       "norm_label": "progressreporter"
     },
     {
@@ -13920,7 +13940,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "runtime_progress_reportprogress",
-      "community": 29,
+      "community": 70,
       "norm_label": "reportprogress()"
     },
     {
@@ -13930,74 +13950,74 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_project_layout",
-      "community": 346,
+      "community": 352,
       "norm_label": "project-layout.ts"
     },
     {
       "label": "projectBinDir()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L4",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "runtime_project_layout_projectbindir",
       "community": 346,
       "norm_label": "projectbindir()"
     },
     {
-      "label": "projectToolchainsDir()",
+      "label": "sharedRuntimeRoot()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L8",
+      "source_location": "L10",
       "_origin": "ast",
-      "id": "runtime_project_layout_projecttoolchainsdir",
-      "community": 346,
-      "norm_label": "projecttoolchainsdir()"
+      "id": "runtime_project_layout_sharedruntimeroot",
+      "community": 352,
+      "norm_label": "sharedruntimeroot()"
     },
     {
-      "label": "runtimeBinDir()",
+      "label": "sharedRuntimeBinDir()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L12",
+      "source_location": "L14",
       "_origin": "ast",
-      "id": "runtime_project_layout_runtimebindir",
-      "community": 346,
-      "norm_label": "runtimebindir()"
+      "id": "runtime_project_layout_sharedruntimebindir",
+      "community": 352,
+      "norm_label": "sharedruntimebindir()"
     },
     {
       "label": "projectToolsDir()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L16",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "runtime_project_layout_projecttoolsdir",
-      "community": 346,
+      "community": 352,
       "norm_label": "projecttoolsdir()"
     },
     {
       "label": "dockToolsDir()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L20",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "runtime_project_layout_docktoolsdir",
-      "community": 346,
+      "community": 352,
       "norm_label": "docktoolsdir()"
     },
     {
       "label": "toolInstallDir()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L24",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "runtime_project_layout_toolinstalldir",
-      "community": 346,
+      "community": 352,
       "norm_label": "toolinstalldir()"
     },
     {
       "label": "projectCommandPathEntries()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L28",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "runtime_project_layout_projectcommandpathentries",
       "community": 29,
@@ -14007,31 +14027,41 @@
       "label": "prependPathEntries()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L32",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "runtime_project_layout_prependpathentries",
-      "community": 29,
+      "community": 352,
       "norm_label": "prependpathentries()"
     },
     {
       "label": "relativeProjectPath()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L37",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "runtime_project_layout_relativeprojectpath",
-      "community": 29,
+      "community": 70,
       "norm_label": "relativeprojectpath()"
     },
     {
       "label": "uniquePathEntries()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L41",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "runtime_project_layout_uniquepathentries",
-      "community": 29,
+      "community": 352,
       "norm_label": "uniquepathentries()"
+    },
+    {
+      "label": "safeRuntimeSegment()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/project-layout.ts",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "runtime_project_layout_saferuntimesegment",
+      "community": 352,
+      "norm_label": "saferuntimesegment()"
     },
     {
       "label": "requirement-runner.ts",
@@ -14040,94 +14070,94 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_requirement_runner",
-      "community": 29,
+      "community": 346,
       "norm_label": "requirement-runner.ts"
     },
     {
       "label": "RequirementContext",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L22",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementcontext",
-      "community": 25,
+      "community": 70,
       "norm_label": "requirementcontext"
     },
     {
       "label": "RuntimeRecord",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L31",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "runtime_requirement_runner_runtimerecord",
-      "community": 29,
+      "community": 70,
       "norm_label": "runtimerecord"
     },
     {
       "label": "RequirementRunResult",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L39",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunresult",
-      "community": 29,
+      "community": 70,
       "norm_label": "requirementrunresult"
     },
     {
       "label": "RequirementRunner",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L44",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunner",
-      "community": 29,
+      "community": 346,
       "norm_label": "requirementrunner"
     },
     {
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L45",
+      "source_location": "L50",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunner_constructor",
-      "community": 29,
+      "community": 346,
       "norm_label": ".constructor()"
     },
     {
       "label": ".run()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L47",
+      "source_location": "L52",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunner_run",
-      "community": 29,
+      "community": 346,
       "norm_label": ".run()"
     },
     {
       "label": ".runRuntime()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L69",
+      "source_location": "L74",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunner_runruntime",
-      "community": 29,
+      "community": 346,
       "norm_label": ".runruntime()"
     },
     {
       "label": ".progress()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L124",
+      "source_location": "L135",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunner_progress",
-      "community": 29,
+      "community": 346,
       "norm_label": ".progress()"
     },
     {
       "label": ".evaluate()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L147",
+      "source_location": "L158",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunner_evaluate",
       "community": 29,
@@ -14137,51 +14167,101 @@
       "label": ".prepareRuntime()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L172",
+      "source_location": "L184",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunner_prepareruntime",
-      "community": 29,
+      "community": 346,
       "norm_label": ".prepareruntime()"
     },
     {
       "label": "failedReport()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L211",
+      "source_location": "L220",
       "_origin": "ast",
       "id": "runtime_requirement_runner_failedreport",
-      "community": 29,
+      "community": 346,
       "norm_label": "failedreport()"
     },
     {
       "label": "resolveCommandPath()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L220",
+      "source_location": "L229",
       "_origin": "ast",
       "id": "runtime_requirement_runner_resolvecommandpath",
-      "community": 29,
+      "community": 346,
       "norm_label": "resolvecommandpath()"
+    },
+    {
+      "label": "openDockManagedCommandDirectories()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L248",
+      "_origin": "ast",
+      "id": "runtime_requirement_runner_opendockmanagedcommanddirectories",
+      "community": 346,
+      "norm_label": "opendockmanagedcommanddirectories()"
+    },
+    {
+      "label": "isIgnoredCommandDirectory()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L252",
+      "_origin": "ast",
+      "id": "runtime_requirement_runner_isignoredcommanddirectory",
+      "community": 346,
+      "norm_label": "isignoredcommanddirectory()"
     },
     {
       "label": "commandCandidates()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L235",
+      "source_location": "L261",
       "_origin": "ast",
       "id": "runtime_requirement_runner_commandcandidates",
-      "community": 29,
+      "community": 346,
       "norm_label": "commandcandidates()"
     },
     {
       "label": "writeRuntimeWrapper()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L244",
+      "source_location": "L270",
       "_origin": "ast",
       "id": "runtime_requirement_runner_writeruntimewrapper",
-      "community": 29,
+      "community": 346,
       "norm_label": "writeruntimewrapper()"
+    },
+    {
+      "label": "ensureRealDirectory()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L283",
+      "_origin": "ast",
+      "id": "runtime_requirement_runner_ensurerealdirectory",
+      "community": 346,
+      "norm_label": "ensurerealdirectory()"
+    },
+    {
+      "label": "lstatIfPresent()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L305",
+      "_origin": "ast",
+      "id": "runtime_requirement_runner_lstatifpresent",
+      "community": 346,
+      "norm_label": "lstatifpresent()"
+    },
+    {
+      "label": "assertRuntimeWrapperWritable()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L316",
+      "_origin": "ast",
+      "id": "runtime_requirement_runner_assertruntimewrapperwritable",
+      "community": 346,
+      "norm_label": "assertruntimewrapperwritable()"
     },
     {
       "label": "runtime-requirements.ts",
@@ -14190,7 +14270,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_runtime_requirements",
-      "community": 25,
+      "community": 346,
       "norm_label": "runtime-requirements.ts"
     },
     {
@@ -14200,7 +14280,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "runtime_runtime_requirements_runtimedefinition",
-      "community": 25,
+      "community": 346,
       "norm_label": "runtimedefinition"
     },
     {
@@ -14210,7 +14290,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "runtime_runtime_requirements_runtimedefinitions",
-      "community": 25,
+      "community": 346,
       "norm_label": "runtimedefinitions"
     },
     {
@@ -14220,7 +14300,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_step_report",
-      "community": 29,
+      "community": 70,
       "norm_label": "step-report.ts"
     },
     {
@@ -14230,7 +14310,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_step_report_stepreport",
-      "community": 29,
+      "community": 70,
       "norm_label": "stepreport"
     },
     {
@@ -14240,7 +14320,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "runtime_step_report_stepprogresspercent",
-      "community": 29,
+      "community": 70,
       "norm_label": "stepprogresspercent()"
     },
     {
@@ -14250,7 +14330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_task_command_validation",
-      "community": 352,
+      "community": 44,
       "norm_label": "task-command-validation.ts"
     },
     {
@@ -14260,7 +14340,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "runtime_task_command_validation_taskphases",
-      "community": 352,
+      "community": 44,
       "norm_label": "taskphases"
     },
     {
@@ -14270,7 +14350,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "runtime_task_command_validation_commandfields",
-      "community": 352,
+      "community": 44,
       "norm_label": "commandfields"
     },
     {
@@ -14280,7 +14360,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "runtime_task_command_validation_validatemanifesttaskcommands",
-      "community": 352,
+      "community": 44,
       "norm_label": "validatemanifesttaskcommands()"
     },
     {
@@ -14290,7 +14370,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "runtime_task_command_validation_manifesttaskpermissions",
-      "community": 352,
+      "community": 44,
       "norm_label": "manifesttaskpermissions()"
     },
     {
@@ -14300,7 +14380,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "runtime_task_command_validation_manifesttaskpermissionprograms",
-      "community": 352,
+      "community": 44,
       "norm_label": "manifesttaskpermissionprograms()"
     },
     {
@@ -14310,7 +14390,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "runtime_task_command_validation_validatemanifestpermissions",
-      "community": 352,
+      "community": 44,
       "norm_label": "validatemanifestpermissions()"
     },
     {
@@ -14320,7 +14400,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "runtime_task_command_validation_validatetaskstepcommands",
-      "community": 352,
+      "community": 44,
       "norm_label": "validatetaskstepcommands()"
     },
     {
@@ -14330,7 +14410,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_task_runner",
-      "community": 29,
+      "community": 44,
       "norm_label": "task-runner.ts"
     },
     {
@@ -14340,7 +14420,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunresult",
-      "community": 29,
+      "community": 70,
       "norm_label": "taskrunresult"
     },
     {
@@ -14350,7 +14430,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "runtime_task_runner_taskcontext",
-      "community": 25,
+      "community": 70,
       "norm_label": "taskcontext"
     },
     {
@@ -14380,7 +14460,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_run",
-      "community": 29,
+      "community": 44,
       "norm_label": ".run()"
     },
     {
@@ -14390,7 +14470,7 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_dockworkdir",
-      "community": 346,
+      "community": 352,
       "norm_label": ".dockworkdir()"
     },
     {
@@ -14480,7 +14560,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_task_selection",
-      "community": 352,
+      "community": 44,
       "norm_label": "task-selection.ts"
     },
     {
@@ -14490,7 +14570,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "runtime_task_selection_assertmanifestsupportsplatform",
-      "community": 352,
+      "community": 44,
       "norm_label": "assertmanifestsupportsplatform()"
     },
     {
@@ -14500,7 +14580,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "runtime_task_selection_selecttasksteps",
-      "community": 352,
+      "community": 44,
       "norm_label": "selecttasksteps()"
     },
     {
@@ -14510,7 +14590,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "runtime_task_selection_collectmanifestplatforms",
-      "community": 352,
+      "community": 44,
       "norm_label": "collectmanifestplatforms()"
     },
     {
@@ -14520,7 +14600,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_tool_runner",
-      "community": 29,
+      "community": 70,
       "norm_label": "tool-runner.ts"
     },
     {
@@ -14530,7 +14610,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrecord",
-      "community": 29,
+      "community": 70,
       "norm_label": "toolrecord"
     },
     {
@@ -14540,7 +14620,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolcontext",
-      "community": 25,
+      "community": 70,
       "norm_label": "toolcontext"
     },
     {
@@ -14550,7 +14630,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunresult",
-      "community": 29,
+      "community": 70,
       "norm_label": "toolrunresult"
     },
     {
@@ -14560,7 +14640,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner",
-      "community": 29,
+      "community": 70,
       "norm_label": "toolrunner"
     },
     {
@@ -14570,7 +14650,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner_constructor",
-      "community": 29,
+      "community": 70,
       "norm_label": ".constructor()"
     },
     {
@@ -14580,7 +14660,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner_run",
-      "community": 29,
+      "community": 70,
       "norm_label": ".run()"
     },
     {
@@ -14590,7 +14670,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner_checktool",
-      "community": 29,
+      "community": 70,
       "norm_label": ".checktool()"
     },
     {
@@ -14600,7 +14680,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner_installtool",
-      "community": 29,
+      "community": 70,
       "norm_label": ".installtool()"
     },
     {
@@ -14610,7 +14690,7 @@
       "source_location": "L138",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner_progress",
-      "community": 29,
+      "community": 70,
       "norm_label": ".progress()"
     },
     {
@@ -14620,7 +14700,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolcommandpermissions",
-      "community": 352,
+      "community": 44,
       "norm_label": "toolcommandpermissions()"
     },
     {
@@ -14630,7 +14710,7 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolversionpermissions",
-      "community": 29,
+      "community": 70,
       "norm_label": "toolversionpermissions()"
     },
     {
@@ -14640,7 +14720,7 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "runtime_tool_runner_preparetoolpackage",
-      "community": 29,
+      "community": 70,
       "norm_label": "preparetoolpackage()"
     },
     {
@@ -14650,7 +14730,7 @@
       "source_location": "L182",
       "_origin": "ast",
       "id": "runtime_tool_runner_runpackageinstall",
-      "community": 29,
+      "community": 70,
       "norm_label": "runpackageinstall()"
     },
     {
@@ -14660,7 +14740,7 @@
       "source_location": "L213",
       "_origin": "ast",
       "id": "runtime_tool_runner_packagespecifier",
-      "community": 29,
+      "community": 70,
       "norm_label": "packagespecifier()"
     },
     {
@@ -14670,7 +14750,7 @@
       "source_location": "L223",
       "_origin": "ast",
       "id": "runtime_tool_runner_resolveinstalledcommand",
-      "community": 29,
+      "community": 70,
       "norm_label": "resolveinstalledcommand()"
     },
     {
@@ -14860,7 +14940,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_installed_dock_updates",
-      "community": 90,
+      "community": 93,
       "norm_label": "installed-dock-updates.ts"
     },
     {
@@ -14870,7 +14950,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_installed_dock_updates_resolvelatestdockversion",
-      "community": 90,
+      "community": 93,
       "norm_label": "resolvelatestdockversion()"
     },
     {
@@ -14890,7 +14970,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_installed_dock_updates_checkinstalleddockupdates",
-      "community": 27,
+      "community": 93,
       "norm_label": "checkinstalleddockupdates()"
     },
     {
@@ -15000,7 +15080,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_platform",
-      "community": 27,
+      "community": 93,
       "norm_label": "platform.ts"
     },
     {
@@ -15010,7 +15090,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_platform_supported_platforms",
-      "community": 27,
+      "community": 93,
       "norm_label": "supported_platforms"
     },
     {
@@ -15030,7 +15110,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_platform_detectplatform",
-      "community": 27,
+      "community": 44,
       "norm_label": "detectplatform()"
     },
     {
@@ -15040,7 +15120,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_platform_parseplatform",
-      "community": 27,
+      "community": 93,
       "norm_label": "parseplatform()"
     },
     {
@@ -15050,7 +15130,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_platform_isopendockplatform",
-      "community": 90,
+      "community": 93,
       "norm_label": "isopendockplatform()"
     },
     {
@@ -15170,7 +15250,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_registry_dockversionresponse",
-      "community": 90,
+      "community": 93,
       "norm_label": "dockversionresponse"
     },
     {
@@ -15230,7 +15310,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_registry_submissionrequest",
-      "community": 6,
+      "community": 319,
       "norm_label": "submissionrequest"
     },
     {
@@ -15250,7 +15330,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "src_registry_submissionlogorequest",
-      "community": 95,
+      "community": 6,
       "norm_label": "submissionlogorequest"
     },
     {
@@ -15260,7 +15340,7 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "src_registry_submissionresponse",
-      "community": 6,
+      "community": 319,
       "norm_label": "submissionresponse"
     },
     {
@@ -15280,7 +15360,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient",
-      "community": 358,
+      "community": 6,
       "norm_label": "opendockregistryclient"
     },
     {
@@ -15290,7 +15370,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_constructor",
-      "community": 358,
+      "community": 6,
       "norm_label": ".constructor()"
     },
     {
@@ -15300,7 +15380,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_resolvedockversion",
-      "community": 358,
+      "community": 6,
       "norm_label": ".resolvedockversion()"
     },
     {
@@ -15310,7 +15390,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_downloaddock",
-      "community": 358,
+      "community": 6,
       "norm_label": ".downloaddock()"
     },
     {
@@ -15320,7 +15400,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_requestbytes",
-      "community": 358,
+      "community": 6,
       "norm_label": ".requestbytes()"
     },
     {
@@ -15330,7 +15410,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_startclilogin",
-      "community": 358,
+      "community": 6,
       "norm_label": ".startclilogin()"
     },
     {
@@ -15340,7 +15420,7 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_exchangeclicode",
-      "community": 358,
+      "community": 6,
       "norm_label": ".exchangeclicode()"
     },
     {
@@ -15350,7 +15430,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_currentuser",
-      "community": 358,
+      "community": 6,
       "norm_label": ".currentuser()"
     },
     {
@@ -15360,7 +15440,7 @@
       "source_location": "L143",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_logout",
-      "community": 358,
+      "community": 6,
       "norm_label": ".logout()"
     },
     {
@@ -15370,7 +15450,7 @@
       "source_location": "L151",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_submitdock",
-      "community": 358,
+      "community": 6,
       "norm_label": ".submitdock()"
     },
     {
@@ -15380,7 +15460,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_apibase",
-      "community": 358,
+      "community": 6,
       "norm_label": ".apibase()"
     },
     {
@@ -15390,7 +15470,7 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_requestjson",
-      "community": 358,
+      "community": 6,
       "norm_label": ".requestjson()"
     },
     {
@@ -15400,7 +15480,7 @@
       "source_location": "L179",
       "_origin": "ast",
       "id": "src_registry_opendockregistryclient_fetchwithtimeout",
-      "community": 358,
+      "community": 6,
       "norm_label": ".fetchwithtimeout()"
     },
     {
@@ -15580,7 +15660,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_resolver_resolvedock",
-      "community": 90,
+      "community": 27,
       "norm_label": "resolvedock()"
     },
     {
@@ -15750,7 +15830,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_terminal_style_terminalstyle",
-      "community": 27,
+      "community": 20,
       "norm_label": "terminalstyle"
     },
     {
@@ -15827,7 +15907,7 @@
       "label": "tempRoots",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "tests_cli_flow_test_temproots",
       "community": 33,
@@ -15837,7 +15917,7 @@
       "label": "install()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L39",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "tests_cli_flow_test_install",
       "community": 33,
@@ -15847,7 +15927,7 @@
       "label": "uninstall()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L43",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "tests_cli_flow_test_uninstall",
       "community": 33,
@@ -15857,7 +15937,7 @@
       "label": "installedDocks()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L47",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "tests_cli_flow_test_installeddocks",
       "community": 33,
@@ -15867,7 +15947,7 @@
       "label": "restoreExitCode()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "_origin": "ast",
       "id": "tests_cli_flow_test_restoreexitcode",
       "community": 33,
@@ -15877,7 +15957,7 @@
       "label": "runTasks()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L55",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "tests_cli_flow_test_runtasks",
       "community": 33,
@@ -15887,7 +15967,7 @@
       "label": "tempDir()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L1765",
+      "source_location": "L1816",
       "_origin": "ast",
       "id": "tests_cli_flow_test_tempdir",
       "community": 33,
@@ -15897,7 +15977,7 @@
       "label": "writeDock()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L1771",
+      "source_location": "L1822",
       "_origin": "ast",
       "id": "tests_cli_flow_test_writedock",
       "community": 33,
@@ -15907,7 +15987,7 @@
       "label": "localResolver()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L1831",
+      "source_location": "L1884",
       "_origin": "ast",
       "id": "tests_cli_flow_test_localresolver",
       "community": 313,
@@ -15917,7 +15997,7 @@
       "label": "MockRegistryRelease",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L1845",
+      "source_location": "L1898",
       "_origin": "ast",
       "id": "tests_cli_flow_test_mockregistryrelease",
       "community": 33,
@@ -15927,7 +16007,7 @@
       "label": "mockRegistry()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L1853",
+      "source_location": "L1906",
       "_origin": "ast",
       "id": "tests_cli_flow_test_mockregistry",
       "community": 90,
@@ -15937,7 +16017,7 @@
       "label": "createDockArchive()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L1917",
+      "source_location": "L1970",
       "_origin": "ast",
       "id": "tests_cli_flow_test_createdockarchive",
       "community": 33,
@@ -15947,7 +16027,7 @@
       "label": "sha256()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L1936",
+      "source_location": "L1989",
       "_origin": "ast",
       "id": "tests_cli_flow_test_sha256",
       "community": 33,
@@ -15957,7 +16037,7 @@
       "label": "writeFakeOma()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L1940",
+      "source_location": "L1993",
       "_origin": "ast",
       "id": "tests_cli_flow_test_writefakeoma",
       "community": 33,
@@ -15967,7 +16047,7 @@
       "label": "writeFakeOmaRequiresSeed()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L1965",
+      "source_location": "L2018",
       "_origin": "ast",
       "id": "tests_cli_flow_test_writefakeomarequiresseed",
       "community": 33,
@@ -15977,7 +16057,7 @@
       "label": "writeFakeOmaWithExternalSymlink()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L1983",
+      "source_location": "L2036",
       "_origin": "ast",
       "id": "tests_cli_flow_test_writefakeomawithexternalsymlink",
       "community": 33,
@@ -15987,7 +16067,7 @@
       "label": "omaToolSpec()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L2000",
+      "source_location": "L2053",
       "_origin": "ast",
       "id": "tests_cli_flow_test_omatoolspec",
       "community": 33,
@@ -15997,7 +16077,7 @@
       "label": "writeFakeBunTool()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L2011",
+      "source_location": "L2064",
       "_origin": "ast",
       "id": "tests_cli_flow_test_writefakebuntool",
       "community": 33,
@@ -16007,17 +16087,27 @@
       "label": "chmod()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L2036",
+      "source_location": "L2089",
       "_origin": "ast",
       "id": "tests_cli_flow_test_chmod",
       "community": 33,
       "norm_label": "chmod()"
     },
     {
+      "label": "writeFakeVersionCommand()",
+      "file_type": "code",
+      "source_file": "packages/cli/tests/cli-flow.test.ts",
+      "source_location": "L2093",
+      "_origin": "ast",
+      "id": "tests_cli_flow_test_writefakeversioncommand",
+      "community": 33,
+      "norm_label": "writefakeversioncommand()"
+    },
+    {
       "label": "withEnv()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L2040",
+      "source_location": "L2106",
       "_origin": "ast",
       "id": "tests_cli_flow_test_withenv",
       "community": 33,
@@ -16027,7 +16117,7 @@
       "label": "withCwd()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L2063",
+      "source_location": "L2129",
       "_origin": "ast",
       "id": "tests_cli_flow_test_withcwd",
       "community": 33,
@@ -16037,7 +16127,7 @@
       "label": "captureConsole()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L2073",
+      "source_location": "L2139",
       "_origin": "ast",
       "id": "tests_cli_flow_test_captureconsole",
       "community": 33,
@@ -16047,7 +16137,7 @@
       "label": "TestOpenDockEvent",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L2087",
+      "source_location": "L2153",
       "_origin": "ast",
       "id": "tests_cli_flow_test_testopendockevent",
       "community": 33,
@@ -16057,7 +16147,7 @@
       "label": "parseJsonLines()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-flow.test.ts",
-      "source_location": "L2099",
+      "source_location": "L2165",
       "_origin": "ast",
       "id": "tests_cli_flow_test_parsejsonlines",
       "community": 33,
@@ -16150,7 +16240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test",
-      "community": 83,
+      "community": 318,
       "norm_label": "examples-cleanup.test.ts"
     },
     {
@@ -16160,7 +16250,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_exampledock",
-      "community": 83,
+      "community": 318,
       "norm_label": "exampledock"
     },
     {
@@ -16170,7 +16260,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_temproots",
-      "community": 83,
+      "community": 318,
       "norm_label": "temproots"
     },
     {
@@ -16180,7 +16270,7 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_installexample",
-      "community": 83,
+      "community": 318,
       "norm_label": "installexample()"
     },
     {
@@ -16190,7 +16280,7 @@
       "source_location": "L195",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_uninstallexample",
-      "community": 83,
+      "community": 318,
       "norm_label": "uninstallexample()"
     },
     {
@@ -16200,7 +16290,7 @@
       "source_location": "L202",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_localexampleresolver",
-      "community": 83,
+      "community": 318,
       "norm_label": "localexampleresolver()"
     },
     {
@@ -16210,7 +16300,7 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_discoverexampledocks",
-      "community": 83,
+      "community": 318,
       "norm_label": "discoverexampledocks()"
     },
     {
@@ -16220,7 +16310,7 @@
       "source_location": "L238",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_requireexample",
-      "community": 83,
+      "community": 318,
       "norm_label": "requireexample()"
     },
     {
@@ -16230,7 +16320,7 @@
       "source_location": "L248",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_installeddocks",
-      "community": 83,
+      "community": 318,
       "norm_label": "installeddocks()"
     },
     {
@@ -16240,7 +16330,7 @@
       "source_location": "L252",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_installedrecords",
-      "community": 83,
+      "community": 318,
       "norm_label": "installedrecords()"
     },
     {
@@ -16250,7 +16340,7 @@
       "source_location": "L256",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_nonstateentries",
-      "community": 83,
+      "community": 318,
       "norm_label": "nonstateentries()"
     },
     {
@@ -16260,7 +16350,7 @@
       "source_location": "L265",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_listentries",
-      "community": 83,
+      "community": 318,
       "norm_label": "listentries()"
     },
     {
@@ -16270,7 +16360,7 @@
       "source_location": "L284",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_tempdir",
-      "community": 83,
+      "community": 318,
       "norm_label": "tempdir()"
     },
     {
@@ -16280,7 +16370,7 @@
       "source_location": "L290",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_examplelabel",
-      "community": 83,
+      "community": 318,
       "norm_label": "examplelabel()"
     },
     {
@@ -16290,7 +16380,7 @@
       "source_location": "L294",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_writefakeoma",
-      "community": 83,
+      "community": 318,
       "norm_label": "writefakeoma()"
     },
     {
@@ -16300,7 +16390,7 @@
       "source_location": "L335",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_writefakebun",
-      "community": 83,
+      "community": 318,
       "norm_label": "writefakebun()"
     },
     {
@@ -16310,7 +16400,7 @@
       "source_location": "L361",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_isexecutable",
-      "community": 83,
+      "community": 318,
       "norm_label": "isexecutable()"
     },
     {
@@ -16320,7 +16410,7 @@
       "source_location": "L365",
       "_origin": "ast",
       "id": "tests_examples_cleanup_test_withenv",
-      "community": 83,
+      "community": 318,
       "norm_label": "withenv()"
     },
     {
@@ -16330,7 +16420,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_examples_test",
-      "community": 93,
+      "community": 313,
       "norm_label": "examples.test.ts"
     },
     {
@@ -16340,7 +16430,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "tests_examples_test_examplesroot",
-      "community": 93,
+      "community": 313,
       "norm_label": "examplesroot"
     },
     {
@@ -16350,7 +16440,7 @@
       "source_location": "L153",
       "_origin": "ast",
       "id": "tests_examples_test_examplenames",
-      "community": 93,
+      "community": 313,
       "norm_label": "examplenames()"
     },
     {
@@ -16360,7 +16450,7 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "tests_examples_test_workspaceexamplenames",
-      "community": 93,
+      "community": 313,
       "norm_label": "workspaceexamplenames()"
     },
     {
@@ -16370,7 +16460,7 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "tests_examples_test_commandsfor",
-      "community": 93,
+      "community": 313,
       "norm_label": "commandsfor()"
     },
     {
@@ -16380,7 +16470,7 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "tests_examples_test_commandfor",
-      "community": 93,
+      "community": 313,
       "norm_label": "commandfor()"
     },
     {
@@ -16390,7 +16480,7 @@
       "source_location": "L177",
       "_origin": "ast",
       "id": "tests_examples_test_powershelltestpath",
-      "community": 93,
+      "community": 313,
       "norm_label": "powershelltestpath()"
     },
     {
@@ -16460,7 +16550,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_platform_regression_test",
-      "community": 19,
+      "community": 356,
       "norm_label": "platform-regression.test.ts"
     },
     {
@@ -16470,7 +16560,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "tests_platform_regression_test_temproots",
-      "community": 19,
+      "community": 356,
       "norm_label": "temproots"
     },
     {
@@ -16480,7 +16570,7 @@
       "source_location": "L487",
       "_origin": "ast",
       "id": "tests_platform_regression_test_platformmanifest",
-      "community": 19,
+      "community": 356,
       "norm_label": "platformmanifest()"
     },
     {
@@ -16490,7 +16580,7 @@
       "source_location": "L508",
       "_origin": "ast",
       "id": "tests_platform_regression_test_platformruntimestep",
-      "community": 19,
+      "community": 356,
       "norm_label": "platformruntimestep()"
     },
     {
@@ -16500,7 +16590,7 @@
       "source_location": "L523",
       "_origin": "ast",
       "id": "tests_platform_regression_test_tempdir",
-      "community": 19,
+      "community": 356,
       "norm_label": "tempdir()"
     },
     {
@@ -16510,7 +16600,7 @@
       "source_location": "L529",
       "_origin": "ast",
       "id": "tests_platform_regression_test_writefakeplatformcommand",
-      "community": 19,
+      "community": 356,
       "norm_label": "writefakeplatformcommand()"
     },
     {
@@ -16520,7 +16610,7 @@
       "source_location": "L544",
       "_origin": "ast",
       "id": "tests_platform_regression_test_writedock",
-      "community": 19,
+      "community": 356,
       "norm_label": "writedock()"
     },
     {
@@ -16530,7 +16620,7 @@
       "source_location": "L592",
       "_origin": "ast",
       "id": "tests_platform_regression_test_createdockarchive",
-      "community": 19,
+      "community": 356,
       "norm_label": "createdockarchive()"
     },
     {
@@ -16540,7 +16630,7 @@
       "source_location": "L611",
       "_origin": "ast",
       "id": "tests_platform_regression_test_sha256",
-      "community": 19,
+      "community": 356,
       "norm_label": "sha256()"
     },
     {
@@ -16560,7 +16650,7 @@
       "source_location": "L629",
       "_origin": "ast",
       "id": "tests_platform_regression_test_installeddocks",
-      "community": 19,
+      "community": 356,
       "norm_label": "installeddocks()"
     },
     {
@@ -16570,7 +16660,7 @@
       "source_location": "L633",
       "_origin": "ast",
       "id": "tests_platform_regression_test_withenv",
-      "community": 19,
+      "community": 356,
       "norm_label": "withenv()"
     },
     {
@@ -16617,7 +16707,7 @@
       "label": "tempRoots",
       "file_type": "code",
       "source_file": "packages/cli/tests/requirements.test.ts",
-      "source_location": "L15",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "tests_requirements_test_temproots",
       "community": 313,
@@ -16627,17 +16717,27 @@
       "label": "omaManifest()",
       "file_type": "code",
       "source_file": "packages/cli/tests/requirements.test.ts",
-      "source_location": "L393",
+      "source_location": "L480",
       "_origin": "ast",
       "id": "tests_requirements_test_omamanifest",
       "community": 313,
       "norm_label": "omamanifest()"
     },
     {
+      "label": "runtimeManifest()",
+      "file_type": "code",
+      "source_file": "packages/cli/tests/requirements.test.ts",
+      "source_location": "L520",
+      "_origin": "ast",
+      "id": "tests_requirements_test_runtimemanifest",
+      "community": 313,
+      "norm_label": "runtimemanifest()"
+    },
+    {
       "label": "tempDir()",
       "file_type": "code",
       "source_file": "packages/cli/tests/requirements.test.ts",
-      "source_location": "L433",
+      "source_location": "L542",
       "_origin": "ast",
       "id": "tests_requirements_test_tempdir",
       "community": 313,
@@ -16647,7 +16747,7 @@
       "label": "captureManifestError()",
       "file_type": "code",
       "source_file": "packages/cli/tests/requirements.test.ts",
-      "source_location": "L439",
+      "source_location": "L548",
       "_origin": "ast",
       "id": "tests_requirements_test_capturemanifesterror",
       "community": 313,
@@ -16657,17 +16757,27 @@
       "label": "writeFakeBun()",
       "file_type": "code",
       "source_file": "packages/cli/tests/requirements.test.ts",
-      "source_location": "L448",
+      "source_location": "L557",
       "_origin": "ast",
       "id": "tests_requirements_test_writefakebun",
       "community": 313,
       "norm_label": "writefakebun()"
     },
     {
+      "label": "writeFakeRuntime()",
+      "file_type": "code",
+      "source_file": "packages/cli/tests/requirements.test.ts",
+      "source_location": "L593",
+      "_origin": "ast",
+      "id": "tests_requirements_test_writefakeruntime",
+      "community": 313,
+      "norm_label": "writefakeruntime()"
+    },
+    {
       "label": "writeExecutable()",
       "file_type": "code",
       "source_file": "packages/cli/tests/requirements.test.ts",
-      "source_location": "L484",
+      "source_location": "L607",
       "_origin": "ast",
       "id": "tests_requirements_test_writeexecutable",
       "community": 313,
@@ -16677,7 +16787,7 @@
       "label": "withEnv()",
       "file_type": "code",
       "source_file": "packages/cli/tests/requirements.test.ts",
-      "source_location": "L489",
+      "source_location": "L612",
       "_origin": "ast",
       "id": "tests_requirements_test_withenv",
       "community": 313,
@@ -16690,7 +16800,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_security_regression_test",
-      "community": 90,
+      "community": 44,
       "norm_label": "security-regression.test.ts"
     },
     {
@@ -16700,7 +16810,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "tests_security_regression_test_temproots",
-      "community": 90,
+      "community": 44,
       "norm_label": "temproots"
     },
     {
@@ -16710,7 +16820,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "tests_security_regression_test_startclilogin",
-      "community": 90,
+      "community": 44,
       "norm_label": "startclilogin()"
     },
     {
@@ -16720,7 +16830,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "tests_security_regression_test_exchangeclicode",
-      "community": 90,
+      "community": 44,
       "norm_label": "exchangeclicode()"
     },
     {
@@ -16730,7 +16840,7 @@
       "source_location": "L644",
       "_origin": "ast",
       "id": "tests_security_regression_test_tempdir",
-      "community": 90,
+      "community": 44,
       "norm_label": "tempdir()"
     },
     {
@@ -16740,7 +16850,7 @@
       "source_location": "L650",
       "_origin": "ast",
       "id": "tests_security_regression_test_createmanydirectoryarchive",
-      "community": 90,
+      "community": 44,
       "norm_label": "createmanydirectoryarchive()"
     },
     {
@@ -17290,7 +17400,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "changelog_0_1_59_2026_07_02",
-      "community": 421,
+      "community": 351,
       "norm_label": "0.1.59 - 2026-07-02"
     },
     {
@@ -17300,7 +17410,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "changelog_desktop_app_19",
-      "community": 421,
+      "community": 351,
       "norm_label": "desktop app"
     },
     {
@@ -17310,7 +17420,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "changelog_0_1_58_2026_07_02",
-      "community": 421,
+      "community": 351,
       "norm_label": "0.1.58 - 2026-07-02"
     },
     {
@@ -17320,7 +17430,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "changelog_desktop_app_26",
-      "community": 421,
+      "community": 351,
       "norm_label": "desktop app"
     },
     {
@@ -17380,7 +17490,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "changelog_cli",
-      "community": 351,
+      "community": 83,
       "norm_label": "cli"
     },
     {
@@ -17540,7 +17650,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "changelog_0_1_47_2026_07_01",
-      "community": 351,
+      "community": 83,
       "norm_label": "0.1.47 - 2026-07-01"
     },
     {
@@ -17550,7 +17660,7 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "changelog_cli_118",
-      "community": 351,
+      "community": 83,
       "norm_label": "cli"
     },
     {
@@ -17560,7 +17670,7 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "changelog_desktop_app_123",
-      "community": 351,
+      "community": 83,
       "norm_label": "desktop app"
     },
     {
@@ -17570,7 +17680,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "changelog_0_1_46_2026_06_30",
-      "community": 351,
+      "community": 83,
       "norm_label": "0.1.46 - 2026-06-30"
     },
     {
@@ -17580,7 +17690,7 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "changelog_cli_132",
-      "community": 351,
+      "community": 83,
       "norm_label": "cli"
     },
     {
@@ -17590,7 +17700,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "changelog_desktop_app_137",
-      "community": 351,
+      "community": 83,
       "norm_label": "desktop app"
     },
     {
@@ -17620,7 +17730,7 @@
       "source_location": "L151",
       "_origin": "ast",
       "id": "changelog_0_1_44_2026_06_30",
-      "community": 351,
+      "community": 83,
       "norm_label": "0.1.44 - 2026-06-30"
     },
     {
@@ -17630,7 +17740,7 @@
       "source_location": "L153",
       "_origin": "ast",
       "id": "changelog_cli_153",
-      "community": 351,
+      "community": 83,
       "norm_label": "cli"
     },
     {
@@ -17640,7 +17750,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "changelog_desktop_app_161",
-      "community": 351,
+      "community": 83,
       "norm_label": "desktop app"
     },
     {
@@ -17650,7 +17760,7 @@
       "source_location": "L166",
       "_origin": "ast",
       "id": "changelog_0_1_43_2026_06_26",
-      "community": 351,
+      "community": 83,
       "norm_label": "0.1.43 - 2026-06-26"
     },
     {
@@ -17660,7 +17770,7 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "changelog_cli_168",
-      "community": 351,
+      "community": 83,
       "norm_label": "cli"
     },
     {
@@ -17670,7 +17780,7 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "changelog_desktop_app_173",
-      "community": 351,
+      "community": 83,
       "norm_label": "desktop app"
     },
     {
@@ -17750,7 +17860,7 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "changelog_0_1_39_2026_06_23",
-      "community": 351,
+      "community": 83,
       "norm_label": "0.1.39 - 2026-06-23"
     },
     {
@@ -17760,7 +17870,7 @@
       "source_location": "L207",
       "_origin": "ast",
       "id": "changelog_cli_207",
-      "community": 351,
+      "community": 83,
       "norm_label": "cli"
     },
     {
@@ -17870,7 +17980,7 @@
       "source_location": "L255",
       "_origin": "ast",
       "id": "changelog_0_1_34_2026_06_17",
-      "community": 26,
+      "community": 360,
       "norm_label": "0.1.34 - 2026-06-17"
     },
     {
@@ -17880,7 +17990,7 @@
       "source_location": "L257",
       "_origin": "ast",
       "id": "changelog_cli_257",
-      "community": 26,
+      "community": 360,
       "norm_label": "cli"
     },
     {
@@ -17890,7 +18000,7 @@
       "source_location": "L264",
       "_origin": "ast",
       "id": "changelog_desktop_app_264",
-      "community": 26,
+      "community": 360,
       "norm_label": "desktop app"
     },
     {
@@ -18120,7 +18230,7 @@
       "source_location": "L360",
       "_origin": "ast",
       "id": "changelog_0_1_25_2026_06_15",
-      "community": 70,
+      "community": 421,
       "norm_label": "0.1.25 - 2026-06-15"
     },
     {
@@ -18130,7 +18240,7 @@
       "source_location": "L362",
       "_origin": "ast",
       "id": "changelog_desktop_app_362",
-      "community": 70,
+      "community": 421,
       "norm_label": "desktop app"
     },
     {
@@ -18140,7 +18250,7 @@
       "source_location": "L369",
       "_origin": "ast",
       "id": "changelog_tests_369",
-      "community": 70,
+      "community": 421,
       "norm_label": "tests"
     },
     {
@@ -18750,7 +18860,7 @@
       "source_location": "L643",
       "_origin": "ast",
       "id": "changelog_0_1_6_2026_06_12",
-      "community": 26,
+      "community": 423,
       "norm_label": "0.1.6 - 2026-06-12"
     },
     {
@@ -18760,7 +18870,7 @@
       "source_location": "L645",
       "_origin": "ast",
       "id": "changelog_fixed_645",
-      "community": 26,
+      "community": 423,
       "norm_label": "fixed"
     },
     {
@@ -18770,7 +18880,7 @@
       "source_location": "L652",
       "_origin": "ast",
       "id": "changelog_tests_652",
-      "community": 26,
+      "community": 423,
       "norm_label": "tests"
     },
     {
@@ -18780,7 +18890,7 @@
       "source_location": "L658",
       "_origin": "ast",
       "id": "changelog_0_1_5_2026_06_12",
-      "community": 44,
+      "community": 26,
       "norm_label": "0.1.5 - 2026-06-12"
     },
     {
@@ -18790,7 +18900,7 @@
       "source_location": "L660",
       "_origin": "ast",
       "id": "changelog_changed_660",
-      "community": 44,
+      "community": 26,
       "norm_label": "changed"
     },
     {
@@ -18800,7 +18910,7 @@
       "source_location": "L669",
       "_origin": "ast",
       "id": "changelog_tests_669",
-      "community": 44,
+      "community": 26,
       "norm_label": "tests"
     },
     {
@@ -18840,7 +18950,7 @@
       "source_location": "L688",
       "_origin": "ast",
       "id": "changelog_0_1_3_2026_06_12",
-      "community": 429,
+      "community": 26,
       "norm_label": "0.1.3 - 2026-06-12"
     },
     {
@@ -18850,7 +18960,7 @@
       "source_location": "L690",
       "_origin": "ast",
       "id": "changelog_fixed_690",
-      "community": 429,
+      "community": 26,
       "norm_label": "fixed"
     },
     {
@@ -18860,7 +18970,7 @@
       "source_location": "L698",
       "_origin": "ast",
       "id": "changelog_tests_698",
-      "community": 429,
+      "community": 26,
       "norm_label": "tests"
     },
     {
@@ -18987,7 +19097,7 @@
       "label": "Install",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L122",
+      "source_location": "L124",
       "_origin": "ast",
       "id": "readme_install",
       "community": 24,
@@ -18997,7 +19107,7 @@
       "label": "Command Reference",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L156",
+      "source_location": "L158",
       "_origin": "ast",
       "id": "readme_command_reference",
       "community": 24,
@@ -19007,7 +19117,7 @@
       "label": "Dock Format",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L196",
+      "source_location": "L198",
       "_origin": "ast",
       "id": "readme_dock_format",
       "community": 24,
@@ -19017,7 +19127,7 @@
       "label": "Task Command Permission",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L280",
+      "source_location": "L282",
       "_origin": "ast",
       "id": "readme_task_command_permission",
       "community": 24,
@@ -19027,7 +19137,7 @@
       "label": "File Ownership",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L337",
+      "source_location": "L339",
       "_origin": "ast",
       "id": "readme_file_ownership",
       "community": 24,
@@ -19037,7 +19147,7 @@
       "label": "Text Managed Blocks",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L342",
+      "source_location": "L344",
       "_origin": "ast",
       "id": "readme_text_managed_blocks",
       "community": 24,
@@ -19047,7 +19157,7 @@
       "label": "Checksum Managed Files",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L360",
+      "source_location": "L362",
       "_origin": "ast",
       "id": "readme_checksum_managed_files",
       "community": 24,
@@ -19057,7 +19167,7 @@
       "label": "Workdir Files And Export",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L366",
+      "source_location": "L368",
       "_origin": "ast",
       "id": "readme_workdir_files_and_export",
       "community": 24,
@@ -19067,7 +19177,7 @@
       "label": "Example Docks",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L424",
+      "source_location": "L426",
       "_origin": "ast",
       "id": "readme_example_docks",
       "community": 24,
@@ -19077,7 +19187,7 @@
       "label": "Registry And Deploy",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L449",
+      "source_location": "L451",
       "_origin": "ast",
       "id": "readme_registry_and_deploy",
       "community": 24,
@@ -19087,7 +19197,7 @@
       "label": "Repository Layout",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L484",
+      "source_location": "L486",
       "_origin": "ast",
       "id": "readme_repository_layout",
       "community": 24,
@@ -19097,7 +19207,7 @@
       "label": "Development",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L507",
+      "source_location": "L509",
       "_origin": "ast",
       "id": "readme_development",
       "community": 24,
@@ -19687,7 +19797,7 @@
       "label": "\uc124\uce58",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L118",
+      "source_location": "L120",
       "_origin": "ast",
       "id": "cli_readme_ko_\uc124\uce58",
       "community": 38,
@@ -19697,7 +19807,7 @@
       "label": "\uba85\ub839\uc5b4",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L151",
+      "source_location": "L153",
       "_origin": "ast",
       "id": "cli_readme_ko_\uba85\ub839\uc5b4",
       "community": 38,
@@ -19707,7 +19817,7 @@
       "label": "Dock Format",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L189",
+      "source_location": "L191",
       "_origin": "ast",
       "id": "cli_readme_ko_dock_format",
       "community": 38,
@@ -19717,7 +19827,7 @@
       "label": "\ud30c\uc77c \uc18c\uc720\uad8c",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L248",
+      "source_location": "L250",
       "_origin": "ast",
       "id": "cli_readme_ko_\ud30c\uc77c_\uc18c\uc720\uad8c",
       "community": 38,
@@ -19727,7 +19837,7 @@
       "label": "Text Managed Blocks",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L253",
+      "source_location": "L255",
       "_origin": "ast",
       "id": "cli_readme_ko_text_managed_blocks",
       "community": 38,
@@ -19737,7 +19847,7 @@
       "label": "Checksum Managed Files",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L266",
+      "source_location": "L268",
       "_origin": "ast",
       "id": "cli_readme_ko_checksum_managed_files",
       "community": 38,
@@ -19747,7 +19857,7 @@
       "label": "Workdir Files And Export",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L272",
+      "source_location": "L274",
       "_origin": "ast",
       "id": "cli_readme_ko_workdir_files_and_export",
       "community": 38,
@@ -19757,7 +19867,7 @@
       "label": "Task Command Permission",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L322",
+      "source_location": "L324",
       "_origin": "ast",
       "id": "cli_readme_ko_task_command_permission",
       "community": 38,
@@ -19767,7 +19877,7 @@
       "label": "Example Docks",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L340",
+      "source_location": "L342",
       "_origin": "ast",
       "id": "cli_readme_ko_example_docks",
       "community": 38,
@@ -19777,7 +19887,7 @@
       "label": "Registry And Deploy",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L364",
+      "source_location": "L366",
       "_origin": "ast",
       "id": "cli_readme_ko_registry_and_deploy",
       "community": 38,
@@ -19787,7 +19897,7 @@
       "label": "Repository Layout",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L396",
+      "source_location": "L398",
       "_origin": "ast",
       "id": "cli_readme_ko_repository_layout",
       "community": 38,
@@ -19797,7 +19907,7 @@
       "label": "Development",
       "file_type": "document",
       "source_file": "packages/cli/README.ko.md",
-      "source_location": "L419",
+      "source_location": "L421",
       "_origin": "ast",
       "id": "cli_readme_ko_development",
       "community": 38,
@@ -19867,7 +19977,7 @@
       "label": "Install",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L122",
+      "source_location": "L124",
       "_origin": "ast",
       "id": "cli_readme_install",
       "community": 37,
@@ -19877,7 +19987,7 @@
       "label": "Command Reference",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L155",
+      "source_location": "L157",
       "_origin": "ast",
       "id": "cli_readme_command_reference",
       "community": 37,
@@ -19887,7 +19997,7 @@
       "label": "Dock Format",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L195",
+      "source_location": "L197",
       "_origin": "ast",
       "id": "cli_readme_dock_format",
       "community": 37,
@@ -19897,7 +20007,7 @@
       "label": "Task Command Permission",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L279",
+      "source_location": "L281",
       "_origin": "ast",
       "id": "cli_readme_task_command_permission",
       "community": 37,
@@ -19907,7 +20017,7 @@
       "label": "File Ownership",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L336",
+      "source_location": "L338",
       "_origin": "ast",
       "id": "cli_readme_file_ownership",
       "community": 37,
@@ -19917,7 +20027,7 @@
       "label": "Text Managed Blocks",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L341",
+      "source_location": "L343",
       "_origin": "ast",
       "id": "cli_readme_text_managed_blocks",
       "community": 37,
@@ -19927,7 +20037,7 @@
       "label": "Checksum Managed Files",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L359",
+      "source_location": "L361",
       "_origin": "ast",
       "id": "cli_readme_checksum_managed_files",
       "community": 37,
@@ -19937,7 +20047,7 @@
       "label": "Workdir Files And Export",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L365",
+      "source_location": "L367",
       "_origin": "ast",
       "id": "cli_readme_workdir_files_and_export",
       "community": 37,
@@ -19947,7 +20057,7 @@
       "label": "Example Docks",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L423",
+      "source_location": "L425",
       "_origin": "ast",
       "id": "cli_readme_example_docks",
       "community": 37,
@@ -19957,7 +20067,7 @@
       "label": "Registry And Deploy",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L448",
+      "source_location": "L450",
       "_origin": "ast",
       "id": "cli_readme_registry_and_deploy",
       "community": 37,
@@ -19967,7 +20077,7 @@
       "label": "Repository Layout",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L483",
+      "source_location": "L485",
       "_origin": "ast",
       "id": "cli_readme_repository_layout",
       "community": 37,
@@ -19977,7 +20087,7 @@
       "label": "Development",
       "file_type": "document",
       "source_file": "packages/cli/README.md",
-      "source_location": "L506",
+      "source_location": "L508",
       "_origin": "ast",
       "id": "cli_readme_development",
       "community": 37,
@@ -21117,7 +21227,7 @@
       "label": "Tools",
       "file_type": "document",
       "source_file": "packages/cli/docs/guides/guide.md",
-      "source_location": "L195",
+      "source_location": "L196",
       "_origin": "ast",
       "id": "guides_guide_tools",
       "community": 40,
@@ -21127,7 +21237,7 @@
       "label": "Task Command Permission",
       "file_type": "document",
       "source_file": "packages/cli/docs/guides/guide.md",
-      "source_location": "L218",
+      "source_location": "L219",
       "_origin": "ast",
       "id": "guides_guide_task_command_permission",
       "community": 40,
@@ -21137,7 +21247,7 @@
       "label": "Host Bootstrap",
       "file_type": "document",
       "source_file": "packages/cli/docs/guides/guide.md",
-      "source_location": "L280",
+      "source_location": "L281",
       "_origin": "ast",
       "id": "guides_guide_host_bootstrap",
       "community": 40,
@@ -21147,7 +21257,7 @@
       "label": "Files",
       "file_type": "document",
       "source_file": "packages/cli/docs/guides/guide.md",
-      "source_location": "L297",
+      "source_location": "L298",
       "_origin": "ast",
       "id": "guides_guide_files",
       "community": 40,
@@ -21157,7 +21267,7 @@
       "label": "Tasks",
       "file_type": "document",
       "source_file": "packages/cli/docs/guides/guide.md",
-      "source_location": "L313",
+      "source_location": "L314",
       "_origin": "ast",
       "id": "guides_guide_tasks",
       "community": 40,
@@ -21167,7 +21277,7 @@
       "label": "Workdir Files And Export",
       "file_type": "document",
       "source_file": "packages/cli/docs/guides/guide.md",
-      "source_location": "L332",
+      "source_location": "L333",
       "_origin": "ast",
       "id": "guides_guide_workdir_files_and_export",
       "community": 40,
@@ -21177,7 +21287,7 @@
       "label": "Production-Ready Example Payloads",
       "file_type": "document",
       "source_file": "packages/cli/docs/guides/guide.md",
-      "source_location": "L386",
+      "source_location": "L387",
       "_origin": "ast",
       "id": "guides_guide_production_ready_example_payloads",
       "community": 40,
@@ -21187,7 +21297,7 @@
       "label": "Platforms",
       "file_type": "document",
       "source_file": "packages/cli/docs/guides/guide.md",
-      "source_location": "L401",
+      "source_location": "L402",
       "_origin": "ast",
       "id": "guides_guide_platforms",
       "community": 40,
@@ -21197,7 +21307,7 @@
       "label": "Deploy",
       "file_type": "document",
       "source_file": "packages/cli/docs/guides/guide.md",
-      "source_location": "L445",
+      "source_location": "L446",
       "_origin": "ast",
       "id": "guides_guide_deploy",
       "community": 40,
@@ -21207,7 +21317,7 @@
       "label": "Checklist",
       "file_type": "document",
       "source_file": "packages/cli/docs/guides/guide.md",
-      "source_location": "L473",
+      "source_location": "L474",
       "_origin": "ast",
       "id": "guides_guide_checklist",
       "community": 40,
@@ -39046,7 +39156,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 314,
       "community_name": "Cli / Examples",
       "norm_label": "review rails, pr structure, and secret-scan defaults for ai-generated changes.",
       "id": "opendock__agent_safety_dock_macos_file"
@@ -39060,7 +39170,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 314,
       "community_name": "Cli / Examples",
       "norm_label": "review rails, pr structure, and secret-scan defaults for ai-generated changes.",
       "id": "opendock__agent_safety_dock_windows_file"
@@ -39942,7 +40052,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "security-first mcp inventory, config examples, and review checklists.",
       "id": "opendock__mcp_safe_dock_macos_file"
@@ -39956,7 +40066,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "security-first mcp inventory, config examples, and review checklists.",
       "id": "opendock__mcp_safe_dock_windows_file"
@@ -40026,7 +40136,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 66,
+      "community": 358,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile architecture, ui patterns, release readiness, and testing guidance.",
       "id": "opendock__mobile_ai_dock_macos_file"
@@ -40040,7 +40150,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 66,
+      "community": 358,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile architecture, ui patterns, release readiness, and testing guidance.",
       "id": "opendock__mobile_ai_dock_windows_file"
@@ -40166,7 +40276,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 314,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "oh my agent setup with opendock-managed install, update, and uninstall.",
       "id": "opendock__oma_dock_macos_file"
@@ -40180,7 +40290,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 314,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "oh my agent setup with opendock-managed install, update, and uninstall.",
       "id": "opendock__oma_dock_windows_file"
@@ -40432,7 +40542,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 314,
       "community_name": "Cli / Examples",
       "norm_label": "repository context packaging, architecture mapping, and change-risk prompts.",
       "id": "opendock__repo_context_dock_macos_file"
@@ -40446,7 +40556,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 314,
       "community_name": "Cli / Examples",
       "norm_label": "repository context packaging, architecture mapping, and change-risk prompts.",
       "id": "opendock__repo_context_dock_windows_file"
@@ -40572,7 +40682,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 375,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "portfolio case study templates for problem, process, decision rationale, and impact.",
       "id": "opendock__ui_case_study_dock_macos_file"
@@ -40586,7 +40696,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 375,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "portfolio case study templates for problem, process, decision rationale, and impact.",
       "id": "opendock__ui_case_study_dock_windows_file"
@@ -42560,7 +42670,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 66,
+      "community": 358,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile quality gate for flutter, react native, swift, android, permissions, accessibility, release readiness, and runtime safety.",
       "id": "opendock_repo__mobile_ultrawork_dock_macos_file"
@@ -42574,7 +42684,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 66,
+      "community": 358,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile quality gate for flutter, react native, swift, android, permissions, accessibility, release readiness, and runtime safety.",
       "id": "opendock_repo__mobile_ultrawork_dock_windows_file"
@@ -43582,7 +43692,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 314,
       "community_name": "Cli / Examples",
       "norm_label": "tag: safety",
       "id": "opendock_tag_safety"
@@ -43596,7 +43706,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 314,
       "community_name": "Cli / Examples",
       "norm_label": "tag: review",
       "id": "opendock_tag_review"
@@ -43610,7 +43720,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 314,
       "community_name": "Cli / Examples",
       "norm_label": "tag: git",
       "id": "opendock_tag_git"
@@ -43624,7 +43734,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 314,
       "community_name": "Cli / Examples",
       "norm_label": "tag: quality",
       "id": "opendock_tag_quality"
@@ -43666,7 +43776,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 66,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: mcp",
       "id": "opendock_tag_mcp"
@@ -44212,7 +44322,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "tag: security",
       "id": "opendock_tag_security"
@@ -44226,7 +44336,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 66,
       "community_name": "Cli / Examples",
       "norm_label": "tag: config",
       "id": "opendock_tag_config"
@@ -44240,7 +44350,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 66,
+      "community": 358,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: mobile",
       "id": "opendock_tag_mobile"
@@ -44254,7 +44364,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 66,
+      "community": 358,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: ios",
       "id": "opendock_tag_ios"
@@ -44268,7 +44378,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 66,
+      "community": 358,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: android",
       "id": "opendock_tag_android"
@@ -44338,7 +44448,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 314,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: oma",
       "id": "opendock_tag_oma"
@@ -44352,7 +44462,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 314,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: oh-my-agent",
       "id": "opendock_tag_oh_my_agent"
@@ -44492,7 +44602,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 314,
       "community_name": "Cli / Examples",
       "norm_label": "tag: repository",
       "id": "opendock_tag_repository"
@@ -44506,7 +44616,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 318,
+      "community": 314,
       "community_name": "Cli / Examples",
       "norm_label": "tag: context",
       "id": "opendock_tag_context"
@@ -44576,7 +44686,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 375,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: portfolio",
       "id": "opendock_tag_portfolio"
@@ -44590,7 +44700,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 375,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: case-study",
       "id": "opendock_tag_case_study"
@@ -44604,7 +44714,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 375,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: impact",
       "id": "opendock_tag_impact"
@@ -44912,7 +45022,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 66,
+      "community": 358,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: flutter",
       "id": "opendock_tag_flutter"
@@ -73028,6 +73138,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "app_dock_installer",
+      "target": "app_dock_installer_replacementruntime",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "app_dock_installer",
+      "target": "app_dock_installer_runtimecommandtarget",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L47",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -73088,6 +73218,28 @@
       "confidence_score": 1.0,
       "source": "app_dock_installer",
       "target": "domain_state_store"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "app_dock_installer",
+      "target": "domain_state_store_installeddockrecord",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "app_dock_installer",
+      "target": "domain_state_store_installedruntimerecord",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -73198,6 +73350,17 @@
       "confidence_score": 1.0,
       "source": "app_dock_installer",
       "target": "runtime_command_shim"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "app_dock_installer",
+      "target": "runtime_command_shim_createprojectcommandshim",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -73374,6 +73537,28 @@
       "confidence_score": 1.0,
       "source": "tests_platform_regression_test",
       "target": "app_dock_installer"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L423",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_removeunusedruntimeshims",
+      "target": "app_dock_installer_replacementruntime",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L431",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_removeunusedruntimeshims",
+      "target": "app_dock_installer_runtimecommandtarget",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -73739,6 +73924,17 @@
       "weight": 1.0,
       "source": "app_dock_installer_dockinstaller_removeunusedruntimeshims",
       "target": "files_path_utils_pruneemptydirectorychain"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L426",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_removeunusedruntimeshims",
+      "target": "runtime_command_shim_createprojectcommandshim"
     },
     {
       "relation": "calls",
@@ -74504,6 +74700,17 @@
       "target": "domain_manifest_dockref_parse"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L278",
+      "weight": 1.0,
+      "source": "runtime_requirement_runner_ensurerealdirectory",
+      "target": "domain_manifest_dockref_parse"
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -74590,6 +74797,17 @@
       "confidence_score": 1.0,
       "source": "runtime_requirement_runner_requirementcontext",
       "target": "domain_manifest_taskphase"
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L158",
+      "weight": 1.0,
+      "source": "runtime_requirement_runner_requirementrunner_evaluate",
+      "target": "domain_manifest_taskphase",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -78510,9 +78728,9 @@
       "source_file": "packages/cli/src/core/runtime/command-policy.ts",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_command_policy",
-      "target": "runtime_command_policy_isdefaultcommandprogram",
-      "confidence_score": 1.0
+      "target": "runtime_command_policy_isdefaultcommandprogram"
     },
     {
       "relation": "contains",
@@ -78640,9 +78858,9 @@
       "source_file": "packages/cli/src/core/runtime/command-policy.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_command_policy",
-      "target": "runtime_command_policy_packagemanagermutations",
-      "confidence_score": 1.0
+      "target": "runtime_command_policy_packagemanagermutations"
     },
     {
       "relation": "contains",
@@ -78779,9 +78997,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation_validatemanifestpermissions",
-      "target": "runtime_command_policy_splitcommand",
-      "confidence_score": 1.0
+      "target": "runtime_command_policy_splitcommand"
     },
     {
       "relation": "calls",
@@ -78834,9 +79052,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation_validatemanifestpermissions",
-      "target": "runtime_command_policy_rejectshellmetacharacters",
-      "confidence_score": 1.0
+      "target": "runtime_command_policy_rejectshellmetacharacters"
     },
     {
       "relation": "calls",
@@ -78856,9 +79074,9 @@
       "source_file": "packages/cli/src/core/runtime/command-policy.ts",
       "source_location": "L97",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_command_policy_ensureallowed",
-      "target": "runtime_command_policy_isdefaultcommandprogram",
-      "confidence_score": 1.0
+      "target": "runtime_command_policy_isdefaultcommandprogram"
     },
     {
       "relation": "imports",
@@ -78867,9 +79085,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation",
-      "target": "runtime_command_policy_isdefaultcommandprogram",
-      "confidence_score": 1.0
+      "target": "runtime_command_policy_isdefaultcommandprogram"
     },
     {
       "relation": "calls",
@@ -78878,9 +79096,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation_validatemanifestpermissions",
-      "target": "runtime_command_policy_isdefaultcommandprogram",
-      "confidence_score": 1.0
+      "target": "runtime_command_policy_isdefaultcommandprogram"
     },
     {
       "relation": "calls",
@@ -78955,9 +79173,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation_validatemanifestpermissions",
-      "target": "runtime_command_policy_ensureallowed",
-      "confidence_score": 1.0
+      "target": "runtime_command_policy_ensureallowed"
     },
     {
       "relation": "calls",
@@ -80501,16 +80719,6 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "runtime_project_layout",
-      "target": "runtime_project_layout_projecttoolchainsdir"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/cli/src/core/runtime/project-layout.ts",
       "source_location": "L16",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -80531,11 +80739,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L12",
+      "source_location": "L56",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "runtime_project_layout",
-      "target": "runtime_project_layout_runtimebindir"
+      "target": "runtime_project_layout_saferuntimesegment"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/project-layout.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_project_layout",
+      "target": "runtime_project_layout_sharedruntimebindir"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/project-layout.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_project_layout",
+      "target": "runtime_project_layout_sharedruntimeroot"
     },
     {
       "relation": "contains",
@@ -80602,26 +80830,81 @@
       "target": "runtime_project_layout_projectbindir"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L17",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner",
+      "target": "runtime_project_layout_projectbindir"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L242",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner_opendockmanagedcommanddirectories",
+      "target": "runtime_project_layout_projectbindir"
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/runtime/project-layout.ts",
-      "source_location": "L13",
+      "source_location": "L15",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "runtime_project_layout_runtimebindir",
-      "target": "runtime_project_layout_projecttoolchainsdir"
+      "source": "runtime_project_layout_sharedruntimebindir",
+      "target": "runtime_project_layout_sharedruntimeroot"
     },
     {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L18",
+      "source_location": "L17",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "runtime_requirement_runner",
-      "target": "runtime_project_layout_runtimebindir"
+      "target": "runtime_project_layout_sharedruntimeroot"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L242",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner_opendockmanagedcommanddirectories",
+      "target": "runtime_project_layout_sharedruntimeroot"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/project-layout.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_project_layout_sharedruntimebindir",
+      "target": "runtime_project_layout_saferuntimesegment"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L17",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner",
+      "target": "runtime_project_layout_sharedruntimebindir"
     },
     {
       "relation": "calls",
@@ -80629,10 +80912,10 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
-      "source_location": "L180",
+      "source_location": "L185",
       "weight": 1.0,
       "source": "runtime_requirement_runner_requirementrunner_prepareruntime",
-      "target": "runtime_project_layout_runtimebindir"
+      "target": "runtime_project_layout_sharedruntimebindir"
     },
     {
       "relation": "calls",
@@ -80858,6 +81141,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L309",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner",
+      "target": "runtime_requirement_runner_assertruntimewrapperwritable"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
       "source_location": "L235",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -80868,11 +81161,51 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L276",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner",
+      "target": "runtime_requirement_runner_ensurerealdirectory"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
       "source_location": "L188",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "runtime_requirement_runner",
       "target": "runtime_requirement_runner_failedreport"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L245",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner",
+      "target": "runtime_requirement_runner_isignoredcommanddirectory"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L298",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner",
+      "target": "runtime_requirement_runner_lstatifpresent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L241",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner",
+      "target": "runtime_requirement_runner_opendockmanagedcommanddirectories"
     },
     {
       "relation": "contains",
@@ -81333,6 +81666,17 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "runtime_requirement_runner_requirementrunner_prepareruntime",
+      "target": "runtime_requirement_runner_ensurerealdirectory"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L186",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner_requirementrunner_prepareruntime",
       "target": "runtime_requirement_runner_resolvecommandpath"
     },
     {
@@ -81367,6 +81711,72 @@
       "confidence_score": 1.0,
       "source": "runtime_requirement_runner_resolvecommandpath",
       "target": "runtime_requirement_runner_commandcandidates"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L229",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner_resolvecommandpath",
+      "target": "runtime_requirement_runner_isignoredcommanddirectory"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L224",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner_resolvecommandpath",
+      "target": "runtime_requirement_runner_opendockmanagedcommanddirectories"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L267",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner_writeruntimewrapper",
+      "target": "runtime_requirement_runner_assertruntimewrapperwritable"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L264",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner_writeruntimewrapper",
+      "target": "runtime_requirement_runner_ensurerealdirectory"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L284",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner_ensurerealdirectory",
+      "target": "runtime_requirement_runner_lstatifpresent"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/requirement-runner.ts",
+      "source_location": "L310",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "runtime_requirement_runner_assertruntimewrapperwritable",
+      "target": "runtime_requirement_runner_lstatifpresent"
     },
     {
       "relation": "contains",
@@ -81600,9 +82010,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation",
-      "target": "runtime_task_command_validation_manifesttaskpermissionprograms",
-      "confidence_score": 1.0
+      "target": "runtime_task_command_validation_manifesttaskpermissionprograms"
     },
     {
       "relation": "contains",
@@ -81610,9 +82020,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation",
-      "target": "runtime_task_command_validation_manifesttaskpermissions",
-      "confidence_score": 1.0
+      "target": "runtime_task_command_validation_manifesttaskpermissions"
     },
     {
       "relation": "contains",
@@ -81630,9 +82040,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation",
-      "target": "runtime_task_command_validation_validatemanifestpermissions",
-      "confidence_score": 1.0
+      "target": "runtime_task_command_validation_validatemanifestpermissions"
     },
     {
       "relation": "contains",
@@ -81738,9 +82148,9 @@
       "source_file": "packages/cli/src/core/runtime/task-runner.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_runner",
-      "target": "runtime_task_command_validation",
-      "confidence_score": 1.0
+      "target": "runtime_task_command_validation"
     },
     {
       "relation": "imports_from",
@@ -81760,9 +82170,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation_validatemanifesttaskcommands",
-      "target": "runtime_task_command_validation_manifesttaskpermissionprograms",
-      "confidence_score": 1.0
+      "target": "runtime_task_command_validation_manifesttaskpermissionprograms"
     },
     {
       "relation": "calls",
@@ -81771,9 +82181,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation_validatemanifesttaskcommands",
-      "target": "runtime_task_command_validation_manifesttaskpermissions",
-      "confidence_score": 1.0
+      "target": "runtime_task_command_validation_manifesttaskpermissions"
     },
     {
       "relation": "calls",
@@ -81837,9 +82247,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation_manifesttaskpermissions",
-      "target": "runtime_task_command_validation_validatemanifestpermissions",
-      "confidence_score": 1.0
+      "target": "runtime_task_command_validation_validatemanifestpermissions"
     },
     {
       "relation": "calls",
@@ -81859,9 +82269,9 @@
       "source_file": "packages/cli/src/core/runtime/task-runner.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_runner",
-      "target": "runtime_task_command_validation_manifesttaskpermissions",
-      "confidence_score": 1.0
+      "target": "runtime_task_command_validation_manifesttaskpermissions"
     },
     {
       "relation": "calls",
@@ -81881,9 +82291,9 @@
       "source_file": "packages/cli/src/core/runtime/task-command-validation.ts",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_command_validation_validatemanifestpermissions",
-      "target": "runtime_task_command_validation_manifesttaskpermissionprograms",
-      "confidence_score": 1.0
+      "target": "runtime_task_command_validation_manifesttaskpermissionprograms"
     },
     {
       "relation": "imports",
@@ -81892,9 +82302,9 @@
       "source_file": "packages/cli/src/core/runtime/task-runner.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runtime_task_runner",
-      "target": "runtime_task_command_validation_manifesttaskpermissionprograms",
-      "confidence_score": 1.0
+      "target": "runtime_task_command_validation_manifesttaskpermissionprograms"
     },
     {
       "relation": "calls",
@@ -85456,9 +85866,9 @@
       "source_file": "packages/cli/tests/cli-flow.test.ts",
       "source_location": "L2000",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_flow_test",
-      "target": "tests_cli_flow_test_omatoolspec",
-      "confidence_score": 1.0
+      "target": "tests_cli_flow_test_omatoolspec"
     },
     {
       "relation": "contains",
@@ -85576,9 +85986,9 @@
       "source_file": "packages/cli/tests/cli-flow.test.ts",
       "source_location": "L2011",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_flow_test",
-      "target": "tests_cli_flow_test_writefakebuntool",
-      "confidence_score": 1.0
+      "target": "tests_cli_flow_test_writefakebuntool"
     },
     {
       "relation": "contains",
@@ -85609,6 +86019,16 @@
       "confidence_score": 1.0,
       "source": "tests_cli_flow_test",
       "target": "tests_cli_flow_test_writefakeomawithexternalsymlink"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/tests/cli-flow.test.ts",
+      "source_location": "L2093",
+      "weight": 1.0,
+      "source": "tests_cli_flow_test",
+      "target": "tests_cli_flow_test_writefakeversioncommand",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -85672,9 +86092,9 @@
       "source_file": "packages/cli/tests/cli-flow.test.ts",
       "source_location": "L1941",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_flow_test_writefakeoma",
-      "target": "tests_cli_flow_test_writefakebuntool",
-      "confidence_score": 1.0
+      "target": "tests_cli_flow_test_writefakebuntool"
     },
     {
       "relation": "calls",
@@ -85694,9 +86114,9 @@
       "source_file": "packages/cli/tests/cli-flow.test.ts",
       "source_location": "L1966",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_flow_test_writefakeomarequiresseed",
-      "target": "tests_cli_flow_test_writefakebuntool",
-      "confidence_score": 1.0
+      "target": "tests_cli_flow_test_writefakebuntool"
     },
     {
       "relation": "calls",
@@ -85716,9 +86136,9 @@
       "source_file": "packages/cli/tests/cli-flow.test.ts",
       "source_location": "L1984",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_flow_test_writefakeomawithexternalsymlink",
-      "target": "tests_cli_flow_test_writefakebuntool",
-      "confidence_score": 1.0
+      "target": "tests_cli_flow_test_writefakebuntool"
     },
     {
       "relation": "calls",
@@ -85727,7 +86147,18 @@
       "source_file": "packages/cli/tests/cli-flow.test.ts",
       "source_location": "L2013",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_flow_test_writefakebuntool",
+      "target": "tests_cli_flow_test_chmod"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/tests/cli-flow.test.ts",
+      "source_location": "L2103",
+      "weight": 1.0,
+      "source": "tests_cli_flow_test_writefakeversioncommand",
       "target": "tests_cli_flow_test_chmod",
       "confidence_score": 1.0
     },
@@ -86356,6 +86787,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/tests/requirements.test.ts",
+      "source_location": "L520",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tests_requirements_test",
+      "target": "tests_requirements_test_runtimemanifest"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/tests/requirements.test.ts",
       "source_location": "L343",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -86403,6 +86844,16 @@
       "target": "tests_requirements_test_writefakebun"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/tests/requirements.test.ts",
+      "source_location": "L593",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tests_requirements_test",
+      "target": "tests_requirements_test_writefakeruntime"
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -86411,6 +86862,17 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "tests_requirements_test_writefakebun",
+      "target": "tests_requirements_test_writeexecutable"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/tests/requirements.test.ts",
+      "source_location": "L594",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tests_requirements_test_writefakeruntime",
       "target": "tests_requirements_test_writeexecutable"
     },
     {
@@ -110423,5 +110885,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "3e66eade71de848bbe4c10eeaf33055b179ab70b"
+  "built_at_commit": "3e89900a25c77feeac6afecc7a2650289239c3e7"
 }

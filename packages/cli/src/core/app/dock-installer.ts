@@ -1,5 +1,5 @@
 import { existsSync, rmSync } from "node:fs";
-import { join, relative } from "node:path";
+import { isAbsolute, join, relative } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
 import type { ResolvedDock } from "../../resolver.js";
 import { resolveDock } from "../../resolver.js";
@@ -8,12 +8,16 @@ import {
   type DockRef,
   type TaskPhase,
 } from "../domain/manifest.js";
-import { OpenDockStateStore } from "../domain/state-store.js";
+import {
+  type InstalledDockRecord,
+  type InstalledRuntimeRecord,
+  OpenDockStateStore,
+} from "../domain/state-store.js";
 import { FileCandidateCollector } from "../files/file-candidate.js";
 import { FilePlan } from "../files/file-plan.js";
 import { pruneEmptyDirectoryChain } from "../files/path-utils.js";
 import { WorkdirSeeder } from "../files/workdir-seeder.js";
-import { removeProjectCommandShim } from "../runtime/command-shim.js";
+import { createProjectCommandShim, removeProjectCommandShim } from "../runtime/command-shim.js";
 import {
   type ProgressReporter,
   type RuntimeProgressEvent,
@@ -32,6 +36,30 @@ type DockResolver = (
   dockRef: DockRef,
   platform: OpenDockPlatform,
 ) => Promise<ResolvedDock> | ResolvedDock;
+
+function replacementRuntime(
+  docks: InstalledDockRecord[],
+  runtimeName: string,
+): { dock: InstalledDockRecord; runtime: InstalledRuntimeRecord } | undefined {
+  for (const dock of [...docks].reverse()) {
+    const runtime = dock.runtimes.find((candidate) => candidate.name === runtimeName);
+    if (runtime) {
+      return { dock, runtime };
+    }
+  }
+  return undefined;
+}
+
+function runtimeCommandTarget(
+  projectDir: string,
+  runtime: InstalledRuntimeRecord,
+  command: string,
+  platform: OpenDockPlatform,
+): string {
+  const binDir = isAbsolute(runtime.path) ? runtime.path : join(projectDir, runtime.path);
+  const target = join(binDir, command);
+  return platform === "windows" ? `${target}.cmd` : target;
+}
 
 export interface InstallOptions {
   dockRef: DockRef;
@@ -392,21 +420,34 @@ export class DockInstaller {
   ): void {
     const otherDocks = store.readLock().docks.filter((candidate) => candidate.id !== dock.id);
     for (const runtime of dock.runtimes) {
-      const stillUsed = otherDocks.some((candidate) =>
-        candidate.runtimes.some(
-          (other) => other.name === runtime.name && other.path === runtime.path,
-        ),
-      );
-      if (stillUsed) {
+      const replacement = replacementRuntime(otherDocks, runtime.name);
+      if (replacement) {
+        for (const command of replacement.runtime.commands) {
+          createProjectCommandShim({
+            command,
+            owner: { dockId: "project", kind: "runtime", name: replacement.runtime.name },
+            platform: replacement.dock.platform,
+            projectDir,
+            target: runtimeCommandTarget(
+              projectDir,
+              replacement.runtime,
+              command,
+              replacement.dock.platform,
+            ),
+          });
+        }
         continue;
       }
       for (const command of runtime.commands) {
         removeProjectCommandShim({
           command,
-          owner: { dockId: dock.id, kind: "runtime", name: runtime.name },
+          owner: { dockId: "project", kind: "runtime", name: runtime.name },
           platform: dock.platform,
           projectDir,
         });
+      }
+      if (isAbsolute(runtime.path)) {
+        continue;
       }
       const path = join(projectDir, runtime.path);
       if (existsSync(path)) {

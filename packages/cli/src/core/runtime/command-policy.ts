@@ -238,7 +238,7 @@ function blockedCommandReason(program: string, args: string[]): string | undefin
     (program === "brew" || program === "winget") &&
     ["install", "upgrade"].includes(args[0] ?? "")
   ) {
-    return "system package installs are not allowed in dock task commands; use OpenDock bootstrap or project-local runtimes";
+    return "system package installs are not allowed in dock task commands; use OpenDock bootstrap or declare runtimes under `requires`";
   }
   return undefined;
 }

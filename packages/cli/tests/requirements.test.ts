@@ -1,4 +1,13 @@
-import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -341,6 +350,84 @@ describe("requires regression coverage", () => {
     );
   });
 
+  it("prepares required runtimes in the home OpenDock runtime store", async () => {
+    const home = realpathSync(tempDir());
+    const project = tempDir();
+    const bin = tempDir();
+    writeFakeRuntime(bin, "node", "v22.12.0");
+
+    const result = await withEnv({ HOME: home, PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      new TaskRunner().run(runtimeManifest("node", ">=22.0.0 <23.0.0"), {
+        projectDir: project,
+        dockId: "test/runtime",
+        phase: "install",
+        platform: "macos",
+        live: false,
+      }),
+    );
+
+    const runtime = result.runtimes[0];
+    const sharedBin = join(home, ".opendock", "runtimes", "node", "22.12.0", "bin");
+    expect(runtime).toEqual({
+      name: "node",
+      requested: ">=22.0.0 <23.0.0",
+      source: "host",
+      version: "22.12.0",
+      path: sharedBin,
+      commands: ["node"],
+    });
+    expect(existsSync(join(sharedBin, "node"))).toBe(true);
+    expect(readFileSync(join(project, ".opendock", "bin", "node"), "utf8")).toContain(sharedBin);
+    expect(existsSync(join(project, ".opendock", "toolchains"))).toBe(false);
+  });
+
+  it("shares one project runtime shim across multiple docks", async () => {
+    const home = realpathSync(tempDir());
+    const project = tempDir();
+    const bin = tempDir();
+    writeFakeRuntime(bin, "node", "v22.12.0");
+
+    await withEnv({ HOME: home, PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
+      for (const dockId of ["test/first", "test/second"]) {
+        await new TaskRunner().run(runtimeManifest("node", ">=22.0.0 <23.0.0"), {
+          projectDir: project,
+          dockId,
+          phase: "install",
+          platform: "macos",
+          live: false,
+        });
+      }
+    });
+
+    const shim = readFileSync(join(project, ".opendock", "bin", "node"), "utf8");
+    expect(shim).toContain("OpenDock command shim");
+    expect(shim).toContain(join(home, ".opendock", "runtimes", "node", "22.12.0", "bin"));
+  });
+
+  it("does not wrap an existing OpenDock runtime wrapper as the host source", async () => {
+    const home = realpathSync(tempDir());
+    const project = tempDir();
+    const hostBin = tempDir();
+    const managedBin = join(home, ".opendock", "runtimes", "node", "22.12.0", "bin");
+    mkdirSync(managedBin, { recursive: true });
+    writeFakeRuntime(managedBin, "node", "v22.12.0");
+    writeFakeRuntime(hostBin, "node", "v22.12.0");
+
+    await withEnv({ HOME: home, PATH: `${managedBin}:${hostBin}:${process.env.PATH ?? ""}` }, () =>
+      new TaskRunner().run(runtimeManifest("node", ">=22.0.0 <23.0.0"), {
+        projectDir: project,
+        dockId: "test/runtime",
+        phase: "install",
+        platform: "macos",
+        live: false,
+      }),
+    );
+
+    const wrapper = readFileSync(join(managedBin, "node"), "utf8");
+    expect(wrapper).toContain(join(hostBin, "node"));
+    expect(wrapper).not.toContain(`exec "${join(managedBin, "node")}"`);
+  });
+
   it("installs declared tools before generated outputs", async () => {
     const project = tempDir();
     const bin = tempDir();
@@ -430,6 +517,28 @@ function omaManifest(): DockManifest {
   };
 }
 
+function runtimeManifest(runtime: "node", version: string): DockManifest {
+  return {
+    opendock: 1,
+    id: "test/runtime",
+    summary: "",
+    tags: [],
+    permission: [],
+    requires: {
+      runtimes: {
+        [runtime]: version,
+      },
+    },
+    tools: {},
+    files: [],
+    tasks: {
+      install: [],
+      update: [],
+      doctor: [],
+    },
+  };
+}
+
 function tempDir(): string {
   const dir = mkdtempSync(join(tmpdir(), "opendock-requires-test-"));
   tempRoots.push(dir);
@@ -477,6 +586,20 @@ EOF
   exit 0
 fi
 exit 1
+`,
+  );
+}
+
+function writeFakeRuntime(bin: string, command: string, version: string): void {
+  writeExecutable(
+    join(bin, command),
+    `#!/bin/sh
+set -eu
+if [ "\${1:-}" = "--version" ] || [ "\${1:-}" = "-v" ] || [ "\${1:-}" = "-V" ]; then
+  printf '${version}\\n'
+  exit 0
+fi
+printf '${version}\\n'
 `,
   );
 }

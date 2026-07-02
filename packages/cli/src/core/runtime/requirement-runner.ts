@@ -1,10 +1,9 @@
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { delimiter, join, resolve } from "node:path";
+import { existsSync, lstatSync, mkdirSync, writeFileSync } from "node:fs";
+import { delimiter, dirname, join, parse, relative, resolve, sep } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
 import { formatStepSymbol, terminalStyle } from "../../terminal-style.js";
 import type { DockManifest, TaskPhase } from "../domain/manifest.js";
 import { isSupportedRuntimeName } from "../domain/runtime-names.js";
-import { ensureRealDirectoryPath } from "../files/path-utils.js";
 import {
   CommandRunner,
   combinedOutput,
@@ -15,7 +14,12 @@ import {
 } from "./command-runner.js";
 import { createProjectCommandShim } from "./command-shim.js";
 import { type ProgressReporter, reportProgress } from "./progress.js";
-import { projectCommandPathEntries, relativeProjectPath, runtimeBinDir } from "./project-layout.js";
+import {
+  projectBinDir,
+  projectCommandPathEntries,
+  sharedRuntimeBinDir,
+  sharedRuntimeRoot,
+} from "./project-layout.js";
 import { runtimeDefinitions } from "./runtime-requirements.js";
 import { type StepReport, stepProgressPercent } from "./step-report.js";
 
@@ -31,6 +35,7 @@ interface RequirementContext {
 export interface RuntimeRecord {
   name: string;
   requested: string;
+  source: "host";
   version: string;
   path: string;
   commands: string[];
@@ -86,7 +91,13 @@ export class RequirementRunner {
       phase: "requirement-check",
       total,
     });
-    const check = this.evaluate(definition.check, version, context.projectDir, platform);
+    const check = this.evaluate(
+      definition.check,
+      version,
+      context.projectDir,
+      platform,
+      context.phase,
+    );
     if (context.phase === "doctor") {
       return {
         report: check.passed
@@ -104,7 +115,7 @@ export class RequirementRunner {
         total,
       });
       throw new Error(
-        `required runtime \`${runtime}\` is missing or does not satisfy ${version}: ${check.message}. OpenDock no longer installs runtimes globally; prepare the host runtime or use project-local toolchain support.`,
+        `required runtime \`${runtime}\` is missing or does not satisfy ${version}: ${check.message}. OpenDock keeps runtime wrappers under ~/.opendock/runtimes, but it does not install missing runtimes yet; prepare the host runtime or run the relevant bootstrap first.`,
       );
     }
 
@@ -149,11 +160,12 @@ export class RequirementRunner {
     version: string,
     projectDir: string,
     platform: OpenDockPlatform,
+    phase: TaskPhase,
   ): { actual?: string; passed: boolean; message: string } {
     const result = this.commandRunner.run(command, {
       cwd: projectDir,
       missingAsFailure: true,
-      pathEntries: projectCommandPathEntries(projectDir),
+      pathEntries: phase === "doctor" ? projectCommandPathEntries(projectDir) : [],
       platform,
     });
     if (!result.success) {
@@ -177,23 +189,19 @@ export class RequirementRunner {
     platform: OpenDockPlatform,
   ): RuntimeRecord {
     const version = actual ?? "unknown";
-    const binDir = runtimeBinDir(context.projectDir, runtime, version);
-    ensureRealDirectoryPath(
-      context.projectDir,
-      relativeProjectPath(context.projectDir, binDir),
-      "runtime bin directory",
-    );
-    const source = resolveCommandPath(runtime);
+    const binDir = sharedRuntimeBinDir(runtime, version);
+    ensureRealDirectory(dirname(binDir), "OpenDock runtime root");
+    ensureRealDirectory(binDir, "runtime bin directory");
+    const source = resolveCommandPath(runtime, context.projectDir);
     if (!source) {
       throw new Error(
         `required runtime \`${runtime}\` is ready but its executable path could not be resolved`,
       );
     }
-    const target = join(binDir, runtime);
-    writeRuntimeWrapper(target, source, platform);
+    const target = writeRuntimeWrapper(join(binDir, runtime), source, platform);
     createProjectCommandShim({
       command: runtime,
-      owner: { dockId: context.dockId ?? "project", kind: "runtime", name: runtime },
+      owner: { dockId: "project", kind: "runtime", name: runtime },
       platform,
       projectDir: context.projectDir,
       target,
@@ -201,8 +209,9 @@ export class RequirementRunner {
     return {
       name: runtime,
       requested,
+      source: "host",
       version,
-      path: relativeProjectPath(context.projectDir, binDir),
+      path: binDir,
       commands: [runtime],
     };
   }
@@ -217,10 +226,14 @@ function failedReport(id: string, name: string, message: string): StepReport {
   };
 }
 
-function resolveCommandPath(command: string): string | undefined {
+function resolveCommandPath(command: string, projectDir: string): string | undefined {
   const pathValue = opendockCommandPath(process.env.PATH) ?? "";
+  const ignoredDirectories = openDockManagedCommandDirectories(projectDir);
   for (const entry of pathValue.split(delimiter)) {
     if (!entry) {
+      continue;
+    }
+    if (isIgnoredCommandDirectory(resolve(entry), ignoredDirectories)) {
       continue;
     }
     for (const candidate of commandCandidates(entry, command)) {
@@ -232,6 +245,19 @@ function resolveCommandPath(command: string): string | undefined {
   return undefined;
 }
 
+function openDockManagedCommandDirectories(projectDir: string): Set<string> {
+  return new Set([resolve(projectBinDir(projectDir)), resolve(sharedRuntimeRoot())]);
+}
+
+function isIgnoredCommandDirectory(path: string, ignoredDirectories: Set<string>): boolean {
+  for (const directory of ignoredDirectories) {
+    if (path === directory || path.startsWith(`${directory}${sep}`)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function commandCandidates(directory: string, command: string): string[] {
   if (process.platform === "win32") {
     return [command, `${command}.exe`, `${command}.cmd`, `${command}.bat`].map((name) =>
@@ -241,10 +267,61 @@ function commandCandidates(directory: string, command: string): string[] {
   return [join(directory, command)];
 }
 
-function writeRuntimeWrapper(target: string, source: string, platform: OpenDockPlatform): void {
-  mkdirSync(join(target, ".."), { recursive: true });
+function writeRuntimeWrapper(target: string, source: string, platform: OpenDockPlatform): string {
+  ensureRealDirectory(dirname(target), "runtime wrapper directory");
   if (platform === "windows") {
-    writeFileSync(`${target}.cmd`, `@echo off\r\n"${source}" %*\r\n`);
+    const cmdTarget = `${target}.cmd`;
+    assertRuntimeWrapperWritable(cmdTarget);
+    writeFileSync(cmdTarget, `@echo off\r\n"${source}" %*\r\n`);
+    return cmdTarget;
   }
+  assertRuntimeWrapperWritable(target);
   writeFileSync(target, `#!/usr/bin/env sh\nexec "${source}" "$@"\n`, { mode: 0o755 });
+  return target;
+}
+
+function ensureRealDirectory(path: string, label: string): void {
+  const absolute = resolve(path);
+  const root = parse(absolute).root;
+  let current = root;
+  for (const part of relative(root, absolute)
+    .split(/[/\\]+/)
+    .filter(Boolean)) {
+    current = join(current, part);
+    const stat = lstatIfPresent(current);
+    if (!stat) {
+      mkdirSync(current);
+      continue;
+    }
+    if (stat.isSymbolicLink()) {
+      throw new Error(`${label} cannot be a symlink: ${path}`);
+    }
+    if (!stat.isDirectory()) {
+      throw new Error(`${label} must be a directory: ${path}`);
+    }
+  }
+}
+
+function lstatIfPresent(path: string): ReturnType<typeof lstatSync> | undefined {
+  try {
+    return lstatSync(path);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
+function assertRuntimeWrapperWritable(path: string): void {
+  const stat = lstatIfPresent(path);
+  if (!stat) {
+    return;
+  }
+  if (stat.isSymbolicLink()) {
+    throw new Error(`runtime wrapper cannot be a symlink: ${path}`);
+  }
+  if (!stat.isFile()) {
+    throw new Error(`runtime wrapper path must be a file: ${path}`);
+  }
 }

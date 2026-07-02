@@ -33,6 +33,7 @@ export interface InstalledDockRecord {
 export interface InstalledRuntimeRecord {
   name: string;
   requested: string;
+  source?: "host";
   version: string;
   path: string;
   commands: string[];
