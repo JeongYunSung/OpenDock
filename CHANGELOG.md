@@ -7,6 +7,12 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.2.1 - 2026-07-02
+
+### Desktop App
+
+- Prepare the desktop app release metadata for OpenDock `0.2.1`.
+
 ## 0.2.0 - 2026-07-02
 
 ### CLI
