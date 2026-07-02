@@ -15,7 +15,12 @@ import { c as createTar } from "tar";
 import { afterEach, describe, expect, it } from "vitest";
 import YAML from "yaml";
 import { DockInstaller } from "../src/core/app/dock-installer.js";
-import { type DockManifest, DockRef, parseManifestFile } from "../src/core/domain/manifest.js";
+import {
+  type DockManifest,
+  DockRef,
+  manifestForRef,
+  parseManifestFile,
+} from "../src/core/domain/manifest.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
 import { CommandRunner, opendockCommandPath } from "../src/core/runtime/command-runner.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
@@ -177,7 +182,6 @@ describe("platform regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/platform",
         install: [
           {
             id: "install-runtime",
@@ -568,7 +572,6 @@ function writeDock(
     join(dockRoot, "dock.yml"),
     YAML.stringify({
       opendock: 1,
-      id: `${owner}/${name}`,
       summary: "",
       readme: "DOCK.md",
       logo: "logo.png",
@@ -616,7 +619,7 @@ function localResolver(root: string) {
   return (dockRef: DockRef, platform: ReturnType<typeof parsePlatform>): ResolvedDock => {
     const dockRoot = join(root, `${dockRef.owner}-${dockRef.name}-${dockRef.requested()}`);
     return {
-      manifest: parseManifestFile(join(dockRoot, "dock.yml")),
+      manifest: manifestForRef(parseManifestFile(join(dockRoot, "dock.yml")), dockRef),
       version: dockRef.requested(),
       platform,
       root: dockRoot,

@@ -520,8 +520,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/manifest.ts": {
-    "mtime": 1782958834.6636937,
-    "ast_hash": "b764d0af667001ea5f64e8a494ddf985",
+    "mtime": 1782968775.1689858,
+    "ast_hash": "6353a405939f7c4bdb8fe6be3771aa97",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/runtime-names.ts": {
@@ -670,8 +670,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-flow.test.ts": {
-    "mtime": 1782966507.1161714,
-    "ast_hash": "6d2a0b42248e5b17fe1d39a6188ac76f",
+    "mtime": 1782969077.1701176,
+    "ast_hash": "8a47d68144fbecc550805e95e543bfbe",
     "semantic_hash": ""
   },
   "packages/cli/tests/examples-cleanup.test.ts": {
@@ -690,8 +690,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/platform-regression.test.ts": {
-    "mtime": 1782961563.2449253,
-    "ast_hash": "fda1100ed35440b0be65a12449832598",
+    "mtime": 1782968998.158835,
+    "ast_hash": "6bc13a16b472e3bc85d577fe7eaea928",
     "semantic_hash": ""
   },
   "packages/cli/tests/release-signature-helper.ts": {
@@ -700,13 +700,13 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/requirements.test.ts": {
-    "mtime": 1782967542.2426972,
-    "ast_hash": "382b501f5feee31f2aad56e08138bf31",
+    "mtime": 1782969455.2797925,
+    "ast_hash": "a9c926e74323ae12b1c7628b6d4e8172",
     "semantic_hash": ""
   },
   "packages/cli/tests/security-regression.test.ts": {
-    "mtime": 1782961685.1258545,
-    "ast_hash": "6309c77b293ef3c1774e6bf738e966e7",
+    "mtime": 1782969025.77994,
+    "ast_hash": "e50eccc0983a86271c1a4e637f8a18a2",
     "semantic_hash": ""
   },
   "packages/cli/tests/terminal-style.test.ts": {
@@ -2647,6 +2647,51 @@
   "packages/cli/src/core/runtime/runtime-installer.ts": {
     "mtime": 1782967592.9987957,
     "ast_hash": "a8800b3bbe8e0845a712e4131e207f6f",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/deploy-manifest-hardening.test.ts": {
+    "mtime": 1782968668.7003505,
+    "ast_hash": "35534004f48850a6abdc6e6859f2e7d6",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/file-lifecycle-matrix.test.ts": {
+    "mtime": 1782968983.4634602,
+    "ast_hash": "853d7121cf1d7778a9566d130f2057e7",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/quality-contracts.test.ts": {
+    "mtime": 1782969185.0836096,
+    "ast_hash": "4803c3f35565595893897805e9ff5c4f",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/runtime-platform-matrix.test.ts": {
+    "mtime": 1782969185.0885339,
+    "ast_hash": "f8cd949457ef1b2bd4fc138faf2faf66",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/task-permission-policy.test.ts": {
+    "mtime": 1782969084.1596448,
+    "ast_hash": "3cd9996f4705d515ea670d1624f11eff",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/cli-ux-status.test.ts": {
+    "mtime": 1782968847.718523,
+    "ast_hash": "f87ea4f0faa94037278a69080a420935",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/real-examples-matrix.test.ts": {
+    "mtime": 1782968792.3713183,
+    "ast_hash": "362bd01fdc44e0cad19b113978aa6751",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/cli-cross-platform-smoke.test.ts": {
+    "mtime": 1782969687.719169,
+    "ast_hash": "b8bd5c198e8dae3107f9369406745a99",
+    "semantic_hash": ""
+  },
+  ".github/workflows/cli-quality.yml": {
+    "mtime": 1782969699.1927404,
+    "ast_hash": "a34144c22f695b629bd3d0260fac20e3",
     "semantic_hash": ""
   }
 }

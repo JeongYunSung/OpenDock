@@ -250,7 +250,6 @@ const permissionListSchema = z
 const manifestSchema = z
   .object({
     opendock: z.number().optional(),
-    id: z.string().optional(),
     name: z.string().optional(),
     summary: z.string().default(""),
     readme: z.string().optional(),
@@ -276,9 +275,9 @@ const manifestSchema = z
       });
     }
   })
-  .transform(({ install, update, doctor, id, permission, permissions, ...manifest }) => ({
+  .transform(({ install, update, doctor, permission, permissions, ...manifest }) => ({
     ...manifest,
-    id: id ?? "",
+    id: "",
     permission: permissions ?? permission ?? [],
     tasks: {
       install: install ?? [],

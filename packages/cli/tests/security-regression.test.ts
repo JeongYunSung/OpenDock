@@ -649,7 +649,7 @@ function tempDir(): string {
 
 async function createManyDirectoryArchive(directoryCount: number): Promise<Buffer> {
   const root = tempDir();
-  writeFileSync(join(root, "dock.yml"), "opendock: 1\nid: test/many-dirs\nfiles: []\n");
+  writeFileSync(join(root, "dock.yml"), "opendock: 1\nfiles: []\n");
   const entries = ["dock.yml"];
   for (let index = 0; index < directoryCount; index += 1) {
     const name = `dir-${index}`;

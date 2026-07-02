@@ -19,7 +19,12 @@ import { afterEach, describe, expect, it } from "vitest";
 import YAML from "yaml";
 import { run as runCli } from "../src/cli.js";
 import { DockInstaller } from "../src/core/app/dock-installer.js";
-import { type DockManifest, DockRef, parseManifestFile } from "../src/core/domain/manifest.js";
+import {
+  type DockManifest,
+  DockRef,
+  manifestForRef,
+  parseManifestFile,
+} from "../src/core/domain/manifest.js";
 import type { InstalledDockRecord } from "../src/core/domain/state-store.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
@@ -1539,7 +1544,6 @@ describe("opendock TypeScript CLI", () => {
       join(dockRoot, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/hardlink",
         summary: "Hardlink dock",
         files: [{ from: "files/secret.md", to: "secret.md" }],
       }),
@@ -1567,7 +1571,6 @@ describe("opendock TypeScript CLI", () => {
       join(dockRoot, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/unsafe-doctor",
         summary: "Unsafe doctor dock",
         doctor: [
           {
@@ -1775,7 +1778,6 @@ describe("opendock TypeScript CLI", () => {
       join(dockRoot, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/host-dock",
         summary: "host platform artifact",
         files: [{ from: "files/AGENTS.md", to: "AGENTS.md" }],
       }),
@@ -1852,7 +1854,6 @@ function writeDock(
 
   const manifest = {
     opendock: 1,
-    id: `${owner}/${name}`,
     summary: "",
     readme: "DOCK.md",
     logo: "logo.png",
@@ -1885,7 +1886,7 @@ function localResolver(root: string) {
   return (dockRef: DockRef, platform: OpenDockPlatform): ResolvedDock => {
     const dockRoot = join(root, `${dockRef.owner}-${dockRef.name}-${dockRef.requested()}`);
     return {
-      manifest: parseManifestFile(join(dockRoot, "dock.yml")),
+      manifest: manifestForRef(parseManifestFile(join(dockRoot, "dock.yml")), dockRef),
       version: dockRef.requested(),
       platform,
       root: dockRoot,

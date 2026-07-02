@@ -64,7 +64,6 @@ describe("requires regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/requires",
         requires: {
           runtimes: {
             node: ">=22.0.0 <25.0.0",
@@ -88,7 +87,6 @@ describe("requires regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/tags",
         tags: ["frontend", "ai-agent", "workflow"],
       }),
     );
@@ -104,7 +102,6 @@ describe("requires regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/tags",
       }),
     );
 
@@ -119,7 +116,6 @@ describe("requires regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/tags",
         tags: ["Frontend"],
       }),
     );
@@ -133,7 +129,6 @@ describe("requires regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/tags",
         tags: ["frontend", "frontend"],
       }),
     );
@@ -147,7 +142,6 @@ describe("requires regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/requires",
         requires: {
           tools: {
             oma: ">=8.43.0",
@@ -169,7 +163,6 @@ describe("requires regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/tasks",
         install: [{ id: "install-step", run: "mkdir -p .opendock" }],
         update: [{ id: "update-step", run: "mkdir -p .opendock" }],
         doctor: [{ id: "doctor-step", check: "test -f AGENTS.md" }],
@@ -189,7 +182,6 @@ describe("requires regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/workdir",
         workdir: {
           files: [{ from: "inputs/oma-config.yaml", to: ".agents/oma-config.yaml" }],
         },
@@ -326,7 +318,6 @@ describe("requires regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/tasks",
         lifecycle: {
           install: [{ id: "legacy-step", run: "mkdir -p .opendock" }],
         },
@@ -346,7 +337,6 @@ describe("requires regression coverage", () => {
       join(root, "dock.yml"),
       YAML.stringify({
         opendock: 1,
-        id: "test/requires",
         requires: {
           runtimes: {
             ruby: ">=3.0.0",
@@ -607,6 +597,13 @@ printf '${npmVersion}\\n'
     );
     expect(readFileSync(log, "utf8")).toContain("bun:add oh-my-agent@8.52.9");
     expect(readFileSync(log, "utf8")).toContain("oma:-y install");
+    const toolDir = join(project, ".opendock", "tools", safeDockDirectoryName("test/oma"), "oma");
+    expect(existsSync(join(toolDir, "package.json"))).toBe(true);
+    expect(existsSync(join(toolDir, "node_modules", ".bin", "oma"))).toBe(true);
+    expect(readFileSync(join(project, ".opendock", "bin", "oma"), "utf8")).toContain(
+      join(toolDir, "node_modules", ".bin", "oma"),
+    );
+    expect(existsSync(join(project, "node_modules"))).toBe(false);
     expect(
       readFileSync(
         join(project, ".opendock", "workdirs", safeDockDirectoryName("test/oma"), "AGENTS.md"),
