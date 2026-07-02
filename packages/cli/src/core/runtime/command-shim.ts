@@ -5,6 +5,7 @@ import { ensureRealDirectoryPath } from "../files/path-utils.js";
 import { projectBinDir } from "./project-layout.js";
 
 const shimMarker = "OpenDock command shim";
+const safeCommandNamePattern = /^[A-Za-z0-9._-]+$/;
 
 export interface CommandShimOwner {
   dockId: string;
@@ -19,6 +20,7 @@ export function createProjectCommandShim(options: {
   projectDir: string;
   target: string;
 }): string {
+  assertSafeCommandName(options.command);
   ensureRealDirectoryPath(options.projectDir, ".opendock/bin", "OpenDock bin directory");
   const shim = join(projectBinDir(options.projectDir), options.command);
   assertShimWritable(shim, options.command, options.owner);
@@ -39,6 +41,7 @@ export function removeProjectCommandShim(options: {
   platform?: OpenDockPlatform;
   projectDir: string;
 }): void {
+  assertSafeCommandName(options.command);
   for (const path of shimPaths(options.projectDir, options.command, options.platform)) {
     if (!existsSync(path)) {
       continue;
@@ -48,6 +51,17 @@ export function removeProjectCommandShim(options: {
       continue;
     }
     rmSync(path, { force: true });
+  }
+}
+
+export function assertSafeCommandName(command: string): void {
+  if (
+    command === "" ||
+    command === "." ||
+    command === ".." ||
+    !safeCommandNamePattern.test(command)
+  ) {
+    throw new Error(`unsafe command shim name: ${command}`);
   }
 }
 
@@ -94,7 +108,7 @@ function posixShim(target: string, owner: CommandShimOwner): string {
   return `#!/usr/bin/env sh
 # ${shimMarker}
 # ${shimOwnerLine(owner)}
-exec "${resolve(target)}" "$@"
+exec ${shQuote(resolve(target))} "$@"
 `;
 }
 
@@ -113,4 +127,8 @@ function shimPaths(projectDir: string, command: string, platform?: OpenDockPlatf
     return [base, `${base}.cmd`];
   }
   return [base, `${base}.cmd`];
+}
+
+function shQuote(value: string): string {
+  return `'${value.replaceAll("'", "'\"'\"'")}'`;
 }

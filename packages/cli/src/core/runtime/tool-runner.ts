@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { chmodSync, existsSync, writeFileSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { OpenDockPlatform } from "../../platform.js";
 import type { DockManifest, TaskPhase, ToolSpec } from "../domain/manifest.js";
@@ -8,7 +8,6 @@ import { CommandRunner, failureMessage, opendockCommandPath } from "./command-ru
 import { createProjectCommandShim } from "./command-shim.js";
 import { type ProgressReporter, reportProgress } from "./progress.js";
 import {
-  prependPathEntries,
   projectCommandPathEntries,
   relativeProjectPath,
   toolInstallDir,
@@ -111,7 +110,7 @@ export class ToolRunner {
     prepareToolPackage(installDir, spec);
     runPackageInstall(installDir, spec, context);
     for (const command of spec.commands) {
-      const target = resolveInstalledCommand(installDir, spec, command, context.platform);
+      const target = resolveInstalledCommand(installDir, spec, command);
       createProjectCommandShim({
         command,
         owner: { dockId: context.dockId, kind: "tool", name },
@@ -194,10 +193,7 @@ function runPackageInstall(installDir: string, spec: ToolSpec, context: ToolCont
     encoding: "utf8",
     env: {
       ...process.env,
-      PATH: prependPathEntries(
-        opendockCommandPath(),
-        projectCommandPathEntries(context.projectDir),
-      ),
+      PATH: opendockCommandPath(),
     },
     stdio: (context.live ?? true) ? "inherit" : "pipe",
   });
@@ -220,12 +216,7 @@ function packageSpecifier(spec: ToolSpec): string {
   return `${spec.package}@${spec.version}`;
 }
 
-function resolveInstalledCommand(
-  installDir: string,
-  spec: ToolSpec,
-  command: string,
-  platform: OpenDockPlatform,
-): string {
+function resolveInstalledCommand(installDir: string, spec: ToolSpec, command: string): string {
   const candidates =
     spec.manager === "pip" || spec.manager === "pip3"
       ? [
@@ -241,13 +232,7 @@ function resolveInstalledCommand(
   if (found) {
     return found;
   }
-  if (platform === "windows") {
-    const fallback = join(installDir, `${command}.cmd`);
-    writeFileSync(fallback, `@echo off\r\n${spec.manager} exec ${command} %*\r\n`);
-    return fallback;
-  }
-  const fallback = join(installDir, command);
-  writeFileSync(fallback, `#!/usr/bin/env sh\nexec ${spec.manager} exec ${command} "$@"\n`);
-  chmodSync(fallback, 0o755);
-  return fallback;
+  throw new Error(
+    `tool \`${spec.package}\` did not provide command \`${command}\`; check tools.commands`,
+  );
 }

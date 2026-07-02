@@ -42,7 +42,7 @@ export class CommandRunner {
     const output = spawnSync(program, rest, {
       cwd: options.cwd,
       encoding: "utf8",
-      env: commandEnvironment(program, options.pathEntries ?? []),
+      env: commandEnvironment(program, options.pathEntries ?? [], options.permissionPrograms ?? []),
       killSignal: "SIGTERM",
       stdio: options.live ? "inherit" : "pipe",
       timeout: options.timeoutMs,
@@ -134,10 +134,15 @@ function parseVersion(version: string): [number, number, number] {
   ];
 }
 
-function commandEnvironment(program: string, pathEntries: string[]): NodeJS.ProcessEnv {
+function commandEnvironment(
+  program: string,
+  pathEntries: string[],
+  projectPathPrograms: string[],
+): NodeJS.ProcessEnv {
   const env = minimalEnvironment();
   delete env._VOLTA_TOOL_RECURSION;
-  env.PATH = prependPathEntries(opendockCommandPath(env.PATH), pathEntries);
+  const projectPathEntries = projectPathPrograms.includes(program) ? pathEntries : [];
+  env.PATH = prependPathEntries(opendockCommandPath(env.PATH), projectPathEntries);
   if (program === "oma") {
     env.OMA_SKIP_VERSION_CHECK = env.OMA_SKIP_VERSION_CHECK ?? "1";
     env.PATH = withoutVoltaNodeImageBin(env.PATH);

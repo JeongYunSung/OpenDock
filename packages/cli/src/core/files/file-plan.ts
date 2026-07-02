@@ -2,7 +2,7 @@ import { chmodSync, existsSync, rmSync, writeFileSync } from "node:fs";
 import type { AppliedFileRecord } from "../domain/state-store.js";
 import { fileChecksum, sha256Bytes, textChecksum } from "./checksum.js";
 import type { FileCandidate } from "./file-candidate.js";
-import { ManagedBlockCodec } from "./managed-block.js";
+import { assertNoOpenDockMarker, ManagedBlockCodec } from "./managed-block.js";
 import {
   assertRegularOrMissing,
   ensureParentDirectory,
@@ -130,6 +130,7 @@ export class FilePlan {
     assertRegularOrMissing(target, candidate.path);
     const prior = this.priorFor(candidate);
     if (candidate.mode === "managed_block") {
+      assertNoOpenDockMarker(candidate.content.toString("utf8"), candidate.path);
       if (prior !== undefined) {
         this.verifyRecord(prior);
       }

@@ -1,5 +1,5 @@
 import { existsSync, rmSync } from "node:fs";
-import { isAbsolute, join, relative } from "node:path";
+import { isAbsolute, join, relative, sep } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
 import type { ResolvedDock } from "../../resolver.js";
 import { resolveDock } from "../../resolver.js";
@@ -15,7 +15,7 @@ import {
 } from "../domain/state-store.js";
 import { FileCandidateCollector } from "../files/file-candidate.js";
 import { FilePlan } from "../files/file-plan.js";
-import { pruneEmptyDirectoryChain } from "../files/path-utils.js";
+import { pruneEmptyDirectoryChain, safeJoin } from "../files/path-utils.js";
 import { WorkdirSeeder } from "../files/workdir-seeder.js";
 import { createProjectCommandShim, removeProjectCommandShim } from "../runtime/command-shim.js";
 import {
@@ -23,6 +23,7 @@ import {
   type RuntimeProgressEvent,
   reportProgress,
 } from "../runtime/progress.js";
+import { sharedRuntimeRoot } from "../runtime/project-layout.js";
 import { TaskRunner } from "../runtime/task-runner.js";
 import {
   type InstallReport,
@@ -56,9 +57,21 @@ function runtimeCommandTarget(
   command: string,
   platform: OpenDockPlatform,
 ): string {
-  const binDir = isAbsolute(runtime.path) ? runtime.path : join(projectDir, runtime.path);
+  const binDir = installedRuntimeBinDir(projectDir, runtime.path);
   const target = join(binDir, command);
   return platform === "windows" ? `${target}.cmd` : target;
+}
+
+function installedRuntimeBinDir(projectDir: string, runtimePath: string): string {
+  if (!isAbsolute(runtimePath)) {
+    return safeJoin(projectDir, runtimePath, "installed runtime path");
+  }
+  const root = sharedRuntimeRoot();
+  const rel = relative(root, runtimePath);
+  if (rel === "" || (!isAbsolute(rel) && rel !== ".." && !rel.startsWith(`..${sep}`))) {
+    return runtimePath;
+  }
+  throw new Error(`unsafe installed runtime path: ${runtimePath}`);
 }
 
 export interface InstallOptions {
@@ -403,7 +416,7 @@ export class DockInstaller {
           projectDir,
         });
       }
-      const path = join(projectDir, tool.path);
+      const path = safeJoin(projectDir, tool.path, "installed tool path");
       rmSync(path, { recursive: true, force: true });
       pruneEmptyDirectoryChain(projectDir, relative(projectDir, path));
     }
@@ -449,7 +462,7 @@ export class DockInstaller {
       if (isAbsolute(runtime.path)) {
         continue;
       }
-      const path = join(projectDir, runtime.path);
+      const path = safeJoin(projectDir, runtime.path, "installed runtime path");
       if (existsSync(path)) {
         rmSync(path, { recursive: true, force: true });
         pruneEmptyDirectoryChain(projectDir, relative(projectDir, path));

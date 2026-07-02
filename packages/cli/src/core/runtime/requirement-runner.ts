@@ -187,6 +187,7 @@ export class RequirementRunner {
       cwd: projectDir,
       missingAsFailure: true,
       pathEntries: phase === "doctor" ? projectCommandPathEntries(projectDir) : [],
+      permissionPrograms: phase === "doctor" ? [commandProgram(command)] : [],
       platform,
     });
     if (!result.success) {
@@ -301,6 +302,10 @@ function failedReport(id: string, name: string, message: string): StepReport {
     status: "Failed",
     message,
   };
+}
+
+function commandProgram(command: string): string {
+  return command.trim().split(/\s+/)[0] ?? command;
 }
 
 function resolveCommandPath(command: string, projectDir: string): string | undefined {

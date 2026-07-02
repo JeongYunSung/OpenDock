@@ -22,6 +22,7 @@ export class ManagedBlockCodec {
   }
 
   blockFor(content: string): string {
+    assertNoOpenDockMarker(content, this.path);
     const { start, end } = this.marker();
     return `${start}\n${content.trimEnd()}\n${end}\n`;
   }
@@ -93,5 +94,11 @@ export class ManagedBlockCodec {
     }
     writeFileSync(path, `${next}\n`);
     return "updated";
+  }
+}
+
+export function assertNoOpenDockMarker(content: string, path: string): void {
+  if (content.includes("<!-- OPENDOCK:START") || content.includes("<!-- OPENDOCK:END")) {
+    throw new Error(`managed block content cannot contain OpenDock markers: ${path}`);
   }
 }

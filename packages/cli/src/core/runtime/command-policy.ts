@@ -1,21 +1,15 @@
 import type { OpenDockPlatform } from "../../platform.js";
 import { includesShellOperator } from "../domain/shell-operators.js";
 
-const safePackagePattern =
-  /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+(?:@[A-Za-z0-9][A-Za-z0-9._+-]*)?$/;
-const safeIdentifierPattern = /^[A-Za-z0-9._:@/=-]+$/;
 const powershellTestPathPattern =
   /^if \(Test-Path -LiteralPath ([A-Za-z0-9._/@-]+)\) \{ exit 0 \} else \{ exit 1 \}$/;
-const blockedPackageRunnerFlags = new Set(["--package", "-p", "--eval", "-e", "--call", "-c"]);
 const packageManagerMutations = new Set(["add", "install", "update", "upgrade"]);
 
 const commonAllowedCommands = new Set([
   "bun",
-  "bunx",
   "git",
   "node",
   "npm",
-  "npx",
   "pip",
   "pip3",
   "pipx",
@@ -164,9 +158,6 @@ function isAllowedCommandShape(program: string, args: string[]): boolean {
   if (program === "uv") {
     return isSafeUvCommand(args);
   }
-  if (program === "npx" || program === "bunx") {
-    return isSafePackageRunnerCommand(args);
-  }
   return false;
 }
 
@@ -196,13 +187,6 @@ function isSafeUvCommand(args: string[]): boolean {
     return true;
   }
   return false;
-}
-
-function isSafePackageRunnerCommand(args: string[]): boolean {
-  if (args.length === 0 || !isSafePackageName(args[0] ?? "")) {
-    return false;
-  }
-  return args.slice(1).every((arg) => !blockedPackageRunnerFlags.has(arg) && isSafeRunnerArg(arg));
 }
 
 function isSafePowershellCommand(args: string[]): boolean {
@@ -245,41 +229,6 @@ function blockedCommandReason(program: string, args: string[]): string | undefin
 
 function isExact(args: string[], expected: string[]): boolean {
   return args.length === expected.length && args.every((arg, index) => arg === expected[index]);
-}
-
-function isSafePackageName(value: string): boolean {
-  return safePackagePattern.test(value) && !isLocalPackageSpec(value);
-}
-
-function isLocalPackageSpec(value: string): boolean {
-  const packageName = stripPackageVersion(value);
-  const unscopedName = packageName.startsWith("@")
-    ? (packageName.split("/")[1] ?? "")
-    : packageName;
-  return (
-    unscopedName === "." ||
-    unscopedName === ".." ||
-    unscopedName.startsWith(".") ||
-    packageName.includes("\\") ||
-    packageName.toLowerCase().startsWith("file:")
-  );
-}
-
-function stripPackageVersion(value: string): string {
-  if (value.startsWith("@")) {
-    const slashIndex = value.indexOf("/");
-    if (slashIndex < 0) {
-      return value;
-    }
-    const versionIndex = value.indexOf("@", slashIndex + 1);
-    return versionIndex < 0 ? value : value.slice(0, versionIndex);
-  }
-  const versionIndex = value.indexOf("@");
-  return versionIndex < 0 ? value : value.slice(0, versionIndex);
-}
-
-function isSafeRunnerArg(value: string): boolean {
-  return safeIdentifierPattern.test(value);
 }
 
 function isSafeRelativeArg(value: string | undefined): boolean {

@@ -99,6 +99,25 @@ const packageManagerSchema = z.enum(["npm", "bun", "pnpm", "pip", "pip3"]);
 
 const safePackageNamePattern = /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+$/;
 const safeCommandNamePattern = /^[A-Za-z0-9._-]+$/;
+const reservedToolCommandNames = new Set([
+  "brew",
+  "bun",
+  "bunx",
+  "git",
+  "node",
+  "npm",
+  "npx",
+  "pip",
+  "pip3",
+  "pipx",
+  "pnpm",
+  "powershell",
+  "python",
+  "python3",
+  "test",
+  "uv",
+  "winget",
+]);
 
 const toolSpecSchema = z
   .object({
@@ -128,6 +147,13 @@ const toolSpecSchema = z
             context.addIssue({
               code: "custom",
               message: `duplicate tool command \`${command}\``,
+              path: [index],
+            });
+          }
+          if (reservedToolCommandNames.has(command.toLowerCase())) {
+            context.addIssue({
+              code: "custom",
+              message: `tool command \`${command}\` is reserved by OpenDock`,
               path: [index],
             });
           }
