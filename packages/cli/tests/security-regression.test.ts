@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   chmodSync,
@@ -21,14 +22,17 @@ import {
   performBrowserLogin,
   selectAuthProvider,
 } from "../src/browser-auth.js";
+import { DockInstaller } from "../src/core/app/dock-installer.js";
 import { type DockManifest, DockRef } from "../src/core/domain/manifest.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
 import type { FileCandidate } from "../src/core/files/file-candidate.js";
 import { FilePlan } from "../src/core/files/file-plan.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
 import { CommandRunner } from "../src/core/runtime/command-runner.js";
+import { projectCommandPathEntries } from "../src/core/runtime/project-layout.js";
 import { validateManifestTaskCommands } from "../src/core/runtime/task-command-validation.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
+import { ToolRunner } from "../src/core/runtime/tool-runner.js";
 import { resolveDock } from "../src/resolver.js";
 import { testReleaseSignature } from "./release-signature-helper.js";
 
@@ -286,11 +290,32 @@ describe("security regression coverage", () => {
       "pip3 install .",
       "pipx install .",
       "uv tool install .",
+      "npx create-react-app",
       "npx .",
+      "bunx create-vite",
       "bunx .",
     ]) {
       expect(() => runner.run(command, { cwd: project, platform: "macos" })).toThrow("not allowed");
     }
+  });
+
+  it("does not let project shims shadow OpenDock default commands", () => {
+    const project = tempDir();
+    const marker = join(project, "shadowed");
+    const projectBin = join(project, ".opendock", "bin");
+    mkdirSync(projectBin, { recursive: true });
+    const fakeGit = join(projectBin, "git");
+    writeFileSync(fakeGit, `#!/bin/sh\ntouch "${marker}"\nexit 0\n`);
+    chmodSync(fakeGit, 0o755);
+
+    const result = new CommandRunner().run("git --version", {
+      cwd: project,
+      pathEntries: projectCommandPathEntries(project),
+      platform: "macos",
+    });
+
+    expect(result.success).toBe(true);
+    expect(existsSync(marker)).toBe(false);
   });
 
   it("allows non-default commands only when the exact permission and tool program are declared", () => {
@@ -516,6 +541,161 @@ describe("security regression coverage", () => {
         projectDir: project,
       }),
     ).toThrow("dock workdir cannot be a symlink");
+  });
+
+  it("rejects managed block payloads that contain OpenDock block markers", () => {
+    const project = tempDir();
+    const candidate: FileCandidate = {
+      content: Buffer.from("safe\n<!-- OPENDOCK:END injected -->\n"),
+      executable: false,
+      markerId: "files:AGENTS.md",
+      mode: "managed_block",
+      path: "AGENTS.md",
+      source: "files",
+    };
+
+    expect(() => new FilePlan(project, "test/marker", [], false).preflight([candidate])).toThrow(
+      "managed block content cannot contain OpenDock markers",
+    );
+  });
+
+  it("fails closed when a declared tool package does not install the declared command", () => {
+    const project = tempDir();
+    const fakeBin = tempDir();
+    const fakeBun = join(fakeBin, "bun");
+    writeFileSync(fakeBun, "#!/bin/sh\nexit 0\n");
+    chmodSync(fakeBun, 0o755);
+    const originalPath = process.env.PATH;
+    process.env.PATH = `${fakeBin}:${originalPath ?? ""}`;
+    try {
+      const manifest: DockManifest = {
+        opendock: 1,
+        id: "test/missing-tool-command",
+        summary: "",
+        tags: [],
+        permission: [],
+        requires: { runtimes: {} },
+        tools: {
+          missing: {
+            manager: "bun",
+            package: "missing-tool-command",
+            version: "1.0.0",
+            commands: ["missing-tool-command"],
+          },
+        },
+        files: [],
+        tasks: { install: [], update: [], doctor: [] },
+      };
+
+      expect(() =>
+        new ToolRunner().run(manifest, {
+          dockId: manifest.id,
+          live: false,
+          phase: "install",
+          platform: "macos",
+          projectDir: project,
+        }),
+      ).toThrow("did not provide command `missing-tool-command`");
+    } finally {
+      process.env.PATH = originalPath;
+    }
+  });
+
+  it("does not trust lockfile paths when uninstalling tools", () => {
+    const project = tempDir();
+    const victim = join(project, "victim");
+    mkdirSync(victim);
+    writeFileSync(join(victim, "keep.txt"), "keep\n");
+    mkdirSync(join(project, ".opendock"), { recursive: true });
+    writeFileSync(
+      join(project, ".opendock", "dock.lock.yml"),
+      [
+        "schema: opendock.lock/v1",
+        "docks:",
+        "  - id: test/bad-lock",
+        "    name: bad-lock",
+        "    requested: 1.0.0",
+        "    version: 1.0.0",
+        "    checksum: checksum",
+        "    signature: signature",
+        "    platform: macos",
+        "    workdir: .opendock/workdirs/test__bad-lock",
+        "    runtimes: []",
+        "    files: []",
+        "    tools:",
+        "      - name: bad",
+        "        manager: npm",
+        "        package: bad",
+        "        version: 1.0.0",
+        "        commands:",
+        "          - bad",
+        "        path: ../victim",
+        "",
+      ].join("\n"),
+    );
+
+    expect(() =>
+      new DockInstaller().uninstall({ dockId: "test/bad-lock", projectDir: project }),
+    ).toThrow("unsafe installed tool path");
+    expect(readFileSync(join(victim, "keep.txt"), "utf8")).toBe("keep\n");
+  });
+
+  it("quotes runtime shim targets restored from lockfile paths", () => {
+    const project = tempDir();
+    const marker = join(tempDir(), "pwned");
+    mkdirSync(join(project, ".opendock"), { recursive: true });
+    writeFileSync(
+      join(project, ".opendock", "dock.lock.yml"),
+      [
+        "schema: opendock.lock/v1",
+        "docks:",
+        "  - id: test/first",
+        "    name: first",
+        "    requested: 1.0.0",
+        "    version: 1.0.0",
+        "    checksum: checksum",
+        "    signature: signature",
+        "    platform: macos",
+        "    workdir: .opendock/workdirs/test__first",
+        "    files: []",
+        "    tools: []",
+        "    runtimes:",
+        "      - name: node",
+        "        requested: '>=22.0.0'",
+        "        source: managed",
+        "        version: 22.0.0",
+        `        path: .opendock/runtimes/$(touch ${marker})/bin`,
+        "        commands:",
+        "          - node",
+        "  - id: test/second",
+        "    name: second",
+        "    requested: 1.0.0",
+        "    version: 1.0.0",
+        "    checksum: checksum",
+        "    signature: signature",
+        "    platform: macos",
+        "    workdir: .opendock/workdirs/test__second",
+        "    files: []",
+        "    tools: []",
+        "    runtimes:",
+        "      - name: node",
+        "        requested: '>=24.0.0'",
+        "        source: managed",
+        "        version: 24.0.0",
+        "        path: .opendock/runtimes/node24/bin",
+        "        commands:",
+        "          - node",
+        "",
+      ].join("\n"),
+    );
+
+    new DockInstaller().uninstall({ dockId: "test/second", projectDir: project });
+    const shim = join(project, ".opendock", "bin", "node");
+    expect(readFileSync(shim, "utf8")).toContain("exec '");
+
+    spawnSync(shim, [], { cwd: project });
+
+    expect(existsSync(marker)).toBe(false);
   });
 
   it("does not adopt pre-existing unmanaged managed-file targets even when bytes match", () => {

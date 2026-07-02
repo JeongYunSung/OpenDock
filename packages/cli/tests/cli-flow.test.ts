@@ -581,15 +581,17 @@ describe("opendock TypeScript CLI", () => {
       join(home, ".opendock", "runtimes", "node", "24.1.0", "bin", "node"),
     );
 
-    uninstall({ dockId: "test/node24", projectDir: project });
-    const restoredShim = readFileSync(shimPath, "utf8");
-    expect(restoredShim).toContain(
-      join(home, ".opendock", "runtimes", "node", "22.12.0", "bin", "node"),
-    );
-    expect(restoredShim).not.toContain("24.1.0");
+    await withEnv({ HOME: home }, async () => {
+      uninstall({ dockId: "test/node24", projectDir: project });
+      const restoredShim = readFileSync(shimPath, "utf8");
+      expect(restoredShim).toContain(
+        join(home, ".opendock", "runtimes", "node", "22.12.0", "bin", "node"),
+      );
+      expect(restoredShim).not.toContain("24.1.0");
 
-    uninstall({ dockId: "test/node22", projectDir: project });
-    expect(existsSync(shimPath)).toBe(false);
+      uninstall({ dockId: "test/node22", projectDir: project });
+      expect(existsSync(shimPath)).toBe(false);
+    });
   });
 
   it("prunes empty parent directories after uninstalling managed files", async () => {

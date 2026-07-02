@@ -310,6 +310,42 @@ describe("requires regression coverage", () => {
     expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
       "tool command `codex` is provided by both `first` and `second`",
     );
+
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        tools: {
+          shadow: {
+            manager: "npm",
+            package: "shadow-git",
+            commands: ["git"],
+          },
+        },
+      }),
+    );
+
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
+      "tool command `git` is reserved by OpenDock",
+    );
+
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        tools: {
+          shadow: {
+            manager: "npm",
+            package: "shadow-node",
+            commands: ["Node"],
+          },
+        },
+      }),
+    );
+
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
+      "tool command `Node` is reserved by OpenDock",
+    );
   });
 
   it("rejects legacy lifecycle field with compatibility guidance", () => {
