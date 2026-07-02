@@ -3,7 +3,6 @@ import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import { registerAuthCommands } from "./cli-auth-commands.js";
-import { registerBootstrapCommands } from "./cli-bootstrap-commands.js";
 import { registerChangeCommands } from "./cli-change-commands.js";
 import { registerDeployCommand } from "./cli-deploy-command.js";
 import { normalizeCliArgv } from "./cli-options.js";
@@ -20,7 +19,6 @@ export async function run(argv = process.argv): Promise<void> {
 
   registerChangeCommands(program);
   registerProjectCommands(program);
-  registerBootstrapCommands(program);
   registerAuthCommands(program);
   registerDeployCommand(program, argv);
 

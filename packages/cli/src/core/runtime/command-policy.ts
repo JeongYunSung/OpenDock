@@ -22,8 +22,8 @@ const commonAllowedCommands = new Set([
 
 const platformAllowedCommands: Record<OpenDockPlatform, Set<string>> = {
   linux: new Set([]),
-  macos: new Set(["brew"]),
-  windows: new Set(["powershell", "winget"]),
+  macos: new Set([]),
+  windows: new Set(["powershell"]),
 };
 
 export function splitCommand(command: string): string[] {
@@ -137,12 +137,6 @@ function isAllowedCommandShape(program: string, args: string[]): boolean {
   if (program === "test") {
     return args.length === 2 && ["-d", "-f"].includes(args[0] ?? "") && isSafeRelativeArg(args[1]);
   }
-  if (program === "brew") {
-    return isExact(args, ["--version"]);
-  }
-  if (program === "winget") {
-    return isExact(args, ["--version"]);
-  }
   if (program === "powershell") {
     return isSafePowershellCommand(args);
   }
@@ -222,7 +216,7 @@ function blockedCommandReason(program: string, args: string[]): string | undefin
     (program === "brew" || program === "winget") &&
     ["install", "upgrade"].includes(args[0] ?? "")
   ) {
-    return "system package installs are not allowed in dock task commands; use OpenDock bootstrap or declare runtimes under `requires`";
+    return "system package installs are not allowed in dock task commands; declare runtimes under `requires` or project-local tools under `tools`";
   }
   return undefined;
 }

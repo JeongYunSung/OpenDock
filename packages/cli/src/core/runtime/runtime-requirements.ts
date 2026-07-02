@@ -29,4 +29,7 @@ export const runtimeDefinitions: Record<SupportedRuntimeName, RuntimeDefinition>
   python3: {
     check: "python3 --version",
   },
+  uv: {
+    check: "uv --version",
+  },
 };

@@ -112,15 +112,13 @@ OpenDock separates responsibilities into explicit scopes.
 | **Project scope** | Current workspace | Installed dock list, lock state, logs, and project-level OpenDock metadata. |
 | **Dock scope** | One installed dock | Version, checksum, managed file records, and private workdir. |
 | **Root output scope** | OpenDock file engine | Files applied into the project root after preflight checks. |
-| **Host bootstrap scope** | Your machine | First-party package managers such as Homebrew or WinGet, prepared explicitly with `opendock bootstrap`. |
-| **Runtime scope** | Your user account | Node, npm, Python, pip, Bun, and Git requirements, prepared or registered by version under `~/.opendock/runtimes/` and exposed to each project through `.opendock/bin/`. |
+| **Runtime scope** | Your user account | Bun, Node, npm, uv, Python, pip, and Git requirements, prepared or registered by version under `~/.opendock/runtimes/` and exposed to each project through `.opendock/bin/`. |
 | **Tool scope** | Installed dock | CLI packages declared in `tools`, installed under `.opendock/tools/` and exposed through `.opendock/bin/`. |
 
 The practical rule is simple: OpenDock can fully track project files it applies,
-but it cannot claim ownership of the whole machine. Host package managers are
-handled by bootstrap. Runtime installs and wrappers are shared from your home
-`.opendock` directory, while dock tools, project files, and dock workdirs are
-tracked in the project `.opendock/`.
+but it does not mutate global package managers. Runtime installs and wrappers
+are shared from your home `.opendock` directory, while dock tools, project files,
+and dock workdirs are tracked in the project `.opendock/`.
 
 ## Install
 
@@ -130,21 +128,6 @@ OpenDock is distributed as an npm package and can be installed with Bun or npm.
 bun install -g opendock
 opendock version
 opendock version --check
-```
-
-For macOS docks that use Homebrew, bootstrap the host once if Homebrew is not
-already available.
-
-```bash
-opendock bootstrap mac
-```
-
-For Windows docks that use WinGet, bootstrap the host once if WinGet is not
-available. OpenDock verifies `winget` and can open Microsoft App Installer when
-it is missing.
-
-```bash
-opendock bootstrap windows
 ```
 
 For local development:
@@ -173,8 +156,6 @@ bin/opendock version
 | `opendock log` | Show recent command history for the current project. |
 | `opendock version` | Print CLI, schema, and Registry details. |
 | `opendock version --check` | Check OpenDock's public release channel for a newer CLI/app version. |
-| `opendock bootstrap mac` | Verify or install Homebrew on macOS. |
-| `opendock bootstrap windows` | Verify WinGet or open Microsoft App Installer on Windows. |
 | `opendock auth login` | Log in to OpenDock Registry for deploy. |
 | `opendock auth status` | Show the current Registry login. |
 | `opendock auth logout` | Clear local Registry login. |
@@ -267,8 +248,8 @@ OpenDock is not a blanket shell permission: each task command still has to match
 one of OpenDock's safe command shapes or an exact `permissions` entry.
 
 Docks should not use global or local package install/update commands such as
-`npm install ...`, `bun add ...`, `pip install ...`, or `brew install ...`;
-declare project-local `tools`, runtime requirements, or host bootstrap instead.
+`npm install ...`, `bun add ...`, or `pip install ...`; declare project-local
+`tools` or runtime requirements instead.
 
 `readme`, `logo`, and `tags` are Registry catalog metadata. They help people
 understand and filter a dock in Hub, but they are not installed into a project
@@ -308,8 +289,8 @@ Platform-specific defaults:
 
 | Platform | Commands |
 |---|---|
-| `macos` | `brew` |
-| `windows` | `powershell`, `winget` |
+| `macos` | none |
+| `windows` | `powershell` |
 | `linux` | none |
 
 Anything outside that default set must first be declared under `tools.commands`.
@@ -327,18 +308,16 @@ Default programs are still shape-limited. For example:
 | `test` | `test -f <relative-path>`, `test -d <relative-path>` |
 | `node`, `python`, `python3` | version checks only |
 | `npm`, `pnpm`, `bun`, `pip`, `pip3`, `pipx`, `uv` | version checks only |
-| `brew`, `winget` | version checks only |
 | `powershell` | constrained Windows `Test-Path` checks only |
 
 Being in the default list does not allow package mutation. `npm install`,
 `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`,
 `brew install`, and `winget install` are rejected in tasks. Use `tools` for
-dock-local CLIs, `requires.runtimes` for runtimes, and `opendock bootstrap` for
-host package managers.
+dock-local CLIs and `requires.runtimes` for runtimes.
 
 Package install/update commands are rejected inside tasks. Use `tools` for
-project-local tools, `requires.runtimes` for Bun/Node/npm/Python/pip runtime
-requirements, and bootstrap for host package managers.
+project-local tools, `requires.runtimes` for Bun/Node/npm/uv/Python/pip runtime
+requirements, and uv-backed Python/pip setup.
 
 ```yaml
 tools:
@@ -520,7 +499,6 @@ packages/cli/src/
   auth.ts                   # Local Registry token storage
   registry.ts               # OpenDock Registry API client
   resolver.ts               # Registry archive download and validation
-  bootstrap.ts              # First-party host bootstrap helpers
   core/
     app/                    # Install, update, uninstall orchestration
     domain/                 # Manifest and project state models

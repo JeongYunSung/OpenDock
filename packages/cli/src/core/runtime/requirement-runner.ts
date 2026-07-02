@@ -136,7 +136,7 @@ export class RequirementRunner {
         total,
       });
       throw new Error(
-        `required runtime \`${runtime}\` is missing or does not satisfy ${version}: ${check.message}. OpenDock can install managed Node/npm runtimes directly and Python/pip runtimes when uv is available; otherwise prepare the host runtime or run the relevant bootstrap first.`,
+        `required runtime \`${runtime}\` is missing or does not satisfy ${version}: ${check.message}. OpenDock can install managed Bun, Node/npm, uv, and Python/pip runtimes directly; otherwise prepare the host runtime first.`,
       );
     }
 

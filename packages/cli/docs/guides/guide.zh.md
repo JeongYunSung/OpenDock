@@ -99,15 +99,6 @@ checksum 追踪。如果用户修改了 OpenDock 管理的内容，update 会在
 `.codex/`, `.claude/`, `.agents/`, `.github/copilot-instructions.md`, `.github/instructions/` 下面的 agent runtime
 文件会保持原样，这样 frontmatter、hook 和 executable bits 都不会失效。
 
-## Host Bootstrap
-
-```bash
-opendock bootstrap mac
-opendock bootstrap windows
-```
-
-macOS 可先检查 Homebrew，Windows 可先检查 WinGet，再执行 dock。
-
 ## Tasks
 
 ```yaml
@@ -126,7 +117,7 @@ doctor:
 
 ## Task Command Permission
 
-OpenDock 不会把 task 的 `run` 和 `check` 直接交给 shell。默认可用命令只包括 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 额外允许 `brew`，Windows 额外允许 `powershell` 和 `winget`。但默认 command 并不代表任何 subcommand 都能执行；只有 `git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` 这类安全形态会通过。默认策略之外的 command 必须先声明在 `tools.commands` 中，然后由 `permissions` 精确允许 task 要执行的形式。`tools.commands` 不能复用 `git`, `node`, `npm`, `python` 等 OpenDock 默认 command 名称。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` 等 package install/update 命令会在 task 中被拒绝。project tool 请用 `tools`，runtime 请用 `requires.runtimes`，host package manager 请用 bootstrap。
+OpenDock 不会把 task 的 `run` 和 `check` 直接交给 shell。默认可用命令只包括 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。Windows 额外允许受限的 `powershell`。但默认 command 并不代表任何 subcommand 都能执行；只有 `git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` 这类安全形态会通过。默认策略之外的 command 必须先声明在 `tools.commands` 中，然后由 `permissions` 精确允许 task 要执行的形式。`tools.commands` 不能复用 `git`, `node`, `npm`, `python` 等 OpenDock 默认 command 名称。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` 等 package install/update 命令会在 task 中被拒绝。project tool 请用 `tools`，runtime 请用 `requires.runtimes`。
 
 ```yaml
 tools:

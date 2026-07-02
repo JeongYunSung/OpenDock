@@ -20,6 +20,7 @@ import {
   OpenDockRuntimeInstaller,
   type RuntimeInstaller,
   selectBunRelease,
+  selectUvRelease,
 } from "../src/core/runtime/runtime-installer.js";
 import type { OpenDockPlatform } from "../src/platform.js";
 
@@ -195,41 +196,26 @@ describe("runtime platform matrix", () => {
     }
   });
 
-  it("falls back when uv is missing and uses OpenDock home uv env when uv exists", async () => {
-    const noUvHome = realpathSync(tempDir());
-    const noUvPath = tempDir();
-
-    await withProcessProperty("platform", "win32", async () => {
-      await withEnv({ HOME: noUvHome, PATH: noUvPath }, () => {
-        const installer = new OpenDockRuntimeInstaller();
-        expect(
-          installer.install({
-            platform: "macos",
-            projectDir: tempDir(),
-            requested: ">=3.12.0 <3.13.0",
-            runtime: "python",
-          }),
-        ).toBeUndefined();
-        expect(
-          installer.install({
-            platform: "macos",
-            projectDir: tempDir(),
-            requested: ">=24.0.0 <25.0.0",
-            runtime: "pip",
-          }),
-        ).toBeUndefined();
-      });
-    });
-
+  it("installs managed uv for Python and uses the OpenDock home uv environment", async () => {
     const home = realpathSync(tempDir());
+    const dist = tempDir();
+    const curlBin = tempDir();
     const fakeBin = tempDir();
     const fakePython = join(fakeBin, "python-managed");
     const uvLog = join(home, "uv.log");
     writeFakePython(fakePython);
-    writeFakeUv(fakeBin, fakePython, uvLog);
+    const uvRelease = await writeUvDist(dist, "0.11.26", fakePython, uvLog);
+    writeFileSync(join(dist, "releases.json"), JSON.stringify([uvRelease]));
+    writeFakeCurl(curlBin, join(dist, "downloads.log"));
 
-    await withProcessProperty("platform", "win32", async () => {
-      const [python, pip] = await withEnv({ HOME: home, PATH: fakeBin }, () => {
+    const [python, pip] = await withEnv(
+      {
+        HOME: home,
+        OPENDOCK_UV_DIST_BASE_URL: `file://${dist}`,
+        OPENDOCK_UV_RELEASES_URL: `file://${join(dist, "releases.json")}`,
+        PATH: `${curlBin}:/usr/bin:/bin`,
+      },
+      () => {
         const installer = new OpenDockRuntimeInstaller();
         return [
           installer.install({
@@ -245,20 +231,20 @@ describe("runtime platform matrix", () => {
             runtime: "pip",
           }),
         ];
-      });
+      },
+    );
 
-      expect(python).toMatchObject({
-        commands: ["python"],
-        path: join(home, ".opendock", "runtimes", "python", "3.12.9", "bin"),
-        source: "managed",
-        version: "3.12.9",
-      });
-      expect(pip).toMatchObject({
-        commands: ["pip"],
-        path: join(home, ".opendock", "runtimes", "pip", "24.2.0", "bin"),
-        source: "managed",
-        version: "24.2.0",
-      });
+    expect(python).toMatchObject({
+      commands: ["python"],
+      path: join(home, ".opendock", "runtimes", "python", "3.12.9", "bin"),
+      source: "managed",
+      version: "3.12.9",
+    });
+    expect(pip).toMatchObject({
+      commands: ["pip"],
+      path: join(home, ".opendock", "runtimes", "pip", "24.2.0", "bin"),
+      source: "managed",
+      version: "24.2.0",
     });
 
     const expectedUvInstallDir = join(
@@ -270,6 +256,38 @@ describe("runtime platform matrix", () => {
       "installations",
     );
     expect(readFileSync(uvLog, "utf8")).toContain(`UV_PYTHON_INSTALL_DIR=${expectedUvInstallDir}`);
+  });
+
+  it("selects uv release artifacts for macOS, Windows, and Linux", () => {
+    const releases = [
+      {
+        assets: [
+          { name: "uv-aarch64-apple-darwin.tar.gz" },
+          { name: "uv-x86_64-pc-windows-msvc.zip" },
+          { name: "uv-x86_64-unknown-linux-gnu.tar.gz" },
+        ],
+        tag_name: "0.11.26",
+      },
+    ];
+
+    expect(
+      selectUvRelease(releases, ">=0.11.0", {
+        archiveName: "uv-aarch64-apple-darwin.tar.gz",
+        compression: "tar-gz",
+      })?.tag_name,
+    ).toBe("0.11.26");
+    expect(
+      selectUvRelease(releases, ">=0.12.0", {
+        archiveName: "uv-aarch64-apple-darwin.tar.gz",
+        compression: "tar-gz",
+      }),
+    ).toBeUndefined();
+    expect(
+      selectUvRelease(releases, ">=0.11.0", {
+        archiveName: "uv-aarch64-unknown-linux-musl.tar.gz",
+        compression: "tar-gz",
+      }),
+    ).toBeUndefined();
   });
 
   it("keeps project shims separate while reusing the shared managed runtime store", async () => {
@@ -427,6 +445,29 @@ printf '${npmVersion}\\n'
     files: [`osx-${arch}-tar`],
     npm: npmVersion,
     version,
+  };
+}
+
+async function writeUvDist(
+  dist: string,
+  version: string,
+  pythonPath: string,
+  log: string,
+): Promise<{ assets: Array<{ name: string }>; tag_name: string }> {
+  const arch = process.arch === "arm64" ? "aarch64" : "x86_64";
+  const archiveRoot = `uv-${arch}-apple-darwin`;
+  const archiveParent = tempDir();
+  const archiveRootPath = join(archiveParent, archiveRoot);
+  mkdirSync(archiveRootPath, { recursive: true });
+  mkdirSync(join(dist, version), { recursive: true });
+  writeFakeUv(archiveRootPath, pythonPath, log);
+  const archiveName = `${archiveRoot}.tar.gz`;
+  await createTar({ cwd: archiveParent, file: join(dist, version, archiveName), gzip: true }, [
+    archiveRoot,
+  ]);
+  return {
+    assets: [{ name: archiveName }],
+    tag_name: version,
   };
 }
 

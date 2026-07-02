@@ -204,8 +204,8 @@ describe("platform regression coverage", () => {
     const project = tempDir();
     const bin = tempDir();
     const log = join(project, "commands.log");
-    writeFakePlatformCommand(bin, "brew", log);
-    writeFakePlatformCommand(bin, "winget", log);
+    writeFakePlatformCommand(bin, "node", log);
+    writeFakePlatformCommand(bin, "powershell", log);
 
     const reports = await withEnv(
       { PATH: `${bin}:${process.env.PATH ?? ""}` },
@@ -224,17 +224,17 @@ describe("platform regression coverage", () => {
       "install-runtime:Ran",
       "after:Ready",
     ]);
-    expect(readFileSync(log, "utf8")).toBe("brew:--version\n");
+    expect(readFileSync(log, "utf8")).toBe("node:--version\n");
     expect(existsSync(join(project, "runtime-ready"))).toBe(true);
-    expect(existsSync(join(project, "winget-ran"))).toBe(false);
+    expect(existsSync(join(project, "powershell-ran"))).toBe(false);
   });
 
   it("selects the Windows platform override and blocks unsupported Linux installs", async () => {
     const project = tempDir();
     const bin = tempDir();
     const log = join(project, "commands.log");
-    writeFakePlatformCommand(bin, "brew", log);
-    writeFakePlatformCommand(bin, "winget", log);
+    writeFakePlatformCommand(bin, "node", log);
+    writeFakePlatformCommand(bin, "powershell", log);
 
     const reports = await withEnv(
       { PATH: `${bin}:${process.env.PATH ?? ""}` },
@@ -253,9 +253,11 @@ describe("platform regression coverage", () => {
       "install-runtime:Ran",
       "after:Ready",
     ]);
-    expect(readFileSync(log, "utf8")).toBe("winget:--version\n");
+    expect(readFileSync(log, "utf8")).toBe(
+      "powershell:-NoProfile -NonInteractive -Command if (Test-Path -LiteralPath runtime-ready) { exit 0 } else { exit 1 }\n",
+    );
     expect(existsSync(join(project, "runtime-ready"))).toBe(true);
-    expect(existsSync(join(project, "brew-ran"))).toBe(false);
+    expect(existsSync(join(project, "node-ran"))).toBe(false);
 
     expect(() =>
       new TaskRunner().run(platformManifest(), {
@@ -301,8 +303,8 @@ describe("platform regression coverage", () => {
     const project = tempDir();
     const bin = tempDir();
     const log = join(project, "commands.log");
-    writeFakePlatformCommand(bin, "brew", log);
-    writeFakePlatformCommand(bin, "winget", log);
+    writeFakePlatformCommand(bin, "node", log);
+    writeFakePlatformCommand(bin, "powershell", log);
     const manifest: DockManifest = {
       opendock: 1,
       id: "test/doctor",
@@ -319,10 +321,10 @@ describe("platform regression coverage", () => {
             id: "runtime-doctor",
             platforms: {
               macos: {
-                run: "brew --version",
+                run: "node --version",
               },
               windows: {
-                run: "winget --version",
+                run: 'powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath runtime-ready) { exit 0 } else { exit 1 }"',
               },
             },
           },
@@ -350,27 +352,27 @@ describe("platform regression coverage", () => {
       ).toMatchObject([{ id: "runtime-doctor", status: "Ready" }]);
     });
 
-    expect(readFileSync(log, "utf8")).toBe("winget:--version\nbrew:--version\n");
+    expect(readFileSync(log, "utf8")).toBe(
+      "powershell:-NoProfile -NonInteractive -Command if (Test-Path -LiteralPath runtime-ready) { exit 0 } else { exit 1 }\nnode:--version\n",
+    );
   });
 
   it("enforces platform-specific command allowlists", async () => {
     const project = tempDir();
     const bin = tempDir();
     const log = join(project, "commands.log");
-    writeFakePlatformCommand(bin, "brew", log);
     writeFakePlatformCommand(bin, "powershell", log);
-    writeFakePlatformCommand(bin, "winget", log);
     const runner = new CommandRunner();
     const powershellFileCheck =
       'powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }"';
 
-    expect(() => runner.run("brew --version", { cwd: project, platform: "windows" })).toThrow(
+    expect(() => runner.run("brew --version", { cwd: project, platform: "macos" })).toThrow(
+      "not allowed for OpenDock platform `macos`",
+    );
+    expect(() => runner.run("winget --version", { cwd: project, platform: "windows" })).toThrow(
       "not allowed for OpenDock platform `windows`",
     );
     expect(() => runner.run(powershellFileCheck, { cwd: project, platform: "macos" })).toThrow(
-      "not allowed for OpenDock platform `macos`",
-    );
-    expect(() => runner.run("winget --version", { cwd: project, platform: "macos" })).toThrow(
       "not allowed for OpenDock platform `macos`",
     );
     expect(() =>
@@ -387,17 +389,13 @@ describe("platform regression coverage", () => {
     ).toThrow("not allowed for OpenDock commands");
 
     await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
-      expect(runner.run("brew --version", { cwd: project, platform: "macos" }).success).toBe(true);
-      expect(runner.run("winget --version", { cwd: project, platform: "windows" }).success).toBe(
-        true,
-      );
       expect(runner.run(powershellFileCheck, { cwd: project, platform: "windows" }).success).toBe(
         true,
       );
     });
 
     expect(readFileSync(log, "utf8")).toBe(
-      "brew:--version\nwinget:--version\npowershell:-NoProfile -NonInteractive -Command if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }\n",
+      "powershell:-NoProfile -NonInteractive -Command if (Test-Path -LiteralPath AGENTS.md) { exit 0 } else { exit 1 }\n",
     );
   });
 
@@ -439,8 +437,8 @@ describe("platform regression coverage", () => {
     const project = tempDir();
     const bin = tempDir();
     const log = join(project, "commands.log");
-    writeFakePlatformCommand(bin, "brew", log);
-    writeFakePlatformCommand(bin, "winget", log);
+    writeFakePlatformCommand(bin, "node", log);
+    writeFakePlatformCommand(bin, "powershell", log);
     writeDock(docks, "test", "tool", "1.0.0", {
       tasks: {
         install: [platformRuntimeStep("install-runtime")],
@@ -479,7 +477,13 @@ describe("platform regression coverage", () => {
       });
     });
 
-    expect(readFileSync(log, "utf8")).toBe(["winget:--version", "winget:--version", ""].join("\n"));
+    expect(readFileSync(log, "utf8")).toBe(
+      [
+        "powershell:-NoProfile -NonInteractive -Command if (Test-Path -LiteralPath runtime-ready) { exit 0 } else { exit 1 }",
+        "powershell:-NoProfile -NonInteractive -Command if (Test-Path -LiteralPath runtime-ready) { exit 0 } else { exit 1 }",
+        "",
+      ].join("\n"),
+    );
     expect(installedDocks(project)[0]).toMatchObject({
       id: "test/tool",
       platform: "windows",
@@ -515,10 +519,10 @@ function platformRuntimeStep(id: string) {
     check: "test -f runtime-ready",
     platforms: {
       macos: {
-        run: "brew --version",
+        run: "node --version",
       },
       windows: {
-        run: "winget --version",
+        run: 'powershell -NoProfile -NonInteractive -Command "if (Test-Path -LiteralPath runtime-ready) { exit 0 } else { exit 1 }"',
       },
     },
   };

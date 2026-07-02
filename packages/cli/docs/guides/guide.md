@@ -24,7 +24,7 @@ Decide these first:
 1. **Outcome**: a tool-only dock, or a ready-to-use AI setup for a role or workflow.
 2. **Root files**: files the project should actually read, such as `AGENTS.md`, `.codex/`, `.agents/`, `DESIGN.md`, or `README.md`.
 3. **Task location**: run tasks in the project root, or in a private dock workdir and export selected outputs.
-4. **Required runtimes**: commands such as Git, Node, Bun, npm, pip, or Python that the dock needs before tasks run.
+4. **Required runtimes**: commands such as Git, Bun, Node, npm, uv, Python, or pip that the dock needs before tasks run.
 5. **CLI tools**: packages such as Codex, Claude Code, or OMA that OpenDock should install and track project-locally.
 6. **Maintenance**: what should happen during update and doctor, and what
    OpenDock should be able to remove through its automatic uninstall records.
@@ -182,9 +182,9 @@ Rules:
 `install`, `update`, and `doctor`. If a matching runtime is already available,
 OpenDock registers a versioned wrapper under
 `~/.opendock/runtimes/<runtime>/<version>/bin`. If it is missing, OpenDock can
-install managed Bun/Node/npm runtimes directly and Python/pip runtimes when `uv` is
-available. Each project gets only a `.opendock/bin/` shim. Dock tasks no longer
-install runtimes globally or per dock.
+install managed Bun, Node/npm, uv, and Python/pip runtimes directly. Each
+project gets only a `.opendock/bin/` shim. Dock tasks no longer install runtimes
+globally or per dock.
 
 ```yaml
 requires:
@@ -220,8 +220,8 @@ tools:
 
 Use `tools` instead of task commands such as `npm install ...`, `bun add ...`,
 `pip install ...`, `pipx install ...`, `uv tool install ...`, or
-`brew install ...`. OpenDock rejects package install/update task commands even
-when they appear in `permissions`.
+system package manager installs. OpenDock rejects package install/update task
+commands even when they appear in `permissions`.
 
 ## Task Command Permission
 
@@ -248,8 +248,8 @@ Platform-specific defaults:
 
 | Platform | Commands |
 |---|---|
-| `macos` | `brew` |
-| `windows` | `powershell`, `winget` |
+| `macos` | none |
+| `windows` | `powershell` |
 | `linux` | none |
 
 Commands outside this default policy must first be declared in `tools.commands`.
@@ -267,7 +267,6 @@ Default programs are not open-ended. They only allow safe shapes:
 | `test` | `test -f <relative-path>`, `test -d <relative-path>` |
 | `node`, `python`, `python3` | version checks only |
 | `npm`, `pnpm`, `bun`, `pip`, `pip3`, `pipx`, `uv` | version checks only |
-| `brew`, `winget` | version checks only |
 | `powershell` | constrained Windows `Test-Path` checks only |
 
 Package mutation is always rejected from tasks. Do not put `npm install`,
@@ -297,23 +296,6 @@ rejected in `permissions`, `run`, and `check`: `|`, `&&`, `||`, `;`, backticks,
 Use `tools` for app-specific CLIs such as `oma`, `omx`, `hermes`, or any
 project-specific helper that OpenDock should install and track. Use
 `permissions` only for the exact command shapes those tools may run.
-
-## Host Bootstrap
-
-Some platform package managers have to exist before a dock can use them.
-OpenDock keeps those first-party host bootstrap actions explicit.
-
-```bash
-opendock bootstrap mac
-opendock bootstrap windows
-```
-
-- `opendock bootstrap mac` verifies Homebrew or runs the official Homebrew installer.
-- `opendock bootstrap windows` verifies WinGet or opens Microsoft App Installer when WinGet is missing.
-
-Do not hide Homebrew or WinGet installation inside a dock task unless the dock has
-a very specific reason. The bootstrap step makes the host prerequisite clear
-before normal dock install/update runs.
 
 ## Files
 

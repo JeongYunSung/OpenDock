@@ -102,15 +102,6 @@ Agent runtime files under `.codex/`, `.claude/`, `.agents/`, and
 `.github/copilot-instructions.md`, `.github/instructions/` stay exact so frontmatter, hooks, and executable bits
 remain valid.
 
-## Host Bootstrap
-
-```bash
-opendock bootstrap mac
-opendock bootstrap windows
-```
-
-macOS では Homebrew、Windows では WinGet を dock 実行前に確認できます。
-
 ## Tasks
 
 ```yaml
@@ -129,7 +120,7 @@ Steps run top to bottom. `doctor` should check state and avoid changing the proj
 
 ## Task Command Permission
 
-OpenDock の task は `run` と `check` を shell にそのまま渡しません。標準で使える command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` に限られます。macOS では `brew`、Windows では `powershell` と `winget` も使えます。ただし標準 command でも任意の subcommand が許可されるわけではありません。`git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` のような安全な形だけ通ります。標準ポリシー外の command はまず `tools.commands` に宣言し、その後 `permissions` で task の完全一致形を許可します。`tools.commands` は `git`, `node`, `npm`, `python` など OpenDock 標準 command 名を再利用できません。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` のような package install/update は task では拒否されます。project tool は `tools`、runtime は `requires.runtimes`、host package manager は bootstrap で扱います。
+OpenDock の task は `run` と `check` を shell にそのまま渡しません。標準で使える command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` に限られます。Windows では制限付きの `powershell` も使えます。ただし標準 command でも任意の subcommand が許可されるわけではありません。`git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` のような安全な形だけ通ります。標準ポリシー外の command はまず `tools.commands` に宣言し、その後 `permissions` で task の完全一致形を許可します。`tools.commands` は `git`, `node`, `npm`, `python` など OpenDock 標準 command 名を再利用できません。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` のような package install/update は task では拒否されます。project tool は `tools`、runtime は `requires.runtimes` で扱います。
 
 ```yaml
 tools:

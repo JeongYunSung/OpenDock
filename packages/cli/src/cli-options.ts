@@ -5,7 +5,6 @@ import type { AuthProvider } from "./registry.js";
 
 const cliCommandNames = new Set([
   "auth",
-  "bootstrap",
   "deploy",
   "doctor",
   "install",

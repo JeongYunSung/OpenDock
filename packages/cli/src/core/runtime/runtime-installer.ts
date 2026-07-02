@@ -63,6 +63,18 @@ export interface BunPlatformArchive {
   archiveName: string;
 }
 
+export interface UvRelease {
+  assets?: Array<{ name: string }>;
+  tag_name: string;
+}
+
+export interface UvPlatformArchive {
+  archiveName: string;
+  compression: "tar-gz" | "zip";
+}
+
+const DEFAULT_UV_RUNTIME_RANGE = ">=0.5.0";
+
 export class OpenDockRuntimeInstaller implements RuntimeInstaller {
   install(request: RuntimeInstallRequest): RuntimeInstallResult | undefined {
     if (request.runtime === "bun") {
@@ -78,6 +90,9 @@ export class OpenDockRuntimeInstaller implements RuntimeInstaller {
       request.runtime === "pip3"
     ) {
       return installPythonRuntime(request);
+    }
+    if (request.runtime === "uv") {
+      return installUvRuntime(request);
     }
     return undefined;
   }
@@ -107,6 +122,20 @@ export function selectBunRelease(
 ): BunRelease | undefined {
   return releases.find((release) => {
     const version = bunVersionFromTag(release.tag_name);
+    if (!version || !satisfiesVersion(version, requested)) {
+      return false;
+    }
+    return release.assets?.some((asset) => asset.name === archive.archiveName) ?? false;
+  });
+}
+
+export function selectUvRelease(
+  releases: UvRelease[],
+  requested: string,
+  archive: UvPlatformArchive,
+): UvRelease | undefined {
+  return releases.find((release) => {
+    const version = uvVersionFromTag(release.tag_name);
     if (!version || !satisfiesVersion(version, requested)) {
       return false;
     }
@@ -208,11 +237,34 @@ function installNodeRuntime(request: RuntimeInstallRequest): RuntimeInstallResul
   };
 }
 
-function installPythonRuntime(request: RuntimeInstallRequest): RuntimeInstallResult | undefined {
-  const uv = resolveCommandPath("uv", request.projectDir);
-  if (!uv) {
-    return undefined;
+function installUvRuntime(request: RuntimeInstallRequest): RuntimeInstallResult {
+  const platform = request.platform ?? detectPlatform();
+  const archive = uvPlatformArchive(platform);
+  const releases = readUvReleases();
+  const release = selectUvRelease(releases, request.requested, archive);
+  if (!release) {
+    throw new Error(`no downloadable uv release satisfies ${request.requested} for ${platform}`);
   }
+  const version = uvVersionFromTag(release.tag_name);
+  if (!version) {
+    throw new Error(`invalid uv release tag: ${release.tag_name}`);
+  }
+  const runtimeDir = ensureUvDistribution(release.tag_name, version, archive);
+  const uvSource = findUvExecutable(runtimeDir);
+  const bin = sharedRuntimeBinDir("uv", version);
+  const target = createExecutableWrapper(join(bin, "uv"), platform, uvSource);
+  return {
+    commands: ["uv"],
+    path: bin,
+    requested: request.requested,
+    source: "managed",
+    targets: { uv: target },
+    version,
+  };
+}
+
+function installPythonRuntime(request: RuntimeInstallRequest): RuntimeInstallResult | undefined {
+  const uv = prepareUvCommand(request);
   const env = uvPythonEnvironment();
   runChecked(uv, ["python", "install", request.requested], { env });
   const pythonPath = runChecked(uv, ["python", "find", request.requested], { env }).stdout.trim();
@@ -265,6 +317,13 @@ function readBunReleases(): BunRelease[] {
     process.env.OPENDOCK_BUN_RELEASES_URL ??
     "https://api.github.com/repos/oven-sh/bun/releases?per_page=100";
   return JSON.parse(runChecked(resolveDownloader(), ["-fsSL", url]).stdout) as BunRelease[];
+}
+
+function readUvReleases(): UvRelease[] {
+  const url =
+    process.env.OPENDOCK_UV_RELEASES_URL ??
+    "https://api.github.com/repos/astral-sh/uv/releases?per_page=100";
+  return JSON.parse(runChecked(resolveDownloader(), ["-fsSL", url]).stdout) as UvRelease[];
 }
 
 function readNodeIndex(): NodeRelease[] {
@@ -336,6 +395,31 @@ function ensureNodeDistribution(version: string, archive: NodePlatformArchive): 
   return runtimeDir;
 }
 
+function ensureUvDistribution(tag: string, version: string, archive: UvPlatformArchive): string {
+  const runtimeDir = sharedRuntimeInstallDir("uv", version);
+  if (existsSync(runtimeDir) && findUvExecutable(runtimeDir, false)) {
+    return runtimeDir;
+  }
+  const runtimeParent = dirname(runtimeDir);
+  ensureRealDirectory(runtimeParent, "runtime install directory");
+  const workRoot = mkdtempSync(join(tmpdir(), "opendock-uv-runtime-"));
+  const archivePath = join(workRoot, archive.archiveName);
+  try {
+    const baseUrl =
+      process.env.OPENDOCK_UV_DIST_BASE_URL ?? "https://github.com/astral-sh/uv/releases/download";
+    const url = `${baseUrl}/${tag}/${archive.archiveName}`;
+    runChecked(resolveDownloader(), ["-fsSL", url, "-o", archivePath]);
+    extractArchive(archivePath, workRoot, archive.compression);
+    const uvSource = findUvExecutable(workRoot);
+    const extractedRoot = dirname(uvSource);
+    rmSync(runtimeDir, { force: true, recursive: true });
+    renameSync(extractedRoot, runtimeDir);
+  } finally {
+    rmSync(workRoot, { force: true, recursive: true });
+  }
+  return runtimeDir;
+}
+
 function bunPlatformArchive(platform: OpenDockPlatform): BunPlatformArchive {
   if (platform === "macos") {
     return {
@@ -351,6 +435,26 @@ function bunPlatformArchive(platform: OpenDockPlatform): BunPlatformArchive {
     throw new Error(`managed Bun runtime is not available for Windows ${process.arch}`);
   }
   return { archiveName: "bun-windows-x64.zip" };
+}
+
+function uvPlatformArchive(platform: OpenDockPlatform): UvPlatformArchive {
+  const arch = uvArch();
+  if (platform === "macos") {
+    return {
+      archiveName: `uv-${arch}-apple-darwin.tar.gz`,
+      compression: "tar-gz",
+    };
+  }
+  if (platform === "linux") {
+    return {
+      archiveName: `uv-${arch}-unknown-linux-gnu.tar.gz`,
+      compression: "tar-gz",
+    };
+  }
+  return {
+    archiveName: `uv-${arch}-pc-windows-msvc.zip`,
+    compression: "zip",
+  };
 }
 
 function nodePlatformArchive(platform: OpenDockPlatform): NodePlatformArchive {
@@ -385,6 +489,13 @@ function nodeArch(): string {
   throw new Error(`unsupported CPU architecture for managed Node.js runtime: ${process.arch}`);
 }
 
+function uvArch(): string {
+  if (process.arch === "arm64") return "aarch64";
+  if (process.arch === "x64") return "x86_64";
+  if (process.arch === "ia32") return "i686";
+  throw new Error(`unsupported CPU architecture for managed uv runtime: ${process.arch}`);
+}
+
 function archiveNameForVersion(archive: NodePlatformArchive, version: string): NodePlatformArchive {
   return { ...archive, archiveName: archive.archiveName.replace("VERSION", version) };
 }
@@ -409,6 +520,25 @@ function extractArchive(
   runChecked("tar", [compression === "tar-xz" ? "-xJf" : "-xzf", archivePath, "-C", destination]);
 }
 
+function findUvExecutable(root: string, required = true): string {
+  const executableName = process.platform === "win32" ? "uv.exe" : "uv";
+  const stack = [root];
+  for (const directory of stack) {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(path);
+      } else if (entry.isFile() && entry.name === executableName) {
+        return path;
+      }
+    }
+  }
+  if (required) {
+    throw new Error(`managed uv runtime did not contain ${executableName}`);
+  }
+  return "";
+}
+
 function findBunExecutable(root: string, required = true): string {
   const executableName = process.platform === "win32" ? "bun.exe" : "bun";
   const stack = [root];
@@ -426,6 +556,27 @@ function findBunExecutable(root: string, required = true): string {
     throw new Error(`managed Bun runtime did not contain ${executableName}`);
   }
   return "";
+}
+
+function prepareUvCommand(request: RuntimeInstallRequest): string {
+  const hostUv = resolveCommandPath("uv", request.projectDir);
+  if (hostUv) {
+    const versionOutput = runChecked(hostUv, ["--version"]);
+    const version = extractRequiredVersion(versionOutput.stdout || versionOutput.stderr, "uv");
+    if (satisfiesVersion(version, DEFAULT_UV_RUNTIME_RANGE)) {
+      return hostUv;
+    }
+  }
+  const managedUv = installUvRuntime({
+    ...request,
+    requested: DEFAULT_UV_RUNTIME_RANGE,
+    runtime: "uv",
+  });
+  const target = managedUv.targets.uv;
+  if (!target) {
+    throw new Error("managed uv runtime did not provide command `uv`");
+  }
+  return target;
 }
 
 function createExecutableWrapper(
@@ -552,6 +703,10 @@ function stripVersionPrefix(version: string): string {
 
 function bunVersionFromTag(tag: string): string | undefined {
   return tag.match(/^bun-v(.+)$/u)?.[1];
+}
+
+function uvVersionFromTag(tag: string): string | undefined {
+  return tag.match(/^v?(.+)$/u)?.[1];
 }
 
 function shellQuote(value: string): string {

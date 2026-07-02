@@ -7,6 +7,7 @@ const supportedRuntimeNames = [
   "pip3",
   "python",
   "python3",
+  "uv",
 ] as const;
 
 export type SupportedRuntimeName = (typeof supportedRuntimeNames)[number];

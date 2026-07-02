@@ -260,8 +260,8 @@ tags:
 `requires`는 dock을 실행하기 전에 필요한 runtime을 선언합니다. OpenDock은
 install/update/doctor 전에 runtime을 확인합니다. 조건에 맞는 runtime이 이미 있으면
 `~/.opendock/runtimes/<runtime>/<version>/bin` 아래 versioned wrapper를 등록합니다.
-없으면 Bun/Node/npm은 OpenDock이 직접 managed runtime으로 설치할 수 있고, Python/pip은
-`uv`가 있는 환경에서 OpenDock 홈 경로에 설치할 수 있습니다. 각 project에는
+없으면 Bun/Node/npm/uv/Python/pip은 OpenDock이 직접 managed runtime으로 설치할 수
+있습니다. 각 project에는
 `.opendock/bin/` shim만 생깁니다. dock task가 runtime을 전역 또는 dock별로
 설치하지 않습니다.
 
@@ -291,6 +291,7 @@ pip
 pip3
 python
 python3
+uv
 ```
 
 ## tools
@@ -654,8 +655,8 @@ host OS별 추가 허용 프로그램:
 
 | platform | 추가 프로그램 |
 |---|---|
-| `macos` | `brew` |
-| `windows` | `powershell`, `winget` |
+| `macos` | 없음 |
+| `windows` | `powershell` |
 | `linux` | 없음 |
 
 기본 허용 프로그램도 아무 subcommand나 실행할 수 있는 것은 아닙니다. 별도
@@ -667,7 +668,6 @@ host OS별 추가 허용 프로그램:
 | `test` | `test -f <relative-path>`, `test -d <relative-path>` |
 | `node`, `python`, `python3` | version check |
 | `npm`, `pnpm`, `bun`, `pip`, `pip3`, `pipx`, `uv` | version check |
-| `brew`, `winget` | version check |
 | `powershell` | 제한된 Windows `Test-Path` check |
 
 `powershell`은 Windows doctor에서 파일 존재 여부를 확인하는 제한된
@@ -714,8 +714,8 @@ $(
 package install/update 명령은 task에서 거부됩니다. `npm install`, `bun add`,
 `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`,
 `winget install` 같은 명령을 `run`, `check`, `permissions`에 넣지 마세요.
-project tool은 `tools`, Bun/Node/npm/Python/pip runtime은 `requires.runtimes`,
-host package manager는 bootstrap으로 처리합니다.
+project tool은 `tools`, Bun/Node/npm/uv/Python/pip runtime은
+`requires.runtimes`로 처리합니다.
 
 ```yaml
 # 나쁨
@@ -731,30 +731,6 @@ host package manager는 bootstrap으로 처리합니다.
 ```
 
 전체 allowlist와 shape 검사는 `src/core/runtime/command-policy.ts`가 기준입니다.
-
-### Homebrew bootstrap
-
-macOS에서 Homebrew가 없으면 dock 실행 전에 first-party bootstrap을 먼저 실행합니다.
-
-```bash
-opendock bootstrap mac
-```
-
-`dock.yml` 안에서 Homebrew 설치용 `curl | sh`를 직접 실행하는 방식은 허용하지
-않습니다.
-
-### WinGet bootstrap
-
-Windows에서 WinGet이 없으면 dock 실행 전에 first-party bootstrap을 먼저 실행합니다.
-
-```bash
-opendock bootstrap windows
-```
-
-OpenDock은 `winget`이 이미 있으면 ready로 처리합니다. 없으면 Microsoft App
-Installer 설치/업데이트 안내를 보여주고, 사용자가 동의하면 App Installer 페이지를
-엽니다. `dock.yml` 안에서 WinGet 또는 App Installer 설치용 PowerShell script를
-직접 실행하는 방식은 권장하지 않습니다.
 
 ## install, list, update, uninstall 의미
 

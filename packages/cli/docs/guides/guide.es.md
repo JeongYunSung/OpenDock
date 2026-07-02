@@ -105,16 +105,6 @@ Agent runtime files under `.codex/`, `.claude/`, `.agents/`, and
 `.github/copilot-instructions.md`, `.github/instructions/` stay exact so frontmatter, hooks, and executable bits
 remain valid.
 
-## Host Bootstrap
-
-```bash
-opendock bootstrap mac
-opendock bootstrap windows
-```
-
-En macOS puedes preparar Homebrew; en Windows puedes preparar WinGet antes de
-ejecutar un dock.
-
 ## Tasks
 
 ```yaml
@@ -134,7 +124,7 @@ modificar el proyecto.
 
 ## Task Command Permission
 
-OpenDock no pasa `run` ni `check` directamente a una shell. La política por defecto solo permite `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Pero un command por defecto no permite cualquier subcommand: solo pasan formas seguras como `git status`, `git init -b main`, `test -f <path>`, checks de versión y el `Test-Path` limitado de Windows. Los commands fuera de la política por defecto deben declararse primero en `tools.commands`; luego `permissions` permite la forma exacta del task. `tools.commands` no puede reutilizar nombres por defecto de OpenDock como `git`, `node`, `npm` o `python`. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`. Los commands de install/update de paquetes como `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` y `winget install` se rechazan dentro de tasks. Usa `tools` para project tools, `requires.runtimes` para runtimes y bootstrap para host package managers.
+OpenDock no pasa `run` ni `check` directamente a una shell. La política por defecto solo permite `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En Windows también se permite un `powershell` limitado. Pero un command por defecto no permite cualquier subcommand: solo pasan formas seguras como `git status`, `git init -b main`, `test -f <path>`, checks de versión y el `Test-Path` limitado de Windows. Los commands fuera de la política por defecto deben declararse primero en `tools.commands`; luego `permissions` permite la forma exacta del task. `tools.commands` no puede reutilizar nombres por defecto de OpenDock como `git`, `node`, `npm` o `python`. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`. Los commands de install/update de paquetes como `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` y `winget install` se rechazan dentro de tasks. Usa `tools` para project tools y `requires.runtimes` para runtimes.
 
 ```yaml
 tools:

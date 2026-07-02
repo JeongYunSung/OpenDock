@@ -163,7 +163,7 @@ export function opendockCommandPath(
   if (platform === "darwin") {
     return uniquePathEntries([
       ...macosUserPathEntries(existingEntries),
-      ...macosHomebrewPathEntries,
+      ...macosCommonToolPathEntries,
       ...macosSystemPathEntries,
       ...(env.HOME ? [join(env.HOME, ".bun", "bin"), join(env.HOME, ".local", "bin")] : []),
       ...(env.BUN_INSTALL ? [join(env.BUN_INSTALL, "bin")] : []),
@@ -182,7 +182,7 @@ export function opendockCommandPath(
   ]).join(delimiter);
 }
 
-const macosHomebrewPathEntries = [
+const macosCommonToolPathEntries = [
   "/opt/homebrew/bin",
   "/opt/homebrew/sbin",
   "/usr/local/bin",
@@ -192,7 +192,7 @@ const macosHomebrewPathEntries = [
 const macosSystemPathEntries = ["/usr/bin", "/bin", "/usr/sbin", "/sbin"];
 
 function macosUserPathEntries(entries: string[]): string[] {
-  const managed = new Set([...macosHomebrewPathEntries, ...macosSystemPathEntries]);
+  const managed = new Set([...macosCommonToolPathEntries, ...macosSystemPathEntries]);
   return entries.filter((entry) => !managed.has(entry));
 }
 
