@@ -112,14 +112,14 @@ OpenDock separates responsibilities into explicit scopes.
 | **Dock scope** | One installed dock | Version, checksum, managed file records, and private workdir. |
 | **Root output scope** | OpenDock file engine | Files applied into the project root after preflight checks. |
 | **Host bootstrap scope** | Your machine | First-party package managers such as Homebrew or WinGet, prepared explicitly with `opendock bootstrap`. |
-| **Runtime scope** | Your user account | Host runtimes such as Node, Bun, Python, npm, or pip, registered by version under `~/.opendock/runtimes/` and exposed to each project through `.opendock/bin/`. |
+| **Runtime scope** | Your user account | Node, npm, Python, pip, Bun, and Git requirements, prepared or registered by version under `~/.opendock/runtimes/` and exposed to each project through `.opendock/bin/`. |
 | **Tool scope** | Installed dock | CLI packages declared in `tools`, installed under `.opendock/tools/` and exposed through `.opendock/bin/`. |
 
 The practical rule is simple: OpenDock can fully track project files it applies,
 but it cannot claim ownership of the whole machine. Host package managers are
-handled by bootstrap. Runtime wrappers are shared from your home `.opendock`
-directory, while dock tools, project files, and dock workdirs are tracked in the
-project `.opendock/`.
+handled by bootstrap. Runtime installs and wrappers are shared from your home
+`.opendock` directory, while dock tools, project files, and dock workdirs are
+tracked in the project `.opendock/`.
 
 ## Install
 
@@ -313,6 +313,10 @@ Anything outside that default set must first be declared under `tools.commands`.
 `permissions` can also allow exact non-standard shapes for OpenDock default
 commands. Commands declared by `tools` automatically allow simple version checks
 such as `codex --version`.
+
+Package install/update commands are rejected inside tasks. Use `tools` for
+project-local tools, `requires.runtimes` for Bun/Node/npm/Python/pip runtime
+requirements, and bootstrap for host package managers.
 
 ```yaml
 tools:

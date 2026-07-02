@@ -15,6 +15,15 @@ export function sharedRuntimeBinDir(runtime: string, version: string): string {
   return join(sharedRuntimeRoot(), safeRuntimeSegment(runtime), safeRuntimeSegment(version), "bin");
 }
 
+export function sharedRuntimeInstallDir(runtime: string, version: string): string {
+  return join(
+    sharedRuntimeRoot(),
+    safeRuntimeSegment(runtime),
+    safeRuntimeSegment(version),
+    "runtime",
+  );
+}
+
 export function projectToolsDir(projectDir: string): string {
   return join(projectDir, ".opendock", "tools");
 }

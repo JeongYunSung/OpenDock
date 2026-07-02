@@ -258,9 +258,12 @@ tags:
 ## requires
 
 `requires`는 dock을 실행하기 전에 필요한 runtime을 선언합니다. OpenDock은
-install/update/doctor 전에 runtime을 확인하고, `~/.opendock/runtimes/<runtime>/<version>/bin`
-아래 versioned runtime wrapper를 등록한 뒤 project의 `.opendock/bin/` shim으로
-노출합니다. dock task가 runtime을 전역 또는 dock별로 설치하지 않습니다.
+install/update/doctor 전에 runtime을 확인합니다. 조건에 맞는 runtime이 이미 있으면
+`~/.opendock/runtimes/<runtime>/<version>/bin` 아래 versioned wrapper를 등록합니다.
+없으면 Bun/Node/npm은 OpenDock이 직접 managed runtime으로 설치할 수 있고, Python/pip은
+`uv`가 있는 환경에서 OpenDock 홈 경로에 설치할 수 있습니다. 각 project에는
+`.opendock/bin/` shim만 생깁니다. dock task가 runtime을 전역 또는 dock별로
+설치하지 않습니다.
 
 ```yaml
 requires:

@@ -20,6 +20,11 @@ import {
   sharedRuntimeBinDir,
   sharedRuntimeRoot,
 } from "./project-layout.js";
+import {
+  OpenDockRuntimeInstaller,
+  type RuntimeInstaller,
+  type RuntimeInstallResult,
+} from "./runtime-installer.js";
 import { runtimeDefinitions } from "./runtime-requirements.js";
 import { type StepReport, stepProgressPercent } from "./step-report.js";
 
@@ -35,7 +40,7 @@ interface RequirementContext {
 export interface RuntimeRecord {
   name: string;
   requested: string;
-  source: "host";
+  source: "host" | "managed";
   version: string;
   path: string;
   commands: string[];
@@ -47,7 +52,10 @@ export interface RequirementRunResult {
 }
 
 export class RequirementRunner {
-  constructor(private readonly commandRunner = new CommandRunner()) {}
+  constructor(
+    private readonly commandRunner = new CommandRunner(),
+    private readonly runtimeInstaller: RuntimeInstaller = new OpenDockRuntimeInstaller(),
+  ) {}
 
   run(manifest: DockManifest, context: RequirementContext): RequirementRunResult {
     const platform = context.platform ?? detectPlatform();
@@ -106,6 +114,19 @@ export class RequirementRunner {
       };
     }
     if (!check.passed) {
+      const installed = this.installRuntime(runtime, version, context, platform, current, total);
+      if (installed) {
+        console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(id)}: installed`);
+        this.progress(context, {
+          current,
+          id,
+          level: "OK",
+          message: `${runtime} was installed`,
+          phase: "requirement-installed",
+          total,
+        });
+        return { report: { id, name: runtime, status: "Ran" }, runtime: installed };
+      }
       this.progress(context, {
         current,
         id,
@@ -115,7 +136,7 @@ export class RequirementRunner {
         total,
       });
       throw new Error(
-        `required runtime \`${runtime}\` is missing or does not satisfy ${version}: ${check.message}. OpenDock keeps runtime wrappers under ~/.opendock/runtimes, but it does not install missing runtimes yet; prepare the host runtime or run the relevant bootstrap first.`,
+        `required runtime \`${runtime}\` is missing or does not satisfy ${version}: ${check.message}. OpenDock can install managed Node/npm runtimes directly and Python/pip runtimes when uv is available; otherwise prepare the host runtime or run the relevant bootstrap first.`,
       );
     }
 
@@ -214,6 +235,62 @@ export class RequirementRunner {
       path: binDir,
       commands: [runtime],
     };
+  }
+
+  private installRuntime(
+    runtime: string,
+    requested: string,
+    context: RequirementContext,
+    platform: OpenDockPlatform,
+    current: number,
+    total: number,
+  ): RuntimeRecord | undefined {
+    this.progress(context, {
+      current,
+      id: `require-runtime-${runtime}`,
+      message: `Installing ${runtime} ${requested}`,
+      phase: "requirement-install",
+      total,
+    });
+    const installed = this.runtimeInstaller.install({
+      platform,
+      projectDir: context.projectDir,
+      requested,
+      runtime,
+    });
+    if (!installed) {
+      return undefined;
+    }
+    this.linkInstalledRuntime(runtime, installed, context, platform);
+    return {
+      commands: installed.commands,
+      name: runtime,
+      path: installed.path,
+      requested,
+      source: installed.source,
+      version: installed.version,
+    };
+  }
+
+  private linkInstalledRuntime(
+    runtime: string,
+    installed: RuntimeInstallResult,
+    context: RequirementContext,
+    platform: OpenDockPlatform,
+  ): void {
+    for (const command of installed.commands) {
+      const target = installed.targets[command];
+      if (!target) {
+        throw new Error(`managed runtime \`${runtime}\` did not provide command \`${command}\``);
+      }
+      createProjectCommandShim({
+        command,
+        owner: { dockId: "project", kind: "runtime", name: runtime },
+        platform,
+        projectDir: context.projectDir,
+        target,
+      });
+    }
   }
 }
 

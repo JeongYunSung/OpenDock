@@ -23,7 +23,7 @@
     "build": "bun run scripts/build.ts",
     "generate:licenses": "cd ../.. && bun run generate:licenses",
     "prepare:github-package": "bun run scripts/prepare-github-package.ts",
-    "test": "vitest run --testTimeout 15000",
+    "test": "vitest run --testTimeout 15000 --no-file-parallelism",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "check": "bun run typecheck && bun run test && bun run lint",

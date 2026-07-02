@@ -174,10 +174,12 @@ Rules:
 ## Requires
 
 `requires` declares the runtimes this dock needs. OpenDock checks them before
-`install`, `update`, and `doctor`, then registers a versioned runtime wrapper
-under `~/.opendock/runtimes/<runtime>/<version>/bin` and exposes it to the
-project through `.opendock/bin/`. Dock tasks no longer install runtimes globally
-or per dock.
+`install`, `update`, and `doctor`. If a matching runtime is already available,
+OpenDock registers a versioned wrapper under
+`~/.opendock/runtimes/<runtime>/<version>/bin`. If it is missing, OpenDock can
+install managed Bun/Node/npm runtimes directly and Python/pip runtimes when `uv` is
+available. Each project gets only a `.opendock/bin/` shim. Dock tasks no longer
+install runtimes globally or per dock.
 
 ```yaml
 requires:

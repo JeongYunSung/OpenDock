@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import {
   chmodSync,
   existsSync,
@@ -10,6 +11,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { c as createTar } from "tar";
 import { afterEach, describe, expect, it } from "vitest";
 import YAML from "yaml";
 import {
@@ -19,6 +21,14 @@ import {
   parseManifestFile,
 } from "../src/core/domain/manifest.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
+import { CommandRunner } from "../src/core/runtime/command-runner.js";
+import { RequirementRunner } from "../src/core/runtime/requirement-runner.js";
+import {
+  OpenDockRuntimeInstaller,
+  type RuntimeInstaller,
+  selectBunRelease,
+  selectNodeRelease,
+} from "../src/core/runtime/runtime-installer.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
 
 const tempRoots: string[] = [];
@@ -426,6 +436,149 @@ describe("requires regression coverage", () => {
     const wrapper = readFileSync(join(managedBin, "node"), "utf8");
     expect(wrapper).toContain(join(hostBin, "node"));
     expect(wrapper).not.toContain(`exec "${join(managedBin, "node")}"`);
+  });
+
+  it("installs a managed runtime when the host runtime is missing or out of range", () => {
+    const project = tempDir();
+    const fakeTargetDir = tempDir();
+    writeFakeRuntime(fakeTargetDir, "node", "v99.1.0");
+    const installer: RuntimeInstaller = {
+      install(request) {
+        expect(request.runtime).toBe("node");
+        expect(request.requested).toBe(">=99.0.0 <100.0.0");
+        return {
+          commands: ["node"],
+          path: join(fakeTargetDir, "managed-bin"),
+          requested: request.requested,
+          source: "managed",
+          targets: { node: join(fakeTargetDir, "node") },
+          version: "99.1.0",
+        };
+      },
+    };
+
+    const result = new RequirementRunner(new CommandRunner(), installer).run(
+      runtimeManifest("node", ">=99.0.0 <100.0.0"),
+      {
+        projectDir: project,
+        phase: "install",
+        platform: "macos",
+      },
+    );
+
+    expect(result.reports[0]).toMatchObject({ id: "require-runtime-node", status: "Ran" });
+    expect(result.runtimes[0]).toMatchObject({
+      commands: ["node"],
+      source: "managed",
+      version: "99.1.0",
+    });
+    expect(readFileSync(join(project, ".opendock", "bin", "node"), "utf8")).toContain(
+      join(fakeTargetDir, "node"),
+    );
+  });
+
+  it("selects downloadable Node.js releases by runtime range and platform artifact", () => {
+    const archive = {
+      archiveName: "node-VERSION-darwin-arm64.tar.gz",
+      compression: "tar-gz",
+      executableDir: "bin",
+      fileKey: "osx-arm64-tar",
+    } as const;
+    const releases = [
+      { files: ["linux-x64"], npm: "11.0.0", version: "v24.5.0" },
+      { files: ["osx-arm64-tar"], npm: "11.2.0", version: "v24.4.0" },
+      { files: ["osx-arm64-tar"], npm: "10.9.0", version: "v22.12.0" },
+    ];
+
+    expect(selectNodeRelease(releases, "node", ">=22.0.0 <23.0.0", archive)?.version).toBe(
+      "v22.12.0",
+    );
+    expect(selectNodeRelease(releases, "npm", ">=11.0.0", archive)?.version).toBe("v24.4.0");
+  });
+
+  it("selects downloadable Bun releases by runtime range and platform artifact", () => {
+    const archive = { archiveName: "bun-darwin-aarch64.zip" };
+    const releases = [
+      { assets: [{ name: "bun-linux-x64.zip" }], tag_name: "bun-v1.4.0" },
+      { assets: [{ name: "bun-darwin-aarch64.zip" }], tag_name: "bun-v1.3.11" },
+      { assets: [{ name: "bun-darwin-aarch64.zip" }], tag_name: "not-bun-v2.0.0" },
+    ];
+
+    expect(selectBunRelease(releases, ">=1.3.0 <1.4.0", archive)?.tag_name).toBe("bun-v1.3.11");
+  });
+
+  it("installs Node.js from a local dist archive into the home runtime store", async () => {
+    const home = realpathSync(tempDir());
+    const project = tempDir();
+    const dist = tempDir();
+    const arch = process.arch === "arm64" ? "arm64" : "x64";
+    const version = "v99.1.0";
+    const npmVersion = "99.2.0";
+    const releaseDir = join(dist, version);
+    const archiveRoot = `node-${version}-darwin-${arch}`;
+    const archiveRootPath = join(tempDir(), archiveRoot);
+    mkdirSync(join(releaseDir), { recursive: true });
+    mkdirSync(join(archiveRootPath, "bin"), { recursive: true });
+    writeExecutable(
+      join(archiveRootPath, "bin", "node"),
+      `#!/bin/sh
+printf '${version}\\n'
+`,
+    );
+    writeExecutable(
+      join(archiveRootPath, "bin", "npm"),
+      `#!/bin/sh
+node --version >/dev/null
+printf '${npmVersion}\\n'
+`,
+    );
+    await createTar(
+      {
+        cwd: join(archiveRootPath, ".."),
+        file: join(releaseDir, `${archiveRoot}.tar.gz`),
+        gzip: true,
+      },
+      [archiveRoot],
+    );
+    writeFileSync(
+      join(dist, "index.json"),
+      JSON.stringify([
+        {
+          files: [`osx-${arch}-tar`],
+          npm: npmVersion,
+          version,
+        },
+      ]),
+    );
+
+    const result = await withEnv(
+      {
+        HOME: home,
+        OPENDOCK_NODE_DIST_BASE_URL: `file://${dist}`,
+        OPENDOCK_NODE_DIST_INDEX_URL: `file://${join(dist, "index.json")}`,
+      },
+      () =>
+        new OpenDockRuntimeInstaller().install({
+          platform: "macos",
+          projectDir: project,
+          requested: ">=99.0.0 <100.0.0",
+          runtime: "node",
+        }),
+    );
+
+    expect(result).toMatchObject({
+      commands: ["node"],
+      source: "managed",
+      version: "99.1.0",
+    });
+    const nodeRun = spawnSync(result?.targets.node ?? "", ["--version"], { encoding: "utf8" });
+    expect(nodeRun.stdout.trim()).toBe(version);
+    const npmRun = spawnSync(
+      join(home, ".opendock", "runtimes", "npm", npmVersion, "bin", "npm"),
+      ["--version"],
+      { encoding: "utf8" },
+    );
+    expect(npmRun.stdout.trim()).toBe(npmVersion);
   });
 
   it("installs declared tools before generated outputs", async () => {

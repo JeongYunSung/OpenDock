@@ -109,13 +109,13 @@ OpenDock은 책임 범위를 명확히 나눕니다.
 | **Dock** | 설치된 dock 하나 | 버전, checksum, 관리 파일 기록, 전용 workdir. |
 | **Root output** | OpenDock file engine | 사전 확인 후 프로젝트 root에 적용되는 파일. |
 | **Host bootstrap** | 사용자 머신 | Homebrew, WinGet 같은 1차 package manager를 `opendock bootstrap`으로 명시적으로 준비합니다. |
-| **Runtime** | 사용자 계정 | Node, Bun, Python, npm, pip 같은 host runtime을 `~/.opendock/runtimes/` 아래 version별로 등록하고, 각 project에서는 `.opendock/bin/` shim으로 사용합니다. |
+| **Runtime** | 사용자 계정 | Node, npm, Python, pip, Bun, Git 요구사항을 `~/.opendock/runtimes/` 아래 version별로 준비하거나 등록하고, 각 project에서는 `.opendock/bin/` shim으로 사용합니다. |
 | **Tool** | 설치된 dock | `tools`에 선언한 CLI package를 `.opendock/tools/`에 설치하고 `.opendock/bin/`으로 연결합니다. |
 
 핵심 규칙은 단순합니다. OpenDock은 프로젝트에 적용한 파일은 추적할 수 있지만,
 전체 머신을 소유한다고 가정하지 않습니다. Host package manager는 bootstrap으로
-분리합니다. Runtime wrapper는 home의 `.opendock`에서 공유하고, dock tool,
-프로젝트 파일, dock workdir은 프로젝트의 `.opendock/`에서 추적합니다.
+분리합니다. Runtime install과 wrapper는 home의 `.opendock`에서 공유하고,
+dock tool, 프로젝트 파일, dock workdir은 프로젝트의 `.opendock/`에서 추적합니다.
 
 ## 설치
 
@@ -323,7 +323,7 @@ top-level `permissions`에 적어야 합니다.
 
 ## Task Command Permission
 
-OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. `oma`, `codex`, `claude`, `omx` 같은 command는 `tools.commands`에 선언된 경우에만 `permissions`로 실행 형태를 열 수 있습니다. `mkdir`처럼 OpenDock 기본 command도 아니고 `tools.commands`도 아닌 command는 거부됩니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permissions`, `run`, `check`에서 거부됩니다. `npm install`, `bun add`, `pip install`, `brew install` 같은 package 설치/update 명령은 task에서 거부되며 `tools`나 bootstrap으로 처리해야 합니다.
+OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. `oma`, `codex`, `claude`, `omx` 같은 command는 `tools.commands`에 선언된 경우에만 `permissions`로 실행 형태를 열 수 있습니다. `mkdir`처럼 OpenDock 기본 command도 아니고 `tools.commands`도 아닌 command는 거부됩니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permissions`, `run`, `check`에서 거부됩니다. `npm install`, `bun add`, `pip install`, `brew install` 같은 package 설치/update 명령은 task에서 거부되며 project tool은 `tools`, Bun/Node/npm/Python/pip runtime은 `requires.runtimes`, host package manager는 bootstrap으로 처리해야 합니다.
 
 ```yaml
 tools:
