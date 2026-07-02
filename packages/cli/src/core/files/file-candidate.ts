@@ -2,6 +2,7 @@ import { existsSync, lstatSync, readFileSync, statSync } from "node:fs";
 import { basename, extname, relative } from "node:path";
 import type { ManagedMode } from "../domain/state-store.js";
 import {
+  assertSafeManagedFileTargetPath,
   assertSafeRelativePath,
   listRegularFiles,
   normalizeRelativePath,
@@ -48,7 +49,7 @@ export class FileCandidateCollector {
 
   private collectMapping(mapping: FileMapping): FileCandidate[] {
     const from = assertSafeRelativePath(mapping.from, "file source");
-    const to = assertSafeRelativePath(mapping.to, "file target");
+    const to = assertSafeManagedFileTargetPath(mapping.to, "file target");
     const sourcePath = safeJoin(mapping.sourceRoot, from, "file source");
     if (!existsSync(sourcePath)) {
       throw new Error(`file mapping source does not exist: ${from}`);
@@ -86,7 +87,7 @@ export class FileCandidateCollector {
     source: "files" | "export",
     markerPrefix: string,
   ): FileCandidate {
-    const path = assertSafeRelativePath(targetPath, "file target");
+    const path = assertSafeManagedFileTargetPath(targetPath, "file target");
     const content = readFileSync(safeJoin(root, sourcePath, "file source"));
     const candidate: FileCandidate = {
       path,

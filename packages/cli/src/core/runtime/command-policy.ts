@@ -88,8 +88,15 @@ export function ensureAllowed(
     throw new Error(blockedReason);
   }
   if (isPermissionAllowed(program, args, permissions)) {
-    if (isDefaultCommandProgram(program, platform) || permissionPrograms.includes(program)) {
+    if (permissionPrograms.includes(program)) {
       return;
+    }
+    if (isDefaultCommandProgram(program, platform) && isAllowedCommandShape(program, args)) {
+      return;
+    }
+    if (isDefaultCommandProgram(program, platform)) {
+      const rendered = [program, ...args].join(" ");
+      throw new Error(`command \`${rendered}\` is not allowed for OpenDock commands`);
     }
     throw new Error(
       `command \`${program}\` is not declared in tools.commands and is not an OpenDock default command`,

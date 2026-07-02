@@ -20,11 +20,22 @@ export function assertSafeRelativePath(value: string, label = "path"): string {
     normalized === "" ||
     normalized === "." ||
     normalized === ".." ||
+    normalized.includes("\0") ||
     isAbsolute(normalized) ||
+    isHomeRelativePath(normalized) ||
+    isWindowsDrivePath(normalized) ||
     normalized.startsWith("../") ||
     normalized.includes("/../")
   ) {
     throw new Error(`unsafe ${label}: ${value}`);
+  }
+  return normalized;
+}
+
+export function assertSafeManagedFileTargetPath(value: string, label = "file target"): string {
+  const normalized = assertSafeRelativePath(value, label);
+  if (isProtectedManagedFileTarget(normalized)) {
+    throw new Error(`protected ${label}: ${value}`);
   }
   return normalized;
 }
@@ -265,4 +276,34 @@ function lstatIfPresent(path: string): ReturnType<typeof lstatSync> | undefined 
     }
     throw error;
   }
+}
+
+function isHomeRelativePath(path: string): boolean {
+  return path === "~" || path.startsWith("~/");
+}
+
+function isWindowsDrivePath(path: string): boolean {
+  return /^[A-Za-z]:/u.test(path);
+}
+
+function isProtectedManagedFileTarget(path: string): boolean {
+  const [first = "", second = ""] = path.split("/");
+  if (first === ".git" || first === ".ssh") {
+    return true;
+  }
+  if (first === ".env" || first.startsWith(".env.")) {
+    return true;
+  }
+  if (first !== ".opendock") {
+    return false;
+  }
+  return (
+    second === "" ||
+    second === "dock.lock.yml" ||
+    second === "project.yml" ||
+    second === "bin" ||
+    second === "workdirs" ||
+    second === "tools" ||
+    second === "runtimes"
+  );
 }

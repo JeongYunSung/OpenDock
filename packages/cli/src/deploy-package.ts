@@ -160,7 +160,11 @@ function normalizeDeployPath(value: string): string {
     normalized === "" ||
     normalized === "." ||
     normalized === ".." ||
+    normalized.includes("\0") ||
     isAbsolute(normalized) ||
+    normalized === "~" ||
+    normalized.startsWith("~/") ||
+    /^[A-Za-z]:/u.test(normalized) ||
     normalized.split("/").some((segment) => segment === "..")
   ) {
     throw new Error(`unsafe deploy archive path: ${value}`);
@@ -209,13 +213,29 @@ function collectDeployArchiveEntries(projectDir: string, manifest: DockManifest)
     roots.add(file.from);
   }
 
-  const entries = new Set<string>(["dock.yml"]);
+  const entries = new Set<string>();
+  const caseFoldedEntries = new Map<string, string>();
+  addDeployArchiveEntry(entries, caseFoldedEntries, "dock.yml");
   for (const root of roots) {
     for (const entry of expandDeployArchiveRoot(projectDir, root)) {
-      entries.add(entry);
+      addDeployArchiveEntry(entries, caseFoldedEntries, entry);
     }
   }
   return [...entries].sort();
+}
+
+function addDeployArchiveEntry(
+  entries: Set<string>,
+  caseFoldedEntries: Map<string, string>,
+  entry: string,
+): void {
+  const caseFolded = entry.toLowerCase();
+  const existing = caseFoldedEntries.get(caseFolded);
+  if (existing !== undefined && existing !== entry) {
+    throw new Error(`case-insensitive deploy archive path collision: ${existing} and ${entry}`);
+  }
+  caseFoldedEntries.set(caseFolded, entry);
+  entries.add(entry);
 }
 
 function expandDeployArchiveRoot(projectDir: string, relativePathValue: string): string[] {

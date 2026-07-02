@@ -535,8 +535,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/file-candidate.ts": {
-    "mtime": 1781759136.3065605,
-    "ast_hash": "e931e8e7b08f171ef5a5974f7c93c72c",
+    "mtime": 1782994586.3168557,
+    "ast_hash": "7c39c2c03299e535fa567371ddffb281",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/file-plan.ts": {
@@ -550,8 +550,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/path-utils.ts": {
-    "mtime": 1781751161.2742977,
-    "ast_hash": "c0a42febf2be074ced2715407e0a33eb",
+    "mtime": 1782994977.1099539,
+    "ast_hash": "d8c7639c7d8611587cd6ef18ddc087c2",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/workdir-seeder.ts": {
@@ -560,8 +560,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/command-policy.ts": {
-    "mtime": 1782984455.094551,
-    "ast_hash": "78c4f7929d9e1c0460b03f870b01cb7d",
+    "mtime": 1782995405.9004636,
+    "ast_hash": "68fe52541321f9af3138a2f677619f7d",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/command-runner.ts": {
@@ -600,8 +600,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/deploy-package.ts": {
-    "mtime": 1782193785.3577886,
-    "ast_hash": "0c8ec93fa71b52f3402e86dda7781ad7",
+    "mtime": 1782994984.0052192,
+    "ast_hash": "3627b6f26f56c40c26f146f80e641acf",
     "semantic_hash": ""
   },
   "packages/cli/src/deploy-submit.ts": {
@@ -645,8 +645,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/resolver.ts": {
-    "mtime": 1781751161.2761056,
-    "ast_hash": "11c166097aa96b8b9c352b4735436bc5",
+    "mtime": 1782995512.6143363,
+    "ast_hash": "55ce96f663df244bfb91ae0c7124d07a",
     "semantic_hash": ""
   },
   "packages/cli/src/terminal-style.ts": {
@@ -2625,8 +2625,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/tool-runner.ts": {
-    "mtime": 1782974892.1046867,
-    "ast_hash": "776aa89fe8b25b54f29fa80eb76bc08c",
+    "mtime": 1782995108.3375106,
+    "ast_hash": "033e7b27f3b4f4f0fd07ee36ab826e61",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-installer.ts": {
@@ -2655,7 +2655,7 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/task-permission-policy.test.ts": {
-    "mtime": 1782969084.1596448,
+    "mtime": 1782995411.9086852,
     "ast_hash": "3cd9996f4705d515ea670d1624f11eff",
     "semantic_hash": ""
   },
@@ -2665,8 +2665,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/real-examples-matrix.test.ts": {
-    "mtime": 1782968792.3713183,
-    "ast_hash": "362bd01fdc44e0cad19b113978aa6751",
+    "mtime": 1782995805.7442784,
+    "ast_hash": "cfe3f5e7b941d5446ae68b33a3b603ff",
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-cross-platform-smoke.test.ts": {
@@ -2677,6 +2677,51 @@
   ".github/workflows/cli-quality.yml": {
     "mtime": 1782969699.1927404,
     "ast_hash": "a34144c22f695b629bd3d0260fac20e3",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/cli-real-user-edge-cases.test.ts": {
+    "mtime": 1782994685.762698,
+    "ast_hash": "38dc2b82805a6d46f014c213ae907ba5",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/command-policy-attack-cases.test.ts": {
+    "mtime": 1782994685.758403,
+    "ast_hash": "4076691fd7e8890271ee64abb7d50bb4",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/deploy-registry-edge-cases.test.ts": {
+    "mtime": 1782995086.2963676,
+    "ast_hash": "f3696db02c09837344e2d74d49d98af3",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/lifecycle-conflict-edge-cases.test.ts": {
+    "mtime": 1782994534.3607082,
+    "ast_hash": "b044e0642412f63358ad8a8278384464",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/path-security-edge-cases.test.ts": {
+    "mtime": 1782994999.4203486,
+    "ast_hash": "dc8246f62981f0b7e192b82cc423dae8",
+    "semantic_hash": ""
+  },
+  "packages/cli/tests/runtime-tool-isolation-edge-cases.test.ts": {
+    "mtime": 1782995809.2400558,
+    "ast_hash": "0cd59157a9c8354d08a351ef062fa4f6",
+    "semantic_hash": ""
+  },
+  ".serena/memories/memory_maintenance.md": {
+    "mtime": 1782994323.4001098,
+    "ast_hash": "5a2422d8355cb91f16402415a54e3c66",
+    "semantic_hash": ""
+  },
+  ".serena/project.local.yml": {
+    "mtime": 1782994308.3995545,
+    "ast_hash": "f136e7d47205d9a758913615074760e5",
+    "semantic_hash": ""
+  },
+  ".serena/project.yml": {
+    "mtime": 1782994308.3992145,
+    "ast_hash": "46f9a234f996285a6b581b87f565483e",
     "semantic_hash": ""
   }
 }

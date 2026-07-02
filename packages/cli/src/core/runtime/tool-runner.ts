@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { OpenDockPlatform } from "../../platform.js";
 import type { DockManifest, TaskPhase, ToolSpec } from "../domain/manifest.js";
@@ -110,7 +110,7 @@ export class ToolRunner {
     prepareToolPackage(installDir, spec);
     runPackageInstall(installDir, spec, context);
     for (const command of spec.commands) {
-      const target = resolveInstalledCommand(installDir, spec, command);
+      const target = resolveInstalledCommand(installDir, spec, command, context.platform);
       createProjectCommandShim({
         command,
         owner: { dockId: context.dockId, kind: "tool", name },
@@ -216,7 +216,12 @@ function packageSpecifier(spec: ToolSpec): string {
   return `${spec.package}@${spec.version}`;
 }
 
-function resolveInstalledCommand(installDir: string, spec: ToolSpec, command: string): string {
+function resolveInstalledCommand(
+  installDir: string,
+  spec: ToolSpec,
+  command: string,
+  platform: OpenDockPlatform,
+): string {
   const candidates =
     spec.manager === "pip" || spec.manager === "pip3"
       ? [
@@ -230,9 +235,46 @@ function resolveInstalledCommand(installDir: string, spec: ToolSpec, command: st
         ];
   const found = candidates.find((candidate) => existsSync(candidate));
   if (found) {
+    if (spec.manager === "pip" || spec.manager === "pip3") {
+      return createPythonToolWrapper(installDir, command, found, platform);
+    }
     return found;
   }
   throw new Error(
     `tool \`${spec.package}\` did not provide command \`${command}\`; check tools.commands`,
   );
+}
+
+function createPythonToolWrapper(
+  installDir: string,
+  command: string,
+  target: string,
+  platform: OpenDockPlatform,
+): string {
+  const wrapperDir = join(installDir, ".opendock-command-wrappers");
+  mkdirSync(wrapperDir, { recursive: true });
+  const packagePath = join(installDir, "python");
+  if (platform === "windows") {
+    const wrapper = join(wrapperDir, `${command}.cmd`);
+    writeFileSync(
+      wrapper,
+      `@echo off\r\nset "PYTHONPATH=${packagePath};%PYTHONPATH%"\r\n"${target}" %*\r\n`,
+    );
+    return wrapper;
+  }
+  const wrapper = join(wrapperDir, command);
+  writeFileSync(
+    wrapper,
+    `#!/usr/bin/env sh
+PYTHONPATH=${shQuote(packagePath)}\${PYTHONPATH:+:\${PYTHONPATH}}
+export PYTHONPATH
+exec ${shQuote(target)} "$@"
+`,
+  );
+  chmodSync(wrapper, 0o755);
+  return wrapper;
+}
+
+function shQuote(value: string): string {
+  return `'${value.replaceAll("'", "'\"'\"'")}'`;
 }

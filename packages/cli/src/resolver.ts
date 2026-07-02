@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve, sep } from "node:path";
+import { join, relative, resolve, sep } from "node:path";
 import { x as extractTar } from "tar";
 import {
   assertVersionSatisfiesSelector,
@@ -115,22 +115,36 @@ async function resolveRemoteDockMetadata(
   const temp = mkdtempSync(join(tmpdir(), "opendock-"));
   const archivePath = join(temp, "dock.tgz");
   writeFileSync(archivePath, archive);
-  const extractionLimits: ExtractionLimits = { entryCount: 0, fileCount: 0, totalBytes: 0 };
+  const extractionLimits: ExtractionLimits = {
+    entryCount: 0,
+    fileCount: 0,
+    seenCaseFoldedFiles: new Set(),
+    seenFiles: new Set(),
+    totalBytes: 0,
+  };
   let blockedArchiveEntry: string | undefined;
 
-  await extractTar({
-    file: archivePath,
-    cwd: root,
-    filter: (entryPath, entry) => {
-      try {
-        return isSafeArchiveEntry(root, entryPath, entry, extractionLimits);
-      } catch (error) {
-        blockedArchiveEntry = (error as Error).message;
-        return false;
-      }
-    },
-  });
-  rmSync(temp, { recursive: true, force: true });
+  try {
+    await extractTar({
+      file: archivePath,
+      cwd: root,
+      filter: (entryPath, entry) => {
+        try {
+          return isSafeArchiveEntry(root, entryPath, entry, extractionLimits);
+        } catch (error) {
+          blockedArchiveEntry = (error as Error).message;
+          return false;
+        }
+      },
+    });
+  } catch (error) {
+    if (blockedArchiveEntry) {
+      throw new Error(blockedArchiveEntry);
+    }
+    throw error;
+  } finally {
+    rmSync(temp, { recursive: true, force: true });
+  }
   if (blockedArchiveEntry) {
     throw new Error(blockedArchiveEntry);
   }
@@ -195,6 +209,8 @@ interface ArchiveEntry {
 interface ExtractionLimits {
   entryCount: number;
   fileCount: number;
+  seenCaseFoldedFiles: Set<string>;
+  seenFiles: Set<string>;
   totalBytes: number;
 }
 
@@ -227,6 +243,20 @@ function isSafeArchiveEntry(
   if (type === "Directory") {
     return true;
   }
+
+  const canonicalFilePath = relative(
+    resolve(destination),
+    resolve(destination, entryPath),
+  ).replaceAll("\\", "/");
+  if (limits.seenFiles.has(canonicalFilePath)) {
+    throw new Error(`duplicate archive file entry is not allowed: ${entryPath}`);
+  }
+  const caseFoldedFilePath = canonicalFilePath.toLowerCase();
+  if (limits.seenCaseFoldedFiles.has(caseFoldedFilePath)) {
+    throw new Error(`case-insensitive archive file collision is not allowed: ${entryPath}`);
+  }
+  limits.seenFiles.add(canonicalFilePath);
+  limits.seenCaseFoldedFiles.add(caseFoldedFilePath);
 
   limits.fileCount += 1;
   if (limits.fileCount > maxExtractedFiles) {

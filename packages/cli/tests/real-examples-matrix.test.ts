@@ -22,16 +22,18 @@ import { validateManifestTaskCommands } from "../src/core/runtime/task-command-v
 import type { OpenDockPlatform } from "../src/platform.js";
 import type { ResolvedDock } from "../src/resolver.js";
 
-const resolverState = vi.hoisted(() => ({
-  examplesRoot: "",
-}));
-
 vi.mock("../src/resolver.js", async () => {
   const path = await import("node:path");
+  const url = await import("node:url");
   const manifest = await import("../src/core/domain/manifest.js");
+  const examplesRoot = path.resolve(
+    path.dirname(url.fileURLToPath(import.meta.url)),
+    "..",
+    "examples",
+  );
   return {
     resolveDock: vi.fn((dockRef: DockRef, platform: OpenDockPlatform): ResolvedDock => {
-      const root = path.join(resolverState.examplesRoot, dockRef.name);
+      const root = path.join(examplesRoot, dockRef.name);
       const manifestFile = path.join(root, `dock.${platform}.yml`);
       return {
         checksum: `${dockRef.id()}-${platform}-${dockRef.requested()}-checksum`,
@@ -58,8 +60,6 @@ const testVersion = "1.0.0";
 const supportedPlatforms = ["macos", "windows"] as const;
 const staticSmokeExamples = ["agent-ready", "frontend-ai", "qa-engineer"] as const;
 const tempRoots: string[] = [];
-
-resolverState.examplesRoot = examplesRoot;
 
 afterEach(() => {
   for (const root of tempRoots.splice(0)) {
