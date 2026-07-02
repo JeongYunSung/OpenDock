@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3dd5ddb3`
+- Built from commit: `7a151bd9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -374,6 +374,7 @@
 - [[_COMMUNITY_Community 357|Community 357]]
 - [[_COMMUNITY_Community 358|Community 358]]
 - [[_COMMUNITY_Community 359|Community 359]]
+- [[_COMMUNITY_Community 360|Community 360]]
 - [[_COMMUNITY_Community 361|Community 361]]
 - [[_COMMUNITY_Community 363|Community 363]]
 - [[_COMMUNITY_Community 364|Community 364]]
@@ -435,7 +436,6 @@
 - [[_COMMUNITY_Community 425|Community 425]]
 - [[_COMMUNITY_Community 426|Community 426]]
 - [[_COMMUNITY_Community 428|Community 428]]
-- [[_COMMUNITY_Community 431|Community 431]]
 - [[_COMMUNITY_Community 432|Community 432]]
 - [[_COMMUNITY_Community 433|Community 433]]
 - [[_COMMUNITY_Community 434|Community 434]]
@@ -799,7 +799,7 @@ Nodes (38): DockManifest, TaskStep, rejectShellMetacharacters(), splitCommand(),
 
 ### Community 20 - "Community 20"
 Cohesion: 0.11
-Nodes (19): 0.1.39 - 2026-06-23, 0.1.43 - 2026-06-26, 0.1.44 - 2026-06-30, 0.1.46 - 2026-06-30, 0.1.47 - 2026-07-01, 0.1.55 - 2026-07-01, 0.1.61 - 2026-07-02, CLI (+11 more)
+Nodes (19): 0.1.39 - 2026-06-23, 0.1.43 - 2026-06-26, 0.1.44 - 2026-06-30, 0.1.46 - 2026-06-30, 0.1.47 - 2026-07-01, 0.1.55 - 2026-07-01, 0.2.0 - 2026-07-02, CLI (+11 more)
 
 ### Community 21 - "Community 21"
 Cohesion: 0.25
@@ -823,7 +823,7 @@ Nodes (30): fileChangesFromSummary(), installedDockRecordFor(), InstallReport, i
 
 ### Community 26 - "Community 26"
 Cohesion: 0.07
-Nodes (30): 0.1.0 - 2026-06-07, 0.1.11 - 2026-06-12, 0.1.12 - 2026-06-12, 0.1.18 - 2026-06-15, 0.1.1 - 2026-06-12, 0.1.27 - 2026-06-16, 0.1.2 - 2026-06-12, 0.1.33 - 2026-06-17 (+22 more)
+Nodes (30): 0.1.0 - 2026-06-07, 0.1.11 - 2026-06-12, 0.1.12 - 2026-06-12, 0.1.1 - 2026-06-12, 0.1.26 - 2026-06-16, 0.1.27 - 2026-06-16, 0.1.2 - 2026-06-12, 0.1.33 - 2026-06-17 (+22 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.21
@@ -1002,12 +1002,12 @@ Cohesion: 0.21
 Nodes (10): AppMenu(), AppMenuGroup, appMenuGroups(), AppMenuItem, WindowControlPlatform, WindowControls(), ProductUpdateState, productUpdateButtonLabel() (+2 more)
 
 ### Community 72 - "Community 72"
-Cohesion: 0.13
-Nodes (14): anyOf, definitions, Number, Target, Value, description, anyOf, description (+6 more)
-
-### Community 73 - "Community 73"
 Cohesion: 0.15
 Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
+
+### Community 73 - "Community 73"
+Cohesion: 0.13
+Nodes (14): anyOf, definitions, Number, Target, Value, description, anyOf, description (+6 more)
 
 ### Community 74 - "Community 74"
 Cohesion: 0.17
@@ -1063,7 +1063,7 @@ Nodes (10): type, webviews, windows, items, description, items, type, descriptio
 
 ### Community 87 - "Community 87"
 Cohesion: 0.20
-Nodes (10): properties, default, description, type, type, description, identifier, remote (+2 more)
+Nodes (10): properties, type, default, description, type, identifier, local, remote (+2 more)
 
 ### Community 88 - "Community 88"
 Cohesion: 0.20
@@ -1611,7 +1611,7 @@ Nodes (6): Best For, First Run, Outcome, Pair With, Repo Context, What Gets Inst
 
 ### Community 225 - "Community 225"
 Cohesion: 0.50
-Nodes (4): default, description, type, local
+Nodes (4): default, description, type, description
 
 ### Community 226 - "Community 226"
 Cohesion: 0.67
@@ -2091,6 +2091,10 @@ Nodes (3): 0.1.7 - 2026-06-12, Changed, Tests
 
 ### Community 359 - "Community 359"
 Cohesion: 0.67
+Nodes (3): 0.1.18 - 2026-06-15, Added, Tests
+
+### Community 360 - "Community 360"
+Cohesion: 0.67
 Nodes (3): PermissionEntry, anyOf, description
 
 ### Community 361 - "Community 361"
@@ -2164,10 +2168,6 @@ Nodes (3): Identifier, description, oneOf
 ### Community 428 - "Community 428"
 Cohesion: 0.60
 Nodes (5): Portfolio case study templates for problem, process, decision rationale, and impact., Portfolio case study templates for problem, process, decision rationale, and impact., Tag: case-study, Tag: impact, Tag: portfolio
-
-### Community 431 - "Community 431"
-Cohesion: 0.67
-Nodes (3): 0.1.26 - 2026-06-16, Desktop App, Tests
 
 ### Community 432 - "Community 432"
 Cohesion: 0.67

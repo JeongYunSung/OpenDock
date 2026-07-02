@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "packages/cli/package.json": {
-    "mtime": 1782977677.6883473,
-    "ast_hash": "5a140263fde1867ecbee0b590cbb80c3",
+    "mtime": 1782978103.5332415,
+    "ast_hash": "cf69ea09440b2d64b66bf6547ce6b401",
     "semantic_hash": ""
   },
   "packages/cli/scripts/build.ts": {
@@ -505,8 +505,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/constants.ts": {
-    "mtime": 1782977677.6892395,
-    "ast_hash": "697f771aab4f79f4f0ca95d9ad126019",
+    "mtime": 1782978103.533585,
+    "ast_hash": "ed581291122131c880d220c10ff4f2b2",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-install-report.ts": {
@@ -740,8 +740,8 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1782977677.6899936,
-    "ast_hash": "218a126787e83089a64f61e73271966e",
+    "mtime": 1782978103.5339046,
+    "ast_hash": "1b4ab35146f6fb63c9e3ef0000d5b502",
     "semantic_hash": ""
   },
   "README.md": {
