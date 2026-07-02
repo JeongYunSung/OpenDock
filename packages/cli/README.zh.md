@@ -158,7 +158,7 @@ doctor:
 
 ## Task Command Permission
 
-OpenDock task 的 `run` 和 `check` 使用很小的默认策略。默认 command 包括 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 还允许 `brew`，Windows 还允许 `powershell`, `winget`。默认策略之外的 command 必须先声明在 `tools.commands` 中，然后由 `permissions` 精确允许 task 要执行的形式。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。
+OpenDock task 的 `run` 和 `check` 使用很小的默认策略。默认 command 包括 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 还允许 `brew`，Windows 还允许 `powershell`, `winget`。但默认 command 并不代表任何 subcommand 都能执行；只有 `git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` 这类安全形态会通过。`oma`, `codex`, `claude`, `omx` 这类 command 只有先声明在 `tools.commands` 中，才能用 `permissions` 打开具体执行形态。`tools.commands` 不能复用 `git`, `node`, `npm`, `python` 等 OpenDock 默认 command 名称。像 `mkdir` 这样既不是 OpenDock 默认 command、也没有声明在 `tools.commands` 中的 command 会被拒绝。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` 等 package install/update 命令会在 task 中被拒绝。project tool 请用 `tools`，Bun/Node/npm/Python/pip runtime 请用 `requires.runtimes`，host package manager 请用 bootstrap。
 
 ```yaml
 tools:
@@ -185,6 +185,8 @@ OMA-style skill discovery 可以读取同一份项目 context。
 Tool docks 包括 `codex`、`claude-code`、`oma`。Outcome docks 包括
 `designer-ai`、`product-manager`、`frontend-ai` 等角色 workspace。Utility
 docks 包括 `agent-ready`、`agent-safety`、`repo-context` 等可组合 harness。
+
+所有 bundled example 都分别提供 macOS 和 Windows manifest。测试会检查 manifest parse、文件引用、Windows doctor check，并确认每个 task command 符合当前 OpenDock command policy。
 
 完整 manifest reference 见 [docs/guides/guide.zh.md](./docs/guides/guide.zh.md)。
 

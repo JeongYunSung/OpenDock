@@ -658,6 +658,18 @@ host OS별 추가 허용 프로그램:
 | `windows` | `powershell`, `winget` |
 | `linux` | 없음 |
 
+기본 허용 프로그램도 아무 subcommand나 실행할 수 있는 것은 아닙니다. 별도
+`permissions` 없이 허용되는 형태는 아래처럼 제한됩니다.
+
+| 프로그램 | 추가 permission 없이 허용되는 형태 |
+|---|---|
+| `git` | `git --version`, `git status`, `git init -b main` |
+| `test` | `test -f <relative-path>`, `test -d <relative-path>` |
+| `node`, `python`, `python3` | version check |
+| `npm`, `pnpm`, `bun`, `pip`, `pip3`, `pipx`, `uv` | version check |
+| `brew`, `winget` | version check |
+| `powershell` | 제한된 Windows `Test-Path` check |
+
 `powershell`은 Windows doctor에서 파일 존재 여부를 확인하는 제한된
 `Test-Path -LiteralPath <relative-path>` 형태만 허용합니다. 임의 PowerShell
 script 실행용으로는 사용할 수 없습니다.
@@ -698,6 +710,12 @@ $(
 ```
 
 한 step에 여러 명령을 묶지 말고 step을 나누세요.
+
+package install/update 명령은 task에서 거부됩니다. `npm install`, `bun add`,
+`pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`,
+`winget install` 같은 명령을 `run`, `check`, `permissions`에 넣지 마세요.
+project tool은 `tools`, Bun/Node/npm/Python/pip runtime은 `requires.runtimes`,
+host package manager는 bootstrap으로 처리합니다.
 
 ```yaml
 # 나쁨
@@ -920,6 +938,10 @@ Utility dock은 여러 outcome dock과 같이 섞어 쓰는 보조 harness입니
 | `examples/dev-env/dock.{macos,windows}.yml` | project-local tool versions와 validation task reference |
 | `examples/devops-ai/dock.{macos,windows}.yml` | CI/CD, deployment, incident runbook workspace |
 | `examples/monorepo-ai/dock.{macos,windows}.yml` | package boundary and change impact workspace |
+
+모든 bundled example은 macOS와 Windows manifest를 분리해서 가지고 있습니다. 테스트
+suite는 각 manifest를 parse하고, 참조 파일 존재 여부와 Windows doctor check, 현재
+OpenDock command policy 통과 여부를 검증합니다.
 
 조합 예시는 다음과 같습니다.
 

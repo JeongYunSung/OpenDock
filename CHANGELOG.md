@@ -7,6 +7,14 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.1.61 - 2026-07-02
+
+### CLI
+
+- Refresh README and guide docs for the current dock manifest spec and task
+  command policy.
+- Add bundled example validation against the current OpenDock command policy.
+
 ## 0.1.60 - 2026-07-02
 
 ### Desktop App

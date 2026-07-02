@@ -164,7 +164,7 @@ en el project root.
 
 ## Task Command Permission
 
-Los tasks `run` y `check` de OpenDock usan una política pequeña por defecto: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Los commands fuera de la política por defecto deben declararse primero en `tools.commands`; luego `permissions` permite la forma exacta del task. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`.
+Los tasks `run` y `check` de OpenDock usan una política pequeña por defecto: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Pero un command por defecto no permite cualquier subcommand: solo pasan formas seguras como `git status`, `git init -b main`, `test -f <path>`, checks de versión y el `Test-Path` limitado de Windows. Commands como `oma`, `codex`, `claude` u `omx` solo pueden abrirse con `permissions` si antes están declarados en `tools.commands`. `tools.commands` no puede reutilizar nombres por defecto de OpenDock como `git`, `node`, `npm` o `python`. Un command como `mkdir`, que no es por defecto ni está declarado en `tools.commands`, se rechaza. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`. Los commands de install/update de paquetes como `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` y `winget install` se rechazan dentro de tasks. Usa `tools` para project tools, `requires.runtimes` para Bun/Node/npm/Python/pip runtime y bootstrap para host package managers.
 
 ```yaml
 tools:
@@ -193,6 +193,8 @@ Los tool docks son `codex`, `claude-code` y `oma`. Los outcome docks como
 `designer-ai`, `product-manager` y `frontend-ai` agregan workspaces por rol. Los
 utility docks como `agent-ready`, `agent-safety` y `repo-context` agregan
 harnesses reutilizables.
+
+Todos los bundled examples tienen manifests separados para macOS y Windows. La suite de tests parsea cada manifest, revisa referencias de archivos, verifica Windows doctor checks y valida cada task command contra la política actual de OpenDock.
 
 Consulta la referencia completa en [docs/guides/guide.es.md](./docs/guides/guide.es.md).
 

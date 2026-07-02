@@ -44,6 +44,7 @@ opendock uninstall opendock/codex
 - [설치](#설치)
 - [명령어](#명령어)
 - [Dock Format](#dock-format)
+- [Task Command Permission](#task-command-permission)
 - [파일 소유권](#파일-소유권)
 - [Workdir Files And Export](#workdir-files-and-export)
 - [Example Docks](#example-docks)
@@ -323,7 +324,7 @@ top-level `permissions`에 적어야 합니다.
 
 ## Task Command Permission
 
-OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. `oma`, `codex`, `claude`, `omx` 같은 command는 `tools.commands`에 선언된 경우에만 `permissions`로 실행 형태를 열 수 있습니다. `tools.commands`는 `git`, `node`, `npm`, `python` 같은 OpenDock 기본 command 이름을 다시 사용할 수 없습니다. `mkdir`처럼 OpenDock 기본 command도 아니고 `tools.commands`도 아닌 command는 거부됩니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permissions`, `run`, `check`에서 거부됩니다. `npm install`, `bun add`, `pip install`, `brew install` 같은 package 설치/update 명령은 task에서 거부되며 project tool은 `tools`, Bun/Node/npm/Python/pip runtime은 `requires.runtimes`, host package manager는 bootstrap으로 처리해야 합니다.
+OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. 다만 기본 command라도 모든 subcommand가 허용되는 것은 아닙니다. `git status`, `git init -b main`, `test -f <path>`, version check, Windows `Test-Path`처럼 안전한 형태만 통과합니다. `oma`, `codex`, `claude`, `omx` 같은 command는 `tools.commands`에 선언된 경우에만 `permissions`로 실행 형태를 열 수 있습니다. `tools.commands`는 `git`, `node`, `npm`, `python` 같은 OpenDock 기본 command 이름을 다시 사용할 수 없습니다. `mkdir`처럼 OpenDock 기본 command도 아니고 `tools.commands`도 아닌 command는 거부됩니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permissions`, `run`, `check`에서 거부됩니다. `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` 같은 package 설치/update 명령은 task에서 거부되며 project tool은 `tools`, Bun/Node/npm/Python/pip runtime은 `requires.runtimes`, host package manager는 bootstrap으로 처리해야 합니다.
 
 ```yaml
 tools:
@@ -353,6 +354,9 @@ local `README.md`와 함께 `.agents/skills/`, `.codex/skills/`, `.claude/skills
 | Tool docks | `codex`, `claude-code`, `oma` | 특정 AI 도구를 설치하거나 실행합니다. |
 | Outcome docks | `designer-ai`, `product-manager`, `frontend-ai`, `backend-ai`, `mobile-ai`, `qa-engineer`, `docs-ai`, `data-analyst`, `startup-founder`, `marketer-ai`, `customer-support`, `recruiter-ai`, `ai-automation`, `ui-case-study` | 직군/작업 결과별 셋업 파일, 프롬프트, agent instruction을 추가합니다. |
 | Utility docks | `agent-ready`, `agent-safety`, `repo-context`, `mcp-safe`, `dev-env`, `devops-ai`, `monorepo-ai` | context, safety, MCP, validation, 운영, monorepo harness를 추가합니다. |
+
+모든 bundled example은 macOS와 Windows manifest를 따로 가지며, 테스트에서 manifest
+parse, 파일 참조, Windows doctor check, 최신 command policy 통과 여부를 확인합니다.
 
 조합 예시:
 

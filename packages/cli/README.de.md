@@ -165,7 +165,7 @@ geschrieben werden sollen.
 
 ## Task Command Permission
 
-OpenDock tasks `run` und `check` nutzen eine kleine Standard-Policy: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Commands außerhalb der Standard-Policy müssen zuerst in `tools.commands` stehen; danach erlaubt `permissions` die exakte Task-Form. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt.
+OpenDock tasks `run` und `check` nutzen eine kleine Standard-Policy: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Ein Standard-Command erlaubt aber nicht beliebige subcommands: Nur sichere Formen wie `git status`, `git init -b main`, `test -f <path>`, version checks und das eingeschränkte Windows `Test-Path` sind erlaubt. Commands wie `oma`, `codex`, `claude` oder `omx` können nur über `permissions` geöffnet werden, wenn sie vorher in `tools.commands` deklariert sind. `tools.commands` darf OpenDock-Standardnamen wie `git`, `node`, `npm` oder `python` nicht wiederverwenden. Ein Command wie `mkdir`, der weder Standard noch in `tools.commands` deklariert ist, wird abgelehnt. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt. Package install/update Commands wie `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` und `winget install` werden in tasks abgelehnt. Nutze `tools` für project tools, `requires.runtimes` für Bun/Node/npm/Python/pip runtimes und bootstrap für host package managers.
 
 ```yaml
 tools:
@@ -194,6 +194,8 @@ Tool docks sind `codex`, `claude-code` und `oma`. Outcome docks wie
 `designer-ai`, `product-manager` und `frontend-ai` fügen rollenbezogene
 Workspaces hinzu. Utility docks wie `agent-ready`, `agent-safety` und
 `repo-context` ergänzen wiederverwendbare Harnesses.
+
+Alle bundled examples haben getrennte macOS- und Windows-Manifeste. Die Testsuite parsed jedes Manifest, prüft Datei-Referenzen, kontrolliert Windows doctor checks und validiert jeden task command gegen die aktuelle OpenDock command policy.
 
 Die vollständige Manifest-Referenz steht in [docs/guides/guide.de.md](./docs/guides/guide.de.md).
 

@@ -162,7 +162,7 @@ dock-private workdir で実行する task が事前に input file を必要と�
 
 ## Task Command Permission
 
-OpenDock の task は `run` と `check` を小さな標準ポリシーで実行します。標準 command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` です。macOS は `brew`、Windows は `powershell`, `winget` も許可します。標準ポリシー外の command はまず `tools.commands` に宣言し、その後 `permissions` で task の完全一致形を許可します。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。
+OpenDock の task は `run` と `check` を小さな標準ポリシーで実行します。標準 command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` です。macOS は `brew`、Windows は `powershell`, `winget` も許可します。ただし標準 command でも任意の subcommand が許可されるわけではありません。`git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` のような安全な形だけ通ります。`oma`, `codex`, `claude`, `omx` などの command は `tools.commands` に宣言された場合だけ、`permissions` で実行形を開けます。`tools.commands` は `git`, `node`, `npm`, `python` など OpenDock 標準 command 名を再利用できません。`mkdir` のように OpenDock 標準でも `tools.commands` でもない command は拒否されます。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` のような package install/update は task では拒否されます。project tool は `tools`、Bun/Node/npm/Python/pip runtime は `requires.runtimes`、host package manager は bootstrap で扱います。
 
 ```yaml
 tools:
@@ -191,6 +191,8 @@ Tool docks は `codex`、`claude-code`、`oma` です。Outcome docks は
 `designer-ai`、`product-manager`、`frontend-ai` などの役割別 workspace を
 追加します。Utility docks は `agent-ready`、`agent-safety`、`repo-context`
 などを組み合わせ用の harness として追加します。
+
+Bundled example はすべて macOS と Windows の manifest を分けています。テストでは manifest parse、file reference、Windows doctor check、現在の command policy を通るかを確認します。
 
 詳しい manifest reference は [docs/guides/guide.ja.md](./docs/guides/guide.ja.md) を参照してください。
 

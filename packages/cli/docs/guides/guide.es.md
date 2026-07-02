@@ -134,7 +134,7 @@ modificar el proyecto.
 
 ## Task Command Permission
 
-OpenDock no pasa `run` ni `check` directamente a una shell. La política por defecto solo permite `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Los commands fuera de la política por defecto deben declararse primero en `tools.commands`; luego `permissions` permite la forma exacta del task. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`.
+OpenDock no pasa `run` ni `check` directamente a una shell. La política por defecto solo permite `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Pero un command por defecto no permite cualquier subcommand: solo pasan formas seguras como `git status`, `git init -b main`, `test -f <path>`, checks de versión y el `Test-Path` limitado de Windows. Los commands fuera de la política por defecto deben declararse primero en `tools.commands`; luego `permissions` permite la forma exacta del task. `tools.commands` no puede reutilizar nombres por defecto de OpenDock como `git`, `node`, `npm` o `python`. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`. Los commands de install/update de paquetes como `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` y `winget install` se rechazan dentro de tasks. Usa `tools` para project tools, `requires.runtimes` para runtimes y bootstrap para host package managers.
 
 ```yaml
 tools:
@@ -199,6 +199,8 @@ docks, instalan `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `README.md` y archivos
 provider-specific bajo `.agents/skills/`, `.codex/skills/`, `.claude/skills/` y
 `.cursor/rules/`, para que los agentes de IA puedan leer el context del proyecto
 de inmediato.
+
+Los bundled examples tienen manifests separados para macOS y Windows. La suite de tests parsea cada manifest, revisa referencias de archivos, verifica Windows doctor checks y valida cada task command contra la política actual.
 
 ## Deploy
 

@@ -134,7 +134,7 @@ nicht verändern.
 
 ## Task Command Permission
 
-OpenDock gibt `run` und `check` nicht direkt an eine Shell weiter. Die Standard-Policy erlaubt nur `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Commands außerhalb der Standard-Policy müssen zuerst in `tools.commands` stehen; danach erlaubt `permissions` die exakte Task-Form. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt.
+OpenDock gibt `run` und `check` nicht direkt an eine Shell weiter. Die Standard-Policy erlaubt nur `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Ein Standard-Command erlaubt aber nicht beliebige subcommands: Nur sichere Formen wie `git status`, `git init -b main`, `test -f <path>`, version checks und das eingeschränkte Windows `Test-Path` sind erlaubt. Commands außerhalb der Standard-Policy müssen zuerst in `tools.commands` stehen; danach erlaubt `permissions` die exakte Task-Form. `tools.commands` darf OpenDock-Standardnamen wie `git`, `node`, `npm` oder `python` nicht wiederverwenden. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt. Package install/update Commands wie `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` und `winget install` werden in tasks abgelehnt. Nutze `tools` für project tools, `requires.runtimes` für runtimes und bootstrap für host package managers.
 
 ```yaml
 tools:
@@ -199,6 +199,8 @@ von tool docks installieren sie `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
 `README.md` und provider-specific files unter `.agents/skills/`,
 `.codex/skills/`, `.claude/skills/` und `.cursor/rules/`, damit AI agents den
 project context direkt lesen können.
+
+Die bundled examples haben getrennte macOS- und Windows-Manifeste. Die Testsuite parsed jedes Manifest, prüft Datei-Referenzen, kontrolliert Windows doctor checks und validiert jeden task command gegen die aktuelle Policy.
 
 ## Deploy
 

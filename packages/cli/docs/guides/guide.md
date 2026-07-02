@@ -1,8 +1,8 @@
 # OpenDock Guide
 
-`dock.yml` describes what a dock adds to a project: files, required tools,
-install/update/doctor tasks, generated outputs, post-install commands, and
-health checks.
+`dock.yml` describes what a dock adds to a project: files, runtime
+requirements, project-local tools, install/update/doctor tasks, generated
+outputs, and health checks.
 
 OpenDock is a small packaging layer for repeatable AI setup. Pick the docks you
 need, combine them in one project, and keep each dock independently tracked for
@@ -26,7 +26,8 @@ Decide these first:
 3. **Task location**: run tasks in the project root, or in a private dock workdir and export selected outputs.
 4. **Required runtimes**: commands such as Git, Node, Bun, npm, pip, or Python that the dock needs before tasks run.
 5. **CLI tools**: packages such as Codex, Claude Code, or OMA that OpenDock should install and track project-locally.
-6. **Maintenance**: what should happen during update, doctor, and uninstall.
+6. **Maintenance**: what should happen during update and doctor, and what
+   OpenDock should be able to remove through its automatic uninstall records.
 
 Good docks are outcome-first. A tool-only dock such as `opendock/codex` is valid,
 but the most useful docks also provide structure, prompts, agent instructions,
@@ -146,6 +147,10 @@ owner/name@latest
 owner/name/extra@1.0.0
 ```
 
+There is no `uninstall` field in `dock.yml`. Uninstall is handled by OpenDock
+from the lock file and managed file/tool records created during install and
+update.
+
 ## Catalog Metadata
 
 ```yaml
@@ -221,9 +226,8 @@ when they appear in `permissions`.
 ## Task Command Permission
 
 OpenDock does not pass task strings to a shell. It splits each `run` and `check`
-command, rejects shell operators, then checks the command against a small
-default policy. This default set is intentionally limited to common runtimes,
-package managers, and simple checks:
+command, rejects shell operators, then checks the program and arguments against
+a small default policy. The default program list is intentionally small:
 
 ```text
 bun
@@ -254,6 +258,21 @@ should run. `permissions` can also allow exact non-standard shapes for OpenDock
 default commands. Commands declared by `tools` automatically allow simple
 version checks such as `codex --version`. Tool command names cannot reuse
 OpenDock default commands such as `git`, `node`, `npm`, or `python`.
+
+Default programs are not open-ended. They only allow safe shapes:
+
+| Program | Allowed without extra permission |
+|---|---|
+| `git` | `git --version`, `git status`, `git init -b main` |
+| `test` | `test -f <relative-path>`, `test -d <relative-path>` |
+| `node`, `python`, `python3` | version checks only |
+| `npm`, `pnpm`, `bun`, `pip`, `pip3`, `pipx`, `uv` | version checks only |
+| `brew`, `winget` | version checks only |
+| `powershell` | constrained Windows `Test-Path` checks only |
+
+Package mutation is always rejected from tasks. Do not put `npm install`,
+`bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`,
+`brew install`, or `winget install` in `run`, `check`, or `permissions`.
 
 ```yaml
 tools:
@@ -400,6 +419,10 @@ Use the tool docks (`opendock/codex`, `opendock/claude-code`, `opendock/oma`)
 when you only need an AI tool. Use outcome and utility docks when you want a
 ready project context that an agent can read immediately.
 
+The example test suite also validates every bundled macOS and Windows manifest
+against the current command policy. If a new example relies on a command shape
+that OpenDock no longer allows, the example test should fail before release.
+
 ## Platforms
 
 Prefer separate platform artifacts instead of putting platform branches inside
@@ -482,6 +505,7 @@ Manifest:
 3. `readme` and `logo` point to real files inside the dock directory.
 4. Non-default `run` and `check` commands use `tools.commands` and are declared
    exactly in `permissions`.
+5. No package install/update command is hidden inside a task.
 
 Files:
 

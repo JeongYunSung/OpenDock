@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parseManifestFile } from "../src/core/domain/manifest.js";
+import { validateManifestTaskCommands } from "../src/core/runtime/task-command-validation.js";
 
 const examplesRoot = join(process.cwd(), "examples");
 
@@ -89,6 +90,19 @@ describe("example dock manifests", () => {
         } else {
           expect(windowsCommand, `${example} doctor ${macStep.id}`).toBe(macCommand);
         }
+      }
+    }
+  });
+
+  it("keeps every example task command within the current command policy", () => {
+    for (const example of exampleNames()) {
+      for (const platform of ["macos", "windows"] as const) {
+        const manifest = parseManifestFile(join(examplesRoot, example, `dock.${platform}.yml`));
+
+        expect(
+          () => validateManifestTaskCommands(manifest, platform),
+          `${example}/${platform}`,
+        ).not.toThrow();
       }
     }
   });

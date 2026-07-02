@@ -46,6 +46,7 @@ opendock uninstall opendock/codex
 - [Install](#install)
 - [Command Reference](#command-reference)
 - [Dock Format](#dock-format)
+- [Task Command Permission](#task-command-permission)
 - [File Ownership](#file-ownership)
 - [Workdir Files And Export](#workdir-files-and-export)
 - [Example Docks](#example-docks)
@@ -261,10 +262,13 @@ tools:
 ```
 
 Runtime commands and tool commands are exposed through `.opendock/bin` while
-OpenDock runs install, update, and doctor steps. Docks should not use global
-or local package install/update commands such as `npm install ...`,
-`bun add ...`, `pip install ...`, or `brew install ...`; declare project-local
-`tools` instead.
+OpenDock runs install, update, and doctor steps. A command name being known to
+OpenDock is not a blanket shell permission: each task command still has to match
+one of OpenDock's safe command shapes or an exact `permissions` entry.
+
+Docks should not use global or local package install/update commands such as
+`npm install ...`, `bun add ...`, `pip install ...`, or `brew install ...`;
+declare project-local `tools`, runtime requirements, or host bootstrap instead.
 
 `readme`, `logo`, and `tags` are Registry catalog metadata. They help people
 understand and filter a dock in Hub, but they are not installed into a project
@@ -281,8 +285,9 @@ For the full manifest reference, see [docs/guides/guide.md](./packages/cli/docs/
 
 ## Task Command Permission
 
-OpenDock tasks do not run arbitrary shell. A small default command set is
-available for common setup checks and project-local tool work:
+OpenDock tasks do not run arbitrary shell. They are split into a program and
+arguments, checked for shell operators, and then matched against a small policy.
+The default programs are:
 
 ```text
 bun
@@ -313,6 +318,23 @@ Anything outside that default set must first be declared under `tools.commands`.
 commands. Commands declared by `tools` automatically allow simple version checks
 such as `codex --version`. Tool command names cannot reuse OpenDock default
 commands such as `git`, `node`, `npm`, or `python`.
+
+Default programs are still shape-limited. For example:
+
+| Program | Allowed without extra permission |
+|---|---|
+| `git` | `git --version`, `git status`, `git init -b main` |
+| `test` | `test -f <relative-path>`, `test -d <relative-path>` |
+| `node`, `python`, `python3` | version checks only |
+| `npm`, `pnpm`, `bun`, `pip`, `pip3`, `pipx`, `uv` | version checks only |
+| `brew`, `winget` | version checks only |
+| `powershell` | constrained Windows `Test-Path` checks only |
+
+Being in the default list does not allow package mutation. `npm install`,
+`bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`,
+`brew install`, and `winget install` are rejected in tasks. Use `tools` for
+dock-local CLIs, `requires.runtimes` for runtimes, and `opendock bootstrap` for
+host package managers.
 
 Package install/update commands are rejected inside tasks. Use `tools` for
 project-local tools, `requires.runtimes` for Bun/Node/npm/Python/pip runtime
@@ -434,6 +456,10 @@ and a local `README.md`) plus tool-specific skill/rule files under
 `.agents/skills/`, `.codex/skills/`, `.claude/skills/`, and `.cursor/rules/`.
 After install, Codex, Claude Code, Gemini-style agents, Cursor, and OMA-style
 skill discovery can read the same project context.
+
+Every bundled example has separate macOS and Windows manifests. The test suite
+parses each manifest, checks referenced files, verifies Windows doctor checks,
+and validates every task command against the current OpenDock command policy.
 
 | Group | Examples | Role |
 |---|---|---|

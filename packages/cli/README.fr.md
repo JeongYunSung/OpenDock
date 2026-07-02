@@ -164,7 +164,7 @@ fichiers d'entrée avant son exécution. Utilisez `files` pour les fichiers à
 
 ## Task Command Permission
 
-Les tasks `run` et `check` d'OpenDock utilisent une petite politique par défaut : `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Sur macOS, `brew` est aussi autorisé; sur Windows, `powershell` et `winget`. Les commandes hors politique par défaut doivent d’abord être déclarées dans `tools.commands`; ensuite `permissions` autorise la forme exacte du task. Les opérateurs `|`, `&&`, `||`, `;`, backticks, `$(`, `>` et `<` sont rejetés dans `permissions`, `run` et `check`.
+Les tasks `run` et `check` d'OpenDock utilisent une petite politique par défaut : `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Sur macOS, `brew` est aussi autorisé; sur Windows, `powershell` et `winget`. Mais une commande par défaut n'autorise pas n'importe quel subcommand : seules les formes sûres comme `git status`, `git init -b main`, `test -f <path>`, les checks de version et le `Test-Path` limité de Windows passent. Les commandes comme `oma`, `codex`, `claude` ou `omx` ne peuvent être ouvertes avec `permissions` que si elles sont d'abord déclarées dans `tools.commands`. `tools.commands` ne peut pas réutiliser des noms par défaut d'OpenDock comme `git`, `node`, `npm` ou `python`. Une commande comme `mkdir`, qui n'est ni par défaut ni déclarée dans `tools.commands`, est rejetée. Les opérateurs `|`, `&&`, `||`, `;`, backticks, `$(`, `>` et `<` sont rejetés dans `permissions`, `run` et `check`. Les commandes d'installation/update de packages comme `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` et `winget install` sont rejetées dans les tasks. Utilisez `tools` pour les project tools, `requires.runtimes` pour les runtimes Bun/Node/npm/Python/pip et bootstrap pour les host package managers.
 
 ```yaml
 tools:
@@ -193,6 +193,8 @@ Les tool docks sont `codex`, `claude-code` et `oma`. Les outcome docks comme
 `designer-ai`, `product-manager` et `frontend-ai` ajoutent des workspaces par
 rôle. Les utility docks comme `agent-ready`, `agent-safety` et `repo-context`
 ajoutent des harnesses réutilisables.
+
+Tous les bundled examples ont des manifests séparés pour macOS et Windows. La suite de tests parse chaque manifest, vérifie les références de fichiers, contrôle les Windows doctor checks et valide chaque task command avec la politique OpenDock actuelle.
 
 Voir la référence complète dans [docs/guides/guide.fr.md](./docs/guides/guide.fr.md).
 

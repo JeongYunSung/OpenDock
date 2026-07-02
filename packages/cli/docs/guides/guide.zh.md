@@ -126,7 +126,7 @@ doctor:
 
 ## Task Command Permission
 
-OpenDock 不会把 task 的 `run` 和 `check` 直接交给 shell。默认可用命令只包括 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 额外允许 `brew`，Windows 额外允许 `powershell` 和 `winget`。默认策略之外的 command 必须先声明在 `tools.commands` 中，然后由 `permissions` 精确允许 task 要执行的形式。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。
+OpenDock 不会把 task 的 `run` 和 `check` 直接交给 shell。默认可用命令只包括 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 额外允许 `brew`，Windows 额外允许 `powershell` 和 `winget`。但默认 command 并不代表任何 subcommand 都能执行；只有 `git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` 这类安全形态会通过。默认策略之外的 command 必须先声明在 `tools.commands` 中，然后由 `permissions` 精确允许 task 要执行的形式。`tools.commands` 不能复用 `git`, `node`, `npm`, `python` 等 OpenDock 默认 command 名称。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` 等 package install/update 命令会在 task 中被拒绝。project tool 请用 `tools`，runtime 请用 `requires.runtimes`，host package manager 请用 bootstrap。
 
 ```yaml
 tools:
@@ -189,6 +189,8 @@ install:
 会一起安装 `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、`README.md`，以及
 `.agents/skills/`、`.codex/skills/`、`.claude/skills/`、`.cursor/rules/`
 下的 provider-specific files，让 AI agent 能立刻读取项目 context。
+
+Bundled example 会分别提供 macOS 和 Windows manifest。测试会检查 manifest parse、文件引用、Windows doctor check，并确认每个 task command 符合当前 command policy。
 
 ## Deploy
 

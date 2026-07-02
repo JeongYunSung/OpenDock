@@ -133,7 +133,7 @@ le projet.
 
 ## Task Command Permission
 
-OpenDock ne transmet pas `run` ni `check` directement à un shell. La politique par défaut autorise seulement `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Sur macOS, `brew` est aussi autorisé; sur Windows, `powershell` et `winget`. Les commandes hors politique par défaut doivent d’abord être déclarées dans `tools.commands`; ensuite `permissions` autorise la forme exacte du task. Les opérateurs `|`, `&&`, `||`, `;`, backticks, `$(`, `>` et `<` sont rejetés dans `permissions`, `run` et `check`.
+OpenDock ne transmet pas `run` ni `check` directement à un shell. La politique par défaut autorise seulement `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Sur macOS, `brew` est aussi autorisé; sur Windows, `powershell` et `winget`. Mais une commande par défaut n'autorise pas n'importe quel subcommand : seules les formes sûres comme `git status`, `git init -b main`, `test -f <path>`, les checks de version et le `Test-Path` limité de Windows passent. Les commandes hors politique par défaut doivent d’abord être déclarées dans `tools.commands`; ensuite `permissions` autorise la forme exacte du task. `tools.commands` ne peut pas réutiliser des noms par défaut d'OpenDock comme `git`, `node`, `npm` ou `python`. Les opérateurs `|`, `&&`, `||`, `;`, backticks, `$(`, `>` et `<` sont rejetés dans `permissions`, `run` et `check`. Les commandes d'installation/update de packages comme `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` et `winget install` sont rejetées dans les tasks. Utilisez `tools` pour les project tools, `requires.runtimes` pour les runtimes et bootstrap pour les host package managers.
 
 ```yaml
 tools:
@@ -198,6 +198,8 @@ les tool docks, ils installent `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
 `README.md` et des fichiers provider-specific dans `.agents/skills/`,
 `.codex/skills/`, `.claude/skills/` et `.cursor/rules/`, afin que les agents IA
 puissent lire immédiatement le context projet.
+
+Les bundled examples ont des manifests séparés pour macOS et Windows. La suite de tests parse chaque manifest, vérifie les références de fichiers, contrôle les Windows doctor checks et valide chaque task command avec la politique actuelle.
 
 ## Deploy
 
