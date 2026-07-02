@@ -515,13 +515,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-installer.ts": {
-    "mtime": 1782966545.467904,
-    "ast_hash": "eebf3f7bb1da058d45473e2a20319dac",
+    "mtime": 1782974122.2150223,
+    "ast_hash": "917caed17741f23689a28f1234fe319d",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/manifest.ts": {
-    "mtime": 1782968775.1689858,
-    "ast_hash": "6353a405939f7c4bdb8fe6be3771aa97",
+    "mtime": 1782974748.4760184,
+    "ast_hash": "84c02ee128a920509b9ee8f906340849",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/runtime-names.ts": {
@@ -550,13 +550,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/file-plan.ts": {
-    "mtime": 1781758960.9374902,
-    "ast_hash": "6318ce45a02e7a4450dc0a10e7947967",
+    "mtime": 1782974772.362571,
+    "ast_hash": "f9285538c72eb8c5ffd5fe2954a72d5c",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/managed-block.ts": {
-    "mtime": 1781185714.580715,
-    "ast_hash": "03a80d83481f3fd02f7ae223eff5e641",
+    "mtime": 1782974766.4246356,
+    "ast_hash": "96296c70768e17f9f4ca7ff1f72d0259",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/path-utils.ts": {
@@ -570,13 +570,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/command-policy.ts": {
-    "mtime": 1782966213.653634,
-    "ast_hash": "f81ed31738e139cf484413040a0da3fe",
+    "mtime": 1782973533.5231705,
+    "ast_hash": "085288108540952b12874a2143ead05a",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/command-runner.ts": {
-    "mtime": 1782961953.4075553,
-    "ast_hash": "bb5c033f3b370c1a8667ba7d4ce9b7fb",
+    "mtime": 1782973903.6660101,
+    "ast_hash": "fc0ce5faf34ce19b2829504ffd05a9df",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/progress.ts": {
@@ -585,8 +585,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/requirement-runner.ts": {
-    "mtime": 1782967272.9912908,
-    "ast_hash": "9416302f92e42895c7529b6f58f983e7",
+    "mtime": 1782973545.0423577,
+    "ast_hash": "be9cd720fa6d9b61ef47a83f9e99515b",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-requirements.ts": {
@@ -670,8 +670,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-flow.test.ts": {
-    "mtime": 1782969077.1701176,
-    "ast_hash": "8a47d68144fbecc550805e95e543bfbe",
+    "mtime": 1782974131.215659,
+    "ast_hash": "bf814d64238d18297f7af801ca087ea5",
     "semantic_hash": ""
   },
   "packages/cli/tests/examples-cleanup.test.ts": {
@@ -700,13 +700,13 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/requirements.test.ts": {
-    "mtime": 1782969455.2797925,
-    "ast_hash": "a9c926e74323ae12b1c7628b6d4e8172",
+    "mtime": 1782974834.4364958,
+    "ast_hash": "5a5b8e9860fe0160478c690ba4c7c93e",
     "semantic_hash": ""
   },
   "packages/cli/tests/security-regression.test.ts": {
-    "mtime": 1782969025.77994,
-    "ast_hash": "e50eccc0983a86271c1a4e637f8a18a2",
+    "mtime": 1782974896.9681754,
+    "ast_hash": "65d10b099af3399e4ac7cfa02a222942",
     "semantic_hash": ""
   },
   "packages/cli/tests/terminal-style.test.ts": {
@@ -745,8 +745,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1782967571.486974,
-    "ast_hash": "ccd3f05e1b72cd5e342b6c2e173ff1df",
+    "mtime": 1782973728.286962,
+    "ast_hash": "4f2e381c5aa05ab886c590a3237705e9",
     "semantic_hash": ""
   },
   "apps/desktop/index.html": {
@@ -755,73 +755,73 @@
     "semantic_hash": ""
   },
   "packages/cli/README.de.md": {
-    "mtime": 1782961904.5826206,
-    "ast_hash": "7172005b7c68fdda86c341832e57e030",
+    "mtime": 1782973716.1694205,
+    "ast_hash": "84621691c74a38a7a0904e20e7a913c7",
     "semantic_hash": ""
   },
   "packages/cli/README.es.md": {
-    "mtime": 1782961904.5868664,
-    "ast_hash": "482849593571a02d40261f4483923626",
+    "mtime": 1782973716.1691275,
+    "ast_hash": "356a404b4c8d2d4f4e6e62deb6c33ae8",
     "semantic_hash": ""
   },
   "packages/cli/README.fr.md": {
-    "mtime": 1782961904.591027,
-    "ast_hash": "9130df961b5d48280939c952d7205b5e",
+    "mtime": 1782973716.1697023,
+    "ast_hash": "e604767360c8b0da679625a277af3d2f",
     "semantic_hash": ""
   },
   "packages/cli/README.ja.md": {
-    "mtime": 1782961904.5953639,
-    "ast_hash": "ed936e1619883ea9a91843cb75b7e1ce",
+    "mtime": 1782973716.1690013,
+    "ast_hash": "7706419ee55160ca6597b6a972dc8846",
     "semantic_hash": ""
   },
   "packages/cli/README.ko.md": {
-    "mtime": 1782967571.4881754,
-    "ast_hash": "8de5bcb611c37a2cb7d356bedbb626ab",
+    "mtime": 1782973749.6009934,
+    "ast_hash": "75738102898cb606d0edcdadd1f2f987",
     "semantic_hash": ""
   },
   "packages/cli/README.md": {
-    "mtime": 1782967571.4872859,
-    "ast_hash": "0f464a0e779076fbb1f315aa21b796d1",
+    "mtime": 1782973722.893172,
+    "ast_hash": "4301afbec4eefff8f172d244f946d19d",
     "semantic_hash": ""
   },
   "packages/cli/README.zh.md": {
-    "mtime": 1782961904.5992734,
-    "ast_hash": "467a68dd5bf59db8604004bfe2bf0184",
+    "mtime": 1782973716.1695883,
+    "ast_hash": "19b6177771dd1b990b3e4418d751ac7a",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.de.md": {
-    "mtime": 1782961929.5361643,
-    "ast_hash": "b0cae4d5640fb4ec02edf382dc85f73e",
+    "mtime": 1782973716.1704566,
+    "ast_hash": "14b92fa97d85f8dbd834c53ce281fbe6",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.es.md": {
-    "mtime": 1782961929.5394855,
-    "ast_hash": "b236024f37a7108d89b0ada6dad77f35",
+    "mtime": 1782973716.1703718,
+    "ast_hash": "d468806f9ef2ba016ebde6bd5b8d43b5",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.fr.md": {
-    "mtime": 1782961929.5429046,
-    "ast_hash": "a007fac54051cab30430177d06968ee8",
+    "mtime": 1782973716.1707535,
+    "ast_hash": "ff0d28a1eaf52b9a358adfd086e7f691",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.ja.md": {
-    "mtime": 1782961929.5461757,
-    "ast_hash": "c0f41ed077916ca8ff5bf3247209ee21",
+    "mtime": 1782973716.1702821,
+    "ast_hash": "d0835f1d10d7e2280156a648b648ab4a",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.ko.md": {
-    "mtime": 1782967571.487869,
-    "ast_hash": "3552d75a13f06507cb68f672bd1daee2",
+    "mtime": 1782973759.8898523,
+    "ast_hash": "3d80bba5b33ad00d1f4b1ad95c7e9119",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.md": {
-    "mtime": 1782967571.4875646,
-    "ast_hash": "97f17219cfeac7bdd2244f967a1692fe",
+    "mtime": 1782973735.676704,
+    "ast_hash": "8ad662fe40a9390afcbfffc9f44f9f5d",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.zh.md": {
-    "mtime": 1782961929.5489416,
-    "ast_hash": "01fc978c72b8e4bb473f976cd0222ddb",
+    "mtime": 1782973716.1706152,
+    "ast_hash": "af74f9ca3fcccbbd366593ef33ad4a3f",
     "semantic_hash": ""
   },
   "packages/cli/examples/agent-ready/DOCK.md": {
@@ -2630,8 +2630,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/command-shim.ts": {
-    "mtime": 1782958412.9232879,
-    "ast_hash": "3911f652ec532b6002539f4c5c3673d7",
+    "mtime": 1782974780.891257,
+    "ast_hash": "c390acd4b44176c5f48d3ef437ef4486",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/project-layout.ts": {
@@ -2640,8 +2640,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/tool-runner.ts": {
-    "mtime": 1782961632.9036002,
-    "ast_hash": "5af5a3269636f140895ebcc90255d3d1",
+    "mtime": 1782974892.1046867,
+    "ast_hash": "776aa89fe8b25b54f29fa80eb76bc08c",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-installer.ts": {
@@ -2692,6 +2692,16 @@
   ".github/workflows/cli-quality.yml": {
     "mtime": 1782969699.1927404,
     "ast_hash": "a34144c22f695b629bd3d0260fac20e3",
+    "semantic_hash": ""
+  },
+  ".serena/project.local.yml": {
+    "mtime": 1782974514.6168501,
+    "ast_hash": "f136e7d47205d9a758913615074760e5",
+    "semantic_hash": ""
+  },
+  ".serena/project.yml": {
+    "mtime": 1782974514.6163561,
+    "ast_hash": "46f9a234f996285a6b581b87f565483e",
     "semantic_hash": ""
   }
 }
