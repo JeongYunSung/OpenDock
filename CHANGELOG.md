@@ -15,6 +15,10 @@ version declared in `package.json`; they do not auto-increment versions.
   command policy.
 - Add bundled example validation against the current OpenDock command policy.
 
+### Desktop App
+
+- Align the desktop app release version with the OpenDock `0.2.0` release line.
+
 ## 0.1.60 - 2026-07-02
 
 ### Desktop App

@@ -1,6 +1,6 @@
 [package]
 name = "opendock-app"
-version = "0.1.60"
+version = "0.2.0"
 description = "OpenDock desktop app"
 authors = ["OpenDock"]
 license = "MIT"
