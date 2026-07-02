@@ -16,6 +16,7 @@ export interface CommandRunOptions {
   missingAsFailure?: boolean;
   pathEntries?: string[];
   permissions?: string[];
+  permissionPrograms?: string[];
   platform?: OpenDockPlatform;
   timeoutMs?: number;
 }
@@ -30,7 +31,13 @@ export class CommandRunner {
     }
 
     const platform = options.platform ?? detectPlatform();
-    ensureAllowed(program, rest, platform, options.permissions ?? []);
+    ensureAllowed(
+      program,
+      rest,
+      platform,
+      options.permissions ?? [],
+      options.permissionPrograms ?? [],
+    );
 
     const output = spawnSync(program, rest, {
       cwd: options.cwd,

@@ -7,12 +7,7 @@ const safeIdentifierPattern = /^[A-Za-z0-9._:@/=-]+$/;
 const powershellTestPathPattern =
   /^if \(Test-Path -LiteralPath ([A-Za-z0-9._/@-]+)\) \{ exit 0 \} else \{ exit 1 \}$/;
 const blockedPackageRunnerFlags = new Set(["--package", "-p", "--eval", "-e", "--call", "-c"]);
-const wingetAllowedFlags = new Set([
-  "--accept-package-agreements",
-  "--accept-source-agreements",
-  "--exact",
-  "--id",
-]);
+const packageManagerMutations = new Set(["add", "install", "update", "upgrade"]);
 
 const commonAllowedCommands = new Set([
   "bun",
@@ -83,20 +78,30 @@ export function rejectShellMetacharacters(command: string): void {
   }
 }
 
+export function isDefaultCommandProgram(program: string, platform: OpenDockPlatform): boolean {
+  return commonAllowedCommands.has(program) || platformAllowedCommands[platform].has(program);
+}
+
 export function ensureAllowed(
   program: string,
   args: string[],
   platform: OpenDockPlatform,
   permissions: string[],
+  permissionPrograms: string[] = [],
 ): void {
   const blockedReason = blockedCommandReason(program, args);
   if (blockedReason) {
     throw new Error(blockedReason);
   }
   if (isPermissionAllowed(program, args, permissions)) {
-    return;
+    if (isDefaultCommandProgram(program, platform) || permissionPrograms.includes(program)) {
+      return;
+    }
+    throw new Error(
+      `command \`${program}\` is not declared in tools.commands and is not an OpenDock default command`,
+    );
   }
-  if (!commonAllowedCommands.has(program) && !platformAllowedCommands[platform].has(program)) {
+  if (!isDefaultCommandProgram(program, platform)) {
     throw new Error(
       `command \`${program}\` is not allowed for OpenDock platform \`${platform}\` commands`,
     );
@@ -139,13 +144,10 @@ function isAllowedCommandShape(program: string, args: string[]): boolean {
     return args.length === 2 && ["-d", "-f"].includes(args[0] ?? "") && isSafeRelativeArg(args[1]);
   }
   if (program === "brew") {
-    return (
-      isExact(args, ["--version"]) ||
-      (["install", "upgrade"].includes(args[0] ?? "") && args.slice(1).every(isSafePackageName))
-    );
+    return isExact(args, ["--version"]);
   }
   if (program === "winget") {
-    return isSafeWingetCommand(args);
+    return isExact(args, ["--version"]);
   }
   if (program === "powershell") {
     return isSafePowershellCommand(args);
@@ -203,29 +205,6 @@ function isSafePackageRunnerCommand(args: string[]): boolean {
   return args.slice(1).every((arg) => !blockedPackageRunnerFlags.has(arg) && isSafeRunnerArg(arg));
 }
 
-function isSafeWingetCommand(args: string[]): boolean {
-  if (isExact(args, ["--version"])) {
-    return true;
-  }
-  if (!["install", "upgrade"].includes(args[0] ?? "")) {
-    return false;
-  }
-  const idIndex = args.indexOf("--id");
-  if (idIndex < 0 || !isSafePackageName(args[idIndex + 1] ?? "")) {
-    return false;
-  }
-  return args.slice(1).every((arg, index) => {
-    const originalIndex = index + 1;
-    if (originalIndex === idIndex) {
-      return true;
-    }
-    if (originalIndex === idIndex + 1) {
-      return isSafePackageName(arg);
-    }
-    return wingetAllowedFlags.has(arg);
-  });
-}
-
 function isSafePowershellCommand(args: string[]): boolean {
   if (
     args.length !== 4 ||
@@ -239,25 +218,21 @@ function isSafePowershellCommand(args: string[]): boolean {
   return !!match && isSafeRelativeArg(match[1]);
 }
 
-function hasGlobalFlag(args: string[]): boolean {
-  return args.includes("--global") || args.includes("-g");
-}
-
 function blockedCommandReason(program: string, args: string[]): string | undefined {
-  if ((program === "npm" || program === "bun" || program === "pnpm") && hasGlobalFlag(args)) {
-    return "global package installs are not allowed in dock task commands; declare project-local `tools` instead";
-  }
-  if (program === "pnpm" && args[0] === "add" && hasGlobalFlag(args)) {
-    return "global package installs are not allowed in dock task commands; declare project-local `tools` instead";
+  if (
+    (program === "npm" || program === "bun" || program === "pnpm") &&
+    packageManagerMutations.has(args[0] ?? "")
+  ) {
+    return "package installs and updates are not allowed in dock task commands; declare project-local `tools` instead";
   }
   if ((program === "pip" || program === "pip3") && args[0] === "install") {
-    return "pip installs are not allowed in dock task commands; declare project-local `tools` instead";
+    return "package installs and updates are not allowed in dock task commands; declare project-local `tools` instead";
   }
   if (program === "pipx" && ["install", "upgrade"].includes(args[0] ?? "")) {
-    return "pipx tool installs are not allowed in dock task commands; declare project-local `tools` instead";
+    return "package installs and updates are not allowed in dock task commands; declare project-local `tools` instead";
   }
   if (program === "uv" && args[0] === "tool" && ["install", "upgrade"].includes(args[1] ?? "")) {
-    return "uv tool installs are not allowed in dock task commands; declare project-local `tools` instead";
+    return "package installs and updates are not allowed in dock task commands; declare project-local `tools` instead";
   }
   if (
     (program === "brew" || program === "winget") &&

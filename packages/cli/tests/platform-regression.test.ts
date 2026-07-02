@@ -271,11 +271,11 @@ describe("platform regression coverage", () => {
       id: "test/common",
       summary: "",
       tags: [],
-      permission: ["mkdir -p common-output"],
+      permission: [],
       requires: { runtimes: {} },
       files: [],
       tasks: {
-        install: [{ id: "common", run: "mkdir -p common-output", platforms: {} }],
+        install: [{ id: "common", run: "git init -b main", platforms: {} }],
         update: [],
         doctor: [],
       },
@@ -290,7 +290,7 @@ describe("platform regression coverage", () => {
     }).reports;
 
     expect(reports).toMatchObject([{ id: "common", status: "Ran" }]);
-    expect(existsSync(join(project, "common-output"))).toBe(true);
+    expect(existsSync(join(project, ".git"))).toBe(true);
   });
 
   it("selects platform overrides for doctor checks", async () => {
@@ -490,14 +490,14 @@ function platformManifest(): DockManifest {
     id: "test/platform",
     summary: "",
     tags: [],
-    permission: ["mkdir -p before"],
+    permission: [],
     requires: { runtimes: {} },
     files: [],
     tasks: {
       install: [
-        { id: "before", run: "mkdir -p before", platforms: {} },
+        { id: "before", run: "git init -b main", platforms: {} },
         platformRuntimeStep("install-runtime"),
-        { id: "after", check: "test -d before", platforms: {} },
+        { id: "after", check: "test -d .git", platforms: {} },
       ],
       update: [],
       doctor: [],

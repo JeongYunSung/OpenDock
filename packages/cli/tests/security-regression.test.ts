@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -292,26 +293,39 @@ describe("security regression coverage", () => {
     }
   });
 
-  it("allows non-default command shapes only when the exact permission is declared", () => {
+  it("allows non-default commands only when the exact permission and tool program are declared", () => {
     const project = tempDir();
+    const bin = tempDir();
     const runner = new CommandRunner();
+    const customTool = join(bin, "custom-tool");
+    writeFileSync(customTool, "#!/bin/sh\nmkdir -p generated\n");
+    chmodSync(customTool, 0o755);
 
-    expect(() => runner.run("mkdir -p generated", { cwd: project, platform: "macos" })).toThrow(
-      "not allowed",
-    );
+    expect(() =>
+      runner.run("custom-tool generate", {
+        cwd: project,
+        pathEntries: [bin],
+        permissions: ["custom-tool generate"],
+        platform: "macos",
+      }),
+    ).toThrow("not declared in tools.commands");
 
-    const result = runner.run("mkdir -p generated", {
+    const result = runner.run("custom-tool generate", {
       cwd: project,
-      permissions: ["mkdir -p generated"],
+      pathEntries: [bin],
+      permissionPrograms: ["custom-tool"],
+      permissions: ["custom-tool generate"],
       platform: "macos",
     });
 
     expect(result.success).toBe(true);
     expect(existsSync(join(project, "generated"))).toBe(true);
     expect(() =>
-      runner.run("mkdir -p other", {
+      runner.run("custom-tool other", {
         cwd: project,
-        permissions: ["mkdir -p generated"],
+        pathEntries: [bin],
+        permissionPrograms: ["custom-tool"],
+        permissions: ["custom-tool generate"],
         platform: "macos",
       }),
     ).toThrow("not allowed");
@@ -323,8 +337,11 @@ describe("security regression coverage", () => {
 
     for (const [command, platform] of [
       ["npm install --global @openai/codex", "macos"],
+      ["npm install oh-my-codex", "macos"],
       ["bun install -g oh-my-agent", "macos"],
+      ["bun add oh-my-agent", "macos"],
       ["pnpm add -g @anthropic-ai/claude-code", "macos"],
+      ["pnpm update @anthropic-ai/claude-code", "macos"],
       ["pip install some-tool", "macos"],
       ["pipx install some-tool", "macos"],
       ["uv tool install some-tool", "macos"],
@@ -367,8 +384,56 @@ describe("security regression coverage", () => {
     };
 
     expect(() => validateManifestTaskCommands(manifest, "macos")).toThrow(
-      "global package installs are not allowed",
+      "package installs and updates are not allowed",
     );
+  });
+
+  it("requires custom permission commands to be declared by tools", () => {
+    const manifest: DockManifest = {
+      opendock: 1,
+      id: "test/undeclared-tool",
+      summary: "",
+      tags: [],
+      permission: ["oma -y install"],
+      requires: { runtimes: {} },
+      files: [],
+      tasks: {
+        install: [{ id: "apply-oma", run: "oma -y install", platforms: {} }],
+        update: [],
+        doctor: [],
+      },
+    };
+
+    expect(() => validateManifestTaskCommands(manifest, "macos")).toThrow(
+      "is not declared in tools.commands",
+    );
+  });
+
+  it("allows exact permission commands for declared tools", () => {
+    const manifest: DockManifest = {
+      opendock: 1,
+      id: "test/declared-tool",
+      summary: "",
+      tags: [],
+      permission: ["oma -y install"],
+      requires: { runtimes: {} },
+      tools: {
+        oma: {
+          manager: "bun",
+          package: "oh-my-agent",
+          version: "8.52.9",
+          commands: ["oma"],
+        },
+      },
+      files: [],
+      tasks: {
+        install: [{ id: "apply-oma", run: "oma -y install", platforms: {} }],
+        update: [],
+        doctor: [],
+      },
+    };
+
+    expect(() => validateManifestTaskCommands(manifest, "macos")).not.toThrow();
   });
 
   it("rejects shell operators in doctor checks even when permissions are declared", () => {
@@ -378,7 +443,7 @@ describe("security regression coverage", () => {
       id: "test/doctor-shell",
       summary: "",
       tags: [],
-      permission: ["mkdir -p generated"],
+      permission: ["git status"],
       requires: { runtimes: {} },
       files: [],
       tasks: {

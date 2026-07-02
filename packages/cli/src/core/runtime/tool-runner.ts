@@ -78,6 +78,7 @@ export class ToolRunner {
       pathEntries: projectCommandPathEntries(context.projectDir),
       platform: context.platform,
       permissions: toolVersionPermissions(spec),
+      permissionPrograms: spec.commands,
     });
     if (!result.success) {
       return {

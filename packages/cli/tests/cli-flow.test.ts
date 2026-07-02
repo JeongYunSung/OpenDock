@@ -270,6 +270,7 @@ describe("opendock TypeScript CLI", () => {
     writeDock(docks, "test", "oma", "1.0.0", {
       files: [{ path: "PROMPTS.md", content: "# Prompts\n" }],
       permission: ["oma -y install", "oma doctor"],
+      tools: omaToolSpec(),
       tasks: {
         install: [
           {
@@ -315,6 +316,7 @@ describe("opendock TypeScript CLI", () => {
     writeFakeOmaRequiresSeed(bin);
     writeDock(docks, "test", "oma", "1.0.0", {
       permission: ["oma -y install"],
+      tools: omaToolSpec(),
       workdirFiles: [
         {
           path: "workdir/oma-config.yaml",
@@ -378,6 +380,7 @@ describe("opendock TypeScript CLI", () => {
     writeFakeOmaWithExternalSymlink(bin, outsideFile);
     writeDock(docks, "test", "oma", "1.0.0", {
       permission: ["oma -y install"],
+      tools: omaToolSpec(),
       tasks: {
         install: [
           {
@@ -720,6 +723,7 @@ describe("opendock TypeScript CLI", () => {
     writeDock(docks, "test", "designer", "1.0.0", {
       files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
       permission: ["oma -y install"],
+      tools: omaToolSpec(),
       tasks: {
         install: [
           {
@@ -1773,6 +1777,7 @@ function writeDock(
     files?: Array<{ path: string; content: string }>;
     workdirFiles?: Array<{ path: string; to: string; content: string }>;
     permission?: string[];
+    tools?: Record<string, unknown>;
     tasks?: {
       install?: unknown[];
       update?: unknown[];
@@ -1800,6 +1805,7 @@ function writeDock(
     readme: "DOCK.md",
     logo: "logo.png",
     permission: options.permission ?? [],
+    tools: options.tools ?? {},
     files: (options.files ?? []).map((file) => ({
       from: `files/${file.path}`,
       to: file.path,
@@ -1932,9 +1938,9 @@ function sha256(bytes: Buffer): string {
 }
 
 function writeFakeOma(bin: string): void {
-  const path = join(bin, "oma");
-  writeFileSync(
-    path,
+  writeFakeBunTool(
+    bin,
+    "oma",
     `#!/usr/bin/env bash
 set -euo pipefail
 mode="\${*: -1}"
@@ -1954,13 +1960,12 @@ case "$mode" in
 esac
 `,
   );
-  chmod(path);
 }
 
 function writeFakeOmaRequiresSeed(bin: string): void {
-  const path = join(bin, "oma");
-  writeFileSync(
-    path,
+  writeFakeBunTool(
+    bin,
+    "oma",
     `#!/usr/bin/env bash
 set -euo pipefail
 if [ "$*" = "-y install" ]; then
@@ -1973,13 +1978,12 @@ fi
 exit 1
 `,
   );
-  chmod(path);
 }
 
 function writeFakeOmaWithExternalSymlink(bin: string, outsideFile: string): void {
-  const path = join(bin, "oma");
-  writeFileSync(
-    path,
+  writeFakeBunTool(
+    bin,
+    "oma",
     `#!/usr/bin/env bash
 set -euo pipefail
 mode="\${*: -1}"
@@ -1991,7 +1995,42 @@ case "$mode" in
 esac
 `,
   );
-  chmod(path);
+}
+
+function omaToolSpec(): Record<string, unknown> {
+  return {
+    oma: {
+      manager: "bun",
+      package: "oh-my-agent",
+      version: "8.52.9",
+      commands: ["oma"],
+    },
+  };
+}
+
+function writeFakeBunTool(bin: string, command: string, script: string): void {
+  writeFileSync(join(bin, command), script);
+  chmod(join(bin, command));
+  writeFileSync(
+    join(bin, "bun"),
+    `#!/usr/bin/env bash
+set -euo pipefail
+if [ "$1" = "--version" ]; then
+  printf '1.3.11\\n'
+  exit 0
+fi
+if [ "$1" = "add" ]; then
+  mkdir -p node_modules/.bin
+  cat > node_modules/.bin/${command} <<'OPENDOCK_FAKE_TOOL'
+${script}
+OPENDOCK_FAKE_TOOL
+  chmod +x node_modules/.bin/${command}
+  exit 0
+fi
+exit 1
+`,
+  );
+  chmod(join(bin, "bun"));
 }
 
 function chmod(path: string): void {
