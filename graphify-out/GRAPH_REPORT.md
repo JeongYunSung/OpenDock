@@ -1,16 +1,16 @@
 # Graph Report - opendock  (2026-07-02)
 
 ## Corpus Check
-- 451 files · ~210,469 words
+- 451 files · ~210,491 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4502 nodes · 6747 edges · 679 communities (380 shown, 299 thin omitted)
+- 4502 nodes · 6747 edges · 678 communities (379 shown, 299 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 66 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fea4a175`
+- Built from commit: `9989a8b7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -443,7 +443,6 @@
 - [[_COMMUNITY_Community 430|Community 430]]
 - [[_COMMUNITY_Community 431|Community 431]]
 - [[_COMMUNITY_Community 432|Community 432]]
-- [[_COMMUNITY_Community 433|Community 433]]
 - [[_COMMUNITY_Community 434|Community 434]]
 - [[_COMMUNITY_Community 435|Community 435]]
 - [[_COMMUNITY_Community 436|Community 436]]
@@ -723,7 +722,7 @@
 - 1-file cycle: `apps/desktop/src-tauri/src/project_state.rs -> apps/desktop/src-tauri/src/project_state.rs`
 - 2-file cycle: `apps/desktop/src/data.ts -> apps/desktop/src/dock-data.ts -> apps/desktop/src/data.ts`
 
-## Communities (679 total, 299 thin omitted)
+## Communities (678 total, 299 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.06
@@ -826,12 +825,12 @@ Cohesion: 0.06
 Nodes (34): Checksum Managed Files, Command Reference, Contents, Development, Dock Format, Example Docks, File Ownership, How It Works (+26 more)
 
 ### Community 25 - "Community 25"
-Cohesion: 0.13
-Nodes (23): fileChangesFromSummary(), installedDockRecordFor(), InstallReport, installReportFor(), UninstallReport, uninstallReportFor(), DockInstaller, DockResolver (+15 more)
+Cohesion: 0.11
+Nodes (24): fileChangesFromSummary(), installedDockRecordFor(), InstallReport, installReportFor(), UninstallReport, uninstallReportFor(), DockInstaller, DockResolver (+16 more)
 
 ### Community 26 - "Community 26"
 Cohesion: 0.08
-Nodes (26): 0.1.0 - 2026-06-07, 0.1.11 - 2026-06-12, 0.1.12 - 2026-06-12, 0.1.13 - 2026-06-12, 0.1.1 - 2026-06-12, 0.1.2 - 2026-06-12, 0.1.37 - 2026-06-22, 0.1.38 - 2026-06-22 (+18 more)
+Nodes (25): 0.1.0 - 2026-06-07, 0.1.13 - 2026-06-12, 0.1.1 - 2026-06-12, 0.1.25 - 2026-06-15, 0.1.2 - 2026-06-12, 0.1.37 - 2026-06-22, 0.1.38 - 2026-06-22, 0.1.42 - 2026-06-23 (+17 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.17
@@ -898,8 +897,8 @@ Cohesion: 0.14
 Nodes (10): appRoot, assertSidecarCliRuns(), localCliEntry, localCliRoot, outDir, outPath, repoRoot, sidecarSmokeTestEnv() (+2 more)
 
 ### Community 44 - "Community 44"
-Cohesion: 0.14
-Nodes (21): blockedShellTokens, commandSeparatorTokens, includesShellOperator(), blockedCommandReason(), blockedPackageRunnerFlags, commonAllowedCommands, isAllowedCommandShape(), isExact() (+13 more)
+Cohesion: 0.19
+Nodes (18): blockedCommandReason(), blockedPackageRunnerFlags, commonAllowedCommands, isAllowedCommandShape(), isExact(), isLocalPackageSpec(), isPermissionAllowed(), isSafePackageManagerCommand() (+10 more)
 
 ### Community 45 - "Community 45"
 Cohesion: 0.14
@@ -990,8 +989,8 @@ Cohesion: 0.26
 Nodes (13): Security-first MCP inventory, config examples, and review checklists., Security-first MCP inventory, config examples, and review checklists., Test planning, regression, bug report, accessibility, and performance review templates., Test planning, regression, bug report, accessibility, and performance review templates., QA quality gate for regression coverage, smoke tests, security checks, release confidence, and final handoff discipline., QA quality gate for regression coverage, smoke tests, security checks, release confidence, and final handoff discipline., Tag: config, Tag: mcp (+5 more)
 
 ### Community 67 - "Community 67"
-Cohesion: 0.24
-Nodes (14): Campaign briefs, content calendars, SEO briefs, and ad experiment planning., Campaign briefs, content calendars, SEO briefs, and ad experiment planning., Business model, ICP, GTM, pricing, and founder strategy workspace., Business model, ICP, GTM, pricing, and founder strategy workspace., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes., Tag: business, Tag: campaign (+6 more)
+Cohesion: 0.17
+Nodes (20): Campaign briefs, content calendars, SEO briefs, and ad experiment planning., Campaign briefs, content calendars, SEO briefs, and ad experiment planning., PRD, user story, roadmap, release note, and decision template workspace., PRD, user story, roadmap, release note, and decision template workspace., Business model, ICP, GTM, pricing, and founder strategy workspace., Business model, ICP, GTM, pricing, and founder strategy workspace., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes. (+12 more)
 
 ### Community 68 - "Community 68"
 Cohesion: 0.14
@@ -1014,8 +1013,8 @@ Cohesion: 0.15
 Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
 
 ### Community 73 - "Community 73"
-Cohesion: 0.15
-Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
+Cohesion: 0.14
+Nodes (14): description, required, type, definitions, Capability, Number, PermissionEntry, Target (+6 more)
 
 ### Community 74 - "Community 74"
 Cohesion: 0.17
@@ -1919,7 +1918,7 @@ Nodes (4): default, description, type, description
 
 ### Community 313 - "Community 313"
 Cohesion: 0.06
-Nodes (29): DockRef, exportSpecSchema, fileSpecSchema, formatManifestReadError(), formatManifestSchemaError(), ManifestReader, manifestSchema, packageManagerSchema (+21 more)
+Nodes (31): exportSpecSchema, fileSpecSchema, formatManifestReadError(), formatManifestSchemaError(), ManifestReader, manifestSchema, packageManagerSchema, ParsedDockManifest (+23 more)
 
 ### Community 314 - "Community 314"
 Cohesion: 0.12
@@ -2106,8 +2105,8 @@ Cohesion: 0.15
 Nodes (11): cliBinaryPath, createDockArchive(), createFixture(), Fixture, packageDir, registryPreloadSource(), registryRelease(), tempRoots (+3 more)
 
 ### Community 360 - "Community 360"
-Cohesion: 0.67
-Nodes (3): 0.1.5 - 2026-06-12, Changed, Tests
+Cohesion: 0.50
+Nodes (4): 0.1.11 - 2026-06-12, 0.1.12 - 2026-06-12, Changed, Changed
 
 ### Community 361 - "Community 361"
 Cohesion: 0.23
@@ -2166,8 +2165,8 @@ Cohesion: 0.12
 Nodes (17): commandEnvironment(), CommandResult, CommandRunOptions, compareVersions(), macosHomebrewPathEntries, macosSystemPathEntries, macosUserPathEntries(), minimalEnvironment() (+9 more)
 
 ### Community 422 - "Community 422"
-Cohesion: 0.53
-Nodes (6): PRD, user story, roadmap, release note, and decision template workspace., PRD, user story, roadmap, release note, and decision template workspace., Tag: planning, Tag: prd, Tag: product, Tag: roadmap
+Cohesion: 0.67
+Nodes (3): 0.1.4 - 2026-06-12, Fixed, Tests
 
 ### Community 423 - "Community 423"
 Cohesion: 0.22
@@ -2175,7 +2174,7 @@ Nodes (5): captureManifestError(), tempRoots, writeExecutable(), writeFakeBun(),
 
 ### Community 424 - "Community 424"
 Cohesion: 0.67
-Nodes (3): 0.1.25 - 2026-06-15, Desktop App, Tests
+Nodes (3): Value, anyOf, description
 
 ### Community 425 - "Community 425"
 Cohesion: 0.67
@@ -2208,10 +2207,6 @@ Nodes (3): 0.1.26 - 2026-06-16, Desktop App, Tests
 ### Community 432 - "Community 432"
 Cohesion: 0.67
 Nodes (3): Identifier, description, oneOf
-
-### Community 433 - "Community 433"
-Cohesion: 0.50
-Nodes (4): description, required, type, Capability
 
 ### Community 434 - "Community 434"
 Cohesion: 0.67

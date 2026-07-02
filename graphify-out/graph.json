@@ -2630,7 +2630,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "schemas_macos_schema_definitions_capability",
-      "community": 433,
+      "community": 73,
       "norm_label": "capability"
     },
     {
@@ -2640,7 +2640,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "schemas_macos_schema_capability_description",
-      "community": 433,
+      "community": 73,
       "norm_label": "description"
     },
     {
@@ -2650,7 +2650,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "schemas_macos_schema_capability_type",
-      "community": 433,
+      "community": 73,
       "norm_label": "type"
     },
     {
@@ -2660,7 +2660,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "schemas_macos_schema_capability_required",
-      "community": 433,
+      "community": 73,
       "norm_label": "required"
     },
     {
@@ -3150,7 +3150,7 @@
       "source_location": "L2251",
       "_origin": "ast",
       "id": "schemas_macos_schema_definitions_value",
-      "community": 73,
+      "community": 424,
       "norm_label": "value"
     },
     {
@@ -3160,7 +3160,7 @@
       "source_location": "L2252",
       "_origin": "ast",
       "id": "schemas_macos_schema_value_description",
-      "community": 73,
+      "community": 424,
       "norm_label": "description"
     },
     {
@@ -3170,7 +3170,7 @@
       "source_location": "L2253",
       "_origin": "ast",
       "id": "schemas_macos_schema_value_anyof",
-      "community": 73,
+      "community": 424,
       "norm_label": "anyof"
     },
     {
@@ -11910,7 +11910,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "domain_manifest_dockref",
-      "community": 313,
+      "community": 25,
       "norm_label": "dockref"
     },
     {
@@ -11920,7 +11920,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "domain_manifest_dockref_constructor",
-      "community": 313,
+      "community": 25,
       "norm_label": ".constructor()"
     },
     {
@@ -11940,7 +11940,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "domain_manifest_dockref_id",
-      "community": 313,
+      "community": 25,
       "norm_label": ".id()"
     },
     {
@@ -11950,7 +11950,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "domain_manifest_dockref_requested",
-      "community": 313,
+      "community": 25,
       "norm_label": ".requested()"
     },
     {
@@ -11960,7 +11960,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "domain_manifest_dockref_tostring",
-      "community": 313,
+      "community": 25,
       "norm_label": ".tostring()"
     },
     {
@@ -12370,7 +12370,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_shell_operators",
-      "community": 44,
+      "community": 313,
       "norm_label": "shell-operators.ts"
     },
     {
@@ -12380,7 +12380,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_shell_operators_blockedshelltokens",
-      "community": 44,
+      "community": 313,
       "norm_label": "blockedshelltokens"
     },
     {
@@ -12390,7 +12390,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "domain_shell_operators_commandseparatortokens",
-      "community": 44,
+      "community": 313,
       "norm_label": "commandseparatortokens"
     },
     {
@@ -12400,7 +12400,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "domain_shell_operators_includesshelloperator",
-      "community": 44,
+      "community": 313,
       "norm_label": "includesshelloperator()"
     },
     {
@@ -12410,7 +12410,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "domain_shell_operators_isshellcommandseparator",
-      "community": 44,
+      "community": 313,
       "norm_label": "isshellcommandseparator()"
     },
     {
@@ -16327,7 +16327,7 @@
       "label": "packageDir",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L13",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_packagedir",
       "community": 359,
@@ -16337,7 +16337,7 @@
       "label": "cliBinaryPath",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L14",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_clibinarypath",
       "community": 359,
@@ -16347,7 +16347,7 @@
       "label": "tempRoots",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L15",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_temproots",
       "community": 359,
@@ -16357,7 +16357,7 @@
       "label": "Fixture",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L72",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_fixture",
       "community": 359,
@@ -16367,7 +16367,7 @@
       "label": "TestRelease",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L81",
+      "source_location": "L92",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_testrelease",
       "community": 359,
@@ -16377,7 +16377,7 @@
       "label": "createFixture()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L91",
+      "source_location": "L102",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_createfixture",
       "community": 359,
@@ -16387,7 +16387,7 @@
       "label": "runCli()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L110",
+      "source_location": "L121",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_runcli",
       "community": 359,
@@ -16397,7 +16397,7 @@
       "label": "writeDock()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L133",
+      "source_location": "L144",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_writedock",
       "community": 359,
@@ -16407,7 +16407,7 @@
       "label": "writeRegistry()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L164",
+      "source_location": "L175",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_writeregistry",
       "community": 359,
@@ -16417,7 +16417,7 @@
       "label": "registryRelease()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L168",
+      "source_location": "L179",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_registryrelease",
       "community": 359,
@@ -16427,7 +16427,7 @@
       "label": "createDockArchive()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L190",
+      "source_location": "L201",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_createdockarchive",
       "community": 359,
@@ -16437,7 +16437,7 @@
       "label": "combinedOutput()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L202",
+      "source_location": "L213",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_combinedoutput",
       "community": 359,
@@ -16447,7 +16447,7 @@
       "label": "registryPreloadSource()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
-      "source_location": "L206",
+      "source_location": "L217",
       "_origin": "ast",
       "id": "tests_cli_cross_platform_smoke_test_registrypreloadsource",
       "community": 359,
@@ -16727,7 +16727,7 @@
       "label": "packageDir",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L14",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_packagedir",
       "community": 314,
@@ -16737,7 +16737,7 @@
       "label": "cliBinaryPath",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L15",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_clibinarypath",
       "community": 314,
@@ -16747,7 +16747,7 @@
       "label": "escapeCharacter",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L16",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_escapecharacter",
       "community": 314,
@@ -16757,7 +16757,7 @@
       "label": "ansiPattern",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L17",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_ansipattern",
       "community": 314,
@@ -16767,7 +16767,7 @@
       "label": "tempRoots",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L18",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_temproots",
       "community": 314,
@@ -16777,7 +16777,7 @@
       "label": "Fixture",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L251",
+      "source_location": "L262",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_fixture",
       "community": 314,
@@ -16787,7 +16787,7 @@
       "label": "RunOptions",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L260",
+      "source_location": "L271",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_runoptions",
       "community": 314,
@@ -16797,7 +16797,7 @@
       "label": "TestRelease",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L266",
+      "source_location": "L277",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_testrelease",
       "community": 314,
@@ -16807,7 +16807,7 @@
       "label": "createFixture()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L276",
+      "source_location": "L287",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_createfixture",
       "community": 314,
@@ -16817,7 +16817,7 @@
       "label": "runCli()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L295",
+      "source_location": "L306",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_runcli",
       "community": 314,
@@ -16827,7 +16827,7 @@
       "label": "cliEnv()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L308",
+      "source_location": "L319",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_clienv",
       "community": 314,
@@ -16837,7 +16837,7 @@
       "label": "writeDock()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L338",
+      "source_location": "L349",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_writedock",
       "community": 314,
@@ -16847,7 +16847,7 @@
       "label": "writeRegistry()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L394",
+      "source_location": "L405",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_writeregistry",
       "community": 314,
@@ -16857,7 +16857,7 @@
       "label": "registryRelease()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L398",
+      "source_location": "L409",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_registryrelease",
       "community": 314,
@@ -16867,7 +16867,7 @@
       "label": "createDockArchive()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L420",
+      "source_location": "L431",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_createdockarchive",
       "community": 314,
@@ -16877,7 +16877,7 @@
       "label": "sha256()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L439",
+      "source_location": "L450",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_sha256",
       "community": 314,
@@ -16887,7 +16887,7 @@
       "label": "stripAnsi()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L443",
+      "source_location": "L454",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_stripansi",
       "community": 314,
@@ -16897,7 +16897,7 @@
       "label": "restoreEnv()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L447",
+      "source_location": "L458",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_restoreenv",
       "community": 314,
@@ -16907,7 +16907,7 @@
       "label": "registryPreloadSource()",
       "file_type": "code",
       "source_file": "packages/cli/tests/cli-ux-status.test.ts",
-      "source_location": "L455",
+      "source_location": "L466",
       "_origin": "ast",
       "id": "tests_cli_ux_status_test_registrypreloadsource",
       "community": 314,
@@ -19950,7 +19950,7 @@
       "source_location": "L360",
       "_origin": "ast",
       "id": "changelog_0_1_25_2026_06_15",
-      "community": 424,
+      "community": 26,
       "norm_label": "0.1.25 - 2026-06-15"
     },
     {
@@ -19960,7 +19960,7 @@
       "source_location": "L362",
       "_origin": "ast",
       "id": "changelog_desktop_app_362",
-      "community": 424,
+      "community": 26,
       "norm_label": "desktop app"
     },
     {
@@ -19970,7 +19970,7 @@
       "source_location": "L369",
       "_origin": "ast",
       "id": "changelog_tests_369",
-      "community": 424,
+      "community": 26,
       "norm_label": "tests"
     },
     {
@@ -20390,7 +20390,7 @@
       "source_location": "L557",
       "_origin": "ast",
       "id": "changelog_0_1_12_2026_06_12",
-      "community": 26,
+      "community": 360,
       "norm_label": "0.1.12 - 2026-06-12"
     },
     {
@@ -20400,7 +20400,7 @@
       "source_location": "L559",
       "_origin": "ast",
       "id": "changelog_changed_559",
-      "community": 26,
+      "community": 360,
       "norm_label": "changed"
     },
     {
@@ -20410,7 +20410,7 @@
       "source_location": "L564",
       "_origin": "ast",
       "id": "changelog_0_1_11_2026_06_12",
-      "community": 26,
+      "community": 360,
       "norm_label": "0.1.11 - 2026-06-12"
     },
     {
@@ -20420,7 +20420,7 @@
       "source_location": "L566",
       "_origin": "ast",
       "id": "changelog_changed_566",
-      "community": 26,
+      "community": 360,
       "norm_label": "changed"
     },
     {
@@ -20610,7 +20610,7 @@
       "source_location": "L658",
       "_origin": "ast",
       "id": "changelog_0_1_5_2026_06_12",
-      "community": 360,
+      "community": 26,
       "norm_label": "0.1.5 - 2026-06-12"
     },
     {
@@ -20620,7 +20620,7 @@
       "source_location": "L660",
       "_origin": "ast",
       "id": "changelog_changed_660",
-      "community": 360,
+      "community": 26,
       "norm_label": "changed"
     },
     {
@@ -20630,7 +20630,7 @@
       "source_location": "L669",
       "_origin": "ast",
       "id": "changelog_tests_669",
-      "community": 360,
+      "community": 26,
       "norm_label": "tests"
     },
     {
@@ -20640,7 +20640,7 @@
       "source_location": "L676",
       "_origin": "ast",
       "id": "changelog_0_1_4_2026_06_12",
-      "community": 26,
+      "community": 422,
       "norm_label": "0.1.4 - 2026-06-12"
     },
     {
@@ -20650,7 +20650,7 @@
       "source_location": "L678",
       "_origin": "ast",
       "id": "changelog_fixed_678",
-      "community": 26,
+      "community": 422,
       "norm_label": "fixed"
     },
     {
@@ -20660,7 +20660,7 @@
       "source_location": "L683",
       "_origin": "ast",
       "id": "changelog_tests_683",
-      "community": 26,
+      "community": 422,
       "norm_label": "tests"
     },
     {
@@ -42038,7 +42038,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 422,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "prd, user story, roadmap, release note, and decision template workspace.",
       "id": "opendock__product_manager_dock_macos_file"
@@ -42052,7 +42052,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 422,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "prd, user story, roadmap, release note, and decision template workspace.",
       "id": "opendock__product_manager_dock_windows_file"
@@ -45762,7 +45762,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 422,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: product",
       "id": "opendock_tag_product"
@@ -46196,7 +46196,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 422,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: prd",
       "id": "opendock_tag_prd"
@@ -46210,7 +46210,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 422,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: roadmap",
       "id": "opendock_tag_roadmap"
@@ -46224,7 +46224,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 422,
+      "community": 67,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: planning",
       "id": "opendock_tag_planning"
@@ -88251,9 +88251,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "src_platform",
-      "confidence_score": 1.0
+      "target": "src_platform"
     },
     {
       "relation": "imports_from",
@@ -88449,9 +88449,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "src_platform_opendockplatform",
-      "confidence_score": 1.0
+      "target": "src_platform_opendockplatform"
     },
     {
       "relation": "references",
@@ -88460,9 +88460,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test_testrelease",
-      "target": "src_platform_opendockplatform",
-      "confidence_score": 1.0
+      "target": "src_platform_opendockplatform"
     },
     {
       "relation": "imports",
@@ -88592,9 +88592,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "src_platform_detectplatform",
-      "confidence_score": 1.0
+      "target": "src_platform_detectplatform"
     },
     {
       "relation": "imports",
@@ -90204,9 +90204,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_clibinarypath",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_clibinarypath"
     },
     {
       "relation": "contains",
@@ -90214,9 +90214,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L202",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_combinedoutput",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_combinedoutput"
     },
     {
       "relation": "contains",
@@ -90224,9 +90224,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L190",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_createdockarchive",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_createdockarchive"
     },
     {
       "relation": "contains",
@@ -90234,9 +90234,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_createfixture",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_createfixture"
     },
     {
       "relation": "contains",
@@ -90244,9 +90244,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L72",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_fixture",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_fixture"
     },
     {
       "relation": "contains",
@@ -90254,9 +90254,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_packagedir",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_packagedir"
     },
     {
       "relation": "contains",
@@ -90264,9 +90264,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L206",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_registrypreloadsource",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_registrypreloadsource"
     },
     {
       "relation": "contains",
@@ -90274,9 +90274,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L168",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_registryrelease",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_registryrelease"
     },
     {
       "relation": "contains",
@@ -90284,9 +90284,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L110",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_runcli",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_runcli"
     },
     {
       "relation": "contains",
@@ -90294,9 +90294,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_temproots",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_temproots"
     },
     {
       "relation": "contains",
@@ -90304,9 +90304,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_testrelease",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_testrelease"
     },
     {
       "relation": "contains",
@@ -90314,9 +90314,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L133",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_writedock",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_writedock"
     },
     {
       "relation": "contains",
@@ -90324,9 +90324,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L164",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_cli_cross_platform_smoke_test_writeregistry",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_writeregistry"
     },
     {
       "relation": "imports_from",
@@ -90335,9 +90335,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_release_signature_helper",
-      "confidence_score": 1.0
+      "target": "tests_release_signature_helper"
     },
     {
       "relation": "imports",
@@ -90346,9 +90346,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test",
-      "target": "tests_release_signature_helper_testreleasesignature",
-      "confidence_score": 1.0
+      "target": "tests_release_signature_helper_testreleasesignature"
     },
     {
       "relation": "calls",
@@ -90357,9 +90357,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L106",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test_createfixture",
-      "target": "tests_cli_cross_platform_smoke_test_registrypreloadsource",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_registrypreloadsource"
     },
     {
       "relation": "calls",
@@ -90368,9 +90368,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L176",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test_registryrelease",
-      "target": "tests_cli_cross_platform_smoke_test_createdockarchive",
-      "confidence_score": 1.0
+      "target": "tests_cli_cross_platform_smoke_test_createdockarchive"
     },
     {
       "relation": "calls",
@@ -90379,9 +90379,9 @@
       "source_file": "packages/cli/tests/cli-cross-platform-smoke.test.ts",
       "source_location": "L185",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_cli_cross_platform_smoke_test_registryrelease",
-      "target": "tests_release_signature_helper_testreleasesignature",
-      "confidence_score": 1.0
+      "target": "tests_release_signature_helper_testreleasesignature"
     },
     {
       "relation": "contains",
@@ -116930,5 +116930,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "fea4a175cf142fb5ab6f7ba5a62b3be397d0a1d1"
+  "built_at_commit": "9989a8b7dd742dc6ece7002791b38b678ca1015a"
 }

@@ -1,6 +1,14 @@
 import { type SpawnSyncReturns, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,6 +21,9 @@ import { testReleaseSignature } from "./release-signature-helper.js";
 
 const packageDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const cliBinaryPath = join(packageDir, "bin", "opendock");
+const cliEntrypointPath = existsSync(cliBinaryPath)
+  ? cliBinaryPath
+  : join(packageDir, "src", "cli.ts");
 const escapeCharacter = String.fromCharCode(27);
 const ansiPattern = new RegExp(`${escapeCharacter}\\[[0-9;]*m`, "g");
 const tempRoots: string[] = [];
@@ -298,7 +309,7 @@ function runCli(
   options: RunOptions = {},
 ): SpawnSyncReturns<string> {
   const env = cliEnv(fixture, options);
-  return spawnSync("bun", ["--preload", fixture.preload, cliBinaryPath, ...args], {
+  return spawnSync("bun", ["--preload", fixture.preload, cliEntrypointPath, ...args], {
     cwd: fixture.project,
     encoding: "utf8",
     env,

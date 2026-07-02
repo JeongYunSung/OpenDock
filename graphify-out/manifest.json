@@ -2675,8 +2675,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-ux-status.test.ts": {
-    "mtime": 1782968847.718523,
-    "ast_hash": "f87ea4f0faa94037278a69080a420935",
+    "mtime": 1782970046.3350937,
+    "ast_hash": "1de8bc21090e90d676d6b247d27a1f0e",
     "semantic_hash": ""
   },
   "packages/cli/tests/real-examples-matrix.test.ts": {
@@ -2685,8 +2685,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-cross-platform-smoke.test.ts": {
-    "mtime": 1782969687.719169,
-    "ast_hash": "b8bd5c198e8dae3107f9369406745a99",
+    "mtime": 1782970046.3348594,
+    "ast_hash": "3eb9f341968eb22cd1ba8ffdbbb21ef8",
     "semantic_hash": ""
   },
   ".github/workflows/cli-quality.yml": {
