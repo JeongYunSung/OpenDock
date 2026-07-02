@@ -62,8 +62,9 @@ files:
 | `readme` | Markdown para la página de detalle del catalog. |
 | `logo` | Imagen de logo del catalog. |
 | `tags` | Labels lowercase para búsqueda y filtros en Hub. |
-| `permission` | Permite de forma exacta comandos de `run` / `check` fuera de la política por defecto. |
+| `permissions` | Permite de forma exacta comandos de `run` / `check` fuera de la política por defecto. |
 | `requires` | Requisitos de runtime. |
+| `tools` | CLI packages installed and tracked under `.opendock/tools/`. |
 | `files` | Archivos o directorios aplicados al project root. |
 | `install` | Tasks for first install and initial generation. |
 | `update` | Tasks for refresh and maintenance. |
@@ -133,10 +134,10 @@ modificar el proyecto.
 
 ## Task Command Permission
 
-OpenDock no pasa `run` ni `check` directamente a una shell. La política por defecto solo permite `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Cualquier otro comando, como `oma`, `codex`, `claude`, `omx` o `mkdir`, debe declararse exactamente en el campo top-level `permission`. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permission`, `run` y `check`.
+OpenDock no pasa `run` ni `check` directamente a una shell. La política por defecto solo permite `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Cualquier otro comando, como `oma`, `codex`, `claude`, `omx` o `mkdir`, debe declararse exactamente en el campo top-level `permissions`. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
   - codex --version
@@ -149,7 +150,7 @@ ejecutarse. Luego usa `workdir: dock` y exporta solo los archivos que OpenDock
 debe gestionar en el proyecto.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
 

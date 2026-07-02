@@ -65,7 +65,8 @@ herramienta pequeña para instalar y gestionar setup de IA repetible.
 | **Project scope** | Proyecto actual | Lista de docks instalados, lock, logs y metadatos del proyecto. |
 | **Dock scope** | Un dock instalado | Versión, checksum, registros de archivos gestionados y workdir privado. |
 | **Root output scope** | OpenDock file engine | Archivos aplicados al project root tras la comprobación previa. |
-| **System/tool scope** | Host tools | Runtimes preparados por `requires` y herramientas instaladas por tasks permitidas, como Homebrew, npm, Bun, pip o winget. |
+| **Host bootstrap scope** | Your machine | Homebrew or WinGet are prepared explicitly with `opendock bootstrap`. |
+| **Tool scope** | Installed dock | CLI packages declared in `tools` are installed under `.opendock/tools/` and exposed through `.opendock/bin/`. |
 
 ## Install
 
@@ -163,10 +164,10 @@ en el project root.
 
 ## Task Command Permission
 
-Los tasks `run` y `check` de OpenDock usan una política pequeña por defecto: `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Cualquier otro command, como `oma`, `codex`, `claude`, `omx` o `mkdir`, debe declararse exactamente en el campo top-level `permission`. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permission`, `run` y `check`.
+Los tasks `run` y `check` de OpenDock usan una política pequeña por defecto: `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Cualquier otro command, como `oma`, `codex`, `claude`, `omx` o `mkdir`, debe declararse exactamente en el campo top-level `permissions`. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
   - codex --version

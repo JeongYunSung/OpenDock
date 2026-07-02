@@ -64,7 +64,8 @@ OpenDock はターミナルの代替でも、汎用 script runner でもあり�
 | **Project scope** | 現在の project | installed dock list, lock, log, project metadata. |
 | **Dock scope** | 1つの installed dock | version, checksum, managed file record, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 後に project root へ適用される file. |
-| **System/tool scope** | host tool | `requires` が準備する runtime と、許可された task がインストールする Homebrew, npm, Bun, pip, winget などの host tool. |
+| **Host bootstrap scope** | Your machine | Homebrew や WinGet は `opendock bootstrap` で明示的に準備します. |
+| **Tool scope** | Installed dock | `tools` に宣言した CLI package を `.opendock/tools/` に入れ、`.opendock/bin/` から使えるようにします. |
 
 ## Install
 
@@ -161,10 +162,10 @@ dock-private workdir で実行する task が事前に input file を必要と�
 
 ## Task Command Permission
 
-OpenDock の task は `run` と `check` を小さな標準ポリシーで実行します。標準 command は `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` です。macOS は `brew`、Windows は `powershell`, `winget` も許可します。`oma`, `codex`, `claude`, `omx`, `mkdir` のような command は top-level `permission` に完全一致する形で宣言します。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permission`, `run`, `check` で拒否されます。
+OpenDock の task は `run` と `check` を小さな標準ポリシーで実行します。標準 command は `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` です。macOS は `brew`、Windows は `powershell`, `winget` も許可します。`oma`, `codex`, `claude`, `omx`, `mkdir` のような command は top-level `permissions` に完全一致する形で宣言します。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
   - codex --version

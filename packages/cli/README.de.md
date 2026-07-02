@@ -66,7 +66,8 @@ kleines Tool, um wiederholbares KI-Setup zu installieren und zu verwalten.
 | **Project scope** | Aktuelles Projekt | Installierte docks, lock, logs und Projektmetadaten. |
 | **Dock scope** | Ein installierter dock | Version, checksum, verwaltete Dateien und privates workdir. |
 | **Root output scope** | OpenDock file engine | Dateien, die nach der Vorprüfung in den project root geschrieben werden. |
-| **System/tool scope** | Host tools | Runtimes aus `requires` und Tools, die erlaubte tasks installieren, z. B. Homebrew, npm, Bun, pip oder winget. |
+| **Host bootstrap scope** | Your machine | Homebrew or WinGet are prepared explicitly with `opendock bootstrap`. |
+| **Tool scope** | Installed dock | CLI packages declared in `tools` are installed under `.opendock/tools/` and exposed through `.opendock/bin/`. |
 
 ## Install
 
@@ -164,10 +165,10 @@ geschrieben werden sollen.
 
 ## Task Command Permission
 
-OpenDock tasks `run` und `check` nutzen eine kleine Standard-Policy: `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Andere Commands wie `oma`, `codex`, `claude`, `omx` oder `mkdir` müssen exakt im top-level Feld `permission` stehen. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permission`, `run` und `check` abgelehnt.
+OpenDock tasks `run` und `check` nutzen eine kleine Standard-Policy: `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Andere Commands wie `oma`, `codex`, `claude`, `omx` oder `mkdir` müssen exakt im top-level Feld `permissions` stehen. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
   - codex --version

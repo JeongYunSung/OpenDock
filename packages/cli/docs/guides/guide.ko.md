@@ -38,6 +38,7 @@ update와 uninstall까지 추적할 수 있게 만드는 작은 packaging layer�
 - [Dock reference](#dock-reference)
 - [readme, logo, tags](#readme-logo-tags)
 - [requires](#requires)
+- [tools](#tools)
 - [files](#files)
 - [파일 소유권](#파일-소유권)
 - [tasks](#tasks)
@@ -53,13 +54,14 @@ update와 uninstall까지 추적할 수 있게 만드는 작은 packaging layer�
 
 ## 작성 전 결정할 것
 
-dock을 작성하기 전에 네 가지를 먼저 정하세요.
+dock을 작성하기 전에 아래 내용을 먼저 정하세요.
 
 1. **대상 결과**: 단순 도구 설치인지, 특정 직군/워크플로우용 AI 셋업인지 정합니다.
 2. **root에 남길 파일**: `AGENTS.md`, `.agents/`, `.codex/`, `DESIGN.md`처럼 프로젝트가 실제로 읽을 파일을 정합니다.
 3. **task 실행 위치**: 프로젝트 root에서 실행할지, dock 전용 workdir에서 실행한 뒤 export할지 정합니다.
-4. **필요한 runtime**: Node, Bun, npm, Python처럼 host에서 확인해야 하는 runtime을 정합니다.
-5. **유지보수 방식**: update 때 다시 실행할 설치 step, doctor로 확인할 상태를 정합니다.
+4. **필요한 runtime**: Node, Bun, npm, Python처럼 task 실행 전에 필요한 command를 정합니다.
+5. **설치할 CLI 도구**: Codex, Claude Code, OMA처럼 OpenDock이 프로젝트 안에서 설치하고 추적할 package를 정합니다.
+6. **유지보수 방식**: update 때 다시 실행할 설치 step, doctor로 확인할 상태를 정합니다.
 
 OpenDock은 outcome-first package를 권장합니다. `opendock/codex`처럼 도구 하나만
 설치하는 dock도 가능하지만, 더 좋은 dock은 다른 dock과 조합돼도 잘 동작하면서
@@ -171,8 +173,9 @@ doctor:
 | `readme` | 선택 | Registry catalog 상세 본문으로 제출할 Markdown 경로입니다. |
 | `logo` | 선택 | Registry catalog 대표 이미지로 제출할 이미지 경로입니다. |
 | `tags` | 선택 | Hub 검색과 필터에 사용할 lowercase catalog label입니다. |
-| `permission` | 선택 | 기본 정책 밖의 `run`/`check` command를 정확한 형태로 허용합니다. |
+| `permissions` | 선택 | 기본 정책 밖의 `run`/`check` command를 정확한 형태로 허용합니다. |
 | `requires` | 선택 | dock 실행 전에 준비할 runtime requirement입니다. |
+| `tools` | 선택 | `.opendock/tools/`에 설치하고 추적할 CLI package입니다. |
 | `files` | 선택 | 프로젝트 root로 적용할 파일 또는 디렉터리 mapping입니다. |
 | `install` | 선택 | 최초 install과 초기 생성 작업 task입니다. |
 | `update` | 선택 | refresh와 유지보수 작업 task입니다. |
@@ -254,28 +257,24 @@ tags:
 
 ## requires
 
-`requires`는 dock을 실행하기 전에 OpenDock이 확인하고 준비해야 하는 host runtime을
-선언합니다. 프로젝트에 복사되는 파일이 아니라 system/tool scope에 대한 요구사항입니다.
-CLI package 설치는 `install` 또는 `update` step에 명시합니다.
+`requires`는 dock을 실행하기 전에 필요한 runtime을 선언합니다. OpenDock은
+install/update/doctor 전에 runtime을 확인하고, 프로젝트 안의 `.opendock/toolchains/`와
+`.opendock/bin/`을 통해 project-local command로 준비합니다. dock task가 runtime을
+전역 설치하지 않습니다.
 
 ```yaml
 requires:
   runtimes:
     bun: ">=1.3.0"
-
-install:
-  - id: install-oma
-    run: bun install --global oh-my-agent@latest
+    node: ">=22.0.0"
 ```
 
 동작:
 
 1. install/update/doctor 전에 `requires`를 먼저 평가합니다.
 2. `runtimes`는 `node --version`, `bun --version` 같은 runtime check를 수행합니다.
-3. install/update에서 runtime이 없거나 version을 만족하지 않으면 OpenDock이 아는
-   host OS별 installer를 실행합니다.
-4. `bun install --global ...`, `npm install --global ...` 같은 CLI package 설치는
-   일반 `install`/`update` step으로 실행합니다.
+3. version을 만족하는 runtime command는 `.opendock/bin`을 통해 OpenDock task에 노출됩니다.
+4. runtime이 없거나 version을 만족하지 않으면 명확한 에러로 중단합니다.
 5. doctor에서는 설치나 수정 없이 상태만 확인합니다.
 
 현재 지원 runtime key:
@@ -291,7 +290,11 @@ python
 python3
 ```
 
-예시:
+## tools
+
+`tools`는 OpenDock이 프로젝트 안에 설치하고 추적할 CLI package입니다. 예를 들어
+Codex, Claude Code, OMA처럼 command를 제공하는 패키지는 task에서 global install하지
+말고 `tools`로 선언합니다.
 
 ```yaml
 requires:
@@ -299,21 +302,23 @@ requires:
     node: ">=22.0.0"
     npm: ">=10.0.0"
 
-install:
-  - id: install-codex
-    run: npm install --global @openai/codex@latest
-
-update:
-  - id: update-codex
-    run: npm install --global @openai/codex@latest
+tools:
+  codex:
+    manager: npm
+    package: "@openai/codex"
+    version: latest
+    commands:
+      - codex
 ```
 
 주의할 점:
 
-- `requires`는 OpenDock이 host runtime을 준비하는 영역입니다.
+- `requires`는 runtime을 확인하고 project-local command로 준비하는 영역입니다.
+- CLI package 설치는 `tools`로 선언합니다.
+- `npm install --global ...`, `bun install --global ...`, `pipx install ...` 같은 global install은 dock task에서 거부됩니다.
 - root에 적용할 파일은 `files` 또는 step의 `export`로 선언해야 합니다.
 - raw shell, pipe, redirect는 `requires`에서도 허용되지 않습니다.
-- 설치된 CLI를 실행해야 한다면 `requires`가 아니라 `install`, `update`, `doctor` task에 `run`을 작성합니다.
+- 설치된 CLI를 실행해야 한다면 `tools.commands`에 command를 선언하고 `install`, `update`, `doctor` task에서 사용합니다.
 
 ## files
 
@@ -502,7 +507,7 @@ OpenDock의 task 실행 위치는 두 가지입니다.
 workdir에 먼저 넣을 수 있습니다.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
 
@@ -547,7 +552,7 @@ install:
 
 이 구조 덕분에 `oma`, `omx`, `npx ... install` 같은 외부 generator와 협력하면서도
 프로젝트 root에 들어온 최종 파일은 OpenDock이 추적할 수 있습니다. 단, `oma -y install`
-처럼 기본 정책 밖의 command는 top-level `permission`에 정확히 선언해야 합니다.
+처럼 기본 정책 밖의 command는 top-level `permissions`에 정확히 선언해야 합니다.
 
 ## platform artifact
 
@@ -613,7 +618,7 @@ semver를 출력하는 명령을 `check`로 사용하세요.
 
 OpenDock은 `requires`와 task에 shell script를 그대로 넘기지
 않습니다. `run`/`check` 문자열을 분리한 뒤 allowlist와 shape 검사를 통과한
-프로그램만 실행합니다. 기본 정책 밖의 command는 top-level `permission`에 정확한
+프로그램만 실행합니다. 기본 정책 밖의 command는 top-level `permissions`에 정확한
 형태로 선언해야 합니다.
 
 현재 공통 허용 프로그램:
@@ -650,13 +655,13 @@ script 실행용으로는 사용할 수 없습니다.
 기본 정책 밖의 command 예시:
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
   - codex --version
 ```
 
-`permission`은 정확히 일치해야 합니다. `oma -y install`을 허용해도 `oma install`,
+`permissions`는 정확히 일치해야 합니다. `oma -y install`을 허용해도 `oma install`,
 `oma -y update`, `oma doctor`는 자동으로 허용되지 않습니다. 필요한 형태를 각각
 명시하세요.
 
@@ -919,7 +924,7 @@ manifest:
 1. `opendock: 1`을 선언했는가?
 2. dock id와 release version을 `dock.yml`이 아니라 install/deploy 명령에서 정했는가?
 3. `readme`와 `logo`가 dock root 안의 실제 파일인가?
-4. 기본 정책 밖의 `run`/`check` command를 `permission`에 정확히 선언했는가?
+4. 기본 정책 밖의 `run`/`check` command를 `permissions`에 정확히 선언했는가?
 
 requires:
 

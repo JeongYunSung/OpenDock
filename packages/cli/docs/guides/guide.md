@@ -24,8 +24,9 @@ Decide these first:
 1. **Outcome**: a tool-only dock, or a ready-to-use AI setup for a role or workflow.
 2. **Root files**: files the project should actually read, such as `AGENTS.md`, `.codex/`, `.agents/`, `DESIGN.md`, or `README.md`.
 3. **Task location**: run tasks in the project root, or in a private dock workdir and export selected outputs.
-4. **Required runtimes**: host runtimes such as Git, Node, Bun, npm, pip, or Python.
-5. **Maintenance**: what should happen during update, doctor, and uninstall.
+4. **Required runtimes**: commands such as Git, Node, Bun, npm, pip, or Python that the dock needs before tasks run.
+5. **CLI tools**: packages such as Codex, Claude Code, or OMA that OpenDock should install and track project-locally.
+6. **Maintenance**: what should happen during update, doctor, and uninstall.
 
 Good docks are outcome-first. A tool-only dock such as `opendock/codex` is valid,
 but the most useful docks also provide structure, prompts, agent instructions,
@@ -91,8 +92,9 @@ stay outside the OpenDock block.
 | `readme` | no | Markdown file submitted as catalog detail content. |
 | `logo` | no | Catalog logo image path. |
 | `tags` | no | Lowercase catalog labels for Hub search and filtering. |
-| `permission` | no | Exact non-default task commands allowed in `run` and `check`. |
+| `permissions` | no | Exact non-default task commands allowed in `run` and `check`. |
 | `requires` | no | Runtime requirements prepared before tasks run. |
+| `tools` | no | CLI packages installed and tracked under `.opendock/tools/`. |
 | `workdir` | no | Files that prepare the private dock workdir before tasks run. |
 | `files` | no | File or directory mappings applied to the project root. |
 | `install` | no | Tasks for first install and initial generation. |
@@ -171,26 +173,47 @@ Rules:
 
 ## Requires
 
-`requires` checks and prepares host runtimes before `install`, `update`, and
-`doctor` tasks run. Package installs belong in explicit task steps.
+`requires` declares the runtimes this dock needs. OpenDock checks them before
+`install`, `update`, and `doctor`, then prepares project-local command shims
+under `.opendock/toolchains/` and `.opendock/bin/`. Dock tasks no longer install
+runtimes globally.
 
 ```yaml
 requires:
   runtimes:
     bun: ">=1.3.0"
-
-install:
-  - id: install-oma
-    run: bun install --global oh-my-agent@latest
+    node: ">=22.0.0"
 ```
 
 Behavior:
 
 1. Runtime checks run before `install`, `update`, and `doctor`.
-2. `install` prepares missing or outdated runtimes when OpenDock knows how.
-3. Package manager commands such as `bun install --global ...` or
-   `npm install --global ...` are normal `install`/`update` steps.
-4. `doctor` checks state only. It does not install or modify tools.
+2. Runtime commands are exposed through the project-local `.opendock/bin` path.
+3. Missing or out-of-range runtimes stop the dock run with a clear error.
+4. `doctor` checks state only. It does not install or modify runtimes.
+
+## Tools
+
+Use `tools` for CLI packages that should be installed, tracked, updated, and
+removed with the dock. Tools are installed project-locally under
+`.opendock/tools/`, and their declared commands are exposed through
+`.opendock/bin/`.
+
+```yaml
+tools:
+  oma:
+    manager: bun
+    package: oh-my-agent
+    version: latest
+    commands:
+      - oma
+      - oh-my-agent
+```
+
+Use `tools` instead of task commands such as `npm install --global ...`,
+`bun install --global ...`, `pipx install ...`, or `uv tool install ...`.
+OpenDock rejects those global install shapes even when they appear in
+`permissions`.
 
 ## Task Command Permission
 
@@ -224,25 +247,25 @@ Platform-specific defaults:
 | `windows` | `powershell`, `winget` |
 | `linux` | none |
 
-Commands outside this default policy must be declared in top-level `permission`
-with the exact shape OpenDock should allow.
+Commands outside this default policy must be declared in top-level
+`permissions` with the exact shape OpenDock should allow. Commands declared by
+`tools` automatically allow simple version checks such as `codex --version`.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
   - codex --version
 ```
 
-`permission` is exact. `oma -y install` does not allow `oma install`,
+`permissions` is exact. `oma -y install` does not allow `oma install`,
 `oma -y update`, or another `oma` command. Shell operators are still rejected in
-`permission`, `run`, and `check`: `|`, `&&`, `||`, `;`, backticks, `$(`, `>`,
+`permissions`, `run`, and `check`: `|`, `&&`, `||`, `;`, backticks, `$(`, `>`,
 and `<`.
 
-Use `permission` for app-specific CLIs such as `oma`, `codex`, `claude`, `omx`,
-`hermes`, or any project-specific helper. Keep package-manager installs such as
-`bun install --global ...` as normal task steps when they match the default
-policy.
+Use `permissions` for app-specific CLIs such as `oma`, `omx`, `hermes`, or any
+project-specific helper. Use `tools` for installing CLI packages; do not hide
+global installs inside task steps.
 
 ## Host Bootstrap
 
@@ -303,7 +326,7 @@ step in the private dock workdir and exports only declared outputs. Use
 `workdir.files` when that tool needs input files before it runs.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
 
@@ -437,7 +460,7 @@ Manifest:
 2. The dock id and release version are in the OpenDock command reference, not in
    `dock.yml`.
 3. `readme` and `logo` point to real files inside the dock directory.
-4. Non-default `run` and `check` commands are declared exactly in `permission`.
+4. Non-default `run` and `check` commands are declared exactly in `permissions`.
 
 Files:
 

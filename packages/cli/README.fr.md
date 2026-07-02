@@ -65,7 +65,8 @@ C'est un petit outil pour installer et gérer un setup IA répétable.
 | **Project scope** | Projet courant | Liste des docks installés, lock, logs et métadonnées projet. |
 | **Dock scope** | Un dock installé | Version, checksum, fichiers gérés et workdir privé. |
 | **Root output scope** | OpenDock file engine | Fichiers appliqués au project root après vérification préalable. |
-| **System/tool scope** | Host tools | Runtimes préparés par `requires` et outils installés par des tasks autorisées, comme Homebrew, npm, Bun, pip ou winget. |
+| **Host bootstrap scope** | Your machine | Homebrew or WinGet are prepared explicitly with `opendock bootstrap`. |
+| **Tool scope** | Installed dock | CLI packages declared in `tools` are installed under `.opendock/tools/` and exposed through `.opendock/bin/`. |
 
 ## Install
 
@@ -163,10 +164,10 @@ fichiers d'entrée avant son exécution. Utilisez `files` pour les fichiers à
 
 ## Task Command Permission
 
-Les tasks `run` et `check` d'OpenDock utilisent une petite politique par défaut : `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Sur macOS, `brew` est aussi autorisé; sur Windows, `powershell` et `winget`. Toute autre commande, comme `oma`, `codex`, `claude`, `omx` ou `mkdir`, doit être déclarée exactement dans le champ top-level `permission`. Les opérateurs `|`, `&&`, `||`, `;`, backticks, `$(`, `>` et `<` sont rejetés dans `permission`, `run` et `check`.
+Les tasks `run` et `check` d'OpenDock utilisent une petite politique par défaut : `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Sur macOS, `brew` est aussi autorisé; sur Windows, `powershell` et `winget`. Toute autre commande, comme `oma`, `codex`, `claude`, `omx` ou `mkdir`, doit être déclarée exactement dans le champ top-level `permissions`. Les opérateurs `|`, `&&`, `||`, `;`, backticks, `$(`, `>` et `<` sont rejetés dans `permissions`, `run` et `check`.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
   - codex --version

@@ -34,6 +34,7 @@ opendock install opendock/codex@1.0.0
 opendock list
 opendock update
 opendock doctor
+opendock doctor opendock/codex
 opendock uninstall opendock/codex
 ```
 
@@ -83,10 +84,11 @@ opendock install opendock/designer-ai@1.0.0
 OpenDock then:
 
 1. Downloads a reviewed dock from the Registry.
-2. Checks the host runtimes the dock needs.
-3. Adds the dock's files to your project.
-4. Checks for conflicts before writing files.
-5. Records what was installed in `.opendock/`.
+2. Checks the runtimes the dock needs.
+3. Prepares declared CLI tools inside the project.
+4. Adds the dock's files to your project.
+5. Checks for conflicts before writing files.
+6. Records what was installed in `.opendock/`.
 
 That record lets OpenDock update or remove the dock later.
 
@@ -109,11 +111,13 @@ OpenDock separates responsibilities into explicit scopes.
 | **Project scope** | Current workspace | Installed dock list, lock state, logs, and project-level OpenDock metadata. |
 | **Dock scope** | One installed dock | Version, checksum, managed file records, and private workdir. |
 | **Root output scope** | OpenDock file engine | Files applied into the project root after preflight checks. |
-| **System/tool scope** | Host tools | Runtimes prepared by `requires` and tools installed by allowed setup tasks, such as Homebrew, npm, Bun, pip, or winget. |
+| **Host bootstrap scope** | Your machine | First-party package managers such as Homebrew or WinGet, prepared explicitly with `opendock bootstrap`. |
+| **Tool scope** | Installed dock | CLI packages declared in `tools`, installed under `.opendock/tools/` and exposed through `.opendock/bin/`. |
 
 The practical rule is simple: OpenDock can fully track project files it applies,
-but it cannot claim ownership of the whole machine. Global tool installers may
-affect the host. Project files and dock workdirs are tracked in `.opendock/`.
+but it cannot claim ownership of the whole machine. Host package managers are
+handled by bootstrap, while dock tools, project files, and dock workdirs are
+tracked in `.opendock/`.
 
 ## Install
 
@@ -161,8 +165,8 @@ bin/opendock version
 | `opendock update --force` | Update even when OpenDock-managed content was edited locally. |
 | `opendock uninstall owner/name` | Remove one installed dock and the project files it manages. |
 | `opendock install/update/uninstall --json` | Print a machine-readable change report. |
-| `opendock doctor` | Check the project state and each installed dock's check steps. |
-| `opendock doctor owner/name` | Check one installed dock. |
+| `opendock doctor` | Check the project state and every installed dock's check steps. |
+| `opendock doctor owner/name` | Check only one installed dock. |
 | `opendock log` | Show recent command history for the current project. |
 | `opendock version` | Print CLI, schema, and Registry details. |
 | `opendock version --check` | Check OpenDock's public release channel for a newer CLI/app version. |
@@ -236,6 +240,29 @@ doctor:
     version: ">=2.40.0"
 ```
 
+Use `tools` for CLI packages that OpenDock should install and track inside the
+project:
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+tools:
+  codex:
+    manager: npm
+    package: "@openai/codex"
+    version: latest
+    commands:
+      - codex
+```
+
+Runtime commands and tool commands are exposed through `.opendock/bin` while
+OpenDock runs install, update, and doctor steps. Docks should not use global
+package install commands such as `npm install --global ...` or
+`bun install --global ...`.
+
 `readme`, `logo`, and `tags` are Registry catalog metadata. They help people
 understand and filter a dock in Hub, but they are not installed into a project
 unless the referenced files are also listed in `files`.
@@ -252,7 +279,7 @@ For the full manifest reference, see [docs/guides/guide.md](./packages/cli/docs/
 ## Task Command Permission
 
 OpenDock tasks do not run arbitrary shell. A small default command set is
-available for common setup checks and package-manager work:
+available for common setup checks and project-local tool work:
 
 ```text
 bun
@@ -280,18 +307,20 @@ Platform-specific defaults:
 | `linux` | none |
 
 Anything outside that default set, or outside the allowed command shape for that
-tool, must be declared in top-level `permission`.
+tool, must be declared in top-level `permissions`. Commands declared by `tools`
+automatically allow simple version checks such as `codex --version`.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
   - codex --version
 ```
 
-`permission` is exact. `oma -y install` does not allow `oma install` or
+`permissions` is exact. `oma -y install` does not allow `oma install` or
 `oma -y update`. Shell operators such as `|`, `&&`, `||`, `;`, backticks, `$(`,
-`>`, and `<` are rejected in `run`, `check`, and `permission`.
+`>`, and `<` are rejected in `run`, `check`, and `permissions`. Global package
+installs are rejected; use `tools` instead.
 
 ## File Ownership
 
@@ -325,12 +354,13 @@ Use `--force` only when the dock version should win.
 ## Workdir Files And Export
 
 Tasks can run in the project root or in a dock-private workdir.
-Use `requires` for runtime prerequisites; use top-level `install`, `update`, and
-`doctor` for package installs, project actions, and generated outputs.
+Use `requires` for runtime prerequisites, `tools` for CLI package installs, and
+top-level `install`, `update`, and `doctor` for project actions and generated
+outputs.
 Use `workdir.files` when a generator needs input files before a task runs.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
 
@@ -361,7 +391,7 @@ install:
 - `workdir: root` runs in the project root.
 - `workdir: dock` runs in `.opendock/workdirs/<dock>/`.
 - Non-default task commands such as `oma -y install` must be declared exactly in
-  top-level `permission`.
+  top-level `permissions`.
 - `workdir.files` copies dock archive files into the private dock workdir before
   tasks run.
 - `export.include/exclude` selects generated files from the dock workdir.

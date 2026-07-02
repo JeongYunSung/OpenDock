@@ -61,7 +61,8 @@ OpenDock 不是 terminal replacement，也不是通用 script runner。它是用
 | **Project scope** | 当前项目 | installed dock list, lock, logs, project metadata. |
 | **Dock scope** | 单个 installed dock | version, checksum, managed file records, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 后应用到 project root 的文件. |
-| **System/tool scope** | host tools | 由 `requires` 准备的 runtime，以及允许的 task 安装的 Homebrew、npm、Bun、pip、winget 等 host tools. |
+| **Host bootstrap scope** | Your machine | Homebrew 或 WinGet 通过 `opendock bootstrap` 显式准备. |
+| **Tool scope** | Installed dock | `tools` 声明的 CLI package 安装到 `.opendock/tools/`，并通过 `.opendock/bin/` 暴露. |
 
 ## Install
 
@@ -157,10 +158,10 @@ doctor:
 
 ## Task Command Permission
 
-OpenDock task 的 `run` 和 `check` 使用很小的默认策略。默认 command 包括 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 还允许 `brew`，Windows 还允许 `powershell`, `winget`。`oma`, `codex`, `claude`, `omx`, `mkdir` 这类 command 必须在 top-level `permission` 中精确声明。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permission`, `run`, `check` 中都会被拒绝。
+OpenDock task 的 `run` 和 `check` 使用很小的默认策略。默认 command 包括 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 还允许 `brew`，Windows 还允许 `powershell`, `winget`。`oma`, `codex`, `claude`, `omx`, `mkdir` 这类 command 必须在 top-level `permissions` 中精确声明。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
   - codex --version

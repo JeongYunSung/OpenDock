@@ -83,9 +83,10 @@ opendock install opendock/designer-ai@1.0.0
 
 1. Registry에서 검토된 dock을 가져옵니다.
 2. dock에 필요한 runtime을 확인합니다.
-3. dock의 파일을 프로젝트에 추가합니다.
-4. 파일을 쓰기 전에 충돌이 없는지 확인합니다.
-5. 설치한 내용을 `.opendock/`에 기록합니다.
+3. dock이 선언한 CLI 도구를 프로젝트 안에 준비합니다.
+4. dock의 파일을 프로젝트에 추가합니다.
+5. 파일을 쓰기 전에 충돌이 없는지 확인합니다.
+6. 설치한 내용을 `.opendock/`에 기록합니다.
 
 이 기록 덕분에 나중에 업데이트하거나 제거할 수 있습니다.
 
@@ -107,11 +108,12 @@ OpenDock은 책임 범위를 명확히 나눕니다.
 | **Project** | 현재 프로젝트 | 설치된 dock 목록, lock, log, 프로젝트 metadata. |
 | **Dock** | 설치된 dock 하나 | 버전, checksum, 관리 파일 기록, 전용 workdir. |
 | **Root output** | OpenDock file engine | 사전 확인 후 프로젝트 root에 적용되는 파일. |
-| **System/tool** | host tool | `requires`가 준비하는 runtime과 허용된 task가 설치하는 Homebrew, npm, Bun, pip, winget 같은 도구. |
+| **Host bootstrap** | 사용자 머신 | Homebrew, WinGet 같은 1차 package manager를 `opendock bootstrap`으로 명시적으로 준비합니다. |
+| **Tool** | 설치된 dock | `tools`에 선언한 CLI package를 `.opendock/tools/`에 설치하고 `.opendock/bin/`으로 연결합니다. |
 
 핵심 규칙은 단순합니다. OpenDock은 프로젝트에 적용한 파일은 추적할 수 있지만,
-전체 머신을 소유한다고 가정하지 않습니다. 전역 tool installer는 host에 영향을
-줄 수 있고, 프로젝트 파일과 dock workdir은 `.opendock/`에서 추적됩니다.
+전체 머신을 소유한다고 가정하지 않습니다. Host package manager는 bootstrap으로
+분리하고, dock tool, 프로젝트 파일, dock workdir은 `.opendock/`에서 추적합니다.
 
 ## 설치
 
@@ -276,7 +278,7 @@ top-level `install`, `update`, `doctor`에 둡니다.
 workdir에 먼저 넣을 수 있습니다.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
 
 workdir:
@@ -306,14 +308,14 @@ install:
 
 이 구조는 `oma`, `omx` 또는 다른 AI setup generator와 협력하면서도 프로젝트
 root에 들어온 최종 파일을 OpenDock이 추적할 수 있게 해줍니다. `oma -y install`처럼
-기본 정책 밖의 command는 top-level `permission`에 정확히 선언해야 합니다.
+기본 정책 밖의 command는 top-level `permissions`에 정확히 선언해야 합니다.
 
 ## Task Command Permission
 
-OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. `oma`, `codex`, `claude`, `omx`, `mkdir` 같은 command는 top-level `permission`에 정확히 선언해야 합니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permission`, `run`, `check`에서 거부됩니다.
+OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. `oma`, `codex`, `claude`, `omx`, `mkdir` 같은 command는 top-level `permissions`에 정확히 선언해야 합니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permissions`, `run`, `check`에서 거부됩니다.
 
 ```yaml
-permission:
+permissions:
   - oma -y install
   - oma link claude codex
   - codex --version
