@@ -510,18 +510,18 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-install-report.ts": {
-    "mtime": 1782193772.5436459,
-    "ast_hash": "77b49430743fcbc9689490998a0c93aa",
+    "mtime": 1782959095.8117886,
+    "ast_hash": "a8b7538a755800bfa30d63ab0f13dc7e",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-installer.ts": {
-    "mtime": 1781764280.0845213,
-    "ast_hash": "8af8e335cb87655413314366d13b89ef",
+    "mtime": 1782958595.173644,
+    "ast_hash": "e7e5df2bca523b1142e11655c6f5190f",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/manifest.ts": {
-    "mtime": 1782193761.4590611,
-    "ast_hash": "fffdc223b792b5ec0b8ac8fedb48fbfc",
+    "mtime": 1782958834.6636937,
+    "ast_hash": "b764d0af667001ea5f64e8a494ddf985",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/runtime-names.ts": {
@@ -535,8 +535,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/state-store.ts": {
-    "mtime": 1782193766.601928,
-    "ast_hash": "6bb471b5c73a5ad43f193a91628dbab3",
+    "mtime": 1782958339.248648,
+    "ast_hash": "eca07af91814a87cf8a90a49c404eaac",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/checksum.ts": {
@@ -570,13 +570,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/command-policy.ts": {
-    "mtime": 1781764626.9786067,
-    "ast_hash": "01630ffeb08b0775e1ee1310df90e731",
+    "mtime": 1782959095.813941,
+    "ast_hash": "875c41cce488502b87c38e4cf65b366e",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/command-runner.ts": {
-    "mtime": 1782183701.52021,
-    "ast_hash": "43cd26f02aec2d27e8368b0a19161c0a",
+    "mtime": 1782958097.904168,
+    "ast_hash": "4407c3684aee87df7f60a85a13b45949",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/progress.ts": {
@@ -585,13 +585,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/requirement-runner.ts": {
-    "mtime": 1781758011.9276168,
-    "ast_hash": "d4a191425f7c49f29efe3fa96f127ab8",
+    "mtime": 1782959095.8134365,
+    "ast_hash": "28153f34e881fa306a5543636dc3bb11",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-requirements.ts": {
-    "mtime": 1781757966.6181817,
-    "ast_hash": "b9b8ae001e5af2aa3c01f509185dd4df",
+    "mtime": 1782958137.3316872,
+    "ast_hash": "2b756229482ddafa05e2249890593118",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/step-report.ts": {
@@ -600,8 +600,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/task-runner.ts": {
-    "mtime": 1781763976.1640668,
-    "ast_hash": "e209e321d73e0227dd828589f970597a",
+    "mtime": 1782959095.8150668,
+    "ast_hash": "583f7334db8b3b4c9a6b7a6dcee94fa3",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/task-selection.ts": {
@@ -675,8 +675,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/examples-cleanup.test.ts": {
-    "mtime": 1781764285.2433107,
-    "ast_hash": "7ea3d3a52cdfde2b5e8e320cc841a130",
+    "mtime": 1782958573.3288772,
+    "ast_hash": "3653bb297c6ebabcc29530c260e08c75",
     "semantic_hash": ""
   },
   "packages/cli/tests/examples.test.ts": {
@@ -690,8 +690,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/platform-regression.test.ts": {
-    "mtime": 1782193886.8317106,
-    "ast_hash": "940aab06106a6aa021cadb553e754f51",
+    "mtime": 1782959095.8169355,
+    "ast_hash": "8a18a7c7d2b003bc192dcea7c2dae994",
     "semantic_hash": ""
   },
   "packages/cli/tests/release-signature-helper.ts": {
@@ -700,13 +700,13 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/requirements.test.ts": {
-    "mtime": 1782193886.8310916,
-    "ast_hash": "0c90d0ecffe061dde4be0ecc7c1bb5c6",
+    "mtime": 1782959095.8140242,
+    "ast_hash": "209747aa15456e8208532970bfba6354",
     "semantic_hash": ""
   },
   "packages/cli/tests/security-regression.test.ts": {
-    "mtime": 1782819868.3233154,
-    "ast_hash": "c51fda324f9d25b0a760b09f7a9b7e5d",
+    "mtime": 1782959256.9606457,
+    "ast_hash": "f09e53d4f1902b19b80a5e78ccdb4a44",
     "semantic_hash": ""
   },
   "packages/cli/tests/terminal-style.test.ts": {
@@ -745,8 +745,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1782194171.208794,
-    "ast_hash": "84d1dca89509383b909e106339e59a6e",
+    "mtime": 1782959183.060881,
+    "ast_hash": "800926f857c1ae9d67161972a605b414",
     "semantic_hash": ""
   },
   "apps/desktop/index.html": {
@@ -755,73 +755,73 @@
     "semantic_hash": ""
   },
   "packages/cli/README.de.md": {
-    "mtime": 1782194222.7673278,
-    "ast_hash": "801048d7960ea2ef8c456576c4c4ad83",
+    "mtime": 1782958953.2971814,
+    "ast_hash": "38481af78b4c26ce7e0ca2e659e18ca4",
     "semantic_hash": ""
   },
   "packages/cli/README.es.md": {
-    "mtime": 1782194222.7676733,
-    "ast_hash": "34170fd3b385a83306329684176729a2",
+    "mtime": 1782958953.2974095,
+    "ast_hash": "6b7ad52b025c8a8a890472a05cc153d5",
     "semantic_hash": ""
   },
   "packages/cli/README.fr.md": {
-    "mtime": 1782194222.768003,
-    "ast_hash": "fd06b9645b3c0897b40f91cd7c9376d9",
+    "mtime": 1782958953.2975879,
+    "ast_hash": "469739b98c08e94e802c8f905068a0da",
     "semantic_hash": ""
   },
   "packages/cli/README.ja.md": {
-    "mtime": 1782194222.768379,
-    "ast_hash": "4bd1bfebca29d0ecf44ee5d7a99051a9",
+    "mtime": 1782958953.2977755,
+    "ast_hash": "82971185e462a4923bf8a66c1d09ca8a",
     "semantic_hash": ""
   },
   "packages/cli/README.ko.md": {
-    "mtime": 1782194222.7689643,
-    "ast_hash": "82de20dda1419ebacf9f4633986f6632",
+    "mtime": 1782958953.2980206,
+    "ast_hash": "7464003a06ddf79f8448281d17fa102d",
     "semantic_hash": ""
   },
   "packages/cli/README.md": {
-    "mtime": 1782194171.209111,
-    "ast_hash": "19dcce1cbbc5436600ae7276673b7743",
+    "mtime": 1782958953.2984374,
+    "ast_hash": "95200252de43c099474f304cd2d3035a",
     "semantic_hash": ""
   },
   "packages/cli/README.zh.md": {
-    "mtime": 1782194222.769408,
-    "ast_hash": "663b8f478c9d40566556c217e9b31741",
+    "mtime": 1782958953.2987018,
+    "ast_hash": "f2273ed61804b0b9eda5cf69c018a51f",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.de.md": {
-    "mtime": 1782194222.7806113,
-    "ast_hash": "9ec48546a9e1cd4baff9eae4fd068f93",
+    "mtime": 1782958953.2989054,
+    "ast_hash": "bd7cda94dc1b5c75b41cf86ecb622b34",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.es.md": {
-    "mtime": 1782194222.7809856,
-    "ast_hash": "afb6be164050cb1160917844137e31be",
+    "mtime": 1782958953.299092,
+    "ast_hash": "e69804143acb4335f315061625d0a5b2",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.fr.md": {
-    "mtime": 1782194222.781183,
-    "ast_hash": "73dd7260a6b4d7a15d3d7ac019137632",
+    "mtime": 1782958953.299303,
+    "ast_hash": "3d59af9391375ef0589ed596174ebaca",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.ja.md": {
-    "mtime": 1782194222.781387,
-    "ast_hash": "811bf22f4b672103170840505660f161",
+    "mtime": 1782958953.2994854,
+    "ast_hash": "dbb2dfe3c10aba5f09dc4a09f09788e6",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.ko.md": {
-    "mtime": 1782194222.7816489,
-    "ast_hash": "7d95b6621d216127aa8aca2686ef7ffa",
+    "mtime": 1782958953.299746,
+    "ast_hash": "9de678256333b4b6284707b7a55ff3e6",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.md": {
-    "mtime": 1782194187.2934442,
-    "ast_hash": "32f9b117613db5cd9b739d3a2677f451",
+    "mtime": 1782958953.2999825,
+    "ast_hash": "3a76566672c5106dcd902f6858122a39",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.zh.md": {
-    "mtime": 1782194222.7819273,
-    "ast_hash": "0875bf67a5db280c44feca21450e08fc",
+    "mtime": 1782958953.3002093,
+    "ast_hash": "d9658e2c3f18b74b1cc26a15ecc0183a",
     "semantic_hash": ""
   },
   "packages/cli/examples/agent-ready/DOCK.md": {
@@ -1145,13 +1145,13 @@
     "semantic_hash": ""
   },
   "packages/cli/examples/claude-code/dock.macos.yml": {
-    "mtime": 1781747528.1175542,
-    "ast_hash": "a88215d6a1d2fb357302662435a077dd",
+    "mtime": 1782958532.2340486,
+    "ast_hash": "f781b5f7cd5f47fee3668929c51e3978",
     "semantic_hash": ""
   },
   "packages/cli/examples/claude-code/dock.windows.yml": {
-    "mtime": 1781747528.117762,
-    "ast_hash": "a88215d6a1d2fb357302662435a077dd",
+    "mtime": 1782958532.234322,
+    "ast_hash": "f781b5f7cd5f47fee3668929c51e3978",
     "semantic_hash": ""
   },
   "packages/cli/examples/codex/DOCK.md": {
@@ -1160,13 +1160,13 @@
     "semantic_hash": ""
   },
   "packages/cli/examples/codex/dock.macos.yml": {
-    "mtime": 1781747528.1171155,
-    "ast_hash": "9c7f7edde23e9ff204c07d034fd60513",
+    "mtime": 1782958532.233302,
+    "ast_hash": "99618a742f29adaad4e83b3c645cb1e7",
     "semantic_hash": ""
   },
   "packages/cli/examples/codex/dock.windows.yml": {
-    "mtime": 1781747528.117347,
-    "ast_hash": "9c7f7edde23e9ff204c07d034fd60513",
+    "mtime": 1782958532.2336285,
+    "ast_hash": "99618a742f29adaad4e83b3c645cb1e7",
     "semantic_hash": ""
   },
   "packages/cli/examples/customer-support/DOCK.md": {
@@ -1965,13 +1965,13 @@
     "semantic_hash": ""
   },
   "packages/cli/examples/oma/dock.macos.yml": {
-    "mtime": 1781747528.1164067,
-    "ast_hash": "6d3afef568cea57a84f44df3161532bd",
+    "mtime": 1782958541.392805,
+    "ast_hash": "cd6640e76a7e79cd0f5b06a7e0bf98bc",
     "semantic_hash": ""
   },
   "packages/cli/examples/oma/dock.windows.yml": {
-    "mtime": 1781747528.1166825,
-    "ast_hash": "3e1d26bddbb949a7531973f8e5a65281",
+    "mtime": 1782958541.3932745,
+    "ast_hash": "26852203acdcf4ccd3d70636a2c7807a",
     "semantic_hash": ""
   },
   "packages/cli/examples/oma/files/AGENTS.md": {
@@ -2600,8 +2600,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/task-command-validation.ts": {
-    "mtime": 1782453465.3808112,
-    "ast_hash": "6b4a9674466537e72f7bec101889008d",
+    "mtime": 1782958420.7749429,
+    "ast_hash": "55b10f82062aee6f54a955a6a41c7b0a",
     "semantic_hash": ""
   },
   "scripts/generate-license-notices.mjs": {
@@ -2627,6 +2627,21 @@
   "packages/cli/tests/desktop-release-workflow.test.ts": {
     "mtime": 1782882932.4767115,
     "ast_hash": "c67bc50c2fc93b8961f1b090c9c3158c",
+    "semantic_hash": ""
+  },
+  "packages/cli/src/core/runtime/command-shim.ts": {
+    "mtime": 1782958412.9232879,
+    "ast_hash": "3911f652ec532b6002539f4c5c3673d7",
+    "semantic_hash": ""
+  },
+  "packages/cli/src/core/runtime/project-layout.ts": {
+    "mtime": 1782958067.44057,
+    "ast_hash": "d475ba8aa948a04382186399d1404bf6",
+    "semantic_hash": ""
+  },
+  "packages/cli/src/core/runtime/tool-runner.ts": {
+    "mtime": 1782959095.8148346,
+    "ast_hash": "5c39454e0a4734d219415679800f6bde",
     "semantic_hash": ""
   }
 }
