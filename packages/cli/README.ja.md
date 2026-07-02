@@ -162,7 +162,7 @@ dock-private workdir で実行する task が事前に input file を必要と�
 
 ## Task Command Permission
 
-OpenDock の task は `run` と `check` を小さな標準ポリシーで実行します。標準 command は `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` です。macOS は `brew`、Windows は `powershell`, `winget` も許可します。標準ポリシー外の command はまず `tools.commands` に宣言し、その後 `permissions` で task の完全一致形を許可します。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。
+OpenDock の task は `run` と `check` を小さな標準ポリシーで実行します。標準 command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` です。macOS は `brew`、Windows は `powershell`, `winget` も許可します。標準ポリシー外の command はまず `tools.commands` に宣言し、その後 `permissions` で task の完全一致形を許可します。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。
 
 ```yaml
 tools:

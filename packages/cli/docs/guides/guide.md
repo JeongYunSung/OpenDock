@@ -227,11 +227,9 @@ package managers, and simple checks:
 
 ```text
 bun
-bunx
 git
 node
 npm
-npx
 pip
 pip3
 pipx
@@ -254,7 +252,8 @@ Commands outside this default policy must first be declared in `tools.commands`.
 Then top-level `permissions` can allow the exact task command shape OpenDock
 should run. `permissions` can also allow exact non-standard shapes for OpenDock
 default commands. Commands declared by `tools` automatically allow simple
-version checks such as `codex --version`.
+version checks such as `codex --version`. Tool command names cannot reuse
+OpenDock default commands such as `git`, `node`, `npm`, or `python`.
 
 ```yaml
 tools:

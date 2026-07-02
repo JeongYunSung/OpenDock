@@ -129,7 +129,7 @@ Steps run top to bottom. `doctor` should check state and avoid changing the proj
 
 ## Task Command Permission
 
-OpenDock の task は `run` と `check` を shell にそのまま渡しません。標準で使える command は `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` に限られます。macOS では `brew`、Windows では `powershell` と `winget` も使えます。標準ポリシー外の command はまず `tools.commands` に宣言し、その後 `permissions` で task の完全一致形を許可します。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。
+OpenDock の task は `run` と `check` を shell にそのまま渡しません。標準で使える command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` に限られます。macOS では `brew`、Windows では `powershell` と `winget` も使えます。標準ポリシー外の command はまず `tools.commands` に宣言し、その後 `permissions` で task の完全一致形を許可します。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。
 
 ```yaml
 tools:

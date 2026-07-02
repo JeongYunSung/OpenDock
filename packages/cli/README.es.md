@@ -164,7 +164,7 @@ en el project root.
 
 ## Task Command Permission
 
-Los tasks `run` y `check` de OpenDock usan una política pequeña por defecto: `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Los commands fuera de la política por defecto deben declararse primero en `tools.commands`; luego `permissions` permite la forma exacta del task. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`.
+Los tasks `run` y `check` de OpenDock usan una política pequeña por defecto: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Los commands fuera de la política por defecto deben declararse primero en `tools.commands`; luego `permissions` permite la forma exacta del task. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`.
 
 ```yaml
 tools:

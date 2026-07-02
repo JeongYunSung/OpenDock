@@ -323,7 +323,7 @@ top-level `permissions`에 적어야 합니다.
 
 ## Task Command Permission
 
-OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. `oma`, `codex`, `claude`, `omx` 같은 command는 `tools.commands`에 선언된 경우에만 `permissions`로 실행 형태를 열 수 있습니다. `mkdir`처럼 OpenDock 기본 command도 아니고 `tools.commands`도 아닌 command는 거부됩니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permissions`, `run`, `check`에서 거부됩니다. `npm install`, `bun add`, `pip install`, `brew install` 같은 package 설치/update 명령은 task에서 거부되며 project tool은 `tools`, Bun/Node/npm/Python/pip runtime은 `requires.runtimes`, host package manager는 bootstrap으로 처리해야 합니다.
+OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. `oma`, `codex`, `claude`, `omx` 같은 command는 `tools.commands`에 선언된 경우에만 `permissions`로 실행 형태를 열 수 있습니다. `tools.commands`는 `git`, `node`, `npm`, `python` 같은 OpenDock 기본 command 이름을 다시 사용할 수 없습니다. `mkdir`처럼 OpenDock 기본 command도 아니고 `tools.commands`도 아닌 command는 거부됩니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permissions`, `run`, `check`에서 거부됩니다. `npm install`, `bun add`, `pip install`, `brew install` 같은 package 설치/update 명령은 task에서 거부되며 project tool은 `tools`, Bun/Node/npm/Python/pip runtime은 `requires.runtimes`, host package manager는 bootstrap으로 처리해야 합니다.
 
 ```yaml
 tools:

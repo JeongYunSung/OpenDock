@@ -286,11 +286,9 @@ available for common setup checks and project-local tool work:
 
 ```text
 bun
-bunx
 git
 node
 npm
-npx
 pip
 pip3
 pipx
@@ -313,7 +311,8 @@ Anything outside that default set must first be declared under `tools.commands`.
 `permissions` can then allow exact task command shapes for that declared tool.
 `permissions` can also allow exact non-standard shapes for OpenDock default
 commands. Commands declared by `tools` automatically allow simple version checks
-such as `codex --version`.
+such as `codex --version`. Tool command names cannot reuse OpenDock default
+commands such as `git`, `node`, `npm`, or `python`.
 
 Package install/update commands are rejected inside tasks. Use `tools` for
 project-local tools, `requires.runtimes` for Bun/Node/npm/Python/pip runtime

@@ -637,11 +637,9 @@ OpenDock은 `requires`와 task에 shell script를 그대로 넘기지
 
 ```text
 bun
-bunx
 git
 node
 npm
-npx
 pip
 pip3
 pipx
@@ -683,7 +681,8 @@ permissions:
 `permissions`는 정확히 일치해야 합니다. `oma -y install`을 허용해도 `oma install`,
 `oma -y update`, `oma doctor`는 자동으로 허용되지 않습니다. 필요한 형태를 각각
 명시하세요. 단, `oma`처럼 기본 정책 밖의 command는 먼저 `tools.commands`에 있어야
-합니다.
+합니다. `tools.commands`는 `git`, `node`, `npm`, `python` 같은 OpenDock 기본
+command 이름을 다시 사용할 수 없습니다.
 
 차단되는 shell operator:
 

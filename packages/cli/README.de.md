@@ -165,7 +165,7 @@ geschrieben werden sollen.
 
 ## Task Command Permission
 
-OpenDock tasks `run` und `check` nutzen eine kleine Standard-Policy: `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Commands außerhalb der Standard-Policy müssen zuerst in `tools.commands` stehen; danach erlaubt `permissions` die exakte Task-Form. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt.
+OpenDock tasks `run` und `check` nutzen eine kleine Standard-Policy: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Commands außerhalb der Standard-Policy müssen zuerst in `tools.commands` stehen; danach erlaubt `permissions` die exakte Task-Form. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt.
 
 ```yaml
 tools:

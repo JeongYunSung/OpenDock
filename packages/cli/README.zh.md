@@ -158,7 +158,7 @@ doctor:
 
 ## Task Command Permission
 
-OpenDock task 的 `run` 和 `check` 使用很小的默认策略。默认 command 包括 `bun`, `bunx`, `git`, `node`, `npm`, `npx`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 还允许 `brew`，Windows 还允许 `powershell`, `winget`。默认策略之外的 command 必须先声明在 `tools.commands` 中，然后由 `permissions` 精确允许 task 要执行的形式。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。
+OpenDock task 的 `run` 和 `check` 使用很小的默认策略。默认 command 包括 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 还允许 `brew`，Windows 还允许 `powershell`, `winget`。默认策略之外的 command 必须先声明在 `tools.commands` 中，然后由 `permissions` 精确允许 task 要执行的形式。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。
 
 ```yaml
 tools:
