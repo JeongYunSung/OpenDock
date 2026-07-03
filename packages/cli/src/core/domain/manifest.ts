@@ -95,7 +95,7 @@ const requiresSchema = z
   .strict()
   .default({ runtimes: {} });
 
-const packageManagerSchema = z.enum(["npm", "bun", "pnpm", "pip", "pip3"]);
+const packageManagerSchema = z.enum(["npm", "bun", "pnpm", "uv", "pip", "pip3"]);
 const dependencyManagerSchema = z.enum(["npm", "pnpm", "bun", "uv", "pip", "pip3"]);
 
 const safePackageNamePattern = /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+$/;
@@ -188,12 +188,12 @@ const toolsSchema = z
   });
 
 const dependencyModesByManager: Record<z.infer<typeof dependencyManagerSchema>, Set<string>> = {
-  bun: new Set(["install"]),
-  npm: new Set(["ci", "install"]),
+  bun: new Set(["install", "locked"]),
+  npm: new Set(["install", "locked"]),
   pip: new Set(["install"]),
   pip3: new Set(["install"]),
-  pnpm: new Set(["install"]),
-  uv: new Set(["sync"]),
+  pnpm: new Set(["install", "locked"]),
+  uv: new Set(["install", "locked"]),
 };
 
 const dependencySpecSchema = z
@@ -206,7 +206,7 @@ const dependencySpecSchema = z
   .strict()
   .transform((spec) => ({
     ...spec,
-    mode: spec.mode ?? defaultDependencyMode(spec.manager),
+    mode: spec.mode ?? defaultDependencyMode(),
   }))
   .superRefine((spec, context) => {
     if (!dependencyModesByManager[spec.manager].has(spec.mode)) {
@@ -433,10 +433,7 @@ function isLikelyLegacyManifestField(field: string): boolean {
   );
 }
 
-function defaultDependencyMode(manager: z.infer<typeof dependencyManagerSchema>): string {
-  if (manager === "uv") {
-    return "sync";
-  }
+function defaultDependencyMode(): string {
   return "install";
 }
 

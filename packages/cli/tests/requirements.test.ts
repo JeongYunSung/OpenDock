@@ -248,11 +248,11 @@ describe("requires regression coverage", () => {
       YAML.stringify({
         opendock: 1,
         tools: {
-          codex: {
-            manager: "npm",
-            package: "@openai/codex",
+          ruff: {
+            manager: "uv",
+            package: "ruff",
             version: "latest",
-            commands: ["codex"],
+            commands: ["ruff"],
           },
         },
       }),
@@ -260,11 +260,11 @@ describe("requires regression coverage", () => {
 
     const manifest = parseManifestFile(join(root, "dock.yml"));
 
-    expect(manifest.tools?.codex).toEqual({
-      manager: "npm",
-      package: "@openai/codex",
+    expect(manifest.tools?.ruff).toEqual({
+      manager: "uv",
+      package: "ruff",
       version: "latest",
-      commands: ["codex"],
+      commands: ["ruff"],
     });
   });
 
@@ -278,7 +278,7 @@ describe("requires regression coverage", () => {
           image2html: {
             manager: "npm",
             path: ".codex/skills/image2html",
-            mode: "ci",
+            mode: "locked",
           },
           pythonChecks: {
             manager: "pip",
@@ -287,7 +287,7 @@ describe("requires regression coverage", () => {
           uvProject: {
             manager: "uv",
             path: "tools/uv-project",
-            mode: "sync",
+            mode: "locked",
           },
         },
       }),
@@ -298,7 +298,7 @@ describe("requires regression coverage", () => {
     expect(manifest.dependencies?.image2html).toEqual({
       manager: "npm",
       path: ".codex/skills/image2html",
-      mode: "ci",
+      mode: "locked",
     });
     expect(manifest.dependencies?.pythonChecks).toEqual({
       manager: "pip",
@@ -308,7 +308,7 @@ describe("requires regression coverage", () => {
     expect(manifest.dependencies?.uvProject).toEqual({
       manager: "uv",
       path: "tools/uv-project",
-      mode: "sync",
+      mode: "locked",
     });
   });
 
@@ -320,16 +320,40 @@ describe("requires regression coverage", () => {
         opendock: 1,
         dependencies: {
           wrong: {
-            manager: "uv",
-            path: "tools/uv-project",
-            mode: "install",
+            manager: "pip",
+            path: "tools/python-checks",
+            mode: "locked",
           },
         },
       }),
     );
 
     expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
-      "dependency manager `uv` does not support mode `install`",
+      "dependency manager `pip` does not support mode `locked`",
+    );
+  });
+
+  it.each([
+    ["npm", "ci"],
+    ["uv", "sync"],
+  ] as const)("rejects legacy dependency mode %s/%s", (manager, mode) => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        dependencies: {
+          legacy: {
+            manager,
+            path: "deps/legacy",
+            mode,
+          },
+        },
+      }),
+    );
+
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
+      `dependency manager \`${manager}\` does not support mode \`${mode}\``,
     );
   });
 

@@ -210,6 +210,39 @@ printf 'host:%s\\n' "$*" >> "${hostLog}"
     expect(readFileSync(toolLog, "utf8")).toBe("fake-python-tool:ok\n");
   });
 
+  it("installs uv tools into dock-local folders and exposes their commands", async () => {
+    const project = tempDir();
+    const bin = tempDir();
+    const toolLog = join(project, "uv-tool.log");
+    writeFakeUv(bin, toolLog);
+
+    const result = await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      new TaskRunner().run(uvToolManifest(), {
+        dockId: "test/uv-tool",
+        live: false,
+        phase: "install",
+        platform: "macos",
+        projectDir: project,
+      }),
+    );
+
+    const toolDir = join(
+      project,
+      ".opendock",
+      "tools",
+      safeDockDirectoryName("test/uv-tool"),
+      "ruff",
+    );
+    const commandShim = readFileSync(join(project, ".opendock", "bin", "ruff"), "utf8");
+    expect(result.reports.map((report) => `${report.id}:${report.status}`)).toEqual([
+      "require-tool-ruff:Ready",
+      "check-ruff:Ran",
+    ]);
+    expect(commandShim).toContain(join(toolDir, "bin", "ruff"));
+    expect(readFileSync(toolLog, "utf8")).toContain("tool install --force ruff==0.9.0");
+    expect(readFileSync(toolLog, "utf8")).toContain("ruff:--version");
+  });
+
   it("resolves managed Python runtime ranges before asking uv to install", async () => {
     const home = realpathSync(tempDir());
     const project = tempDir();
@@ -457,6 +490,28 @@ function pythonToolManifest(): DockManifest {
   });
 }
 
+function uvToolManifest(): DockManifest {
+  return manifest({
+    tools: {
+      ruff: {
+        manager: "uv",
+        package: "ruff",
+        version: "0.9.0",
+        commands: ["ruff"],
+      },
+    },
+    tasks: {
+      install: [
+        {
+          id: "check-ruff",
+          run: "ruff --version",
+          platforms: {},
+        },
+      ],
+    },
+  });
+}
+
 function platformTaskManifest(): DockManifest {
   return manifest({
     tasks: {
@@ -616,6 +671,16 @@ if [ "$1" = "python" ] && [ "$2" = "find" ]; then
     exit 42
   fi
   printf '%s\\n' "\${UV_PYTHON_INSTALL_DIR}/cpython-3.13.5/bin/python"
+  exit 0
+fi
+if [ "$1" = "tool" ] && [ "$2" = "install" ]; then
+  mkdir -p "$UV_TOOL_BIN_DIR"
+  /bin/cat > "$UV_TOOL_BIN_DIR/ruff" <<'EOF'
+#!/bin/sh
+printf 'ruff:%s\n' "$*" >> "${log}"
+exit 0
+EOF
+  /bin/chmod +x "$UV_TOOL_BIN_DIR/ruff"
   exit 0
 fi
 exit 1

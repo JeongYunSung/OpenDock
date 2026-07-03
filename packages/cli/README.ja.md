@@ -178,13 +178,15 @@ dependencies:
   image2html:
     manager: npm
     path: .codex/skills/image2html
-    mode: ci
+    mode: locked
 ```
 
 現在の supported managers は `npm`, `pnpm`, `bun`, `uv`, `pip`, `pip3` です。
-OpenDock は任意の install command を実行しません。`npm` は `ci` と `install`、
-`pnpm` と `bun` は `install`、`uv` は `sync`、`pip` と `pip3` は
-`requirements.txt` からの `install` を扱います。
+mode は `install` と `locked` を使います。`install` は通常 install、`locked`
+は lockfile または frozen environment を優先します。内部的には `locked` が
+`npm ci`, `pnpm install --frozen-lockfile`,
+`bun install --frozen-lockfile`, `uv sync --frozen` に対応します。`pip` と
+`pip3` は `requirements.txt` からの `install` のみ対応します。
 
 dock-private workdir で実行する task が事前に input file を必要とする場合は
 `workdir.files` を使います。project root に書き込む file には `files` を使います。

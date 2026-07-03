@@ -247,7 +247,7 @@ dependencies:
   image2html:
     manager: npm
     path: .codex/skills/image2html
-    mode: ci
+    mode: locked
     timeout_ms: 600000
 ```
 
@@ -263,11 +263,15 @@ Supported managers and modes:
 
 | Manager | Modes | Output cleaned by OpenDock |
 |---|---|---|
-| `npm` | `ci`, `install` | `node_modules` |
-| `pnpm` | `install` | `node_modules` |
-| `bun` | `install` | `node_modules` |
-| `uv` | `sync` | `.venv` |
+| `npm` | `install`, `locked` | `node_modules` |
+| `pnpm` | `install`, `locked` | `node_modules` |
+| `bun` | `install`, `locked` | `node_modules` |
+| `uv` | `install`, `locked` | `.venv` |
 | `pip`, `pip3` | `install` from `requirements.txt` | `.opendock/python` |
+
+`install` means a normal dependency install. `locked` means the manager should
+respect the lockfile or frozen environment: `npm ci`, `pnpm install
+--frozen-lockfile`, `bun install --frozen-lockfile`, or `uv sync --frozen`.
 
 ## Task Command Permission
 

@@ -186,6 +186,10 @@ function runPackageInstall(installDir: string, spec: ToolSpec, context: ToolCont
     runPythonPackageInstall(installDir, spec, spec.manager, packageSpec, context);
     return;
   }
+  if (spec.manager === "uv") {
+    runUvToolInstall(installDir, spec, packageSpec, context);
+    return;
+  }
   const [program, args] =
     spec.manager === "npm"
       ? ["npm", ["install", "--no-audit", "--no-fund", "--save-exact", packageSpec]]
@@ -193,6 +197,25 @@ function runPackageInstall(installDir: string, spec: ToolSpec, context: ToolCont
         ? ["bun", ["add", packageSpec]]
         : ["pnpm", ["add", packageSpec]];
   runPackageCommand(program, args, installDir, context, spec.package);
+}
+
+function runUvToolInstall(
+  installDir: string,
+  spec: ToolSpec,
+  packageSpec: string,
+  context: ToolContext,
+): void {
+  runPackageCommand(
+    "uv",
+    ["tool", "install", "--force", packageSpec],
+    installDir,
+    context,
+    spec.package,
+    {
+      UV_TOOL_BIN_DIR: join(installDir, "bin"),
+      UV_TOOL_DIR: join(installDir, "tools"),
+    },
+  );
 }
 
 function runPythonPackageInstall(
@@ -241,6 +264,7 @@ function runPackageCommand(
   installDir: string,
   context: ToolContext,
   packageName: string,
+  extraEnv: NodeJS.ProcessEnv = {},
 ): void {
   const pathValue = prependPathEntries(
     opendockCommandPath(),
@@ -251,6 +275,7 @@ function runPackageCommand(
     encoding: "utf8",
     env: {
       ...process.env,
+      ...extraEnv,
       PATH: pathValue,
     },
     stdio: (context.live ?? true) ? "inherit" : "pipe",
@@ -266,9 +291,9 @@ function runPackageCommand(
 
 function packageSpecifier(spec: ToolSpec): string {
   if (spec.version === "latest") {
-    return `${spec.package}@latest`;
+    return spec.manager === "uv" ? spec.package : `${spec.package}@latest`;
   }
-  if (spec.manager === "pip" || spec.manager === "pip3") {
+  if (spec.manager === "pip" || spec.manager === "pip3" || spec.manager === "uv") {
     return `${spec.package}==${spec.version}`;
   }
   return `${spec.package}@${spec.version}`;
@@ -287,10 +312,16 @@ function resolveInstalledCommand(
           join(installDir, "python", "Scripts", `${command}.exe`),
           join(installDir, "python", "Scripts", `${command}.cmd`),
         ]
-      : [
-          join(installDir, "node_modules", ".bin", command),
-          join(installDir, "node_modules", ".bin", `${command}.cmd`),
-        ];
+      : spec.manager === "uv"
+        ? [
+            join(installDir, "bin", command),
+            join(installDir, "bin", `${command}.exe`),
+            join(installDir, "bin", `${command}.cmd`),
+          ]
+        : [
+            join(installDir, "node_modules", ".bin", command),
+            join(installDir, "node_modules", ".bin", `${command}.cmd`),
+          ];
   const found = candidates.find((candidate) => existsSync(candidate));
   if (found) {
     if (spec.manager === "pip" || spec.manager === "pip3") {

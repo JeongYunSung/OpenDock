@@ -174,12 +174,15 @@ dependencies:
   image2html:
     manager: npm
     path: .codex/skills/image2html
-    mode: ci
+    mode: locked
 ```
 
-当前支持 `npm`, `pnpm`, `bun`, `uv`, `pip`, `pip3`。OpenDock 不会执行任意
-install command：`npm` 支持 `ci` 和 `install`；`pnpm` 和 `bun` 支持
-`install`；`uv` 支持 `sync`；`pip` 和 `pip3` 从 `requirements.txt` 安装。
+当前支持 `npm`, `pnpm`, `bun`, `uv`, `pip`, `pip3`。mode 使用 `install` 和
+`locked`。`install` 是普通安装，`locked` 会优先使用 lockfile 或 frozen
+environment。内部会把 `locked` 映射到 `npm ci`,
+`pnpm install --frozen-lockfile`, `bun install --frozen-lockfile`,
+`uv sync --frozen`。`pip` 和 `pip3` 只支持从 `requirements.txt` 执行
+`install`。
 
 如果 dock-private workdir 中运行的 task 需要先读取输入文件，请使用
 `workdir.files`。需要写入 project root 的文件使用 `files`。

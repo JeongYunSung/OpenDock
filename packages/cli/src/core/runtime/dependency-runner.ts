@@ -224,19 +224,28 @@ function dependencyCommand(target: string, spec: DependencySpec): DependencyComm
     return {
       program: "npm",
       args:
-        spec.mode === "ci"
+        spec.mode === "locked"
           ? ["ci", "--no-audit", "--no-fund"]
           : ["install", "--no-audit", "--no-fund"],
     };
   }
   if (spec.manager === "pnpm") {
-    return { program: "pnpm", args: ["install"] };
+    return {
+      program: "pnpm",
+      args: spec.mode === "locked" ? ["install", "--frozen-lockfile"] : ["install"],
+    };
   }
   if (spec.manager === "bun") {
-    return { program: "bun", args: ["install"] };
+    return {
+      program: "bun",
+      args: spec.mode === "locked" ? ["install", "--frozen-lockfile"] : ["install"],
+    };
   }
   if (spec.manager === "uv") {
-    return { program: "uv", args: ["sync"] };
+    return {
+      program: "uv",
+      args: spec.mode === "locked" ? ["sync", "--frozen"] : ["sync"],
+    };
   }
   const requirements = join(target, "requirements.txt");
   if (!existsSync(requirements)) {

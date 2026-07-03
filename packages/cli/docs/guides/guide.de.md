@@ -93,7 +93,7 @@ dependencies:
   image2html:
     manager: npm
     path: .codex/skills/image2html
-    mode: ci
+    mode: locked
 ```
 
 OpenDock wendet zuerst `files` an und installiert danach `dependencies` im
@@ -102,11 +102,15 @@ dependency outputs wie `node_modules`, `.venv` oder `.opendock/python`.
 
 | Manager | Modes |
 |---|---|
-| `npm` | `ci`, `install` |
-| `pnpm` | `install` |
-| `bun` | `install` |
-| `uv` | `sync` |
+| `npm` | `install`, `locked` |
+| `pnpm` | `install`, `locked` |
+| `bun` | `install`, `locked` |
+| `uv` | `install`, `locked` |
 | `pip`, `pip3` | `install` aus `requirements.txt` |
+
+`locked` steht für die jeweilige lockfile/frozen Installation des Managers.
+Intern nutzt OpenDock `npm ci`, `pnpm install --frozen-lockfile`,
+`bun install --frozen-lockfile` oder `uv sync --frozen`.
 
 ## Version
 

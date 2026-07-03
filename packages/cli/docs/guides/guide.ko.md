@@ -348,7 +348,7 @@ dependencies:
   image2html:
     manager: npm
     path: .codex/skills/image2html
-    mode: ci
+    mode: locked
     timeout_ms: 600000
 ```
 
@@ -361,11 +361,15 @@ OpenDock은 `files`를 먼저 적용한 뒤, 선언된 `path`에서 dependency i
 
 | manager | mode | OpenDock이 정리하는 output |
 |---|---|---|
-| `npm` | `ci`, `install` | `node_modules` |
-| `pnpm` | `install` | `node_modules` |
-| `bun` | `install` | `node_modules` |
-| `uv` | `sync` | `.venv` |
+| `npm` | `install`, `locked` | `node_modules` |
+| `pnpm` | `install`, `locked` | `node_modules` |
+| `bun` | `install`, `locked` | `node_modules` |
+| `uv` | `install`, `locked` | `.venv` |
 | `pip`, `pip3` | `install` (`requirements.txt` 기준) | `.opendock/python` |
+
+`locked`는 manager별 lockfile/frozen install을 의미합니다. 내부적으로 `npm ci`,
+`pnpm install --frozen-lockfile`, `bun install --frozen-lockfile`,
+`uv sync --frozen`을 사용합니다.
 
 ## files
 

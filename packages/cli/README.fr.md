@@ -180,13 +180,15 @@ dependencies:
   image2html:
     manager: npm
     path: .codex/skills/image2html
-    mode: ci
+    mode: locked
 ```
 
-OpenDock prend en charge `npm`, `pnpm`, `bun`, `uv`, `pip` et `pip3`. Il
-n'exécute pas de commandes d'installation arbitraires : `npm` accepte `ci` et
-`install`; `pnpm` et `bun` acceptent `install`; `uv` accepte `sync`; `pip` et
-`pip3` installent depuis `requirements.txt`.
+OpenDock prend en charge `npm`, `pnpm`, `bun`, `uv`, `pip` et `pip3`. Les modes
+sont `install` et `locked`. `install` lance une installation normale; `locked`
+respecte les lockfiles ou les environnements frozen. En interne, `locked`
+correspond à `npm ci`, `pnpm install --frozen-lockfile`,
+`bun install --frozen-lockfile` ou `uv sync --frozen`. `pip` et `pip3` prennent
+seulement en charge `install` depuis `requirements.txt`.
 
 Utilisez `workdir.files` quand une task dans le dock-private workdir a besoin de
 fichiers d'entrée avant son exécution. Utilisez `files` pour les fichiers à

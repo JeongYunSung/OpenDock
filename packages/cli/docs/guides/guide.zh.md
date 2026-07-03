@@ -90,7 +90,7 @@ dependencies:
   image2html:
     manager: npm
     path: .codex/skills/image2html
-    mode: ci
+    mode: locked
 ```
 
 OpenDock 会先应用 `files`，再在声明的 `path` 中安装 `dependencies`。update 和
@@ -99,11 +99,15 @@ dependency outputs。
 
 | Manager | Modes |
 |---|---|
-| `npm` | `ci`, `install` |
-| `pnpm` | `install` |
-| `bun` | `install` |
-| `uv` | `sync` |
+| `npm` | `install`, `locked` |
+| `pnpm` | `install`, `locked` |
+| `bun` | `install`, `locked` |
+| `uv` | `install`, `locked` |
 | `pip`, `pip3` | 从 `requirements.txt` 执行 `install` |
+
+`locked` 表示使用对应 manager 的 lockfile/frozen install。内部会执行
+`npm ci`, `pnpm install --frozen-lockfile`,
+`bun install --frozen-lockfile`, `uv sync --frozen`。
 
 ## Version
 

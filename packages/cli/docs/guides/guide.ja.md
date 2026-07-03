@@ -91,7 +91,7 @@ dependencies:
   image2html:
     manager: npm
     path: .codex/skills/image2html
-    mode: ci
+    mode: locked
 ```
 
 OpenDock は先に `files` を適用し、その後 declared `path` で `dependencies` を
@@ -100,11 +100,15 @@ install します。update と uninstall では、`node_modules`、`.venv`、
 
 | Manager | Modes |
 |---|---|
-| `npm` | `ci`, `install` |
-| `pnpm` | `install` |
-| `bun` | `install` |
-| `uv` | `sync` |
+| `npm` | `install`, `locked` |
+| `pnpm` | `install`, `locked` |
+| `bun` | `install`, `locked` |
+| `uv` | `install`, `locked` |
 | `pip`, `pip3` | `requirements.txt` から `install` |
+
+`locked` は manager ごとの lockfile/frozen install を意味します。内部的には
+`npm ci`, `pnpm install --frozen-lockfile`,
+`bun install --frozen-lockfile`, `uv sync --frozen` を使います。
 
 ## Version
 

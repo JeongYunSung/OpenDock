@@ -86,7 +86,7 @@ describe("dock dependencies", () => {
         image2html: {
           manager: "npm",
           path: ".codex/skills/image2html",
-          mode: "ci",
+          mode: "locked",
         },
       },
       files: [
@@ -114,7 +114,7 @@ describe("dock dependencies", () => {
     expect(new OpenDockStateStore(project).readLock().docks[0]?.dependencies).toEqual([
       {
         manager: "npm",
-        mode: "ci",
+        mode: "locked",
         name: "image2html",
         path: ".codex/skills/image2html",
       },
@@ -202,7 +202,7 @@ describe("dock dependencies", () => {
         renderer: {
           manager: "npm",
           path: "deps/renderer",
-          mode: "ci",
+          mode: "locked",
         },
       },
       files: [
@@ -242,7 +242,7 @@ describe("dock dependencies", () => {
     expect(new OpenDockStateStore(project).readLock().docks[0]?.dependencies).toEqual([
       {
         manager: "npm",
-        mode: "ci",
+        mode: "locked",
         name: "renderer",
         path: "deps/renderer",
       },
@@ -346,10 +346,10 @@ describe("dock dependencies", () => {
       parseManifestText({
         opendock: 1,
         dependencies: {
-          npm: { manager: "npm", path: "deps/npm-deps", mode: "install" },
-          pnpm: { manager: "pnpm", path: "deps/pnpm-deps" },
-          bun: { manager: "bun", path: "deps/bun-deps" },
-          uv: { manager: "uv", path: "deps/uv-deps" },
+          npm: { manager: "npm", path: "deps/npm-deps", mode: "locked" },
+          pnpm: { manager: "pnpm", path: "deps/pnpm-deps", mode: "locked" },
+          bun: { manager: "bun", path: "deps/bun-deps", mode: "locked" },
+          uv: { manager: "uv", path: "deps/uv-deps", mode: "locked" },
           pip: { manager: "pip", path: "deps/pip-deps" },
           pip3: { manager: "pip3", path: "deps/pip3-deps" },
         },
@@ -376,10 +376,15 @@ describe("dock dependencies", () => {
       "pnpm",
       "uv",
     ]);
-    expect(readFileSync(log, "utf8")).toContain("npm:");
-    expect(readFileSync(log, "utf8")).toContain("pnpm:");
-    expect(readFileSync(log, "utf8")).toContain("bun:");
-    expect(readFileSync(log, "utf8")).toContain("uv:");
+    const logText = readFileSync(log, "utf8");
+    expect(logText).toContain("npm:");
+    expect(logText).toContain("ci --no-audit --no-fund");
+    expect(logText).toContain("pnpm:");
+    expect(logText).toContain("install --frozen-lockfile");
+    expect(logText).toContain("bun:");
+    expect(logText).toContain("install --frozen-lockfile");
+    expect(logText).toContain("uv:");
+    expect(logText).toContain("sync --frozen");
     expect(readFileSync(log, "utf8")).toContain("pip:");
     expect(readFileSync(log, "utf8")).toContain("pip3:");
     expect(existsSync(join(project, "deps", "uv-deps", ".venv", "uv.txt"))).toBe(true);

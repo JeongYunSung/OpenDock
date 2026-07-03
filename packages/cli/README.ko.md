@@ -272,14 +272,18 @@ dependencies:
   image2html:
     manager: npm
     path: .codex/skills/image2html
-    mode: ci
+    mode: locked
 ```
 
 OpenDock은 `files`를 먼저 적용한 뒤 `dependencies`를 해당 path에서 실행합니다.
-지원 manager는 `npm`, `pnpm`, `bun`, `uv`, `pip`, `pip3`입니다. task에 직접
-`npm install`이나 `pip install`을 쓰는 방식은 계속 거부됩니다. CLI command 자체를
-설치해야 하면 `tools`, 복사된 폴더의 dependency를 설치해야 하면 `dependencies`를
-사용합니다.
+지원 manager는 `npm`, `pnpm`, `bun`, `uv`, `pip`, `pip3`입니다. mode는 `install`과
+`locked`를 사용합니다. `install`은 일반 설치이고, `locked`는 lockfile 또는 frozen
+환경을 우선합니다. 내부적으로 `locked`는 `npm ci`,
+`pnpm install --frozen-lockfile`, `bun install --frozen-lockfile`,
+`uv sync --frozen`으로 실행됩니다. `pip`와 `pip3`는 `requirements.txt` 기준
+`install`만 지원합니다. task에 직접 `npm install`이나 `pip install`을 쓰는 방식은
+계속 거부됩니다. CLI command 자체를 설치해야 하면 `tools`, 복사된 폴더의 dependency를
+설치해야 하면 `dependencies`를 사용합니다.
 
 ## 파일 소유권
 

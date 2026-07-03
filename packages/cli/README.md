@@ -274,7 +274,7 @@ dependencies:
   image2html:
     manager: npm
     path: .codex/skills/image2html
-    mode: ci
+    mode: locked
     timeout_ms: 600000
 ```
 
@@ -284,11 +284,12 @@ outputs such as `node_modules`, `.venv`, or `.opendock/python` before
 reinstalling or cleaning up.
 
 Supported dependency managers today are `npm`, `pnpm`, `bun`, `uv`, `pip`, and
-`pip3`. OpenDock does not run arbitrary install commands here. It maps each
-manager to a small set of modes: `npm` supports `ci` and `install`; `pnpm` and
-`bun` support `install`; `uv` supports `sync`; `pip` and `pip3` support
-`install` from `requirements.txt`. Use `timeout_ms` when a dependency install
-can take longer than the default.
+`pip3`. OpenDock does not run arbitrary install commands here. Use `install` for
+a normal install and `locked` when a lockfile must be respected. Internally,
+`locked` maps to commands such as `npm ci`, `pnpm install --frozen-lockfile`,
+`bun install --frozen-lockfile`, and `uv sync --frozen`. `pip` and `pip3`
+support `install` from `requirements.txt`. Use `timeout_ms` when a dependency
+install can take longer than the default.
 
 `readme`, `logo`, and `tags` are Registry catalog metadata. They help people
 understand and filter a dock in Hub, but they are not installed into a project
