@@ -1,7 +1,7 @@
 {
   "apps/desktop/package.json": {
-    "mtime": 1782992465.018866,
-    "ast_hash": "747540633df06feb0d64b83c14c5b2cd",
+    "mtime": 1783044281.0880296,
+    "ast_hash": "730e0641adfb2b5bb3f0a32cbdf18951",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/browser-test-runtime.mjs": {
@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/tauri.conf.json": {
-    "mtime": 1782992465.0190542,
-    "ast_hash": "ab6215211ab4af61ca00a5efdd5206bf",
+    "mtime": 1783044281.0889382,
+    "ast_hash": "53a344ee8f3eb89902b03fc19a5ee220",
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "packages/cli/package.json": {
-    "mtime": 1782992465.018455,
-    "ast_hash": "24878ddd9af857be8d0b0c0e7e348d3b",
+    "mtime": 1783044281.0878174,
+    "ast_hash": "4aa5733d4a87721282cc9ba6157498bd",
     "semantic_hash": ""
   },
   "packages/cli/scripts/build.ts": {
@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/constants.ts": {
-    "mtime": 1782992465.0186424,
-    "ast_hash": "c2dba82dc246bcf99ac5f106bad7e9cc",
+    "mtime": 1783044281.0882893,
+    "ast_hash": "68228ebba2d4ae8c6acff43e5396133f",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-install-report.ts": {
@@ -725,8 +725,8 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1782992465.0200024,
-    "ast_hash": "6a3558abcd770619bf031c18df71c0b7",
+    "mtime": 1783044281.0901222,
+    "ast_hash": "2f7952ecfb033b7804836466c56ac0e2",
     "semantic_hash": ""
   },
   "README.md": {
