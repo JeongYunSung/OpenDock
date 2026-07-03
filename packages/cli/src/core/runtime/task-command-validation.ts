@@ -1,6 +1,6 @@
 import type { OpenDockPlatform } from "../../platform.js";
 import type { DockManifest, TaskPhase, TaskStep } from "../domain/manifest.js";
-import { assertSafeRelativePath } from "../files/path-utils.js";
+import { assertSafeDependencyPath } from "../files/path-utils.js";
 import {
   ensureAllowed,
   isDefaultCommandProgram,
@@ -31,14 +31,10 @@ export function validateManifestTaskCommands(
 
 function validateManifestDependencies(manifest: DockManifest): void {
   for (const [name, dependency] of Object.entries(manifest.dependencies ?? {})) {
-    let path: string;
     try {
-      path = assertSafeRelativePath(dependency.path, "dependency path");
+      assertSafeDependencyPath(dependency.path, "dependency path");
     } catch (error) {
       throw new Error(`invalid dependency \`${name}\` path: ${(error as Error).message}`);
-    }
-    if (path === ".opendock" || path.startsWith(".opendock/")) {
-      throw new Error(`invalid dependency \`${name}\` path: protected dependency path`);
     }
   }
 }

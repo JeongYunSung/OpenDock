@@ -127,20 +127,29 @@ describe("command policy attack cases", () => {
   it("blocks package and system installs or updates in task commands even with exact permissions", () => {
     const blocked: Array<[string, OpenDockPlatform]> = [
       ["npm install left-pad", "macos"],
+      ["npm i left-pad", "macos"],
+      ["npm ci", "macos"],
       ["npm update left-pad", "macos"],
       ["npm add left-pad", "macos"],
       ["bun install", "macos"],
       ["bun add oh-my-agent", "macos"],
       ["bun update oh-my-agent", "macos"],
+      ["bun upgrade oh-my-agent", "macos"],
       ["pnpm add left-pad", "macos"],
+      ["pnpm i left-pad", "macos"],
+      ["pnpm install", "macos"],
       ["pnpm update left-pad", "macos"],
       ["pnpm upgrade left-pad", "macos"],
       ["pip install requests", "macos"],
       ["pip3 install requests", "macos"],
       ["pipx install black", "macos"],
       ["pipx upgrade black", "macos"],
+      ["uv add ruff", "macos"],
+      ["uv pip install ruff", "macos"],
       ["uv tool install ruff", "macos"],
       ["uv tool upgrade ruff", "macos"],
+      ["python -m pip install requests", "macos"],
+      ["python3 -m pip install requests", "macos"],
       ["brew install node", "macos"],
       ["brew upgrade node", "macos"],
       ["winget install Git.Git", "windows"],
@@ -155,8 +164,25 @@ describe("command policy attack cases", () => {
             platform,
           ),
         command,
-      ).toThrow(/package installs|system package installs|not declared/);
+      ).toThrow(/package installs|system package installs|not declared|not allowed/);
     }
+  });
+
+  it("does not let dependency declarations widen task command package installs", () => {
+    const manifest = manifestWithCommand("install", "run", "npm install", {
+      permission: ["npm install"],
+    });
+    manifest.dependencies = {
+      image2html: {
+        manager: "npm",
+        mode: "install",
+        path: ".codex/skills/image2html",
+      },
+    };
+
+    expect(() => validateManifestTaskCommands(manifest, "macos")).toThrow(
+      /package installs and updates are not allowed/,
+    );
   });
 
   it("rejects package executor shortcuts in task commands", () => {

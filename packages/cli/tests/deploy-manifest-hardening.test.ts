@@ -148,6 +148,9 @@ describe("deploy manifest hardening", () => {
     for (const [path, expected] of [
       ["../outside", "unsafe dependency path"],
       [".opendock/bin", "protected dependency path"],
+      [".git/hooks", "protected dependency path"],
+      [".ssh/tools", "protected dependency path"],
+      [".env.d", "protected dependency path"],
     ] as const) {
       const root = tempDir();
       writeManifest(root, {

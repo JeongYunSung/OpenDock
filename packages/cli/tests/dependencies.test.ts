@@ -6,6 +6,7 @@ import {
   readFileSync,
   realpathSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -15,7 +16,10 @@ import YAML from "yaml";
 import { DockInstaller } from "../src/core/app/dock-installer.js";
 import { DockRef, manifestForRef, parseManifestFile } from "../src/core/domain/manifest.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
-import { DependencyRunner } from "../src/core/runtime/dependency-runner.js";
+import {
+  DependencyRunner,
+  removeInstalledDependencyOutputs,
+} from "../src/core/runtime/dependency-runner.js";
 import type { ResolvedDock } from "../src/resolver.js";
 
 const tempRoots: string[] = [];
@@ -27,6 +31,50 @@ afterEach(() => {
 });
 
 describe("dock dependencies", () => {
+  it("supports image2html-style copied package payloads without task package installs", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakeDependencyManager(bin, "npm", log, "node_modules/sharp/package.json");
+    writeDock(docks, "test", "image2html-payload", "1.0.0", {
+      dependencies: {
+        image2html: {
+          manager: "npm",
+          path: ".codex/skills/image2html",
+          mode: "install",
+        },
+      },
+      files: [
+        { path: ".codex/skills/image2html/SKILL.md", content: "# Image2HTML\n" },
+        { path: ".codex/skills/image2html/scripts/run-harness.mjs", content: "export {}\n" },
+        { path: ".codex/skills/image2html/package.json", content: '{"name":"image2html"}\n' },
+        { path: ".codex/skills/image2html/package-lock.json", content: '{"lockfileVersion":3}\n' },
+      ],
+    });
+
+    const report = await withEnvAsync({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      new DockInstaller().install({
+        dockRef: DockRef.parse("test/image2html-payload@1.0.0"),
+        projectDir: project,
+        phase: "install",
+        platform: "macos",
+        live: false,
+        runTasks: true,
+        resolve: localResolver(docks),
+      }),
+    );
+
+    const dependencyPath = join(realpathSync(project), ".codex", "skills", "image2html");
+    expect(report.steps.map((step) => `${step.id}:${step.status}`)).toContain(
+      "dependency-image2html:Ready",
+    );
+    expect(readFileSync(log, "utf8")).toContain(
+      `npm:${dependencyPath}:install --no-audit --no-fund`,
+    );
+    expect(existsSync(join(dependencyPath, "node_modules", "sharp", "package.json"))).toBe(true);
+  });
+
   it("installs dependencies after managed files and removes generated dependency folders", async () => {
     const docks = tempDir();
     const project = tempDir();
@@ -79,6 +127,203 @@ describe("dock dependencies", () => {
     });
 
     expect(existsSync(dependencyPath)).toBe(false);
+  });
+
+  it("reinstalls dependency outputs during update and removes stale generated folders", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakeDependencyManager(bin, "npm", log, "node_modules/sharp/package.json");
+    writeDock(docks, "test", "image2html", "1.0.0", {
+      dependencies: {
+        image2html: {
+          manager: "npm",
+          path: ".codex/skills/image2html",
+          mode: "install",
+        },
+      },
+      files: [
+        { path: ".codex/skills/image2html/package.json", content: '{"name":"image2html"}\n' },
+        { path: ".codex/skills/image2html/package-lock.json", content: '{"lockfileVersion":3}\n' },
+      ],
+    });
+
+    await withEnvAsync({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      new DockInstaller().install({
+        dockRef: DockRef.parse("test/image2html@1.0.0"),
+        projectDir: project,
+        phase: "install",
+        platform: "macos",
+        live: false,
+        runTasks: true,
+        resolve: localResolver(docks),
+      }),
+    );
+
+    const dependencyPath = join(realpathSync(project), ".codex", "skills", "image2html");
+    writeFileSync(join(dependencyPath, "node_modules", "stale.txt"), "old dependency output\n");
+
+    await withEnvAsync({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      new DockInstaller().install({
+        dockRef: DockRef.parse("test/image2html@1.0.0"),
+        projectDir: project,
+        phase: "update",
+        platform: "macos",
+        live: false,
+        runTasks: true,
+        resolve: localResolver(docks),
+      }),
+    );
+
+    expect(existsSync(join(dependencyPath, "node_modules", "stale.txt"))).toBe(false);
+    expect(existsSync(join(dependencyPath, "node_modules", "sharp", "package.json"))).toBe(true);
+    expect(readFileSync(log, "utf8").match(/npm:/g)).toHaveLength(2);
+  });
+
+  it("replaces dependency lock records and cleans removed dependency paths during update", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakeDependencyManager(bin, "npm", log, "node_modules/installed.txt");
+    writeDock(docks, "test", "changing-deps", "1.0.0", {
+      dependencies: {
+        image2html: {
+          manager: "npm",
+          path: "deps/image2html",
+          mode: "install",
+        },
+      },
+      files: [{ path: "deps/image2html/package.json", content: '{"name":"image2html"}\n' }],
+    });
+    writeDock(docks, "test", "changing-deps", "1.0.1", {
+      dependencies: {
+        renderer: {
+          manager: "npm",
+          path: "deps/renderer",
+          mode: "ci",
+        },
+      },
+      files: [
+        { path: "deps/renderer/package.json", content: '{"name":"renderer"}\n' },
+        { path: "deps/renderer/package-lock.json", content: '{"lockfileVersion":3}\n' },
+      ],
+    });
+
+    await withEnvAsync({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      new DockInstaller().install({
+        dockRef: DockRef.parse("test/changing-deps@1.0.0"),
+        projectDir: project,
+        phase: "install",
+        platform: "macos",
+        live: false,
+        runTasks: true,
+        resolve: localResolver(docks),
+      }),
+    );
+
+    await withEnvAsync({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      new DockInstaller().install({
+        dockRef: DockRef.parse("test/changing-deps@1.0.1"),
+        projectDir: project,
+        phase: "update",
+        platform: "macos",
+        live: false,
+        runTasks: true,
+        resolve: localResolver(docks),
+      }),
+    );
+
+    expect(existsSync(join(project, "deps", "image2html"))).toBe(false);
+    expect(existsSync(join(project, "deps", "renderer", "node_modules", "installed.txt"))).toBe(
+      true,
+    );
+    expect(new OpenDockStateStore(project).readLock().docks[0]?.dependencies).toEqual([
+      {
+        manager: "npm",
+        mode: "ci",
+        name: "renderer",
+        path: "deps/renderer",
+      },
+    ]);
+    expect(readFileSync(log, "utf8")).toContain("npm:");
+  });
+
+  it("does not save lock records when dependency installation fails", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFailingDependencyManager(bin, "npm", log);
+    writeDock(docks, "test", "failing-deps", "1.0.0", {
+      dependencies: {
+        harness: {
+          manager: "npm",
+          path: "harness",
+        },
+      },
+      files: [
+        { path: "README.md", content: "# Applied before dependency failure\n" },
+        { path: "harness/package.json", content: '{"name":"harness"}\n' },
+      ],
+    });
+
+    await expect(
+      withEnvAsync({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+        new DockInstaller().install({
+          dockRef: DockRef.parse("test/failing-deps@1.0.0"),
+          projectDir: project,
+          phase: "install",
+          platform: "macos",
+          live: false,
+          runTasks: true,
+          resolve: localResolver(docks),
+        }),
+      ),
+    ).rejects.toThrow("dependency `harness` install failed");
+
+    expect(existsSync(join(project, "README.md"))).toBe(true);
+    expect(new OpenDockStateStore(project).readLock().docks).toEqual([]);
+    expect(readFileSync(log, "utf8")).toContain("npm:");
+  });
+
+  it("does not run dependency managers when file preflight fails", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakeDependencyManager(bin, "npm", log, "node_modules/sharp/package.json");
+    writeFileSync(join(project, "config.json"), '{"user":true}\n');
+    writeDock(docks, "test", "preflight-conflict", "1.0.0", {
+      dependencies: {
+        docs: {
+          manager: "npm",
+          path: "harness",
+        },
+      },
+      files: [
+        { path: "config.json", content: '{"dock":true}\n' },
+        { path: "harness/package.json", content: '{"name":"harness"}\n' },
+      ],
+    });
+
+    await expect(
+      withEnvAsync({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+        new DockInstaller().install({
+          dockRef: DockRef.parse("test/preflight-conflict@1.0.0"),
+          projectDir: project,
+          phase: "install",
+          platform: "macos",
+          live: false,
+          runTasks: true,
+          resolve: localResolver(docks),
+        }),
+      ),
+    ).rejects.toThrow("target already exists and is not OpenDock-owned: config.json");
+
+    expect(existsSync(log)).toBe(false);
+    expect(existsSync(join(project, "harness", "node_modules"))).toBe(false);
   });
 
   it("runs supported dependency managers with manager-specific modes", () => {
@@ -144,6 +389,244 @@ describe("dock dependencies", () => {
     expect(existsSync(join(project, "deps", "pip3-deps", ".opendock", "python", "pip3.txt"))).toBe(
       true,
     );
+  });
+
+  it("uses project-managed command shims before host dependency managers", () => {
+    const project = tempDir();
+    const hostBin = tempDir();
+    const projectBin = join(project, ".opendock", "bin");
+    const log = join(project, "commands.log");
+    writeFailingDependencyManager(hostBin, "npm", log);
+    writeFakeDependencyManager(projectBin, "npm", log, "node_modules/project-shim.txt");
+    mkdirSync(join(project, "deps", "image2html"), { recursive: true });
+    writeFileSync(join(project, "deps", "image2html", "package.json"), "{}\n");
+    const manifest = manifestForRef(
+      parseManifestText({
+        opendock: 1,
+        dependencies: {
+          image2html: {
+            manager: "npm",
+            path: "deps/image2html",
+          },
+        },
+      }),
+      DockRef.parse("test/dependency-project-shim@1.0.0"),
+    );
+
+    withEnv({ PATH: `${hostBin}:${process.env.PATH ?? ""}` }, () =>
+      new DependencyRunner().run(manifest, {
+        projectDir: project,
+        dockId: "test/dependency-project-shim",
+        phase: "install",
+        platform: "macos",
+        live: false,
+      }),
+    );
+
+    expect(
+      existsSync(join(project, "deps", "image2html", "node_modules", "project-shim.txt")),
+    ).toBe(true);
+    expect(readFileSync(log, "utf8")).toContain("npm:");
+  });
+
+  it("reports missing dependency outputs during doctor", () => {
+    const project = tempDir();
+    mkdirSync(join(project, "deps", "image2html"), { recursive: true });
+    writeFileSync(join(project, "deps", "image2html", "package.json"), "{}\n");
+    const manifest = manifestForRef(
+      parseManifestText({
+        opendock: 1,
+        dependencies: {
+          image2html: {
+            manager: "npm",
+            path: "deps/image2html",
+          },
+        },
+      }),
+      DockRef.parse("test/dependency-doctor@1.0.0"),
+    );
+
+    const result = new DependencyRunner().run(manifest, {
+      projectDir: project,
+      dockId: "test/dependency-doctor",
+      phase: "doctor",
+      platform: "macos",
+      live: false,
+    });
+
+    expect(result.reports).toEqual([
+      expect.objectContaining({
+        id: "dependency-image2html",
+        status: "Failed",
+        message: expect.stringContaining("missing dependency output"),
+      }),
+    ]);
+  });
+
+  it("rejects missing, file, and symlink dependency paths before running managers", () => {
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakeDependencyManager(bin, "npm", log, "node_modules/sharp/package.json");
+    mkdirSync(join(project, "deps", "real"), { recursive: true });
+    writeFileSync(join(project, "deps", "file"), "{}\n");
+    symlinkSync("real", join(project, "deps", "link"));
+
+    for (const [path, expected] of [
+      ["deps/missing", "dependency path does not exist"],
+      ["deps/file", "dependency path must be a directory"],
+      ["deps/link", "dependency path cannot be a symlink"],
+    ] as const) {
+      const manifest = manifestForRef(
+        parseManifestText({
+          opendock: 1,
+          dependencies: {
+            bad: {
+              manager: "npm",
+              path,
+            },
+          },
+        }),
+        DockRef.parse("test/bad-dependency-path@1.0.0"),
+      );
+
+      expect(() =>
+        withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+          new DependencyRunner().run(manifest, {
+            projectDir: project,
+            dockId: "test/bad-dependency-path",
+            phase: "install",
+            platform: "macos",
+            live: false,
+          }),
+        ),
+      ).toThrow(expected);
+    }
+
+    expect(existsSync(log)).toBe(false);
+  });
+
+  it("rejects dependency paths with symlink ancestors before running managers", () => {
+    const project = tempDir();
+    const outside = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakeDependencyManager(bin, "npm", log, "node_modules/sharp/package.json");
+    mkdirSync(join(project, "deps"), { recursive: true });
+    mkdirSync(join(outside, "pkg"), { recursive: true });
+    symlinkSync(outside, join(project, "deps", "link"));
+    const manifest = manifestForRef(
+      parseManifestText({
+        opendock: 1,
+        dependencies: {
+          bad: {
+            manager: "npm",
+            path: "deps/link/pkg",
+          },
+        },
+      }),
+      DockRef.parse("test/symlink-ancestor@1.0.0"),
+    );
+
+    expect(() =>
+      withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+        new DependencyRunner().run(manifest, {
+          projectDir: project,
+          dockId: "test/symlink-ancestor",
+          phase: "install",
+          platform: "macos",
+          live: false,
+        }),
+      ),
+    ).toThrow("dependency path cannot be a symlink: deps/link/pkg");
+    expect(existsSync(log)).toBe(false);
+  });
+
+  it("rejects tampered lock dependency cleanup paths before deleting outputs", () => {
+    const project = tempDir();
+    const outside = tempDir();
+    mkdirSync(join(project, "deps"), { recursive: true });
+    mkdirSync(join(outside, "pkg", "node_modules"), { recursive: true });
+    writeFileSync(join(outside, "pkg", "node_modules", "sentinel.txt"), "keep\n");
+    symlinkSync(outside, join(project, "deps", "link"));
+    mkdirSync(join(project, ".opendock", "bin", "node_modules"), { recursive: true });
+    writeFileSync(join(project, ".opendock", "bin", "node_modules", "sentinel.txt"), "keep\n");
+
+    for (const [path, expected] of [
+      ["../outside", "unsafe installed dependency path"],
+      [".opendock/bin", "protected installed dependency path"],
+      ["deps/link/pkg", "installed dependency path cannot be a symlink"],
+    ] as const) {
+      expect(() =>
+        removeInstalledDependencyOutputs(project, [
+          {
+            manager: "npm",
+            mode: "install",
+            name: "tampered",
+            path,
+          },
+        ]),
+      ).toThrow(expected);
+    }
+
+    expect(existsSync(join(outside, "pkg", "node_modules", "sentinel.txt"))).toBe(true);
+    expect(existsSync(join(project, ".opendock", "bin", "node_modules", "sentinel.txt"))).toBe(
+      true,
+    );
+  });
+
+  it("removes dependency output symlinks without deleting their targets", () => {
+    const project = tempDir();
+    const outside = tempDir();
+    mkdirSync(join(project, "deps", "image2html"), { recursive: true });
+    mkdirSync(join(outside, "node_modules"), { recursive: true });
+    writeFileSync(join(outside, "node_modules", "sentinel.txt"), "keep\n");
+    symlinkSync(join(outside, "node_modules"), join(project, "deps", "image2html", "node_modules"));
+
+    removeInstalledDependencyOutputs(project, [
+      {
+        manager: "npm",
+        mode: "install",
+        name: "image2html",
+        path: "deps/image2html",
+      },
+    ]);
+
+    expect(existsSync(join(project, "deps", "image2html", "node_modules"))).toBe(false);
+    expect(existsSync(join(outside, "node_modules", "sentinel.txt"))).toBe(true);
+  });
+
+  it("requires requirements.txt for pip dependency installs", () => {
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakePip(bin, "pip", log);
+    mkdirSync(join(project, "deps", "python-checks"), { recursive: true });
+    const manifest = manifestForRef(
+      parseManifestText({
+        opendock: 1,
+        dependencies: {
+          pythonChecks: {
+            manager: "pip",
+            path: "deps/python-checks",
+          },
+        },
+      }),
+      DockRef.parse("test/pip-dependencies@1.0.0"),
+    );
+
+    expect(() =>
+      withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+        new DependencyRunner().run(manifest, {
+          projectDir: project,
+          dockId: "test/pip-dependencies",
+          phase: "install",
+          platform: "macos",
+          live: false,
+        }),
+      ),
+    ).toThrow("pip dependency path must contain requirements.txt");
+    expect(existsSync(log)).toBe(false);
   });
 });
 
@@ -221,6 +704,22 @@ if [ "$1" = "--version" ]; then
 fi
 mkdir -p "$(dirname "${output}")"
 printf '${command}\\n' > "${output}"
+`,
+  );
+}
+
+function writeFailingDependencyManager(
+  bin: string,
+  command: "bun" | "npm" | "pnpm" | "uv",
+  log: string,
+): void {
+  writeExecutable(
+    join(bin, command),
+    `#!/bin/sh
+set -eu
+printf '${command}:%s:%s\\n' "$PWD" "$*" >> "${log}"
+printf 'simulated failure\\n' >&2
+exit 42
 `,
   );
 }

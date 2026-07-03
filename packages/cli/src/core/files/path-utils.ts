@@ -40,6 +40,14 @@ export function assertSafeManagedFileTargetPath(value: string, label = "file tar
   return normalized;
 }
 
+export function assertSafeDependencyPath(value: string, label = "dependency path"): string {
+  const normalized = assertSafeRelativePath(value, label);
+  if (isProtectedDependencyTarget(normalized)) {
+    throw new Error(`protected ${label}: ${value}`);
+  }
+  return normalized;
+}
+
 function assertInsideRoot(root: string, candidate: string, label = "path"): void {
   const rootReal = resolve(root);
   const candidateReal = resolve(candidate);
@@ -305,5 +313,16 @@ function isProtectedManagedFileTarget(path: string): boolean {
     second === "workdirs" ||
     second === "tools" ||
     second === "runtimes"
+  );
+}
+
+function isProtectedDependencyTarget(path: string): boolean {
+  const [first = ""] = path.split("/");
+  return (
+    first === ".opendock" ||
+    first === ".git" ||
+    first === ".ssh" ||
+    first === ".env" ||
+    first.startsWith(".env.")
   );
 }

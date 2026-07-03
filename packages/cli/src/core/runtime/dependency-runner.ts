@@ -4,7 +4,12 @@ import { join, relative } from "node:path";
 import type { OpenDockPlatform } from "../../platform.js";
 import { formatStepSymbol, terminalStyle } from "../../terminal-style.js";
 import type { DependencySpec, DockManifest, TaskPhase } from "../domain/manifest.js";
-import { assertSafeRelativePath, pruneEmptyDirectoryChain, safeJoin } from "../files/path-utils.js";
+import {
+  assertRealDirectoryPath,
+  assertSafeDependencyPath,
+  pruneEmptyDirectoryChain,
+  safeJoin,
+} from "../files/path-utils.js";
 import { opendockCommandPath } from "./command-runner.js";
 import { type ProgressReporter, reportProgress } from "./progress.js";
 import {
@@ -198,14 +203,12 @@ function dependencyStepId(name: string): string {
 }
 
 function resolveDependencyPath(projectDir: string, path: string): string {
-  const normalized = assertSafeRelativePath(path, "dependency path");
-  if (normalized === ".opendock" || normalized.startsWith(".opendock/")) {
-    throw new Error(`protected dependency path: ${path}`);
-  }
+  const normalized = assertSafeDependencyPath(path, "dependency path");
   const target = safeJoin(projectDir, normalized, "dependency path");
   if (!existsSync(target)) {
     throw new Error(`dependency path does not exist: ${path}`);
   }
+  assertRealDirectoryPath(projectDir, normalized, "dependency path");
   const stat = lstatSync(target);
   if (stat.isSymbolicLink()) {
     throw new Error(`dependency path cannot be a symlink: ${path}`);
@@ -291,7 +294,9 @@ function removeDependencyOutputsForRecord(
     path: string;
   },
 ): void {
-  const path = safeJoin(projectDir, dependency.path, "installed dependency path");
+  const normalized = assertSafeDependencyPath(dependency.path, "installed dependency path");
+  assertRealDirectoryPath(projectDir, normalized, "installed dependency path");
+  const path = safeJoin(projectDir, normalized, "installed dependency path");
   removeOutputPaths(projectDir, path, dependency.manager);
 }
 
