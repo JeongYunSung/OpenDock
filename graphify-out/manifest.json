@@ -510,7 +510,7 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/manifest.ts": {
-    "mtime": 1783037655.5626187,
+    "mtime": 1783040877.7202308,
     "ast_hash": "4f8f2a6635b6377d8d95315e3071e13d",
     "semantic_hash": ""
   },
@@ -550,8 +550,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/path-utils.ts": {
-    "mtime": 1782994977.1099539,
-    "ast_hash": "d8c7639c7d8611587cd6ef18ddc087c2",
+    "mtime": 1783042522.1162047,
+    "ast_hash": "c337ae2b80a350a435ead8ea7b9036d2",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/workdir-seeder.ts": {
@@ -730,8 +730,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1782985028.3834548,
-    "ast_hash": "7a835c2c8076b9449054cbf647c604f7",
+    "mtime": 1783042823.5379374,
+    "ast_hash": "34357a11fd407c3d73184921c0c4e4fe",
     "semantic_hash": ""
   },
   "apps/desktop/index.html": {
@@ -740,23 +740,23 @@
     "semantic_hash": ""
   },
   "packages/cli/README.de.md": {
-    "mtime": 1782976195.3860645,
-    "ast_hash": "6f2048db034fa61a9570031ee67c224a",
+    "mtime": 1783038631.1267262,
+    "ast_hash": "eba07139da458d7a3167819ef2f8defe",
     "semantic_hash": ""
   },
   "packages/cli/README.es.md": {
-    "mtime": 1782976195.3844361,
-    "ast_hash": "bfd38ea4eb74a2a3a8870d2bf9902812",
+    "mtime": 1783038664.6961486,
+    "ast_hash": "7440f7152973f59968d88fd41b066d40",
     "semantic_hash": ""
   },
   "packages/cli/README.fr.md": {
-    "mtime": 1782976195.3846712,
-    "ast_hash": "1d0f705ce7f40f9097d7804840c1fb08",
+    "mtime": 1783038691.777748,
+    "ast_hash": "036b92c7158d154e90de856eb84c9350",
     "semantic_hash": ""
   },
   "packages/cli/README.ja.md": {
-    "mtime": 1782976195.382702,
-    "ast_hash": "ff5c636d782f4be26a72242c951c87ff",
+    "mtime": 1783038720.9869342,
+    "ast_hash": "3adbcda07950911bfa70eb98ff5bf224",
     "semantic_hash": ""
   },
   "packages/cli/README.ko.md": {
@@ -765,48 +765,48 @@
     "semantic_hash": ""
   },
   "packages/cli/README.md": {
-    "mtime": 1783038216.8402722,
-    "ast_hash": "29fd761db1c2c1db30a687150b22dfb3",
+    "mtime": 1783042833.4688225,
+    "ast_hash": "2b4fd590fb2d61b35d133243bf5c7dc7",
     "semantic_hash": ""
   },
   "packages/cli/README.zh.md": {
-    "mtime": 1782976195.38409,
-    "ast_hash": "1f32faef86e7e723a71842d67336d417",
+    "mtime": 1783038746.1128936,
+    "ast_hash": "7795d5b8b080e1cf3224e03fd7f453c2",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.de.md": {
-    "mtime": 1782984919.6899655,
-    "ast_hash": "3bb8c74c9498ec3025d12f6b77bc8cf2",
+    "mtime": 1783038784.7154365,
+    "ast_hash": "bc2f68d3e20ec856ba50f6f066d42f02",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.es.md": {
-    "mtime": 1782984919.6895144,
-    "ast_hash": "24f76b9c26ca139c3a96248c72e5a2b8",
+    "mtime": 1783038809.3310075,
+    "ast_hash": "56dd8685f3b06289e74e664645c4724a",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.fr.md": {
-    "mtime": 1782984919.6897576,
-    "ast_hash": "7647e1fe846aa2514aac716b5dfee357",
+    "mtime": 1783038838.813569,
+    "ast_hash": "df8623cab21568ca8a5d94aec7b9cd87",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.ja.md": {
-    "mtime": 1782984856.323268,
-    "ast_hash": "7d4683b5458bb99e892fa13324148fd3",
+    "mtime": 1783038864.7948663,
+    "ast_hash": "1942d0b8def7d674ca28195f80f5db94",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.ko.md": {
-    "mtime": 1783038151.7191763,
-    "ast_hash": "869304fc169109c04ab1ef7f67496cc9",
+    "mtime": 1783042901.4580927,
+    "ast_hash": "0182bf017880238365a89ebf25741089",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.md": {
-    "mtime": 1783038202.1209936,
-    "ast_hash": "d3cb957405af59735a717f40af938783",
+    "mtime": 1783042874.836955,
+    "ast_hash": "dee9f3167bfa2c2f2c7ccd6f60c1c7da",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.zh.md": {
-    "mtime": 1782984919.6903732,
-    "ast_hash": "976617307233c1a13c478d683daf0efb",
+    "mtime": 1783038889.087857,
+    "ast_hash": "1383aa32fd580ff8a92673132ba9200f",
     "semantic_hash": ""
   },
   "packages/cli/examples/agent-ready/DOCK.md": {
@@ -2585,8 +2585,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/task-command-validation.ts": {
-    "mtime": 1783037928.3344889,
-    "ast_hash": "805ca394ef161f3b5a7db405f6f1018d",
+    "mtime": 1783042542.3385234,
+    "ast_hash": "6c2080340f910045d7a8bffd27e10f6c",
     "semantic_hash": ""
   },
   "scripts/generate-license-notices.mjs": {
@@ -2635,8 +2635,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/deploy-manifest-hardening.test.ts": {
-    "mtime": 1783037937.0714295,
-    "ast_hash": "c99e2573c1e99e6079855b35e3fb2fcf",
+    "mtime": 1783042615.1031916,
+    "ast_hash": "9349465ae32d781436ee32a6fbed8b93",
     "semantic_hash": ""
   },
   "packages/cli/tests/file-lifecycle-matrix.test.ts": {
@@ -2685,8 +2685,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/command-policy-attack-cases.test.ts": {
-    "mtime": 1782994685.758403,
-    "ast_hash": "4076691fd7e8890271ee64abb7d50bb4",
+    "mtime": 1783042972.1259055,
+    "ast_hash": "aee19b761df57fe612ba4ec9eac9a19f",
     "semantic_hash": ""
   },
   "packages/cli/tests/deploy-registry-edge-cases.test.ts": {
@@ -2725,13 +2725,18 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/dependency-runner.ts": {
-    "mtime": 1783038009.6726334,
-    "ast_hash": "fcb1ffdeddf04a3ba4804b1d1f14fd20",
+    "mtime": 1783042534.4274852,
+    "ast_hash": "761918e7965e3e4e604e3eb7eb5924b1",
     "semantic_hash": ""
   },
   "packages/cli/tests/dependencies.test.ts": {
-    "mtime": 1783038009.6727858,
-    "ast_hash": "26684d2dc3d020d2030877039ce51d0b",
+    "mtime": 1783043310.762563,
+    "ast_hash": "a4d490456a1fabe4e5d331d23863b250",
+    "semantic_hash": ""
+  },
+  "packages/cli/docs/plans/dependencies-qa.md": {
+    "mtime": 1783043247.610272,
+    "ast_hash": "09eab030b8de7d998508973536f43fb5",
     "semantic_hash": ""
   }
 }
