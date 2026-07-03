@@ -44,6 +44,7 @@ opendock uninstall opendock/codex
 - [설치](#설치)
 - [명령어](#명령어)
 - [Dock Format](#dock-format)
+- [Dependencies](#dependencies)
 - [Task Command Permission](#task-command-permission)
 - [파일 소유권](#파일-소유권)
 - [Workdir Files And Export](#workdir-files-and-export)
@@ -86,8 +87,9 @@ opendock install opendock/designer-ai@1.0.0
 2. dock에 필요한 runtime을 확인합니다.
 3. dock이 선언한 CLI 도구를 프로젝트 안에 준비합니다.
 4. dock의 파일을 프로젝트에 추가합니다.
-5. 파일을 쓰기 전에 충돌이 없는지 확인합니다.
-6. 설치한 내용을 `.opendock/`에 기록합니다.
+5. 복사된 폴더 안에 선언된 dependency를 설치합니다.
+6. 파일을 쓰기 전에 충돌이 없는지 확인합니다.
+7. 설치한 내용을 `.opendock/`에 기록합니다.
 
 이 기록 덕분에 나중에 업데이트하거나 제거할 수 있습니다.
 
@@ -112,11 +114,12 @@ OpenDock은 책임 범위를 명확히 나눕니다.
 | **Host bootstrap** | 사용자 머신 | Homebrew, WinGet 같은 1차 package manager를 `opendock bootstrap`으로 명시적으로 준비합니다. |
 | **Runtime** | 사용자 계정 | Node, npm, Python, pip, Bun, Git 요구사항을 `~/.opendock/runtimes/` 아래 version별로 준비하거나 등록하고, 각 project에서는 `.opendock/bin/` shim으로 사용합니다. |
 | **Tool** | 설치된 dock | `tools`에 선언한 CLI package를 `.opendock/tools/`에 설치하고 `.opendock/bin/`으로 연결합니다. |
+| **Dependency** | 설치된 dock payload | `dependencies`에 선언한 package dependency를 복사된 프로젝트 폴더 안에 설치하고 update/uninstall 때 정리합니다. |
 
 핵심 규칙은 단순합니다. OpenDock은 프로젝트에 적용한 파일은 추적할 수 있지만,
 전체 머신을 소유한다고 가정하지 않습니다. Host package manager는 bootstrap으로
 분리합니다. Runtime install과 wrapper는 home의 `.opendock`에서 공유하고,
-dock tool, 프로젝트 파일, dock workdir은 프로젝트의 `.opendock/`에서 추적합니다.
+dock tool, 프로젝트 파일, dependency output, dock workdir은 프로젝트의 `.opendock/`에서 추적합니다.
 
 ## 설치
 
@@ -248,6 +251,36 @@ opendock deploy owner/name@1.0.0
 전체 manifest reference는 [docs/guides/guide.ko.md](./docs/guides/guide.ko.md)를
 참고하세요.
 
+## Dependencies
+
+`dependencies`는 dock이 프로젝트 안에 복사한 폴더에서 package dependency를 설치해야
+할 때 씁니다. 예를 들어 Codex skill, harness, 작은 helper app 폴더 안에
+`package.json`, `requirements.txt`, `pyproject.toml` 같은 파일이 있고, 그 폴더 안에
+dependency를 준비해야 하는 경우입니다.
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+files:
+  - from: image2html
+    to: .codex/skills/image2html
+
+dependencies:
+  image2html:
+    manager: npm
+    path: .codex/skills/image2html
+    mode: ci
+```
+
+OpenDock은 `files`를 먼저 적용한 뒤 `dependencies`를 해당 path에서 실행합니다.
+지원 manager는 `npm`, `pnpm`, `bun`, `uv`, `pip`, `pip3`입니다. task에 직접
+`npm install`이나 `pip install`을 쓰는 방식은 계속 거부됩니다. CLI command 자체를
+설치해야 하면 `tools`, 복사된 폴더의 dependency를 설치해야 하면 `dependencies`를
+사용합니다.
+
 ## 파일 소유권
 
 OpenDock은 dock author에게 per-file update policy를 고르게 하지 않습니다. file
@@ -324,7 +357,7 @@ top-level `permissions`에 적어야 합니다.
 
 ## Task Command Permission
 
-OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, macOS는 `brew`, Windows는 `powershell`, `winget`도 허용합니다. 다만 기본 command라도 모든 subcommand가 허용되는 것은 아닙니다. `git status`, `git init -b main`, `test -f <path>`, version check, Windows `Test-Path`처럼 안전한 형태만 통과합니다. `oma`, `codex`, `claude`, `omx` 같은 command는 `tools.commands`에 선언된 경우에만 `permissions`로 실행 형태를 열 수 있습니다. `tools.commands`는 `git`, `node`, `npm`, `python` 같은 OpenDock 기본 command 이름을 다시 사용할 수 없습니다. `mkdir`처럼 OpenDock 기본 command도 아니고 `tools.commands`도 아닌 command는 거부됩니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permissions`, `run`, `check`에서 거부됩니다. `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` 같은 package 설치/update 명령은 task에서 거부되며 project tool은 `tools`, Bun/Node/npm/Python/pip runtime은 `requires.runtimes`, host package manager는 bootstrap으로 처리해야 합니다.
+OpenDock task의 `run`과 `check`는 작은 기본 정책 안에서 실행됩니다. 기본 command는 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`이며, Windows는 `powershell`도 허용합니다. 다만 기본 command라도 모든 subcommand가 허용되는 것은 아닙니다. `git status`, `git init -b main`, `test -f <path>`, version check, Windows `Test-Path`처럼 안전한 형태만 통과합니다. `oma`, `codex`, `claude`, `omx` 같은 command는 `tools.commands`에 선언된 경우에만 `permissions`로 실행 형태를 열 수 있습니다. `tools.commands`는 `git`, `node`, `npm`, `python` 같은 OpenDock 기본 command 이름을 다시 사용할 수 없습니다. `mkdir`처럼 OpenDock 기본 command도 아니고 `tools.commands`도 아닌 command는 거부됩니다. `|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<`는 `permissions`, `run`, `check`에서 거부됩니다. `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` 같은 package 설치/update 명령은 task에서 거부되며 project tool은 `tools`, 복사된 폴더의 dependency는 `dependencies`, Bun/Node/npm/Python/pip runtime은 `requires.runtimes`로 처리해야 합니다.
 
 ```yaml
 tools:

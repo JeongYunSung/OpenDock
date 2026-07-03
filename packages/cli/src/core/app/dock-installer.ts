@@ -19,6 +19,10 @@ import { pruneEmptyDirectoryChain, safeJoin } from "../files/path-utils.js";
 import { WorkdirSeeder } from "../files/workdir-seeder.js";
 import { createProjectCommandShim, removeProjectCommandShim } from "../runtime/command-shim.js";
 import {
+  DependencyRunner,
+  removeInstalledDependencyOutputs,
+} from "../runtime/dependency-runner.js";
+import {
   type ProgressReporter,
   type RuntimeProgressEvent,
   reportProgress,
@@ -98,6 +102,7 @@ export class DockInstaller {
     private readonly taskRunner = new TaskRunner(),
     private readonly collector = new FileCandidateCollector(),
     private readonly workdirSeeder = new WorkdirSeeder(),
+    private readonly dependencyRunner = new DependencyRunner(),
   ) {}
 
   async install(options: InstallOptions): Promise<InstallReport> {
@@ -258,10 +263,58 @@ export class DockInstaller {
       version: resolved.version,
     });
 
+    if (priorDock) {
+      this.progress(options.progress, {
+        dockId: resolved.manifest.id,
+        message: `Cleaning previous ${resolved.manifest.id} dependencies`,
+        percent: 91,
+        phase: "dependency-clean",
+        version: resolved.version,
+      });
+      removeInstalledDependencyOutputs(options.projectDir, priorDock.dependencies);
+    }
+
+    this.progress(options.progress, {
+      dockId: resolved.manifest.id,
+      message: `Preparing ${resolved.manifest.id} dependencies`,
+      percent: 92,
+      phase: "dependencies-start",
+      version: resolved.version,
+    });
+    const dependencyResult = options.runTasks
+      ? this.dependencyRunner.run(resolved.manifest, {
+          projectDir: options.projectDir,
+          dockId: resolved.manifest.id,
+          phase: options.phase ?? "install",
+          platform,
+          ...(options.live === undefined ? {} : { live: options.live }),
+          ...(options.progress === undefined
+            ? {}
+            : {
+                progress: this.nestedProgress(
+                  options.progress,
+                  resolved.manifest.id,
+                  resolved.version,
+                  92,
+                  96,
+                ),
+              }),
+        })
+      : { dependencies: [], reports: [] };
+    this.progress(options.progress, {
+      dockId: resolved.manifest.id,
+      level: "OK",
+      message: `Prepared ${dependencyResult.dependencies.length} dependency set(s)`,
+      percent: 96,
+      phase: "dependencies-complete",
+      total: dependencyResult.dependencies.length,
+      version: resolved.version,
+    });
+
     this.progress(options.progress, {
       dockId: resolved.manifest.id,
       message: `Recording ${resolved.manifest.id}@${resolved.version}`,
-      percent: 92,
+      percent: 97,
       phase: "lock-save",
       version: resolved.version,
     });
@@ -273,6 +326,7 @@ export class DockInstaller {
         platform,
         projectDir: options.projectDir,
         requested: options.dockRef.requested(),
+        dependencies: dependencyResult.dependencies,
         runtimes: taskResult.runtimes,
         signature: resolved.signature,
         tools: taskResult.tools,
@@ -284,7 +338,7 @@ export class DockInstaller {
       dockId: resolved.manifest.id,
       level: "OK",
       message: `Recorded ${resolved.manifest.id}@${resolved.version}`,
-      percent: 94,
+      percent: 98,
       phase: "lock-saved",
       version: resolved.version,
     });
@@ -293,7 +347,7 @@ export class DockInstaller {
       dockId: resolved.manifest.id,
       fileSummary,
       platform,
-      steps: taskResult.reports,
+      steps: [...taskResult.reports, ...dependencyResult.reports],
       version: resolved.version,
     });
   }
@@ -328,6 +382,7 @@ export class DockInstaller {
       version: dock.version,
     });
     const summary = filePlan.apply([]);
+    removeInstalledDependencyOutputs(options.projectDir, dock.dependencies);
     this.progress(options.progress, {
       dockId: dock.id,
       level: "OK",

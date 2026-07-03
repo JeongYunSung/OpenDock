@@ -3,6 +3,7 @@ import { type InstalledDockUpdateCheck, installedDockListCommandResult } from ".
 import { resolveCliPlatform } from "./cli-options.js";
 import { DockRef } from "./core/domain/manifest.js";
 import { type InstalledDockRecord, OpenDockStateStore } from "./core/domain/state-store.js";
+import { DependencyRunner } from "./core/runtime/dependency-runner.js";
 import { TaskRunner } from "./core/runtime/task-runner.js";
 import { lockedDockVersionSelector } from "./installed-dock-updates.js";
 import type { OpenDockPlatform } from "./platform.js";
@@ -176,12 +177,19 @@ async function printDockDoctorChecks(
 ): Promise<void> {
   try {
     const resolved = await resolveDock(dockRef, platform);
-    const reports = new TaskRunner().run(resolved.manifest, {
+    const taskReports = new TaskRunner().run(resolved.manifest, {
       projectDir: cwd,
       dockId: resolved.manifest.id,
       phase: "doctor",
       platform,
     }).reports;
+    const dependencyReports = new DependencyRunner().run(resolved.manifest, {
+      projectDir: cwd,
+      dockId: resolved.manifest.id,
+      phase: "doctor",
+      platform,
+    }).reports;
+    const reports = [...taskReports, ...dependencyReports];
     for (const report of reports) {
       const symbol = report.status === "Failed" ? formatStepSymbol("!") : formatStepSymbol("✓");
       const suffix = report.message ? ` (${report.message})` : "";

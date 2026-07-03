@@ -39,6 +39,7 @@ update와 uninstall까지 추적할 수 있게 만드는 작은 packaging layer�
 - [readme, logo, tags](#readme-logo-tags)
 - [requires](#requires)
 - [tools](#tools)
+- [dependencies](#dependencies)
 - [files](#files)
 - [파일 소유권](#파일-소유권)
 - [tasks](#tasks)
@@ -176,6 +177,7 @@ doctor:
 | `permissions` | 선택 | 기본 정책 밖의 `run`/`check` command를 정확한 형태로 허용합니다. |
 | `requires` | 선택 | dock 실행 전에 준비할 runtime requirement입니다. |
 | `tools` | 선택 | `.opendock/tools/`에 설치하고 추적할 CLI package입니다. |
+| `dependencies` | 선택 | 프로젝트에 복사한 폴더 안에서 설치할 package dependency입니다. |
 | `files` | 선택 | 프로젝트 root로 적용할 파일 또는 디렉터리 mapping입니다. |
 | `install` | 선택 | 최초 install과 초기 생성 작업 task입니다. |
 | `update` | 선택 | refresh와 유지보수 작업 task입니다. |
@@ -319,10 +321,46 @@ tools:
 
 - `requires`는 runtime을 확인하고 project-local command로 준비하는 영역입니다.
 - CLI package 설치는 `tools`로 선언합니다.
+- 복사된 폴더 안의 package dependency 설치는 `dependencies`로 선언합니다.
 - `npm install ...`, `bun add ...`, `pip install ...`, `pipx install ...`, `brew install ...` 같은 package 설치/update 명령은 dock task에서 거부됩니다.
 - root에 적용할 파일은 `files` 또는 step의 `export`로 선언해야 합니다.
 - raw shell, pipe, redirect는 `requires`에서도 허용되지 않습니다.
 - 설치된 CLI를 실행해야 한다면 `tools.commands`에 command를 선언하고 `install`, `update`, `doctor` task에서 사용합니다.
+
+## dependencies
+
+`dependencies`는 dock이 설치한 폴더 안에서 dependency를 준비하는 선언입니다.
+`tools`가 command를 설치해 `.opendock/bin`에 노출하는 기능이라면, `dependencies`는
+Codex skill, harness, helper app 같은 프로젝트 payload 폴더 안의 `node_modules`,
+`.venv`, Python target directory를 준비하는 기능입니다.
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+files:
+  - from: image2html
+    to: .codex/skills/image2html
+
+dependencies:
+  image2html:
+    manager: npm
+    path: .codex/skills/image2html
+    mode: ci
+```
+
+OpenDock은 `files`를 먼저 적용한 뒤, 선언된 `path`에서 dependency install을
+실행합니다. update와 uninstall에서는 OpenDock이 만든 dependency output을 정리합니다.
+
+| manager | mode | OpenDock이 정리하는 output |
+|---|---|---|
+| `npm` | `ci`, `install` | `node_modules` |
+| `pnpm` | `install` | `node_modules` |
+| `bun` | `install` | `node_modules` |
+| `uv` | `sync` | `.venv` |
+| `pip`, `pip3` | `install` (`requirements.txt` 기준) | `.opendock/python` |
 
 ## files
 
@@ -714,8 +752,8 @@ $(
 package install/update 명령은 task에서 거부됩니다. `npm install`, `bun add`,
 `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`,
 `winget install` 같은 명령을 `run`, `check`, `permissions`에 넣지 마세요.
-project tool은 `tools`, Bun/Node/npm/uv/Python/pip runtime은
-`requires.runtimes`로 처리합니다.
+project tool은 `tools`, 복사된 폴더 안의 package dependency는 `dependencies`,
+Bun/Node/npm/uv/Python/pip runtime은 `requires.runtimes`로 처리합니다.
 
 ```yaml
 # 나쁨

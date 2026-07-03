@@ -268,6 +268,71 @@ describe("requires regression coverage", () => {
     });
   });
 
+  it("parses path-based dependency declarations from dock.yml", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        dependencies: {
+          image2html: {
+            manager: "npm",
+            path: ".codex/skills/image2html",
+            mode: "ci",
+          },
+          pythonChecks: {
+            manager: "pip",
+            path: "tools/python-checks",
+          },
+          uvProject: {
+            manager: "uv",
+            path: "tools/uv-project",
+            mode: "sync",
+          },
+        },
+      }),
+    );
+
+    const manifest = parseManifestFile(join(root, "dock.yml"));
+
+    expect(manifest.dependencies?.image2html).toEqual({
+      manager: "npm",
+      path: ".codex/skills/image2html",
+      mode: "ci",
+    });
+    expect(manifest.dependencies?.pythonChecks).toEqual({
+      manager: "pip",
+      path: "tools/python-checks",
+      mode: "install",
+    });
+    expect(manifest.dependencies?.uvProject).toEqual({
+      manager: "uv",
+      path: "tools/uv-project",
+      mode: "sync",
+    });
+  });
+
+  it("rejects dependency modes that do not belong to the selected manager", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "dock.yml"),
+      YAML.stringify({
+        opendock: 1,
+        dependencies: {
+          wrong: {
+            manager: "uv",
+            path: "tools/uv-project",
+            mode: "install",
+          },
+        },
+      }),
+    );
+
+    expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
+      "dependency manager `uv` does not support mode `install`",
+    );
+  });
+
   it("rejects unsafe or conflicting tool declarations", () => {
     const root = tempDir();
     writeFileSync(

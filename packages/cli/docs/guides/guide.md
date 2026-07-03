@@ -1,8 +1,8 @@
 # OpenDock Guide
 
 `dock.yml` describes what a dock adds to a project: files, runtime
-requirements, project-local tools, install/update/doctor tasks, generated
-outputs, and health checks.
+requirements, project-local tools, copied-folder dependencies,
+install/update/doctor tasks, generated outputs, and health checks.
 
 OpenDock is a small packaging layer for repeatable AI setup. Pick the docks you
 need, combine them in one project, and keep each dock independently tracked for
@@ -26,7 +26,8 @@ Decide these first:
 3. **Task location**: run tasks in the project root, or in a private dock workdir and export selected outputs.
 4. **Required runtimes**: commands such as Git, Bun, Node, npm, uv, Python, or pip that the dock needs before tasks run.
 5. **CLI tools**: packages such as Codex, Claude Code, or OMA that OpenDock should install and track project-locally.
-6. **Maintenance**: what should happen during update and doctor, and what
+6. **Folder dependencies**: package dependencies inside folders copied by the dock, such as a skill or harness folder.
+7. **Maintenance**: what should happen during update and doctor, and what
    OpenDock should be able to remove through its automatic uninstall records.
 
 Good docks are outcome-first. A tool-only dock such as `opendock/codex` is valid,
@@ -96,6 +97,7 @@ stay outside the OpenDock block.
 | `permissions` | no | Exact task command shapes allowed for default commands or declared tool commands. |
 | `requires` | no | Runtime requirements prepared before tasks run. |
 | `tools` | no | CLI packages installed and tracked under `.opendock/tools/`. |
+| `dependencies` | no | Package dependencies installed inside folders copied by the dock. |
 | `workdir` | no | Files that prepare the private dock workdir before tasks run. |
 | `files` | no | File or directory mappings applied to the project root. |
 | `install` | no | Tasks for first install and initial generation. |
@@ -223,6 +225,46 @@ Use `tools` instead of task commands such as `npm install ...`, `bun add ...`,
 system package manager installs. OpenDock rejects package install/update task
 commands even when they appear in `permissions`.
 
+## Dependencies
+
+Use `dependencies` when the dock installs a folder into the project and that
+folder has its own package dependencies. This is different from `tools`: a tool
+exposes one or more commands through `.opendock/bin`, while a dependency belongs
+to a copied project folder such as a Codex skill, a harness, or a generated app
+snippet.
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+files:
+  - from: image2html
+    to: .codex/skills/image2html
+
+dependencies:
+  image2html:
+    manager: npm
+    path: .codex/skills/image2html
+    mode: ci
+```
+
+OpenDock applies `files` first, then installs `dependencies` in their declared
+paths. The dependency outputs are tracked at the directory level so update and
+uninstall can remove generated folders such as `node_modules`, `.venv`, or
+`.opendock/python`.
+
+Supported managers and modes:
+
+| Manager | Modes | Output cleaned by OpenDock |
+|---|---|---|
+| `npm` | `ci`, `install` | `node_modules` |
+| `pnpm` | `install` | `node_modules` |
+| `bun` | `install` | `node_modules` |
+| `uv` | `sync` | `.venv` |
+| `pip`, `pip3` | `install` from `requirements.txt` | `.opendock/python` |
+
 ## Task Command Permission
 
 OpenDock does not pass task strings to a shell. It splits each `run` and `check`
@@ -271,7 +313,9 @@ Default programs are not open-ended. They only allow safe shapes:
 
 Package mutation is always rejected from tasks. Do not put `npm install`,
 `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`,
-`brew install`, or `winget install` in `run`, `check`, or `permissions`.
+`brew install`, or `winget install` in `run`, `check`, or `permissions`. Use
+`tools` for command packages and `dependencies` for package dependencies inside
+copied project folders.
 
 ```yaml
 tools:

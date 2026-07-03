@@ -144,6 +144,30 @@ describe("deploy manifest hardening", () => {
     expect(() => validateManifestTaskCommands(manifest, "macos")).toThrow(/shell operators/);
   });
 
+  it("rejects unsafe dependency paths before submission", () => {
+    for (const [path, expected] of [
+      ["../outside", "unsafe dependency path"],
+      [".opendock/bin", "protected dependency path"],
+    ] as const) {
+      const root = tempDir();
+      writeManifest(root, {
+        opendock: 1,
+        dependencies: {
+          bad: {
+            manager: "npm",
+            path,
+          },
+        },
+      });
+      const manifest = manifestForRef(
+        parseManifestFile(join(root, "dock.yml")),
+        DockRef.parse("test/bad-dependency@1.0.0"),
+      );
+
+      expect(() => validateManifestTaskCommands(manifest, "macos")).toThrow(expected);
+    }
+  });
+
   it("validates readme, logo, and tags types while parsing dock.yml", () => {
     for (const [field, value] of [
       ["readme", ["DOCK.md"]],

@@ -96,6 +96,7 @@ const requiresSchema = z
   .default({ runtimes: {} });
 
 const packageManagerSchema = z.enum(["npm", "bun", "pnpm", "pip", "pip3"]);
+const dependencyManagerSchema = z.enum(["npm", "pnpm", "bun", "uv", "pip", "pip3"]);
 
 const safePackageNamePattern = /^(?:@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+$/;
 const safeCommandNamePattern = /^[A-Za-z0-9._-]+$/;
@@ -185,6 +186,44 @@ const toolsSchema = z
       }
     }
   });
+
+const dependencyModesByManager: Record<z.infer<typeof dependencyManagerSchema>, Set<string>> = {
+  bun: new Set(["install"]),
+  npm: new Set(["ci", "install"]),
+  pip: new Set(["install"]),
+  pip3: new Set(["install"]),
+  pnpm: new Set(["install"]),
+  uv: new Set(["sync"]),
+};
+
+const dependencySpecSchema = z
+  .object({
+    manager: dependencyManagerSchema,
+    path: z.string().trim().min(1).max(240),
+    mode: z.string().trim().min(1).max(32).optional(),
+    timeout_ms: z.number().int().positive().optional(),
+  })
+  .strict()
+  .transform((spec) => ({
+    ...spec,
+    mode: spec.mode ?? defaultDependencyMode(spec.manager),
+  }))
+  .superRefine((spec, context) => {
+    if (!dependencyModesByManager[spec.manager].has(spec.mode)) {
+      context.addIssue({
+        code: "custom",
+        message: `dependency manager \`${spec.manager}\` does not support mode \`${spec.mode}\``,
+        path: ["mode"],
+      });
+    }
+  });
+
+const dependenciesSchema = z
+  .record(
+    z.string().regex(/^[A-Za-z0-9._-]+$/, "dependency name must be a safe identifier"),
+    dependencySpecSchema,
+  )
+  .default({});
 
 const exportSpecSchema = z.object({
   include: z.array(z.string()).default([]),
@@ -285,6 +324,7 @@ const manifestSchema = z
     permissions: permissionListSchema.optional(),
     requires: requiresSchema,
     tools: toolsSchema,
+    dependencies: dependenciesSchema,
     workdir: workdirSpecSchema,
     files: z.array(fileSpecSchema).default([]),
     install: phaseTasksSchema.optional(),
@@ -314,12 +354,14 @@ const manifestSchema = z
 
 export type FileSpec = z.infer<typeof fileSpecSchema>;
 export type ToolSpec = z.infer<typeof toolSpecSchema>;
+export type DependencySpec = z.infer<typeof dependencySpecSchema>;
 type WorkdirSpec = z.infer<typeof workdirSpecSchema>;
 type Tasks = z.infer<typeof tasksSchema>;
 export type TaskPhase = keyof Tasks;
 export type TaskStep = z.infer<typeof taskStepSchema>;
 type ParsedDockManifest = z.infer<typeof manifestSchema>;
-export type DockManifest = Omit<ParsedDockManifest, "tools" | "workdir"> & {
+export type DockManifest = Omit<ParsedDockManifest, "dependencies" | "tools" | "workdir"> & {
+  dependencies?: Record<string, DependencySpec>;
   tools?: Record<string, ToolSpec>;
   workdir?: WorkdirSpec;
 };
@@ -389,6 +431,13 @@ function isLikelyLegacyManifestField(field: string): boolean {
     field.startsWith("requires.packages") ||
     field.endsWith(".update")
   );
+}
+
+function defaultDependencyMode(manager: z.infer<typeof dependencyManagerSchema>): string {
+  if (manager === "uv") {
+    return "sync";
+  }
+  return "install";
 }
 
 export function parseManifestFile(path: string): DockManifest {

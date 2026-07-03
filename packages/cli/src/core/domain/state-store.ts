@@ -27,6 +27,7 @@ export interface InstalledDockRecord {
   workdir: string;
   runtimes: InstalledRuntimeRecord[];
   tools: InstalledToolRecord[];
+  dependencies: InstalledDependencyRecord[];
   files: AppliedFileRecord[];
 }
 
@@ -45,6 +46,13 @@ export interface InstalledToolRecord {
   package: string;
   version: string;
   commands: string[];
+  path: string;
+}
+
+export interface InstalledDependencyRecord {
+  name: string;
+  manager: string;
+  mode: string;
   path: string;
 }
 
@@ -160,6 +168,7 @@ function normalizeInstalledDockRecord(dock: InstalledDockRecord): InstalledDockR
     files: Array.isArray(dock.files) ? dock.files : [],
     runtimes: Array.isArray(dock.runtimes) ? dock.runtimes : [],
     tools: Array.isArray(dock.tools) ? dock.tools : [],
+    dependencies: Array.isArray(dock.dependencies) ? dock.dependencies : [],
   };
 }
 
