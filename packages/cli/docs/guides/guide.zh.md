@@ -69,6 +69,25 @@ files:
 | `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
 
+## Tools
+
+`tools` 是 OpenDock 在项目本地安装并追踪的 CLI package。支持的 manager 是
+`npm`, `bun`, `pnpm`, `uv`, `pip`, `pip3`。提供 command 的 package 不要在 task
+里直接 install，请声明到 `tools`。
+
+```yaml
+tools:
+  ruff:
+    manager: uv
+    package: ruff
+    version: latest
+    commands:
+      - ruff
+```
+
+`npm install ...`, `bun add ...`, `pip install ...`, `pipx install ...`,
+`uv tool install ...` 这类 package install/update command 会在 task 中被拒绝。
+
 ## Dependencies
 
 当 dock 把一个 folder 复制到项目中，而这个 folder 自己需要 package dependencies
@@ -105,8 +124,14 @@ dependency outputs。
 | `uv` | `install`, `locked` |
 | `pip`, `pip3` | 从 `requirements.txt` 执行 `install` |
 
-`locked` 表示使用对应 manager 的 lockfile/frozen install。内部会执行
-`npm ci`, `pnpm install --frozen-lockfile`,
+如果要安装之后由 agent 或 task 调用的 command，请使用 `tools`。如果 OpenDock 复制
+到项目里的文件夹本身需要准备 package，请使用 `dependencies`。
+
+`install` 是普通 dependency install。复制的 template folder、harness、小型 helper
+app 没有 lockfile，或可以接受 compatible update 时使用它。`locked` 会优先 lockfile
+或 frozen environment。当 dock 包含 `package-lock.json`, `pnpm-lock.yaml`,
+`bun.lock`, `uv.lock`，并需要复现同一组 dependency 时使用它。内部会把 `locked`
+映射到 `npm ci`, `pnpm install --frozen-lockfile`,
 `bun install --frozen-lockfile`, `uv sync --frozen`。
 
 ## Version

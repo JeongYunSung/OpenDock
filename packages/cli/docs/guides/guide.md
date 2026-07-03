@@ -207,7 +207,8 @@ Behavior:
 Use `tools` for CLI packages that should be installed, tracked, updated, and
 removed with the dock. Tools are installed project-locally under
 `.opendock/tools/`, and their declared commands are exposed through
-`.opendock/bin/`.
+`.opendock/bin/`. Supported tool managers are `npm`, `bun`, `pnpm`, `uv`,
+`pip`, and `pip3`.
 
 ```yaml
 tools:
@@ -218,6 +219,18 @@ tools:
     commands:
       - oma
       - oh-my-agent
+```
+
+Python CLI tools can use `manager: uv`:
+
+```yaml
+tools:
+  ruff:
+    manager: uv
+    package: ruff
+    version: latest
+    commands:
+      - ruff
 ```
 
 Use `tools` instead of task commands such as `npm install ...`, `bun add ...`,
@@ -269,9 +282,17 @@ Supported managers and modes:
 | `uv` | `install`, `locked` | `.venv` |
 | `pip`, `pip3` | `install` from `requirements.txt` | `.opendock/python` |
 
-`install` means a normal dependency install. `locked` means the manager should
-respect the lockfile or frozen environment: `npm ci`, `pnpm install
---frozen-lockfile`, `bun install --frozen-lockfile`, or `uv sync --frozen`.
+Choose `tools` when the dock is installing a command that users, agents, or
+tasks will call later. Choose `dependencies` when OpenDock has copied a folder
+and that copied folder needs its own packages installed in place.
+
+`install` means a normal dependency install. Use it for template folders,
+harnesses, or small generated apps that do not ship with a lockfile. `locked`
+means the manager should respect the lockfile or frozen environment. Use it when
+the dock includes `package-lock.json`, `pnpm-lock.yaml`, `bun.lock`, or
+`uv.lock` and reproducibility matters more than floating updates. Internally,
+`locked` maps to `npm ci`, `pnpm install --frozen-lockfile`,
+`bun install --frozen-lockfile`, or `uv sync --frozen`.
 
 ## Task Command Permission
 

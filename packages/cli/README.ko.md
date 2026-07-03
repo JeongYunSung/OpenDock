@@ -111,15 +111,14 @@ OpenDock은 책임 범위를 명확히 나눕니다.
 | **Project** | 현재 프로젝트 | 설치된 dock 목록, lock, log, 프로젝트 metadata. |
 | **Dock** | 설치된 dock 하나 | 버전, checksum, 관리 파일 기록, 전용 workdir. |
 | **Root output** | OpenDock file engine | 사전 확인 후 프로젝트 root에 적용되는 파일. |
-| **Host bootstrap** | 사용자 머신 | Homebrew, WinGet 같은 1차 package manager를 `opendock bootstrap`으로 명시적으로 준비합니다. |
 | **Runtime** | 사용자 계정 | Node, npm, Python, pip, Bun, Git 요구사항을 `~/.opendock/runtimes/` 아래 version별로 준비하거나 등록하고, 각 project에서는 `.opendock/bin/` shim으로 사용합니다. |
 | **Tool** | 설치된 dock | `tools`에 선언한 CLI package를 `.opendock/tools/`에 설치하고 `.opendock/bin/`으로 연결합니다. |
 | **Dependency** | 설치된 dock payload | `dependencies`에 선언한 package dependency를 복사된 프로젝트 폴더 안에 설치하고 update/uninstall 때 정리합니다. |
 
 핵심 규칙은 단순합니다. OpenDock은 프로젝트에 적용한 파일은 추적할 수 있지만,
-전체 머신을 소유한다고 가정하지 않습니다. Host package manager는 bootstrap으로
-분리합니다. Runtime install과 wrapper는 home의 `.opendock`에서 공유하고,
-dock tool, 프로젝트 파일, dependency output, dock workdir은 프로젝트의 `.opendock/`에서 추적합니다.
+전체 머신을 소유한다고 가정하지 않습니다. Runtime install과 wrapper는 home의
+`.opendock`에서 공유하고, dock tool, 프로젝트 파일, dependency output, dock workdir은
+프로젝트의 `.opendock/`에서 추적합니다.
 
 ## 설치
 
@@ -129,21 +128,6 @@ OpenDock은 npm package로 배포되며 Bun 또는 npm으로 설치할 수 있�
 bun install -g opendock
 opendock version
 opendock version --check
-```
-
-Homebrew를 사용하는 macOS dock을 실행하려면, Homebrew가 없을 때 host bootstrap을
-먼저 실행합니다.
-
-```bash
-opendock bootstrap mac
-```
-
-WinGet을 사용하는 Windows dock을 실행하려면, WinGet이 없을 때 host bootstrap을
-먼저 실행합니다. OpenDock은 `winget`을 확인하고, 없으면 Microsoft App Installer를
-열 수 있게 안내합니다.
-
-```bash
-opendock bootstrap windows
 ```
 
 로컬 개발:
@@ -169,8 +153,6 @@ bin/opendock version
 | `opendock log` | 현재 프로젝트의 최근 명령 실행 기록을 보여줍니다. |
 | `opendock version` | CLI, schema, Registry 정보를 출력합니다. |
 | `opendock version --check` | OpenDock public release channel 기준으로 새 CLI/app 버전이 있는지 확인합니다. |
-| `opendock bootstrap mac` | macOS에서 Homebrew를 확인하거나 설치합니다. |
-| `opendock bootstrap windows` | Windows에서 WinGet을 확인하거나 Microsoft App Installer를 엽니다. |
 | `opendock auth login` | deploy를 위해 OpenDock Registry에 로그인합니다. |
 | `opendock auth status` | 현재 Registry 로그인 상태를 보여줍니다. |
 | `opendock auth logout` | 로컬 Registry 로그인 정보를 지웁니다. |
@@ -276,14 +258,24 @@ dependencies:
 ```
 
 OpenDock은 `files`를 먼저 적용한 뒤 `dependencies`를 해당 path에서 실행합니다.
-지원 manager는 `npm`, `pnpm`, `bun`, `uv`, `pip`, `pip3`입니다. mode는 `install`과
-`locked`를 사용합니다. `install`은 일반 설치이고, `locked`는 lockfile 또는 frozen
-환경을 우선합니다. 내부적으로 `locked`는 `npm ci`,
-`pnpm install --frozen-lockfile`, `bun install --frozen-lockfile`,
-`uv sync --frozen`으로 실행됩니다. `pip`와 `pip3`는 `requirements.txt` 기준
-`install`만 지원합니다. task에 직접 `npm install`이나 `pip install`을 쓰는 방식은
-계속 거부됩니다. CLI command 자체를 설치해야 하면 `tools`, 복사된 폴더의 dependency를
-설치해야 하면 `dependencies`를 사용합니다.
+지원 manager는 `npm`, `pnpm`, `bun`, `uv`, `pip`, `pip3`입니다.
+
+어디에 적을지는 소유 기준으로 정합니다.
+
+| 필요 | 사용 |
+|---|---|
+| `codex`, `ruff`, `oma`처럼 `.opendock/bin`에서 실행할 command | `tools` |
+| skill, harness, template app처럼 dock이 복사한 폴더 안에 필요한 package | `dependencies` |
+
+dependency mode는 `install`과 `locked`입니다.
+
+| Mode | 언제 사용하나 | 내부 실행 형태 |
+|---|---|---|
+| `install` | 복사한 폴더에 lockfile이 없거나 compatible update를 허용해도 될 때 | 일반 manager install |
+| `locked` | lockfile이 있고 같은 dependency set을 재현해야 할 때 | `npm ci`, `pnpm install --frozen-lockfile`, `bun install --frozen-lockfile`, `uv sync --frozen` |
+
+`pip`와 `pip3`는 `requirements.txt` 기준 `install`만 지원합니다. task에 직접
+`npm install`이나 `pip install`을 쓰는 방식은 계속 거부됩니다.
 
 ## 파일 소유권
 
@@ -444,7 +436,6 @@ src/
   auth.ts                   # Local Registry token storage
   registry.ts               # OpenDock Registry API client
   resolver.ts               # Registry archive download and validation
-  bootstrap.ts              # First-party host bootstrap helpers
   core/
     app/                    # Install, update, uninstall orchestration
     domain/                 # Manifest and project state models

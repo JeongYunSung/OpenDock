@@ -298,9 +298,9 @@ uv
 
 ## tools
 
-`tools`는 OpenDock이 프로젝트 안에 설치하고 추적할 CLI package입니다. 예를 들어
-Codex, Claude Code, OMA처럼 command를 제공하는 패키지는 task에서 직접 설치하지
-말고 `tools`로 선언합니다.
+`tools`는 OpenDock이 프로젝트 안에 설치하고 추적할 CLI package입니다. 지원 manager는
+`npm`, `bun`, `pnpm`, `uv`, `pip`, `pip3`입니다. 예를 들어 Codex, Claude Code,
+OMA처럼 command를 제공하는 패키지는 task에서 직접 설치하지 말고 `tools`로 선언합니다.
 
 ```yaml
 requires:
@@ -315,6 +315,18 @@ tools:
     version: latest
     commands:
       - codex
+```
+
+Python CLI 도구는 `manager: uv`로 선언할 수 있습니다.
+
+```yaml
+tools:
+  ruff:
+    manager: uv
+    package: ruff
+    version: latest
+    commands:
+      - ruff
 ```
 
 주의할 점:
@@ -367,7 +379,15 @@ OpenDock은 `files`를 먼저 적용한 뒤, 선언된 `path`에서 dependency i
 | `uv` | `install`, `locked` | `.venv` |
 | `pip`, `pip3` | `install` (`requirements.txt` 기준) | `.opendock/python` |
 
-`locked`는 manager별 lockfile/frozen install을 의미합니다. 내부적으로 `npm ci`,
+나중에 agent나 task가 실행할 command를 설치하는 경우에는 `tools`를 사용합니다.
+OpenDock이 복사한 폴더 안에서 package를 준비해야 하는 경우에는 `dependencies`를
+사용합니다.
+
+`install`은 일반 dependency install입니다. 복사한 template folder, harness, 작은
+helper app에 lockfile이 없거나 compatible update를 허용할 때 씁니다. `locked`는
+lockfile 또는 frozen 환경을 우선합니다. dock에 `package-lock.json`,
+`pnpm-lock.yaml`, `bun.lock`, `uv.lock`이 포함되어 있고 같은 dependency set을 재현해야
+할 때 씁니다. 내부적으로 `locked`는 `npm ci`,
 `pnpm install --frozen-lockfile`, `bun install --frozen-lockfile`,
 `uv sync --frozen`을 사용합니다.
 

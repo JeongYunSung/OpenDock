@@ -46,6 +46,7 @@ opendock uninstall opendock/codex
 - [Install](#install)
 - [Command Reference](#command-reference)
 - [Dock Format](#dock-format)
+- [Tools](#tools)
 - [Dependencies](#dependencies)
 - [Task Command Permission](#task-command-permission)
 - [File Ownership](#file-ownership)
@@ -227,8 +228,11 @@ doctor:
     version: ">=2.40.0"
 ```
 
+## Tools
+
 Use `tools` for CLI packages that OpenDock should install and track inside the
-project:
+project. Supported tool managers are `npm`, `bun`, `pnpm`, `uv`, `pip`, and
+`pip3`.
 
 ```yaml
 requires:
@@ -245,14 +249,27 @@ tools:
       - codex
 ```
 
+For Python CLI tools, use `manager: uv` when the package exposes a command:
+
+```yaml
+tools:
+  ruff:
+    manager: uv
+    package: ruff
+    version: latest
+    commands:
+      - ruff
+```
+
 Runtime commands and tool commands are exposed through `.opendock/bin` while
 OpenDock runs install, update, and doctor steps. A command name being known to
 OpenDock is not a blanket shell permission: each task command still has to match
 one of OpenDock's safe command shapes or an exact `permissions` entry.
 
 Docks should not use global or local package install/update commands such as
-`npm install ...`, `bun add ...`, or `pip install ...`; declare project-local
-`tools`, path-based `dependencies`, or runtime requirements instead.
+`npm install ...`, `bun add ...`, `uv tool install ...`, or `pip install ...`;
+declare project-local `tools`, path-based `dependencies`, or runtime
+requirements instead.
 
 ## Dependencies
 
@@ -285,13 +302,24 @@ outputs such as `node_modules`, `.venv`, or `.opendock/python` before
 reinstalling or cleaning up.
 
 Supported dependency managers today are `npm`, `pnpm`, `bun`, `uv`, `pip`, and
-`pip3`. OpenDock does not run arbitrary install commands here. Dependency mode
-is either `install` or `locked`: `install` runs the normal manager install,
-while `locked` respects a lockfile or frozen environment. Internally, `locked`
-maps to commands such as `npm ci`, `pnpm install --frozen-lockfile`,
-`bun install --frozen-lockfile`, or `uv sync --frozen`. `pip` and `pip3`
-support `install` from `requirements.txt`. Use `timeout_ms` when a dependency
-install can take longer than the default.
+`pip3`. OpenDock does not run arbitrary install commands here.
+
+Choose the field by ownership:
+
+| Need | Use |
+|---|---|
+| A command that should be available from `.opendock/bin`, such as `codex`, `ruff`, or `oma` | `tools` |
+| Packages required inside a folder copied by the dock, such as a skill, harness, or template app | `dependencies` |
+
+Dependency mode is either `install` or `locked`:
+
+| Mode | Use when | Internal shape |
+|---|---|---|
+| `install` | The copied folder has no committed lockfile, or the dock should accept compatible package updates | normal manager install |
+| `locked` | The copied folder carries a lockfile and the dock should reproduce that exact dependency set | `npm ci`, `pnpm install --frozen-lockfile`, `bun install --frozen-lockfile`, or `uv sync --frozen` |
+
+`pip` and `pip3` support `install` from `requirements.txt`. Use `timeout_ms`
+when a dependency install can take longer than the default.
 
 `readme`, `logo`, and `tags` are Registry catalog metadata. They help people
 understand and filter a dock in Hub, but they are not installed into a project

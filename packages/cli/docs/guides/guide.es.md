@@ -72,6 +72,27 @@ files:
 | `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
 
+## Tools
+
+`tools` instala y rastrea CLI packages de forma local al proyecto. Los managers
+admitidos son `npm`, `bun`, `pnpm`, `uv`, `pip` y `pip3`. Si un package expone
+un command, decláralo en `tools` en vez de instalarlo directamente dentro de un
+task.
+
+```yaml
+tools:
+  ruff:
+    manager: uv
+    package: ruff
+    version: latest
+    commands:
+      - ruff
+```
+
+Los commands de package install/update como `npm install ...`, `bun add ...`,
+`pip install ...`, `pipx install ...` o `uv tool install ...` se rechazan dentro
+de tasks.
+
 ## Dependencies
 
 Usa `dependencies` cuando el dock copia una carpeta al proyecto y esa carpeta
@@ -108,9 +129,17 @@ declarado. En update y uninstall, OpenDock elimina outputs generados como
 | `uv` | `install`, `locked` |
 | `pip`, `pip3` | `install` desde `requirements.txt` |
 
-`locked` significa instalación con lockfile/frozen para cada manager. Por
-dentro usa `npm ci`, `pnpm install --frozen-lockfile`,
-`bun install --frozen-lockfile` o `uv sync --frozen`.
+Usa `tools` cuando el dock instala un command que un agent, task o usuario
+ejecutará después. Usa `dependencies` cuando OpenDock copia una carpeta y esa
+carpeta necesita preparar sus propios packages.
+
+`install` es una instalación normal de dependency. Úsalo para template folders,
+harnesses o pequeñas helper apps que no traen lockfile. `locked` respeta el
+lockfile o entorno frozen. Úsalo cuando el dock incluye `package-lock.json`,
+`pnpm-lock.yaml`, `bun.lock` o `uv.lock` y reproducir el mismo dependency set es
+más importante que aceptar updates flotantes. Por dentro usa `npm ci`,
+`pnpm install --frozen-lockfile`, `bun install --frozen-lockfile` o
+`uv sync --frozen`.
 
 ## Version
 

@@ -510,8 +510,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/manifest.ts": {
-    "mtime": 1783040877.7202308,
-    "ast_hash": "4f8f2a6635b6377d8d95315e3071e13d",
+    "mtime": 1783071648.7799625,
+    "ast_hash": "fe2de1f85cf4d4b97879ccb711c18e49",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/runtime-names.ts": {
@@ -685,8 +685,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/requirements.test.ts": {
-    "mtime": 1783037827.233264,
-    "ast_hash": "11cb178a117349abad3627b74e33efeb",
+    "mtime": 1783072019.8645453,
+    "ast_hash": "5dadfaf817e7b16d0300cf523107543d",
     "semantic_hash": ""
   },
   "packages/cli/tests/security-regression.test.ts": {
@@ -730,8 +730,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1783042823.5379374,
-    "ast_hash": "34357a11fd407c3d73184921c0c4e4fe",
+    "mtime": 1783073319.645125,
+    "ast_hash": "0d7a4965cffa6b768dd374a3ed40ca1a",
     "semantic_hash": ""
   },
   "apps/desktop/index.html": {
@@ -740,73 +740,73 @@
     "semantic_hash": ""
   },
   "packages/cli/README.de.md": {
-    "mtime": 1783038631.1267262,
-    "ast_hash": "eba07139da458d7a3167819ef2f8defe",
+    "mtime": 1783073282.5244212,
+    "ast_hash": "8145f9fabb8633ea0c2daead2abcf43f",
     "semantic_hash": ""
   },
   "packages/cli/README.es.md": {
-    "mtime": 1783038664.6961486,
-    "ast_hash": "7440f7152973f59968d88fd41b066d40",
+    "mtime": 1783073282.5249214,
+    "ast_hash": "08517e3c9c290708d8cadbb832843163",
     "semantic_hash": ""
   },
   "packages/cli/README.fr.md": {
-    "mtime": 1783038691.777748,
-    "ast_hash": "036b92c7158d154e90de856eb84c9350",
+    "mtime": 1783073282.5252419,
+    "ast_hash": "b3412044273ead637b10d80a8638752d",
     "semantic_hash": ""
   },
   "packages/cli/README.ja.md": {
-    "mtime": 1783038720.9869342,
-    "ast_hash": "3adbcda07950911bfa70eb98ff5bf224",
+    "mtime": 1783073282.5255055,
+    "ast_hash": "ffb0d2bbc1907fd3c91b45baefd4bdfd",
     "semantic_hash": ""
   },
   "packages/cli/README.ko.md": {
-    "mtime": 1783038230.566568,
-    "ast_hash": "53c688c3bd7fd030ff8e7bd0032573b0",
+    "mtime": 1783073239.2366366,
+    "ast_hash": "6133d6b1fbe0dd4631f8b9c6fcddfa80",
     "semantic_hash": ""
   },
   "packages/cli/README.md": {
-    "mtime": 1783042833.4688225,
-    "ast_hash": "2b4fd590fb2d61b35d133243bf5c7dc7",
+    "mtime": 1783073319.6457286,
+    "ast_hash": "2585e6f7bb43c5a65cf95728ca974c87",
     "semantic_hash": ""
   },
   "packages/cli/README.zh.md": {
-    "mtime": 1783038746.1128936,
-    "ast_hash": "7795d5b8b080e1cf3224e03fd7f453c2",
+    "mtime": 1783073282.525818,
+    "ast_hash": "698fd855f5af875177aee197a73908ca",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.de.md": {
-    "mtime": 1783038784.7154365,
-    "ast_hash": "bc2f68d3e20ec856ba50f6f066d42f02",
+    "mtime": 1783073599.1147425,
+    "ast_hash": "7b5a09b366813a06d6ee89039e9e3bf5",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.es.md": {
-    "mtime": 1783038809.3310075,
-    "ast_hash": "56dd8685f3b06289e74e664645c4724a",
+    "mtime": 1783073599.1083024,
+    "ast_hash": "cc8955b12fa8977290d9d24c29dad0fb",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.fr.md": {
-    "mtime": 1783038838.813569,
-    "ast_hash": "df8623cab21568ca8a5d94aec7b9cd87",
+    "mtime": 1783073599.111558,
+    "ast_hash": "a9329a6c507aa145b47d9e6bcae5ce2a",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.ja.md": {
-    "mtime": 1783038864.7948663,
-    "ast_hash": "1942d0b8def7d674ca28195f80f5db94",
+    "mtime": 1783073599.1012418,
+    "ast_hash": "b1d95257f29d2c450cfa9ff1665d748e",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.ko.md": {
-    "mtime": 1783042901.4580927,
-    "ast_hash": "0182bf017880238365a89ebf25741089",
+    "mtime": 1783073346.5670965,
+    "ast_hash": "9ee5e118016244924fba20a7c3ead158",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.md": {
-    "mtime": 1783042874.836955,
-    "ast_hash": "dee9f3167bfa2c2f2c7ccd6f60c1c7da",
+    "mtime": 1783073346.5661075,
+    "ast_hash": "e5d4f23ba0fce7eb1a9431ab894d044c",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.zh.md": {
-    "mtime": 1783038889.087857,
-    "ast_hash": "1383aa32fd580ff8a92673132ba9200f",
+    "mtime": 1783073599.1047337,
+    "ast_hash": "a7fde60501a09daf4c68a834b9f255e4",
     "semantic_hash": ""
   },
   "packages/cli/examples/agent-ready/DOCK.md": {
@@ -2625,8 +2625,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/tool-runner.ts": {
-    "mtime": 1783038009.6728036,
-    "ast_hash": "0e43fabb711c51107165f2ed5e125aac",
+    "mtime": 1783071730.0118446,
+    "ast_hash": "e76f052d68df178fe933e490cb4183ce",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-installer.ts": {
@@ -2645,8 +2645,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/quality-contracts.test.ts": {
-    "mtime": 1782969185.0836096,
-    "ast_hash": "4803c3f35565595893897805e9ff5c4f",
+    "mtime": 1783073789.3918695,
+    "ast_hash": "59c4cc597d0a2558ee73a7a839058c70",
     "semantic_hash": ""
   },
   "packages/cli/tests/runtime-platform-matrix.test.ts": {
@@ -2705,8 +2705,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/runtime-tool-isolation-edge-cases.test.ts": {
-    "mtime": 1783038009.6755095,
-    "ast_hash": "000851187fc93a1567b70ac113a92f3e",
+    "mtime": 1783073148.1505442,
+    "ast_hash": "00ab5d373a3bc695c9d003e53ce26e16",
     "semantic_hash": ""
   },
   ".serena/memories/memory_maintenance.md": {
@@ -2725,13 +2725,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/dependency-runner.ts": {
-    "mtime": 1783042534.4274852,
-    "ast_hash": "761918e7965e3e4e604e3eb7eb5924b1",
+    "mtime": 1783071170.2475529,
+    "ast_hash": "e1c881c6142a2cb36c9961ca043a8b64",
     "semantic_hash": ""
   },
   "packages/cli/tests/dependencies.test.ts": {
-    "mtime": 1783043310.762563,
-    "ast_hash": "a4d490456a1fabe4e5d331d23863b250",
+    "mtime": 1783073851.150276,
+    "ast_hash": "6e991312e80998dbec0a1648af0ca60d",
     "semantic_hash": ""
   },
   "packages/cli/docs/plans/dependencies-qa.md": {

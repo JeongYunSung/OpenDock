@@ -240,7 +240,32 @@ printf 'host:%s\\n' "$*" >> "${hostLog}"
     ]);
     expect(commandShim).toContain(join(toolDir, "bin", "ruff"));
     expect(readFileSync(toolLog, "utf8")).toContain("tool install --force ruff==0.9.0");
+    expect(readFileSync(toolLog, "utf8")).toContain(
+      `uv-tool-env:${join(toolDir, "bin")}:${join(toolDir, "tools")}`,
+    );
     expect(readFileSync(toolLog, "utf8")).toContain("ruff:--version");
+  });
+
+  it("installs latest uv tools without npm-style or pip-style version suffixes", async () => {
+    const project = tempDir();
+    const bin = tempDir();
+    const toolLog = join(project, "uv-tool-latest.log");
+    writeFakeUv(bin, toolLog);
+
+    await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      new TaskRunner().run(uvToolManifest("latest"), {
+        dockId: "test/uv-tool-latest",
+        live: false,
+        phase: "install",
+        platform: "macos",
+        projectDir: project,
+      }),
+    );
+
+    const logText = readFileSync(toolLog, "utf8");
+    expect(logText).toContain("tool install --force ruff");
+    expect(logText).not.toContain("ruff@latest");
+    expect(logText).not.toContain("ruff==latest");
   });
 
   it("resolves managed Python runtime ranges before asking uv to install", async () => {
@@ -490,13 +515,13 @@ function pythonToolManifest(): DockManifest {
   });
 }
 
-function uvToolManifest(): DockManifest {
+function uvToolManifest(version = "0.9.0"): DockManifest {
   return manifest({
     tools: {
       ruff: {
         manager: "uv",
         package: "ruff",
-        version: "0.9.0",
+        version,
         commands: ["ruff"],
       },
     },
@@ -674,6 +699,10 @@ if [ "$1" = "python" ] && [ "$2" = "find" ]; then
   exit 0
 fi
 if [ "$1" = "tool" ] && [ "$2" = "install" ]; then
+  if [ -z "\${UV_TOOL_BIN_DIR:-}" ] || [ -z "\${UV_TOOL_DIR:-}" ]; then
+    exit 43
+  fi
+  printf 'uv-tool-env:%s:%s\\n' "$UV_TOOL_BIN_DIR" "$UV_TOOL_DIR" >> "${log}"
   mkdir -p "$UV_TOOL_BIN_DIR"
   /bin/cat > "$UV_TOOL_BIN_DIR/ruff" <<'EOF'
 #!/bin/sh

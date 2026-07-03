@@ -66,7 +66,6 @@ kleines Tool, um wiederholbares KI-Setup zu installieren und zu verwalten.
 | **Project scope** | Aktuelles Projekt | Installierte docks, lock, logs und Projektmetadaten. |
 | **Dock scope** | Ein installierter dock | Version, checksum, verwaltete Dateien und privates workdir. |
 | **Root output scope** | OpenDock file engine | Dateien, die nach der Vorprüfung in den project root geschrieben werden. |
-| **Host bootstrap scope** | Your machine | Homebrew or WinGet are prepared explicitly with `opendock bootstrap`. |
 | **Tool scope** | Installed dock | CLI packages declared in `tools` are installed under `.opendock/tools/` and exposed through `.opendock/bin/`. |
 | **Dependency scope** | Installed dock payload | Package dependencies declared in `dependencies` are installed inside copied project folders and cleaned on update/uninstall. |
 
@@ -76,18 +75,6 @@ kleines Tool, um wiederholbares KI-Setup zu installieren und zu verwalten.
 bun install -g opendock
 opendock version
 opendock version --check
-```
-
-Wenn ein macOS dock Homebrew verwendet und Homebrew fehlt, führe zuerst aus:
-
-```bash
-opendock bootstrap mac
-```
-
-Wenn ein Windows dock WinGet verwendet und WinGet fehlt, führe zuerst aus:
-
-```bash
-opendock bootstrap windows
 ```
 
 ## Commands
@@ -105,8 +92,6 @@ opendock bootstrap windows
 | `opendock log` | Zeigt aktuelle Befehlslogs für das Projekt. |
 | `opendock version` | Zeigt Informationen zu CLI, schema und Registry. |
 | `opendock version --check` | Prüft den öffentlichen OpenDock release channel auf eine neue CLI/app-Version. |
-| `opendock bootstrap mac` | Prüft oder installiert Homebrew auf macOS. |
-| `opendock bootstrap windows` | Prüft WinGet oder öffnet Microsoft App Installer auf Windows. |
 | `opendock auth login` | Login bei Registry für deploy. |
 | `opendock auth status` | Zeigt den aktuellen Registry login. |
 | `opendock auth logout` | Entfernt den lokalen Registry login. |
@@ -183,12 +168,23 @@ dependencies:
     mode: locked
 ```
 
-Heute unterstützt OpenDock `npm`, `pnpm`, `bun`, `uv`, `pip` und `pip3`. Die
-Modes sind `install` und `locked`. `install` ist die normale Installation;
-`locked` respektiert lockfiles oder frozen environments. Intern wird `locked`
-auf `npm ci`, `pnpm install --frozen-lockfile`,
-`bun install --frozen-lockfile` oder `uv sync --frozen` abgebildet. `pip` und
-`pip3` unterstützen nur `install` aus `requirements.txt`.
+Heute unterstützt OpenDock `npm`, `pnpm`, `bun`, `uv`, `pip` und `pip3`.
+
+Wähle das Feld nach Ownership.
+
+| Need | Use |
+|---|---|
+| Ein Command, der über `.opendock/bin` verfügbar sein soll, etwa `codex`, `ruff` oder `oma` | `tools` |
+| Packages in einem vom dock kopierten Ordner, etwa einem Skill, Harness oder einer Template-App | `dependencies` |
+
+Dependency modes sind `install` und `locked`.
+
+| Mode | Wann verwenden | Interne Form |
+|---|---|---|
+| `install` | Der kopierte Ordner hat kein lockfile oder darf compatible updates akzeptieren | normale Manager-Installation |
+| `locked` | Der Ordner enthält ein lockfile und soll dasselbe dependency set reproduzieren | `npm ci`, `pnpm install --frozen-lockfile`, `bun install --frozen-lockfile`, `uv sync --frozen` |
+
+`pip` und `pip3` unterstützen nur `install` aus `requirements.txt`.
 
 Nutze `workdir.files`, wenn ein task im dock-private workdir vor der Ausführung
 Input-Dateien braucht. Nutze `files` für Dateien, die in den project root
@@ -196,7 +192,7 @@ geschrieben werden sollen.
 
 ## Task Command Permission
 
-OpenDock tasks `run` und `check` nutzen eine kleine Standard-Policy: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf Windows ist zusätzlich ein eingeschränktes `powershell` erlaubt. Ein Standard-Command erlaubt aber nicht beliebige subcommands: Nur sichere Formen wie `git status`, `git init -b main`, `test -f <path>`, version checks und das eingeschränkte Windows `Test-Path` sind erlaubt. Commands wie `oma`, `codex`, `claude` oder `omx` können nur über `permissions` geöffnet werden, wenn sie vorher in `tools.commands` deklariert sind. `tools.commands` darf OpenDock-Standardnamen wie `git`, `node`, `npm` oder `python` nicht wiederverwenden. Ein Command wie `mkdir`, der weder Standard noch in `tools.commands` deklariert ist, wird abgelehnt. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt. Package install/update Commands wie `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` und `winget install` werden in tasks abgelehnt. Nutze `tools` für project tools, `dependencies` für dependencies in kopierten Projektordnern, `requires.runtimes` für Bun/Node/npm/Python/pip runtimes und bootstrap für host package managers.
+OpenDock tasks `run` und `check` nutzen eine kleine Standard-Policy: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf Windows ist zusätzlich ein eingeschränktes `powershell` erlaubt. Ein Standard-Command erlaubt aber nicht beliebige subcommands: Nur sichere Formen wie `git status`, `git init -b main`, `test -f <path>`, version checks und das eingeschränkte Windows `Test-Path` sind erlaubt. Commands wie `oma`, `codex`, `claude` oder `omx` können nur über `permissions` geöffnet werden, wenn sie vorher in `tools.commands` deklariert sind. `tools.commands` darf OpenDock-Standardnamen wie `git`, `node`, `npm` oder `python` nicht wiederverwenden. Ein Command wie `mkdir`, der weder Standard noch in `tools.commands` deklariert ist, wird abgelehnt. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt. Package install/update Commands wie `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` und `winget install` werden in tasks abgelehnt. Nutze `tools` für project tools, `dependencies` für dependencies in kopierten Projektordnern, `requires.runtimes` für Bun/Node/npm/Python/pip runtimes.
 
 ```yaml
 tools:

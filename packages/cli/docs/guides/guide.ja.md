@@ -70,6 +70,26 @@ files:
 | `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
 
+## Tools
+
+`tools` は OpenDock が project-local にインストールして追跡する CLI package です。
+対応 manager は `npm`, `bun`, `pnpm`, `uv`, `pip`, `pip3` です。Command を提供する
+package は task で直接 install せず、`tools` に宣言します。
+
+```yaml
+tools:
+  ruff:
+    manager: uv
+    package: ruff
+    version: latest
+    commands:
+      - ruff
+```
+
+`npm install ...`, `bun add ...`, `pip install ...`, `pipx install ...`,
+`uv tool install ...` のような package install/update command は task では拒否
+されます。
+
 ## Dependencies
 
 `dependencies` は、dock が folder を project にコピーし、その folder 自体が
@@ -106,9 +126,17 @@ install します。update と uninstall では、`node_modules`、`.venv`、
 | `uv` | `install`, `locked` |
 | `pip`, `pip3` | `requirements.txt` から `install` |
 
-`locked` は manager ごとの lockfile/frozen install を意味します。内部的には
+あとで agent や task が呼び出す command をインストールする場合は `tools` を使い
+ます。OpenDock がコピーした folder 内で package を準備する場合は
+`dependencies` を使います。
+
+`install` は通常の dependency install です。コピーした template folder、harness、
+小さな helper app に lockfile がない場合や compatible update を許可できる場合に使
+います。`locked` は lockfile または frozen environment を優先します。dock に
+`package-lock.json`, `pnpm-lock.yaml`, `bun.lock`, `uv.lock` が含まれ、同じ
+dependency set を再現する必要がある場合に使います。内部的には `locked` が
 `npm ci`, `pnpm install --frozen-lockfile`,
-`bun install --frozen-lockfile`, `uv sync --frozen` を使います。
+`bun install --frozen-lockfile`, `uv sync --frozen` に対応します。
 
 ## Version
 

@@ -64,7 +64,6 @@ OpenDock はターミナルの代替でも、汎用 script runner でもあり�
 | **Project scope** | 現在の project | installed dock list, lock, log, project metadata. |
 | **Dock scope** | 1つの installed dock | version, checksum, managed file record, private workdir. |
 | **Root output scope** | OpenDock file engine | preflight 後に project root へ適用される file. |
-| **Host bootstrap scope** | Your machine | Homebrew や WinGet は `opendock bootstrap` で明示的に準備します. |
 | **Tool scope** | Installed dock | `tools` に宣言した CLI package を `.opendock/tools/` に入れ、`.opendock/bin/` から使えるようにします. |
 | **Dependency scope** | Installed dock payload | `dependencies` に宣言した package dependencies を、project にコピーされた folder 内へ install し、update/uninstall 時に cleanup します. |
 
@@ -74,18 +73,6 @@ OpenDock はターミナルの代替でも、汎用 script runner でもあり�
 bun install -g opendock
 opendock version
 opendock version --check
-```
-
-macOS dock が Homebrew を使う場合、Homebrew がなければ先に bootstrap します。
-
-```bash
-opendock bootstrap mac
-```
-
-Windows dock が WinGet を使う場合、WinGet がなければ先に bootstrap します。
-
-```bash
-opendock bootstrap windows
 ```
 
 ## Commands
@@ -103,8 +90,6 @@ opendock bootstrap windows
 | `opendock log` | current project の最近の command log を表示. |
 | `opendock version` | CLI, schema, Registry 情報を表示. |
 | `opendock version --check` | OpenDock の public release channel で新しい CLI/app version を確認. |
-| `opendock bootstrap mac` | macOS で Homebrew を確認またはインストール. |
-| `opendock bootstrap windows` | Windows で WinGet を確認または Microsoft App Installer を開く. |
 | `opendock auth login` | deploy のため Registry に login. |
 | `opendock auth status` | 現在の Registry login を表示. |
 | `opendock auth logout` | local Registry login を削除. |
@@ -182,18 +167,29 @@ dependencies:
 ```
 
 現在の supported managers は `npm`, `pnpm`, `bun`, `uv`, `pip`, `pip3` です。
-mode は `install` と `locked` を使います。`install` は通常 install、`locked`
-は lockfile または frozen environment を優先します。内部的には `locked` が
-`npm ci`, `pnpm install --frozen-lockfile`,
-`bun install --frozen-lockfile`, `uv sync --frozen` に対応します。`pip` と
-`pip3` は `requirements.txt` からの `install` のみ対応します。
+
+どこに書くかは ownership で決めます。
+
+| Need | Use |
+|---|---|
+| `codex`, `ruff`, `oma` のように `.opendock/bin` から実行する command | `tools` |
+| skill, harness, template app のように dock がコピーした folder 内で必要な package | `dependencies` |
+
+dependency mode は `install` と `locked` です。
+
+| Mode | 使う場面 | 内部実行 |
+|---|---|---|
+| `install` | コピーした folder に lockfile がない、または compatible update を許可できる場合 | 通常の manager install |
+| `locked` | lockfile があり、同じ dependency set を再現したい場合 | `npm ci`, `pnpm install --frozen-lockfile`, `bun install --frozen-lockfile`, `uv sync --frozen` |
+
+`pip` と `pip3` は `requirements.txt` からの `install` のみ対応します。
 
 dock-private workdir で実行する task が事前に input file を必要とする場合は
 `workdir.files` を使います。project root に書き込む file には `files` を使います。
 
 ## Task Command Permission
 
-OpenDock の task は `run` と `check` を小さな標準ポリシーで実行します。標準 command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` です。Windows では制限付きの `powershell` も許可します。ただし標準 command でも任意の subcommand が許可されるわけではありません。`git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` のような安全な形だけ通ります。`oma`, `codex`, `claude`, `omx` などの command は `tools.commands` に宣言された場合だけ、`permissions` で実行形を開けます。`tools.commands` は `git`, `node`, `npm`, `python` など OpenDock 標準 command 名を再利用できません。`mkdir` のように OpenDock 標準でも `tools.commands` でもない command は拒否されます。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` のような package install/update は task では拒否されます。project tool は `tools`、コピーされた project folder 内の dependencies は `dependencies`、Bun/Node/npm/Python/pip runtime は `requires.runtimes`、host package manager は bootstrap で扱います。
+OpenDock の task は `run` と `check` を小さな標準ポリシーで実行します。標準 command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` です。Windows では制限付きの `powershell` も許可します。ただし標準 command でも任意の subcommand が許可されるわけではありません。`git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` のような安全な形だけ通ります。`oma`, `codex`, `claude`, `omx` などの command は `tools.commands` に宣言された場合だけ、`permissions` で実行形を開けます。`tools.commands` は `git`, `node`, `npm`, `python` など OpenDock 標準 command 名を再利用できません。`mkdir` のように OpenDock 標準でも `tools.commands` でもない command は拒否されます。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` のような package install/update は task では拒否されます。project tool は `tools`、コピーされた project folder 内の dependencies は `dependencies`、Bun/Node/npm/Python/pip runtime は `requires.runtimes`。
 
 ```yaml
 tools:

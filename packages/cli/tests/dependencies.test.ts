@@ -288,6 +288,54 @@ describe("dock dependencies", () => {
     expect(readFileSync(log, "utf8")).toContain("npm:");
   });
 
+  it.each([
+    ["npm", "ci"],
+    ["uv", "sync"],
+  ] as const)("rejects legacy dependency mode %s/%s before mutating project", async (manager, mode) => {
+    const docks = tempDir();
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakeDependencyManager(
+      bin,
+      manager,
+      log,
+      manager === "uv" ? ".venv/uv.txt" : "node_modules/pkg.txt",
+    );
+    writeDock(docks, "test", `legacy-${manager}`, "1.0.0", {
+      dependencies: {
+        legacy: {
+          manager,
+          path: "legacy",
+          mode,
+        },
+      },
+      files: [
+        { path: "README.md", content: "# Should not be applied\n" },
+        { path: "legacy/package.json", content: '{"name":"legacy"}\n' },
+      ],
+    });
+
+    await expect(
+      withEnvAsync({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+        new DockInstaller().install({
+          dockRef: DockRef.parse(`test/legacy-${manager}@1.0.0`),
+          projectDir: project,
+          phase: "install",
+          platform: "macos",
+          live: false,
+          runTasks: true,
+          resolve: localResolver(docks),
+        }),
+      ),
+    ).rejects.toThrow(`dependency manager \`${manager}\` does not support mode \`${mode}\``);
+
+    expect(new OpenDockStateStore(project).readLock().docks).toEqual([]);
+    expect(existsSync(join(project, "README.md"))).toBe(false);
+    expect(existsSync(join(project, "legacy"))).toBe(false);
+    expect(existsSync(log)).toBe(false);
+  });
+
   it("does not run dependency managers when file preflight fails", async () => {
     const docks = tempDir();
     const project = tempDir();
@@ -324,6 +372,49 @@ describe("dock dependencies", () => {
 
     expect(existsSync(log)).toBe(false);
     expect(existsSync(join(project, "harness", "node_modules"))).toBe(false);
+  });
+
+  it("defaults uv dependency mode to install without frozen sync", () => {
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "commands.log");
+    writeFakeDependencyManager(bin, "uv", log, ".venv/uv.txt");
+    mkdirSync(join(project, "deps", "uv-default"), { recursive: true });
+    writeFileSync(
+      join(project, "deps", "uv-default", "pyproject.toml"),
+      "[project]\nname='demo'\n",
+    );
+    const manifest = manifestForRef(
+      parseManifestText({
+        opendock: 1,
+        dependencies: {
+          uvDefault: { manager: "uv", path: "deps/uv-default" },
+        },
+      }),
+      DockRef.parse("test/uv-default@1.0.0"),
+    );
+
+    const result = withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      new DependencyRunner().run(manifest, {
+        projectDir: project,
+        dockId: "test/uv-default",
+        phase: "install",
+        platform: "macos",
+        live: false,
+      }),
+    );
+
+    const dependencyPath = join(realpathSync(project), "deps", "uv-default");
+    expect(result.dependencies).toEqual([
+      {
+        manager: "uv",
+        mode: "install",
+        name: "uvDefault",
+        path: "deps/uv-default",
+      },
+    ]);
+    expect(readFileSync(log, "utf8")).toBe(`uv:${dependencyPath}:sync\n`);
+    expect(existsSync(join(dependencyPath, ".venv", "uv.txt"))).toBe(true);
   });
 
   it("runs supported dependency managers with manager-specific modes", () => {
@@ -376,17 +467,28 @@ describe("dock dependencies", () => {
       "pnpm",
       "uv",
     ]);
-    const logText = readFileSync(log, "utf8");
-    expect(logText).toContain("npm:");
-    expect(logText).toContain("ci --no-audit --no-fund");
-    expect(logText).toContain("pnpm:");
-    expect(logText).toContain("install --frozen-lockfile");
-    expect(logText).toContain("bun:");
-    expect(logText).toContain("install --frozen-lockfile");
-    expect(logText).toContain("uv:");
-    expect(logText).toContain("sync --frozen");
-    expect(readFileSync(log, "utf8")).toContain("pip:");
-    expect(readFileSync(log, "utf8")).toContain("pip3:");
+    const dependencyRoot = realpathSync(project);
+    const logLines = readFileSync(log, "utf8").trim().split("\n").sort();
+    expect(logLines).toEqual(
+      [
+        `bun:${join(dependencyRoot, "deps", "bun-deps")}:install --frozen-lockfile`,
+        `npm:${join(dependencyRoot, "deps", "npm-deps")}:ci --no-audit --no-fund`,
+        `pip:${join(dependencyRoot, "deps", "pip-deps")}:install -r ${join(
+          project,
+          "deps",
+          "pip-deps",
+          "requirements.txt",
+        )} --target ${join(project, "deps", "pip-deps", ".opendock", "python")}`,
+        `pip3:${join(dependencyRoot, "deps", "pip3-deps")}:install -r ${join(
+          project,
+          "deps",
+          "pip3-deps",
+          "requirements.txt",
+        )} --target ${join(project, "deps", "pip3-deps", ".opendock", "python")}`,
+        `pnpm:${join(dependencyRoot, "deps", "pnpm-deps")}:install --frozen-lockfile`,
+        `uv:${join(dependencyRoot, "deps", "uv-deps")}:sync --frozen`,
+      ].sort(),
+    );
     expect(existsSync(join(project, "deps", "uv-deps", ".venv", "uv.txt"))).toBe(true);
     expect(existsSync(join(project, "deps", "pip-deps", ".opendock", "python", "pip.txt"))).toBe(
       true,

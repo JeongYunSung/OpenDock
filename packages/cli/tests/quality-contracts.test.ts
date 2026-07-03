@@ -12,6 +12,49 @@ const platformManifests: Array<{ file: string; platform: OpenDockPlatform }> = [
 ];
 
 describe("OpenDock quality contracts", () => {
+  it("keeps shipped CLI docs aligned with current commands and dependency modes", () => {
+    const docs = [
+      join(process.cwd(), "..", "..", "README.md"),
+      ...[
+        "README.md",
+        "README.ko.md",
+        "README.ja.md",
+        "README.zh.md",
+        "README.es.md",
+        "README.fr.md",
+        "README.de.md",
+        "docs/guides/guide.md",
+        "docs/guides/guide.ko.md",
+        "docs/guides/guide.ja.md",
+        "docs/guides/guide.zh.md",
+        "docs/guides/guide.es.md",
+        "docs/guides/guide.fr.md",
+        "docs/guides/guide.de.md",
+      ].map((path) => join(process.cwd(), path)),
+    ];
+
+    for (const file of docs) {
+      const text = readFileSync(file, "utf8");
+      expect(text, `${file} should not document removed bootstrap command`).not.toMatch(
+        /\bopendock\s+bootstrap\b|\bbootstrap\.ts\b/i,
+      );
+      expect(text, `${file} should not document removed dependency modes`).not.toMatch(
+        /mode:\s*(?:ci|sync)\b|supports `ci`|supports `sync`/i,
+      );
+      expect(text, `${file} should document current dependency modes`).toMatch(/`install`/);
+      expect(text, `${file} should document current dependency modes`).toMatch(/`locked`/);
+      if (file.includes("docs/guides/guide")) {
+        expect(text, `${file} should include a uv tool declaration example`).toMatch(
+          /manager:\s*uv/,
+        );
+      } else {
+        expect(text, `${file} should mention uv support`).toMatch(/\buv\b/);
+      }
+      expect(text, `${file} should explain tools vs dependencies`).toMatch(/`tools`/);
+      expect(text, `${file} should explain tools vs dependencies`).toMatch(/`dependencies`/);
+    }
+  });
+
   it("keeps every bundled example manifest executable under the command policy", () => {
     for (const example of exampleNames()) {
       for (const { file, platform } of platformManifests) {
