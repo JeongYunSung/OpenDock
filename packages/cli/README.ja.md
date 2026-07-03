@@ -66,6 +66,7 @@ OpenDock はターミナルの代替でも、汎用 script runner でもあり�
 | **Root output scope** | OpenDock file engine | preflight 後に project root へ適用される file. |
 | **Host bootstrap scope** | Your machine | Homebrew や WinGet は `opendock bootstrap` で明示的に準備します. |
 | **Tool scope** | Installed dock | `tools` に宣言した CLI package を `.opendock/tools/` に入れ、`.opendock/bin/` から使えるようにします. |
+| **Dependency scope** | Installed dock payload | `dependencies` に宣言した package dependencies を、project にコピーされた folder 内へ install し、update/uninstall 時に cleanup します. |
 
 ## Install
 
@@ -157,12 +158,40 @@ doctor:
 理解・filter するために使われます。実際に project に install する file は
 `files` にも別途宣言します。
 
+## Dependencies
+
+`dependencies` は、dock が project に folder をコピーし、その folder 自体が
+package dependencies を必要とする場合に使います。skill folder、harness、小さな
+helper app など、installed project tree 内に残る payload 向けです。
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+files:
+  - from: image2html
+    to: .codex/skills/image2html
+
+dependencies:
+  image2html:
+    manager: npm
+    path: .codex/skills/image2html
+    mode: ci
+```
+
+現在の supported managers は `npm`, `pnpm`, `bun`, `uv`, `pip`, `pip3` です。
+OpenDock は任意の install command を実行しません。`npm` は `ci` と `install`、
+`pnpm` と `bun` は `install`、`uv` は `sync`、`pip` と `pip3` は
+`requirements.txt` からの `install` を扱います。
+
 dock-private workdir で実行する task が事前に input file を必要とする場合は
 `workdir.files` を使います。project root に書き込む file には `files` を使います。
 
 ## Task Command Permission
 
-OpenDock の task は `run` と `check` を小さな標準ポリシーで実行します。標準 command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` です。macOS は `brew`、Windows は `powershell`, `winget` も許可します。ただし標準 command でも任意の subcommand が許可されるわけではありません。`git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` のような安全な形だけ通ります。`oma`, `codex`, `claude`, `omx` などの command は `tools.commands` に宣言された場合だけ、`permissions` で実行形を開けます。`tools.commands` は `git`, `node`, `npm`, `python` など OpenDock 標準 command 名を再利用できません。`mkdir` のように OpenDock 標準でも `tools.commands` でもない command は拒否されます。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` のような package install/update は task では拒否されます。project tool は `tools`、Bun/Node/npm/Python/pip runtime は `requires.runtimes`、host package manager は bootstrap で扱います。
+OpenDock の task は `run` と `check` を小さな標準ポリシーで実行します。標準 command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` です。Windows では制限付きの `powershell` も許可します。ただし標準 command でも任意の subcommand が許可されるわけではありません。`git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` のような安全な形だけ通ります。`oma`, `codex`, `claude`, `omx` などの command は `tools.commands` に宣言された場合だけ、`permissions` で実行形を開けます。`tools.commands` は `git`, `node`, `npm`, `python` など OpenDock 標準 command 名を再利用できません。`mkdir` のように OpenDock 標準でも `tools.commands` でもない command は拒否されます。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` のような package install/update は task では拒否されます。project tool は `tools`、コピーされた project folder 内の dependencies は `dependencies`、Bun/Node/npm/Python/pip runtime は `requires.runtimes`、host package manager は bootstrap で扱います。
 
 ```yaml
 tools:

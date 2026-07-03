@@ -253,6 +253,8 @@ Docks should not use global or local package install/update commands such as
 `npm install ...`, `bun add ...`, or `pip install ...`; declare project-local
 `tools`, path-based `dependencies`, or runtime requirements instead.
 
+## Dependencies
+
 Use `dependencies` when the dock copies a folder that already contains a
 package manifest, then needs that folder's dependencies installed in place. This
 is for skill folders, harness folders, or other project payloads that should stay

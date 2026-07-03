@@ -1,8 +1,9 @@
 # OpenDock ガイド
 
 `dock.yml` は、dock がプロジェクトに追加する内容を説明する manifest です。
-追加するファイル、必要なツール、install/update/doctor task、
-外部ツールが生成した output のうち project root に取り込むものを宣言します。
+追加するファイル、runtime requirements、project-local tools、コピーした folder 内の
+dependencies、install/update/doctor task、外部ツールが生成した output のうち
+project root に取り込むものを宣言します。
 
 OpenDock は AI setup を選び、1 つのプロジェクトに組み合わせ、dock ごとに update
 と uninstall を追跡するための小さな packaging layer です。
@@ -63,10 +64,47 @@ files:
 | `permissions` | 標準 command または tools で宣言した command の task 形を完全一致で許可します。 |
 | `requires` | Runtime requirements. |
 | `tools` | CLI packages installed and tracked under `.opendock/tools/`. |
+| `dependencies` | Package dependencies installed inside folders copied by the dock. |
 | `files` | Files or directories applied to the project root. |
 | `install` | Tasks for first install and initial generation. |
 | `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
+
+## Dependencies
+
+`dependencies` は、dock が folder を project にコピーし、その folder 自体が
+package dependencies を必要とする場合に使います。`tools` は `.opendock/tools/`
+配下に command を install しますが、`dependencies` は Codex skill、harness、
+helper app などコピー済み payload folder のためのものです。
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+files:
+  - from: image2html
+    to: .codex/skills/image2html
+
+dependencies:
+  image2html:
+    manager: npm
+    path: .codex/skills/image2html
+    mode: ci
+```
+
+OpenDock は先に `files` を適用し、その後 declared `path` で `dependencies` を
+install します。update と uninstall では、`node_modules`、`.venv`、
+`.opendock/python` など生成された dependency outputs を削除します。
+
+| Manager | Modes |
+|---|---|
+| `npm` | `ci`, `install` |
+| `pnpm` | `install` |
+| `bun` | `install` |
+| `uv` | `sync` |
+| `pip`, `pip3` | `requirements.txt` から `install` |
 
 ## Version
 
@@ -120,7 +158,7 @@ Steps run top to bottom. `doctor` should check state and avoid changing the proj
 
 ## Task Command Permission
 
-OpenDock の task は `run` と `check` を shell にそのまま渡しません。標準で使える command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` に限られます。Windows では制限付きの `powershell` も使えます。ただし標準 command でも任意の subcommand が許可されるわけではありません。`git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` のような安全な形だけ通ります。標準ポリシー外の command はまず `tools.commands` に宣言し、その後 `permissions` で task の完全一致形を許可します。`tools.commands` は `git`, `node`, `npm`, `python` など OpenDock 標準 command 名を再利用できません。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` のような package install/update は task では拒否されます。project tool は `tools`、runtime は `requires.runtimes` で扱います。
+OpenDock の task は `run` と `check` を shell にそのまま渡しません。標準で使える command は `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv` に限られます。Windows では制限付きの `powershell` も使えます。ただし標準 command でも任意の subcommand が許可されるわけではありません。`git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` のような安全な形だけ通ります。標準ポリシー外の command はまず `tools.commands` に宣言し、その後 `permissions` で task の完全一致形を許可します。`tools.commands` は `git`, `node`, `npm`, `python` など OpenDock 標準 command 名を再利用できません。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` は `permissions`, `run`, `check` で拒否されます。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` のような package install/update は task では拒否されます。project tool は `tools`、コピーされた project folder 内の package dependencies は `dependencies`、runtime は `requires.runtimes` で扱います。
 
 ```yaml
 tools:

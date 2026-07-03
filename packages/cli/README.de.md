@@ -68,6 +68,7 @@ kleines Tool, um wiederholbares KI-Setup zu installieren und zu verwalten.
 | **Root output scope** | OpenDock file engine | Dateien, die nach der Vorprüfung in den project root geschrieben werden. |
 | **Host bootstrap scope** | Your machine | Homebrew or WinGet are prepared explicitly with `opendock bootstrap`. |
 | **Tool scope** | Installed dock | CLI packages declared in `tools` are installed under `.opendock/tools/` and exposed through `.opendock/bin/`. |
+| **Dependency scope** | Installed dock payload | Package dependencies declared in `dependencies` are installed inside copied project folders and cleaned on update/uninstall. |
 
 ## Install
 
@@ -159,13 +160,41 @@ doctor:
 im Hub zu erklären und zu filtern. Dateien, die ins Projekt installiert werden
 sollen, müssen zusätzlich in `files` stehen.
 
+## Dependencies
+
+Nutze `dependencies`, wenn ein Dock einen Ordner ins Projekt kopiert und dieser
+Ordner eigene package dependencies braucht. Das ist für skill folders, harnesses
+oder kleine helper apps gedacht, die im installierten Projektbaum bleiben.
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+files:
+  - from: image2html
+    to: .codex/skills/image2html
+
+dependencies:
+  image2html:
+    manager: npm
+    path: .codex/skills/image2html
+    mode: ci
+```
+
+Heute unterstützt OpenDock `npm`, `pnpm`, `bun`, `uv`, `pip` und `pip3`.
+OpenDock führt dabei keine beliebigen install commands aus: `npm` erlaubt `ci`
+und `install`; `pnpm` und `bun` erlauben `install`; `uv` erlaubt `sync`;
+`pip` und `pip3` installieren aus `requirements.txt`.
+
 Nutze `workdir.files`, wenn ein task im dock-private workdir vor der Ausführung
 Input-Dateien braucht. Nutze `files` für Dateien, die in den project root
 geschrieben werden sollen.
 
 ## Task Command Permission
 
-OpenDock tasks `run` und `check` nutzen eine kleine Standard-Policy: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf macOS ist zusätzlich `brew` erlaubt, auf Windows `powershell` und `winget`. Ein Standard-Command erlaubt aber nicht beliebige subcommands: Nur sichere Formen wie `git status`, `git init -b main`, `test -f <path>`, version checks und das eingeschränkte Windows `Test-Path` sind erlaubt. Commands wie `oma`, `codex`, `claude` oder `omx` können nur über `permissions` geöffnet werden, wenn sie vorher in `tools.commands` deklariert sind. `tools.commands` darf OpenDock-Standardnamen wie `git`, `node`, `npm` oder `python` nicht wiederverwenden. Ein Command wie `mkdir`, der weder Standard noch in `tools.commands` deklariert ist, wird abgelehnt. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt. Package install/update Commands wie `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` und `winget install` werden in tasks abgelehnt. Nutze `tools` für project tools, `requires.runtimes` für Bun/Node/npm/Python/pip runtimes und bootstrap für host package managers.
+OpenDock tasks `run` und `check` nutzen eine kleine Standard-Policy: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. Auf Windows ist zusätzlich ein eingeschränktes `powershell` erlaubt. Ein Standard-Command erlaubt aber nicht beliebige subcommands: Nur sichere Formen wie `git status`, `git init -b main`, `test -f <path>`, version checks und das eingeschränkte Windows `Test-Path` sind erlaubt. Commands wie `oma`, `codex`, `claude` oder `omx` können nur über `permissions` geöffnet werden, wenn sie vorher in `tools.commands` deklariert sind. `tools.commands` darf OpenDock-Standardnamen wie `git`, `node`, `npm` oder `python` nicht wiederverwenden. Ein Command wie `mkdir`, der weder Standard noch in `tools.commands` deklariert ist, wird abgelehnt. Operatoren wie `|`, `&&`, `||`, `;`, backticks, `$(`, `>` und `<` werden in `permissions`, `run` und `check` abgelehnt. Package install/update Commands wie `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` und `winget install` werden in tasks abgelehnt. Nutze `tools` für project tools, `dependencies` für dependencies in kopierten Projektordnern, `requires.runtimes` für Bun/Node/npm/Python/pip runtimes und bootstrap für host package managers.
 
 ```yaml
 tools:

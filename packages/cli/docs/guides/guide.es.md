@@ -1,8 +1,9 @@
 # Guía De OpenDock
 
-`dock.yml` describe qué agrega un dock a un proyecto: archivos, herramientas
-requeridas, tasks de install/update/doctor y outputs generados por herramientas
-externas que deben exportarse al project root.
+`dock.yml` describe qué agrega un dock a un proyecto: archivos, runtime
+requirements, project-local tools, dependencies dentro de carpetas copiadas,
+tasks de install/update/doctor y outputs generados por herramientas externas
+que deben exportarse al project root.
 
 OpenDock es una pequeña capa de packaging para setup de IA repetible. Puedes elegir
 varios docks, combinarlos en un mismo proyecto y mantener update y uninstall
@@ -65,10 +66,47 @@ files:
 | `permissions` | Permite formas exactas de task para commands por defecto o declarados en tools. |
 | `requires` | Requisitos de runtime. |
 | `tools` | CLI packages installed and tracked under `.opendock/tools/`. |
+| `dependencies` | Package dependencies installed inside folders copied by the dock. |
 | `files` | Archivos o directorios aplicados al project root. |
 | `install` | Tasks for first install and initial generation. |
 | `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
+
+## Dependencies
+
+Usa `dependencies` cuando el dock copia una carpeta al proyecto y esa carpeta
+necesita sus propias package dependencies. `tools` instala commands bajo
+`.opendock/tools/`; `dependencies` pertenece a un payload copiado, como un Codex
+skill, harness o helper app.
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+files:
+  - from: image2html
+    to: .codex/skills/image2html
+
+dependencies:
+  image2html:
+    manager: npm
+    path: .codex/skills/image2html
+    mode: ci
+```
+
+OpenDock aplica primero `files` y luego instala `dependencies` en el `path`
+declarado. En update y uninstall, OpenDock elimina outputs generados como
+`node_modules`, `.venv` o `.opendock/python`.
+
+| Manager | Modes |
+|---|---|
+| `npm` | `ci`, `install` |
+| `pnpm` | `install` |
+| `bun` | `install` |
+| `uv` | `sync` |
+| `pip`, `pip3` | `install` desde `requirements.txt` |
 
 ## Version
 
@@ -124,7 +162,7 @@ modificar el proyecto.
 
 ## Task Command Permission
 
-OpenDock no pasa `run` ni `check` directamente a una shell. La política por defecto solo permite `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En Windows también se permite un `powershell` limitado. Pero un command por defecto no permite cualquier subcommand: solo pasan formas seguras como `git status`, `git init -b main`, `test -f <path>`, checks de versión y el `Test-Path` limitado de Windows. Los commands fuera de la política por defecto deben declararse primero en `tools.commands`; luego `permissions` permite la forma exacta del task. `tools.commands` no puede reutilizar nombres por defecto de OpenDock como `git`, `node`, `npm` o `python`. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`. Los commands de install/update de paquetes como `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` y `winget install` se rechazan dentro de tasks. Usa `tools` para project tools y `requires.runtimes` para runtimes.
+OpenDock no pasa `run` ni `check` directamente a una shell. La política por defecto solo permite `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En Windows también se permite un `powershell` limitado. Pero un command por defecto no permite cualquier subcommand: solo pasan formas seguras como `git status`, `git init -b main`, `test -f <path>`, checks de versión y el `Test-Path` limitado de Windows. Los commands fuera de la política por defecto deben declararse primero en `tools.commands`; luego `permissions` permite la forma exacta del task. `tools.commands` no puede reutilizar nombres por defecto de OpenDock como `git`, `node`, `npm` o `python`. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`. Los commands de install/update de paquetes como `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` y `winget install` se rechazan dentro de tasks. Usa `tools` para project tools, `dependencies` para package dependencies dentro de carpetas copiadas al proyecto y `requires.runtimes` para runtimes.
 
 ```yaml
 tools:

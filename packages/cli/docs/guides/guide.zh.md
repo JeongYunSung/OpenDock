@@ -1,6 +1,7 @@
 # OpenDock 指南
 
-`dock.yml` 描述一个 dock 会给项目添加什么：文件、所需工具、install/update/doctor
+`dock.yml` 描述一个 dock 会给项目添加什么：文件、runtime requirements、
+project-local tools、复制到项目中的 folder dependencies、install/update/doctor
 tasks，以及外部工具生成后需要导出到 project root 的文件。
 
 OpenDock 是一个面向可重复 AI setup 的小型 packaging layer。你可以选择多个
@@ -62,10 +63,47 @@ files:
 | `permissions` | 精确允许默认 command 或 tools 声明 command 的 task 形式。 |
 | `requires` | Runtime requirements. |
 | `tools` | CLI packages installed and tracked under `.opendock/tools/`. |
+| `dependencies` | Package dependencies installed inside folders copied by the dock. |
 | `files` | 应用到 project root 的文件或目录. |
 | `install` | Tasks for first install and initial generation. |
 | `update` | Tasks for refresh and maintenance. |
 | `doctor` | Health checks that do not modify the project. |
+
+## Dependencies
+
+当 dock 把一个 folder 复制到项目中，而这个 folder 自己需要 package dependencies
+时，使用 `dependencies`。`tools` 会把 command 安装到 `.opendock/tools/`；而
+`dependencies` 属于已复制的 payload folder，例如 Codex skill、harness 或 helper
+app。
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+files:
+  - from: image2html
+    to: .codex/skills/image2html
+
+dependencies:
+  image2html:
+    manager: npm
+    path: .codex/skills/image2html
+    mode: ci
+```
+
+OpenDock 会先应用 `files`，再在声明的 `path` 中安装 `dependencies`。update 和
+uninstall 时，OpenDock 会删除 `node_modules`、`.venv`、`.opendock/python` 等生成的
+dependency outputs。
+
+| Manager | Modes |
+|---|---|
+| `npm` | `ci`, `install` |
+| `pnpm` | `install` |
+| `bun` | `install` |
+| `uv` | `sync` |
+| `pip`, `pip3` | 从 `requirements.txt` 执行 `install` |
 
 ## Version
 
@@ -117,7 +155,7 @@ doctor:
 
 ## Task Command Permission
 
-OpenDock 不会把 task 的 `run` 和 `check` 直接交给 shell。默认可用命令只包括 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。Windows 额外允许受限的 `powershell`。但默认 command 并不代表任何 subcommand 都能执行；只有 `git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` 这类安全形态会通过。默认策略之外的 command 必须先声明在 `tools.commands` 中，然后由 `permissions` 精确允许 task 要执行的形式。`tools.commands` 不能复用 `git`, `node`, `npm`, `python` 等 OpenDock 默认 command 名称。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` 等 package install/update 命令会在 task 中被拒绝。project tool 请用 `tools`，runtime 请用 `requires.runtimes`。
+OpenDock 不会把 task 的 `run` 和 `check` 直接交给 shell。默认可用命令只包括 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。Windows 额外允许受限的 `powershell`。但默认 command 并不代表任何 subcommand 都能执行；只有 `git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` 这类安全形态会通过。默认策略之外的 command 必须先声明在 `tools.commands` 中，然后由 `permissions` 精确允许 task 要执行的形式。`tools.commands` 不能复用 `git`, `node`, `npm`, `python` 等 OpenDock 默认 command 名称。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` 等 package install/update 命令会在 task 中被拒绝。project tool 请用 `tools`，复制到项目中的 folder package dependencies 请用 `dependencies`，runtime 请用 `requires.runtimes`。
 
 ```yaml
 tools:

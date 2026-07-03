@@ -46,6 +46,7 @@ opendock uninstall opendock/codex
 - [Install](#install)
 - [Command Reference](#command-reference)
 - [Dock Format](#dock-format)
+- [Dependencies](#dependencies)
 - [Task Command Permission](#task-command-permission)
 - [File Ownership](#file-ownership)
 - [Workdir Files And Export](#workdir-files-and-export)
@@ -88,8 +89,9 @@ OpenDock then:
 2. Checks the runtimes the dock needs.
 3. Prepares declared CLI tools inside the project.
 4. Adds the dock's files to your project.
-5. Checks for conflicts before writing files.
-6. Records what was installed in `.opendock/`.
+5. Installs declared dependencies inside copied project folders.
+6. Checks for conflicts before writing files.
+7. Records what was installed in `.opendock/`.
 
 That record lets OpenDock update or remove the dock later.
 
@@ -114,11 +116,12 @@ OpenDock separates responsibilities into explicit scopes.
 | **Root output scope** | OpenDock file engine | Files applied into the project root after preflight checks. |
 | **Runtime scope** | Your user account | Bun, Node, npm, uv, Python, pip, and Git requirements, prepared or registered by version under `~/.opendock/runtimes/` and exposed to each project through `.opendock/bin/`. |
 | **Tool scope** | Installed dock | CLI packages declared in `tools`, installed under `.opendock/tools/` and exposed through `.opendock/bin/`. |
+| **Dependency scope** | Installed dock payload | Package dependencies declared in `dependencies`, installed inside copied project folders and cleaned on update/uninstall. |
 
 The practical rule is simple: OpenDock can fully track project files it applies,
 but it does not mutate global package managers. Runtime installs and wrappers
 are shared from your home `.opendock` directory, while dock tools, project files,
-and dock workdirs are tracked in the project `.opendock/`.
+dependency outputs, and dock workdirs are tracked in the project `.opendock/`.
 
 ## Install
 
@@ -249,7 +252,37 @@ one of OpenDock's safe command shapes or an exact `permissions` entry.
 
 Docks should not use global or local package install/update commands such as
 `npm install ...`, `bun add ...`, or `pip install ...`; declare project-local
-`tools` or runtime requirements instead.
+`tools`, path-based `dependencies`, or runtime requirements instead.
+
+## Dependencies
+
+Use `dependencies` when the dock copies a folder that already contains a
+package manifest, then needs that folder's dependencies installed in place. This
+is for skill folders, harness folders, or other project payloads that should stay
+inside the installed project tree.
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+files:
+  - from: image2html
+    to: .codex/skills/image2html
+
+dependencies:
+  image2html:
+    manager: npm
+    path: .codex/skills/image2html
+    mode: ci
+```
+
+Supported dependency managers today are `npm`, `pnpm`, `bun`, `uv`, `pip`, and
+`pip3`. OpenDock does not run arbitrary install commands here. It maps each
+manager to a small set of modes: `npm` supports `ci` and `install`; `pnpm` and
+`bun` support `install`; `uv` supports `sync`; `pip` and `pip3` support
+`install` from `requirements.txt`.
 
 `readme`, `logo`, and `tags` are Registry catalog metadata. They help people
 understand and filter a dock in Hub, but they are not installed into a project
@@ -313,11 +346,13 @@ Default programs are still shape-limited. For example:
 Being in the default list does not allow package mutation. `npm install`,
 `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`,
 `brew install`, and `winget install` are rejected in tasks. Use `tools` for
-dock-local CLIs and `requires.runtimes` for runtimes.
+dock-local CLIs, `dependencies` for a copied folder's package dependencies, and
+`requires.runtimes` for runtimes.
 
 Package install/update commands are rejected inside tasks. Use `tools` for
 project-local tools, `requires.runtimes` for Bun/Node/npm/uv/Python/pip runtime
-requirements, and uv-backed Python/pip setup.
+requirements, `dependencies` for npm/pnpm/bun/uv/pip project payload
+dependencies, and uv-backed Python/pip setup.
 
 ```yaml
 tools:
@@ -338,7 +373,7 @@ permissions:
 declared in `tools.commands`. Shell operators such as `|`, `&&`, `||`, `;`,
 backticks, `$(`, `>`, and `<` are rejected in `run`, `check`, and
 `permissions`. Package install/update commands are rejected in tasks; use
-`tools` instead.
+`tools` or `dependencies` instead.
 
 ## File Ownership
 

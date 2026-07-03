@@ -67,6 +67,7 @@ herramienta pequeña para instalar y gestionar setup de IA repetible.
 | **Root output scope** | OpenDock file engine | Archivos aplicados al project root tras la comprobación previa. |
 | **Host bootstrap scope** | Your machine | Homebrew or WinGet are prepared explicitly with `opendock bootstrap`. |
 | **Tool scope** | Installed dock | CLI packages declared in `tools` are installed under `.opendock/tools/` and exposed through `.opendock/bin/`. |
+| **Dependency scope** | Installed dock payload | Las package dependencies declaradas en `dependencies` se instalan dentro de carpetas copiadas al proyecto y se limpian en update/uninstall. |
 
 ## Install
 
@@ -158,13 +159,41 @@ doctor:
 explicar y filtrar el dock en Hub. Los archivos que deban instalarse en el
 proyecto también deben declararse en `files`.
 
+## Dependencies
+
+Usa `dependencies` cuando el dock copia una carpeta al proyecto y esa carpeta
+necesita sus propias package dependencies. Sirve para skill folders, harnesses o
+pequeñas helper apps que deben quedarse dentro del árbol del proyecto instalado.
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+files:
+  - from: image2html
+    to: .codex/skills/image2html
+
+dependencies:
+  image2html:
+    manager: npm
+    path: .codex/skills/image2html
+    mode: ci
+```
+
+OpenDock admite `npm`, `pnpm`, `bun`, `uv`, `pip` y `pip3`. No ejecuta install
+commands arbitrarios: `npm` admite `ci` e `install`; `pnpm` y `bun` admiten
+`install`; `uv` admite `sync`; `pip` y `pip3` instalan desde
+`requirements.txt`.
+
 Usa `workdir.files` cuando un task en el dock-private workdir necesita archivos
 de entrada antes de ejecutarse. Usa `files` para archivos que deben escribirse
 en el project root.
 
 ## Task Command Permission
 
-Los tasks `run` y `check` de OpenDock usan una política pequeña por defecto: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En macOS también se permite `brew`; en Windows, `powershell` y `winget`. Pero un command por defecto no permite cualquier subcommand: solo pasan formas seguras como `git status`, `git init -b main`, `test -f <path>`, checks de versión y el `Test-Path` limitado de Windows. Commands como `oma`, `codex`, `claude` u `omx` solo pueden abrirse con `permissions` si antes están declarados en `tools.commands`. `tools.commands` no puede reutilizar nombres por defecto de OpenDock como `git`, `node`, `npm` o `python`. Un command como `mkdir`, que no es por defecto ni está declarado en `tools.commands`, se rechaza. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`. Los commands de install/update de paquetes como `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` y `winget install` se rechazan dentro de tasks. Usa `tools` para project tools, `requires.runtimes` para Bun/Node/npm/Python/pip runtime y bootstrap para host package managers.
+Los tasks `run` y `check` de OpenDock usan una política pequeña por defecto: `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`. En Windows también se permite un `powershell` limitado. Pero un command por defecto no permite cualquier subcommand: solo pasan formas seguras como `git status`, `git init -b main`, `test -f <path>`, checks de versión y el `Test-Path` limitado de Windows. Commands como `oma`, `codex`, `claude` u `omx` solo pueden abrirse con `permissions` si antes están declarados en `tools.commands`. `tools.commands` no puede reutilizar nombres por defecto de OpenDock como `git`, `node`, `npm` o `python`. Un command como `mkdir`, que no es por defecto ni está declarado en `tools.commands`, se rechaza. Los operadores `|`, `&&`, `||`, `;`, backticks, `$(`, `>` y `<` se rechazan en `permissions`, `run` y `check`. Los commands de install/update de paquetes como `npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install` y `winget install` se rechazan dentro de tasks. Usa `tools` para project tools, `dependencies` para dependencies dentro de carpetas copiadas al proyecto, `requires.runtimes` para Bun/Node/npm/Python/pip runtime y bootstrap para host package managers.
 
 ```yaml
 tools:

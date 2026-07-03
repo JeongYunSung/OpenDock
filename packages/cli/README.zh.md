@@ -63,6 +63,7 @@ OpenDock 不是 terminal replacement，也不是通用 script runner。它是用
 | **Root output scope** | OpenDock file engine | preflight 后应用到 project root 的文件. |
 | **Host bootstrap scope** | Your machine | Homebrew 或 WinGet 通过 `opendock bootstrap` 显式准备. |
 | **Tool scope** | Installed dock | `tools` 声明的 CLI package 安装到 `.opendock/tools/`，并通过 `.opendock/bin/` 暴露. |
+| **Dependency scope** | Installed dock payload | `dependencies` 声明的 package dependencies 会安装到复制进项目的 folder 中，并在 update/uninstall 时清理. |
 
 ## Install
 
@@ -153,12 +154,39 @@ doctor:
 `readme`、`logo` 和 `tags` 是 Registry catalog metadata，用于在 Hub 中说明和
 筛选 dock。真正要安装到项目中的文件仍需同时写入 `files`。
 
+## Dependencies
+
+当 dock 把一个 folder 复制到项目中，而这个 folder 自己需要 package dependencies
+时，使用 `dependencies`。它适合 skill folder、harness 或小型 helper app 这类需要留在
+installed project tree 中的 payload。
+
+```yaml
+requires:
+  runtimes:
+    node: ">=22.0.0"
+    npm: ">=10.0.0"
+
+files:
+  - from: image2html
+    to: .codex/skills/image2html
+
+dependencies:
+  image2html:
+    manager: npm
+    path: .codex/skills/image2html
+    mode: ci
+```
+
+当前支持 `npm`, `pnpm`, `bun`, `uv`, `pip`, `pip3`。OpenDock 不会执行任意
+install command：`npm` 支持 `ci` 和 `install`；`pnpm` 和 `bun` 支持
+`install`；`uv` 支持 `sync`；`pip` 和 `pip3` 从 `requirements.txt` 安装。
+
 如果 dock-private workdir 中运行的 task 需要先读取输入文件，请使用
 `workdir.files`。需要写入 project root 的文件使用 `files`。
 
 ## Task Command Permission
 
-OpenDock task 的 `run` 和 `check` 使用很小的默认策略。默认 command 包括 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。macOS 还允许 `brew`，Windows 还允许 `powershell`, `winget`。但默认 command 并不代表任何 subcommand 都能执行；只有 `git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` 这类安全形态会通过。`oma`, `codex`, `claude`, `omx` 这类 command 只有先声明在 `tools.commands` 中，才能用 `permissions` 打开具体执行形态。`tools.commands` 不能复用 `git`, `node`, `npm`, `python` 等 OpenDock 默认 command 名称。像 `mkdir` 这样既不是 OpenDock 默认 command、也没有声明在 `tools.commands` 中的 command 会被拒绝。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` 等 package install/update 命令会在 task 中被拒绝。project tool 请用 `tools`，Bun/Node/npm/Python/pip runtime 请用 `requires.runtimes`，host package manager 请用 bootstrap。
+OpenDock task 的 `run` 和 `check` 使用很小的默认策略。默认 command 包括 `bun`, `git`, `node`, `npm`, `pip`, `pip3`, `pipx`, `pnpm`, `python`, `python3`, `test`, `uv`。Windows 额外允许受限的 `powershell`。但默认 command 并不代表任何 subcommand 都能执行；只有 `git status`、`git init -b main`、`test -f <path>`、version check、Windows `Test-Path` 这类安全形态会通过。`oma`, `codex`, `claude`, `omx` 这类 command 只有先声明在 `tools.commands` 中，才能用 `permissions` 打开具体执行形态。`tools.commands` 不能复用 `git`, `node`, `npm`, `python` 等 OpenDock 默认 command 名称。像 `mkdir` 这样既不是 OpenDock 默认 command、也没有声明在 `tools.commands` 中的 command 会被拒绝。`|`, `&&`, `||`, `;`, backticks, `$(`, `>`, `<` 在 `permissions`, `run`, `check` 中都会被拒绝。`npm install`, `bun add`, `pnpm update`, `pip install`, `pipx install`, `uv tool install`, `brew install`, `winget install` 等 package install/update 命令会在 task 中被拒绝。project tool 请用 `tools`，复制到项目中的 folder dependencies 请用 `dependencies`，Bun/Node/npm/Python/pip runtime 请用 `requires.runtimes`，host package manager 请用 bootstrap。
 
 ```yaml
 tools:
