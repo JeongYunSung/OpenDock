@@ -8,6 +8,8 @@ import { CommandRunner, failureMessage, opendockCommandPath } from "./command-ru
 import { createProjectCommandShim } from "./command-shim.js";
 import { type ProgressReporter, reportProgress } from "./progress.js";
 import {
+  prependPathEntries,
+  projectBinDir,
   projectCommandPathEntries,
   relativeProjectPath,
   toolInstallDir,
@@ -180,20 +182,76 @@ function prepareToolPackage(installDir: string, spec: ToolSpec): void {
 
 function runPackageInstall(installDir: string, spec: ToolSpec, context: ToolContext): void {
   const packageSpec = packageSpecifier(spec);
+  if (spec.manager === "pip" || spec.manager === "pip3") {
+    runPythonPackageInstall(installDir, spec, spec.manager, packageSpec, context);
+    return;
+  }
   const [program, args] =
     spec.manager === "npm"
       ? ["npm", ["install", "--no-audit", "--no-fund", "--save-exact", packageSpec]]
       : spec.manager === "bun"
         ? ["bun", ["add", packageSpec]]
-        : spec.manager === "pnpm"
-          ? ["pnpm", ["add", packageSpec]]
-          : [spec.manager, ["install", "--target", join(installDir, "python"), packageSpec]];
+        : ["pnpm", ["add", packageSpec]];
+  runPackageCommand(program, args, installDir, context, spec.package);
+}
+
+function runPythonPackageInstall(
+  installDir: string,
+  spec: ToolSpec,
+  manager: "pip" | "pip3",
+  packageSpec: string,
+  context: ToolContext,
+): void {
+  if (!hasManagedPythonCommand(context.projectDir, manager)) {
+    runPackageCommand(
+      manager,
+      ["install", "--target", join(installDir, "python"), packageSpec],
+      installDir,
+      context,
+      spec.package,
+    );
+    return;
+  }
+  const pythonCommand = manager === "pip3" ? "python3" : "python";
+  runPackageCommand(
+    pythonCommand,
+    ["-m", "ensurepip", "--upgrade"],
+    installDir,
+    context,
+    spec.package,
+  );
+  runPackageCommand(
+    pythonCommand,
+    ["-m", "pip", "install", "--target", join(installDir, "python"), packageSpec],
+    installDir,
+    context,
+    spec.package,
+  );
+}
+
+function hasManagedPythonCommand(projectDir: string, manager: "pip" | "pip3"): boolean {
+  const command = manager === "pip3" ? "python3" : "python";
+  const bin = projectBinDir(projectDir);
+  return existsSync(join(bin, command)) || existsSync(join(bin, `${command}.cmd`));
+}
+
+function runPackageCommand(
+  program: string,
+  args: string[],
+  installDir: string,
+  context: ToolContext,
+  packageName: string,
+): void {
+  const pathValue = prependPathEntries(
+    opendockCommandPath(),
+    projectCommandPathEntries(context.projectDir),
+  );
   const result = spawnSync(program, args, {
     cwd: installDir,
     encoding: "utf8",
     env: {
       ...process.env,
-      PATH: opendockCommandPath(),
+      PATH: pathValue,
     },
     stdio: (context.live ?? true) ? "inherit" : "pipe",
   });
@@ -202,7 +260,7 @@ function runPackageInstall(installDir: string, spec: ToolSpec, context: ToolCont
   }
   if (result.status !== 0) {
     const text = `${result.stdout ?? ""}\n${result.stderr ?? ""}`.trim();
-    throw new Error(`tool \`${spec.package}\` install failed${text ? `: ${text}` : ""}`);
+    throw new Error(`tool \`${packageName}\` install failed${text ? `: ${text}` : ""}`);
   }
 }
 

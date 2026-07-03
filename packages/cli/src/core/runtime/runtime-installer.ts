@@ -73,7 +73,16 @@ export interface UvPlatformArchive {
   compression: "tar-gz" | "zip";
 }
 
+interface UvPythonDownload {
+  arch?: string;
+  implementation?: string;
+  os?: string;
+  variant?: string;
+  version?: string;
+}
+
 const DEFAULT_UV_RUNTIME_RANGE = ">=0.5.0";
+const DEFAULT_PYTHON_RUNTIME_RANGE = ">=3.11.0 <3.14.0";
 
 export class OpenDockRuntimeInstaller implements RuntimeInstaller {
   install(request: RuntimeInstallRequest): RuntimeInstallResult | undefined {
@@ -266,13 +275,28 @@ function installUvRuntime(request: RuntimeInstallRequest): RuntimeInstallResult 
 function installPythonRuntime(request: RuntimeInstallRequest): RuntimeInstallResult | undefined {
   const uv = prepareUvCommand(request);
   const env = uvPythonEnvironment();
-  runChecked(uv, ["python", "install", request.requested], { env });
-  const pythonPath = runChecked(uv, ["python", "find", request.requested], { env }).stdout.trim();
+  const requestedPython =
+    request.runtime === "pip" || request.runtime === "pip3"
+      ? DEFAULT_PYTHON_RUNTIME_RANGE
+      : request.requested;
+  const pythonRequest = resolvePythonDownloadRequest(
+    uv,
+    { ...request, requested: requestedPython },
+    env,
+  );
+  runChecked(uv, ["python", "install", pythonRequest], { env });
+  const pythonPath = runChecked(uv, ["python", "find", pythonRequest], { env }).stdout.trim();
   const pythonVersionOutput = runChecked(pythonPath, ["--version"], { env });
   const pythonVersion = extractRequiredVersion(
     pythonVersionOutput.stdout || pythonVersionOutput.stderr,
     "python",
   );
+  if (
+    isRangeLikeVersionRequest(requestedPython) &&
+    !satisfiesVersion(pythonVersion, requestedPython)
+  ) {
+    throw new Error(`managed Python ${pythonVersion} does not satisfy ${requestedPython}`);
+  }
 
   if (request.runtime === "python" || request.runtime === "python3") {
     const bin = sharedRuntimeBinDir(request.runtime, pythonVersion);
@@ -310,6 +334,66 @@ function installPythonRuntime(request: RuntimeInstallRequest): RuntimeInstallRes
     targets: { [request.runtime]: target },
     version: pipVersion,
   };
+}
+
+function resolvePythonDownloadRequest(
+  uv: string,
+  request: RuntimeInstallRequest,
+  env: NodeJS.ProcessEnv,
+): string {
+  if (!isRangeLikeVersionRequest(request.requested)) {
+    return request.requested;
+  }
+  const downloads = JSON.parse(
+    runChecked(uv, ["python", "list", "--only-downloads", "--output-format", "json"], { env })
+      .stdout,
+  ) as UvPythonDownload[];
+  const selected = downloads
+    .filter((download) => download.implementation === "cpython")
+    .filter((download) => download.variant === undefined || download.variant === "default")
+    .filter((download) => download.version && isStableVersion(download.version))
+    .filter((download) => satisfiesVersion(download.version ?? "", request.requested))
+    .sort((left, right) => compareVersionStrings(right.version ?? "", left.version ?? ""))[0];
+  if (!selected?.version) {
+    throw new Error(
+      `no downloadable Python release satisfies ${request.runtime} ${request.requested} for ${request.platform}`,
+    );
+  }
+  return selected.version;
+}
+
+function isRangeLikeVersionRequest(requested: string): boolean {
+  return /[<>=]|\s/u.test(requested.trim());
+}
+
+function isStableVersion(version: string): boolean {
+  return /^\d+\.\d+\.\d+$/u.test(version);
+}
+
+function compareVersionStrings(left: string, right: string): number {
+  const leftParts = versionParts(left);
+  const rightParts = versionParts(right);
+  for (const index of [0, 1, 2]) {
+    const leftPart = leftParts[index] ?? 0;
+    const rightPart = rightParts[index] ?? 0;
+    const delta = leftPart - rightPart;
+    if (delta !== 0) {
+      return delta > 0 ? 1 : -1;
+    }
+  }
+  return 0;
+}
+
+function versionParts(version: string): [number, number, number] {
+  const match = version.match(/^(\d+)(?:\.(\d+))?(?:\.(\d+))?/u);
+  if (!match) {
+    throw new Error(`invalid Python version \`${version}\``);
+  }
+  return [
+    Number.parseInt(match[1] ?? "0", 10),
+    Number.parseInt(match[2] ?? "0", 10),
+    Number.parseInt(match[3] ?? "0", 10),
+  ];
 }
 
 function readBunReleases(): BunRelease[] {

@@ -22,6 +22,7 @@ import type {
   RuntimeInstaller,
   RuntimeInstallRequest,
 } from "../src/core/runtime/runtime-installer.js";
+import { OpenDockRuntimeInstaller } from "../src/core/runtime/runtime-installer.js";
 import { validateManifestTaskCommands } from "../src/core/runtime/task-command-validation.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
 import type { ToolRunner } from "../src/core/runtime/tool-runner.js";
@@ -207,6 +208,74 @@ printf 'host:%s\\n' "$*" >> "${hostLog}"
     expect(commandShim).toContain(wrapper);
     expect(readFileSync(wrapper, "utf8")).toContain(join(toolDir, "python"));
     expect(readFileSync(toolLog, "utf8")).toBe("fake-python-tool:ok\n");
+  });
+
+  it("resolves managed Python runtime ranges before asking uv to install", async () => {
+    const home = realpathSync(tempDir());
+    const project = tempDir();
+    const bin = tempDir();
+    const log = join(project, "uv.log");
+    writeFakeUv(bin, log);
+
+    await withEnv({ HOME: home, PATH: `${bin}:${process.env.PATH ?? ""}` }, async () => {
+      const result = new OpenDockRuntimeInstaller().install({
+        platform: "macos",
+        projectDir: project,
+        requested: ">=3.11.0 <3.14.0",
+        runtime: "python",
+      });
+
+      expect(result).toMatchObject({
+        commands: ["python"],
+        requested: ">=3.11.0 <3.14.0",
+        version: "3.13.5",
+      });
+      expect(readFileSync(log, "utf8")).toContain(
+        "python list --only-downloads --output-format json",
+      );
+      expect(readFileSync(log, "utf8")).toContain("python install 3.13.5");
+      expect(readFileSync(log, "utf8")).not.toContain("python install >=3.11.0 <3.14.0");
+    });
+  });
+
+  it("prefers managed project Python over host pip for pip tool installs", async () => {
+    const project = tempDir();
+    const bin = tempDir();
+    const toolLog = join(project, "managed-python-tool.log");
+    const hostPipLog = join(project, "host-pip.log");
+    createProjectCommandShim({
+      command: "python",
+      owner: { dockId: "project", kind: "runtime", name: "python" },
+      platform: "macos",
+      projectDir: project,
+      target: writeManagedPythonForPip(join(tempDir(), "python"), toolLog),
+    });
+    writeExecutable(
+      join(bin, "pip"),
+      `#!/bin/sh
+printf 'host-pip:%s\\n' "$*" >> "${hostPipLog}"
+exit 1
+`,
+    );
+
+    const result = await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      new TaskRunner().run(pythonToolManifest(), {
+        dockId: "test/python-tool",
+        live: false,
+        phase: "install",
+        platform: "macos",
+        projectDir: project,
+      }),
+    );
+
+    expect(result.reports.map((report) => `${report.id}:${report.status}`)).toEqual([
+      "require-tool-fake-python-tool:Ready",
+      "check-fake-python-tool:Ran",
+    ]);
+    expect(readFileSync(toolLog, "utf8")).toContain("ensurepip:--upgrade");
+    expect(readFileSync(toolLog, "utf8")).toContain("pip:-m pip install --target");
+    expect(readFileSync(toolLog, "utf8")).toContain("fake-python-tool:ok");
+    expect(existsSync(hostPipLog)).toBe(false);
   });
 
   it("blocks package-manager installs in task commands", () => {
@@ -504,6 +573,84 @@ Path("${log}").write_text(f"fake-python-tool:{fake_tool.VALUE}\\n")
 PY
 EOF
   /bin/chmod +x "$target/bin/fake-tool"
+  exit 0
+fi
+exit 1
+`,
+  );
+}
+
+function writeFakeUv(bin: string, log: string): void {
+  writeExecutable(
+    join(bin, "uv"),
+    `#!/bin/sh
+set -eu
+printf '%s\\n' "$*" >> "${log}"
+if [ "$1" = "--version" ]; then
+  printf 'uv 0.7.21\\n'
+  exit 0
+fi
+if [ "$1" = "python" ] && [ "$2" = "list" ]; then
+  printf '%s\\n' '[{"implementation":"cpython","variant":"default","version":"3.14.0b4"},{"implementation":"cpython","variant":"freethreaded","version":"3.13.5"},{"implementation":"cpython","variant":"default","version":"3.13.5"},{"implementation":"cpython","variant":"default","version":"3.12.11"},{"implementation":"pypy","variant":"default","version":"3.13.5"}]'
+  exit 0
+fi
+if [ "$1" = "python" ] && [ "$2" = "install" ]; then
+  if [ "$3" != "3.13.5" ]; then
+    exit 41
+  fi
+  root="\${UV_PYTHON_INSTALL_DIR:-$PWD/uv-python}"
+  mkdir -p "$root/cpython-3.13.5/bin"
+  /bin/cat > "$root/cpython-3.13.5/bin/python" <<'EOF'
+#!/bin/sh
+if [ "$1" = "--version" ]; then
+  printf 'Python 3.13.5\\n'
+  exit 0
+fi
+exit 0
+EOF
+  /bin/chmod +x "$root/cpython-3.13.5/bin/python"
+  exit 0
+fi
+if [ "$1" = "python" ] && [ "$2" = "find" ]; then
+  if [ "$3" != "3.13.5" ]; then
+    exit 42
+  fi
+  printf '%s\\n' "\${UV_PYTHON_INSTALL_DIR}/cpython-3.13.5/bin/python"
+  exit 0
+fi
+exit 1
+`,
+  );
+}
+
+function writeManagedPythonForPip(path: string, log: string): string {
+  return writeExecutable(
+    path,
+    `#!/bin/sh
+set -eu
+if [ "$1" = "--version" ]; then
+  printf 'Python 3.13.5\\n'
+  exit 0
+fi
+if [ "$1" = "-m" ] && [ "$2" = "ensurepip" ]; then
+  printf 'ensurepip:%s\\n' "$3" >> "${log}"
+  exit 0
+fi
+if [ "$1" = "-m" ] && [ "$2" = "pip" ] && [ "$3" = "install" ] && [ "$4" = "--target" ]; then
+  target="$5"
+  mkdir -p "$target/bin" "$target/fake_tool"
+  /bin/cat > "$target/fake_tool/__init__.py" <<'EOF'
+VALUE = "ok"
+EOF
+  /bin/cat > "$target/bin/fake-tool" <<'EOF'
+#!/bin/sh
+python3 - <<'PY'
+import fake_tool
+PY
+printf 'fake-python-tool:ok\\n' >> "${log}"
+EOF
+  /bin/chmod +x "$target/bin/fake-tool"
+  printf 'pip:%s\\n' "$*" >> "${log}"
   exit 0
 fi
 exit 1

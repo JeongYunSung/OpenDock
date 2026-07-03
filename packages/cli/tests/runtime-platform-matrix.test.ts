@@ -256,6 +256,11 @@ describe("runtime platform matrix", () => {
       "installations",
     );
     expect(readFileSync(uvLog, "utf8")).toContain(`UV_PYTHON_INSTALL_DIR=${expectedUvInstallDir}`);
+    expect(readFileSync(uvLog, "utf8")).toContain(
+      "args:python list --only-downloads --output-format json",
+    );
+    expect(readFileSync(uvLog, "utf8")).toContain("args:python install 3.12.9");
+    expect(readFileSync(uvLog, "utf8")).toContain("args:python install 3.13.5");
   });
 
   it("selects uv release artifacts for macOS, Windows, and Linux", () => {
@@ -557,6 +562,10 @@ set -eu
 printf 'args:%s\\n' "$*" >> "${log}"
 printf 'UV_PYTHON_INSTALL_DIR=%s\\n' "$UV_PYTHON_INSTALL_DIR" >> "${log}"
 if [ "$1" = "python" ] && [ "$2" = "install" ]; then
+  exit 0
+fi
+if [ "$1" = "python" ] && [ "$2" = "list" ]; then
+  printf '%s\\n' '[{"implementation":"cpython","variant":"default","version":"3.13.5"},{"implementation":"cpython","variant":"default","version":"3.12.9"},{"implementation":"cpython","variant":"default","version":"3.14.0b4"}]'
   exit 0
 fi
 if [ "$1" = "python" ] && [ "$2" = "find" ]; then
