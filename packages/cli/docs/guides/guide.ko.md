@@ -349,10 +349,15 @@ dependencies:
     manager: npm
     path: .codex/skills/image2html
     mode: ci
+    timeout_ms: 600000
 ```
 
 OpenDock은 `files`를 먼저 적용한 뒤, 선언된 `path`에서 dependency install을
-실행합니다. update와 uninstall에서는 OpenDock이 만든 dependency output을 정리합니다.
+실행합니다. update와 uninstall에서는 `node_modules`, `.venv`, `.opendock/python`
+같이 OpenDock이 만든 dependency output을 정리합니다.
+
+`timeout_ms`는 선택값입니다. dependency install이 기본 timeout보다 오래 걸릴 수
+있을 때만 지정합니다.
 
 | manager | mode | OpenDock이 정리하는 output |
 |---|---|---|

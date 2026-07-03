@@ -248,12 +248,16 @@ dependencies:
     manager: npm
     path: .codex/skills/image2html
     mode: ci
+    timeout_ms: 600000
 ```
 
 OpenDock applies `files` first, then installs `dependencies` in their declared
 paths. The dependency outputs are tracked at the directory level so update and
 uninstall can remove generated folders such as `node_modules`, `.venv`, or
 `.opendock/python`.
+
+`timeout_ms` is optional. Use it when a dependency install can take longer than
+the default timeout.
 
 Supported managers and modes:
 

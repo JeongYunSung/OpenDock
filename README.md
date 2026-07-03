@@ -88,9 +88,9 @@ OpenDock then:
 1. Downloads a reviewed dock from the Registry.
 2. Checks the runtimes the dock needs.
 3. Prepares declared CLI tools inside the project.
-4. Adds the dock's files to your project.
-5. Installs declared dependencies inside copied project folders.
-6. Checks for conflicts before writing files.
+4. Checks for file conflicts before writing to the project.
+5. Adds the dock's files to your project.
+6. Installs declared dependencies inside copied project folders.
 7. Records what was installed in `.opendock/`.
 
 That record lets OpenDock update or remove the dock later.
@@ -276,13 +276,20 @@ dependencies:
     manager: npm
     path: .codex/skills/image2html
     mode: ci
+    timeout_ms: 600000
 ```
+
+OpenDock applies `files` first, then runs each dependency manager in the
+declared `path`. On update and uninstall, it removes generated dependency
+outputs such as `node_modules`, `.venv`, or `.opendock/python` before
+reinstalling or cleaning up.
 
 Supported dependency managers today are `npm`, `pnpm`, `bun`, `uv`, `pip`, and
 `pip3`. OpenDock does not run arbitrary install commands here. It maps each
 manager to a small set of modes: `npm` supports `ci` and `install`; `pnpm` and
 `bun` support `install`; `uv` supports `sync`; `pip` and `pip3` support
-`install` from `requirements.txt`.
+`install` from `requirements.txt`. Use `timeout_ms` when a dependency install
+can take longer than the default.
 
 `readme`, `logo`, and `tags` are Registry catalog metadata. They help people
 understand and filter a dock in Hub, but they are not installed into a project
