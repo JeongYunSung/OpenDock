@@ -7,6 +7,18 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.2.3 - 2026-07-03
+
+### CLI
+
+- Harden `dependencies` path validation and cleanup boundaries.
+- Add focused QA coverage for copied package payloads, dependency updates,
+  lock tampering, symlink boundaries, and task command install bypasses.
+
+### Desktop App
+
+- Align the desktop app release version with the OpenDock `0.2.3` release line.
+
 ## 0.2.2 - 2026-07-02
 
 ### CLI
