@@ -7,6 +7,20 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.2.4 - 2026-07-04
+
+### CLI
+
+- Refresh README and guide coverage for `tools`, `dependencies`, `uv`, and the
+  `install`/`locked` dependency modes.
+- Add regression coverage that prevents removed bootstrap and legacy dependency
+  mode docs from returning.
+
+### Desktop App
+
+- Include the latest dock list interaction and graph refresh changes in the
+  desktop release line.
+
 ## 0.2.3 - 2026-07-03
 
 ### CLI
