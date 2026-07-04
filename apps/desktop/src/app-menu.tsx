@@ -27,6 +27,12 @@ export function appMenuGroups(t: (typeof TEXT)[Lang], appVersion: string): AppMe
       label: t.menuEdit,
       items: [
         { id: "edit:rename-project", label: t.renameProjectTitle },
+        { type: "separator" },
+        { id: "edit:cut", label: t.menuCut, shortcut: "Ctrl+X" },
+        { id: "edit:copy", label: t.menuCopy, shortcut: "Ctrl+C" },
+        { id: "edit:paste", label: t.menuPaste, shortcut: "Ctrl+V" },
+        { id: "edit:select-all", label: t.menuSelectAll, shortcut: "Ctrl+A" },
+        { type: "separator" },
         { id: "edit:copy-project-path", label: t.menuCopyProjectPath, shortcut: "Ctrl+Shift+C" },
         { id: "edit:import-shortcuts", label: t.importShortcuts },
         { id: "edit:export-shortcuts", label: t.exportShortcuts },

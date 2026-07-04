@@ -146,6 +146,25 @@ const catalogRefreshSkipsStaleResponses =
   catalogController.includes("currentCatalogRequestKeyRef.current = currentCatalogRequestKey") &&
   catalogController.includes("currentCatalogRequestKeyRef.current !== requestKey") &&
   catalogController.includes("if (cancelled || currentCatalogRequestKeyRef.current !== requestKey) return;");
+const appClipboardEditingEnabled =
+  appMenu.includes('id: "edit:copy"') &&
+  appMenu.includes('id: "edit:paste"') &&
+  appMenuRust.includes('"edit:copy"') &&
+  appMenuRust.includes('"edit:paste"') &&
+  appMenuRust.includes("CmdOrCtrl+C") &&
+  appMenuRust.includes("CmdOrCtrl+V") &&
+  navigationController.includes('case "edit:copy"') &&
+  navigationController.includes('case "edit:paste"') &&
+  navigationController.includes("navigator.clipboard.writeText") &&
+  navigationController.includes("navigator.clipboard.readText");
+const appTextSelectionEnabled =
+  styles.includes(".app-root") &&
+  styles.includes("user-select: text") &&
+  styles.includes(".workspace-main") &&
+  styles.includes(".readme-panel") &&
+  styles.includes(".log-lines") &&
+  styles.includes("button,") &&
+  styles.includes("user-select: none");
 const registryTauriRequestsHaveTimeout =
   registryClient.includes("function withRegistryRequestTimeout") &&
   registryClient.includes("REGISTRY_REQUEST_TIMEOUT_MS") &&
@@ -555,6 +574,12 @@ const failures = [
     : []),
   ...(!catalogRefreshSkipsStaleResponses
     ? ["catalog refresh must skip stale responses after search, sort, page, or page-size changes"]
+    : []),
+  ...(!appClipboardEditingEnabled
+    ? ["desktop edit menus must expose copy/paste and route them to selected text or active inputs"]
+    : []),
+  ...(!appTextSelectionEnabled
+    ? ["desktop app text should be selectable while interactive controls remain non-selectable"]
     : []),
   ...(!registryTauriRequestsHaveTimeout
     ? ["Tauri registry requests must time out so catalog/detail/logo loading cannot spin forever"]

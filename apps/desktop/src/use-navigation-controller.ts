@@ -113,6 +113,18 @@ export function useNavigationController(options: NavigationControllerOptions) {
       case "edit:rename-project":
         if (options.activeProject) options.openRenameProject(options.activeProject);
         break;
+      case "edit:cut":
+        await runTextEditCommand("cut");
+        break;
+      case "edit:copy":
+        await runTextEditCommand("copy");
+        break;
+      case "edit:paste":
+        await runTextEditCommand("paste");
+        break;
+      case "edit:select-all":
+        await runTextEditCommand("selectAll");
+        break;
       case "edit:copy-project-path":
         await copyProjectPath(options.activeProject);
         break;
@@ -228,4 +240,74 @@ export function useNavigationController(options: NavigationControllerOptions) {
     selectProject,
     setMainView,
   };
+}
+
+type TextEditCommand = "copy" | "cut" | "paste" | "selectAll";
+type EditableElement = HTMLInputElement | HTMLTextAreaElement;
+
+async function runTextEditCommand(command: TextEditCommand) {
+  try {
+    const editable = activeEditableElement();
+    if (command === "selectAll") {
+      selectAppText(editable);
+      return;
+    }
+    if (command === "paste") {
+      await pasteIntoEditable(editable);
+      return;
+    }
+
+    const text = selectionText(editable);
+    if (!text) return;
+    await navigator.clipboard.writeText(text);
+    if (command === "cut" && editable) replaceEditableSelection(editable, "");
+  } catch {
+    document.execCommand(command === "selectAll" ? "selectAll" : command);
+  }
+}
+
+function activeEditableElement(): EditableElement | null {
+  const element = document.activeElement;
+  if (element instanceof HTMLTextAreaElement && !element.disabled && !element.readOnly) return element;
+  if (element instanceof HTMLInputElement && isTextInput(element) && !element.disabled && !element.readOnly) return element;
+  return null;
+}
+
+function isTextInput(element: HTMLInputElement) {
+  return ["", "email", "password", "search", "tel", "text", "url"].includes(element.type);
+}
+
+function selectionText(editable: EditableElement | null) {
+  if (editable && editable.selectionStart !== null && editable.selectionEnd !== null) {
+    return editable.value.slice(editable.selectionStart, editable.selectionEnd);
+  }
+  return window.getSelection()?.toString() ?? "";
+}
+
+async function pasteIntoEditable(editable: EditableElement | null) {
+  if (!editable) return;
+  const text = await navigator.clipboard.readText();
+  if (!text) return;
+  replaceEditableSelection(editable, text);
+}
+
+function replaceEditableSelection(editable: EditableElement, text: string) {
+  const start = editable.selectionStart ?? editable.value.length;
+  const end = editable.selectionEnd ?? editable.value.length;
+  editable.setRangeText(text, start, end, "end");
+  editable.dispatchEvent(new InputEvent("input", { bubbles: true, data: text, inputType: text ? "insertText" : "deleteByCut" }));
+}
+
+function selectAppText(editable: EditableElement | null) {
+  if (editable) {
+    editable.select();
+    return;
+  }
+  const selection = window.getSelection();
+  const target = document.querySelector(".workspace-main") ?? document.body;
+  if (!selection || !target) return;
+  const range = document.createRange();
+  range.selectNodeContents(target);
+  selection.removeAllRanges();
+  selection.addRange(range);
 }

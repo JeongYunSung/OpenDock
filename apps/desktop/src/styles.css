@@ -132,6 +132,42 @@ input:focus-visible,
   border-radius: var(--window-radius);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+button,
+[role="menu"],
+.account-tabs,
+.app-menu-panel,
+.command-palette-list,
+.detail-tabs,
+.dock-tabs,
+.installed-actions,
+.modal-actions,
+.pagination,
+.project-row-actions,
+.shortcut-actions,
+.sort-menu,
+.titlebar,
+.window-controls {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea,
+.account-panel,
+.command-progress-log,
+.detail-panel,
+.dock-card,
+.installed-table,
+.log-lines,
+.project-row-copy,
+.readme-panel,
+.workspace-main {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .app-root[data-theme="light"] {

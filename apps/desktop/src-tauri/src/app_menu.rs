@@ -24,6 +24,11 @@ pub(crate) fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Re
         true,
         None::<&str>,
     )?;
+    let cut = MenuItem::with_id(app, "edit:cut", "Cut", true, Some("CmdOrCtrl+X"))?;
+    let copy = MenuItem::with_id(app, "edit:copy", "Copy", true, Some("CmdOrCtrl+C"))?;
+    let paste = MenuItem::with_id(app, "edit:paste", "Paste", true, Some("CmdOrCtrl+V"))?;
+    let select_all =
+        MenuItem::with_id(app, "edit:select-all", "Select All", true, Some("CmdOrCtrl+A"))?;
     let copy_project_path = MenuItem::with_id(
         app,
         "edit:copy-project-path",
@@ -46,18 +51,22 @@ pub(crate) fn build_app_menu<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Re
         None::<&str>,
     )?;
     let edit_sep = PredefinedMenuItem::separator(app)?;
-    let select_all = PredefinedMenuItem::select_all(app, None)?;
+    let clipboard_sep = PredefinedMenuItem::separator(app)?;
     let edit_menu = Submenu::with_items(
         app,
         "Edit",
         true,
         &[
             &rename_project,
+            &edit_sep,
+            &cut,
+            &copy,
+            &paste,
+            &select_all,
+            &clipboard_sep,
             &copy_project_path,
             &import_shortcuts,
             &export_shortcuts,
-            &edit_sep,
-            &select_all,
         ],
     )?;
 
