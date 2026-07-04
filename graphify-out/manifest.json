@@ -1,7 +1,7 @@
 {
   "apps/desktop/package.json": {
-    "mtime": 1783148975.1089954,
-    "ast_hash": "730e0641adfb2b5bb3f0a32cbdf18951",
+    "mtime": 1783165890.8385973,
+    "ast_hash": "5c40fab7b0f324ae1584d15c118e0935",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/browser-test-runtime.mjs": {
@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-native-contract.mjs": {
-    "mtime": 1783165336.8823817,
-    "ast_hash": "c0822fa6340dab3e65dbfc44bb13c893",
+    "mtime": 1783169982.652509,
+    "ast_hash": "b27f73f3e0f27810159486fd7f06bf15",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-od-assertions.mjs": {
@@ -75,8 +75,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/app_menu.rs": {
-    "mtime": 1783165210.8415916,
-    "ast_hash": "30064dd5ac5050bef936026196e09bd8",
+    "mtime": 1783169890.7898033,
+    "ast_hash": "66e6af3ecad143d5830dd8bd66d9a5ae",
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/command_output.rs": {
@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/lib.rs": {
-    "mtime": 1782908106.7997763,
-    "ast_hash": "6b4931c6fe011c954e01aaa986873989",
+    "mtime": 1783169799.3895478,
+    "ast_hash": "e7bae7bee7638eb12ebca523d79c2e06",
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/main.rs": {
@@ -120,13 +120,13 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/tauri.conf.json": {
-    "mtime": 1783148975.109487,
-    "ast_hash": "53a344ee8f3eb89902b03fc19a5ee220",
+    "mtime": 1783165890.8387787,
+    "ast_hash": "5281344f73ef05225d579e0b2bf45ed5",
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
-    "mtime": 1783150525.1389973,
-    "ast_hash": "4ab665c67599079fa5d42557b23e2132",
+    "mtime": 1783169971.6706994,
+    "ast_hash": "55c9807ee6d208035bcf4ffa7e8d2e5a",
     "semantic_hash": ""
   },
   "apps/desktop/src/account-model.ts": {
@@ -200,8 +200,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/dock-panels.tsx": {
-    "mtime": 1783150000.1342757,
-    "ast_hash": "8da99a3f087563e73cba98da36513b6c",
+    "mtime": 1783169773.2610023,
+    "ast_hash": "573e5e927941f5f044c0f892b8e4a4a4",
     "semantic_hash": ""
   },
   "apps/desktop/src/dock-workspace-model.ts": {
@@ -370,8 +370,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/workspace-view.tsx": {
-    "mtime": 1782922271.1678123,
-    "ast_hash": "7058563465eb37d93dad28f09e3c5727",
+    "mtime": 1783169958.0010734,
+    "ast_hash": "acf2f23b4e294a507c0b40ac4f7e33eb",
     "semantic_hash": ""
   },
   "apps/desktop/tsconfig.json": {
@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "packages/cli/package.json": {
-    "mtime": 1783148975.117948,
-    "ast_hash": "4aa5733d4a87721282cc9ba6157498bd",
+    "mtime": 1783165890.8382487,
+    "ast_hash": "54b8b288fac60c40d0a9a66fa766d821",
     "semantic_hash": ""
   },
   "packages/cli/scripts/build.ts": {
@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/constants.ts": {
-    "mtime": 1783148975.1181588,
-    "ast_hash": "68228ebba2d4ae8c6acff43e5396133f",
+    "mtime": 1783165890.8384225,
+    "ast_hash": "d58d0220848849261f7443ada32ba64a",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-install-report.ts": {
@@ -725,8 +725,8 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1783148975.1086407,
-    "ast_hash": "2f7952ecfb033b7804836466c56ac0e2",
+    "mtime": 1783165890.8391216,
+    "ast_hash": "65536ba791695f9fe51f1e88ba132c33",
     "semantic_hash": ""
   },
   "README.md": {
@@ -2742,6 +2742,21 @@
   "apps/desktop/src/use-installed-dock-metadata.ts": {
     "mtime": 1783150581.3534677,
     "ast_hash": "cdfb2860adc273dffd8139f5f181b4af",
+    "semantic_hash": ""
+  },
+  "apps/desktop/src/use-dock-navigation-history.ts": {
+    "mtime": 1783169879.101437,
+    "ast_hash": "35878b1d7cd3868346d94b5a72d83805",
+    "semantic_hash": ""
+  },
+  ".serena/memories/session-ultrawork.md": {
+    "mtime": 1783169413.5083349,
+    "ast_hash": "2c49c2286bdabef32ad50d0448dd2776",
+    "semantic_hash": ""
+  },
+  ".serena/memories/task-board.md": {
+    "mtime": 1783169434.7313986,
+    "ast_hash": "7064e160248c30be4c98585cbba59fbe",
     "semantic_hash": ""
   }
 }
