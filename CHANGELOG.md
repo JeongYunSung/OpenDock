@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.2.5 - 2026-07-04
+
+### Desktop App
+
+- Use browser history for dock detail navigation and preserve detail navigation
+  state while moving through dock pages.
+
 ## 0.2.4 - 2026-07-04
 
 ### CLI
