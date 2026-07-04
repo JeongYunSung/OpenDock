@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-native-contract.mjs": {
-    "mtime": 1783150559.0140605,
-    "ast_hash": "b1a2a49d03dcee857e5a0a9e17d5eea6",
+    "mtime": 1783165336.8823817,
+    "ast_hash": "c0822fa6340dab3e65dbfc44bb13c893",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/verify-od-assertions.mjs": {
@@ -75,8 +75,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/app_menu.rs": {
-    "mtime": 1782809699.9804158,
-    "ast_hash": "f1aa2cc819cb6b0684891b28686a5e7c",
+    "mtime": 1783165210.8415916,
+    "ast_hash": "30064dd5ac5050bef936026196e09bd8",
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/src/command_output.rs": {
@@ -145,8 +145,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/app-menu.tsx": {
-    "mtime": 1782193421.043087,
-    "ast_hash": "3b4d54934edd29f25a5ba125563d8f0c",
+    "mtime": 1783165196.44268,
+    "ast_hash": "23001f0c341c5d041109d8947ed9ce37",
     "semantic_hash": ""
   },
   "apps/desktop/src/app-notice.tsx": {
@@ -180,8 +180,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/desktop-text.ts": {
-    "mtime": 1782919166.2466695,
-    "ast_hash": "6db8c748f0d43833c62d18dda5c3aa13",
+    "mtime": 1783165187.6019363,
+    "ast_hash": "cc02c328b365ccb317fd6ad66ba143c1",
     "semantic_hash": ""
   },
   "apps/desktop/src/desktop-ui.tsx": {
@@ -325,8 +325,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src/use-navigation-controller.ts": {
-    "mtime": 1782895226.5650797,
-    "ast_hash": "b5744d43acec3b9f4b4d2d43bc38f632",
+    "mtime": 1783165309.9621196,
+    "ast_hash": "dba66d41b9ac0f1ce986b3e2f3a886e7",
     "semantic_hash": ""
   },
   "apps/desktop/src/use-pagination-guards.ts": {
