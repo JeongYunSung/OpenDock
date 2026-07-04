@@ -1473,7 +1473,26 @@ input:focus-visible,
   cursor: pointer;
 }
 
+.install-metric {
+  cursor: pointer;
+}
+
 .star-button svg {
+  color: var(--text-3);
+}
+
+.install-metric:hover,
+.install-metric:hover svg {
+  color: var(--info);
+}
+
+.install-metric:disabled {
+  cursor: default;
+  color: var(--text-3);
+  opacity: 0.58;
+}
+
+.install-metric:disabled svg {
   color: var(--text-3);
 }
 

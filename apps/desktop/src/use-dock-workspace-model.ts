@@ -13,6 +13,7 @@ interface DockWorkspaceModelOptions {
   catalogDocks: Dock[];
   detailId: string;
   installedDocks: Record<string, boolean>;
+  installedMetadataDocks: Dock[];
   installedRecords: InstalledDockRecord[];
   installedSearchQuery: string;
   lang: Lang;
@@ -30,9 +31,12 @@ export function useDockWorkspaceModel(options: DockWorkspaceModelOptions) {
   const allKnownDocks = useMemo(
     () => [
       ...registryDocks,
-      ...installedFallbackDocks.filter((dock) => !findDockByKey(registryDocks, dockFullId(dock))),
+      ...options.installedMetadataDocks.filter((dock) => !findDockByKey(registryDocks, dockFullId(dock))),
+      ...installedFallbackDocks.filter((dock) =>
+        !findDockByKey([...registryDocks, ...options.installedMetadataDocks], dockFullId(dock))
+      ),
     ],
-    [registryDocks, installedFallbackDocks],
+    [registryDocks, options.installedMetadataDocks, installedFallbackDocks],
   );
   const baseDetail = useMemo(
     () => findDockByKey(allKnownDocks, options.detailId) ?? allKnownDocks[0] ?? null,

@@ -35,6 +35,8 @@ const desktopUi = readSrc("desktop-ui.tsx");
 const display = readSrc("display.tsx");
 const dockPanels = readSrc("dock-panels.tsx");
 const dockWorkspaceModel = readSrc("dock-workspace-model.ts");
+const dockWorkspaceHook = readSrc("use-dock-workspace-model.ts");
+const installedDockMetadata = readSrc("use-installed-dock-metadata.ts");
 const installedPanel = readSrc("installed-panel.tsx");
 const authController = readSrc("use-auth-controller.ts");
 const dockCommandController = readSrc("use-dock-command-controller.ts");
@@ -144,6 +146,23 @@ const catalogRefreshSkipsStaleResponses =
   catalogController.includes("currentCatalogRequestKeyRef.current = currentCatalogRequestKey") &&
   catalogController.includes("currentCatalogRequestKeyRef.current !== requestKey") &&
   catalogController.includes("if (cancelled || currentCatalogRequestKeyRef.current !== requestKey) return;");
+const registryTauriRequestsHaveTimeout =
+  registryClient.includes("function withRegistryRequestTimeout") &&
+  registryClient.includes("REGISTRY_REQUEST_TIMEOUT_MS") &&
+  registryClient.includes('invoke<RegistryDockSearchResponse>("opendock_catalog"') &&
+  registryClient.includes('invoke<RegistryDockDetail>("opendock_dock_detail"') &&
+  registryClient.includes('invoke<RegistryDockVersionsResponse>("opendock_dock_versions"') &&
+  registryClient.includes('invoke<string>("opendock_registry_asset_data_url"') &&
+  registryClient.includes("registry request timed out after");
+const installedRowsUseRegistryMetadata =
+  app.includes('import { useInstalledDockMetadata } from "./use-installed-dock-metadata"') &&
+  app.includes("const installedMetadataDocks = useInstalledDockMetadata({") &&
+  app.includes("installedMetadataDocks,") &&
+  dockWorkspaceHook.includes("installedMetadataDocks: Dock[]") &&
+  dockWorkspaceHook.includes("...options.installedMetadataDocks.filter") &&
+  installedDockMetadata.includes("requestDockDetail(record.id)") &&
+  installedDockMetadata.includes("normalizeRegistryDock(detail") &&
+  installedDockMetadata.includes("mergeRegistryDockDetail");
 const detailRefreshKeepsVersionTotalScoped =
   catalogController.includes('const activeDetailKeyRef = useRef(options.dockView === "detail" ? options.detailKey : "")') &&
   catalogController.includes("activeDetailKeyRef.current = options.dockView === \"detail\" ? options.detailKey : \"\"") &&
@@ -536,6 +555,12 @@ const failures = [
     : []),
   ...(!catalogRefreshSkipsStaleResponses
     ? ["catalog refresh must skip stale responses after search, sort, page, or page-size changes"]
+    : []),
+  ...(!registryTauriRequestsHaveTimeout
+    ? ["Tauri registry requests must time out so catalog/detail/logo loading cannot spin forever"]
+    : []),
+  ...(!installedRowsUseRegistryMetadata
+    ? ["installed rows must enrich lockfile records with registry metadata so logos do not depend on the current catalog page"]
     : []),
   ...(!detailRefreshKeepsVersionTotalScoped
     ? ["manual dock detail refresh must not overwrite version pagination for a different active detail"]

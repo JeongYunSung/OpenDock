@@ -27,12 +27,15 @@ export async function requestCatalog(
   const sort = registrySortMode(sortMode);
   const trimmedQuery = query.trim();
   if (isTauriRuntime()) {
-    return invoke<RegistryDockSearchResponse>("opendock_catalog", {
-      page,
-      limit,
-      sort,
-      query: trimmedQuery || null,
-    });
+    return withRegistryRequestTimeout(
+      invoke<RegistryDockSearchResponse>("opendock_catalog", {
+        page,
+        limit,
+        sort,
+        query: trimmedQuery || null,
+      }),
+      "/v1/docks",
+    );
   }
   return requestRegistryJson<RegistryDockSearchResponse>("/v1/docks", {
     sort,
@@ -43,13 +46,21 @@ export async function requestCatalog(
 }
 
 export async function requestDockDetail(dockId: string) {
-  if (isTauriRuntime()) return invoke<RegistryDockDetail>("opendock_dock_detail", { dockId });
+  if (isTauriRuntime()) {
+    return withRegistryRequestTimeout(
+      invoke<RegistryDockDetail>("opendock_dock_detail", { dockId }),
+      `/v1/docks/${dockId}`,
+    );
+  }
   return requestRegistryJson<RegistryDockDetail>(`/v1/docks/${dockId}`);
 }
 
 export async function requestDockVersions(dockId: string, page: number, limit: number) {
   if (isTauriRuntime()) {
-    return invoke<RegistryDockVersionsResponse>("opendock_dock_versions", { dockId, page, limit });
+    return withRegistryRequestTimeout(
+      invoke<RegistryDockVersionsResponse>("opendock_dock_versions", { dockId, page, limit }),
+      `/v1/docks/${dockId}/versions`,
+    );
   }
   return requestRegistryJson<RegistryDockVersionsResponse>(`/v1/docks/${dockId}/versions`, {
     page: String(page),
@@ -121,7 +132,10 @@ export async function loadRegistryAssetUrl(url?: string | null) {
   const request = (async () => {
     try {
       const value = isTauriRuntime()
-        ? await invoke<string>("opendock_registry_asset_data_url", { url })
+        ? await withRegistryRequestTimeout(
+            invoke<string>("opendock_registry_asset_data_url", { url }),
+            new URL(url).pathname,
+          )
         : resolveRegistryAssetUrl(url);
       registryAssetCache.set(url, value);
       return value;
@@ -150,6 +164,16 @@ export function emptyMyDocksCounts(): MyDocksCounts {
 
 function registrySortMode(mode: SortMode) {
   return mode === "recent" ? "updated" : mode;
+}
+
+function withRegistryRequestTimeout<T>(request: Promise<T>, path: string) {
+  if (typeof window === "undefined") return request;
+  return new Promise<T>((resolve, reject) => {
+    const timeout = window.setTimeout(() => {
+      reject(new Error(`registry request timed out after ${REGISTRY_REQUEST_TIMEOUT_MS}ms for ${path}`));
+    }, REGISTRY_REQUEST_TIMEOUT_MS);
+    request.then(resolve, reject).finally(() => window.clearTimeout(timeout));
+  });
 }
 
 async function requestRegistryJson<T>(path: string, params: Record<string, string> = {}) {

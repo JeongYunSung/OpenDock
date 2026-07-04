@@ -31,6 +31,7 @@ import { useCatalogController, useDockDetailController } from "./use-catalog-con
 import { useCommandTaskController } from "./use-command-task-controller";
 import { useDesktopStateSync } from "./use-desktop-state-sync";
 import { useDockCommandController } from "./use-dock-command-controller";
+import { useInstalledDockMetadata } from "./use-installed-dock-metadata";
 import { useDockWorkspaceModel } from "./use-dock-workspace-model";
 import { useNativeEventBridge } from "./use-native-event-bridge";
 import { useNavigationController } from "./use-navigation-controller";
@@ -169,6 +170,11 @@ export function App() {
     setInstalledDocks,
     setLogs,
   });
+  const installedMetadataDocks = useInstalledDockMetadata({
+    appendLog,
+    catalogDocks,
+    installedRecords,
+  });
   const {
     activeInstalledDocks,
     allKnownDocks,
@@ -182,6 +188,7 @@ export function App() {
     catalogDocks,
     detailId,
     installedDocks,
+    installedMetadataDocks,
     installedRecords,
     installedSearchQuery,
     lang,
