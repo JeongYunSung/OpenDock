@@ -52,6 +52,10 @@ export function useDockNavigationHistory(options: DockNavigationHistoryOptions) 
     window.history.back();
   }, []);
 
+  const replaceNextSnapshot = useCallback(() => {
+    replaceNextSnapshotRef.current = true;
+  }, []);
+
   useEffect(() => {
     if (!options.enabled || typeof window === "undefined") return;
 
@@ -103,7 +107,7 @@ export function useDockNavigationHistory(options: DockNavigationHistoryOptions) 
     options.enabled,
   ]);
 
-  return { goBack };
+  return { goBack, replaceNextSnapshot };
 }
 
 function currentSnapshot(options: DockNavigationHistoryOptions): DockNavigationSnapshot {

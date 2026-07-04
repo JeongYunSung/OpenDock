@@ -465,7 +465,6 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(RunningCommands::default())
         .setup(|app| {
-            enable_native_navigation_gestures(app.handle());
             focus_existing_main_window(app.handle());
             Ok(())
         })
@@ -524,19 +523,6 @@ fn focus_existing_main_window(app: &tauri::AppHandle) {
         let _ = window.set_focus();
     }
 }
-
-#[cfg(target_os = "macos")]
-fn enable_native_navigation_gestures(app: &tauri::AppHandle) {
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.with_webview(|webview| unsafe {
-            let view = &*webview.inner().cast::<objc2_web_kit::WKWebView>();
-            view.setAllowsBackForwardNavigationGestures(true);
-        });
-    }
-}
-
-#[cfg(not(target_os = "macos"))]
-fn enable_native_navigation_gestures(_app: &tauri::AppHandle) {}
 
 fn parse_auth_email(stdout: &str) -> Option<String> {
     stdout

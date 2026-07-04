@@ -320,6 +320,7 @@ export function App() {
   const currentAppVersion = appVersion || productUpdate.check?.currentVersion || "";
   const {
     handleNativeMenu,
+    openExploreRoot,
     openDockDetail,
     runAppMenuCommand,
     runShortcutCommand,
@@ -356,7 +357,7 @@ export function App() {
     setProjectSwitcherOpen,
     updateDocks,
   });
-  const { goBack } = useDockNavigationHistory({
+  const { replaceNextSnapshot } = useDockNavigationHistory({
     activeProjectId,
     detailId,
     detailTab,
@@ -370,6 +371,11 @@ export function App() {
     setDetailVersion,
     setDockView,
   });
+
+  function backToExploreRoot() {
+    replaceNextSnapshot();
+    openExploreRoot();
+  }
 
   useNativeEventBridge({
     appendLog,
@@ -633,7 +639,7 @@ export function App() {
             onBack={() => setMainView("list")}
             onCreate={createBlankProject}
             onDeleteDock={deleteDock}
-            onDetailBack={() => goBack(() => setMainView("list"))}
+            onDetailBack={backToExploreRoot}
             onInstallDock={installDock}
             onOpenAdd={() => {
               setProjectAddOpen(true);

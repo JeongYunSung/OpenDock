@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState, type WheelEvent as ReactWheelEvent } from "react";
 import { ACCOUNT_PAGE_LIMIT, AccountPanel } from "./account-panel";
 import type { CommandTask } from "./command-task";
 import type {
@@ -21,6 +22,21 @@ import type { OpenMenu } from "./titlebar";
 import { ProjectSidebar } from "./workspace-shell";
 
 export { ACCOUNT_PAGE_LIMIT };
+
+const DETAIL_LAYER_EXIT_MS = 220;
+const BACK_GESTURE_COOLDOWN_MS = 520;
+const BACK_GESTURE_RESET_MS = 260;
+const BACK_GESTURE_THRESHOLD = 56;
+const BACK_GESTURE_DOMINANCE = 1.25;
+
+interface DetailLayerSnapshot {
+  detail: Dock | null;
+  detailLoading: boolean;
+  detailTab: "readme" | "versions";
+  detailVersion: DockVersion | null;
+  versionPage: number;
+  versionPageCount: number;
+}
 
 export function Workspace(props: {
   activeProject: Project;
@@ -102,6 +118,96 @@ export function Workspace(props: {
   onSetShortcut: (commandId: ShortcutCommandId, shortcut: string | null) => boolean;
 }) {
   const showTabs = props.dockView !== "account";
+  const [exitingDetail, setExitingDetail] = useState<DetailLayerSnapshot | null>(null);
+  const previousDockViewRef = useRef<DockView>(props.dockView);
+  const lastDetailLayerRef = useRef<DetailLayerSnapshot | null>(null);
+  const exitTimerRef = useRef<number | null>(null);
+  const backGestureRef = useRef({ deltaX: 0, deltaY: 0, lastAt: 0, lockedUntil: 0 });
+  const activeDetailLayer =
+    props.dockView === "detail"
+      ? {
+          detail: props.detail,
+          detailLoading: props.detailLoading,
+          detailTab: props.detailTab,
+          detailVersion: props.detailVersion,
+          versionPage: props.versionPage,
+          versionPageCount: props.versionPageCount,
+        }
+      : null;
+
+  if (activeDetailLayer) {
+    lastDetailLayerRef.current = activeDetailLayer;
+  }
+
+  useEffect(() => {
+    const previousDockView = previousDockViewRef.current;
+    if (props.dockView === "detail") {
+      if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = null;
+      setExitingDetail(null);
+    } else if (previousDockView === "detail" && props.dockView === "list" && lastDetailLayerRef.current) {
+      if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);
+      setExitingDetail(lastDetailLayerRef.current);
+      exitTimerRef.current = window.setTimeout(() => {
+        setExitingDetail(null);
+        exitTimerRef.current = null;
+      }, DETAIL_LAYER_EXIT_MS);
+    }
+    previousDockViewRef.current = props.dockView;
+  }, [props.dockView]);
+
+  useEffect(() => {
+    return () => {
+      if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);
+    };
+  }, []);
+
+  function renderDetailLayer(layer: DetailLayerSnapshot) {
+    if (layer.detailLoading) return <DetailLoadingState label={props.t.loadingDockDetail} />;
+    if (!layer.detail) return <CatalogEmptyState t={props.t} />;
+    return (
+      <DetailPanel
+        {...props}
+        detail={layer.detail}
+        detailTab={layer.detailTab}
+        detailVersion={layer.detailVersion}
+        onBack={props.onDetailBack}
+        versionPage={layer.versionPage}
+        versionPageCount={layer.versionPageCount}
+      />
+    );
+  }
+
+  function handlePanelWheel(event: ReactWheelEvent<HTMLDivElement>) {
+    if (props.dockView !== "detail" || !isMacRuntime() || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+
+    const deltaX = normalizeWheelDelta(event.deltaX, event.deltaMode);
+    const deltaY = normalizeWheelDelta(event.deltaY, event.deltaMode);
+    if (deltaX >= 0 || canScrollableAncestorConsumeHorizontalWheel(event.target, event.currentTarget, deltaX)) return;
+
+    const now = Date.now();
+    const gesture = backGestureRef.current;
+    if (now - gesture.lastAt > BACK_GESTURE_RESET_MS) {
+      gesture.deltaX = 0;
+      gesture.deltaY = 0;
+    }
+    gesture.lastAt = now;
+    gesture.deltaX += deltaX;
+    gesture.deltaY += deltaY;
+
+    const horizontalEnough = Math.abs(gesture.deltaX) >= BACK_GESTURE_THRESHOLD;
+    const mostlyHorizontal = Math.abs(gesture.deltaX) > Math.abs(gesture.deltaY) * BACK_GESTURE_DOMINANCE;
+    if (!horizontalEnough || !mostlyHorizontal || now < gesture.lockedUntil) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    gesture.deltaX = 0;
+    gesture.deltaY = 0;
+    gesture.lockedUntil = now + BACK_GESTURE_COOLDOWN_MS;
+    props.onDetailBack();
+  }
+
+  const showExploreSurface = props.dockView === "list" || props.dockView === "detail";
   return (
     <section className="workspace">
       {showTabs ? (
@@ -137,37 +243,74 @@ export function Workspace(props: {
           </nav>
         ) : null}
 
-        {props.dockView === "list" ? <ExplorePanel {...props} loading={props.catalogLoading} /> : null}
-        {props.dockView === "detail" ? (
-          props.detailLoading ? <DetailLoadingState label={props.t.loadingDockDetail} /> : props.detail ? <DetailPanel {...props} detail={props.detail} onBack={props.onDetailBack} /> : <CatalogEmptyState t={props.t} />
-        ) : null}
-        {props.dockView === "installed" ? <InstalledPanel {...props} loading={props.installedLoading} /> : null}
-        {props.dockView === "logs" ? <LogsPanel activeProject={props.activeProject} logs={props.logs} t={props.t} /> : null}
-        {props.dockView === "account" ? (
-          <AccountPanel
-            accountAvatarUrl={props.accountAvatarUrl}
-            accountDisplayName={props.accountDisplayName}
-            accountEmail={props.accountEmail}
-            accountOfficial={props.accountOfficial}
-            lang={props.lang}
-            myDocks={props.myDocks}
-            myDocksCounts={props.myDocksCounts}
-            myDocksLoading={props.myDocksLoading}
-            myDocksPage={props.myDocksPage}
-            myDocksPageCount={props.myDocksPageCount}
-            myDocksTotal={props.myDocksTotal}
-            myStarredDocks={props.myStarredDocks}
-            myStarsLoading={props.myStarsLoading}
-            nickname={props.nickname}
-            profileSaving={props.profileSaving}
-            onBack={props.onBack}
-            onOpenDetail={props.onOpenDetail}
-            onSaveNickname={props.onSaveNickname}
-            onSetMyDocksPage={props.onSetMyDocksPage}
-            t={props.t}
-          />
-        ) : null}
+        <div className={`workspace-panel-stack ${activeDetailLayer ? "detail-active" : ""}`} onWheelCapture={handlePanelWheel}>
+          {showExploreSurface ? <ExplorePanel {...props} loading={props.catalogLoading} /> : null}
+          {activeDetailLayer ? <div className="workspace-detail-layer workspace-detail-layer-enter">{renderDetailLayer(activeDetailLayer)}</div> : null}
+          {exitingDetail ? (
+            <div aria-hidden="true" className="workspace-detail-layer workspace-detail-layer-exit">
+              {renderDetailLayer(exitingDetail)}
+            </div>
+          ) : null}
+          {props.dockView === "installed" ? <InstalledPanel {...props} loading={props.installedLoading} /> : null}
+          {props.dockView === "logs" ? <LogsPanel activeProject={props.activeProject} logs={props.logs} t={props.t} /> : null}
+          {props.dockView === "account" ? (
+            <AccountPanel
+              accountAvatarUrl={props.accountAvatarUrl}
+              accountDisplayName={props.accountDisplayName}
+              accountEmail={props.accountEmail}
+              accountOfficial={props.accountOfficial}
+              lang={props.lang}
+              myDocks={props.myDocks}
+              myDocksCounts={props.myDocksCounts}
+              myDocksLoading={props.myDocksLoading}
+              myDocksPage={props.myDocksPage}
+              myDocksPageCount={props.myDocksPageCount}
+              myDocksTotal={props.myDocksTotal}
+              myStarredDocks={props.myStarredDocks}
+              myStarsLoading={props.myStarsLoading}
+              nickname={props.nickname}
+              profileSaving={props.profileSaving}
+              onBack={props.onBack}
+              onOpenDetail={props.onOpenDetail}
+              onSaveNickname={props.onSaveNickname}
+              onSetMyDocksPage={props.onSetMyDocksPage}
+              t={props.t}
+            />
+          ) : null}
+        </div>
       </div>
     </section>
   );
+}
+
+function isMacRuntime() {
+  if (typeof navigator === "undefined") return false;
+  return `${navigator.platform} ${navigator.userAgent}`.toLowerCase().includes("mac");
+}
+
+function normalizeWheelDelta(delta: number, deltaMode: number) {
+  if (deltaMode === 1) return delta * 16;
+  if (deltaMode === 2 && typeof window !== "undefined") return delta * window.innerWidth;
+  return delta;
+}
+
+function canScrollableAncestorConsumeHorizontalWheel(target: EventTarget, boundary: HTMLElement, deltaX: number) {
+  if (!(target instanceof Element)) return false;
+
+  let element: Element | null = target;
+  while (element && element !== boundary) {
+    if (element instanceof HTMLElement && isHorizontallyScrollable(element)) {
+      if (deltaX < 0 && element.scrollLeft > 1) return true;
+      if (deltaX > 0 && element.scrollLeft < element.scrollWidth - element.clientWidth - 1) return true;
+    }
+    element = element.parentElement;
+  }
+  return false;
+}
+
+function isHorizontallyScrollable(element: HTMLElement) {
+  const style = window.getComputedStyle(element);
+  const overflowX = style.overflowX;
+  if (overflowX !== "auto" && overflowX !== "scroll") return false;
+  return element.scrollWidth > element.clientWidth + 1;
 }

@@ -169,7 +169,10 @@ const appTextSelectionEnabled =
 const dockNavigationUsesBrowserHistory =
   app.includes('import { useDockNavigationHistory } from "./use-dock-navigation-history"') &&
   app.includes("useDockNavigationHistory({") &&
-  app.includes('onDetailBack={() => goBack(() => setMainView("list"))}') &&
+  app.includes("const { replaceNextSnapshot } = useDockNavigationHistory({") &&
+  app.includes("function backToExploreRoot()") &&
+  app.includes("replaceNextSnapshot();") &&
+  app.includes("onDetailBack={backToExploreRoot}") &&
   app.includes('onBack={() => setMainView("list")}') &&
   workspaceView.includes("onDetailBack: () => void;") &&
   workspaceView.includes("onBack={props.onDetailBack}") &&
@@ -184,10 +187,30 @@ const wheelBackGestureRemoved =
   !dockPanels.includes("isMacBackSwipe") &&
   !dockPanels.includes("MAC_BACK_SWIPE") &&
   !dockPanels.includes("deltaX");
-const macosNativeNavigationGesturesEnabled =
-  rust.includes("enable_native_navigation_gestures(app.handle())") &&
-  rust.includes("setAllowsBackForwardNavigationGestures(true)") &&
-  cargoToml.includes("objc2-web-kit");
+const dockDetailUsesLayeredBackTransition =
+  workspaceView.includes("workspace-panel-stack") &&
+  workspaceView.includes("workspace-detail-layer workspace-detail-layer-enter") &&
+  workspaceView.includes("workspace-detail-layer workspace-detail-layer-exit") &&
+  workspaceView.includes("exitingDetail") &&
+  styles.includes(".workspace-panel-stack.detail-active > .explore-panel") &&
+  styles.includes("@keyframes detail-slide-out") &&
+  styles.includes("translateX(100%)");
+const dockDetailUsesInternalBackGesture =
+  workspaceView.includes("onWheelCapture={handlePanelWheel}") &&
+  workspaceView.includes("BACK_GESTURE_THRESHOLD") &&
+  workspaceView.includes("props.onDetailBack()") &&
+  workspaceView.includes("isMacRuntime()") &&
+  workspaceView.includes("canScrollableAncestorConsumeHorizontalWheel");
+const macosNativeNavigationGesturesDisabled =
+  !rust.includes("enable_native_navigation_gestures") &&
+  !rust.includes("setAllowsBackForwardNavigationGestures(true)") &&
+  !cargoToml.includes("objc2-web-kit");
+const explorerRestoresLastDetailState =
+  navigationController.includes("lastExploreViewRef") &&
+  navigationController.includes('options.dockView === "list" || options.dockView === "detail"') &&
+  navigationController.includes('lastExploreViewRef.current === "detail"') &&
+  navigationController.includes("function openExploreRoot()") &&
+  app.includes("onDetailBack={backToExploreRoot}");
 const registryTauriRequestsHaveTimeout =
   registryClient.includes("function withRegistryRequestTimeout") &&
   registryClient.includes("REGISTRY_REQUEST_TIMEOUT_MS") &&
@@ -610,8 +633,17 @@ const failures = [
   ...(!wheelBackGestureRemoved
     ? ["desktop dock detail must not use wheel delta as a back gesture fallback"]
     : []),
-  ...(!macosNativeNavigationGesturesEnabled
-    ? ["macOS webview must enable native back/forward navigation gestures"]
+  ...(!dockDetailUsesLayeredBackTransition
+    ? ["desktop dock detail back navigation must slide only the detail layer so the explore surface is revealed"]
+    : []),
+  ...(!dockDetailUsesInternalBackGesture
+    ? ["desktop dock detail must handle macOS back gestures inside the app layer without native webview page sliding"]
+    : []),
+  ...(!macosNativeNavigationGesturesDisabled
+    ? ["macOS webview native back/forward gestures must stay disabled so the whole app viewport does not slide"]
+    : []),
+  ...(!explorerRestoresLastDetailState
+    ? ["Explorer tab must restore the last detail subview after visiting Installed or Logs, while detail back can force the Explorer root"]
     : []),
   ...(!registryTauriRequestsHaveTimeout
     ? ["Tauri registry requests must time out so catalog/detail/logo loading cannot spin forever"]

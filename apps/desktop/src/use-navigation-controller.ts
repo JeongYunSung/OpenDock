@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { Dispatch, SetStateAction } from "react";
+import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import type { Dock, DockView, Project } from "./data";
 import type { OpenMenu } from "./titlebar";
 import type { ShortcutCommandId } from "./shortcuts";
@@ -38,6 +38,14 @@ interface NavigationControllerOptions {
 }
 
 export function useNavigationController(options: NavigationControllerOptions) {
+  const lastExploreViewRef = useRef<DockView>("list");
+
+  useEffect(() => {
+    if (options.dockView === "list" || options.dockView === "detail") {
+      lastExploreViewRef.current = options.dockView;
+    }
+  }, [options.dockView]);
+
   function openDockDetail(dockId: string) {
     options.setDetailId(dockId);
     options.setDetailTab("readme");
@@ -46,12 +54,25 @@ export function useNavigationController(options: NavigationControllerOptions) {
   }
 
   function setMainView(view: DockView) {
-    options.setDockView(view);
+    const nextView =
+      view === "list" && options.dockView !== "detail" && lastExploreViewRef.current === "detail" && options.detailKey
+        ? "detail"
+        : view;
+    options.setDockView(nextView);
+    if (nextView === "list") options.setDetailTab("readme");
+    options.setOpenMenu("");
+    options.setCommandPaletteOpen(false);
+    options.setProjectSwitcherOpen(false);
+    if (nextView === "logs") void options.refreshProjectLogs(options.activeProject);
+  }
+
+  function openExploreRoot() {
+    lastExploreViewRef.current = "list";
+    options.setDockView("list");
     options.setDetailTab("readme");
     options.setOpenMenu("");
     options.setCommandPaletteOpen(false);
     options.setProjectSwitcherOpen(false);
-    if (view === "logs") void options.refreshProjectLogs(options.activeProject);
   }
 
   function selectProject(projectId: string) {
@@ -235,6 +256,7 @@ export function useNavigationController(options: NavigationControllerOptions) {
   return {
     handleNativeMenu,
     openDockDetail,
+    openExploreRoot,
     runAppMenuCommand,
     runShortcutCommand,
     selectProject,
