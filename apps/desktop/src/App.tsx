@@ -31,6 +31,7 @@ import { useCatalogController, useDockDetailController } from "./use-catalog-con
 import { useCommandTaskController } from "./use-command-task-controller";
 import { useDesktopStateSync } from "./use-desktop-state-sync";
 import { useDockCommandController } from "./use-dock-command-controller";
+import { useDockNavigationHistory } from "./use-dock-navigation-history";
 import { useInstalledDockMetadata } from "./use-installed-dock-metadata";
 import { useDockWorkspaceModel } from "./use-dock-workspace-model";
 import { useNativeEventBridge } from "./use-native-event-bridge";
@@ -355,6 +356,20 @@ export function App() {
     setProjectSwitcherOpen,
     updateDocks,
   });
+  const { goBack } = useDockNavigationHistory({
+    activeProjectId,
+    detailId,
+    detailTab,
+    detailVersion,
+    dockView,
+    enabled: appStateLoaded,
+    projects,
+    setActiveProjectId,
+    setDetailId,
+    setDetailTab,
+    setDetailVersion,
+    setDockView,
+  });
 
   useNativeEventBridge({
     appendLog,
@@ -618,6 +633,7 @@ export function App() {
             onBack={() => setMainView("list")}
             onCreate={createBlankProject}
             onDeleteDock={deleteDock}
+            onDetailBack={() => goBack(() => setMainView("list"))}
             onInstallDock={installDock}
             onOpenAdd={() => {
               setProjectAddOpen(true);

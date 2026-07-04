@@ -1,5 +1,4 @@
 import { ArrowLeft, ChevronDown, ChevronLeft, Download, Search } from "lucide-react";
-import { useEffect, useRef, type WheelEvent as ReactWheelEvent } from "react";
 import { isTaskActive, type CommandTask } from "./command-task";
 import {
   dockFullId,
@@ -22,9 +21,6 @@ import {
 } from "./display";
 import { Pagination, SkeletonBlock, SkeletonSpinner, StarButton } from "./desktop-ui";
 import { ReadmePanel } from "./readme-panel";
-
-const MAC_BACK_SWIPE_THRESHOLD = 72;
-const MAC_BACK_SWIPE_DOMINANCE = 1.25;
 
 export function ExplorePanel(props: {
   catalogPage: number;
@@ -328,27 +324,14 @@ export function DetailPanel(props: {
   versionPageCount: number;
 }) {
   const fullId = dockFullId(props.detail);
-  const macBackSwipeHandledRef = useRef(false);
   const installed = Boolean(props.installedDocks[fullId] || props.installedDocks[props.detail.id]);
   const owner = props.detail.owner ?? dockOwnerFromId(fullId);
   const publisher = dockPublisherLabel(props.detail);
   const publisherOfficial = dockPublisherOfficial(props.detail);
   const taskActive = isTaskActive(props.commandTask);
 
-  useEffect(() => {
-    macBackSwipeHandledRef.current = false;
-  }, [fullId]);
-
-  const handleWheelBack = (event: ReactWheelEvent<HTMLDivElement>) => {
-    if (macBackSwipeHandledRef.current || !isMacBackSwipe(event)) return;
-    event.preventDefault();
-    event.stopPropagation();
-    macBackSwipeHandledRef.current = true;
-    props.onBack();
-  };
-
   return (
-    <div className="panel detail-panel" onWheel={handleWheelBack}>
+    <div className="panel detail-panel">
       <div className="detail-sticky-header">
         <div className="detail-hero">
           <button aria-label={props.t.back} className="detail-back-button" onClick={props.onBack} title={props.t.back} type="button">
@@ -421,49 +404,6 @@ export function DetailPanel(props: {
       )}
     </div>
   );
-}
-
-function isMacBackSwipe(event: ReactWheelEvent<HTMLElement>) {
-  if (!isMacRuntime() || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return false;
-
-  const deltaX = normalizeWheelDelta(event.deltaX, event.deltaMode);
-  const deltaY = normalizeWheelDelta(event.deltaY, event.deltaMode);
-  const horizontalEnough = Math.abs(deltaX) >= MAC_BACK_SWIPE_THRESHOLD;
-  const mostlyHorizontal = Math.abs(deltaX) > Math.abs(deltaY) * MAC_BACK_SWIPE_DOMINANCE;
-  if (!horizontalEnough || !mostlyHorizontal || deltaX >= 0) return false;
-
-  return !canScrollableAncestorConsumeHorizontalWheel(event.target, event.currentTarget, deltaX);
-}
-
-function isMacRuntime() {
-  if (typeof navigator === "undefined") return false;
-  return `${navigator.platform} ${navigator.userAgent}`.toLowerCase().includes("mac");
-}
-
-function normalizeWheelDelta(delta: number, deltaMode: number) {
-  if (deltaMode === 1) return delta * 16;
-  if (deltaMode === 2 && typeof window !== "undefined") return delta * window.innerWidth;
-  return delta;
-}
-
-function canScrollableAncestorConsumeHorizontalWheel(target: EventTarget, boundary: HTMLElement, deltaX: number) {
-  if (!(target instanceof Element) || typeof window === "undefined") return false;
-
-  let element: Element | null = target;
-  while (element && element !== boundary) {
-    if (element instanceof HTMLElement && isHorizontallyScrollable(element)) {
-      if (deltaX < 0 && element.scrollLeft > 1) return true;
-      if (deltaX > 0 && element.scrollLeft < element.scrollWidth - element.clientWidth - 1) return true;
-    }
-    element = element.parentElement;
-  }
-
-  return false;
-}
-
-function isHorizontallyScrollable(element: HTMLElement) {
-  const overflowX = window.getComputedStyle(element).overflowX;
-  return /auto|scroll|overlay/.test(overflowX) && element.scrollWidth > element.clientWidth + 1;
 }
 
 function VersionsPanel(props: {

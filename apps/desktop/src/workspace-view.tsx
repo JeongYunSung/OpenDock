@@ -58,6 +58,7 @@ export function Workspace(props: {
   onBack: () => void;
   onCreate: () => void;
   onDeleteDock: (dock: Dock) => void;
+  onDetailBack: () => void;
   onInstallDock: (dock: Dock) => void;
   onOpenAdd: () => void;
   onOpenDetail: (dockId: string) => void;
@@ -138,7 +139,7 @@ export function Workspace(props: {
 
         {props.dockView === "list" ? <ExplorePanel {...props} loading={props.catalogLoading} /> : null}
         {props.dockView === "detail" ? (
-          props.detailLoading ? <DetailLoadingState label={props.t.loadingDockDetail} /> : props.detail ? <DetailPanel {...props} detail={props.detail} /> : <CatalogEmptyState t={props.t} />
+          props.detailLoading ? <DetailLoadingState label={props.t.loadingDockDetail} /> : props.detail ? <DetailPanel {...props} detail={props.detail} onBack={props.onDetailBack} /> : <CatalogEmptyState t={props.t} />
         ) : null}
         {props.dockView === "installed" ? <InstalledPanel {...props} loading={props.installedLoading} /> : null}
         {props.dockView === "logs" ? <LogsPanel activeProject={props.activeProject} logs={props.logs} t={props.t} /> : null}

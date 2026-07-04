@@ -34,6 +34,7 @@ const dockData = readSrc("dock-data.ts");
 const desktopUi = readSrc("desktop-ui.tsx");
 const display = readSrc("display.tsx");
 const dockPanels = readSrc("dock-panels.tsx");
+const dockNavigationHistory = readSrc("use-dock-navigation-history.ts");
 const dockWorkspaceModel = readSrc("dock-workspace-model.ts");
 const dockWorkspaceHook = readSrc("use-dock-workspace-model.ts");
 const installedDockMetadata = readSrc("use-installed-dock-metadata.ts");
@@ -165,6 +166,28 @@ const appTextSelectionEnabled =
   styles.includes(".log-lines") &&
   styles.includes("button,") &&
   styles.includes("user-select: none");
+const dockNavigationUsesBrowserHistory =
+  app.includes('import { useDockNavigationHistory } from "./use-dock-navigation-history"') &&
+  app.includes("useDockNavigationHistory({") &&
+  app.includes('onDetailBack={() => goBack(() => setMainView("list"))}') &&
+  app.includes('onBack={() => setMainView("list")}') &&
+  workspaceView.includes("onDetailBack: () => void;") &&
+  workspaceView.includes("onBack={props.onDetailBack}") &&
+  dockNavigationHistory.includes("window.history.pushState") &&
+  dockNavigationHistory.includes("window.history.replaceState") &&
+  dockNavigationHistory.includes('window.addEventListener("popstate"') &&
+  dockNavigationHistory.includes('__opendockNavigation: "v1"') &&
+  dockNavigationHistory.includes("setDockView(snapshot.view)") &&
+  dockNavigationHistory.includes("setDetailTab(snapshot.detailTab)");
+const wheelBackGestureRemoved =
+  !dockPanels.includes("onWheel={handleWheelBack}") &&
+  !dockPanels.includes("isMacBackSwipe") &&
+  !dockPanels.includes("MAC_BACK_SWIPE") &&
+  !dockPanels.includes("deltaX");
+const macosNativeNavigationGesturesEnabled =
+  rust.includes("enable_native_navigation_gestures(app.handle())") &&
+  rust.includes("setAllowsBackForwardNavigationGestures(true)") &&
+  cargoToml.includes("objc2-web-kit");
 const registryTauriRequestsHaveTimeout =
   registryClient.includes("function withRegistryRequestTimeout") &&
   registryClient.includes("REGISTRY_REQUEST_TIMEOUT_MS") &&
@@ -580,6 +603,15 @@ const failures = [
     : []),
   ...(!appTextSelectionEnabled
     ? ["desktop app text should be selectable while interactive controls remain non-selectable"]
+    : []),
+  ...(!dockNavigationUsesBrowserHistory
+    ? ["desktop dock navigation must use browser history for app views and detail state"]
+    : []),
+  ...(!wheelBackGestureRemoved
+    ? ["desktop dock detail must not use wheel delta as a back gesture fallback"]
+    : []),
+  ...(!macosNativeNavigationGesturesEnabled
+    ? ["macOS webview must enable native back/forward navigation gestures"]
     : []),
   ...(!registryTauriRequestsHaveTimeout
     ? ["Tauri registry requests must time out so catalog/detail/logo loading cannot spin forever"]
