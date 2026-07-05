@@ -43,12 +43,11 @@ jobs:
 
       - name: Install macOS native optional bindings
         if: runner.os == 'macOS'
-        working-directory: apps/desktop
         run: |
           set -euo pipefail
           arch="$(node -p "process.arch")"
-          rolldown_version="$(node -p "require('rolldown/package.json').version")"
-          tauri_cli_version="$(node -p "require('@tauri-apps/cli/package.json').version")"
+          rolldown_version="$(node -e "const fs=require('node:fs'); const lock=fs.readFileSync('bun.lock','utf8'); const match=lock.match(/\"rolldown\": \\[\"rolldown@([^\"]+)/); if (!match) process.exit(1); console.log(match[1]);")"
+          tauri_cli_version="$(node -e "const fs=require('node:fs'); const lock=fs.readFileSync('bun.lock','utf8'); const match=lock.match(/\"@tauri-apps\\/cli\": \\[\"@tauri-apps\\/cli@([^\"]+)/); if (!match) process.exit(1); console.log(match[1]);")"
           npm install --no-save \
             "@rolldown/binding-darwin-${arch}@${rolldown_version}" \
             "@tauri-apps/cli-darwin-${arch}@${tauri_cli_version}"
