@@ -155,11 +155,11 @@ export function opendockCommandPath(
   platform: NodeJS.Platform = process.platform,
   env: NodeJS.ProcessEnv = process.env,
 ): string | undefined {
+  const existingEntries = pathValue ? pathValue.split(pathDelimiter(platform)) : [];
   if (platform === "win32") {
-    return pathValue;
+    return uniquePathEntries([...existingEntries, ...windowsSystemPathEntries(env)]).join(";");
   }
 
-  const existingEntries = pathValue ? pathValue.split(delimiter) : [];
   if (platform === "darwin") {
     return uniquePathEntries([
       ...macosUserPathEntries(existingEntries),
@@ -190,6 +190,25 @@ const macosCommonToolPathEntries = [
 ];
 
 const macosSystemPathEntries = ["/usr/bin", "/bin", "/usr/sbin", "/sbin"];
+
+function pathDelimiter(platform: NodeJS.Platform): string {
+  return platform === "win32" ? ";" : delimiter;
+}
+
+function windowsSystemPathEntries(env: NodeJS.ProcessEnv): string[] {
+  const windowsRoot = env.SystemRoot || env.WINDIR || "C:\\Windows";
+  return [
+    windowsPath(windowsRoot, "System32"),
+    windowsPath(windowsRoot, "System32", "WindowsPowerShell", "v1.0"),
+    windowsPath(windowsRoot, "SysWOW64"),
+    ...(env.ProgramFiles ? [windowsPath(env.ProgramFiles, "PowerShell", "7")] : []),
+    ...(env["ProgramFiles(x86)"] ? [windowsPath(env["ProgramFiles(x86)"], "PowerShell", "7")] : []),
+  ];
+}
+
+function windowsPath(root: string, ...parts: string[]): string {
+  return [root.replace(/[\\/]+$/, ""), ...parts].join("\\");
+}
 
 function macosUserPathEntries(entries: string[]): string[] {
   const managed = new Set([...macosCommonToolPathEntries, ...macosSystemPathEntries]);

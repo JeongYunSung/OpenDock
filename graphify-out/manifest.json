@@ -1,7 +1,7 @@
 {
   "apps/desktop/package.json": {
-    "mtime": 1783165890.8385973,
-    "ast_hash": "5c40fab7b0f324ae1584d15c118e0935",
+    "mtime": 1783174138.4700656,
+    "ast_hash": "6f9aed2c9759f370bd61bdb9e8b0f89a",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/browser-test-runtime.mjs": {
@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/tauri.conf.json": {
-    "mtime": 1783165890.8387787,
-    "ast_hash": "5281344f73ef05225d579e0b2bf45ed5",
+    "mtime": 1783174138.470501,
+    "ast_hash": "abad1f56f49c250ee3f8793132763b3b",
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "packages/cli/package.json": {
-    "mtime": 1783165890.8382487,
-    "ast_hash": "54b8b288fac60c40d0a9a66fa766d821",
+    "mtime": 1783174138.4693286,
+    "ast_hash": "d7d3381372050f2998ee53dbb7a260eb",
     "semantic_hash": ""
   },
   "packages/cli/scripts/build.ts": {
@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/constants.ts": {
-    "mtime": 1783165890.8384225,
-    "ast_hash": "d58d0220848849261f7443ada32ba64a",
+    "mtime": 1783174138.469708,
+    "ast_hash": "c1fe8a58300aff0996e85df4fd0d4847",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-install-report.ts": {
@@ -565,8 +565,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/command-runner.ts": {
-    "mtime": 1782985006.0140471,
-    "ast_hash": "f07d851a327c727b093b0ee2738817b3",
+    "mtime": 1783240027.956258,
+    "ast_hash": "c7a2a5c79ec4d65eafcabff50dfe1d55",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/progress.ts": {
@@ -675,8 +675,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/platform-regression.test.ts": {
-    "mtime": 1782985187.4749165,
-    "ast_hash": "71d05c9843a2d72ee75c682e695f84d0",
+    "mtime": 1783240184.8670018,
+    "ast_hash": "afdf6c9a1bf261c1c5e15d78da8d1d68",
     "semantic_hash": ""
   },
   "packages/cli/tests/release-signature-helper.ts": {
@@ -725,8 +725,8 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1783165890.8391216,
-    "ast_hash": "65536ba791695f9fe51f1e88ba132c33",
+    "mtime": 1783174138.4711819,
+    "ast_hash": "d42646521dd52433b937a9153928b943",
     "semantic_hash": ""
   },
   "README.md": {
@@ -2630,8 +2630,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-installer.ts": {
-    "mtime": 1783148975.1195345,
-    "ast_hash": "02a67f7c6c2e3260dfc7e2903f1c8233",
+    "mtime": 1783240166.7074847,
+    "ast_hash": "676ead406d974f83c4c2cbe780852d3a",
     "semantic_hash": ""
   },
   "packages/cli/tests/deploy-manifest-hardening.test.ts": {

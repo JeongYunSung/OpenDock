@@ -432,6 +432,23 @@ describe("platform regression coverage", () => {
     ]);
   });
 
+  it("adds Windows system PowerShell locations for GUI-launched app commands", () => {
+    const commandPath = opendockCommandPath("C:\\Tools;C:\\Windows\\System32", "win32", {
+      ProgramFiles: "C:\\Program Files",
+      "ProgramFiles(x86)": "C:\\Program Files (x86)",
+      SystemRoot: "C:\\Windows",
+    });
+
+    expect(commandPath?.split(";")).toEqual([
+      "C:\\Tools",
+      "C:\\Windows\\System32",
+      "C:\\Windows\\System32\\WindowsPowerShell\\v1.0",
+      "C:\\Windows\\SysWOW64",
+      "C:\\Program Files\\PowerShell\\7",
+      "C:\\Program Files (x86)\\PowerShell\\7",
+    ]);
+  });
+
   it("records the selected platform in lock state and can reuse it for an update", async () => {
     const docks = tempDir();
     const project = tempDir();

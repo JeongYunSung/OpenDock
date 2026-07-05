@@ -590,7 +590,7 @@ function extractArchive(
   compression: NodePlatformArchive["compression"],
 ): void {
   if (compression === "zip") {
-    runChecked("powershell", [
+    runChecked(resolvePowerShellCommand(), [
       "-NoProfile",
       "-ExecutionPolicy",
       "Bypass",
@@ -708,6 +708,10 @@ function resolveDownloader(): string {
   return curl;
 }
 
+function resolvePowerShellCommand(): string {
+  return resolveCommandPath("powershell", process.cwd()) ?? "powershell";
+}
+
 function resolveCommandPath(command: string, projectDir: string): string | undefined {
   const pathValue = opendockCommandPath(process.env.PATH) ?? "";
   const ignoredRuntimeRoot = resolve(sharedRuntimeRoot());
@@ -745,9 +749,14 @@ function runChecked(
   args: string[],
   options: { env?: NodeJS.ProcessEnv } = {},
 ): { stderr: string; stdout: string } {
+  const env = { ...process.env, ...(options.env ?? {}) };
+  const pathValue = opendockCommandPath(env.PATH);
+  if (pathValue) {
+    env.PATH = pathValue;
+  }
   const result = spawnSync(command, args, {
     encoding: "utf8",
-    env: { ...process.env, ...(options.env ?? {}) },
+    env,
     stdio: "pipe",
   });
   if (result.error) {
