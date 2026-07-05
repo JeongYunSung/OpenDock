@@ -51,10 +51,6 @@ jobs:
             runs-on:
               - self-hosted
               - siba
-          - name: macos-15
-            runs-on: macos-15
-          - name: windows-latest
-            runs-on: windows-latest
 
     steps:
       - name: Checkout

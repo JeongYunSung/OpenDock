@@ -11,17 +11,19 @@ permissions:
 
 jobs:
   build:
-    name: Build desktop app (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+    name: Build desktop app (${{ matrix.name }})
+    runs-on: ${{ matrix.runs-on }}
     concurrency:
       group: desktop-${{ github.ref }}-${{ matrix.os }}
       cancel-in-progress: false
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - macos-15
-          - windows-latest
+        include:
+          - name: siba
+            runs-on:
+              - self-hosted
+              - siba
 
     steps:
       - name: Checkout
