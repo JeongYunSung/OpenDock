@@ -2630,8 +2630,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-installer.ts": {
-    "mtime": 1783250919.9724414,
-    "ast_hash": "b4b0f9bc779df060c9c09c4920a1bd79",
+    "mtime": 1783251006.5580683,
+    "ast_hash": "a2aee054ef8586f37a7c176cb62019ab",
     "semantic_hash": ""
   },
   "packages/cli/tests/deploy-manifest-hardening.test.ts": {
@@ -2650,8 +2650,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/runtime-platform-matrix.test.ts": {
-    "mtime": 1783250634.226535,
-    "ast_hash": "1afdf9860ececea4e3ee03cd79a96bc0",
+    "mtime": 1783251303.5395353,
+    "ast_hash": "062377b731d52e6cb5c7314c94bb6b1f",
     "semantic_hash": ""
   },
   "packages/cli/tests/task-permission-policy.test.ts": {
@@ -2660,8 +2660,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-ux-status.test.ts": {
-    "mtime": 1782970046.3350937,
-    "ast_hash": "1de8bc21090e90d676d6b247d27a1f0e",
+    "mtime": 1783251259.2108536,
+    "ast_hash": "e8bbab76ea2032203124651db0bf7727",
     "semantic_hash": ""
   },
   "packages/cli/tests/real-examples-matrix.test.ts": {
@@ -2680,8 +2680,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-real-user-edge-cases.test.ts": {
-    "mtime": 1783148975.1202598,
-    "ast_hash": "38dc2b82805a6d46f014c213ae907ba5",
+    "mtime": 1783251266.5504434,
+    "ast_hash": "934ae21f3c1ed55d037649c206cc17ae",
     "semantic_hash": ""
   },
   "packages/cli/tests/command-policy-attack-cases.test.ts": {

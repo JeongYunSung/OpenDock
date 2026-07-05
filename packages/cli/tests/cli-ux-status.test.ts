@@ -309,11 +309,21 @@ function runCli(
   options: RunOptions = {},
 ): SpawnSyncReturns<string> {
   const env = cliEnv(fixture, options);
-  return spawnSync("bun", ["--preload", fixture.preload, cliEntrypointPath, ...args], {
+  const result = spawnSync("bun", ["--preload", fixture.preload, cliEntrypointPath, ...args], {
     cwd: fixture.project,
     encoding: "utf8",
     env,
   });
+  return { ...result, stderr: stripBunRuntimeWarning(result.stderr) };
+}
+
+function stripBunRuntimeWarning(stderr: string): string {
+  return stderr
+    .replace(
+      /warn: CPU lacks AVX support, strange crashes may occur\. Reinstall Bun or use \*-baseline build:\n\s+https:\/\/github\.com\/oven-sh\/bun\/releases\/download\/bun-v[^\n]+\n\n?/gu,
+      "",
+    )
+    .trimStart();
 }
 
 function cliEnv(fixture: Fixture, options: RunOptions): NodeJS.ProcessEnv {

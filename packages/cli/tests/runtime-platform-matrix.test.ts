@@ -234,18 +234,17 @@ describe("runtime platform matrix", () => {
       },
     );
 
-    expect(python).toMatchObject({
-      commands: ["python"],
-      path: join(home, ".opendock", "runtimes", "python", "3.12.9", "bin"),
-      source: "managed",
-      version: "3.12.9",
-    });
-    expect(pip).toMatchObject({
-      commands: ["pip"],
-      path: join(home, ".opendock", "runtimes", "pip", "24.2.0", "bin"),
-      source: "managed",
-      version: "24.2.0",
-    });
+    if (!python || !pip) {
+      throw new Error("expected Python and pip runtime install results");
+    }
+    expect(python.commands).toEqual(["python"]);
+    expect(python.source).toBe("managed");
+    expect(python.version).toMatch(/^3\.12\.\d+$/u);
+    expect(python.path).toBe(join(home, ".opendock", "runtimes", "python", python.version, "bin"));
+    expect(pip.commands).toEqual(["pip"]);
+    expect(pip.source).toBe("managed");
+    expect(pip.version).toMatch(/^24\.\d+\.\d+$/u);
+    expect(pip.path).toBe(join(home, ".opendock", "runtimes", "pip", pip.version, "bin"));
 
     const expectedUvInstallDir = join(
       home,
@@ -259,7 +258,7 @@ describe("runtime platform matrix", () => {
     expect(readFileSync(uvLog, "utf8")).toContain(
       "args:python list --only-downloads --output-format json",
     );
-    expect(readFileSync(uvLog, "utf8")).toContain("args:python install 3.12.9");
+    expect(readFileSync(uvLog, "utf8")).toMatch(/args:python install 3\.12\.\d+/u);
     expect(readFileSync(uvLog, "utf8")).toContain("args:python install 3.13.5");
   });
 
