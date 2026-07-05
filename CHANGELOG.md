@@ -7,6 +7,16 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.2.8 - 2026-07-05
+
+### CLI
+
+- Invoke Windows command shims safely for dependency and tool execution.
+
+### CI
+
+- Run common release and quality jobs on the `siba` self-hosted runner.
+
 ## 0.2.7 - 2026-07-05
 
 ### CLI

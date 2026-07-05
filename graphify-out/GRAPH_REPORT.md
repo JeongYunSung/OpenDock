@@ -1,16 +1,16 @@
 # Graph Report - opendock  (2026-07-05)
 
 ## Corpus Check
-- 464 files · ~234,460 words
+- 464 files · ~234,491 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4736 nodes · 7339 edges · 690 communities (389 shown, 301 thin omitted)
+- 4739 nodes · 7344 edges · 687 communities (386 shown, 301 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 66 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `72f78d40`
+- Built from commit: `c0940258`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -444,7 +444,6 @@
 - [[_COMMUNITY_Community 431|Community 431]]
 - [[_COMMUNITY_Community 432|Community 432]]
 - [[_COMMUNITY_Community 433|Community 433]]
-- [[_COMMUNITY_Community 434|Community 434]]
 - [[_COMMUNITY_Community 435|Community 435]]
 - [[_COMMUNITY_Community 436|Community 436]]
 - [[_COMMUNITY_Community 437|Community 437]]
@@ -452,14 +451,12 @@
 - [[_COMMUNITY_Community 439|Community 439]]
 - [[_COMMUNITY_Community 440|Community 440]]
 - [[_COMMUNITY_Community 441|Community 441]]
-- [[_COMMUNITY_Community 442|Community 442]]
 - [[_COMMUNITY_Community 443|Community 443]]
 - [[_COMMUNITY_Community 444|Community 444]]
 - [[_COMMUNITY_Community 445|Community 445]]
 - [[_COMMUNITY_Community 446|Community 446]]
 - [[_COMMUNITY_Community 447|Community 447]]
 - [[_COMMUNITY_Community 448|Community 448]]
-- [[_COMMUNITY_Community 449|Community 449]]
 - [[_COMMUNITY_Community 462|Community 462]]
 - [[_COMMUNITY_Community 464|Community 464]]
 - [[_COMMUNITY_Community 465|Community 465]]
@@ -703,7 +700,7 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `OpenDockPlatform` - 76 edges
-2. `Changelog` - 70 edges
+2. `Changelog` - 71 edges
 3. `String` - 33 edges
 4. `parseManifestFile()` - 32 edges
 5. `OpenDock 가이드` - 31 edges
@@ -734,11 +731,11 @@
 - 1-file cycle: `apps/desktop/src-tauri/src/project_state.rs -> apps/desktop/src-tauri/src/project_state.rs`
 - 2-file cycle: `apps/desktop/src/data.ts -> apps/desktop/src/dock-data.ts -> apps/desktop/src/data.ts`
 
-## Communities (690 total, 301 thin omitted)
+## Communities (687 total, 301 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
-Nodes (57): FileSpec, AppliedFileRecord, InstalledDependencyRecord, InstalledRuntimeRecord, InstalledToolRecord, LockState, lstatIfPresent(), ManagedMode (+49 more)
+Nodes (58): FileSpec, AppliedFileRecord, InstalledDependencyRecord, InstalledRuntimeRecord, InstalledToolRecord, LockState, lstatIfPresent(), ManagedMode (+50 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.02
@@ -757,12 +754,12 @@ Cohesion: 0.14
 Nodes (47): AppliedFile, AppHandle, Option, Result, String, Value, Vec, InstalledDock (+39 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.14
-Nodes (19): TaskStep, safeDockDirectoryName(), combinedOutput(), extractVersion(), failureMessage(), satisfiesVersion(), dockToolsDir(), projectCommandPathEntries() (+11 more)
+Cohesion: 0.22
+Nodes (13): DockManifest, TaskStep, combinedOutput(), extractVersion(), failureMessage(), satisfiesVersion(), RuntimeRecord, stepName() (+5 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.11
-Nodes (33): DockManifest, blockedCommandReason(), commonAllowedCommands, ensureAllowed(), isAllowedCommandShape(), isDefaultCommandProgram(), isExact(), isPermissionAllowed() (+25 more)
+Cohesion: 0.10
+Nodes (33): blockedShellTokens, commandSeparatorTokens, includesShellOperator(), blockedCommandReason(), commonAllowedCommands, ensureAllowed(), isAllowedCommandShape(), isDefaultCommandProgram() (+25 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.06
@@ -773,8 +770,8 @@ Cohesion: 0.07
 Nodes (47): accountStatsFor(), dockFromMyDock(), myDockReviewGroup, myDockStatus(), myDockStatusLabel(), primaryMyDockVersion(), AccountPanel(), isTaskActive() (+39 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.08
-Nodes (35): App(), AppNotice(), AppNoticeKind, AppNoticeOptions, AppNoticeState, ProductUpdateCheck, ProductUpdateState, ProjectFolder (+27 more)
+Cohesion: 0.07
+Nodes (40): App(), AppNotice(), AppNoticeKind, AppNoticeOptions, AppNoticeState, ProductUpdateCheck, ProductUpdateState, ProjectFolder (+32 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.10
@@ -825,8 +822,8 @@ Cohesion: 0.25
 Nodes (5): repoRoot, Workflow, WorkflowJob, workflowPath, WorkflowStep
 
 ### Community 22 - "Community 22"
-Cohesion: 0.11
-Nodes (27): InstallOptions, UninstallOptions, TaskPhase, isSupportedRuntimeName(), SupportedRuntimeName, supportedRuntimeNames, supportedRuntimeNameSet, DependencyContext (+19 more)
+Cohesion: 0.14
+Nodes (18): isSupportedRuntimeName(), SupportedRuntimeName, supportedRuntimeNames, supportedRuntimeNameSet, assertRuntimeWrapperWritable(), commandCandidates(), commandProgram(), ensureRealDirectory() (+10 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.12
@@ -837,24 +834,24 @@ Cohesion: 0.13
 Nodes (12): commandFailureMessage(), TEXT, LogsPanel(), markdownToBlocks(), parseReadmeMarkdown(), ReadmeBlock, ReadmePanel(), stripInlineMarkdown() (+4 more)
 
 ### Community 25 - "Community 25"
-Cohesion: 0.11
-Nodes (20): fileChangesFromSummary(), installedDockRecordFor(), InstallReport, installReportFor(), UninstallReport, uninstallReportFor(), DockInstaller, DockResolver (+12 more)
+Cohesion: 0.14
+Nodes (23): fileChangesFromSummary(), installedDockRecordFor(), InstallReport, installReportFor(), UninstallReport, uninstallReportFor(), DockInstaller, DockResolver (+15 more)
 
 ### Community 26 - "Community 26"
-Cohesion: 0.07
-Nodes (28): 0.1.0 - 2026-06-07, 0.1.11 - 2026-06-12, 0.1.12 - 2026-06-12, 0.1.19 - 2026-06-15, 0.1.1 - 2026-06-12, 0.1.29 - 2026-06-16, 0.1.2 - 2026-06-12, 0.1.33 - 2026-06-17 (+20 more)
+Cohesion: 0.06
+Nodes (33): 0.1.0 - 2026-06-07, 0.1.11 - 2026-06-12, 0.1.12 - 2026-06-12, 0.1.25 - 2026-06-15, 0.1.27 - 2026-06-16, 0.1.28 - 2026-06-16, 0.1.29 - 2026-06-16, 0.1.33 - 2026-06-17 (+25 more)
 
 ### Community 27 - "Community 27"
-Cohesion: 0.15
-Nodes (25): installedDockListCommandResult(), resolveCliPlatform(), formatCheckPlatform(), formatCurrentCheckLine(), formatFailedCheckLine(), formatInstalledDockLine(), formatManagedFileCount(), formatUpdateCheckLine() (+17 more)
+Cohesion: 0.16
+Nodes (24): installedDockListCommandResult(), resolveCliPlatform(), formatCheckPlatform(), formatCurrentCheckLine(), formatFailedCheckLine(), formatInstalledDockLine(), formatManagedFileCount(), formatUpdateCheckLine() (+16 more)
 
 ### Community 28 - "Community 28"
 Cohesion: 0.20
 Nodes (28): Option, PathBuf, Result, String, Value, Vec, Client, Method (+20 more)
 
 ### Community 29 - "Community 29"
-Cohesion: 0.13
-Nodes (20): replacementRuntime(), ensureRealDirectoryPath(), assertSafeCommandName(), assertShimWritable(), CommandShimOwner, createProjectCommandShim(), posixShim(), readShimOwner() (+12 more)
+Cohesion: 0.14
+Nodes (19): ensureRealDirectoryPath(), assertSafeCommandName(), assertShimWritable(), CommandShimOwner, createProjectCommandShim(), posixShim(), readShimOwner(), removeProjectCommandShim() (+11 more)
 
 ### Community 30 - "Community 30"
 Cohesion: 0.19
@@ -901,8 +898,8 @@ Cohesion: 0.11
 Nodes (18): Before You Write A Dock, Catalog Metadata, Checklist, Dependencies, Deploy, Dock Reference, Files, Minimal Example (+10 more)
 
 ### Community 41 - "Community 41"
-Cohesion: 0.10
-Nodes (21): commandEnvironment(), CommandResult, CommandRunner, CommandRunOptions, compareVersions(), macosCommonToolPathEntries, macosSystemPathEntries, macosUserPathEntries() (+13 more)
+Cohesion: 0.09
+Nodes (26): commandEnvironment(), CommandResult, CommandRunOptions, compareVersions(), macosCommonToolPathEntries, macosSystemPathEntries, macosUserPathEntries(), minimalEnvironment() (+18 more)
 
 ### Community 43 - "Community 43"
 Cohesion: 0.14
@@ -929,8 +926,8 @@ Cohesion: 0.14
 Nodes (13): Backend AI Workspace, Common Workflows, Good Pairings, Installed Agent Context, Prompt 1, Prompt 2, Prompt 3, Quality Checks (+5 more)
 
 ### Community 49 - "Community 49"
-Cohesion: 0.08
-Nodes (17): manifestForRef(), parseManifestFile(), validateManifestFor(), localResolver(), localResolver(), DockFile, installDock(), localResolver() (+9 more)
+Cohesion: 0.10
+Nodes (20): manifestForRef(), parseManifestFile(), validateManifestFor(), localResolver(), localResolver(), DockFile, installDock(), localResolver() (+12 more)
 
 ### Community 50 - "Community 50"
 Cohesion: 0.14
@@ -1013,8 +1010,8 @@ Cohesion: 0.12
 Nodes (15): license, name, packageManager, private, scripts, build:cli, build:desktop, check (+7 more)
 
 ### Community 70 - "Community 70"
-Cohesion: 0.11
-Nodes (30): AccountProfile, DockStarResponse, DockStarStatusResponse, MyDocksResponse, MyStarsResponse, RegistryDockSearchResponse, emptyMyDocksCounts(), fetchRegistryJson() (+22 more)
+Cohesion: 0.13
+Nodes (25): AccountProfile, DockStarResponse, DockStarStatusResponse, MyDocksResponse, MyStarsResponse, RegistryDockSearchResponse, emptyMyDocksCounts(), fetchRegistryJson() (+17 more)
 
 ### Community 71 - "Community 71"
 Cohesion: 0.21
@@ -1025,8 +1022,8 @@ Cohesion: 0.15
 Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
 
 ### Community 73 - "Community 73"
-Cohesion: 0.14
-Nodes (14): description, required, type, definitions, Capability, Number, PermissionEntry, Target (+6 more)
+Cohesion: 0.13
+Nodes (14): anyOf, definitions, Number, PermissionEntry, Target, description, anyOf, description (+6 more)
 
 ### Community 74 - "Community 74"
 Cohesion: 0.15
@@ -1053,8 +1050,8 @@ Cohesion: 0.07
 Nodes (47): Baseline instructions and shared rules for AI coding agents., Baseline instructions and shared rules for AI coding agents., Review rails, PR structure, and secret-scan defaults for AI-generated changes., Review rails, PR structure, and secret-scan defaults for AI-generated changes., A practical workspace for mapping and designing safe internal automations., A practical workspace for mapping and designing safe internal automations., Tool dock for installing Claude Code without project payloads., Tool dock for installing Claude Code without project payloads. (+39 more)
 
 ### Community 80 - "Community 80"
-Cohesion: 0.21
-Nodes (11): createDeployArchive(), createArchive(), createArchive(), boundManifest(), createArchive(), installResolved(), isCaseInsensitive(), sha256() (+3 more)
+Cohesion: 0.17
+Nodes (17): DependencySpec, DependencyCommand, dependencyOutputPaths(), DependencyRecord, DependencyRunner, DependencyRunResult, dependencyStepId(), outputPathsForManager() (+9 more)
 
 ### Community 81 - "Community 81"
 Cohesion: 0.18
@@ -1094,7 +1091,7 @@ Nodes (10): type, webviews, windows, items, description, items, type, descriptio
 
 ### Community 90 - "Community 90"
 Cohesion: 0.08
-Nodes (24): 0.1.39 - 2026-06-23, 0.1.44 - 2026-06-30, 0.1.46 - 2026-06-30, 0.1.47 - 2026-07-01, 0.1.55 - 2026-07-01, 0.2.3 - 2026-07-03, 0.2.4 - 2026-07-04, 0.2.6 - 2026-07-05 (+16 more)
+Nodes (25): 0.1.39 - 2026-06-23, 0.1.43 - 2026-06-26, 0.1.44 - 2026-06-30, 0.1.47 - 2026-07-01, 0.2.0 - 2026-07-02, 0.2.3 - 2026-07-03, 0.2.4 - 2026-07-04, 0.2.6 - 2026-07-05 (+17 more)
 
 ### Community 91 - "Community 91"
 Cohesion: 0.22
@@ -1105,8 +1102,8 @@ Cohesion: 0.22
 Nodes (8): Background, Case Study Template, Insights, Problem, Reflection, Research, Results, Solution
 
 ### Community 93 - "Community 93"
-Cohesion: 0.09
-Nodes (40): DependencySpec, ToolSpec, DependencyCommand, dependencyOutputPaths(), DependencyRecord, DependencyRunner, DependencyRunResult, dependencyStepId() (+32 more)
+Cohesion: 0.10
+Nodes (31): ToolSpec, safeDockDirectoryName(), CommandRunner, runDependencyCommand(), hasPathSeparator(), isWindowsBatchFile(), pathDelimiter(), programCandidates() (+23 more)
 
 ### Community 94 - "Community 94"
 Cohesion: 0.25
@@ -1257,8 +1254,8 @@ Cohesion: 0.25
 Nodes (7): Agent Safety Skill, Procedure, Prompt Starters, Purpose, Quality Checks, Required References, Use When
 
 ### Community 131 - "Community 131"
-Cohesion: 0.15
-Nodes (14): mockRegistry(), cliBinaryPath, cliEnv(), createDockArchive(), createFixture(), Fixture, packageDir, registryPreloadSource() (+6 more)
+Cohesion: 0.16
+Nodes (12): cliBinaryPath, cliEnv(), createDockArchive(), createFixture(), Fixture, packageDir, registryPreloadSource(), registryRelease() (+4 more)
 
 ### Community 132 - "Community 132"
 Cohesion: 0.25
@@ -1393,8 +1390,8 @@ Cohesion: 0.25
 Nodes (7): MCP Safe Skill, Procedure, Prompt Starters, Purpose, Quality Checks, Required References, Use When
 
 ### Community 165 - "Community 165"
-Cohesion: 0.25
-Nodes (7): parseManifestText(), tempDir(), tempRoots, writeExecutable(), writeFailingDependencyManager(), writeFakeDependencyManager(), writeFakePip()
+Cohesion: 0.23
+Nodes (8): windowsBatchSpawnArgs(), parseManifestText(), tempDir(), tempRoots, writeExecutable(), writeFailingDependencyManager(), writeFakeDependencyManager(), writeFakePip()
 
 ### Community 166 - "Community 166"
 Cohesion: 0.25
@@ -1637,8 +1634,8 @@ Cohesion: 0.50
 Nodes (4): default, description, type, description
 
 ### Community 226 - "Community 226"
-Cohesion: 0.28
-Nodes (12): boundManifest(), createCaseFoldCollisionDockArchive(), createDuplicateDockArchive(), createMinimalDockArchive(), listArchiveEntryPaths(), mockRegistry(), mockRegistryArchive(), pngSignature (+4 more)
+Cohesion: 0.24
+Nodes (14): mockRegistry(), boundManifest(), createCaseFoldCollisionDockArchive(), createDuplicateDockArchive(), createMinimalDockArchive(), listArchiveEntryPaths(), mockRegistry(), mockRegistryArchive() (+6 more)
 
 ### Community 227 - "Community 227"
 Cohesion: 0.29
@@ -1693,8 +1690,8 @@ Cohesion: 0.33
 Nodes (4): repoRoot, Workflow, workflowPath, WorkflowStep
 
 ### Community 240 - "Community 240"
-Cohesion: 0.33
-Nodes (6): 0.1.32 - 2026-06-17, 0.1.41 - 2026-06-23, CLI, CLI, Docs, Docs
+Cohesion: 0.18
+Nodes (11): 0.1.30 - 2026-06-16, 0.1.32 - 2026-06-17, 0.1.41 - 2026-06-23, CLI, CLI, CLI, Desktop App, Docs (+3 more)
 
 ### Community 241 - "Community 241"
 Cohesion: 0.40
@@ -2085,8 +2082,8 @@ Cohesion: 0.26
 Nodes (13): Backend API, database, security, and testing guidance for AI-assisted engineering., Backend API, database, security, and testing guidance for AI-assisted engineering., Backend quality gate for API contracts, validation, authentication, migrations, logging, and service safety., Backend quality gate for API contracts, validation, authentication, migrations, logging, and service safety., Kotlin/Spring Boot quality gate for Gradle, ktlint, detekt, DTO validation, profiles, transactions, and readiness., Kotlin/Spring Boot quality gate for Gradle, ktlint, detekt, DTO validation, profiles, transactions, and readiness., Tag: api, Tag: backend (+5 more)
 
 ### Community 353 - "Community 353"
-Cohesion: 0.06
-Nodes (63): safeRuntimeSegment(), sharedRuntimeBinDir(), sharedRuntimeInstallDir(), sharedRuntimeRoot(), archiveNameForVersion(), assertRuntimeWrapperWritable(), BunPlatformArchive, BunRelease (+55 more)
+Cohesion: 0.05
+Nodes (68): safeRuntimeSegment(), sharedRuntimeBinDir(), sharedRuntimeInstallDir(), sharedRuntimeRoot(), archiveNameForVersion(), assertRuntimeWrapperWritable(), BunPlatformArchive, BunRelease (+60 more)
 
 ### Community 354 - "Community 354"
 Cohesion: 0.05
@@ -2105,8 +2102,8 @@ Cohesion: 0.36
 Nodes (11): UI, UX, product design, design system, Figma workflow, and review templates., UI, UX, product design, design system, Figma workflow, and review templates., Design implementation quality gate aligned to DESIGN.md plus hard UI checks., Design implementation quality gate aligned to DESIGN.md plus hard UI checks., Figma MCP quality gate aligned to DESIGN.md plus hard UI checks., Figma MCP quality gate aligned to DESIGN.md plus hard UI checks., Tag: design, Tag: figma (+3 more)
 
 ### Community 358 - "Community 358"
-Cohesion: 0.29
-Nodes (14): addDeployArchiveEntry(), assertDeployFileHasSingleLink(), assertInsideDeployRoot(), collectDeployArchiveEntries(), expandDeployArchiveRoot(), listDeployDirectoryFiles(), logoContentType(), normalizeDeployPath() (+6 more)
+Cohesion: 0.12
+Nodes (27): parseDeployRef(), addDeployArchiveEntry(), assertDeployFileHasSingleLink(), assertInsideDeployRoot(), collectDeployArchiveEntries(), createDeployArchive(), expandDeployArchiveRoot(), listDeployDirectoryFiles() (+19 more)
 
 ### Community 359 - "Community 359"
 Cohesion: 0.50
@@ -2121,28 +2118,28 @@ Cohesion: 0.29
 Nodes (11): CI/CD, deployment, incident, and secrets policy guidance for AI-assisted operations., CI/CD, deployment, incident, and secrets policy guidance for AI-assisted operations., DevOps quality gate for Terraform, Kubernetes, Helm, secrets, public exposure, image tags, resource limits, and runbooks., DevOps quality gate for Terraform, Kubernetes, Helm, secrets, public exposure, image tags, resource limits, and runbooks., Tag: ci-cd, Tag: deployment, Tag: devops, Tag: incident (+3 more)
 
 ### Community 362 - "Community 362"
-Cohesion: 0.15
-Nodes (20): updateCheckCommandResult(), registerAuthCommands(), registerChangeCommands(), recordCommandFailure(), recordCommandLog(), registerDeployCommand(), cliCommandNames, deployOptionValue() (+12 more)
+Cohesion: 0.13
+Nodes (23): updateCheckCommandResult(), registerAuthCommands(), registerChangeCommands(), recordCommandFailure(), recordCommandLog(), registerDeployCommand(), cliCommandNames, deployOptionValue() (+15 more)
 
 ### Community 363 - "Community 363"
 Cohesion: 0.67
 Nodes (3): 0.1.20 - 2026-06-15, Changed, Desktop App
 
 ### Community 364 - "Community 364"
-Cohesion: 0.13
-Nodes (10): DockRef, ManifestReader, boundManifest(), createSymlinkArchive(), mockRegistryArchive(), parsedManifest(), sha256(), tempDir() (+2 more)
+Cohesion: 0.11
+Nodes (6): DockRef, ManifestReader, DockFile, installDock(), localResolver(), tempRoots
 
 ### Community 365 - "Community 365"
-Cohesion: 0.33
-Nodes (3): exampleNames(), examplesRoot, workspaceExampleNames()
+Cohesion: 0.50
+Nodes (4): 0.1.1 - 2026-06-12, 0.1.2 - 2026-06-12, Fixed, Fixed
 
 ### Community 366 - "Community 366"
-Cohesion: 0.40
-Nodes (5): 0.1.30 - 2026-06-16, CLI, Desktop App, Docs, Tests
+Cohesion: 0.50
+Nodes (4): 0.1.37 - 2026-06-22, 0.1.38 - 2026-06-22, Desktop App, Desktop App
 
 ### Community 367 - "Community 367"
-Cohesion: 0.40
-Nodes (5): 0.1.60 - 2026-07-02, 0.2.0 - 2026-07-02, CLI, Desktop App, Desktop App
+Cohesion: 0.50
+Nodes (4): description, required, type, Capability
 
 ### Community 368 - "Community 368"
 Cohesion: 0.67
@@ -2165,20 +2162,20 @@ Cohesion: 0.67
 Nodes (3): 0.1.34 - 2026-06-17, CLI, Desktop App
 
 ### Community 420 - "Community 420"
-Cohesion: 0.40
-Nodes (5): 0.1.42 - 2026-06-23, 0.1.43 - 2026-06-26, CLI, Desktop App, Desktop App
+Cohesion: 0.67
+Nodes (3): 0.1.19 - 2026-06-15, Changed, Tests
 
 ### Community 421 - "Community 421"
 Cohesion: 0.67
-Nodes (3): 0.1.27 - 2026-06-16, Desktop App, Tests
+Nodes (3): 0.1.46 - 2026-06-30, CLI, Desktop App
 
 ### Community 422 - "Community 422"
 Cohesion: 0.67
 Nodes (3): 0.1.26 - 2026-06-16, Desktop App, Tests
 
 ### Community 424 - "Community 424"
-Cohesion: 0.36
-Nodes (7): appendRunLog(), canonicalProjectPath(), projectLogPath(), readProjectLogs(), RunLog, RunStatus, dataRoot()
+Cohesion: 0.67
+Nodes (3): 0.1.55 - 2026-07-01, CLI, Desktop App
 
 ### Community 425 - "Community 425"
 Cohesion: 0.33
@@ -2190,7 +2187,7 @@ Nodes (3): Identifier, description, oneOf
 
 ### Community 427 - "Community 427"
 Cohesion: 0.07
-Nodes (29): 0.1.40 - 2026-06-23, 0.1.48 - 2026-07-01, 0.1.49 - 2026-07-01, 0.1.50 - 2026-07-01, 0.1.51 - 2026-07-01, 0.1.53 - 2026-07-01, 0.1.54 - 2026-07-01, 0.1.56 - 2026-07-01 (+21 more)
+Nodes (28): 0.1.40 - 2026-06-23, 0.1.48 - 2026-07-01, 0.1.49 - 2026-07-01, 0.1.50 - 2026-07-01, 0.1.51 - 2026-07-01, 0.1.53 - 2026-07-01, 0.1.54 - 2026-07-01, 0.1.56 - 2026-07-01 (+20 more)
 
 ### Community 428 - "Community 428"
 Cohesion: 0.50
@@ -2202,7 +2199,7 @@ Nodes (5): install, install, list, update, uninstall 의미, list, uninstall, up
 
 ### Community 430 - "Community 430"
 Cohesion: 0.67
-Nodes (3): 0.1.28 - 2026-06-16, CLI, Tests
+Nodes (3): 0.2.2 - 2026-07-02, CLI, Desktop App
 
 ### Community 431 - "Community 431"
 Cohesion: 0.67
@@ -2215,10 +2212,6 @@ Nodes (3): Identifier, description, oneOf
 ### Community 433 - "Community 433"
 Cohesion: 0.67
 Nodes (3): 0.1.4 - 2026-06-12, Fixed, Tests
-
-### Community 434 - "Community 434"
-Cohesion: 0.40
-Nodes (4): anyOf, description, $schema, title
 
 ### Community 435 - "Community 435"
 Cohesion: 0.67
@@ -2248,10 +2241,6 @@ Nodes (3): 0.1.7 - 2026-06-12, Changed, Tests
 Cohesion: 0.50
 Nodes (4): default, description, type, description
 
-### Community 442 - "Community 442"
-Cohesion: 0.67
-Nodes (3): 0.1.25 - 2026-06-15, Desktop App, Tests
-
 ### Community 445 - "Community 445"
 Cohesion: 0.67
 Nodes (3): 0.1.36 - 2026-06-22, CLI, Desktop App
@@ -2268,26 +2257,22 @@ Nodes (3): Value, anyOf, description
 Cohesion: 0.67
 Nodes (3): State, RunningCommands, opendock_cancel_command()
 
-### Community 449 - "Community 449"
-Cohesion: 0.67
-Nodes (3): 0.1.5 - 2026-06-12, Changed, Tests
-
 ## Knowledge Gaps
-- **2362 isolated node(s):** `name`, `version`, `private`, `type`, `license` (+2357 more)
+- **2364 isolated node(s):** `name`, `version`, `private`, `type`, `license` (+2359 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **301 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `OpenDockPlatform` connect `Community 22` to `Community 0`, `Community 3`, `Community 131`, `Community 5`, `Community 6`, `Community 14`, `Community 19`, `Community 25`, `Community 27`, `Community 29`, `Community 33`, `Community 41`, `Community 44`, `Community 49`, `Community 314`, `Community 66`, `Community 80`, `Community 93`, `Community 350`, `Community 95`, `Community 353`, `Community 226`, `Community 354`, `Community 358`, `Community 362`, `Community 364`, `Community 111`?**
+- **Why does `OpenDockPlatform` connect `Community 25` to `Community 0`, `Community 3`, `Community 131`, `Community 5`, `Community 6`, `Community 14`, `Community 19`, `Community 22`, `Community 27`, `Community 29`, `Community 33`, `Community 41`, `Community 44`, `Community 49`, `Community 314`, `Community 66`, `Community 80`, `Community 93`, `Community 350`, `Community 95`, `Community 353`, `Community 226`, `Community 354`, `Community 358`, `Community 362`, `Community 364`, `Community 111`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Why does `Client` connect `Community 28` to `Community 9`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `private` to the rest of the system?**
-  _2362 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _2364 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.05329593267882188 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05307709906199954 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.023809523809523808 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
