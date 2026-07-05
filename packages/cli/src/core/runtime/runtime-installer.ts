@@ -315,9 +315,20 @@ function installPythonRuntime(request: RuntimeInstallRequest): RuntimeInstallRes
     };
   }
 
-  runChecked(uv, ["pip", "install", "--python", pythonPath, "--break-system-packages", "pip"], {
-    env,
-  });
+  runChecked(
+    uv,
+    [
+      "pip",
+      "install",
+      "--python",
+      pythonPath,
+      "--break-system-packages",
+      pipPackageSpec(request.requested),
+    ],
+    {
+      env,
+    },
+  );
   const pipOutput = runChecked(pythonPath, ["-m", "pip", "--version"], { env }).stdout;
   const pipVersion = extractRequiredVersion(pipOutput, "pip");
   if (!satisfiesVersion(pipVersion, request.requested)) {
@@ -783,6 +794,17 @@ function uvPythonEnvironment(): NodeJS.ProcessEnv {
     UV_PYTHON_NO_REGISTRY: "1",
     PIP_BREAK_SYSTEM_PACKAGES: "1",
   };
+}
+
+function pipPackageSpec(versionRequest: string): string {
+  const requested = versionRequest.trim();
+  if (!requested || requested === "*" || requested === "latest") {
+    return "pip";
+  }
+  if (isRangeLikeVersionRequest(requested)) {
+    return `pip${requested.split(/\s+/u).join(",")}`;
+  }
+  return `pip==${requested}`;
 }
 
 function extractRequiredVersion(output: string, label: string): string {

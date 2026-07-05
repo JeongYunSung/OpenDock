@@ -42,8 +42,8 @@ jobs:
             mkdir -p "$RUNNER_TEMP/bun-baseline"
             curl -fsSL "https://github.com/oven-sh/bun/releases/download/bun-v1.3.11/bun-darwin-x64-baseline.zip" -o "$RUNNER_TEMP/bun-baseline.zip"
             unzip -q -o "$RUNNER_TEMP/bun-baseline.zip" -d "$RUNNER_TEMP/bun-baseline"
-            echo "$RUNNER_TEMP/bun-baseline/bun-darwin-x64-baseline" >> "$GITHUB_PATH"
-            echo "PATH=$RUNNER_TEMP/bun-baseline/bun-darwin-x64-baseline:$PATH" >> "$GITHUB_ENV"
+            bun_path="$(command -v bun)"
+            install -m 0755 "$RUNNER_TEMP/bun-baseline/bun-darwin-x64-baseline/bun" "$bun_path"
           fi
           bun --version
 

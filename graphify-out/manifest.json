@@ -715,13 +715,13 @@
     "semantic_hash": ""
   },
   ".github/workflows/build-desktop.yml": {
-    "mtime": 1783250670.9885838,
-    "ast_hash": "4747b56b33ec6b0820cdd9699f947574",
+    "mtime": 1783250928.7681196,
+    "ast_hash": "6d9016da7be7468e27f414550b02062a",
     "semantic_hash": ""
   },
   ".github/workflows/publish-github-package.yml": {
-    "mtime": 1783250664.037864,
-    "ast_hash": "20a15f4f8b8969db5be1a7163ef0a6f4",
+    "mtime": 1783250928.7679722,
+    "ast_hash": "4b57192de62e873b77f37abac0b4911d",
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
@@ -2630,8 +2630,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-installer.ts": {
-    "mtime": 1783250628.0151963,
-    "ast_hash": "9e21af4d5a2935d0866369eaf59e23d5",
+    "mtime": 1783250919.9724414,
+    "ast_hash": "b4b0f9bc779df060c9c09c4920a1bd79",
     "semantic_hash": ""
   },
   "packages/cli/tests/deploy-manifest-hardening.test.ts": {
@@ -2675,8 +2675,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/cli-quality.yml": {
-    "mtime": 1783250647.794094,
-    "ast_hash": "cbb42b65ad9430e34811d74a2f63babe",
+    "mtime": 1783250928.7678604,
+    "ast_hash": "0299888cdc6b44ea60081afbd84e8570",
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-real-user-edge-cases.test.ts": {
