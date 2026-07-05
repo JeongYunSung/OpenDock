@@ -41,10 +41,15 @@ jobs:
       - name: Checkout
         if: runner.os == 'Windows'
         shell: cmd
+        env:
+          CHECKOUT_TOKEN: ${{ github.token }}
         run: |
+          set "PATH=C:\Program Files\Git\cmd;C:\Program Files\Git\bin;C:\Windows\System32;C:\Windows;%PATH%"
+          where git
+          git --version
           if exist .git rmdir /s /q .git
           git init .
-          git remote add origin https://github.com/%GITHUB_REPOSITORY%.git
+          git remote add origin https://x-access-token:%CHECKOUT_TOKEN%@github.com/%GITHUB_REPOSITORY%.git
           git fetch --force --no-tags --prune --depth=1 origin %GITHUB_SHA%
           git checkout --force FETCH_HEAD
           git clean -ffdx
