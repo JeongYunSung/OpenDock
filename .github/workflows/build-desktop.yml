@@ -21,9 +21,16 @@ jobs:
       matrix:
         include:
           - name: siba
+            os: macos
             runs-on:
               - self-hosted
               - macOS
+              - X64
+          - name: kku
+            os: windows
+            runs-on:
+              - self-hosted
+              - Windows
               - X64
 
     steps:
@@ -64,6 +71,16 @@ jobs:
           bun add --no-save --os=darwin --cpu="${arch}" \
             "@rolldown/binding-darwin-${arch}@${rolldown_version}" \
             "@tauri-apps/cli-darwin-${arch}@${tauri_cli_version}"
+
+      - name: Install Windows native optional bindings
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $arch = node -p "process.arch"
+          $rolldownVersion = node -e 'const fs=require("node:fs"); const lock=fs.readFileSync("bun.lock","utf8"); const match=lock.match(/"rolldown": \["rolldown@([^"]+)/); if (!match) process.exit(1); console.log(match[1]);'
+          $tauriCliVersion = node -e 'const fs=require("node:fs"); const lock=fs.readFileSync("bun.lock","utf8"); const match=lock.match(/"@tauri-apps\/cli": \["@tauri-apps\/cli@([^"]+)/); if (!match) process.exit(1); console.log(match[1]);'
+          bun add --no-save --os=win32 --cpu="$arch" "@rolldown/binding-win32-$arch-msvc@$rolldownVersion" "@tauri-apps/cli-win32-$arch-msvc@$tauriCliVersion"
 
       - name: Build desktop app
         env:
