@@ -1,16 +1,16 @@
 # Graph Report - opendock  (2026-07-05)
 
 ## Corpus Check
-- 464 files · ~234,975 words
+- 464 files · ~234,978 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4742 nodes · 7351 edges · 689 communities (387 shown, 302 thin omitted)
+- 4742 nodes · 7351 edges · 690 communities (388 shown, 302 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 66 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0fccddcc`
+- Built from commit: `a7b9739a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -459,6 +459,7 @@
 - [[_COMMUNITY_Community 446|Community 446]]
 - [[_COMMUNITY_Community 447|Community 447]]
 - [[_COMMUNITY_Community 448|Community 448]]
+- [[_COMMUNITY_Community 449|Community 449]]
 - [[_COMMUNITY_Community 462|Community 462]]
 - [[_COMMUNITY_Community 464|Community 464]]
 - [[_COMMUNITY_Community 465|Community 465]]
@@ -733,7 +734,7 @@
 - 1-file cycle: `apps/desktop/src-tauri/src/project_state.rs -> apps/desktop/src-tauri/src/project_state.rs`
 - 2-file cycle: `apps/desktop/src/data.ts -> apps/desktop/src/dock-data.ts -> apps/desktop/src/data.ts`
 
-## Communities (689 total, 302 thin omitted)
+## Communities (690 total, 302 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.08
@@ -756,12 +757,12 @@ Cohesion: 0.13
 Nodes (52): AppliedFile, AppHandle, Option, Result, String, Value, Vec, Option (+44 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.12
-Nodes (19): DockManifest, TaskStep, combinedOutput(), extractVersion(), failureMessage(), satisfiesVersion(), commandProgram(), stepName() (+11 more)
+Cohesion: 0.17
+Nodes (16): DockManifest, TaskStep, combinedOutput(), extractVersion(), failureMessage(), satisfiesVersion(), commandProgram(), RuntimeRecord (+8 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.09
-Nodes (36): blockedShellTokens, commandSeparatorTokens, includesShellOperator(), blockedCommandReason(), commonAllowedCommands, ensureAllowed(), isAllowedCommandShape(), isDefaultCommandProgram() (+28 more)
+Nodes (37): blockedShellTokens, commandSeparatorTokens, includesShellOperator(), blockedCommandReason(), commonAllowedCommands, ensureAllowed(), isAllowedCommandShape(), isDefaultCommandProgram() (+29 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.05
@@ -852,8 +853,8 @@ Cohesion: 0.25
 Nodes (24): PathBuf, Result, String, Value, Vec, Method, Response, append_registry_asset_chunk() (+16 more)
 
 ### Community 29 - "Community 29"
-Cohesion: 0.20
-Nodes (15): commandEnvironment(), CommandResult, CommandRunOptions, compareVersions(), macosCommonToolPathEntries, macosSystemPathEntries, macosUserPathEntries(), minimalEnvironment() (+7 more)
+Cohesion: 0.10
+Nodes (21): commandEnvironment(), CommandResult, CommandRunner, CommandRunOptions, compareVersions(), macosCommonToolPathEntries, macosSystemPathEntries, macosUserPathEntries() (+13 more)
 
 ### Community 30 - "Community 30"
 Cohesion: 0.21
@@ -1020,8 +1021,8 @@ Cohesion: 0.15
 Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
 
 ### Community 73 - "Community 73"
-Cohesion: 0.15
-Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
+Cohesion: 0.13
+Nodes (14): anyOf, definitions, Number, Target, Value, description, anyOf, description (+6 more)
 
 ### Community 74 - "Community 74"
 Cohesion: 0.15
@@ -1088,8 +1089,8 @@ Cohesion: 0.20
 Nodes (10): type, webviews, windows, items, description, items, type, description (+2 more)
 
 ### Community 90 - "Community 90"
-Cohesion: 0.07
-Nodes (28): 0.1.39 - 2026-06-23, 0.1.44 - 2026-06-30, 0.1.47 - 2026-07-01, 0.1.55 - 2026-07-01, 0.2.0 - 2026-07-02, 0.2.2 - 2026-07-02, 0.2.3 - 2026-07-03, 0.2.4 - 2026-07-04 (+20 more)
+Cohesion: 0.08
+Nodes (25): 0.1.39 - 2026-06-23, 0.1.43 - 2026-06-26, 0.1.44 - 2026-06-30, 0.1.47 - 2026-07-01, 0.2.0 - 2026-07-02, 0.2.3 - 2026-07-03, 0.2.4 - 2026-07-04, 0.2.6 - 2026-07-05 (+17 more)
 
 ### Community 91 - "Community 91"
 Cohesion: 0.22
@@ -1100,8 +1101,8 @@ Cohesion: 0.22
 Nodes (8): Background, Case Study Template, Insights, Problem, Reflection, Research, Results, Solution
 
 ### Community 93 - "Community 93"
-Cohesion: 0.09
-Nodes (33): ToolSpec, safeDockDirectoryName(), CommandRunner, DependencyRunResult, dockToolsDir(), prependPathEntries(), projectCommandPathEntries(), projectToolsDir() (+25 more)
+Cohesion: 0.10
+Nodes (29): ToolSpec, safeDockDirectoryName(), DependencyRunResult, dockToolsDir(), prependPathEntries(), projectCommandPathEntries(), projectToolsDir(), relativeProjectPath() (+21 more)
 
 ### Community 94 - "Community 94"
 Cohesion: 0.25
@@ -2145,7 +2146,7 @@ Nodes (3): 0.1.23 - 2026-06-15, Changed, Desktop App
 
 ### Community 369 - "Community 369"
 Cohesion: 0.67
-Nodes (3): 0.1.3 - 2026-06-12, Fixed, Tests
+Nodes (3): 0.1.55 - 2026-07-01, CLI, Desktop App
 
 ### Community 373 - "Community 373"
 Cohesion: 0.67
@@ -2212,8 +2213,8 @@ Cohesion: 0.33
 Nodes (3): exampleNames(), examplesRoot, workspaceExampleNames()
 
 ### Community 434 - "Community 434"
-Cohesion: 0.40
-Nodes (4): anyOf, description, $schema, title
+Cohesion: 0.67
+Nodes (3): 0.1.5 - 2026-06-12, Changed, Tests
 
 ### Community 435 - "Community 435"
 Cohesion: 0.67
@@ -2257,11 +2258,15 @@ Nodes (4): anyOf, description, $schema, title
 
 ### Community 447 - "Community 447"
 Cohesion: 0.67
-Nodes (3): 0.1.43 - 2026-06-26, CLI, Desktop App
+Nodes (3): 0.2.2 - 2026-07-02, CLI, Desktop App
 
 ### Community 448 - "Community 448"
 Cohesion: 0.67
 Nodes (3): 0.1.4 - 2026-06-12, Fixed, Tests
+
+### Community 449 - "Community 449"
+Cohesion: 0.67
+Nodes (3): PermissionEntry, anyOf, description
 
 ## Knowledge Gaps
 - **2364 isolated node(s):** `name`, `version`, `private`, `type`, `license` (+2359 more)

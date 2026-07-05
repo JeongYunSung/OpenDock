@@ -2650,8 +2650,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/runtime-platform-matrix.test.ts": {
-    "mtime": 1783251303.5395353,
-    "ast_hash": "062377b731d52e6cb5c7314c94bb6b1f",
+    "mtime": 1783251523.340243,
+    "ast_hash": "b57db2bcde8ad77604ec83ff6d8d6c7a",
     "semantic_hash": ""
   },
   "packages/cli/tests/task-permission-policy.test.ts": {
