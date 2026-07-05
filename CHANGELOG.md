@@ -7,6 +7,12 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.2.6 - 2026-07-05
+
+### CLI
+
+- Resolve Windows PowerShell lookup handling.
+
 ## 0.2.5 - 2026-07-04
 
 ### Desktop App
