@@ -715,8 +715,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/build-desktop.yml": {
-    "mtime": 1783254425.730079,
-    "ast_hash": "6549995f82ea40a5c53ee7d7186ef584",
+    "mtime": 1783254764.792144,
+    "ast_hash": "3b91c244adaf9740027ddfdd78505298",
     "semantic_hash": ""
   },
   ".github/workflows/publish-github-package.yml": {
