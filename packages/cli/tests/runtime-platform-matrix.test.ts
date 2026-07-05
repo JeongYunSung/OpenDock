@@ -572,6 +572,9 @@ if [ "$1" = "python" ] && [ "$2" = "find" ]; then
   printf '${pythonPath}\\n'
   exit 0
 fi
+if [ "$1" = "pip" ] && [ "$2" = "install" ]; then
+  exit 0
+fi
 exit 1
 `,
   );

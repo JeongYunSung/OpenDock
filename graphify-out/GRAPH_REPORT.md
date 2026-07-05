@@ -1,7 +1,7 @@
 # Graph Report - opendock  (2026-07-05)
 
 ## Corpus Check
-- 464 files · ~234,831 words
+- 464 files · ~234,866 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `1984bc08`
+- Built from commit: `2b886d6a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -744,7 +744,7 @@ Nodes (75): accountDocksController, accountPanel, app, appDialogs, appMenu, appM
 
 ### Community 2 - "Community 2"
 Cohesion: 0.08
-Nodes (51): CommandProgressCard(), commandForceRetryFor(), commandResultColor(), commandResultGroups(), commandResultRows(), isNoUpdateChangeResult(), openDockChangeResult(), openDockOutdatedResult() (+43 more)
+Nodes (51): commandForceRetryFor(), commandResultColor(), commandResultGroups(), commandResultRows(), isNoUpdateChangeResult(), openDockChangeResult(), openDockOutdatedResult(), outdatedReportsByDockId() (+43 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.08
@@ -764,15 +764,15 @@ Nodes (33): blockedShellTokens, commandSeparatorTokens, includesShellOperator(),
 
 ### Community 7 - "Community 7"
 Cohesion: 0.06
-Nodes (48): assertInvalid(), customShortcuts, exported, imported, CommandPaletteDialog(), CommandProgressDialog(), ProjectSwitcherDialog(), AppOverlays() (+40 more)
+Nodes (52): assertInvalid(), customShortcuts, exported, imported, CommandPaletteDialog(), CommandProgressCard(), CommandProgressDialog(), ProjectSwitcherDialog() (+44 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.07
 Nodes (47): accountStatsFor(), dockFromMyDock(), myDockReviewGroup, myDockStatus(), myDockStatusLabel(), primaryMyDockVersion(), AccountPanel(), isTaskActive() (+39 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.08
-Nodes (35): App(), AppNotice(), AppNoticeKind, AppNoticeOptions, AppNoticeState, ProductUpdateCheck, ProductUpdateState, ProjectFolder (+27 more)
+Cohesion: 0.07
+Nodes (40): App(), AppNotice(), AppNoticeKind, AppNoticeOptions, AppNoticeState, ProductUpdateCheck, ProductUpdateState, ProjectFolder (+32 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.10
@@ -831,8 +831,8 @@ Cohesion: 0.12
 Nodes (18): TokenStore, authProviderChoices, AuthProviderSelectOptions, BrowserLoginClient, BrowserLoginOptions, browserOpenCommand(), closeServer(), KeypressEvent (+10 more)
 
 ### Community 24 - "Community 24"
-Cohesion: 0.15
-Nodes (11): commandFailureMessage(), TEXT, markdownToBlocks(), parseReadmeMarkdown(), ReadmeBlock, ReadmePanel(), stripInlineMarkdown(), AuthControllerOptions (+3 more)
+Cohesion: 0.13
+Nodes (12): commandFailureMessage(), TEXT, LogsPanel(), markdownToBlocks(), parseReadmeMarkdown(), ReadmeBlock, ReadmePanel(), stripInlineMarkdown() (+4 more)
 
 ### Community 25 - "Community 25"
 Cohesion: 0.14
@@ -1011,8 +1011,8 @@ Cohesion: 0.12
 Nodes (15): license, name, packageManager, private, scripts, build:cli, build:desktop, check (+7 more)
 
 ### Community 70 - "Community 70"
-Cohesion: 0.11
-Nodes (30): AccountProfile, DockStarResponse, DockStarStatusResponse, MyDocksResponse, MyStarsResponse, RegistryDockSearchResponse, emptyMyDocksCounts(), fetchRegistryJson() (+22 more)
+Cohesion: 0.13
+Nodes (25): AccountProfile, DockStarResponse, DockStarStatusResponse, MyDocksResponse, MyStarsResponse, RegistryDockSearchResponse, emptyMyDocksCounts(), fetchRegistryJson() (+17 more)
 
 ### Community 71 - "Community 71"
 Cohesion: 0.21
@@ -1063,8 +1063,8 @@ Cohesion: 0.20
 Nodes (9): API Documentation Template, Authentication, Change Notes, Endpoint, Errors, Examples, Purpose, Request (+1 more)
 
 ### Community 83 - "Community 83"
-Cohesion: 0.09
-Nodes (31): commandLinesToStoredLogs(), AppLog, AuthSession, BASE_LOGS, DesktopAppState, OpenDockChangeSummary, OpenDockChangeSummaryCounts, OpenDockFileChanges (+23 more)
+Cohesion: 0.15
+Nodes (21): BASE_LOGS, OpenDockChangeSummary, OpenDockChangeSummaryCounts, OpenDockFileChanges, RegistryDockDetail, RegistryDockSummary, RegistryDockVersionGroup, RegistryDockVersionItem (+13 more)
 
 ### Community 84 - "Community 84"
 Cohesion: 0.20
@@ -1092,7 +1092,7 @@ Nodes (10): type, webviews, windows, items, description, items, type, descriptio
 
 ### Community 90 - "Community 90"
 Cohesion: 0.08
-Nodes (25): 0.1.39 - 2026-06-23, 0.1.43 - 2026-06-26, 0.1.44 - 2026-06-30, 0.1.47 - 2026-07-01, 0.2.0 - 2026-07-02, 0.2.2 - 2026-07-02, 0.2.4 - 2026-07-04, 0.2.6 - 2026-07-05 (+17 more)
+Nodes (25): 0.1.39 - 2026-06-23, 0.1.43 - 2026-06-26, 0.1.44 - 2026-06-30, 0.1.47 - 2026-07-01, 0.2.0 - 2026-07-02, 0.2.3 - 2026-07-03, 0.2.4 - 2026-07-04, 0.2.6 - 2026-07-05 (+17 more)
 
 ### Community 91 - "Community 91"
 Cohesion: 0.22
@@ -2075,8 +2075,8 @@ Cohesion: 0.16
 Nodes (9): cliBinaryPath, createDockArchive(), createFixture(), Fixture, packageDir, registryPreloadSource(), registryRelease(), tempRoots (+1 more)
 
 ### Community 351 - "Community 351"
-Cohesion: 0.11
-Nodes (19): DockView, OpenMenu, DetailControllerOptions, DETAIL_TABS, DetailTab, DOCK_VIEWS, DockNavigationHistoryOptions, DockNavigationHistoryState (+11 more)
+Cohesion: 0.09
+Nodes (24): AuthSession, DesktopAppState, DockView, Project, resolveActiveProjectId(), OpenMenu, DetailControllerOptions, DesktopStateSyncOptions (+16 more)
 
 ### Community 352 - "Community 352"
 Cohesion: 0.26
@@ -2248,7 +2248,7 @@ Nodes (4): default, description, type, description
 
 ### Community 442 - "Community 442"
 Cohesion: 0.67
-Nodes (3): 0.2.3 - 2026-07-03, CLI, Desktop App
+Nodes (3): 0.2.2 - 2026-07-02, CLI, Desktop App
 
 ### Community 445 - "Community 445"
 Cohesion: 0.67
@@ -2281,6 +2281,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.023809523809523808 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.0771478667445938 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07650273224043716 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.08412698412698413 - nodes in this community are weakly interconnected._

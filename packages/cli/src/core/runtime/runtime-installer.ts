@@ -315,7 +315,9 @@ function installPythonRuntime(request: RuntimeInstallRequest): RuntimeInstallRes
     };
   }
 
-  runChecked(pythonPath, ["-m", "ensurepip", "--upgrade"], { env });
+  runChecked(uv, ["pip", "install", "--python", pythonPath, "--break-system-packages", "pip"], {
+    env,
+  });
   const pipOutput = runChecked(pythonPath, ["-m", "pip", "--version"], { env }).stdout;
   const pipVersion = extractRequiredVersion(pipOutput, "pip");
   if (!satisfiesVersion(pipVersion, request.requested)) {
