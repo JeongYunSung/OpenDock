@@ -39,6 +39,7 @@ jobs:
 
       - name: Install macOS native optional bindings
         if: runner.os == 'macOS'
+        working-directory: packages/cli
         run: |
           set -euo pipefail
           arch="$(node -p "process.arch")"
