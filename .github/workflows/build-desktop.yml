@@ -23,7 +23,8 @@ jobs:
           - name: siba
             runs-on:
               - self-hosted
-              - siba
+              - macOS
+              - X64
 
     steps:
       - name: Checkout
@@ -128,7 +129,8 @@ jobs:
     if: github.event_name == 'release'
     runs-on:
       - self-hosted
-      - siba
+      - macOS
+      - X64
     steps:
       - name: Download desktop release assets
         env:
@@ -218,7 +220,8 @@ jobs:
     if: ${{ always() && github.event_name == 'release' }}
     runs-on:
       - self-hosted
-      - siba
+      - macOS
+      - X64
     permissions:
       actions: write
       contents: read

@@ -19,7 +19,8 @@ jobs:
     name: Publish @jeongyunsung/opendock
     runs-on:
       - self-hosted
-      - siba
+      - macOS
+      - X64
     env:
       OPENDOCK_GITHUB_PACKAGE: "@jeongyunsung/opendock"
       OPENDOCK_GITHUB_REPOSITORY: ${{ github.repository }}
