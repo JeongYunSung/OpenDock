@@ -7,6 +7,12 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.2.7 - 2026-07-05
+
+### CLI
+
+- Handle Windows dependency managers during dock installation and update flows.
+
 ## 0.2.6 - 2026-07-05
 
 ### CLI
