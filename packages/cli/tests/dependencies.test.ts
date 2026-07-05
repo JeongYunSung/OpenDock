@@ -20,7 +20,10 @@ import {
   DependencyRunner,
   removeInstalledDependencyOutputs,
 } from "../src/core/runtime/dependency-runner.js";
-import { resolveProgramFromPath } from "../src/core/runtime/process-spawn.js";
+import {
+  resolveProgramFromPath,
+  windowsBatchSpawnArgs,
+} from "../src/core/runtime/process-spawn.js";
 import type { ResolvedDock } from "../src/resolver.js";
 
 const tempRoots: string[] = [];
@@ -568,6 +571,18 @@ describe("dock dependencies", () => {
     expect(resolveProgramFromPath("npm", `${projectBin};C:\\Windows\\System32`, "windows")).toBe(
       join(projectBin, "npm.cmd"),
     );
+
+    const windowsPath =
+      "C:\\Users\\12rnw\\OpenDock Projects\\빈 프로젝트1\\.opendock\\bin\\npm.cmd";
+    expect(windowsBatchSpawnArgs(windowsPath, ["install", "--no-audit", "--no-fund"])).toEqual([
+      "/d",
+      "/c",
+      "call",
+      windowsPath,
+      "install",
+      "--no-audit",
+      "--no-fund",
+    ]);
   });
 
   it("reports missing dependency outputs during doctor", () => {

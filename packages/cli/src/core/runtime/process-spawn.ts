@@ -37,11 +37,15 @@ export function spawnOpenDockCommand(
   if (platform === "windows" && isWindowsBatchFile(program)) {
     return spawnSync(
       process.env.ComSpec ?? "cmd.exe",
-      ["/d", "/s", "/c", windowsCommandLine(program, args)],
+      windowsBatchSpawnArgs(program, args),
       options,
     );
   }
   return spawnSync(program, args, options);
+}
+
+export function windowsBatchSpawnArgs(program: string, args: string[]): string[] {
+  return ["/d", "/c", "call", program, ...args];
 }
 
 function programCandidates(
@@ -67,12 +71,4 @@ function hasPathSeparator(value: string): boolean {
 
 function isWindowsBatchFile(value: string): boolean {
   return /\.(?:cmd|bat)$/iu.test(value);
-}
-
-function windowsCommandLine(program: string, args: string[]): string {
-  return [program, ...args].map(windowsCommandArg).join(" ");
-}
-
-function windowsCommandArg(value: string): string {
-  return `"${value.replaceAll("%", "%%").replaceAll('"', '\\"')}"`;
 }

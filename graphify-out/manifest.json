@@ -715,13 +715,13 @@
     "semantic_hash": ""
   },
   ".github/workflows/build-desktop.yml": {
-    "mtime": 1782924788.9472876,
-    "ast_hash": "a7681e7d01dd61d0e983bfb0fd19b543",
+    "mtime": 1783248484.8439388,
+    "ast_hash": "197f44007a755e11b24127a3dd157713",
     "semantic_hash": ""
   },
   ".github/workflows/publish-github-package.yml": {
-    "mtime": 1781490889.9586477,
-    "ast_hash": "6e11a26eb6ca16f14503836b7906216f",
+    "mtime": 1783248399.7767537,
+    "ast_hash": "aa11ccd5167b96a4caa1c53e1ab71e21",
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
@@ -2675,8 +2675,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/cli-quality.yml": {
-    "mtime": 1782969699.1927404,
-    "ast_hash": "a34144c22f695b629bd3d0260fac20e3",
+    "mtime": 1783248484.844374,
+    "ast_hash": "fc930d0a2a7cb2c5f1906a18ef3da15f",
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-real-user-edge-cases.test.ts": {
@@ -2730,8 +2730,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/dependencies.test.ts": {
-    "mtime": 1783246338.067617,
-    "ast_hash": "e3b081540f43c20d29c9d5cfe3af21a9",
+    "mtime": 1783248813.2737854,
+    "ast_hash": "f813a412d38037e4ba5557f6a6d3d3ef",
     "semantic_hash": ""
   },
   "packages/cli/docs/plans/dependencies-qa.md": {
@@ -2765,8 +2765,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/process-spawn.ts": {
-    "mtime": 1783246378.8799107,
-    "ast_hash": "8d4e161ee9854fd2fa106049a6bb06a9",
+    "mtime": 1783248772.423451,
+    "ast_hash": "ff9619582ff93aad9c3520e922895d03",
     "semantic_hash": ""
   }
 }
