@@ -55,9 +55,28 @@ jobs:
           git clean -ffdx
 
       - name: Set up Bun
+        if: runner.os != 'Windows'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.11
+
+      - name: Set up Bun
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          set "BUN_HOME=%USERPROFILE%\.bun"
+          set "BUN_BIN=%BUN_HOME%\bin"
+          if not exist "%BUN_BIN%" mkdir "%BUN_BIN%"
+          set "PATH=%BUN_BIN%;%PATH%"
+          where bun >nul 2>nul
+          if errorlevel 1 (
+            curl -fsSL -o "%RUNNER_TEMP%\bun-windows-x64.zip" https://github.com/oven-sh/bun/releases/download/bun-v1.3.11/bun-windows-x64.zip
+            tar -xf "%RUNNER_TEMP%\bun-windows-x64.zip" -C "%RUNNER_TEMP%"
+            copy /Y "%RUNNER_TEMP%\bun-windows-x64\bun.exe" "%BUN_BIN%\bun.exe"
+          )
+          if not exist "%BUN_BIN%\bunx.exe" copy /Y "%BUN_BIN%\bun.exe" "%BUN_BIN%\bunx.exe"
+          echo %BUN_BIN%>>%GITHUB_PATH%
+          bun --version
 
       - name: Use baseline Bun on siba
         if: runner.os == 'macOS'
@@ -80,6 +99,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: cmd
         run: |
+          set "PATH=%USERPROFILE%\.cargo\bin;%PATH%"
+          echo %USERPROFILE%\.cargo\bin>>%GITHUB_PATH%
           rustup default stable
           rustc --version
           cargo --version
