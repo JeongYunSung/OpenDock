@@ -1,4 +1,3 @@
-import { spawnSync } from "node:child_process";
 import { existsSync, lstatSync, rmSync } from "node:fs";
 import { join, relative } from "node:path";
 import type { OpenDockPlatform } from "../../platform.js";
@@ -11,6 +10,7 @@ import {
   safeJoin,
 } from "../files/path-utils.js";
 import { opendockCommandPath } from "./command-runner.js";
+import { resolveProgramFromPath, spawnOpenDockCommand } from "./process-spawn.js";
 import { type ProgressReporter, reportProgress } from "./progress.js";
 import {
   prependPathEntries,
@@ -138,7 +138,12 @@ export class DependencyRunner {
         [command.program, ...command.args].join(" "),
       )}`,
     );
-    runDependencyCommand(target, command, spec, context, name);
+    try {
+      runDependencyCommand(target, command, spec, context, name);
+    } catch (error) {
+      removeOutputPaths(context.projectDir, target, spec.manager);
+      throw error;
+    }
     console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(id)}: ready`);
     this.progress(
       context,
@@ -268,17 +273,23 @@ function runDependencyCommand(
     opendockCommandPath(),
     projectCommandPathEntries(context.projectDir),
   );
-  const result = spawnSync(command.program, command.args, {
-    cwd,
-    encoding: "utf8",
-    env: {
-      ...process.env,
-      PATH: pathValue,
+  const program = resolveProgramFromPath(command.program, pathValue, context.platform);
+  const result = spawnOpenDockCommand(
+    program,
+    command.args,
+    {
+      cwd,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        PATH: pathValue,
+      },
+      killSignal: "SIGTERM",
+      stdio: (context.live ?? true) ? "inherit" : "pipe",
+      timeout: spec.timeout_ms ?? defaultDependencyTimeoutMs,
     },
-    killSignal: "SIGTERM",
-    stdio: (context.live ?? true) ? "inherit" : "pipe",
-    timeout: spec.timeout_ms ?? defaultDependencyTimeoutMs,
-  });
+    context.platform,
+  );
   if (result.error) {
     const code = (result.error as NodeJS.ErrnoException).code;
     if (code === "ETIMEDOUT") {

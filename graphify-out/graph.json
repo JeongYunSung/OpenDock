@@ -3440,7 +3440,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "src_command_output_should_emit_empty_stream_message",
-      "community": 10,
+      "community": 30,
       "norm_label": "should_emit_empty_stream_message()"
     },
     {
@@ -3750,7 +3750,7 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "src_lib_opendock_cancel_command",
-      "community": 10,
+      "community": 448,
       "norm_label": "opendock_cancel_command()"
     },
     {
@@ -3760,7 +3760,7 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "apps_desktop_src_tauri_src_lib_rs_state",
-      "community": 10,
+      "community": 448,
       "norm_label": "state"
     },
     {
@@ -3770,7 +3770,7 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "runningcommands",
-      "community": 10,
+      "community": 448,
       "norm_label": "runningcommands"
     },
     {
@@ -4210,7 +4210,7 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "src_opendock_runner_run_opendock_blocking",
-      "community": 4,
+      "community": 10,
       "norm_label": "run_opendock_blocking()"
     },
     {
@@ -4230,7 +4230,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "src_opendock_runner_run_opendock_streaming_blocking",
-      "community": 4,
+      "community": 10,
       "norm_label": "run_opendock_streaming_blocking()"
     },
     {
@@ -5150,7 +5150,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "client",
-      "community": 9,
+      "community": 28,
       "norm_label": "client"
     },
     {
@@ -5190,7 +5190,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "src_registry_bounded_page",
-      "community": 4,
+      "community": 28,
       "norm_label": "bounded_page()"
     },
     {
@@ -5200,7 +5200,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "apps_desktop_src_tauri_src_registry_rs_option",
-      "community": 4,
+      "community": 28,
       "norm_label": "option"
     },
     {
@@ -5210,7 +5210,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "src_registry_bounded_limit",
-      "community": 4,
+      "community": 28,
       "norm_label": "bounded_limit()"
     },
     {
@@ -5870,7 +5870,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_dialogs",
-      "community": 7,
+      "community": 71,
       "norm_label": "app-dialogs.tsx"
     },
     {
@@ -5880,7 +5880,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_app_dialogs_commandprogressdialog",
-      "community": 7,
+      "community": 71,
       "norm_label": "commandprogressdialog()"
     },
     {
@@ -5900,7 +5900,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "src_app_dialogs_commandpalettedialog",
-      "community": 7,
+      "community": 71,
       "norm_label": "commandpalettedialog()"
     },
     {
@@ -5910,7 +5910,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "src_app_dialogs_projectswitcherdialog",
-      "community": 7,
+      "community": 71,
       "norm_label": "projectswitcherdialog()"
     },
     {
@@ -6050,7 +6050,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_overlays",
-      "community": 7,
+      "community": 71,
       "norm_label": "app-overlays.tsx"
     },
     {
@@ -6060,7 +6060,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_overlays_appoverlays",
-      "community": 7,
+      "community": 9,
       "norm_label": "appoverlays()"
     },
     {
@@ -6260,7 +6260,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_command_log_commandfailuremessage",
-      "community": 2,
+      "community": 9,
       "norm_label": "commandfailuremessage()"
     },
     {
@@ -6580,7 +6580,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_data_lang",
-      "community": 8,
+      "community": 71,
       "norm_label": "lang"
     },
     {
@@ -6620,7 +6620,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_data_project",
-      "community": 351,
+      "community": 9,
       "norm_label": "project"
     },
     {
@@ -6630,7 +6630,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_data_desktopappstate",
-      "community": 351,
+      "community": 9,
       "norm_label": "desktopappstate"
     },
     {
@@ -6640,7 +6640,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_data_dock",
-      "community": 41,
+      "community": 70,
       "norm_label": "dock"
     },
     {
@@ -6770,7 +6770,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "src_data_mydockscounts",
-      "community": 70,
+      "community": 8,
       "norm_label": "mydockscounts"
     },
     {
@@ -6780,7 +6780,7 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "src_data_mydock",
-      "community": 70,
+      "community": 8,
       "norm_label": "mydock"
     },
     {
@@ -6800,7 +6800,7 @@
       "source_location": "L203",
       "_origin": "ast",
       "id": "src_data_installeddockrecord",
-      "community": 41,
+      "community": 70,
       "norm_label": "installeddockrecord"
     },
     {
@@ -6860,7 +6860,7 @@
       "source_location": "L256",
       "_origin": "ast",
       "id": "src_data_opendockcommandresult",
-      "community": 41,
+      "community": 2,
       "norm_label": "opendockcommandresult"
     },
     {
@@ -6890,7 +6890,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "src_data_opendockoutdatedreport",
-      "community": 41,
+      "community": 70,
       "norm_label": "opendockoutdatedreport"
     },
     {
@@ -6940,7 +6940,7 @@
       "source_location": "L334",
       "_origin": "ast",
       "id": "src_data_authsession",
-      "community": 351,
+      "community": 9,
       "norm_label": "authsession"
     },
     {
@@ -6970,7 +6970,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_desktop_text",
-      "community": 8,
+      "community": 71,
       "norm_label": "desktop-text.ts"
     },
     {
@@ -6980,7 +6980,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_desktop_text_text",
-      "community": 8,
+      "community": 71,
       "norm_label": "text"
     },
     {
@@ -7080,7 +7080,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_desktop_ui_starbutton",
-      "community": 41,
+      "community": 8,
       "norm_label": "starbutton()"
     },
     {
@@ -7090,7 +7090,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_display",
-      "community": 8,
+      "community": 70,
       "norm_label": "display.tsx"
     },
     {
@@ -7120,7 +7120,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_display_finddockbykey",
-      "community": 41,
+      "community": 70,
       "norm_label": "finddockbykey()"
     },
     {
@@ -7140,7 +7140,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_display_installedatlabel",
-      "community": 8,
+      "community": 70,
       "norm_label": "installedatlabel()"
     },
     {
@@ -7160,7 +7160,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "src_display_iconbutton",
-      "community": 7,
+      "community": 71,
       "norm_label": "iconbutton()"
     },
     {
@@ -7190,7 +7190,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_dock_data_dockfullid",
-      "community": 41,
+      "community": 70,
       "norm_label": "dockfullid()"
     },
     {
@@ -7400,7 +7400,7 @@
       "source_location": "L235",
       "_origin": "ast",
       "id": "src_dock_panels_installmetricbutton",
-      "community": 41,
+      "community": 8,
       "norm_label": "installmetricbutton()"
     },
     {
@@ -7440,7 +7440,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_dock_workspace_model",
-      "community": 41,
+      "community": 70,
       "norm_label": "dock-workspace-model.ts"
     },
     {
@@ -7450,7 +7450,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_dock_workspace_model_installeddockrow",
-      "community": 41,
+      "community": 2,
       "norm_label": "installeddockrow"
     },
     {
@@ -7460,7 +7460,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_dock_workspace_model_resolveactiveprojectid",
-      "community": 351,
+      "community": 9,
       "norm_label": "resolveactiveprojectid()"
     },
     {
@@ -7470,7 +7470,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_dock_workspace_model_installeddockstatemap",
-      "community": 41,
+      "community": 70,
       "norm_label": "installeddockstatemap()"
     },
     {
@@ -7480,7 +7480,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_dock_workspace_model_buildinstalledfallbackdocks",
-      "community": 41,
+      "community": 70,
       "norm_label": "buildinstalledfallbackdocks()"
     },
     {
@@ -7490,7 +7490,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "src_dock_workspace_model_sortcatalogdocks",
-      "community": 41,
+      "community": 70,
       "norm_label": "sortcatalogdocks()"
     },
     {
@@ -7500,7 +7500,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_dock_workspace_model_installeddockrows",
-      "community": 41,
+      "community": 70,
       "norm_label": "installeddockrows()"
     },
     {
@@ -7510,7 +7510,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_dock_workspace_model_matchesinstalledsearch",
-      "community": 41,
+      "community": 70,
       "norm_label": "matchesinstalledsearch()"
     },
     {
@@ -7520,7 +7520,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_installed_panel",
-      "community": 8,
+      "community": 2,
       "norm_label": "installed-panel.tsx"
     },
     {
@@ -7540,7 +7540,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "src_installed_panel_installedloadingstate",
-      "community": 8,
+      "community": 2,
       "norm_label": "installedloadingstate()"
     },
     {
@@ -7570,7 +7570,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_logs_panel",
-      "community": 8,
+      "community": 71,
       "norm_label": "logs-panel.tsx"
     },
     {
@@ -7580,7 +7580,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_logs_panel_logspanel",
-      "community": 8,
+      "community": 71,
       "norm_label": "logspanel()"
     },
     {
@@ -7600,7 +7600,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_platform_label",
-      "community": 8,
+      "community": 70,
       "norm_label": "platform-label.ts"
     },
     {
@@ -7610,7 +7610,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_platform_label_platformlabel",
-      "community": 8,
+      "community": 70,
       "norm_label": "platformlabel()"
     },
     {
@@ -7620,7 +7620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_preview_change_result",
-      "community": 41,
+      "community": 2,
       "norm_label": "preview-change-result.ts"
     },
     {
@@ -7630,7 +7630,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_preview_change_result_previewchangeresult",
-      "community": 41,
+      "community": 2,
       "norm_label": "previewchangeresult()"
     },
     {
@@ -7640,7 +7640,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_project_modals",
-      "community": 7,
+      "community": 71,
       "norm_label": "project-modals.tsx"
     },
     {
@@ -7650,7 +7650,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_project_modals_projectaddmodal",
-      "community": 7,
+      "community": 71,
       "norm_label": "projectaddmodal()"
     },
     {
@@ -7660,7 +7660,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_project_modals_projectrenamemodal",
-      "community": 7,
+      "community": 71,
       "norm_label": "projectrenamemodal()"
     },
     {
@@ -7670,7 +7670,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "src_project_modals_projectdeletemodal",
-      "community": 7,
+      "community": 71,
       "norm_label": "projectdeletemodal()"
     },
     {
@@ -7840,7 +7840,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "src_registry_client_requestaccountprofile",
-      "community": 70,
+      "community": 9,
       "norm_label": "requestaccountprofile()"
     },
     {
@@ -7850,7 +7850,7 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "src_registry_client_requestupdateaccountprofile",
-      "community": 70,
+      "community": 9,
       "norm_label": "requestupdateaccountprofile()"
     },
     {
@@ -7870,7 +7870,7 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "src_registry_client_loadregistryasseturl",
-      "community": 8,
+      "community": 70,
       "norm_label": "loadregistryasseturl()"
     },
     {
@@ -7950,7 +7950,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_responsive_page_size",
-      "community": 9,
+      "community": 447,
       "norm_label": "responsive-page-size.ts"
     },
     {
@@ -7960,7 +7960,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_responsive_page_size_responsivepagesizes",
-      "community": 9,
+      "community": 447,
       "norm_label": "responsivepagesizes"
     },
     {
@@ -7980,7 +7980,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_responsive_page_size_readresponsivepagesizes",
-      "community": 9,
+      "community": 447,
       "norm_label": "readresponsivepagesizes()"
     },
     {
@@ -7990,7 +7990,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_responsive_page_size_catalogpagelimitforviewport",
-      "community": 9,
+      "community": 447,
       "norm_label": "catalogpagelimitforviewport()"
     },
     {
@@ -8000,7 +8000,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "src_responsive_page_size_catalogcolumnsforviewport",
-      "community": 9,
+      "community": 447,
       "norm_label": "catalogcolumnsforviewport()"
     },
     {
@@ -8010,7 +8010,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "src_responsive_page_size_versionpagelimitforviewport",
-      "community": 9,
+      "community": 447,
       "norm_label": "versionpagelimitforviewport()"
     },
     {
@@ -8070,7 +8070,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_shortcuts_shortcutplatform",
-      "community": 7,
+      "community": 71,
       "norm_label": "shortcutplatform"
     },
     {
@@ -8090,7 +8090,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_shortcuts_shortcutcommandid",
-      "community": 7,
+      "community": 71,
       "norm_label": "shortcutcommandid"
     },
     {
@@ -8430,7 +8430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_tauri_runtime_istauriruntime",
-      "community": 70,
+      "community": 9,
       "norm_label": "istauriruntime()"
     },
     {
@@ -8520,7 +8520,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_use_account_docks_controller_accountdockscontrolleroptions",
-      "community": 41,
+      "community": 70,
       "norm_label": "accountdockscontrolleroptions"
     },
     {
@@ -8530,7 +8530,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_use_account_docks_controller_useaccountdockscontroller",
-      "community": 9,
+      "community": 70,
       "norm_label": "useaccountdockscontroller()"
     },
     {
@@ -8550,7 +8550,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_auth_controller",
-      "community": 8,
+      "community": 9,
       "norm_label": "use-auth-controller.ts"
     },
     {
@@ -8560,7 +8560,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_use_auth_controller_authprovider",
-      "community": 8,
+      "community": 9,
       "norm_label": "authprovider"
     },
     {
@@ -8570,7 +8570,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_use_auth_controller_authcontrolleroptions",
-      "community": 8,
+      "community": 71,
       "norm_label": "authcontrolleroptions"
     },
     {
@@ -8590,7 +8590,7 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "src_use_auth_controller_authcommandid",
-      "community": 8,
+      "community": 9,
       "norm_label": "authcommandid()"
     },
     {
@@ -8600,7 +8600,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "src_use_auth_controller_iscurrentauthrequest",
-      "community": 8,
+      "community": 9,
       "norm_label": "iscurrentauthrequest()"
     },
     {
@@ -8610,7 +8610,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "src_use_auth_controller_finishauthrequest",
-      "community": 8,
+      "community": 9,
       "norm_label": "finishauthrequest()"
     },
     {
@@ -8620,7 +8620,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "src_use_auth_controller_applysuccessfullogin",
-      "community": 8,
+      "community": 9,
       "norm_label": "applysuccessfullogin()"
     },
     {
@@ -8650,7 +8650,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_use_catalog_controller_detailcontrolleroptions",
-      "community": 351,
+      "community": 70,
       "norm_label": "detailcontrolleroptions"
     },
     {
@@ -8730,7 +8730,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_desktop_state_sync",
-      "community": 351,
+      "community": 9,
       "norm_label": "use-desktop-state-sync.ts"
     },
     {
@@ -8740,7 +8740,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_use_desktop_state_sync_desktopstatesyncoptions",
-      "community": 351,
+      "community": 9,
       "norm_label": "desktopstatesyncoptions"
     },
     {
@@ -8760,7 +8760,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_dock_command_controller",
-      "community": 41,
+      "community": 2,
       "norm_label": "use-dock-command-controller.ts"
     },
     {
@@ -8770,7 +8770,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_use_dock_command_controller_dockcommandcontrolleroptions",
-      "community": 41,
+      "community": 2,
       "norm_label": "dockcommandcontrolleroptions"
     },
     {
@@ -8860,7 +8860,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "src_use_dock_navigation_history_usedocknavigationhistory",
-      "community": 351,
+      "community": 9,
       "norm_label": "usedocknavigationhistory()"
     },
     {
@@ -8930,7 +8930,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_dock_workspace_model",
-      "community": 41,
+      "community": 70,
       "norm_label": "use-dock-workspace-model.ts"
     },
     {
@@ -8940,7 +8940,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_use_dock_workspace_model_dockworkspacemodeloptions",
-      "community": 41,
+      "community": 70,
       "norm_label": "dockworkspacemodeloptions"
     },
     {
@@ -8950,7 +8950,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_use_dock_workspace_model_usedockworkspacemodel",
-      "community": 41,
+      "community": 70,
       "norm_label": "usedockworkspacemodel()"
     },
     {
@@ -8960,7 +8960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_installed_dock_metadata",
-      "community": 41,
+      "community": 70,
       "norm_label": "use-installed-dock-metadata.ts"
     },
     {
@@ -8970,7 +8970,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_use_installed_dock_metadata_installeddockmetadataoptions",
-      "community": 41,
+      "community": 70,
       "norm_label": "installeddockmetadataoptions"
     },
     {
@@ -8980,7 +8980,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_use_installed_dock_metadata_useinstalleddockmetadata",
-      "community": 41,
+      "community": 9,
       "norm_label": "useinstalleddockmetadata()"
     },
     {
@@ -9050,7 +9050,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_use_navigation_controller_usenavigationcontroller",
-      "community": 351,
+      "community": 9,
       "norm_label": "usenavigationcontroller()"
     },
     {
@@ -9310,7 +9310,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_use_project_runtime_controller_useprojectruntimecontroller",
-      "community": 9,
+      "community": 2,
       "norm_label": "useprojectruntimecontroller()"
     },
     {
@@ -10590,7 +10590,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_auth",
-      "community": 362,
+      "community": 226,
       "norm_label": "auth.ts"
     },
     {
@@ -11230,7 +11230,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "src_change_output_updatecheckcommandresult",
-      "community": 362,
+      "community": 3,
       "norm_label": "updatecheckcommandresult()"
     },
     {
@@ -11510,7 +11510,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_errors",
-      "community": 362,
+      "community": 3,
       "norm_label": "cli-errors.ts"
     },
     {
@@ -11520,7 +11520,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_errors_errormessage",
-      "community": 362,
+      "community": 3,
       "norm_label": "errormessage()"
     },
     {
@@ -11530,7 +11530,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_options",
-      "community": 165,
+      "community": 362,
       "norm_label": "cli-options.ts"
     },
     {
@@ -11540,7 +11540,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_cli_options_clicommandnames",
-      "community": 165,
+      "community": 362,
       "norm_label": "clicommandnames"
     },
     {
@@ -11560,7 +11560,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_cli_options_parsedeployref",
-      "community": 165,
+      "community": 362,
       "norm_label": "parsedeployref()"
     },
     {
@@ -11570,7 +11570,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_cli_options_deployoptionvalue",
-      "community": 165,
+      "community": 362,
       "norm_label": "deployoptionvalue()"
     },
     {
@@ -11580,7 +11580,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_cli_options_parseinstallref",
-      "community": 165,
+      "community": 362,
       "norm_label": "parseinstallref()"
     },
     {
@@ -11590,7 +11590,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "src_cli_options_parseinstalleddockid",
-      "community": 165,
+      "community": 362,
       "norm_label": "parseinstalleddockid()"
     },
     {
@@ -11600,7 +11600,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "src_cli_options_dockidfromreference",
-      "community": 165,
+      "community": 362,
       "norm_label": "dockidfromreference()"
     },
     {
@@ -11610,7 +11610,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "src_cli_options_parseauthprovider",
-      "community": 165,
+      "community": 362,
       "norm_label": "parseauthprovider()"
     },
     {
@@ -11620,7 +11620,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "src_cli_options_resolvecliplatform",
-      "community": 165,
+      "community": 27,
       "norm_label": "resolvecliplatform()"
     },
     {
@@ -11630,7 +11630,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "src_cli_options_resolvedeployplatform",
-      "community": 165,
+      "community": 362,
       "norm_label": "resolvedeployplatform()"
     },
     {
@@ -11640,7 +11640,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "src_cli_options_inferdeployplatformfrommanifestpath",
-      "community": 165,
+      "community": 362,
       "norm_label": "inferdeployplatformfrommanifestpath()"
     },
     {
@@ -11650,7 +11650,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_project_commands",
-      "community": 362,
+      "community": 27,
       "norm_label": "cli-project-commands.ts"
     },
     {
@@ -11670,7 +11670,7 @@
       "source_location": "L179",
       "_origin": "ast",
       "id": "src_cli_project_commands_printversion",
-      "community": 362,
+      "community": 27,
       "norm_label": "printversion()"
     },
     {
@@ -11680,7 +11680,7 @@
       "source_location": "L198",
       "_origin": "ast",
       "id": "src_cli_project_commands_versioncommandresult",
-      "community": 362,
+      "community": 27,
       "norm_label": "versioncommandresult()"
     },
     {
@@ -11850,7 +11850,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_dock_install_report",
-      "community": 25,
+      "community": 93,
       "norm_label": "dock-install-report.ts"
     },
     {
@@ -11870,7 +11870,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "app_dock_install_report_installreport",
-      "community": 25,
+      "community": 93,
       "norm_label": "installreport"
     },
     {
@@ -11960,7 +11960,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "app_dock_installer_runtimecommandtarget",
-      "community": 0,
+      "community": 25,
       "norm_label": "runtimecommandtarget()"
     },
     {
@@ -11970,7 +11970,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "app_dock_installer_installedruntimebindir",
-      "community": 0,
+      "community": 25,
       "norm_label": "installedruntimebindir()"
     },
     {
@@ -12024,20 +12024,30 @@
       "norm_label": ".install()"
     },
     {
+      "label": ".rollbackNewInstall()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L363",
+      "_origin": "ast",
+      "id": "app_dock_installer_dockinstaller_rollbacknewinstall",
+      "community": 25,
+      "norm_label": ".rollbacknewinstall()"
+    },
+    {
       "label": ".uninstall()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L355",
+      "source_location": "L391",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_uninstall",
-      "community": 0,
+      "community": 25,
       "norm_label": ".uninstall()"
     },
     {
       "label": ".collectManifestFiles()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L434",
+      "source_location": "L470",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_collectmanifestfiles",
       "community": 25,
@@ -12047,7 +12057,7 @@
       "label": ".seedWorkdir()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L446",
+      "source_location": "L482",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_seedworkdir",
       "community": 25,
@@ -12057,27 +12067,27 @@
       "label": ".removeDockTools()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L457",
+      "source_location": "L493",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_removedocktools",
-      "community": 0,
+      "community": 25,
       "norm_label": ".removedocktools()"
     },
     {
       "label": ".removeUnusedRuntimeShims()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L480",
+      "source_location": "L516",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_removeunusedruntimeshims",
-      "community": 0,
+      "community": 25,
       "norm_label": ".removeunusedruntimeshims()"
     },
     {
       "label": ".progress()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L528",
+      "source_location": "L564",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_progress",
       "community": 25,
@@ -12087,7 +12097,7 @@
       "label": ".nestedProgress()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L535",
+      "source_location": "L571",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_nestedprogress",
       "community": 25,
@@ -12410,7 +12420,7 @@
       "source_location": "L357",
       "_origin": "ast",
       "id": "domain_manifest_dependencyspec",
-      "community": 25,
+      "community": 20,
       "norm_label": "dependencyspec"
     },
     {
@@ -12450,7 +12460,7 @@
       "source_location": "L361",
       "_origin": "ast",
       "id": "domain_manifest_taskstep",
-      "community": 22,
+      "community": 5,
       "norm_label": "taskstep"
     },
     {
@@ -12470,7 +12480,7 @@
       "source_location": "L363",
       "_origin": "ast",
       "id": "domain_manifest_dockmanifest",
-      "community": 6,
+      "community": 93,
       "norm_label": "dockmanifest"
     },
     {
@@ -12590,7 +12600,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_runtime_names",
-      "community": 354,
+      "community": 22,
       "norm_label": "runtime-names.ts"
     },
     {
@@ -12600,7 +12610,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_runtime_names_supportedruntimenames",
-      "community": 354,
+      "community": 22,
       "norm_label": "supportedruntimenames"
     },
     {
@@ -12610,7 +12620,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "domain_runtime_names_supportedruntimename",
-      "community": 354,
+      "community": 22,
       "norm_label": "supportedruntimename"
     },
     {
@@ -12620,7 +12630,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "domain_runtime_names_supportedruntimenameset",
-      "community": 354,
+      "community": 22,
       "norm_label": "supportedruntimenameset"
     },
     {
@@ -12630,7 +12640,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "domain_runtime_names_issupportedruntimename",
-      "community": 354,
+      "community": 22,
       "norm_label": "issupportedruntimename()"
     },
     {
@@ -12690,7 +12700,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_state_store",
-      "community": 20,
+      "community": 25,
       "norm_label": "state-store.ts"
     },
     {
@@ -12700,7 +12710,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "domain_state_store_managedmode",
-      "community": 20,
+      "community": 0,
       "norm_label": "managedmode"
     },
     {
@@ -12710,7 +12720,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "domain_state_store_appliedfilerecord",
-      "community": 20,
+      "community": 0,
       "norm_label": "appliedfilerecord"
     },
     {
@@ -12730,7 +12740,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "domain_state_store_installedruntimerecord",
-      "community": 20,
+      "community": 25,
       "norm_label": "installedruntimerecord"
     },
     {
@@ -12740,7 +12750,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "domain_state_store_installedtoolrecord",
-      "community": 20,
+      "community": 25,
       "norm_label": "installedtoolrecord"
     },
     {
@@ -12750,7 +12760,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "domain_state_store_installeddependencyrecord",
-      "community": 20,
+      "community": 25,
       "norm_label": "installeddependencyrecord"
     },
     {
@@ -12760,7 +12770,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "domain_state_store_projectstate",
-      "community": 20,
+      "community": 25,
       "norm_label": "projectstate"
     },
     {
@@ -12770,7 +12780,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "domain_state_store_lockstate",
-      "community": 20,
+      "community": 25,
       "norm_label": "lockstate"
     },
     {
@@ -12900,7 +12910,7 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "domain_state_store_normalizeinstalleddockrecord",
-      "community": 20,
+      "community": 25,
       "norm_label": "normalizeinstalleddockrecord()"
     },
     {
@@ -12910,7 +12920,7 @@
       "source_location": "L175",
       "_origin": "ast",
       "id": "domain_state_store_lstatifpresent",
-      "community": 20,
+      "community": 312,
       "norm_label": "lstatifpresent()"
     },
     {
@@ -12920,7 +12930,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "files_checksum",
-      "community": 20,
+      "community": 0,
       "norm_label": "checksum.ts"
     },
     {
@@ -12930,7 +12940,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "files_checksum_sha256bytes",
-      "community": 20,
+      "community": 0,
       "norm_label": "sha256bytes()"
     },
     {
@@ -12940,7 +12950,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "files_checksum_filechecksum",
-      "community": 20,
+      "community": 0,
       "norm_label": "filechecksum()"
     },
     {
@@ -12950,7 +12960,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "files_checksum_textchecksum",
-      "community": 20,
+      "community": 0,
       "norm_label": "textchecksum()"
     },
     {
@@ -12970,7 +12980,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "files_file_candidate_filecandidate",
-      "community": 20,
+      "community": 0,
       "norm_label": "filecandidate"
     },
     {
@@ -13130,7 +13140,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "files_file_plan",
-      "community": 20,
+      "community": 0,
       "norm_label": "file-plan.ts"
     },
     {
@@ -13140,7 +13150,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "files_file_plan_fileapplysummary",
-      "community": 25,
+      "community": 0,
       "norm_label": "fileapplysummary"
     },
     {
@@ -13150,7 +13160,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "files_file_plan_fileplan",
-      "community": 20,
+      "community": 0,
       "norm_label": "fileplan"
     },
     {
@@ -13160,7 +13170,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "files_file_plan_fileplan_constructor",
-      "community": 20,
+      "community": 0,
       "norm_label": ".constructor()"
     },
     {
@@ -13170,7 +13180,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "files_file_plan_fileplan_verifypriorstate",
-      "community": 20,
+      "community": 0,
       "norm_label": ".verifypriorstate()"
     },
     {
@@ -13180,7 +13190,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "files_file_plan_fileplan_preflight",
-      "community": 20,
+      "community": 0,
       "norm_label": ".preflight()"
     },
     {
@@ -13190,7 +13200,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "files_file_plan_fileplan_apply",
-      "community": 20,
+      "community": 0,
       "norm_label": ".apply()"
     },
     {
@@ -13200,7 +13210,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "files_file_plan_fileplan_verifyrecord",
-      "community": 20,
+      "community": 0,
       "norm_label": ".verifyrecord()"
     },
     {
@@ -13210,7 +13220,7 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "files_file_plan_fileplan_preflightcandidate",
-      "community": 20,
+      "community": 0,
       "norm_label": ".preflightcandidate()"
     },
     {
@@ -13220,7 +13230,7 @@
       "source_location": "L155",
       "_origin": "ast",
       "id": "files_file_plan_fileplan_applycandidate",
-      "community": 20,
+      "community": 0,
       "norm_label": ".applycandidate()"
     },
     {
@@ -13230,7 +13240,7 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "files_file_plan_fileplan_removerecord",
-      "community": 20,
+      "community": 0,
       "norm_label": ".removerecord()"
     },
     {
@@ -13240,7 +13250,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "files_file_plan_fileplan_priorfor",
-      "community": 20,
+      "community": 0,
       "norm_label": ".priorfor()"
     },
     {
@@ -13250,7 +13260,7 @@
       "source_location": "L189",
       "_origin": "ast",
       "id": "files_file_plan_fileplan_assertuniquecandidates",
-      "community": 20,
+      "community": 0,
       "norm_label": ".assertuniquecandidates()"
     },
     {
@@ -13260,7 +13270,7 @@
       "source_location": "L200",
       "_origin": "ast",
       "id": "files_file_plan_fileplan_target",
-      "community": 20,
+      "community": 0,
       "norm_label": ".target()"
     },
     {
@@ -13270,7 +13280,7 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "files_file_plan_recordfromcandidate",
-      "community": 20,
+      "community": 0,
       "norm_label": "recordfromcandidate()"
     },
     {
@@ -13280,7 +13290,7 @@
       "source_location": "L219",
       "_origin": "ast",
       "id": "files_file_plan_candidatekey",
-      "community": 20,
+      "community": 0,
       "norm_label": "candidatekey()"
     },
     {
@@ -13290,7 +13300,7 @@
       "source_location": "L225",
       "_origin": "ast",
       "id": "files_file_plan_recordkey",
-      "community": 20,
+      "community": 0,
       "norm_label": "recordkey()"
     },
     {
@@ -13300,7 +13310,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "files_file_plan_requiremarkerid",
-      "community": 20,
+      "community": 0,
       "norm_label": "requiremarkerid()"
     },
     {
@@ -13310,7 +13320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "files_managed_block",
-      "community": 20,
+      "community": 0,
       "norm_label": "managed-block.ts"
     },
     {
@@ -13320,7 +13330,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "files_managed_block_managedblock",
-      "community": 20,
+      "community": 0,
       "norm_label": "managedblock"
     },
     {
@@ -13330,7 +13340,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec",
-      "community": 349,
+      "community": 0,
       "norm_label": "managedblockcodec"
     },
     {
@@ -13340,7 +13350,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_constructor",
-      "community": 349,
+      "community": 0,
       "norm_label": ".constructor()"
     },
     {
@@ -13350,7 +13360,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_marker",
-      "community": 349,
+      "community": 0,
       "norm_label": ".marker()"
     },
     {
@@ -13360,7 +13370,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_blockfor",
-      "community": 349,
+      "community": 0,
       "norm_label": ".blockfor()"
     },
     {
@@ -13370,7 +13380,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_extract",
-      "community": 349,
+      "community": 0,
       "norm_label": ".extract()"
     },
     {
@@ -13380,7 +13390,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_currentchecksum",
-      "community": 349,
+      "community": 0,
       "norm_label": ".currentchecksum()"
     },
     {
@@ -13390,7 +13400,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_upsert",
-      "community": 349,
+      "community": 0,
       "norm_label": ".upsert()"
     },
     {
@@ -13400,7 +13410,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_remove",
-      "community": 349,
+      "community": 0,
       "norm_label": ".remove()"
     },
     {
@@ -13410,7 +13420,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "files_managed_block_assertnoopendockmarker",
-      "community": 349,
+      "community": 0,
       "norm_label": "assertnoopendockmarker()"
     },
     {
@@ -13460,7 +13470,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "files_path_utils_assertsafedependencypath",
-      "community": 6,
+      "community": 20,
       "norm_label": "assertsafedependencypath()"
     },
     {
@@ -13500,7 +13510,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "files_path_utils_ensurerealdirectorypath",
-      "community": 93,
+      "community": 29,
       "norm_label": "ensurerealdirectorypath()"
     },
     {
@@ -13510,7 +13520,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "files_path_utils_assertrealdirectorypath",
-      "community": 0,
+      "community": 20,
       "norm_label": "assertrealdirectorypath()"
     },
     {
@@ -13590,7 +13600,7 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "files_path_utils_safedockdirectoryname",
-      "community": 22,
+      "community": 93,
       "norm_label": "safedockdirectoryname()"
     },
     {
@@ -13640,7 +13650,7 @@
       "source_location": "L319",
       "_origin": "ast",
       "id": "files_path_utils_isprotecteddependencytarget",
-      "community": 6,
+      "community": 0,
       "norm_label": "isprotecteddependencytarget()"
     },
     {
@@ -13920,7 +13930,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "runtime_command_runner_commandrunoptions",
-      "community": 5,
+      "community": 25,
       "norm_label": "commandrunoptions"
     },
     {
@@ -13950,7 +13960,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "runtime_command_runner_combinedoutput",
-      "community": 22,
+      "community": 5,
       "norm_label": "combinedoutput()"
     },
     {
@@ -13960,7 +13970,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "runtime_command_runner_failuremessage",
-      "community": 22,
+      "community": 5,
       "norm_label": "failuremessage()"
     },
     {
@@ -13970,7 +13980,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "runtime_command_runner_extractversion",
-      "community": 22,
+      "community": 5,
       "norm_label": "extractversion()"
     },
     {
@@ -13980,7 +13990,7 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "runtime_command_runner_satisfiesversion",
-      "community": 22,
+      "community": 5,
       "norm_label": "satisfiesversion()"
     },
     {
@@ -14120,7 +14130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_command_shim",
-      "community": 93,
+      "community": 29,
       "norm_label": "command-shim.ts"
     },
     {
@@ -14130,7 +14140,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "runtime_command_shim_commandshimowner",
-      "community": 93,
+      "community": 29,
       "norm_label": "commandshimowner"
     },
     {
@@ -14140,7 +14150,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "runtime_command_shim_createprojectcommandshim",
-      "community": 93,
+      "community": 29,
       "norm_label": "createprojectcommandshim()"
     },
     {
@@ -14150,7 +14160,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "runtime_command_shim_removeprojectcommandshim",
-      "community": 93,
+      "community": 29,
       "norm_label": "removeprojectcommandshim()"
     },
     {
@@ -14160,7 +14170,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "runtime_command_shim_assertsafecommandname",
-      "community": 93,
+      "community": 29,
       "norm_label": "assertsafecommandname()"
     },
     {
@@ -14170,7 +14180,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "runtime_command_shim_assertshimwritable",
-      "community": 93,
+      "community": 29,
       "norm_label": "assertshimwritable()"
     },
     {
@@ -14180,7 +14190,7 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "runtime_command_shim_readshimowner",
-      "community": 93,
+      "community": 29,
       "norm_label": "readshimowner()"
     },
     {
@@ -14190,7 +14200,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "runtime_command_shim_shimownerline",
-      "community": 93,
+      "community": 29,
       "norm_label": "shimownerline()"
     },
     {
@@ -14200,7 +14210,7 @@
       "source_location": "L107",
       "_origin": "ast",
       "id": "runtime_command_shim_posixshim",
-      "community": 93,
+      "community": 29,
       "norm_label": "posixshim()"
     },
     {
@@ -14210,7 +14220,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "runtime_command_shim_windowsshim",
-      "community": 93,
+      "community": 29,
       "norm_label": "windowsshim()"
     },
     {
@@ -14220,7 +14230,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "runtime_command_shim_shimpaths",
-      "community": 93,
+      "community": 29,
       "norm_label": "shimpaths()"
     },
     {
@@ -14230,7 +14240,7 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "runtime_command_shim_shquote",
-      "community": 93,
+      "community": 29,
       "norm_label": "shquote()"
     },
     {
@@ -14240,7 +14250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_dependency_runner",
-      "community": 25,
+      "community": 20,
       "norm_label": "dependency-runner.ts"
     },
     {
@@ -14250,7 +14260,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencyrecord",
-      "community": 25,
+      "community": 20,
       "norm_label": "dependencyrecord"
     },
     {
@@ -14270,7 +14280,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencyrunresult",
-      "community": 22,
+      "community": 20,
       "norm_label": "dependencyrunresult"
     },
     {
@@ -14280,7 +14290,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencycommand",
-      "community": 25,
+      "community": 20,
       "norm_label": "dependencycommand"
     },
     {
@@ -14290,7 +14300,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencyrunner",
-      "community": 25,
+      "community": 20,
       "norm_label": "dependencyrunner"
     },
     {
@@ -14300,7 +14310,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencyrunner_run",
-      "community": 25,
+      "community": 20,
       "norm_label": ".run()"
     },
     {
@@ -14310,7 +14320,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencyrunner_checkdependency",
-      "community": 25,
+      "community": 20,
       "norm_label": ".checkdependency()"
     },
     {
@@ -14320,24 +14330,24 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencyrunner_installdependency",
-      "community": 25,
+      "community": 20,
       "norm_label": ".installdependency()"
     },
     {
       "label": ".progress()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
-      "source_location": "L164",
+      "source_location": "L169",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencyrunner_progress",
-      "community": 25,
+      "community": 20,
       "norm_label": ".progress()"
     },
     {
       "label": "removeInstalledDependencyOutputs()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
-      "source_location": "L187",
+      "source_location": "L192",
       "_origin": "ast",
       "id": "runtime_dependency_runner_removeinstalleddependencyoutputs",
       "community": 25,
@@ -14347,81 +14357,171 @@
       "label": "dependencyStepId()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
-      "source_location": "L201",
+      "source_location": "L206",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencystepid",
-      "community": 25,
+      "community": 20,
       "norm_label": "dependencystepid()"
     },
     {
       "label": "resolveDependencyPath()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
-      "source_location": "L205",
+      "source_location": "L210",
       "_origin": "ast",
       "id": "runtime_dependency_runner_resolvedependencypath",
-      "community": 25,
+      "community": 20,
       "norm_label": "resolvedependencypath()"
     },
     {
       "label": "runDependencyCommand()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
-      "source_location": "L260",
+      "source_location": "L265",
       "_origin": "ast",
       "id": "runtime_dependency_runner_rundependencycommand",
-      "community": 5,
+      "community": 20,
       "norm_label": "rundependencycommand()"
     },
     {
       "label": "removeDependencyOutputsForRecord()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
-      "source_location": "L299",
+      "source_location": "L310",
       "_origin": "ast",
       "id": "runtime_dependency_runner_removedependencyoutputsforrecord",
-      "community": 25,
+      "community": 20,
       "norm_label": "removedependencyoutputsforrecord()"
     },
     {
       "label": "removeDependencyOutputsForSpec()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
-      "source_location": "L312",
+      "source_location": "L323",
       "_origin": "ast",
       "id": "runtime_dependency_runner_removedependencyoutputsforspec",
-      "community": 25,
+      "community": 20,
       "norm_label": "removedependencyoutputsforspec()"
     },
     {
       "label": "removeOutputPaths()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
-      "source_location": "L321",
+      "source_location": "L332",
       "_origin": "ast",
       "id": "runtime_dependency_runner_removeoutputpaths",
-      "community": 25,
+      "community": 20,
       "norm_label": "removeoutputpaths()"
     },
     {
       "label": "dependencyOutputPaths()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
-      "source_location": "L329",
+      "source_location": "L340",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencyoutputpaths",
-      "community": 25,
+      "community": 20,
       "norm_label": "dependencyoutputpaths()"
     },
     {
       "label": "outputPathsForManager()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
-      "source_location": "L333",
+      "source_location": "L344",
       "_origin": "ast",
       "id": "runtime_dependency_runner_outputpathsformanager",
-      "community": 25,
+      "community": 20,
       "norm_label": "outputpathsformanager()"
+    },
+    {
+      "label": "process-spawn.ts",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "runtime_process_spawn",
+      "community": 20,
+      "norm_label": "process-spawn.ts"
+    },
+    {
+      "label": "resolveProgramFromPath()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "runtime_process_spawn_resolveprogramfrompath",
+      "community": 20,
+      "norm_label": "resolveprogramfrompath()"
+    },
+    {
+      "label": "spawnOpenDockCommand()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "runtime_process_spawn_spawnopendockcommand",
+      "community": 20,
+      "norm_label": "spawnopendockcommand()"
+    },
+    {
+      "label": "programCandidates()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L47",
+      "_origin": "ast",
+      "id": "runtime_process_spawn_programcandidates",
+      "community": 20,
+      "norm_label": "programcandidates()"
+    },
+    {
+      "label": "pathDelimiter()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L60",
+      "_origin": "ast",
+      "id": "runtime_process_spawn_pathdelimiter",
+      "community": 20,
+      "norm_label": "pathdelimiter()"
+    },
+    {
+      "label": "hasPathSeparator()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L64",
+      "_origin": "ast",
+      "id": "runtime_process_spawn_haspathseparator",
+      "community": 20,
+      "norm_label": "haspathseparator()"
+    },
+    {
+      "label": "isWindowsBatchFile()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "runtime_process_spawn_iswindowsbatchfile",
+      "community": 20,
+      "norm_label": "iswindowsbatchfile()"
+    },
+    {
+      "label": "windowsCommandLine()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L72",
+      "_origin": "ast",
+      "id": "runtime_process_spawn_windowscommandline",
+      "community": 20,
+      "norm_label": "windowscommandline()"
+    },
+    {
+      "label": "windowsCommandArg()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L76",
+      "_origin": "ast",
+      "id": "runtime_process_spawn_windowscommandarg",
+      "community": 20,
+      "norm_label": "windowscommandarg()"
     },
     {
       "label": "progress.ts",
@@ -14470,7 +14570,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "runtime_progress_reportprogress",
-      "community": 25,
+      "community": 5,
       "norm_label": "reportprogress()"
     },
     {
@@ -14490,7 +14590,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "runtime_project_layout_projectbindir",
-      "community": 93,
+      "community": 29,
       "norm_label": "projectbindir()"
     },
     {
@@ -14560,7 +14660,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "runtime_project_layout_projectcommandpathentries",
-      "community": 22,
+      "community": 93,
       "norm_label": "projectcommandpathentries()"
     },
     {
@@ -14570,7 +14670,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "runtime_project_layout_prependpathentries",
-      "community": 5,
+      "community": 93,
       "norm_label": "prependpathentries()"
     },
     {
@@ -14580,7 +14680,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "runtime_project_layout_relativeprojectpath",
-      "community": 93,
+      "community": 22,
       "norm_label": "relativeprojectpath()"
     },
     {
@@ -14590,7 +14690,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "runtime_project_layout_uniquepathentries",
-      "community": 5,
+      "community": 93,
       "norm_label": "uniquepathentries()"
     },
     {
@@ -14600,7 +14700,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "runtime_project_layout_saferuntimesegment",
-      "community": 93,
+      "community": 353,
       "norm_label": "saferuntimesegment()"
     },
     {
@@ -14630,7 +14730,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "runtime_requirement_runner_runtimerecord",
-      "community": 22,
+      "community": 93,
       "norm_label": "runtimerecord"
     },
     {
@@ -14660,7 +14760,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunner_constructor",
-      "community": 22,
+      "community": 44,
       "norm_label": ".constructor()"
     },
     {
@@ -14700,7 +14800,7 @@
       "source_location": "L179",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunner_evaluate",
-      "community": 22,
+      "community": 5,
       "norm_label": ".evaluate()"
     },
     {
@@ -14880,7 +14980,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "runtime_runtime_installer_runtimeinstaller",
-      "community": 353,
+      "community": 44,
       "norm_label": "runtimeinstaller"
     },
     {
@@ -14960,7 +15060,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "runtime_runtime_installer_opendockruntimeinstaller",
-      "community": 353,
+      "community": 44,
       "norm_label": "opendockruntimeinstaller"
     },
     {
@@ -15400,7 +15500,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_runtime_requirements",
-      "community": 354,
+      "community": 22,
       "norm_label": "runtime-requirements.ts"
     },
     {
@@ -15410,7 +15510,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "runtime_runtime_requirements_runtimedefinition",
-      "community": 354,
+      "community": 22,
       "norm_label": "runtimedefinition"
     },
     {
@@ -15420,7 +15520,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "runtime_runtime_requirements_runtimedefinitions",
-      "community": 354,
+      "community": 22,
       "norm_label": "runtimedefinitions"
     },
     {
@@ -15430,7 +15530,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_step_report",
-      "community": 22,
+      "community": 93,
       "norm_label": "step-report.ts"
     },
     {
@@ -15440,7 +15540,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_step_report_stepreport",
-      "community": 22,
+      "community": 93,
       "norm_label": "stepreport"
     },
     {
@@ -15450,7 +15550,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "runtime_step_report_stepprogresspercent",
-      "community": 22,
+      "community": 93,
       "norm_label": "stepprogresspercent()"
     },
     {
@@ -15550,7 +15650,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_task_runner",
-      "community": 22,
+      "community": 93,
       "norm_label": "task-runner.ts"
     },
     {
@@ -15560,7 +15660,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunresult",
-      "community": 22,
+      "community": 93,
       "norm_label": "taskrunresult"
     },
     {
@@ -15580,7 +15680,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner",
-      "community": 22,
+      "community": 5,
       "norm_label": "taskrunner"
     },
     {
@@ -15590,7 +15690,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_constructor",
-      "community": 22,
+      "community": 5,
       "norm_label": ".constructor()"
     },
     {
@@ -15600,7 +15700,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_run",
-      "community": 22,
+      "community": 5,
       "norm_label": ".run()"
     },
     {
@@ -15610,7 +15710,7 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_dockworkdir",
-      "community": 22,
+      "community": 93,
       "norm_label": ".dockworkdir()"
     },
     {
@@ -15620,7 +15720,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_runsetupsteps",
-      "community": 22,
+      "community": 5,
       "norm_label": ".runsetupsteps()"
     },
     {
@@ -15630,7 +15730,7 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_finishsetupstep",
-      "community": 22,
+      "community": 5,
       "norm_label": ".finishsetupstep()"
     },
     {
@@ -15640,7 +15740,7 @@
       "source_location": "L246",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_progress",
-      "community": 22,
+      "community": 5,
       "norm_label": ".progress()"
     },
     {
@@ -15650,7 +15750,7 @@
       "source_location": "L268",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_rundoctorsteps",
-      "community": 22,
+      "community": 5,
       "norm_label": ".rundoctorsteps()"
     },
     {
@@ -15660,7 +15760,7 @@
       "source_location": "L322",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_resolveworkdir",
-      "community": 22,
+      "community": 5,
       "norm_label": ".resolveworkdir()"
     },
     {
@@ -15670,7 +15770,7 @@
       "source_location": "L335",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_evaluatestepcheck",
-      "community": 22,
+      "community": 5,
       "norm_label": ".evaluatestepcheck()"
     },
     {
@@ -15680,7 +15780,7 @@
       "source_location": "L371",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_collectstepexports",
-      "community": 22,
+      "community": 5,
       "norm_label": ".collectstepexports()"
     },
     {
@@ -15690,7 +15790,7 @@
       "source_location": "L380",
       "_origin": "ast",
       "id": "runtime_task_runner_stepname",
-      "community": 22,
+      "community": 5,
       "norm_label": "stepname()"
     },
     {
@@ -15770,7 +15870,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunresult",
-      "community": 22,
+      "community": 93,
       "norm_label": "toolrunresult"
     },
     {
@@ -15917,7 +16017,7 @@
       "label": "packageSpecifier()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/tool-runner.ts",
-      "source_location": "L292",
+      "source_location": "L298",
       "_origin": "ast",
       "id": "runtime_tool_runner_packagespecifier",
       "community": 93,
@@ -15927,7 +16027,7 @@
       "label": "resolveInstalledCommand()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/tool-runner.ts",
-      "source_location": "L302",
+      "source_location": "L308",
       "_origin": "ast",
       "id": "runtime_tool_runner_resolveinstalledcommand",
       "community": 93,
@@ -15937,7 +16037,7 @@
       "label": "createPythonToolWrapper()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/tool-runner.ts",
-      "source_location": "L337",
+      "source_location": "L343",
       "_origin": "ast",
       "id": "runtime_tool_runner_createpythontoolwrapper",
       "community": 93,
@@ -15947,7 +16047,7 @@
       "label": "shQuote()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/runtime/tool-runner.ts",
-      "source_location": "L367",
+      "source_location": "L373",
       "_origin": "ast",
       "id": "runtime_tool_runner_shquote",
       "community": 93,
@@ -15990,7 +16090,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_deploy_package_createdeployarchive",
-      "community": 358,
+      "community": 80,
       "norm_label": "createdeployarchive()"
     },
     {
@@ -16150,7 +16250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_installed_dock_updates",
-      "community": 165,
+      "community": 3,
       "norm_label": "installed-dock-updates.ts"
     },
     {
@@ -16160,7 +16260,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_installed_dock_updates_resolvelatestdockversion",
-      "community": 165,
+      "community": 111,
       "norm_label": "resolvelatestdockversion()"
     },
     {
@@ -16180,7 +16280,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_installed_dock_updates_checkinstalleddockupdates",
-      "community": 165,
+      "community": 3,
       "norm_label": "checkinstalleddockupdates()"
     },
     {
@@ -16190,7 +16290,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_logging",
-      "community": 362,
+      "community": 226,
       "norm_label": "logging.ts"
     },
     {
@@ -16200,7 +16300,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_logging_runstatus",
-      "community": 362,
+      "community": 226,
       "norm_label": "runstatus"
     },
     {
@@ -16210,7 +16310,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_logging_runlog",
-      "community": 362,
+      "community": 226,
       "norm_label": "runlog"
     },
     {
@@ -16220,7 +16320,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_logging_appendrunlog",
-      "community": 362,
+      "community": 226,
       "norm_label": "appendrunlog()"
     },
     {
@@ -16230,7 +16330,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_logging_readprojectlogs",
-      "community": 362,
+      "community": 226,
       "norm_label": "readprojectlogs()"
     },
     {
@@ -16240,7 +16340,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_logging_projectlogpath",
-      "community": 362,
+      "community": 226,
       "norm_label": "projectlogpath()"
     },
     {
@@ -16250,7 +16350,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_logging_canonicalprojectpath",
-      "community": 362,
+      "community": 226,
       "norm_label": "canonicalprojectpath()"
     },
     {
@@ -16260,7 +16360,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_paths",
-      "community": 362,
+      "community": 226,
       "norm_label": "paths.ts"
     },
     {
@@ -16270,7 +16370,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_paths_dataroot",
-      "community": 362,
+      "community": 226,
       "norm_label": "dataroot()"
     },
     {
@@ -16290,7 +16390,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_platform",
-      "community": 350,
+      "community": 25,
       "norm_label": "platform.ts"
     },
     {
@@ -16300,7 +16400,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_platform_supported_platforms",
-      "community": 350,
+      "community": 25,
       "norm_label": "supported_platforms"
     },
     {
@@ -16320,7 +16420,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_platform_detectplatform",
-      "community": 350,
+      "community": 25,
       "norm_label": "detectplatform()"
     },
     {
@@ -16330,7 +16430,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_platform_parseplatform",
-      "community": 165,
+      "community": 362,
       "norm_label": "parseplatform()"
     },
     {
@@ -16340,7 +16440,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_platform_isopendockplatform",
-      "community": 165,
+      "community": 111,
       "norm_label": "isopendockplatform()"
     },
     {
@@ -16460,7 +16560,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_registry_dockversionresponse",
-      "community": 165,
+      "community": 3,
       "norm_label": "dockversionresponse"
     },
     {
@@ -16470,7 +16570,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_registry_releasesignatureresponse",
-      "community": 111,
+      "community": 350,
       "norm_label": "releasesignatureresponse"
     },
     {
@@ -16750,7 +16850,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_release_signature",
-      "community": 111,
+      "community": 350,
       "norm_label": "release-signature.ts"
     },
     {
@@ -16760,7 +16860,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_release_signature_defaulttrustedpublickeys",
-      "community": 111,
+      "community": 350,
       "norm_label": "defaulttrustedpublickeys"
     },
     {
@@ -16770,7 +16870,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_release_signature_releasesignaturesubject",
-      "community": 111,
+      "community": 350,
       "norm_label": "releasesignaturesubject"
     },
     {
@@ -16780,7 +16880,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_release_signature_releasesignatureplatform",
-      "community": 111,
+      "community": 350,
       "norm_label": "releasesignatureplatform"
     },
     {
@@ -16790,7 +16890,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_release_signature_releasesignaturepayload",
-      "community": 111,
+      "community": 350,
       "norm_label": "releasesignaturepayload()"
     },
     {
@@ -16820,7 +16920,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "src_release_signature_trustedreleasepublickeys",
-      "community": 111,
+      "community": 350,
       "norm_label": "trustedreleasepublickeys()"
     },
     {
@@ -17350,7 +17450,7 @@
       "source_location": "L1909",
       "_origin": "ast",
       "id": "tests_cli_flow_test_mockregistry",
-      "community": 131,
+      "community": 350,
       "norm_label": "mockregistry()"
     },
     {
@@ -17910,54 +18010,54 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_dependencies_test",
-      "community": 226,
+      "community": 83,
       "norm_label": "dependencies.test.ts"
     },
     {
       "label": "tempRoots",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "tests_dependencies_test_temproots",
-      "community": 226,
+      "community": 83,
       "norm_label": "temproots"
     },
     {
       "label": "tempDir()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L740",
+      "source_location": "L774",
       "_origin": "ast",
       "id": "tests_dependencies_test_tempdir",
-      "community": 226,
+      "community": 83,
       "norm_label": "tempdir()"
     },
     {
       "label": "parseManifestText()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L746",
+      "source_location": "L780",
       "_origin": "ast",
       "id": "tests_dependencies_test_parsemanifesttext",
-      "community": 226,
+      "community": 83,
       "norm_label": "parsemanifesttext()"
     },
     {
       "label": "writeDock()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L752",
+      "source_location": "L786",
       "_origin": "ast",
       "id": "tests_dependencies_test_writedock",
-      "community": 226,
+      "community": 83,
       "norm_label": "writedock()"
     },
     {
       "label": "localResolver()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L783",
+      "source_location": "L817",
       "_origin": "ast",
       "id": "tests_dependencies_test_localresolver",
       "community": 83,
@@ -17967,60 +18067,60 @@
       "label": "writeFakeDependencyManager()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L797",
+      "source_location": "L831",
       "_origin": "ast",
       "id": "tests_dependencies_test_writefakedependencymanager",
-      "community": 226,
+      "community": 83,
       "norm_label": "writefakedependencymanager()"
     },
     {
       "label": "writeFailingDependencyManager()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L818",
+      "source_location": "L852",
       "_origin": "ast",
       "id": "tests_dependencies_test_writefailingdependencymanager",
-      "community": 226,
+      "community": 83,
       "norm_label": "writefailingdependencymanager()"
     },
     {
       "label": "writeFakePip()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L834",
+      "source_location": "L868",
       "_origin": "ast",
       "id": "tests_dependencies_test_writefakepip",
-      "community": 226,
+      "community": 83,
       "norm_label": "writefakepip()"
     },
     {
       "label": "writeExecutable()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L857",
+      "source_location": "L891",
       "_origin": "ast",
       "id": "tests_dependencies_test_writeexecutable",
-      "community": 226,
+      "community": 83,
       "norm_label": "writeexecutable()"
     },
     {
       "label": "withEnv()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L863",
+      "source_location": "L897",
       "_origin": "ast",
       "id": "tests_dependencies_test_withenv",
-      "community": 226,
+      "community": 83,
       "norm_label": "withenv()"
     },
     {
       "label": "withEnvAsync()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L886",
+      "source_location": "L920",
       "_origin": "ast",
       "id": "tests_dependencies_test_withenvasync",
-      "community": 226,
+      "community": 83,
       "norm_label": "withenvasync()"
     },
     {
@@ -18030,7 +18130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test",
-      "community": 358,
+      "community": 165,
       "norm_label": "deploy-manifest-hardening.test.ts"
     },
     {
@@ -18040,7 +18140,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test_temproots",
-      "community": 358,
+      "community": 165,
       "norm_label": "temproots"
     },
     {
@@ -18050,7 +18150,7 @@
       "source_location": "L278",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test_tempdir",
-      "community": 358,
+      "community": 165,
       "norm_label": "tempdir()"
     },
     {
@@ -18060,7 +18160,7 @@
       "source_location": "L284",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test_writemanifest",
-      "community": 358,
+      "community": 165,
       "norm_label": "writemanifest()"
     },
     {
@@ -18070,7 +18170,7 @@
       "source_location": "L289",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test_parsedmanifest",
-      "community": 358,
+      "community": 165,
       "norm_label": "parsedmanifest()"
     },
     {
@@ -18080,7 +18180,7 @@
       "source_location": "L294",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test_boundmanifest",
-      "community": 358,
+      "community": 165,
       "norm_label": "boundmanifest()"
     },
     {
@@ -18090,7 +18190,7 @@
       "source_location": "L309",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test_createarchive",
-      "community": 358,
+      "community": 80,
       "norm_label": "createarchive()"
     },
     {
@@ -18100,7 +18200,7 @@
       "source_location": "L319",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test_installresolved",
-      "community": 358,
+      "community": 165,
       "norm_label": "installresolved()"
     },
     {
@@ -18110,7 +18210,7 @@
       "source_location": "L337",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test_createsymlinkarchive",
-      "community": 358,
+      "community": 165,
       "norm_label": "createsymlinkarchive()"
     },
     {
@@ -18120,7 +18220,7 @@
       "source_location": "L355",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test_mockregistryarchive",
-      "community": 358,
+      "community": 165,
       "norm_label": "mockregistryarchive()"
     },
     {
@@ -18130,7 +18230,7 @@
       "source_location": "L393",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test_sha256",
-      "community": 358,
+      "community": 165,
       "norm_label": "sha256()"
     },
     {
@@ -18140,7 +18240,7 @@
       "source_location": "L397",
       "_origin": "ast",
       "id": "tests_deploy_manifest_hardening_test_escaperegexp",
-      "community": 358,
+      "community": 165,
       "norm_label": "escaperegexp()"
     },
     {
@@ -18210,7 +18310,7 @@
       "source_location": "L319",
       "_origin": "ast",
       "id": "tests_deploy_registry_edge_cases_test_createarchive",
-      "community": 358,
+      "community": 80,
       "norm_label": "createarchive()"
     },
     {
@@ -18550,7 +18650,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_examples_test",
-      "community": 360,
+      "community": 354,
       "norm_label": "examples.test.ts"
     },
     {
@@ -18560,7 +18660,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "tests_examples_test_examplesroot",
-      "community": 360,
+      "community": 354,
       "norm_label": "examplesroot"
     },
     {
@@ -18570,7 +18670,7 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "tests_examples_test_examplenames",
-      "community": 360,
+      "community": 354,
       "norm_label": "examplenames()"
     },
     {
@@ -18580,7 +18680,7 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "tests_examples_test_workspaceexamplenames",
-      "community": 360,
+      "community": 354,
       "norm_label": "workspaceexamplenames()"
     },
     {
@@ -18590,7 +18690,7 @@
       "source_location": "L179",
       "_origin": "ast",
       "id": "tests_examples_test_commandsfor",
-      "community": 360,
+      "community": 354,
       "norm_label": "commandsfor()"
     },
     {
@@ -18600,7 +18700,7 @@
       "source_location": "L187",
       "_origin": "ast",
       "id": "tests_examples_test_commandfor",
-      "community": 360,
+      "community": 354,
       "norm_label": "commandfor()"
     },
     {
@@ -18610,7 +18710,7 @@
       "source_location": "L191",
       "_origin": "ast",
       "id": "tests_examples_test_powershelltestpath",
-      "community": 360,
+      "community": 354,
       "norm_label": "powershelltestpath()"
     },
     {
@@ -18920,7 +19020,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_path_security_edge_cases_test",
-      "community": 83,
+      "community": 80,
       "norm_label": "path-security-edge-cases.test.ts"
     },
     {
@@ -18930,7 +19030,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "tests_path_security_edge_cases_test_temproots",
-      "community": 83,
+      "community": 80,
       "norm_label": "temproots"
     },
     {
@@ -18940,7 +19040,7 @@
       "source_location": "L239",
       "_origin": "ast",
       "id": "tests_path_security_edge_cases_test_tempdir",
-      "community": 83,
+      "community": 80,
       "norm_label": "tempdir()"
     },
     {
@@ -18950,7 +19050,7 @@
       "source_location": "L245",
       "_origin": "ast",
       "id": "tests_path_security_edge_cases_test_writesource",
-      "community": 83,
+      "community": 80,
       "norm_label": "writesource()"
     },
     {
@@ -18960,7 +19060,7 @@
       "source_location": "L251",
       "_origin": "ast",
       "id": "tests_path_security_edge_cases_test_writemanifest",
-      "community": 83,
+      "community": 80,
       "norm_label": "writemanifest()"
     },
     {
@@ -18970,7 +19070,7 @@
       "source_location": "L256",
       "_origin": "ast",
       "id": "tests_path_security_edge_cases_test_boundmanifest",
-      "community": 83,
+      "community": 80,
       "norm_label": "boundmanifest()"
     },
     {
@@ -18980,7 +19080,7 @@
       "source_location": "L269",
       "_origin": "ast",
       "id": "tests_path_security_edge_cases_test_installresolved",
-      "community": 83,
+      "community": 80,
       "norm_label": "installresolved()"
     },
     {
@@ -18990,7 +19090,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "tests_path_security_edge_cases_test_createarchive",
-      "community": 358,
+      "community": 80,
       "norm_label": "createarchive()"
     },
     {
@@ -19000,7 +19100,7 @@
       "source_location": "L302",
       "_origin": "ast",
       "id": "tests_path_security_edge_cases_test_sha256",
-      "community": 83,
+      "community": 80,
       "norm_label": "sha256()"
     },
     {
@@ -19010,7 +19110,7 @@
       "source_location": "L306",
       "_origin": "ast",
       "id": "tests_path_security_edge_cases_test_iscaseinsensitive",
-      "community": 83,
+      "community": 80,
       "norm_label": "iscaseinsensitive()"
     },
     {
@@ -19020,7 +19120,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_platform_regression_test",
-      "community": 350,
+      "community": 25,
       "norm_label": "platform-regression.test.ts"
     },
     {
@@ -19030,7 +19130,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "tests_platform_regression_test_temproots",
-      "community": 350,
+      "community": 25,
       "norm_label": "temproots"
     },
     {
@@ -19040,7 +19140,7 @@
       "source_location": "L512",
       "_origin": "ast",
       "id": "tests_platform_regression_test_platformmanifest",
-      "community": 350,
+      "community": 25,
       "norm_label": "platformmanifest()"
     },
     {
@@ -19050,7 +19150,7 @@
       "source_location": "L533",
       "_origin": "ast",
       "id": "tests_platform_regression_test_platformruntimestep",
-      "community": 350,
+      "community": 25,
       "norm_label": "platformruntimestep()"
     },
     {
@@ -19060,7 +19160,7 @@
       "source_location": "L548",
       "_origin": "ast",
       "id": "tests_platform_regression_test_tempdir",
-      "community": 350,
+      "community": 25,
       "norm_label": "tempdir()"
     },
     {
@@ -19070,7 +19170,7 @@
       "source_location": "L554",
       "_origin": "ast",
       "id": "tests_platform_regression_test_writefakeplatformcommand",
-      "community": 350,
+      "community": 25,
       "norm_label": "writefakeplatformcommand()"
     },
     {
@@ -19080,7 +19180,7 @@
       "source_location": "L569",
       "_origin": "ast",
       "id": "tests_platform_regression_test_writedock",
-      "community": 350,
+      "community": 25,
       "norm_label": "writedock()"
     },
     {
@@ -19090,7 +19190,7 @@
       "source_location": "L616",
       "_origin": "ast",
       "id": "tests_platform_regression_test_createdockarchive",
-      "community": 350,
+      "community": 25,
       "norm_label": "createdockarchive()"
     },
     {
@@ -19100,7 +19200,7 @@
       "source_location": "L635",
       "_origin": "ast",
       "id": "tests_platform_regression_test_sha256",
-      "community": 350,
+      "community": 25,
       "norm_label": "sha256()"
     },
     {
@@ -19120,7 +19220,7 @@
       "source_location": "L653",
       "_origin": "ast",
       "id": "tests_platform_regression_test_installeddocks",
-      "community": 350,
+      "community": 25,
       "norm_label": "installeddocks()"
     },
     {
@@ -19130,7 +19230,7 @@
       "source_location": "L657",
       "_origin": "ast",
       "id": "tests_platform_regression_test_withenv",
-      "community": 350,
+      "community": 25,
       "norm_label": "withenv()"
     },
     {
@@ -19140,7 +19240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_quality_contracts_test",
-      "community": 350,
+      "community": 354,
       "norm_label": "quality-contracts.test.ts"
     },
     {
@@ -19150,7 +19250,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "tests_quality_contracts_test_examplesroot",
-      "community": 350,
+      "community": 354,
       "norm_label": "examplesroot"
     },
     {
@@ -19160,7 +19260,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "tests_quality_contracts_test_platformmanifests",
-      "community": 350,
+      "community": 354,
       "norm_label": "platformmanifests"
     },
     {
@@ -19170,7 +19270,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "tests_quality_contracts_test_examplenames",
-      "community": 350,
+      "community": 354,
       "norm_label": "examplenames()"
     },
     {
@@ -19180,7 +19280,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "tests_quality_contracts_test_textfiles",
-      "community": 350,
+      "community": 354,
       "norm_label": "textfiles()"
     },
     {
@@ -19190,7 +19290,7 @@
       "source_location": "L135",
       "_origin": "ast",
       "id": "tests_quality_contracts_test_istextfile",
-      "community": 350,
+      "community": 354,
       "norm_label": "istextfile()"
     },
     {
@@ -19580,7 +19680,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_release_signature_helper",
-      "community": 111,
+      "community": 350,
       "norm_label": "release-signature-helper.ts"
     },
     {
@@ -19590,7 +19690,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "tests_release_signature_helper_testprivatekey",
-      "community": 111,
+      "community": 350,
       "norm_label": "testprivatekey"
     },
     {
@@ -19600,7 +19700,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "tests_release_signature_helper_testreleasesignature",
-      "community": 131,
+      "community": 350,
       "norm_label": "testreleasesignature()"
     },
     {
@@ -19610,7 +19710,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_requirements_test",
-      "community": 353,
+      "community": 44,
       "norm_label": "requirements.test.ts"
     },
     {
@@ -19620,7 +19720,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "tests_requirements_test_temproots",
-      "community": 353,
+      "community": 44,
       "norm_label": "temproots"
     },
     {
@@ -19630,7 +19730,7 @@
       "source_location": "L561",
       "_origin": "ast",
       "id": "tests_requirements_test_install",
-      "community": 353,
+      "community": 44,
       "norm_label": "install()"
     },
     {
@@ -19640,7 +19740,7 @@
       "source_location": "L755",
       "_origin": "ast",
       "id": "tests_requirements_test_omamanifest",
-      "community": 353,
+      "community": 44,
       "norm_label": "omamanifest()"
     },
     {
@@ -19650,7 +19750,7 @@
       "source_location": "L795",
       "_origin": "ast",
       "id": "tests_requirements_test_runtimemanifest",
-      "community": 353,
+      "community": 44,
       "norm_label": "runtimemanifest()"
     },
     {
@@ -19660,7 +19760,7 @@
       "source_location": "L817",
       "_origin": "ast",
       "id": "tests_requirements_test_tempdir",
-      "community": 353,
+      "community": 44,
       "norm_label": "tempdir()"
     },
     {
@@ -19670,7 +19770,7 @@
       "source_location": "L823",
       "_origin": "ast",
       "id": "tests_requirements_test_capturemanifesterror",
-      "community": 353,
+      "community": 83,
       "norm_label": "capturemanifesterror()"
     },
     {
@@ -19680,7 +19780,7 @@
       "source_location": "L832",
       "_origin": "ast",
       "id": "tests_requirements_test_writefakebun",
-      "community": 353,
+      "community": 44,
       "norm_label": "writefakebun()"
     },
     {
@@ -19690,7 +19790,7 @@
       "source_location": "L868",
       "_origin": "ast",
       "id": "tests_requirements_test_writefakeruntime",
-      "community": 353,
+      "community": 44,
       "norm_label": "writefakeruntime()"
     },
     {
@@ -19700,7 +19800,7 @@
       "source_location": "L882",
       "_origin": "ast",
       "id": "tests_requirements_test_writeexecutable",
-      "community": 353,
+      "community": 44,
       "norm_label": "writeexecutable()"
     },
     {
@@ -19710,7 +19810,7 @@
       "source_location": "L887",
       "_origin": "ast",
       "id": "tests_requirements_test_withenv",
-      "community": 353,
+      "community": 44,
       "norm_label": "withenv()"
     },
     {
@@ -19720,7 +19820,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test",
-      "community": 353,
+      "community": 41,
       "norm_label": "runtime-platform-matrix.test.ts"
     },
     {
@@ -19730,7 +19830,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_temproots",
-      "community": 353,
+      "community": 41,
       "norm_label": "temproots"
     },
     {
@@ -19740,7 +19840,7 @@
       "source_location": "L351",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_install",
-      "community": 353,
+      "community": 41,
       "norm_label": "install()"
     },
     {
@@ -19750,7 +19850,7 @@
       "source_location": "L383",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_runtimemanifest",
-      "community": 353,
+      "community": 41,
       "norm_label": "runtimemanifest()"
     },
     {
@@ -19760,7 +19860,7 @@
       "source_location": "L405",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_tempdir",
-      "community": 353,
+      "community": 41,
       "norm_label": "tempdir()"
     },
     {
@@ -19770,7 +19870,7 @@
       "source_location": "L411",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_writenodedist",
-      "community": 353,
+      "community": 41,
       "norm_label": "writenodedist()"
     },
     {
@@ -19780,7 +19880,7 @@
       "source_location": "L456",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_writeuvdist",
-      "community": 353,
+      "community": 41,
       "norm_label": "writeuvdist()"
     },
     {
@@ -19790,7 +19890,7 @@
       "source_location": "L479",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_writenodeindex",
-      "community": 353,
+      "community": 41,
       "norm_label": "writenodeindex()"
     },
     {
@@ -19800,7 +19900,7 @@
       "source_location": "L489",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_writefakecurl",
-      "community": 353,
+      "community": 41,
       "norm_label": "writefakecurl()"
     },
     {
@@ -19810,7 +19910,7 @@
       "source_location": "L529",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_writefakepowershell",
-      "community": 353,
+      "community": 41,
       "norm_label": "writefakepowershell()"
     },
     {
@@ -19820,7 +19920,7 @@
       "source_location": "L557",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_writefakeuv",
-      "community": 353,
+      "community": 41,
       "norm_label": "writefakeuv()"
     },
     {
@@ -19830,7 +19930,7 @@
       "source_location": "L580",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_writefakepython",
-      "community": 353,
+      "community": 41,
       "norm_label": "writefakepython()"
     },
     {
@@ -19840,7 +19940,7 @@
       "source_location": "L601",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_writefakeruntime",
-      "community": 353,
+      "community": 41,
       "norm_label": "writefakeruntime()"
     },
     {
@@ -19850,7 +19950,7 @@
       "source_location": "L615",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_writeexecutable",
-      "community": 353,
+      "community": 41,
       "norm_label": "writeexecutable()"
     },
     {
@@ -19860,7 +19960,7 @@
       "source_location": "L620",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_withenv",
-      "community": 353,
+      "community": 41,
       "norm_label": "withenv()"
     },
     {
@@ -19870,7 +19970,7 @@
       "source_location": "L643",
       "_origin": "ast",
       "id": "tests_runtime_platform_matrix_test_withprocessproperty",
-      "community": 353,
+      "community": 41,
       "norm_label": "withprocessproperty()"
     },
     {
@@ -20090,7 +20190,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_security_regression_test",
-      "community": 20,
+      "community": 93,
       "norm_label": "security-regression.test.ts"
     },
     {
@@ -20100,7 +20200,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "tests_security_regression_test_temproots",
-      "community": 20,
+      "community": 93,
       "norm_label": "temproots"
     },
     {
@@ -20110,7 +20210,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "tests_security_regression_test_startclilogin",
-      "community": 20,
+      "community": 93,
       "norm_label": "startclilogin()"
     },
     {
@@ -20120,7 +20220,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "tests_security_regression_test_exchangeclicode",
-      "community": 20,
+      "community": 93,
       "norm_label": "exchangeclicode()"
     },
     {
@@ -20130,7 +20230,7 @@
       "source_location": "L824",
       "_origin": "ast",
       "id": "tests_security_regression_test_tempdir",
-      "community": 20,
+      "community": 93,
       "norm_label": "tempdir()"
     },
     {
@@ -20140,7 +20240,7 @@
       "source_location": "L830",
       "_origin": "ast",
       "id": "tests_security_regression_test_createmanydirectoryarchive",
-      "community": 20,
+      "community": 93,
       "norm_label": "createmanydirectoryarchive()"
     },
     {
@@ -20150,7 +20250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test",
-      "community": 93,
+      "community": 29,
       "norm_label": "task-permission-policy.test.ts"
     },
     {
@@ -20160,7 +20260,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_temproots",
-      "community": 93,
+      "community": 29,
       "norm_label": "temproots"
     },
     {
@@ -20170,7 +20270,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_shelloperatorcommands",
-      "community": 93,
+      "community": 29,
       "norm_label": "shelloperatorcommands"
     },
     {
@@ -20180,7 +20280,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_packageinstallcommands",
-      "community": 93,
+      "community": 29,
       "norm_label": "packageinstallcommands"
     },
     {
@@ -20190,7 +20290,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_manifestoverrides",
-      "community": 93,
+      "community": 29,
       "norm_label": "manifestoverrides"
     },
     {
@@ -20200,7 +20300,7 @@
       "source_location": "L343",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_manifest",
-      "community": 93,
+      "community": 29,
       "norm_label": "manifest()"
     },
     {
@@ -20210,7 +20310,7 @@
       "source_location": "L363",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_tool",
-      "community": 93,
+      "community": 29,
       "norm_label": "tool()"
     },
     {
@@ -20220,7 +20320,7 @@
       "source_location": "L372",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_taskrunnerwithouttoolinstall",
-      "community": 93,
+      "community": 29,
       "norm_label": "taskrunnerwithouttoolinstall()"
     },
     {
@@ -20230,7 +20330,7 @@
       "source_location": "L383",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_tempdir",
-      "community": 93,
+      "community": 29,
       "norm_label": "tempdir()"
     },
     {
@@ -20240,7 +20340,7 @@
       "source_location": "L389",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_writeprojectcommand",
-      "community": 93,
+      "community": 29,
       "norm_label": "writeprojectcommand()"
     },
     {
@@ -20250,7 +20350,7 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_writeexecutable",
-      "community": 93,
+      "community": 29,
       "norm_label": "writeexecutable()"
     },
     {
@@ -43022,7 +43122,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "baseline instructions and shared rules for ai coding agents.",
       "id": "opendock__agent_ready_dock_macos_file"
@@ -43036,7 +43136,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "baseline instructions and shared rules for ai coding agents.",
       "id": "opendock__agent_ready_dock_windows_file"
@@ -43106,7 +43206,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "review rails, pr structure, and secret-scan defaults for ai-generated changes.",
       "id": "opendock__agent_safety_dock_macos_file"
@@ -43120,7 +43220,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "review rails, pr structure, and secret-scan defaults for ai-generated changes.",
       "id": "opendock__agent_safety_dock_windows_file"
@@ -43372,7 +43472,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tool dock for installing claude code without project payloads.",
       "id": "opendock__claude_code_dock_macos_file"
@@ -43386,7 +43486,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tool dock for installing claude code without project payloads.",
       "id": "opendock__claude_code_dock_windows_file"
@@ -43400,7 +43500,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tool dock for installing the codex cli without project payloads.",
       "id": "opendock__codex_dock_macos_file"
@@ -43414,7 +43514,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tool dock for installing the codex cli without project payloads.",
       "id": "opendock__codex_dock_windows_file"
@@ -44002,7 +44102,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 37,
       "community_name": "Cli / Examples",
       "norm_label": "security-first mcp inventory, config examples, and review checklists.",
       "id": "opendock__mcp_safe_dock_macos_file"
@@ -44016,7 +44116,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 37,
       "community_name": "Cli / Examples",
       "norm_label": "security-first mcp inventory, config examples, and review checklists.",
       "id": "opendock__mcp_safe_dock_windows_file"
@@ -44086,7 +44186,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 37,
+      "community": 360,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile architecture, ui patterns, release readiness, and testing guidance.",
       "id": "opendock__mobile_ai_dock_macos_file"
@@ -44100,7 +44200,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 37,
+      "community": 360,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile architecture, ui patterns, release readiness, and testing guidance.",
       "id": "opendock__mobile_ai_dock_windows_file"
@@ -44156,7 +44256,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "workspace maps, package boundaries, change impact review, and build cache notes.",
       "id": "opendock__monorepo_ai_dock_macos_file"
@@ -44170,7 +44270,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "workspace maps, package boundaries, change impact review, and build cache notes.",
       "id": "opendock__monorepo_ai_dock_windows_file"
@@ -44268,7 +44368,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 67,
+      "community": 446,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "prd, user story, roadmap, release note, and decision template workspace.",
       "id": "opendock__product_manager_dock_macos_file"
@@ -44282,7 +44382,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 67,
+      "community": 446,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "prd, user story, roadmap, release note, and decision template workspace.",
       "id": "opendock__product_manager_dock_windows_file"
@@ -44492,7 +44592,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "repository context packaging, architecture mapping, and change-risk prompts.",
       "id": "opendock__repo_context_dock_macos_file"
@@ -44506,7 +44606,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "repository context packaging, architecture mapping, and change-risk prompts.",
       "id": "opendock__repo_context_dock_windows_file"
@@ -45360,7 +45460,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 349,
       "community_name": "Dock Catalog",
       "norm_label": "creative generation loop for image, logo, favicon, video, audio, and asset analysis deliverables.",
       "id": "opendock_repo__creative_gen_ultrawork_dock_macos_file"
@@ -45374,7 +45474,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 349,
       "community_name": "Dock Catalog",
       "norm_label": "creative generation loop for image, logo, favicon, video, audio, and asset analysis deliverables.",
       "id": "opendock_repo__creative_gen_ultrawork_dock_windows_file"
@@ -46620,7 +46720,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 37,
+      "community": 360,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile quality gate for flutter, react native, swift, android, permissions, accessibility, release readiness, and runtime safety.",
       "id": "opendock_repo__mobile_ultrawork_dock_macos_file"
@@ -46634,7 +46734,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 37,
+      "community": 360,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile quality gate for flutter, react native, swift, android, permissions, accessibility, release readiness, and runtime safety.",
       "id": "opendock_repo__mobile_ultrawork_dock_windows_file"
@@ -47586,7 +47686,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: ai-agent",
       "id": "opendock_tag_ai_agent"
@@ -47600,7 +47700,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: workspace",
       "id": "opendock_tag_workspace"
@@ -47614,7 +47714,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: instructions",
       "id": "opendock_tag_instructions"
@@ -47628,7 +47728,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: starter",
       "id": "opendock_tag_starter"
@@ -47642,7 +47742,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: safety",
       "id": "opendock_tag_safety"
@@ -47656,7 +47756,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: review",
       "id": "opendock_tag_review"
@@ -47670,7 +47770,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: git",
       "id": "opendock_tag_git"
@@ -47684,7 +47784,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: quality",
       "id": "opendock_tag_quality"
@@ -47726,7 +47826,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 37,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: mcp",
       "id": "opendock_tag_mcp"
@@ -47810,7 +47910,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: claude-code",
       "id": "opendock_tag_claude_code"
@@ -47824,7 +47924,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: tool",
       "id": "opendock_tag_tool"
@@ -47838,7 +47938,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: codex",
       "id": "opendock_tag_codex"
@@ -47992,7 +48092,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 67,
+      "community": 446,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: product",
       "id": "opendock_tag_product"
@@ -48272,7 +48372,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 37,
       "community_name": "Cli / Examples",
       "norm_label": "tag: security",
       "id": "opendock_tag_security"
@@ -48286,7 +48386,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 37,
       "community_name": "Cli / Examples",
       "norm_label": "tag: config",
       "id": "opendock_tag_config"
@@ -48300,7 +48400,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 37,
+      "community": 360,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: mobile",
       "id": "opendock_tag_mobile"
@@ -48314,7 +48414,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 37,
+      "community": 360,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: ios",
       "id": "opendock_tag_ios"
@@ -48328,7 +48428,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 37,
+      "community": 360,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: android",
       "id": "opendock_tag_android"
@@ -48356,7 +48456,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: monorepo",
       "id": "opendock_tag_monorepo"
@@ -48370,7 +48470,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: architecture",
       "id": "opendock_tag_architecture"
@@ -48384,7 +48484,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: build",
       "id": "opendock_tag_build"
@@ -48426,7 +48526,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 67,
+      "community": 446,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: prd",
       "id": "opendock_tag_prd"
@@ -48440,7 +48540,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 67,
+      "community": 446,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: roadmap",
       "id": "opendock_tag_roadmap"
@@ -48454,7 +48554,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 67,
+      "community": 446,
       "community_name": "Cli / Examples / Release Flow",
       "norm_label": "tag: planning",
       "id": "opendock_tag_planning"
@@ -48552,7 +48652,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: repository",
       "id": "opendock_tag_repository"
@@ -48566,7 +48666,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 79,
       "community_name": "Cli / Examples",
       "norm_label": "tag: context",
       "id": "opendock_tag_context"
@@ -48706,7 +48806,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 349,
       "community_name": "Dock Catalog",
       "norm_label": "tag: generation",
       "id": "opendock_tag_generation"
@@ -48720,7 +48820,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 349,
       "community_name": "Dock Catalog",
       "norm_label": "tag: image",
       "id": "opendock_tag_image"
@@ -48734,7 +48834,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 349,
       "community_name": "Dock Catalog",
       "norm_label": "tag: logo",
       "id": "opendock_tag_logo"
@@ -48748,7 +48848,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 349,
       "community_name": "Dock Catalog",
       "norm_label": "tag: favicon",
       "id": "opendock_tag_favicon"
@@ -48762,7 +48862,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 349,
       "community_name": "Dock Catalog",
       "norm_label": "tag: video",
       "id": "opendock_tag_video"
@@ -48776,7 +48876,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 349,
       "community_name": "Dock Catalog",
       "norm_label": "tag: audio",
       "id": "opendock_tag_audio"
@@ -48790,7 +48890,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 349,
       "community_name": "Dock Catalog",
       "norm_label": "tag: assets",
       "id": "opendock_tag_assets"
@@ -48972,7 +49072,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 37,
+      "community": 360,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: flutter",
       "id": "opendock_tag_flutter"
@@ -78433,6 +78533,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L363",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller",
+      "target": "app_dock_installer_dockinstaller_rollbacknewinstall",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L344",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -78597,6 +78707,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L317",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_install",
+      "target": "app_dock_installer_dockinstaller_rollbacknewinstall",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L135",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -78635,6 +78756,50 @@
       "weight": 1.0,
       "source": "app_dock_installer_dockinstaller_install",
       "target": "src_platform_detectplatform"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L384",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_rollbacknewinstall",
+      "target": "files_path_utils_pruneemptydirectorychain"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L382",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_rollbacknewinstall",
+      "target": "files_path_utils_safejoin"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L369",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_rollbacknewinstall",
+      "target": "runtime_dependency_runner_removeinstalleddependencyoutputs"
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L363",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_rollbacknewinstall",
+      "target": "src_resolver_resolveddock",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -87292,6 +87457,39 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "runtime_dependency_runner",
+      "target": "runtime_process_spawn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "runtime_dependency_runner",
+      "target": "runtime_process_spawn_resolveprogramfrompath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "runtime_dependency_runner",
+      "target": "runtime_process_spawn_spawnopendockcommand",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
       "source_location": "L9",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -87673,6 +87871,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
+      "source_location": "L144",
+      "weight": 1.0,
+      "source": "runtime_dependency_runner_dependencyrunner_installdependency",
+      "target": "runtime_dependency_runner_removeoutputpaths",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
       "source_location": "L128",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -87783,6 +87992,28 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
+      "source_location": "L276",
+      "weight": 1.0,
+      "source": "runtime_dependency_runner_rundependencycommand",
+      "target": "runtime_process_spawn_resolveprogramfrompath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
+      "source_location": "L277",
+      "weight": 1.0,
+      "source": "runtime_dependency_runner_rundependencycommand",
+      "target": "runtime_process_spawn_spawnopendockcommand",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/dependency-runner.ts",
       "source_location": "L255",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -87843,6 +88074,240 @@
       "confidence_score": 1.0,
       "source": "runtime_dependency_runner_dependencyoutputpaths",
       "target": "runtime_dependency_runner_outputpathsformanager"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "runtime_process_spawn",
+      "target": "runtime_process_spawn_haspathseparator",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "runtime_process_spawn",
+      "target": "runtime_process_spawn_iswindowsbatchfile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "runtime_process_spawn",
+      "target": "runtime_process_spawn_pathdelimiter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L47",
+      "weight": 1.0,
+      "source": "runtime_process_spawn",
+      "target": "runtime_process_spawn_programcandidates",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "runtime_process_spawn",
+      "target": "runtime_process_spawn_resolveprogramfrompath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "runtime_process_spawn",
+      "target": "runtime_process_spawn_spawnopendockcommand",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "runtime_process_spawn",
+      "target": "runtime_process_spawn_windowscommandarg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L72",
+      "weight": 1.0,
+      "source": "runtime_process_spawn",
+      "target": "runtime_process_spawn_windowscommandline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "runtime_process_spawn",
+      "target": "src_platform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "runtime_process_spawn",
+      "target": "src_platform_opendockplatform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/tool-runner.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "runtime_tool_runner",
+      "target": "runtime_process_spawn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/tests/dependencies.test.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "tests_dependencies_test",
+      "target": "runtime_process_spawn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "runtime_process_spawn_resolveprogramfrompath",
+      "target": "runtime_process_spawn_haspathseparator",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "runtime_process_spawn_resolveprogramfrompath",
+      "target": "runtime_process_spawn_pathdelimiter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "runtime_process_spawn_resolveprogramfrompath",
+      "target": "runtime_process_spawn_programcandidates",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/tool-runner.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "runtime_tool_runner",
+      "target": "runtime_process_spawn_resolveprogramfrompath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/tool-runner.ts",
+      "source_location": "L273",
+      "weight": 1.0,
+      "source": "runtime_tool_runner_runpackagecommand",
+      "target": "runtime_process_spawn_resolveprogramfrompath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/tests/dependencies.test.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "tests_dependencies_test",
+      "target": "runtime_process_spawn_resolveprogramfrompath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "runtime_process_spawn_spawnopendockcommand",
+      "target": "runtime_process_spawn_iswindowsbatchfile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/process-spawn.ts",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "runtime_process_spawn_spawnopendockcommand",
+      "target": "runtime_process_spawn_windowscommandline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/tool-runner.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "runtime_tool_runner",
+      "target": "runtime_process_spawn_spawnopendockcommand",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/runtime/tool-runner.ts",
+      "source_location": "L274",
+      "weight": 1.0,
+      "source": "runtime_tool_runner_runpackagecommand",
+      "target": "runtime_process_spawn_spawnopendockcommand",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -101863,9 +102328,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_changelog",
-      "target": "changelog_0_2_6_2026_07_05",
-      "confidence_score": 1.0
+      "target": "changelog_0_2_6_2026_07_05"
     },
     {
       "relation": "contains",
@@ -101893,9 +102358,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_6_2026_07_05",
-      "target": "changelog_cli",
-      "confidence_score": 1.0
+      "target": "changelog_cli"
     },
     {
       "relation": "contains",
@@ -102233,9 +102698,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_4_2026_07_04",
-      "target": "changelog_cli_25",
-      "confidence_score": 1.0
+      "target": "changelog_cli_25"
     },
     {
       "relation": "contains",
@@ -102243,9 +102708,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_4_2026_07_04",
-      "target": "changelog_desktop_app_32",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_32"
     },
     {
       "relation": "contains",
@@ -102253,9 +102718,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_3_2026_07_03",
-      "target": "changelog_cli_39",
-      "confidence_score": 1.0
+      "target": "changelog_cli_39"
     },
     {
       "relation": "contains",
@@ -102263,9 +102728,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_3_2026_07_03",
-      "target": "changelog_desktop_app_45",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_45"
     },
     {
       "relation": "contains",
@@ -102273,9 +102738,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_2_2026_07_02",
-      "target": "changelog_cli_51",
-      "confidence_score": 1.0
+      "target": "changelog_cli_51"
     },
     {
       "relation": "contains",
@@ -102283,9 +102748,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_2_2026_07_02",
-      "target": "changelog_desktop_app_56",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_56"
     },
     {
       "relation": "contains",
@@ -102303,9 +102768,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_1_2026_07_02",
-      "target": "changelog_desktop_app_62",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_62"
     },
     {
       "relation": "contains",
@@ -102313,9 +102778,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_0_2026_07_02",
-      "target": "changelog_cli_68",
-      "confidence_score": 1.0
+      "target": "changelog_cli_68"
     },
     {
       "relation": "contains",
@@ -102323,9 +102788,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_0_2026_07_02",
-      "target": "changelog_desktop_app_74",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_74"
     },
     {
       "relation": "contains",
@@ -102353,9 +102818,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_60_2026_07_02",
-      "target": "changelog_desktop_app_80",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_80"
     },
     {
       "relation": "contains",
@@ -102363,9 +102828,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_59_2026_07_02",
-      "target": "changelog_desktop_app_87",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_87"
     },
     {
       "relation": "contains",
@@ -102373,9 +102838,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L94",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_58_2026_07_02",
-      "target": "changelog_desktop_app_94",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_94"
     },
     {
       "relation": "contains",
@@ -102383,9 +102848,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L102",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_57_2026_07_02",
-      "target": "changelog_desktop_app_102",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_102"
     },
     {
       "relation": "contains",
@@ -102393,9 +102858,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L110",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_56_2026_07_01",
-      "target": "changelog_desktop_app_110",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_110"
     },
     {
       "relation": "contains",
@@ -102403,9 +102868,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L117",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_55_2026_07_01",
-      "target": "changelog_cli_117",
-      "confidence_score": 1.0
+      "target": "changelog_cli_117"
     },
     {
       "relation": "contains",
@@ -102413,9 +102878,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_55_2026_07_01",
-      "target": "changelog_desktop_app_122",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_122"
     },
     {
       "relation": "contains",
@@ -102423,9 +102888,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L129",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_54_2026_07_01",
-      "target": "changelog_desktop_app_129",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_129"
     },
     {
       "relation": "contains",
@@ -102433,9 +102898,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L138",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_53_2026_07_01",
-      "target": "changelog_desktop_app_138",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_138"
     },
     {
       "relation": "contains",
@@ -102443,9 +102908,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L149",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_52_2026_07_01",
-      "target": "changelog_desktop_app_149",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_149"
     },
     {
       "relation": "contains",
@@ -102453,9 +102918,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L156",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_51_2026_07_01",
-      "target": "changelog_desktop_app_156",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_156"
     },
     {
       "relation": "contains",
@@ -102463,9 +102928,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L163",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_50_2026_07_01",
-      "target": "changelog_desktop_app_163",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_163"
     },
     {
       "relation": "contains",
@@ -102473,9 +102938,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L170",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_49_2026_07_01",
-      "target": "changelog_desktop_app_170",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_170"
     },
     {
       "relation": "contains",
@@ -102483,9 +102948,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L179",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_48_2026_07_01",
-      "target": "changelog_desktop_app_179",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_179"
     },
     {
       "relation": "contains",
@@ -102493,9 +102958,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_47_2026_07_01",
-      "target": "changelog_cli_186",
-      "confidence_score": 1.0
+      "target": "changelog_cli_186"
     },
     {
       "relation": "contains",
@@ -102503,9 +102968,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L191",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_47_2026_07_01",
-      "target": "changelog_desktop_app_191",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_191"
     },
     {
       "relation": "contains",
@@ -102513,9 +102978,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L200",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_46_2026_06_30",
-      "target": "changelog_cli_200",
-      "confidence_score": 1.0
+      "target": "changelog_cli_200"
     },
     {
       "relation": "contains",
@@ -102523,9 +102988,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L205",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_46_2026_06_30",
-      "target": "changelog_desktop_app_205",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_205"
     },
     {
       "relation": "contains",
@@ -102543,9 +103008,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L221",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_44_2026_06_30",
-      "target": "changelog_cli_221",
-      "confidence_score": 1.0
+      "target": "changelog_cli_221"
     },
     {
       "relation": "contains",
@@ -102553,9 +103018,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L229",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_44_2026_06_30",
-      "target": "changelog_desktop_app_229",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_229"
     },
     {
       "relation": "contains",
@@ -102563,9 +103028,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L236",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_43_2026_06_26",
-      "target": "changelog_cli_236",
-      "confidence_score": 1.0
+      "target": "changelog_cli_236"
     },
     {
       "relation": "contains",
@@ -102573,9 +103038,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L241",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_43_2026_06_26",
-      "target": "changelog_desktop_app_241",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_241"
     },
     {
       "relation": "contains",
@@ -102593,9 +103058,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L247",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_42_2026_06_23",
-      "target": "changelog_desktop_app_247",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_247"
     },
     {
       "relation": "contains",
@@ -102603,9 +103068,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L254",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_41_2026_06_23",
-      "target": "changelog_cli_254",
-      "confidence_score": 1.0
+      "target": "changelog_cli_254"
     },
     {
       "relation": "contains",
@@ -102633,9 +103098,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L268",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_40_2026_06_23",
-      "target": "changelog_desktop_app_268",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_268"
     },
     {
       "relation": "contains",
@@ -102643,9 +103108,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L275",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_39_2026_06_23",
-      "target": "changelog_cli_275",
-      "confidence_score": 1.0
+      "target": "changelog_cli_275"
     },
     {
       "relation": "contains",
@@ -102653,9 +103118,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L282",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_38_2026_06_22",
-      "target": "changelog_desktop_app_282",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_282"
     },
     {
       "relation": "contains",
@@ -102663,9 +103128,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L292",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_37_2026_06_22",
-      "target": "changelog_desktop_app_292",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_292"
     },
     {
       "relation": "contains",
@@ -102673,9 +103138,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L299",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_36_2026_06_22",
-      "target": "changelog_cli_299",
-      "confidence_score": 1.0
+      "target": "changelog_cli_299"
     },
     {
       "relation": "contains",
@@ -102683,9 +103148,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L304",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_36_2026_06_22",
-      "target": "changelog_desktop_app_304",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_304"
     },
     {
       "relation": "contains",
@@ -102693,9 +103158,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L313",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_35_2026_06_19",
-      "target": "changelog_cli_313",
-      "confidence_score": 1.0
+      "target": "changelog_cli_313"
     },
     {
       "relation": "contains",
@@ -102703,9 +103168,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L318",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_35_2026_06_19",
-      "target": "changelog_desktop_app_318",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_318"
     },
     {
       "relation": "contains",
@@ -102713,9 +103178,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L325",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_34_2026_06_17",
-      "target": "changelog_cli_325",
-      "confidence_score": 1.0
+      "target": "changelog_cli_325"
     },
     {
       "relation": "contains",
@@ -102723,9 +103188,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L332",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_34_2026_06_17",
-      "target": "changelog_desktop_app_332",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_332"
     },
     {
       "relation": "contains",
@@ -102733,9 +103198,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L338",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_33_2026_06_17",
-      "target": "changelog_cli_338",
-      "confidence_score": 1.0
+      "target": "changelog_cli_338"
     },
     {
       "relation": "contains",
@@ -102743,9 +103208,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L345",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_32_2026_06_17",
-      "target": "changelog_cli_345",
-      "confidence_score": 1.0
+      "target": "changelog_cli_345"
     },
     {
       "relation": "contains",
@@ -102753,9 +103218,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L349",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_32_2026_06_17",
-      "target": "changelog_docs_349",
-      "confidence_score": 1.0
+      "target": "changelog_docs_349"
     },
     {
       "relation": "contains",
@@ -102763,9 +103228,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L355",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_30_2026_06_16",
-      "target": "changelog_cli_355",
-      "confidence_score": 1.0
+      "target": "changelog_cli_355"
     },
     {
       "relation": "contains",
@@ -102773,9 +103238,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L359",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_30_2026_06_16",
-      "target": "changelog_desktop_app_359",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_359"
     },
     {
       "relation": "contains",
@@ -102783,9 +103248,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L364",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_30_2026_06_16",
-      "target": "changelog_docs_364",
-      "confidence_score": 1.0
+      "target": "changelog_docs_364"
     },
     {
       "relation": "contains",
@@ -102813,9 +103278,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L382",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_29_2026_06_16",
-      "target": "changelog_tests_382",
-      "confidence_score": 1.0
+      "target": "changelog_tests_382"
     },
     {
       "relation": "contains",
@@ -102823,9 +103288,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L388",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_28_2026_06_16",
-      "target": "changelog_cli_388",
-      "confidence_score": 1.0
+      "target": "changelog_cli_388"
     },
     {
       "relation": "contains",
@@ -102833,9 +103298,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L395",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_28_2026_06_16",
-      "target": "changelog_tests_395",
-      "confidence_score": 1.0
+      "target": "changelog_tests_395"
     },
     {
       "relation": "contains",
@@ -102843,9 +103308,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L402",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_27_2026_06_16",
-      "target": "changelog_desktop_app_402",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_402"
     },
     {
       "relation": "contains",
@@ -102853,9 +103318,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L408",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_27_2026_06_16",
-      "target": "changelog_tests_408",
-      "confidence_score": 1.0
+      "target": "changelog_tests_408"
     },
     {
       "relation": "contains",
@@ -102863,9 +103328,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L415",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_26_2026_06_16",
-      "target": "changelog_desktop_app_415",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_415"
     },
     {
       "relation": "contains",
@@ -102873,9 +103338,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L423",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_26_2026_06_16",
-      "target": "changelog_tests_423",
-      "confidence_score": 1.0
+      "target": "changelog_tests_423"
     },
     {
       "relation": "contains",
@@ -102883,9 +103348,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L430",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_25_2026_06_15",
-      "target": "changelog_desktop_app_430",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_430"
     },
     {
       "relation": "contains",
@@ -102893,9 +103358,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L437",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_25_2026_06_15",
-      "target": "changelog_tests_437",
-      "confidence_score": 1.0
+      "target": "changelog_tests_437"
     },
     {
       "relation": "contains",
@@ -102903,9 +103368,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L444",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_24_2026_06_15",
-      "target": "changelog_fixed_444",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_444"
     },
     {
       "relation": "contains",
@@ -102913,9 +103378,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L452",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_24_2026_06_15",
-      "target": "changelog_tests_452",
-      "confidence_score": 1.0
+      "target": "changelog_tests_452"
     },
     {
       "relation": "contains",
@@ -102933,9 +103398,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L466",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_23_2026_06_15",
-      "target": "changelog_desktop_app_466",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_466"
     },
     {
       "relation": "contains",
@@ -102943,9 +103408,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L473",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_22_2026_06_15",
-      "target": "changelog_changed_473",
-      "confidence_score": 1.0
+      "target": "changelog_changed_473"
     },
     {
       "relation": "contains",
@@ -102953,9 +103418,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L479",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_22_2026_06_15",
-      "target": "changelog_desktop_app_479",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_479"
     },
     {
       "relation": "contains",
@@ -102963,9 +103428,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L485",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_22_2026_06_15",
-      "target": "changelog_tests_485",
-      "confidence_score": 1.0
+      "target": "changelog_tests_485"
     },
     {
       "relation": "contains",
@@ -102983,9 +103448,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L497",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_21_2026_06_15",
-      "target": "changelog_desktop_app_497",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_497"
     },
     {
       "relation": "contains",
@@ -102993,9 +103458,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L504",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_21_2026_06_15",
-      "target": "changelog_tests_504",
-      "confidence_score": 1.0
+      "target": "changelog_tests_504"
     },
     {
       "relation": "contains",
@@ -103003,9 +103468,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L511",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_20_2026_06_15",
-      "target": "changelog_changed_511",
-      "confidence_score": 1.0
+      "target": "changelog_changed_511"
     },
     {
       "relation": "contains",
@@ -103013,9 +103478,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L520",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_20_2026_06_15",
-      "target": "changelog_desktop_app_520",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_520"
     },
     {
       "relation": "contains",
@@ -103023,9 +103488,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L527",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_19_2026_06_15",
-      "target": "changelog_changed_527",
-      "confidence_score": 1.0
+      "target": "changelog_changed_527"
     },
     {
       "relation": "contains",
@@ -103033,9 +103498,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L535",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_19_2026_06_15",
-      "target": "changelog_tests_535",
-      "confidence_score": 1.0
+      "target": "changelog_tests_535"
     },
     {
       "relation": "contains",
@@ -103043,9 +103508,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L541",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_18_2026_06_15",
-      "target": "changelog_added_541",
-      "confidence_score": 1.0
+      "target": "changelog_added_541"
     },
     {
       "relation": "contains",
@@ -103053,9 +103518,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L546",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_18_2026_06_15",
-      "target": "changelog_tests_546",
-      "confidence_score": 1.0
+      "target": "changelog_tests_546"
     },
     {
       "relation": "contains",
@@ -103063,9 +103528,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L552",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_17_2026_06_15",
-      "target": "changelog_changed_552",
-      "confidence_score": 1.0
+      "target": "changelog_changed_552"
     },
     {
       "relation": "contains",
@@ -103073,9 +103538,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L557",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_17_2026_06_15",
-      "target": "changelog_tests_557",
-      "confidence_score": 1.0
+      "target": "changelog_tests_557"
     },
     {
       "relation": "contains",
@@ -103083,9 +103548,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L564",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_16_2026_06_15",
-      "target": "changelog_added_564",
-      "confidence_score": 1.0
+      "target": "changelog_added_564"
     },
     {
       "relation": "contains",
@@ -103093,9 +103558,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L569",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_16_2026_06_15",
-      "target": "changelog_changed_569",
-      "confidence_score": 1.0
+      "target": "changelog_changed_569"
     },
     {
       "relation": "contains",
@@ -103103,9 +103568,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L575",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_16_2026_06_15",
-      "target": "changelog_tests_575",
-      "confidence_score": 1.0
+      "target": "changelog_tests_575"
     },
     {
       "relation": "contains",
@@ -103113,9 +103578,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L582",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_15_2026_06_15",
-      "target": "changelog_added_582",
-      "confidence_score": 1.0
+      "target": "changelog_added_582"
     },
     {
       "relation": "contains",
@@ -103123,9 +103588,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L586",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_15_2026_06_15",
-      "target": "changelog_changed_586",
-      "confidence_score": 1.0
+      "target": "changelog_changed_586"
     },
     {
       "relation": "contains",
@@ -103133,9 +103598,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L590",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_15_2026_06_15",
-      "target": "changelog_tests_590",
-      "confidence_score": 1.0
+      "target": "changelog_tests_590"
     },
     {
       "relation": "contains",
@@ -103143,9 +103608,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L596",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_14_2026_06_12",
-      "target": "changelog_added_596",
-      "confidence_score": 1.0
+      "target": "changelog_added_596"
     },
     {
       "relation": "contains",
@@ -103153,9 +103618,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L601",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_14_2026_06_12",
-      "target": "changelog_changed_601",
-      "confidence_score": 1.0
+      "target": "changelog_changed_601"
     },
     {
       "relation": "contains",
@@ -103163,9 +103628,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L605",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_14_2026_06_12",
-      "target": "changelog_tests_605",
-      "confidence_score": 1.0
+      "target": "changelog_tests_605"
     },
     {
       "relation": "contains",
@@ -103173,9 +103638,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L612",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_13_2026_06_12",
-      "target": "changelog_changed_612",
-      "confidence_score": 1.0
+      "target": "changelog_changed_612"
     },
     {
       "relation": "contains",
@@ -103183,9 +103648,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L620",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_13_2026_06_12",
-      "target": "changelog_tests_620",
-      "confidence_score": 1.0
+      "target": "changelog_tests_620"
     },
     {
       "relation": "contains",
@@ -103193,9 +103658,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L627",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_12_2026_06_12",
-      "target": "changelog_changed_627",
-      "confidence_score": 1.0
+      "target": "changelog_changed_627"
     },
     {
       "relation": "contains",
@@ -103203,9 +103668,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L634",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_11_2026_06_12",
-      "target": "changelog_changed_634",
-      "confidence_score": 1.0
+      "target": "changelog_changed_634"
     },
     {
       "relation": "contains",
@@ -103213,9 +103678,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L641",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_10_2026_06_12",
-      "target": "changelog_added_641",
-      "confidence_score": 1.0
+      "target": "changelog_added_641"
     },
     {
       "relation": "contains",
@@ -103223,9 +103688,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L646",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_10_2026_06_12",
-      "target": "changelog_changed_646",
-      "confidence_score": 1.0
+      "target": "changelog_changed_646"
     },
     {
       "relation": "contains",
@@ -103233,9 +103698,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L651",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_10_2026_06_12",
-      "target": "changelog_tests_651",
-      "confidence_score": 1.0
+      "target": "changelog_tests_651"
     },
     {
       "relation": "contains",
@@ -103243,9 +103708,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L665",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_9_2026_06_12",
-      "target": "changelog_changed_665",
-      "confidence_score": 1.0
+      "target": "changelog_changed_665"
     },
     {
       "relation": "contains",
@@ -103253,9 +103718,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L658",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_9_2026_06_12",
-      "target": "changelog_fixed_658",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_658"
     },
     {
       "relation": "contains",
@@ -103263,9 +103728,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L672",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_9_2026_06_12",
-      "target": "changelog_tests_672",
-      "confidence_score": 1.0
+      "target": "changelog_tests_672"
     },
     {
       "relation": "contains",
@@ -103273,9 +103738,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L679",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_8_2026_06_12",
-      "target": "changelog_added_679",
-      "confidence_score": 1.0
+      "target": "changelog_added_679"
     },
     {
       "relation": "contains",
@@ -103283,9 +103748,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L685",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_8_2026_06_12",
-      "target": "changelog_changed_685",
-      "confidence_score": 1.0
+      "target": "changelog_changed_685"
     },
     {
       "relation": "contains",
@@ -103293,9 +103758,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L692",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_8_2026_06_12",
-      "target": "changelog_tests_692",
-      "confidence_score": 1.0
+      "target": "changelog_tests_692"
     },
     {
       "relation": "contains",
@@ -103303,9 +103768,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L700",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_7_2026_06_12",
-      "target": "changelog_changed_700",
-      "confidence_score": 1.0
+      "target": "changelog_changed_700"
     },
     {
       "relation": "contains",
@@ -103313,9 +103778,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L706",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_7_2026_06_12",
-      "target": "changelog_tests_706",
-      "confidence_score": 1.0
+      "target": "changelog_tests_706"
     },
     {
       "relation": "contains",
@@ -103323,9 +103788,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L713",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_6_2026_06_12",
-      "target": "changelog_fixed_713",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_713"
     },
     {
       "relation": "contains",
@@ -103333,9 +103798,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L720",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_6_2026_06_12",
-      "target": "changelog_tests_720",
-      "confidence_score": 1.0
+      "target": "changelog_tests_720"
     },
     {
       "relation": "contains",
@@ -103343,9 +103808,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L728",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_5_2026_06_12",
-      "target": "changelog_changed_728",
-      "confidence_score": 1.0
+      "target": "changelog_changed_728"
     },
     {
       "relation": "contains",
@@ -103353,9 +103818,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L737",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_5_2026_06_12",
-      "target": "changelog_tests_737",
-      "confidence_score": 1.0
+      "target": "changelog_tests_737"
     },
     {
       "relation": "contains",
@@ -103363,9 +103828,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L746",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_4_2026_06_12",
-      "target": "changelog_fixed_746",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_746"
     },
     {
       "relation": "contains",
@@ -103373,9 +103838,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L751",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_4_2026_06_12",
-      "target": "changelog_tests_751",
-      "confidence_score": 1.0
+      "target": "changelog_tests_751"
     },
     {
       "relation": "contains",
@@ -103383,9 +103848,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L758",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_3_2026_06_12",
-      "target": "changelog_fixed_758",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_758"
     },
     {
       "relation": "contains",
@@ -103393,9 +103858,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L766",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_3_2026_06_12",
-      "target": "changelog_tests_766",
-      "confidence_score": 1.0
+      "target": "changelog_tests_766"
     },
     {
       "relation": "contains",
@@ -103403,9 +103868,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L777",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_2_2026_06_12",
-      "target": "changelog_fixed_777",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_777"
     },
     {
       "relation": "contains",
@@ -103413,9 +103878,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L787",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_1_2026_06_12",
-      "target": "changelog_fixed_787",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_787"
     },
     {
       "relation": "contains",
@@ -103423,9 +103888,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L795",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_0_2026_06_07",
-      "target": "changelog_added_795",
-      "confidence_score": 1.0
+      "target": "changelog_added_795"
     },
     {
       "relation": "references",
@@ -125059,5 +125524,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "dc2483c21377981ff047d00e472a09c36841174d"
+  "built_at_commit": "ece59f4b23795debaf075dec2d3d029c5a270c13"
 }

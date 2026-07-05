@@ -20,6 +20,7 @@ import {
   DependencyRunner,
   removeInstalledDependencyOutputs,
 } from "../src/core/runtime/dependency-runner.js";
+import { resolveProgramFromPath } from "../src/core/runtime/process-spawn.js";
 import type { ResolvedDock } from "../src/resolver.js";
 
 const tempRoots: string[] = [];
@@ -250,7 +251,7 @@ describe("dock dependencies", () => {
     expect(readFileSync(log, "utf8")).toContain("npm:");
   });
 
-  it("does not save lock records when dependency installation fails", async () => {
+  it("rolls back copied files when dependency installation fails so install can retry", async () => {
     const docks = tempDir();
     const project = tempDir();
     const bin = tempDir();
@@ -266,6 +267,7 @@ describe("dock dependencies", () => {
       files: [
         { path: "README.md", content: "# Applied before dependency failure\n" },
         { path: "harness/package.json", content: '{"name":"harness"}\n' },
+        { path: "harness/package-lock.json", content: '{"lockfileVersion":3}\n' },
       ],
     });
 
@@ -283,9 +285,29 @@ describe("dock dependencies", () => {
       ),
     ).rejects.toThrow("dependency `harness` install failed");
 
-    expect(existsSync(join(project, "README.md"))).toBe(true);
+    expect(existsSync(join(project, "README.md"))).toBe(false);
+    expect(existsSync(join(project, "harness", "package.json"))).toBe(false);
+    expect(existsSync(join(project, "harness", "package-lock.json"))).toBe(false);
     expect(new OpenDockStateStore(project).readLock().docks).toEqual([]);
     expect(readFileSync(log, "utf8")).toContain("npm:");
+
+    const retryBin = tempDir();
+    const retryLog = join(project, "retry-commands.log");
+    writeFakeDependencyManager(retryBin, "npm", retryLog, "node_modules/pkg.txt");
+    await withEnvAsync({ PATH: `${retryBin}:${process.env.PATH ?? ""}` }, () =>
+      new DockInstaller().install({
+        dockRef: DockRef.parse("test/failing-deps@1.0.0"),
+        projectDir: project,
+        phase: "install",
+        platform: "macos",
+        live: false,
+        runTasks: true,
+        resolve: localResolver(docks),
+      }),
+    );
+
+    expect(existsSync(join(project, "harness", "node_modules", "pkg.txt"))).toBe(true);
+    expect(new OpenDockStateStore(project).readLock().docks[0]?.id).toBe("test/failing-deps");
   });
 
   it.each([
@@ -534,6 +556,18 @@ describe("dock dependencies", () => {
       existsSync(join(project, "deps", "image2html", "node_modules", "project-shim.txt")),
     ).toBe(true);
     expect(readFileSync(log, "utf8")).toContain("npm:");
+  });
+
+  it("prefers Windows command shims for dependency managers", () => {
+    const project = tempDir();
+    const projectBin = join(project, ".opendock", "bin");
+    mkdirSync(projectBin, { recursive: true });
+    writeFileSync(join(projectBin, "npm"), "#!/usr/bin/env sh\nexit 1\n");
+    writeFileSync(join(projectBin, "npm.cmd"), "@echo off\r\nexit /b 0\r\n");
+
+    expect(resolveProgramFromPath("npm", `${projectBin};C:\\Windows\\System32`, "windows")).toBe(
+      join(projectBin, "npm.cmd"),
+    );
   });
 
   it("reports missing dependency outputs during doctor", () => {

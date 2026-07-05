@@ -1,4 +1,3 @@
-import { spawnSync } from "node:child_process";
 import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { OpenDockPlatform } from "../../platform.js";
@@ -6,6 +5,7 @@ import type { DockManifest, TaskPhase, ToolSpec } from "../domain/manifest.js";
 import { ensureRealDirectoryPath } from "../files/path-utils.js";
 import { CommandRunner, failureMessage, opendockCommandPath } from "./command-runner.js";
 import { createProjectCommandShim } from "./command-shim.js";
+import { resolveProgramFromPath, spawnOpenDockCommand } from "./process-spawn.js";
 import { type ProgressReporter, reportProgress } from "./progress.js";
 import {
   prependPathEntries,
@@ -270,16 +270,22 @@ function runPackageCommand(
     opendockCommandPath(),
     projectCommandPathEntries(context.projectDir),
   );
-  const result = spawnSync(program, args, {
-    cwd: installDir,
-    encoding: "utf8",
-    env: {
-      ...process.env,
-      ...extraEnv,
-      PATH: pathValue,
+  const resolvedProgram = resolveProgramFromPath(program, pathValue, context.platform);
+  const result = spawnOpenDockCommand(
+    resolvedProgram,
+    args,
+    {
+      cwd: installDir,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        ...extraEnv,
+        PATH: pathValue,
+      },
+      stdio: (context.live ?? true) ? "inherit" : "pipe",
     },
-    stdio: (context.live ?? true) ? "inherit" : "pipe",
-  });
+    context.platform,
+  );
   if (result.error) {
     throw result.error;
   }

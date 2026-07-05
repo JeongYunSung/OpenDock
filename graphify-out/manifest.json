@@ -505,8 +505,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-installer.ts": {
-    "mtime": 1783148975.1183994,
-    "ast_hash": "917e12911cabafe4cf961bc7f8b78647",
+    "mtime": 1783246313.4974926,
+    "ast_hash": "7cb65a703cd4c8ecedb25a0772ad7c40",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/manifest.ts": {
@@ -2625,8 +2625,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/tool-runner.ts": {
-    "mtime": 1783148975.119841,
-    "ast_hash": "e76f052d68df178fe933e490cb4183ce",
+    "mtime": 1783246378.8829017,
+    "ast_hash": "913d7866b07077ddee7bb5205a15c71b",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-installer.ts": {
@@ -2725,13 +2725,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/dependency-runner.ts": {
-    "mtime": 1783148975.1193056,
-    "ast_hash": "e1c881c6142a2cb36c9961ca043a8b64",
+    "mtime": 1783246378.8823318,
+    "ast_hash": "ce6581873ca14d024ac7d58d3ca03fc6",
     "semantic_hash": ""
   },
   "packages/cli/tests/dependencies.test.ts": {
-    "mtime": 1783148975.1204977,
-    "ast_hash": "6e991312e80998dbec0a1648af0ca60d",
+    "mtime": 1783246338.067617,
+    "ast_hash": "e3b081540f43c20d29c9d5cfe3af21a9",
     "semantic_hash": ""
   },
   "packages/cli/docs/plans/dependencies-qa.md": {
@@ -2762,6 +2762,11 @@
   ".serena/memories/result-ultrawork.md": {
     "mtime": 1783170161.0359018,
     "ast_hash": "8b7052be7e79903ffdb3a54875ef8898",
+    "semantic_hash": ""
+  },
+  "packages/cli/src/core/runtime/process-spawn.ts": {
+    "mtime": 1783246378.8799107,
+    "ast_hash": "8d4e161ee9854fd2fa106049a6bb06a9",
     "semantic_hash": ""
   }
 }

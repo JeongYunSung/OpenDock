@@ -263,53 +263,61 @@ export class DockInstaller {
       version: resolved.version,
     });
 
-    if (priorDock) {
+    let dependencyResult: ReturnType<DependencyRunner["run"]>;
+    try {
+      if (priorDock) {
+        this.progress(options.progress, {
+          dockId: resolved.manifest.id,
+          message: `Cleaning previous ${resolved.manifest.id} dependencies`,
+          percent: 91,
+          phase: "dependency-clean",
+          version: resolved.version,
+        });
+        removeInstalledDependencyOutputs(options.projectDir, priorDock.dependencies);
+      }
+
       this.progress(options.progress, {
         dockId: resolved.manifest.id,
-        message: `Cleaning previous ${resolved.manifest.id} dependencies`,
-        percent: 91,
-        phase: "dependency-clean",
+        message: `Preparing ${resolved.manifest.id} dependencies`,
+        percent: 92,
+        phase: "dependencies-start",
         version: resolved.version,
       });
-      removeInstalledDependencyOutputs(options.projectDir, priorDock.dependencies);
+      dependencyResult = options.runTasks
+        ? this.dependencyRunner.run(resolved.manifest, {
+            projectDir: options.projectDir,
+            dockId: resolved.manifest.id,
+            phase: options.phase ?? "install",
+            platform,
+            ...(options.live === undefined ? {} : { live: options.live }),
+            ...(options.progress === undefined
+              ? {}
+              : {
+                  progress: this.nestedProgress(
+                    options.progress,
+                    resolved.manifest.id,
+                    resolved.version,
+                    92,
+                    96,
+                  ),
+                }),
+          })
+        : { dependencies: [], reports: [] };
+      this.progress(options.progress, {
+        dockId: resolved.manifest.id,
+        level: "OK",
+        message: `Prepared ${dependencyResult.dependencies.length} dependency set(s)`,
+        percent: 96,
+        phase: "dependencies-complete",
+        total: dependencyResult.dependencies.length,
+        version: resolved.version,
+      });
+    } catch (error) {
+      if (!priorDock && (options.phase ?? "install") === "install") {
+        this.rollbackNewInstall(options.projectDir, resolved, fileSummary.createdPaths);
+      }
+      throw error;
     }
-
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      message: `Preparing ${resolved.manifest.id} dependencies`,
-      percent: 92,
-      phase: "dependencies-start",
-      version: resolved.version,
-    });
-    const dependencyResult = options.runTasks
-      ? this.dependencyRunner.run(resolved.manifest, {
-          projectDir: options.projectDir,
-          dockId: resolved.manifest.id,
-          phase: options.phase ?? "install",
-          platform,
-          ...(options.live === undefined ? {} : { live: options.live }),
-          ...(options.progress === undefined
-            ? {}
-            : {
-                progress: this.nestedProgress(
-                  options.progress,
-                  resolved.manifest.id,
-                  resolved.version,
-                  92,
-                  96,
-                ),
-              }),
-        })
-      : { dependencies: [], reports: [] };
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      level: "OK",
-      message: `Prepared ${dependencyResult.dependencies.length} dependency set(s)`,
-      percent: 96,
-      phase: "dependencies-complete",
-      total: dependencyResult.dependencies.length,
-      version: resolved.version,
-    });
 
     this.progress(options.progress, {
       dockId: resolved.manifest.id,
@@ -350,6 +358,34 @@ export class DockInstaller {
       steps: [...taskResult.reports, ...dependencyResult.reports],
       version: resolved.version,
     });
+  }
+
+  private rollbackNewInstall(
+    projectDir: string,
+    resolved: ResolvedDock,
+    createdPaths: string[],
+  ): void {
+    try {
+      removeInstalledDependencyOutputs(
+        projectDir,
+        Object.entries(resolved.manifest.dependencies ?? {}).map(([name, spec]) => ({
+          manager: spec.manager,
+          mode: spec.mode,
+          name,
+          path: spec.path,
+        })),
+      );
+    } catch {
+      // Preserve the original install error; rollback is best-effort for partial installs.
+    }
+    for (const path of [...createdPaths].reverse()) {
+      const target = safeJoin(projectDir, path, "created managed output");
+      rmSync(target, { force: true });
+      pruneEmptyDirectoryChain(projectDir, relative(projectDir, target));
+    }
+    const workdir = this.taskRunner.dockWorkdir(projectDir, resolved.manifest.id);
+    rmSync(workdir, { force: true, recursive: true });
+    pruneEmptyDirectoryChain(projectDir, relative(projectDir, workdir));
   }
 
   uninstall(options: UninstallOptions): UninstallReport {
