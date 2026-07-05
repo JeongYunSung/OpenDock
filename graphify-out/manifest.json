@@ -10,8 +10,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/scripts/prepare-sidecars.mjs": {
-    "mtime": 1781529300.0755417,
-    "ast_hash": "6910e8c32068c9975a024ea7dbd8d310",
+    "mtime": 1783252111.4206402,
+    "ast_hash": "15b3a4736300c7aa7593713402f08304",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/registry-fixtures.mjs": {

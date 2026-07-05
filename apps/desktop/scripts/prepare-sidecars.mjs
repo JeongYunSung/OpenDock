@@ -9,26 +9,32 @@ const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = resolve(appRoot, "../..");
 const localCliRoot = join(repoRoot, "packages", "cli");
 const localCliEntry = join(localCliRoot, "src", "cli.ts");
-const target = targetTriple();
 const source = resolveSource();
 const outDir = join(appRoot, "src-tauri", "binaries");
-const outPath = join(outDir, `opendock-${target.suffix}`);
+const targets = targetTriples();
+const nativeTarget = targetTriple();
 
 await mkdir(outDir, { recursive: true });
 
-if (source === localCliEntry) {
-  compileLocalCliSidecar(outPath);
-} else if (!existsSync(source)) {
-  throw new Error(`OpenDock CLI sidecar source not found: ${source}`);
-} else {
-  await copyFile(source, outPath);
+for (const target of targets) {
+  const outPath = join(outDir, `opendock-${target.suffix}`);
+
+  if (source === localCliEntry) {
+    compileLocalCliSidecar(outPath, target);
+  } else if (!existsSync(source)) {
+    throw new Error(`OpenDock CLI sidecar source not found: ${source}`);
+  } else {
+    await copyFile(source, outPath);
+  }
+
+  await chmod(outPath, 0o755);
+  await assertStandaloneSidecar(outPath);
+  if (target.suffix === nativeTarget.suffix) {
+    assertSidecarCliRuns(outPath);
+  }
+
+  console.log(`prepared OpenDock sidecar: ${outPath}`);
 }
-
-await chmod(outPath, 0o755);
-await assertStandaloneSidecar(outPath);
-assertSidecarCliRuns(outPath);
-
-console.log(`prepared OpenDock sidecar: ${outPath}`);
 
 function resolveSource() {
   if (process.env.OPENDOCK_CLI_SOURCE) {
@@ -40,8 +46,8 @@ function resolveSource() {
   return localCliEntry;
 }
 
-function compileLocalCliSidecar(outputPath) {
-  const result = spawnSync("bun", ["build", "src/cli.ts", "--compile", "--outfile", outputPath], {
+function compileLocalCliSidecar(outputPath, target) {
+  const result = spawnSync("bun", ["build", "src/cli.ts", "--compile", "--target", target.bun, "--outfile", outputPath], {
     cwd: localCliRoot,
     stdio: "inherit",
   });
@@ -82,11 +88,21 @@ function sidecarSmokeTestEnv() {
 function targetTriple() {
   const os = platform();
   const cpu = arch();
-  if (os === "darwin" && cpu === "arm64") return { suffix: "aarch64-apple-darwin" };
-  if (os === "darwin" && cpu === "x64") return { suffix: "x86_64-apple-darwin" };
-  if (os === "win32" && cpu === "x64") return { suffix: "x86_64-pc-windows-msvc.exe" };
-  if (os === "win32" && cpu === "arm64") return { suffix: "aarch64-pc-windows-msvc.exe" };
-  if (os === "linux" && cpu === "x64") return { suffix: "x86_64-unknown-linux-gnu" };
-  if (os === "linux" && cpu === "arm64") return { suffix: "aarch64-unknown-linux-gnu" };
+  if (os === "darwin" && cpu === "arm64") return { bun: "bun-darwin-arm64", suffix: "aarch64-apple-darwin" };
+  if (os === "darwin" && cpu === "x64") return { bun: "bun-darwin-x64", suffix: "x86_64-apple-darwin" };
+  if (os === "win32" && cpu === "x64") return { bun: "bun-windows-x64", suffix: "x86_64-pc-windows-msvc.exe" };
+  if (os === "win32" && cpu === "arm64") return { bun: "bun-windows-arm64", suffix: "aarch64-pc-windows-msvc.exe" };
+  if (os === "linux" && cpu === "x64") return { bun: "bun-linux-x64", suffix: "x86_64-unknown-linux-gnu" };
+  if (os === "linux" && cpu === "arm64") return { bun: "bun-linux-arm64", suffix: "aarch64-unknown-linux-gnu" };
   throw new Error(`unsupported sidecar target: ${os}/${cpu}`);
+}
+
+function targetTriples() {
+  if (platform() === "darwin") {
+    return [
+      { bun: "bun-darwin-x64", suffix: "x86_64-apple-darwin" },
+      { bun: "bun-darwin-arm64", suffix: "aarch64-apple-darwin" },
+    ];
+  }
+  return [targetTriple()];
 }
