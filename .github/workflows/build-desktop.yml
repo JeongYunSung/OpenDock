@@ -136,10 +136,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: cmd
         run: |
-          for /f "delims=" %%A in ('node -p "process.arch"') do set "ARCH=%%A"
-          for /f "delims=" %%A in ('node -e "const fs=require('node:fs'); const lock=fs.readFileSync('bun.lock','utf8'); const match=lock.match(/\"rolldown\": \\[\"rolldown@([^\"]+)/); if (!match) process.exit(1); console.log(match[1]);"') do set "ROLLDOWN_VERSION=%%A"
-          for /f "delims=" %%A in ('node -e "const fs=require('node:fs'); const lock=fs.readFileSync('bun.lock','utf8'); const match=lock.match(/\"@tauri-apps\/cli\": \\[\"@tauri-apps\/cli@([^\"]+)/); if (!match) process.exit(1); console.log(match[1]);"') do set "TAURI_CLI_VERSION=%%A"
-          bun add --no-save --os=win32 --cpu=%ARCH% "@rolldown/binding-win32-%ARCH%-msvc@%ROLLDOWN_VERSION%" "@tauri-apps/cli-win32-%ARCH%-msvc@%TAURI_CLI_VERSION%"
+          bun add --no-save --os=win32 --cpu=x64 "@rolldown/binding-win32-x64-msvc@1.0.3" "@tauri-apps/cli-win32-x64-msvc@2.11.2"
 
       - name: Build desktop app
         if: runner.os != 'Windows'
