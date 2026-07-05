@@ -112,6 +112,53 @@ jobs:
           rustc --version
           cargo --version
 
+      - name: Set up MSVC
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+          if not exist "%VSWHERE%" set "VSWHERE=%ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"
+
+          set "VSDEVCMD="
+          if exist "%VSWHERE%" (
+            for /f "usebackq delims=" %%I in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find Common7\Tools\VsDevCmd.bat`) do set "VSDEVCMD=%%I"
+          )
+
+          if not defined VSDEVCMD if exist "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat" set "VSDEVCMD=C:\Program Files\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat"
+          if not defined VSDEVCMD if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat" set "VSDEVCMD=C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat"
+          if not defined VSDEVCMD if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\Tools\VsDevCmd.bat" set "VSDEVCMD=C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\Tools\VsDevCmd.bat"
+          if not defined VSDEVCMD if exist "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" set "VSDEVCMD=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
+
+          if not defined VSDEVCMD (
+            echo Visual Studio Build Tools with the C++ workload was not found. Installing it on the kku runner.
+            curl -fsSL -o "%RUNNER_TEMP%\vs_BuildTools.exe" https://aka.ms/vs/17/release/vs_BuildTools.exe
+            "%RUNNER_TEMP%\vs_BuildTools.exe" --quiet --wait --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended
+            set "VS_INSTALL_EXIT=%ERRORLEVEL%"
+            if not "%VS_INSTALL_EXIT%"=="0" if not "%VS_INSTALL_EXIT%"=="3010" exit /b %VS_INSTALL_EXIT%
+          )
+
+          set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+          if not exist "%VSWHERE%" set "VSWHERE=%ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"
+          set "VSDEVCMD="
+          if exist "%VSWHERE%" (
+            for /f "usebackq delims=" %%I in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find Common7\Tools\VsDevCmd.bat`) do set "VSDEVCMD=%%I"
+          )
+
+          if not defined VSDEVCMD if exist "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat" set "VSDEVCMD=C:\Program Files\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat"
+          if not defined VSDEVCMD if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat" set "VSDEVCMD=C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat"
+          if not defined VSDEVCMD if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\Tools\VsDevCmd.bat" set "VSDEVCMD=C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\Tools\VsDevCmd.bat"
+          if not defined VSDEVCMD if exist "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" set "VSDEVCMD=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
+
+          if not defined VSDEVCMD (
+            echo Visual Studio Build Tools with the C++ workload is required on the kku runner.
+            echo Install "Build Tools for Visual Studio" with "Desktop development with C++" and retry.
+            exit /b 1
+          )
+
+          call "%VSDEVCMD%" -arch=x64 -host_arch=x64
+          where link
+          bun -e "const fs=require('node:fs'); const pathFile=process.env.GITHUB_PATH; const envFile=process.env.GITHUB_ENV; for (const entry of (process.env.PATH||'').split(';')) { if (entry.trim()) fs.appendFileSync(pathFile, entry + '\n'); } for (const name of ['INCLUDE','LIB','LIBPATH','VCINSTALLDIR','VCToolsInstallDir','VSINSTALLDIR','VisualStudioVersion','WindowsSdkDir','WindowsSDKVersion']) { if (process.env[name]) fs.appendFileSync(envFile, name + '=' + process.env[name] + '\n'); }"
+
       - name: Install dependencies
         if: runner.os != 'Windows'
         run: bun install --frozen-lockfile
