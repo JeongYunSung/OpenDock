@@ -1,16 +1,16 @@
 # Graph Report - opendock  (2026-07-05)
 
 ## Corpus Check
-- 464 files · ~234,491 words
+- 464 files · ~234,831 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4739 nodes · 7344 edges · 687 communities (386 shown, 301 thin omitted)
+- 4739 nodes · 7344 edges · 688 communities (387 shown, 301 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 66 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c0940258`
+- Built from commit: `1984bc08`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -444,6 +444,7 @@
 - [[_COMMUNITY_Community 431|Community 431]]
 - [[_COMMUNITY_Community 432|Community 432]]
 - [[_COMMUNITY_Community 433|Community 433]]
+- [[_COMMUNITY_Community 434|Community 434]]
 - [[_COMMUNITY_Community 435|Community 435]]
 - [[_COMMUNITY_Community 436|Community 436]]
 - [[_COMMUNITY_Community 437|Community 437]]
@@ -451,11 +452,11 @@
 - [[_COMMUNITY_Community 439|Community 439]]
 - [[_COMMUNITY_Community 440|Community 440]]
 - [[_COMMUNITY_Community 441|Community 441]]
+- [[_COMMUNITY_Community 442|Community 442]]
 - [[_COMMUNITY_Community 443|Community 443]]
 - [[_COMMUNITY_Community 444|Community 444]]
 - [[_COMMUNITY_Community 445|Community 445]]
 - [[_COMMUNITY_Community 446|Community 446]]
-- [[_COMMUNITY_Community 447|Community 447]]
 - [[_COMMUNITY_Community 448|Community 448]]
 - [[_COMMUNITY_Community 462|Community 462]]
 - [[_COMMUNITY_Community 464|Community 464]]
@@ -731,7 +732,7 @@
 - 1-file cycle: `apps/desktop/src-tauri/src/project_state.rs -> apps/desktop/src-tauri/src/project_state.rs`
 - 2-file cycle: `apps/desktop/src/data.ts -> apps/desktop/src/dock-data.ts -> apps/desktop/src/data.ts`
 
-## Communities (687 total, 301 thin omitted)
+## Communities (688 total, 301 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
@@ -743,7 +744,7 @@ Nodes (75): accountDocksController, accountPanel, app, appDialogs, appMenu, appM
 
 ### Community 2 - "Community 2"
 Cohesion: 0.08
-Nodes (51): commandForceRetryFor(), commandResultColor(), commandResultGroups(), commandResultRows(), isNoUpdateChangeResult(), openDockChangeResult(), openDockOutdatedResult(), outdatedReportsByDockId() (+43 more)
+Nodes (51): CommandProgressCard(), commandForceRetryFor(), commandResultColor(), commandResultGroups(), commandResultRows(), isNoUpdateChangeResult(), openDockChangeResult(), openDockOutdatedResult() (+43 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.08
@@ -763,15 +764,15 @@ Nodes (33): blockedShellTokens, commandSeparatorTokens, includesShellOperator(),
 
 ### Community 7 - "Community 7"
 Cohesion: 0.06
-Nodes (52): assertInvalid(), customShortcuts, exported, imported, CommandPaletteDialog(), CommandProgressCard(), CommandProgressDialog(), ProjectSwitcherDialog() (+44 more)
+Nodes (48): assertInvalid(), customShortcuts, exported, imported, CommandPaletteDialog(), CommandProgressDialog(), ProjectSwitcherDialog(), AppOverlays() (+40 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.07
 Nodes (47): accountStatsFor(), dockFromMyDock(), myDockReviewGroup, myDockStatus(), myDockStatusLabel(), primaryMyDockVersion(), AccountPanel(), isTaskActive() (+39 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.07
-Nodes (40): App(), AppNotice(), AppNoticeKind, AppNoticeOptions, AppNoticeState, ProductUpdateCheck, ProductUpdateState, ProjectFolder (+32 more)
+Cohesion: 0.08
+Nodes (35): App(), AppNotice(), AppNoticeKind, AppNoticeOptions, AppNoticeState, ProductUpdateCheck, ProductUpdateState, ProjectFolder (+27 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.10
@@ -830,8 +831,8 @@ Cohesion: 0.12
 Nodes (18): TokenStore, authProviderChoices, AuthProviderSelectOptions, BrowserLoginClient, BrowserLoginOptions, browserOpenCommand(), closeServer(), KeypressEvent (+10 more)
 
 ### Community 24 - "Community 24"
-Cohesion: 0.13
-Nodes (12): commandFailureMessage(), TEXT, LogsPanel(), markdownToBlocks(), parseReadmeMarkdown(), ReadmeBlock, ReadmePanel(), stripInlineMarkdown() (+4 more)
+Cohesion: 0.15
+Nodes (11): commandFailureMessage(), TEXT, markdownToBlocks(), parseReadmeMarkdown(), ReadmeBlock, ReadmePanel(), stripInlineMarkdown(), AuthControllerOptions (+3 more)
 
 ### Community 25 - "Community 25"
 Cohesion: 0.14
@@ -998,8 +999,8 @@ Cohesion: 0.13
 Nodes (12): AuthUserResponse, CliLoginStartResponse, CliTokenResponse, OpenDockRegistryClient, parseContentLength(), readResponseBytes(), RegistryRequestError, SubmissionArchiveRequest (+4 more)
 
 ### Community 67 - "Community 67"
-Cohesion: 0.17
-Nodes (20): Campaign briefs, content calendars, SEO briefs, and ad experiment planning., Campaign briefs, content calendars, SEO briefs, and ad experiment planning., PRD, user story, roadmap, release note, and decision template workspace., PRD, user story, roadmap, release note, and decision template workspace., Business model, ICP, GTM, pricing, and founder strategy workspace., Business model, ICP, GTM, pricing, and founder strategy workspace., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes. (+12 more)
+Cohesion: 0.24
+Nodes (14): Campaign briefs, content calendars, SEO briefs, and ad experiment planning., Campaign briefs, content calendars, SEO briefs, and ad experiment planning., Business model, ICP, GTM, pricing, and founder strategy workspace., Business model, ICP, GTM, pricing, and founder strategy workspace., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes., Business quality gate for PRDs, user stories, GTM, ICP, pricing, marketing claims, evidence, and release notes., Tag: business, Tag: campaign (+6 more)
 
 ### Community 68 - "Community 68"
 Cohesion: 0.14
@@ -1010,8 +1011,8 @@ Cohesion: 0.12
 Nodes (15): license, name, packageManager, private, scripts, build:cli, build:desktop, check (+7 more)
 
 ### Community 70 - "Community 70"
-Cohesion: 0.13
-Nodes (25): AccountProfile, DockStarResponse, DockStarStatusResponse, MyDocksResponse, MyStarsResponse, RegistryDockSearchResponse, emptyMyDocksCounts(), fetchRegistryJson() (+17 more)
+Cohesion: 0.11
+Nodes (30): AccountProfile, DockStarResponse, DockStarStatusResponse, MyDocksResponse, MyStarsResponse, RegistryDockSearchResponse, emptyMyDocksCounts(), fetchRegistryJson() (+22 more)
 
 ### Community 71 - "Community 71"
 Cohesion: 0.21
@@ -1022,8 +1023,8 @@ Cohesion: 0.15
 Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
 
 ### Community 73 - "Community 73"
-Cohesion: 0.13
-Nodes (14): anyOf, definitions, Number, PermissionEntry, Target, description, anyOf, description (+6 more)
+Cohesion: 0.15
+Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
 
 ### Community 74 - "Community 74"
 Cohesion: 0.15
@@ -1062,8 +1063,8 @@ Cohesion: 0.20
 Nodes (9): API Documentation Template, Authentication, Change Notes, Endpoint, Errors, Examples, Purpose, Request (+1 more)
 
 ### Community 83 - "Community 83"
-Cohesion: 0.15
-Nodes (21): BASE_LOGS, OpenDockChangeSummary, OpenDockChangeSummaryCounts, OpenDockFileChanges, RegistryDockDetail, RegistryDockSummary, RegistryDockVersionGroup, RegistryDockVersionItem (+13 more)
+Cohesion: 0.09
+Nodes (31): commandLinesToStoredLogs(), AppLog, AuthSession, BASE_LOGS, DesktopAppState, OpenDockChangeSummary, OpenDockChangeSummaryCounts, OpenDockFileChanges (+23 more)
 
 ### Community 84 - "Community 84"
 Cohesion: 0.20
@@ -1091,7 +1092,7 @@ Nodes (10): type, webviews, windows, items, description, items, type, descriptio
 
 ### Community 90 - "Community 90"
 Cohesion: 0.08
-Nodes (25): 0.1.39 - 2026-06-23, 0.1.43 - 2026-06-26, 0.1.44 - 2026-06-30, 0.1.47 - 2026-07-01, 0.2.0 - 2026-07-02, 0.2.3 - 2026-07-03, 0.2.4 - 2026-07-04, 0.2.6 - 2026-07-05 (+17 more)
+Nodes (25): 0.1.39 - 2026-06-23, 0.1.43 - 2026-06-26, 0.1.44 - 2026-06-30, 0.1.47 - 2026-07-01, 0.2.0 - 2026-07-02, 0.2.2 - 2026-07-02, 0.2.4 - 2026-07-04, 0.2.6 - 2026-07-05 (+17 more)
 
 ### Community 91 - "Community 91"
 Cohesion: 0.22
@@ -2074,8 +2075,8 @@ Cohesion: 0.16
 Nodes (9): cliBinaryPath, createDockArchive(), createFixture(), Fixture, packageDir, registryPreloadSource(), registryRelease(), tempRoots (+1 more)
 
 ### Community 351 - "Community 351"
-Cohesion: 0.09
-Nodes (24): AuthSession, DesktopAppState, DockView, Project, resolveActiveProjectId(), OpenMenu, DetailControllerOptions, DesktopStateSyncOptions (+16 more)
+Cohesion: 0.11
+Nodes (19): DockView, OpenMenu, DetailControllerOptions, DETAIL_TABS, DetailTab, DOCK_VIEWS, DockNavigationHistoryOptions, DockNavigationHistoryState (+11 more)
 
 ### Community 352 - "Community 352"
 Cohesion: 0.26
@@ -2198,8 +2199,8 @@ Cohesion: 0.40
 Nodes (5): install, install, list, update, uninstall 의미, list, uninstall, update
 
 ### Community 430 - "Community 430"
-Cohesion: 0.67
-Nodes (3): 0.2.2 - 2026-07-02, CLI, Desktop App
+Cohesion: 0.53
+Nodes (6): PRD, user story, roadmap, release note, and decision template workspace., PRD, user story, roadmap, release note, and decision template workspace., Tag: planning, Tag: prd, Tag: product, Tag: roadmap
 
 ### Community 431 - "Community 431"
 Cohesion: 0.67
@@ -2212,6 +2213,10 @@ Nodes (3): Identifier, description, oneOf
 ### Community 433 - "Community 433"
 Cohesion: 0.67
 Nodes (3): 0.1.4 - 2026-06-12, Fixed, Tests
+
+### Community 434 - "Community 434"
+Cohesion: 0.40
+Nodes (4): anyOf, description, $schema, title
 
 ### Community 435 - "Community 435"
 Cohesion: 0.67
@@ -2241,6 +2246,10 @@ Nodes (3): 0.1.7 - 2026-06-12, Changed, Tests
 Cohesion: 0.50
 Nodes (4): default, description, type, description
 
+### Community 442 - "Community 442"
+Cohesion: 0.67
+Nodes (3): 0.2.3 - 2026-07-03, CLI, Desktop App
+
 ### Community 445 - "Community 445"
 Cohesion: 0.67
 Nodes (3): 0.1.36 - 2026-06-22, CLI, Desktop App
@@ -2248,10 +2257,6 @@ Nodes (3): 0.1.36 - 2026-06-22, CLI, Desktop App
 ### Community 446 - "Community 446"
 Cohesion: 0.40
 Nodes (4): anyOf, description, $schema, title
-
-### Community 447 - "Community 447"
-Cohesion: 0.67
-Nodes (3): Value, anyOf, description
 
 ### Community 448 - "Community 448"
 Cohesion: 0.67
@@ -2276,6 +2281,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.023809523809523808 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.07650273224043716 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0771478667445938 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.08412698412698413 - nodes in this community are weakly interconnected._

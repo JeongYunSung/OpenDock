@@ -779,6 +779,7 @@ function uvPythonEnvironment(): NodeJS.ProcessEnv {
     UV_PYTHON_INSTALL_BIN: "1",
     UV_PYTHON_INSTALL_DIR: join(root, "python", "_uv", "installations"),
     UV_PYTHON_NO_REGISTRY: "1",
+    PIP_BREAK_SYSTEM_PACKAGES: "1",
   };
 }
 
