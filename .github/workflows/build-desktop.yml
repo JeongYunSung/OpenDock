@@ -41,6 +41,17 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Install macOS native optional bindings
+        if: runner.os == 'macOS'
+        run: |
+          set -euo pipefail
+          arch="$(node -p "process.arch")"
+          rolldown_version="$(node -p "require('rolldown/package.json').version")"
+          tauri_cli_version="$(node -p "require('@tauri-apps/cli/package.json').version")"
+          npm install --no-save \
+            "@rolldown/binding-darwin-${arch}@${rolldown_version}" \
+            "@tauri-apps/cli-darwin-${arch}@${tauri_cli_version}"
+
       - name: Build desktop app
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}

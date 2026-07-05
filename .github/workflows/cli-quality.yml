@@ -33,6 +33,14 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Install macOS native optional bindings
+        if: runner.os == 'macOS'
+        run: |
+          set -euo pipefail
+          arch="$(node -p "process.arch")"
+          rolldown_version="$(node -p "require('rolldown/package.json').version")"
+          npm install --no-save "@rolldown/binding-darwin-${arch}@${rolldown_version}"
+
       - name: Verify CLI
         working-directory: packages/cli
         run: bun run check
