@@ -565,8 +565,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/command-runner.ts": {
-    "mtime": 1783240027.956258,
-    "ast_hash": "c7a2a5c79ec4d65eafcabff50dfe1d55",
+    "mtime": 1783319311.6038165,
+    "ast_hash": "9e46cb10d74a4526f1c30cb3120bf96a",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/progress.ts": {
@@ -575,8 +575,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/requirement-runner.ts": {
-    "mtime": 1782984461.5093582,
-    "ast_hash": "6c676d5cc7ee5d526c4afa511f9f47a7",
+    "mtime": 1783318609.6219678,
+    "ast_hash": "af0ad46eae566bc8bb9f5ee08a96632c",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-requirements.ts": {
@@ -685,8 +685,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/requirements.test.ts": {
-    "mtime": 1783148975.1214256,
-    "ast_hash": "5dadfaf817e7b16d0300cf523107543d",
+    "mtime": 1783318628.5567124,
+    "ast_hash": "fa39bd31631befa5c886ccafdb4b6eda",
     "semantic_hash": ""
   },
   "packages/cli/tests/security-regression.test.ts": {
@@ -2615,8 +2615,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/command-shim.ts": {
-    "mtime": 1782974780.891257,
-    "ast_hash": "c390acd4b44176c5f48d3ef437ef4486",
+    "mtime": 1783321294.833583,
+    "ast_hash": "c814fcf438b18c2340ec97b31ecd4456",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/project-layout.ts": {
@@ -2625,13 +2625,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/tool-runner.ts": {
-    "mtime": 1783246378.8829017,
-    "ast_hash": "913d7866b07077ddee7bb5205a15c71b",
+    "mtime": 1783321301.0334477,
+    "ast_hash": "15140dafd5a9bfe41dfcb0a1f45baa41",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-installer.ts": {
-    "mtime": 1783251006.5580683,
-    "ast_hash": "a2aee054ef8586f37a7c176cb62019ab",
+    "mtime": 1783316195.3795269,
+    "ast_hash": "5f39e00e422a5a7d1242c8ca969b3488",
     "semantic_hash": ""
   },
   "packages/cli/tests/deploy-manifest-hardening.test.ts": {
@@ -2650,8 +2650,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/runtime-platform-matrix.test.ts": {
-    "mtime": 1783251523.340243,
-    "ast_hash": "b57db2bcde8ad77604ec83ff6d8d6c7a",
+    "mtime": 1783316275.938214,
+    "ast_hash": "7622cf9dd3f1b091b75ec8bf780789a9",
     "semantic_hash": ""
   },
   "packages/cli/tests/task-permission-policy.test.ts": {
@@ -2705,8 +2705,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/runtime-tool-isolation-edge-cases.test.ts": {
-    "mtime": 1783148975.121652,
-    "ast_hash": "00ab5d373a3bc695c9d003e53ce26e16",
+    "mtime": 1783321340.3353863,
+    "ast_hash": "06e12cb5585cbbd23138bb53f127028e",
     "semantic_hash": ""
   },
   ".serena/memories/memory_maintenance.md": {
@@ -2720,8 +2720,8 @@
     "semantic_hash": ""
   },
   ".serena/project.yml": {
-    "mtime": 1782994308.3992145,
-    "ast_hash": "46f9a234f996285a6b581b87f565483e",
+    "mtime": 1783267671.1663477,
+    "ast_hash": "64f5b823a9c5be34634622aecdc03703",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/dependency-runner.ts": {
