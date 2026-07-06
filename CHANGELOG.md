@@ -7,6 +7,12 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.2.9 - 2026-07-06
+
+### CLI
+
+- Harden managed runtime isolation while keeping project-local command shims.
+
 ## 0.2.8 - 2026-07-05
 
 ### CLI
