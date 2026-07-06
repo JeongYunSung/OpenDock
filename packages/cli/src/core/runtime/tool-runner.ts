@@ -116,6 +116,7 @@ export class ToolRunner {
       createProjectCommandShim({
         command,
         owner: { dockId: context.dockId, kind: "tool", name },
+        pathEntries: projectCommandPathEntries(context.projectDir),
         platform: context.platform,
         projectDir: context.projectDir,
         target,

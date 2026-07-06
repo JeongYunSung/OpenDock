@@ -19,6 +19,8 @@ import {
   sharedRuntimeRoot,
 } from "./project-layout.js";
 
+const runtimeCommandMaxBuffer = 20 * 1024 * 1024;
+
 export type RuntimeInstallSource = "managed";
 
 export interface RuntimeInstallRequest {
@@ -603,6 +605,10 @@ function extractArchive(
   compression: NodePlatformArchive["compression"],
 ): void {
   if (compression === "zip") {
+    if (process.platform !== "win32") {
+      runChecked("unzip", ["-q", archivePath, "-d", destination]);
+      return;
+    }
     runChecked(resolvePowerShellCommand(), [
       "-NoProfile",
       "-ExecutionPolicy",
@@ -770,6 +776,7 @@ function runChecked(
   const result = spawnSync(command, args, {
     encoding: "utf8",
     env,
+    maxBuffer: runtimeCommandMaxBuffer,
     stdio: "pipe",
   });
   if (result.error) {

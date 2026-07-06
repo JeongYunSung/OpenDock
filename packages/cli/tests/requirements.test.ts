@@ -7,6 +7,7 @@ import {
   readFileSync,
   realpathSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -551,6 +552,85 @@ describe("requires regression coverage", () => {
     const wrapper = readFileSync(join(managedBin, "node"), "utf8");
     expect(wrapper).toContain(join(hostBin, "node"));
     expect(wrapper).not.toContain(`exec "${join(managedBin, "node")}"`);
+  });
+
+  it("does not wrap another project OpenDock shim as the host source", async () => {
+    const home = realpathSync(tempDir());
+    const firstProject = tempDir();
+    const secondProject = tempDir();
+    const hostBin = tempDir();
+    const firstProjectBin = join(firstProject, ".opendock", "bin");
+    const managedBin = join(home, ".opendock", "runtimes", "node", "22.12.0", "bin");
+    writeFakeRuntime(hostBin, "node", "v22.12.0");
+
+    await withEnv({ HOME: home, PATH: `${hostBin}:${process.env.PATH ?? ""}` }, () =>
+      new TaskRunner().run(runtimeManifest("node", ">=22.0.0 <23.0.0"), {
+        projectDir: firstProject,
+        dockId: "test/first",
+        phase: "install",
+        platform: "macos",
+        live: false,
+      }),
+    );
+
+    await withEnv(
+      { HOME: home, PATH: `${firstProjectBin}:${hostBin}:${process.env.PATH ?? ""}` },
+      () =>
+        new TaskRunner().run(runtimeManifest("node", ">=22.0.0 <23.0.0"), {
+          projectDir: secondProject,
+          dockId: "test/second",
+          phase: "install",
+          platform: "macos",
+          live: false,
+        }),
+    );
+
+    const wrapper = readFileSync(join(managedBin, "node"), "utf8");
+    expect(wrapper).toContain(join(hostBin, "node"));
+    expect(wrapper).not.toContain(firstProjectBin);
+  });
+
+  it("ignores Volta shims when resolving host Node runtimes", async () => {
+    const home = realpathSync(tempDir());
+    const project = tempDir();
+    const hostBin = tempDir();
+    const symlinkedVoltaBin = tempDir();
+    const voltaBin = join(home, ".volta", "bin");
+    mkdirSync(voltaBin, { recursive: true });
+    writeExecutable(
+      join(voltaBin, "node"),
+      `#!/bin/sh
+printf 'Volta v2.0.1\\nNode is not available.\\n' >&2
+exit 1
+`,
+    );
+    symlinkSync(join(voltaBin, "node"), join(symlinkedVoltaBin, "node"));
+    writeFakeRuntime(hostBin, "node", "v22.12.0");
+    const installer: RuntimeInstaller = {
+      install() {
+        throw new Error("managed install should not run when a non-Volta host node is available");
+      },
+    };
+
+    const result = await withEnv(
+      { HOME: home, PATH: `${voltaBin}:${symlinkedVoltaBin}:${hostBin}:${process.env.PATH ?? ""}` },
+      () =>
+        new RequirementRunner(new CommandRunner(), installer).run(
+          runtimeManifest("node", ">=22.0.0 <23.0.0"),
+          {
+            projectDir: project,
+            phase: "install",
+            platform: "macos",
+          },
+        ),
+    );
+
+    const managedBin = join(home, ".opendock", "runtimes", "node", "22.12.0", "bin");
+    const wrapper = readFileSync(join(managedBin, "node"), "utf8");
+    expect(result.reports[0]).toMatchObject({ id: "require-runtime-node", status: "Ready" });
+    expect(wrapper).toContain(join(hostBin, "node"));
+    expect(wrapper).not.toContain(voltaBin);
+    expect(wrapper).not.toContain(symlinkedVoltaBin);
   });
 
   it("installs a managed runtime when the host runtime is missing or out of range", () => {

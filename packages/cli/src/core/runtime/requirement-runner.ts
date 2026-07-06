@@ -1,4 +1,4 @@
-import { existsSync, lstatSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, realpathSync, writeFileSync } from "node:fs";
 import { delimiter, dirname, join, parse, relative, resolve, sep } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
 import { formatStepSymbol, terminalStyle } from "../../terminal-style.js";
@@ -320,6 +320,9 @@ function resolveCommandPath(command: string, projectDir: string): string | undef
     }
     for (const candidate of commandCandidates(entry, command)) {
       if (existsSync(candidate)) {
+        if (isVoltaCommandCandidate(candidate)) {
+          continue;
+        }
         return resolve(candidate);
       }
     }
@@ -332,12 +335,38 @@ function openDockManagedCommandDirectories(projectDir: string): Set<string> {
 }
 
 function isIgnoredCommandDirectory(path: string, ignoredDirectories: Set<string>): boolean {
+  if (isOpenDockProjectBinDirectory(path)) {
+    return true;
+  }
+  if (isVoltaCommandBinDirectory(path)) {
+    return true;
+  }
   for (const directory of ignoredDirectories) {
     if (path === directory || path.startsWith(`${directory}${sep}`)) {
       return true;
     }
   }
   return false;
+}
+
+function isOpenDockProjectBinDirectory(path: string): boolean {
+  return /(^|[/\\])\.opendock[/\\]bin$/u.test(path);
+}
+
+function isVoltaCommandBinDirectory(path: string): boolean {
+  return isVoltaPath(path) && /[/\\]bin$/u.test(path);
+}
+
+function isVoltaCommandCandidate(path: string): boolean {
+  try {
+    return isVoltaPath(realpathSync(path));
+  } catch {
+    return false;
+  }
+}
+
+function isVoltaPath(path: string): boolean {
+  return /(^|[/\\])\.volta([/\\]|$)/u.test(path);
 }
 
 function commandCandidates(directory: string, command: string): string[] {

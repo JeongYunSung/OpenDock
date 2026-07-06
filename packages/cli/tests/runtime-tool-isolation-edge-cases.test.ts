@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import {
   chmodSync,
   existsSync,
@@ -128,6 +129,55 @@ printf 'project:%s\\n' "$*" >> "${projectLog}"
 
     expect(readFileSync(projectLog, "utf8")).toBe("project:-y install\n");
     expect(existsSync(hostLog)).toBe(false);
+  });
+
+  it("keeps project runtime shims first when a tool command uses env shebangs", async () => {
+    const project = tempDir();
+    const hostBin = tempDir();
+    const targetDir = tempDir();
+    const log = join(project, "bun-selection.log");
+
+    writeExecutable(
+      join(hostBin, "bun"),
+      `#!/bin/sh
+printf 'host-bun:%s\\n' "$*" >> "${log}"
+exit 14
+`,
+    );
+    createProjectCommandShim({
+      command: "bun",
+      owner: { dockId: "project", kind: "runtime", name: "bun" },
+      platform: "macos",
+      projectDir: project,
+      target: writeExecutable(
+        join(targetDir, "managed-bun"),
+        `#!/bin/sh
+printf 'managed-bun:%s\\n' "$*" >> "${log}"
+exit 0
+`,
+      ),
+    });
+    const gjcTarget = writeExecutable(
+      join(targetDir, "gjc"),
+      `#!/usr/bin/env bun
+`,
+    );
+    const gjcShim = createProjectCommandShim({
+      command: "gjc",
+      owner: { dockId: "test/gajae-code", kind: "tool", name: "gajae-code" },
+      pathEntries: projectCommandPathEntries(project),
+      platform: "macos",
+      projectDir: project,
+      target: gjcTarget,
+    });
+
+    const result = await withEnv({ PATH: `${hostBin}:${process.env.PATH ?? ""}` }, () =>
+      spawnSync(gjcShim, ["--smoke-test"], { encoding: "utf8" }),
+    );
+
+    expect(result.status).toBe(0);
+    expect(readFileSync(log, "utf8")).toContain(`managed-bun:${gjcTarget} --smoke-test`);
+    expect(readFileSync(log, "utf8")).not.toContain("host-bun");
   });
 
   it("installs tools into dock-local folders and runs their wrappers instead of host commands", async () => {

@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { existsSync, realpathSync } from "node:fs";
 import { delimiter, dirname, join, sep } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
 import { ensureAllowed, rejectShellMetacharacters, splitCommand } from "./command-policy.js";
@@ -142,7 +143,11 @@ function commandEnvironment(
   const env = minimalEnvironment();
   delete env._VOLTA_TOOL_RECURSION;
   const projectPathEntries = projectPathPrograms.includes(program) ? pathEntries : [];
-  env.PATH = prependPathEntries(opendockCommandPath(env.PATH), projectPathEntries);
+  let commandPath = opendockCommandPath(env.PATH);
+  if (shouldAvoidVoltaShim(program)) {
+    commandPath = withoutVoltaCommandBins(commandPath, program);
+  }
+  env.PATH = prependPathEntries(commandPath, projectPathEntries);
   if (program === "oma") {
     env.OMA_SKIP_VERSION_CHECK = env.OMA_SKIP_VERSION_CHECK ?? "1";
     env.PATH = withoutVoltaNodeImageBin(env.PATH);
@@ -277,4 +282,42 @@ function withoutVoltaNodeImageBin(pathValue: string | undefined): string | undef
     .split(delimiter)
     .filter((entry) => entry !== nodeBin)
     .join(delimiter);
+}
+
+function withoutVoltaCommandBins(
+  pathValue: string | undefined,
+  program: string,
+): string | undefined {
+  if (!pathValue) {
+    return pathValue;
+  }
+
+  return pathValue
+    .split(delimiter)
+    .filter((entry) => !isVoltaCommandBin(entry) && !entryResolvesProgramToVolta(entry, program))
+    .join(delimiter);
+}
+
+function shouldAvoidVoltaShim(program: string): boolean {
+  return new Set(["node", "npm", "npx"]).has(program);
+}
+
+function isVoltaCommandBin(pathValue: string): boolean {
+  return isVoltaPath(pathValue) && /[/\\]bin$/u.test(pathValue);
+}
+
+function entryResolvesProgramToVolta(entry: string, program: string): boolean {
+  const candidate = join(entry, program);
+  if (!existsSync(candidate)) {
+    return false;
+  }
+  try {
+    return isVoltaPath(realpathSync(candidate));
+  } catch {
+    return false;
+  }
+}
+
+function isVoltaPath(pathValue: string): boolean {
+  return /(^|[/\\])\.volta([/\\]|$)/u.test(pathValue);
 }

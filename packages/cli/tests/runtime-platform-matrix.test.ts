@@ -160,6 +160,7 @@ describe("runtime platform matrix", () => {
     const dist = tempDir();
     const downloadLog = join(dist, "downloads.log");
     writeFakeCurl(curlBin, downloadLog);
+    writeFakeUnzip(curlBin);
     writeFakePowershell(curlBin);
     writeFileSync(join(dist, "releases.json"), JSON.stringify(releases));
     for (const { archive, version } of matrix) {
@@ -542,6 +543,39 @@ while [ "$#" -gt 0 ]; do
 done
 archive=$(printf '%s' "$command" | /usr/bin/sed -n 's/.*-LiteralPath "\\([^"]*\\)".*/\\1/p')
 destination=$(printf '%s' "$command" | /usr/bin/sed -n 's/.*-DestinationPath "\\([^"]*\\)".*/\\1/p')
+name="\${archive##*/}"
+name="\${name%.zip}"
+/bin/mkdir -p "$destination/$name"
+/bin/cat > "$destination/$name/bun" <<'EOF'
+#!/bin/sh
+printf 'bun fake\\n'
+EOF
+/bin/chmod +x "$destination/$name/bun"
+`,
+  );
+}
+
+function writeFakeUnzip(bin: string): void {
+  writeExecutable(
+    join(bin, "unzip"),
+    `#!/bin/sh
+set -eu
+archive=""
+destination=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -d)
+      shift
+      destination="$1"
+      ;;
+    -*)
+      ;;
+    *)
+      archive="$1"
+      ;;
+  esac
+  shift
+done
 name="\${archive##*/}"
 name="\${name%.zip}"
 /bin/mkdir -p "$destination/$name"

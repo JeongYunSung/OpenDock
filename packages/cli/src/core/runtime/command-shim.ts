@@ -16,6 +16,7 @@ export interface CommandShimOwner {
 export function createProjectCommandShim(options: {
   command: string;
   owner: CommandShimOwner;
+  pathEntries?: string[];
   platform: OpenDockPlatform;
   projectDir: string;
   target: string;
@@ -24,13 +25,13 @@ export function createProjectCommandShim(options: {
   ensureRealDirectoryPath(options.projectDir, ".opendock/bin", "OpenDock bin directory");
   const shim = join(projectBinDir(options.projectDir), options.command);
   assertShimWritable(shim, options.command, options.owner);
-  writeFileSync(shim, posixShim(options.target, options.owner));
+  writeFileSync(shim, posixShim(options.target, options.owner, options.pathEntries ?? []));
   chmodSync(shim, 0o755);
 
   if (options.platform === "windows") {
     const cmdShim = `${shim}.cmd`;
     assertShimWritable(cmdShim, `${options.command}.cmd`, options.owner);
-    writeFileSync(cmdShim, windowsShim(options.target, options.owner));
+    writeFileSync(cmdShim, windowsShim(options.target, options.owner, options.pathEntries ?? []));
   }
   return shim;
 }
@@ -104,19 +105,27 @@ function shimOwnerLine(owner: CommandShimOwner): string {
   return `OPENDOCK_OWNER=${Buffer.from(JSON.stringify(owner), "utf8").toString("base64")}`;
 }
 
-function posixShim(target: string, owner: CommandShimOwner): string {
+function posixShim(target: string, owner: CommandShimOwner, pathEntries: string[]): string {
+  const pathPrefix =
+    pathEntries.length === 0
+      ? ""
+      : `PATH=${pathEntries.map(shQuote).join(":")}\${PATH:+:\${PATH}}\nexport PATH\n`;
   return `#!/usr/bin/env sh
 # ${shimMarker}
 # ${shimOwnerLine(owner)}
+${pathPrefix}\
 exec ${shQuote(resolve(target))} "$@"
 `;
 }
 
-function windowsShim(target: string, owner: CommandShimOwner): string {
+function windowsShim(target: string, owner: CommandShimOwner, pathEntries: string[]): string {
   const targetPath = resolve(target);
+  const pathPrefix =
+    pathEntries.length === 0 ? "" : `set "PATH=${windowsPathList(pathEntries)};%PATH%"\r\n`;
   return `@echo off\r
 REM ${shimMarker}\r
 REM ${shimOwnerLine(owner)}\r
+${pathPrefix}\
 "${targetPath}" %*\r
 `;
 }
@@ -131,4 +140,8 @@ function shimPaths(projectDir: string, command: string, platform?: OpenDockPlatf
 
 function shQuote(value: string): string {
   return `'${value.replaceAll("'", "'\"'\"'")}'`;
+}
+
+function windowsPathList(pathEntries: string[]): string {
+  return pathEntries.map((entry) => entry.replaceAll("%", "%%").replaceAll('"', "")).join(";");
 }
