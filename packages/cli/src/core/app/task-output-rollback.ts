@@ -3,7 +3,7 @@ import { ProjectDirectoryRollback } from "./workdir-rollback.js";
 
 export class TaskOutputRollback {
   private readonly directories: ProjectDirectoryRollback[];
-  private prepared = false;
+  private state: "idle" | "prepared" | "rolled-back" | "committed" = "idle";
 
   constructor(projectDir: string, dockId: string) {
     this.directories = [
@@ -23,14 +23,14 @@ export class TaskOutputRollback {
   }
 
   prepare(): void {
-    if (this.prepared) throw new Error("task output rollback is already prepared");
-    this.prepared = true;
+    if (this.state !== "idle") throw new Error("task output rollback is already prepared");
     const prepared: ProjectDirectoryRollback[] = [];
     try {
       for (const directory of this.directories) {
         directory.prepare();
         prepared.push(directory);
       }
+      this.state = "prepared";
     } catch (error) {
       const rollbackErrors: unknown[] = [];
       for (const directory of prepared.reverse()) {
@@ -40,6 +40,7 @@ export class TaskOutputRollback {
           rollbackErrors.push(rollbackError);
         }
       }
+      this.state = "rolled-back";
       if (rollbackErrors.length > 0) {
         throw new AggregateError(
           [error, ...rollbackErrors],
@@ -51,7 +52,7 @@ export class TaskOutputRollback {
   }
 
   rollback(): void {
-    if (!this.prepared) return;
+    if (this.state !== "prepared") return;
     const rollbackErrors: unknown[] = [];
     for (const directory of [...this.directories].reverse()) {
       try {
@@ -63,9 +64,12 @@ export class TaskOutputRollback {
     if (rollbackErrors.length > 0) {
       throw new AggregateError(rollbackErrors, "task output rollback was incomplete");
     }
+    this.state = "rolled-back";
   }
 
   commit(): void {
+    if (this.state !== "prepared") return;
+    this.state = "committed";
     for (const directory of [...this.directories].reverse()) {
       directory.commit();
     }

@@ -17,7 +17,7 @@ import { assertRealDirectoryPath, pruneEmptyDirectoryChain } from "../files/path
 export class ProjectDirectoryRollback {
   private backupPath: string | undefined;
   private backupRoot: string | undefined;
-  private prepared = false;
+  private state: "idle" | "prepared" | "rolled-back" | "committed" = "idle";
 
   constructor(
     private readonly projectDir: string,
@@ -27,42 +27,48 @@ export class ProjectDirectoryRollback {
   ) {}
 
   prepare(): void {
-    if (this.prepared) throw new Error(`${this.label} rollback is already prepared`);
-    this.prepared = true;
+    if (this.state !== "idle") throw new Error(`${this.label} rollback is already prepared`);
     this.assertDirectoryParent();
     const stat = lstatIfPresent(this.directory);
-    if (!stat) return;
+    if (!stat) {
+      this.state = "prepared";
+      return;
+    }
     if (stat.isSymbolicLink() || !stat.isDirectory()) {
       throw new Error(`${this.label} must be a real directory: ${this.directory}`);
     }
 
-    const stateRoot = join(this.projectDir, ".opendock");
-    assertRealDirectoryPath(this.projectDir, ".opendock", `${this.label} backup root`);
-    const backupParent = join(stateRoot, "update-backups");
-    mkdirSync(backupParent, { recursive: true });
-    assertRealDirectoryPath(
-      this.projectDir,
-      relative(this.projectDir, backupParent),
-      `${this.label} backup root`,
-    );
-    this.backupRoot = mkdtempSync(join(backupParent, `${this.backupPrefix}-`));
-    this.backupPath = join(this.backupRoot, "content");
-    this.assertDirectoryParent();
-    renameSync(this.directory, this.backupPath);
     try {
+      const stateRoot = join(this.projectDir, ".opendock");
+      assertRealDirectoryPath(this.projectDir, ".opendock", `${this.label} backup root`);
+      const backupParent = join(stateRoot, "update-backups");
+      mkdirSync(backupParent, { recursive: true });
+      assertRealDirectoryPath(
+        this.projectDir,
+        relative(this.projectDir, backupParent),
+        `${this.label} backup root`,
+      );
+      this.backupRoot = mkdtempSync(join(backupParent, `${this.backupPrefix}-`));
+      this.backupPath = join(this.backupRoot, "content");
+      this.assertDirectoryParent();
+      renameSync(this.directory, this.backupPath);
       copyDirectory(this.backupPath, this.directory);
+      this.state = "prepared";
     } catch (error) {
-      this.assertDirectoryParent();
-      rmSync(this.directory, { force: true, recursive: true });
-      this.assertDirectoryParent();
-      renameSync(this.backupPath, this.directory);
+      if (this.backupPath && existsSync(this.backupPath)) {
+        this.assertDirectoryParent();
+        rmSync(this.directory, { force: true, recursive: true });
+        this.assertDirectoryParent();
+        renameSync(this.backupPath, this.directory);
+      }
+      this.state = "rolled-back";
       this.dispose();
       throw error;
     }
   }
 
   rollback(): void {
-    if (!this.prepared) return;
+    if (this.state !== "prepared") return;
     this.assertDirectoryParent();
     rmSync(this.directory, { force: true, recursive: true });
     if (this.backupPath && existsSync(this.backupPath)) {
@@ -70,10 +76,13 @@ export class ProjectDirectoryRollback {
       this.assertDirectoryParent();
       renameSync(this.backupPath, this.directory);
     }
+    this.state = "rolled-back";
     this.dispose();
   }
 
   commit(): void {
+    if (this.state !== "prepared") return;
+    this.state = "committed";
     this.dispose();
   }
 

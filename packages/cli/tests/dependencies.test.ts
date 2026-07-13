@@ -1194,9 +1194,9 @@ printf 'npm\n' > "${externalModules}/binary/tool.bin"
       ),
     ).rejects.toThrow("simulated tool state failure");
 
-    expect(
-      existsSync(join(project, ".opendock", "tools", safeDockDirectoryName(dockId))),
-    ).toBe(false);
+    expect(existsSync(join(project, ".opendock", "tools", safeDockDirectoryName(dockId)))).toBe(
+      false,
+    );
     expect(existsSync(join(project, ".opendock", "bin", "acme"))).toBe(false);
     expect(new OpenDockStateStore(project).findDock(dockId)).toBeUndefined();
   });
@@ -1325,6 +1325,37 @@ printf 'npm\n' > "${externalModules}/binary/tool.bin"
 
     expect(readFileSync(sentinel, "utf8")).toBe("outside\n");
     expect(existsSync(join(outsideWorkdir, "config.txt"))).toBe(false);
+  });
+
+  it("preserves command shims when the second task-output snapshot fails", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const outside = tempDir();
+    writeDock(docks, "test", "task-output-prepare", "1.0.0", {
+      files: [],
+    });
+    const binDir = join(project, ".opendock", "bin");
+    mkdirSync(binDir, { recursive: true });
+    const shimSentinel = join(binDir, "sentinel");
+    writeFileSync(shimSentinel, "shim\n");
+    const outsideSentinel = join(outside, "outside.txt");
+    writeFileSync(outsideSentinel, "outside\n");
+    symlinkSync(outside, join(project, ".opendock", "tools"));
+
+    await expect(
+      new DockInstaller().install({
+        dockRef: DockRef.parse("test/task-output-prepare@1.0.0"),
+        projectDir: project,
+        phase: "install",
+        platform: "macos",
+        live: false,
+        runTasks: true,
+        resolve: localResolver(docks),
+      }),
+    ).rejects.toThrow("dock tool directory parent cannot be a symlink");
+
+    expect(readFileSync(shimSentinel, "utf8")).toBe("shim\n");
+    expect(readFileSync(outsideSentinel, "utf8")).toBe("outside\n");
   });
 
   it("treats progress reporter failures as non-fatal", async () => {

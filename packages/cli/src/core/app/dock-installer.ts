@@ -199,10 +199,10 @@ export class DockInstaller {
         phase: "workdir-ready",
         version: resolved.version,
       });
-    taskOutputRollback.prepare();
-    if (priorDock) {
-      this.removeDockTools(options.projectDir, priorDock);
-      this.removeUnusedRuntimeShims(options.projectDir, priorDock, store, false);
+      taskOutputRollback.prepare();
+      if (priorDock) {
+        this.removeDockTools(options.projectDir, priorDock);
+        this.removeUnusedRuntimeShims(options.projectDir, priorDock, store, false);
       }
       this.progress(options.progress, {
         dockId: resolved.manifest.id,
