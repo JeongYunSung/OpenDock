@@ -4,6 +4,7 @@ import { z } from "zod";
 import { isOpenDockPlatform } from "../../platform.js";
 import { isSupportedRuntimeName } from "./runtime-names.js";
 import { includesShellOperator } from "./shell-operators.js";
+import { isValidVersionRange } from "./version-range.js";
 
 const safeSegmentPattern = /^[A-Za-z0-9._-]+$/;
 const versionSelectorPattern = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,79}$/;
@@ -77,11 +78,18 @@ const runtimeRequirementsSchema = z
   )
   .default({})
   .superRefine((runtimes, context) => {
-    for (const runtime of Object.keys(runtimes)) {
+    for (const [runtime, version] of Object.entries(runtimes)) {
       if (!isSupportedRuntimeName(runtime)) {
         context.addIssue({
           code: "custom",
           message: `unsupported required runtime \`${runtime}\``,
+          path: [runtime],
+        });
+      }
+      if (!isValidVersionRange(version)) {
+        context.addIssue({
+          code: "custom",
+          message: "runtime version must be an exact version or a space-separated comparison range",
           path: [runtime],
         });
       }

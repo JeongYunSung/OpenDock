@@ -12,6 +12,7 @@ import {
 import { tmpdir } from "node:os";
 import { basename, dirname, join, parse, relative, resolve } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
+import { compareVersions, parseVersionRange } from "../domain/version-range.js";
 import { opendockCommandPath, satisfiesVersion } from "./command-runner.js";
 import {
   sharedRuntimeBinDir,
@@ -317,24 +318,145 @@ function installPythonRuntime(request: RuntimeInstallRequest): RuntimeInstallRes
     };
   }
 
-  const pipOutput = runChecked(pythonPath, ["-m", "pip", "--version"], { env }).stdout;
-  const pipVersion = extractRequiredVersion(pipOutput, "pip");
-  if (!satisfiesVersion(pipVersion, request.requested)) {
-    throw new Error(`managed pip ${pipVersion} does not satisfy ${request.requested}`);
-  }
-  const bin = sharedRuntimeBinDir(request.runtime, pipVersion);
-  const target = createExecutableWrapper(join(bin, request.runtime), request.platform, pythonPath, [
-    "-m",
-    "pip",
-  ]);
+  const pipRuntime = installSharedPipRuntime(uv, pythonPath, request, env);
+  const bin = sharedRuntimeBinDir(request.runtime, pipRuntime.version);
+  const target = createExecutableWrapper(
+    join(bin, request.runtime),
+    request.platform,
+    pipRuntime.pythonPath,
+    ["-m", "pip"],
+  );
   return {
     commands: [request.runtime],
     path: bin,
     requested: request.requested,
     source: "managed",
     targets: { [request.runtime]: target },
-    version: pipVersion,
+    version: pipRuntime.version,
   };
+}
+
+function installSharedPipRuntime(
+  uv: string,
+  basePythonPath: string,
+  request: RuntimeInstallRequest,
+  env: NodeJS.ProcessEnv,
+): { pythonPath: string; version: string } {
+  const runtimeRoot = join(sharedRuntimeRoot(), request.runtime);
+  ensureRealDirectory(runtimeRoot, "pip runtime root");
+  const installed = findInstalledPipRuntime(runtimeRoot, request, env);
+  if (installed) {
+    return installed;
+  }
+  const stagingRoot = mkdtempSync(join(runtimeRoot, ".staging-"));
+  const stagingRuntime = join(stagingRoot, "runtime");
+  try {
+    runChecked(uv, ["venv", "--python", basePythonPath, stagingRuntime], { env });
+    ensureRealDirectory(stagingRuntime, "staged pip runtime directory");
+    const stagingPython = pipEnvironmentPython(stagingRuntime, request.platform);
+    ensureRealDirectory(dirname(stagingPython), "staged pip runtime executable directory");
+    runChecked(
+      uv,
+      ["pip", "install", "--python", stagingPython, pipPackageSpecifier(request.requested)],
+      { env },
+    );
+
+    const pipOutput = runChecked(stagingPython, ["-m", "pip", "--version"], { env }).stdout;
+    const pipVersion = extractRequiredVersion(pipOutput, "pip");
+    if (!satisfiesVersion(pipVersion, request.requested)) {
+      throw new Error(`managed pip ${pipVersion} does not satisfy ${request.requested}`);
+    }
+
+    const runtimeDir = sharedRuntimeInstallDir(request.runtime, pipVersion);
+    ensureRealDirectory(dirname(runtimeDir), "pip runtime install directory");
+    const installedPython = pipEnvironmentPython(runtimeDir, request.platform);
+    if (hasMatchingPipRuntime(runtimeDir, installedPython, pipVersion, env)) {
+      return { pythonPath: installedPython, version: pipVersion };
+    }
+
+    const existingRuntime = lstatIfPresent(runtimeDir);
+    const previousRuntime = join(stagingRoot, "previous-runtime");
+    if (existingRuntime) {
+      ensureRealDirectory(runtimeDir, "pip runtime install directory");
+      renameSync(runtimeDir, previousRuntime);
+    }
+    try {
+      renameSync(stagingRuntime, runtimeDir);
+    } catch (error) {
+      if (existingRuntime && !lstatIfPresent(runtimeDir)) {
+        renameSync(previousRuntime, runtimeDir);
+      }
+      throw error;
+    }
+    return {
+      pythonPath: pipEnvironmentPython(runtimeDir, request.platform),
+      version: pipVersion,
+    };
+  } finally {
+    rmSync(stagingRoot, { force: true, recursive: true });
+  }
+}
+
+function findInstalledPipRuntime(
+  runtimeRoot: string,
+  request: RuntimeInstallRequest,
+  env: NodeJS.ProcessEnv,
+): { pythonPath: string; version: string } | undefined {
+  const versions = readdirSync(runtimeRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && satisfiesVersion(entry.name, request.requested))
+    .map((entry) => entry.name)
+    .sort((left, right) => compareVersions(right, left));
+  for (const version of versions) {
+    const runtimeDir = sharedRuntimeInstallDir(request.runtime, version);
+    const pythonPath = pipEnvironmentPython(runtimeDir, request.platform);
+    if (hasMatchingPipRuntime(runtimeDir, pythonPath, version, env)) {
+      return { pythonPath, version };
+    }
+  }
+  return undefined;
+}
+
+function hasMatchingPipRuntime(
+  runtimeDir: string,
+  pythonPath: string,
+  expectedVersion: string,
+  env: NodeJS.ProcessEnv,
+): boolean {
+  if (!lstatIfPresent(runtimeDir)) {
+    return false;
+  }
+  ensureRealDirectory(runtimeDir, "pip runtime install directory");
+  if (!lstatIfPresent(dirname(pythonPath))) {
+    return false;
+  }
+  ensureRealDirectory(dirname(pythonPath), "pip runtime executable directory");
+  if (!existsSync(pythonPath)) {
+    return false;
+  }
+  try {
+    const output = runChecked(pythonPath, ["-m", "pip", "--version"], { env }).stdout;
+    return extractRequiredVersion(output, "pip") === expectedVersion;
+  } catch {
+    return false;
+  }
+}
+
+function pipEnvironmentPython(runtimeDir: string, platform: OpenDockPlatform): string {
+  return platform === "windows"
+    ? join(runtimeDir, "Scripts", "python.exe")
+    : join(runtimeDir, "bin", "python");
+}
+
+function pipPackageSpecifier(requested: string): string {
+  const conditions = parseVersionRange(requested);
+  if (!conditions) {
+    throw new Error(`invalid pip runtime version range \`${requested}\``);
+  }
+  const specifiers = conditions.map(({ expected, operator }) => {
+    const pipOperator = operator === "=" ? "==" : operator;
+    return `${pipOperator}${expected.replace(/^v/u, "")}`;
+  });
+  return `pip${specifiers.join(",")}`;
 }
 
 function resolvePythonDownloadRequest(

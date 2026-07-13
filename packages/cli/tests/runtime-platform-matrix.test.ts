@@ -4,6 +4,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   realpathSync,
   rmSync,
@@ -197,6 +198,90 @@ describe("runtime platform matrix", () => {
     }
   });
 
+  it("isolates requested pip from a newer bundled pip with host uv", async () => {
+    for (const platform of ["macos", "linux", "windows"] as const) {
+      const home = realpathSync(tempDir());
+      const hostBin = tempDir();
+      const basePython = join(hostBin, "python-managed");
+      const basePythonLog = join(home, "python.log");
+      const uvLog = join(home, "uv.log");
+      writeFakePython(basePython, { log: basePythonLog, pipVersion: "26.0.1" });
+      writeFakeUv(hostBin, basePython, uvLog, { pipVersion: "24.3.1" });
+      const basePythonBefore = readFileSync(basePython, "utf8");
+
+      const result = await withEnv(
+        {
+          HOME: home,
+          PATH: `${hostBin}:/usr/bin:/bin`,
+        },
+        () =>
+          new OpenDockRuntimeInstaller().install({
+            platform,
+            projectDir: tempDir(),
+            requested: ">=24.0.0 <25.0.0",
+            runtime: "pip",
+          }),
+      );
+
+      if (!result) {
+        throw new Error("expected pip runtime install result");
+      }
+      const runtimeDir = join(home, ".opendock", "runtimes", "pip", "24.3.1", "runtime");
+      const environmentPython =
+        platform === "windows"
+          ? join(runtimeDir, "Scripts", "python.exe")
+          : join(runtimeDir, "bin", "python");
+      expect(result).toMatchObject({
+        commands: ["pip"],
+        path: join(home, ".opendock", "runtimes", "pip", "24.3.1", "bin"),
+        requested: ">=24.0.0 <25.0.0",
+        source: "managed",
+        version: "24.3.1",
+      });
+      expect(readFileSync(result.targets.pip ?? "", "utf8")).toContain(environmentPython);
+      expect(readFileSync(basePython, "utf8")).toBe(basePythonBefore);
+      expect(readFileSync(basePythonLog, "utf8")).toBe("args:--version\n");
+
+      const uvLogText = readFileSync(uvLog, "utf8");
+      const uvCalls = uvLogText.split("\n");
+      const venvCall = uvCalls.find((line) => line.startsWith("args:venv "));
+      const pipInstallCall = uvCalls.find((line) => line.startsWith("args:pip install "));
+      expect(uvLogText).toContain("args:--version");
+      expect(venvCall).toContain(`--python ${basePython}`);
+      expect(venvCall).toContain(join(home, ".opendock", "runtimes", "pip", ".staging-"));
+      expect(pipInstallCall).toContain("pip>=24.0.0,<25.0.0");
+      expect(pipInstallCall).toContain(
+        platform === "windows" ? "runtime/Scripts/python.exe" : "runtime/bin/python",
+      );
+      expect(uvLogText).not.toContain("--break-system-packages");
+      expect(
+        readdirSync(join(home, ".opendock", "runtimes", "pip")).some((entry) =>
+          entry.startsWith(".staging-"),
+        ),
+      ).toBe(false);
+
+      const uvLogBeforeReuse = readFileSync(uvLog, "utf8");
+      const reused = await withEnv({ HOME: home, PATH: `${hostBin}:/usr/bin:/bin` }, () =>
+        new OpenDockRuntimeInstaller().install({
+          platform,
+          projectDir: tempDir(),
+          requested: ">=24.0.0 <25.0.0",
+          runtime: "pip",
+        }),
+      );
+      expect(reused).toMatchObject({ source: "managed", version: "24.3.1" });
+      const reuseCalls = readFileSync(uvLog, "utf8").slice(uvLogBeforeReuse.length);
+      expect(reuseCalls).not.toContain("args:venv ");
+      expect(reuseCalls).not.toContain("args:pip install ");
+
+      if (platform !== "windows") {
+        const pipRun = spawnSync(result.targets.pip ?? "", ["--version"], { encoding: "utf8" });
+        expect(pipRun.status).toBe(0);
+        expect(pipRun.stdout).toContain("pip 24.3.1");
+      }
+    }
+  }, 15_000);
+
   it("installs managed uv for Python and uses the OpenDock home uv environment", async () => {
     const home = realpathSync(tempDir());
     const dist = tempDir();
@@ -262,7 +347,7 @@ describe("runtime platform matrix", () => {
       expect(log).toMatch(/args:python install 3\.12\.\d+/u);
       expect(log).toContain("args:python install 3.13.5");
     }
-  });
+  }, 15_000);
 
   it("selects uv release artifacts for macOS, Windows, and Linux", () => {
     const releases = [
@@ -588,13 +673,23 @@ EOF
   );
 }
 
-function writeFakeUv(bin: string, pythonPath: string, log: string): void {
+function writeFakeUv(
+  bin: string,
+  pythonPath: string,
+  log: string,
+  options: { pipVersion?: string } = {},
+): void {
+  const pipVersion = options.pipVersion ?? "24.2.0";
   writeExecutable(
     join(bin, "uv"),
     `#!/bin/sh
 set -eu
 printf 'args:%s\\n' "$*" >> "${log}"
-printf 'UV_PYTHON_INSTALL_DIR=%s\\n' "$UV_PYTHON_INSTALL_DIR" >> "${log}"
+printf 'UV_PYTHON_INSTALL_DIR=%s\\n' "\${UV_PYTHON_INSTALL_DIR:-}" >> "${log}"
+if [ "\${1:-}" = "--version" ]; then
+  printf 'uv 0.11.26\\n'
+  exit 0
+fi
 if [ "$1" = "python" ] && [ "$2" = "install" ]; then
   exit 0
 fi
@@ -606,6 +701,25 @@ if [ "$1" = "python" ] && [ "$2" = "find" ]; then
   printf '${pythonPath}\\n'
   exit 0
 fi
+if [ "$1" = "venv" ]; then
+  environment=""
+  for argument in "$@"; do
+    environment="$argument"
+  done
+  /bin/mkdir -p "$environment/bin" "$environment/Scripts"
+  /bin/cat > "$environment/bin/python" <<'EOF'
+#!/bin/sh
+set -eu
+if [ "\${1:-}" = "-m" ] && [ "\${2:-}" = "pip" ] && [ "\${3:-}" = "--version" ]; then
+  printf 'pip ${pipVersion} from fake venv (python 3.12)\\n'
+  exit 0
+fi
+exit 1
+EOF
+  /bin/chmod +x "$environment/bin/python"
+  /bin/cp "$environment/bin/python" "$environment/Scripts/python.exe"
+  exit 0
+fi
 if [ "$1" = "pip" ] && [ "$2" = "install" ]; then
   exit 0
 fi
@@ -614,12 +728,14 @@ exit 1
   );
 }
 
-function writeFakePython(path: string): void {
+function writeFakePython(path: string, options: { log?: string; pipVersion?: string } = {}): void {
+  const logCall = options.log ? `printf 'args:%s\\n' "$*" >> "${options.log}"\n` : "";
+  const pipVersion = options.pipVersion ?? "24.2.0";
   writeExecutable(
     path,
     `#!/bin/sh
 set -eu
-if [ "\${1:-}" = "--version" ]; then
+${logCall}if [ "\${1:-}" = "--version" ]; then
   printf 'Python 3.12.9\\n'
   exit 0
 fi
@@ -627,7 +743,7 @@ if [ "\${1:-}" = "-m" ] && [ "\${2:-}" = "ensurepip" ]; then
   exit 0
 fi
 if [ "\${1:-}" = "-m" ] && [ "\${2:-}" = "pip" ] && [ "\${3:-}" = "--version" ]; then
-  printf 'pip 24.2.0 from fake (python 3.12)\\n'
+  printf 'pip ${pipVersion} from fake (python 3.12)\\n'
   exit 0
 fi
 exit 1

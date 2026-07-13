@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, realpathSync } from "node:fs";
 import { delimiter, dirname, join, sep } from "node:path";
 import { detectPlatform, type OpenDockPlatform } from "../../platform.js";
+import { compareVersions, parseVersionRange } from "../domain/version-range.js";
 import { ensureAllowed, rejectShellMetacharacters, splitCommand } from "./command-policy.js";
 import { prependPathEntries } from "./project-layout.js";
 
@@ -89,20 +90,17 @@ export function extractVersion(output: string): string | undefined {
 }
 
 export function satisfiesVersion(actual: string, range: string): boolean {
-  for (const condition of range.trim().split(/\s+/)) {
-    if (condition === "") {
-      continue;
-    }
-    const match = condition.match(/^(>=|>|<=|<|=)?(.+)$/);
-    if (!match) {
+  const conditions = parseVersionRange(range);
+  if (!conditions) {
+    return false;
+  }
+  for (const { expected, operator } of conditions) {
+    let comparison: number;
+    try {
+      comparison = compareVersions(actual, expected);
+    } catch {
       return false;
     }
-    const operator = match[1] ?? "=";
-    const expected = match[2];
-    if (!expected) {
-      return false;
-    }
-    const comparison = compareVersions(actual, expected);
     if (operator === ">=" && comparison < 0) return false;
     if (operator === ">" && comparison <= 0) return false;
     if (operator === "<=" && comparison > 0) return false;
@@ -110,29 +108,6 @@ export function satisfiesVersion(actual: string, range: string): boolean {
     if (operator === "=" && comparison !== 0) return false;
   }
   return true;
-}
-
-function compareVersions(left: string, right: string): number {
-  const [leftMajor, leftMinor, leftPatch] = parseVersion(left);
-  const [rightMajor, rightMinor, rightPatch] = parseVersion(right);
-  for (const delta of [leftMajor - rightMajor, leftMinor - rightMinor, leftPatch - rightPatch]) {
-    if (delta !== 0) {
-      return delta > 0 ? 1 : -1;
-    }
-  }
-  return 0;
-}
-
-function parseVersion(version: string): [number, number, number] {
-  const match = version.match(/^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?/);
-  if (!match) {
-    throw new Error(`invalid version \`${version}\``);
-  }
-  return [
-    Number.parseInt(match[1] ?? "0", 10),
-    Number.parseInt(match[2] ?? "0", 10),
-    Number.parseInt(match[3] ?? "0", 10),
-  ];
 }
 
 function commandEnvironment(

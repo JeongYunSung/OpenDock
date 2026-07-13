@@ -479,6 +479,23 @@ describe("requires regression coverage", () => {
     );
   });
 
+  it("rejects runtime selectors that the version checker cannot interpret", () => {
+    for (const version of ["latest", "*", "24.*", ">=24.0.0,<25.0.0", "==24.3.1"]) {
+      const root = tempDir();
+      writeFileSync(
+        join(root, "dock.yml"),
+        YAML.stringify({
+          opendock: 1,
+          requires: { runtimes: { pip: version } },
+        }),
+      );
+
+      expect(() => parseManifestFile(join(root, "dock.yml"))).toThrow(
+        "runtime version must be an exact version or a space-separated comparison range",
+      );
+    }
+  });
+
   it("prepares required runtimes in the home OpenDock runtime store", async () => {
     const home = realpathSync(tempDir());
     const project = tempDir();
