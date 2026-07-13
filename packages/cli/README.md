@@ -293,6 +293,10 @@ dependencies:
     path: .codex/skills/image2html
     mode: locked
     timeout_ms: 600000
+    integrity:
+      - path: node_modules/native-tool/bin/tool
+        sha256:
+          - 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 ```
 
 OpenDock applies `files` first, then runs each dependency manager in the
@@ -302,6 +306,11 @@ reinstalling or cleaning up.
 
 Supported dependency managers today are `npm`, `pnpm`, `bun`, `uv`, `pip`, and
 `pip3`. OpenDock does not run arbitrary install commands here.
+
+Optional `integrity` entries make installation and `doctor` hash a regular file
+inside the dependency folder. Each entry accepts one or more lowercase SHA-256
+digests, which supports platform manifests that cover multiple architectures.
+Missing files, symlinks, path traversal, and digest mismatches fail closed.
 
 Choose the field by ownership:
 

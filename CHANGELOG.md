@@ -7,6 +7,22 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+### CLI
+
+- Create pip-managed tool virtual environments with `uv venv` and install with
+  `uv pip install --python` so OpenDock does not mutate uv-managed Python
+  runtimes or trigger PEP 668 `EXTERNALLY-MANAGED` failures.
+
+## 0.2.11 - 2026-07-13
+
+### CLI
+
+- Verify allowlisted SHA-256 digests for dependency files after installation
+  and during project doctor checks.
+- Revalidate dependency roots after package commands and restore prior managed
+  files and dependency outputs when update verification fails.
+- Return a failing doctor status when dock task or dependency checks fail.
+
 ## 0.2.10 - 2026-07-13
 
 ### CLI

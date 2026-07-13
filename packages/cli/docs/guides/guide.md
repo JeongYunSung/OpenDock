@@ -262,6 +262,10 @@ dependencies:
     path: .codex/skills/image2html
     mode: locked
     timeout_ms: 600000
+    integrity:
+      - path: node_modules/native-tool/bin/tool
+        sha256:
+          - 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 ```
 
 OpenDock applies `files` first, then installs `dependencies` in their declared
@@ -271,6 +275,12 @@ uninstall can remove generated folders such as `node_modules`, `.venv`, or
 
 `timeout_ms` is optional. Use it when a dependency install can take longer than
 the default timeout.
+
+Use optional `integrity` entries for generated native binaries or other files
+that must match an allowlisted SHA-256. OpenDock verifies these files after
+installation and again during `doctor`. Paths must stay inside the dependency,
+must resolve to regular files without symlink ancestors, and may list multiple
+digests when one platform manifest supports more than one architecture.
 
 Supported managers and modes:
 
