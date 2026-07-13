@@ -1,7 +1,7 @@
 {
   "apps/desktop/package.json": {
-    "mtime": 1783322025.5357234,
-    "ast_hash": "288d48e9a5f7609ca600dff4bec56e76",
+    "mtime": 1783939238.5606365,
+    "ast_hash": "80f00d1cf7f1cdaa92e120b0dc63d0d9",
     "semantic_hash": ""
   },
   "apps/desktop/scripts/browser-test-runtime.mjs": {
@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "apps/desktop/src-tauri/tauri.conf.json": {
-    "mtime": 1783322025.536196,
-    "ast_hash": "c88fc48889616a31474ebec8b10773e2",
+    "mtime": 1783939238.5608113,
+    "ast_hash": "73897d6ae75002ef9d382a45ed2ad0b5",
     "semantic_hash": ""
   },
   "apps/desktop/src/App.tsx": {
@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "packages/cli/package.json": {
-    "mtime": 1783914086.3307328,
-    "ast_hash": "7c069c95092b0ac37c346b8faa3e70c8",
+    "mtime": 1783939238.5600698,
+    "ast_hash": "22ecbaddc60afc5ac3c17bc35515a389",
     "semantic_hash": ""
   },
   "packages/cli/scripts/build.ts": {
@@ -485,8 +485,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/cli-project-output.ts": {
-    "mtime": 1783911977.6412466,
-    "ast_hash": "cfc6df67463de50dea19f169f1467b87",
+    "mtime": 1783935739.7506223,
+    "ast_hash": "bbbc8e8a018044547269babd8582b24a",
     "semantic_hash": ""
   },
   "packages/cli/src/cli.ts": {
@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/constants.ts": {
-    "mtime": 1783914086.3310444,
-    "ast_hash": "d60abef9f10a2ac7a4f0ec7e33a5e535",
+    "mtime": 1783939238.5603838,
+    "ast_hash": "2e0fb08cd621bbdd8ac352461fbd716c",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-install-report.ts": {
@@ -505,8 +505,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-installer.ts": {
-    "mtime": 1783918258.6067874,
-    "ast_hash": "1a2a7b8781fe22f4665a65b5cd123fd9",
+    "mtime": 1783937103.0740666,
+    "ast_hash": "4219162d05ae7aef02a4fc072b59b3dd",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/manifest.ts": {
@@ -525,8 +525,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/state-store.ts": {
-    "mtime": 1783916266.8975143,
-    "ast_hash": "3e6b12468e24bc9c4cf64e16aaf1cc66",
+    "mtime": 1783937267.3079152,
+    "ast_hash": "3eeec04173497bd116fa31bd9d43017e",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/checksum.ts": {
@@ -540,13 +540,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/file-plan.ts": {
-    "mtime": 1782974772.362571,
-    "ast_hash": "f9285538c72eb8c5ffd5fe2954a72d5c",
+    "mtime": 1783937520.3156874,
+    "ast_hash": "65a3a3ff04f39bd9aba6a0d0bf2345d0",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/managed-block.ts": {
-    "mtime": 1782974766.4246356,
-    "ast_hash": "96296c70768e17f9f4ca7ff1f72d0259",
+    "mtime": 1783938892.7846003,
+    "ast_hash": "db17c8370cb4ff38ae07e2d84834a05f",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/path-utils.ts": {
@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-flow.test.ts": {
-    "mtime": 1783911996.4914408,
-    "ast_hash": "2f582905767835f5e25827e8235382b0",
+    "mtime": 1783935764.4056058,
+    "ast_hash": "ba3935625a6ca4a6847a8747f9764a3c",
     "semantic_hash": ""
   },
   "packages/cli/tests/examples-cleanup.test.ts": {
@@ -725,8 +725,8 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1783920151.167373,
-    "ast_hash": "d2458d7f252ab3a29c9f190e9c1d163f",
+    "mtime": 1783939238.561751,
+    "ast_hash": "1aa8d75f6adf031089f18207f8420c3b",
     "semantic_hash": ""
   },
   "README.md": {
@@ -2695,8 +2695,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/lifecycle-conflict-edge-cases.test.ts": {
-    "mtime": 1783148975.120858,
-    "ast_hash": "b044e0642412f63358ad8a8278384464",
+    "mtime": 1783937103.0744643,
+    "ast_hash": "8d596da76377fdee7ef0d9c70767a8ee",
     "semantic_hash": ""
   },
   "packages/cli/tests/path-security-edge-cases.test.ts": {
@@ -2750,8 +2750,8 @@
     "semantic_hash": ""
   },
   ".serena/memories/session-ultrawork.md": {
-    "mtime": 1783919268.2889333,
-    "ast_hash": "388889da8cc8ab1b9423c3d965bcc72f",
+    "mtime": 1783923456.8104568,
+    "ast_hash": "354fa2a781cf10579845a61e69e7f2de",
     "semantic_hash": ""
   },
   ".serena/memories/task-board.md": {
@@ -2780,8 +2780,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/update-rollback.ts": {
-    "mtime": 1783916698.982755,
-    "ast_hash": "7e8e4f4846cee666aafbde0bc23868be",
+    "mtime": 1783937520.3156912,
+    "ast_hash": "3d0330547123731ba9a4dfee410d86ed",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/task-output-rollback.ts": {
