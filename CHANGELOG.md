@@ -31,6 +31,10 @@ version declared in `package.json`; they do not auto-increment versions.
 - Install pip-managed tools in dock-local virtual environments without mutating
   OpenDock-managed Python runtimes.
 
+### Desktop App
+
+- Bundle the current OpenDock CLI with isolated pip tool and runtime handling.
+
 ## 0.2.9 - 2026-07-06
 
 ### CLI
