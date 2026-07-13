@@ -14,6 +14,7 @@ import type { FileCandidate } from "../files/file-candidate.js";
 import {
   assertRealDirectoryPath,
   assertSafeRelativePath,
+  ensureSafeParent,
   pruneEmptyDirectoryChain,
   safeJoin,
 } from "../files/path-utils.js";
@@ -52,6 +53,7 @@ export class UpdateRollback {
     for (const path of paths) {
       const normalized = assertSafeRelativePath(path, "update rollback path");
       const target = safeJoin(projectDir, normalized, "update rollback path");
+      ensureSafeParent(projectDir, normalized);
       if (!existsSync(target)) {
         absentPaths.push(normalized);
         continue;

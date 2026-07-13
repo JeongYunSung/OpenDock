@@ -46,6 +46,7 @@ export class FilePlan {
   }
 
   apply(candidates: FileCandidate[]): FileApplySummary {
+    this.verifyPriorState();
     const summary: FileApplySummary = {
       created: 0,
       createdPaths: [],
@@ -75,7 +76,8 @@ export class FilePlan {
 
     for (const candidate of candidates) {
       const existed = existsSync(this.target(candidate.path));
-      this.applyCandidate(candidate);
+      const prior = this.priorFor(candidate);
+      const prefixNewlines = this.applyCandidate(candidate);
       if (existed) {
         summary.updated += 1;
         summary.updatedPaths.push(candidate.path);
@@ -83,7 +85,7 @@ export class FilePlan {
         summary.created += 1;
         summary.createdPaths.push(candidate.path);
       }
-      summary.records.push(recordFromCandidate(candidate));
+      summary.records.push(recordFromCandidate(candidate, prefixNewlines ?? prior?.prefixNewlines));
     }
 
     for (const path of summary.deletedPaths) {
@@ -95,6 +97,8 @@ export class FilePlan {
 
   private verifyRecord(record: AppliedFileRecord): void {
     const target = this.target(record.path);
+    ensureSafeParent(this.projectDir, record.path);
+    assertRegularOrMissing(target, record.path);
     if (record.mode === "managed_block") {
       if (!record.markerId) {
         throw new Error(`managed block record is missing marker id: ${record.path}`);
@@ -152,28 +156,37 @@ export class FilePlan {
     }
   }
 
-  private applyCandidate(candidate: FileCandidate): void {
+  private applyCandidate(candidate: FileCandidate): number | undefined {
     const target = this.target(candidate.path);
     ensureParentDirectory(this.projectDir, candidate.path);
     if (candidate.mode === "managed_block") {
       const markerId = requireMarkerId(candidate);
-      new ManagedBlockCodec(this.dockId, markerId, candidate.path).upsert(
+      return new ManagedBlockCodec(this.dockId, markerId, candidate.path).upsert(
         target,
         candidate.content.toString("utf8"),
       );
-      return;
     }
     writeFileSync(target, candidate.content);
     chmodSync(target, candidate.executable ? 0o755 : 0o644);
+    return undefined;
   }
 
   private removeRecord(record: AppliedFileRecord): "deleted" | "missing" | "updated" {
     const target = this.target(record.path);
+    ensureSafeParent(this.projectDir, record.path);
+    assertRegularOrMissing(target, record.path);
     if (record.mode === "managed_block") {
       if (!record.markerId) {
-        return "missing";
+        throw new Error(`managed block record is missing marker id: ${record.path}`);
       }
-      return new ManagedBlockCodec(this.dockId, record.markerId, record.path).remove(target);
+      const result = new ManagedBlockCodec(this.dockId, record.markerId, record.path).remove(
+        target,
+        record.prefixNewlines,
+      );
+      if (result === "missing" && existsSync(target)) {
+        throw new Error(`managed block missing: ${record.path}`);
+      }
+      return result;
     }
     if (existsSync(target)) {
       rmSync(target);
@@ -202,7 +215,10 @@ export class FilePlan {
   }
 }
 
-function recordFromCandidate(candidate: FileCandidate): AppliedFileRecord {
+function recordFromCandidate(
+  candidate: FileCandidate,
+  prefixNewlines: number | undefined,
+): AppliedFileRecord {
   return {
     path: candidate.path,
     mode: candidate.mode,
@@ -211,6 +227,9 @@ function recordFromCandidate(candidate: FileCandidate): AppliedFileRecord {
         ? textChecksum(candidate.content.toString("utf8").trimEnd())
         : sha256Bytes(candidate.content),
     ...(candidate.markerId === undefined ? {} : { markerId: candidate.markerId }),
+    ...(candidate.mode === "managed_block" && prefixNewlines !== undefined
+      ? { prefixNewlines }
+      : {}),
     source: candidate.source,
     ...(candidate.executable ? { executable: true } : {}),
   };

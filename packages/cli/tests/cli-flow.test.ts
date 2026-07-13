@@ -27,6 +27,7 @@ import {
 } from "../src/core/domain/manifest.js";
 import type { InstalledDockRecord } from "../src/core/domain/state-store.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
+import { ManagedBlockCodec } from "../src/core/files/managed-block.js";
 import { safeDockDirectoryName } from "../src/core/files/path-utils.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
 import { readProjectLogs } from "../src/logging.js";
@@ -1214,6 +1215,71 @@ describe("opendock TypeScript CLI", () => {
       expect(logs).toContain("✓ designer-ready");
       expect(logs.some((line) => line.includes("test/frontend"))).toBe(false);
       expect(logs.some((line) => line.includes("frontend-ready"))).toBe(false);
+    } finally {
+      registry.restore();
+    }
+  });
+
+  it("fails doctor when one dock loses its block from a shared managed document", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "designer", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Designer Agent\n" }],
+      tasks: { doctor: [{ id: "designer-ready", check: "test -f AGENTS.md" }] },
+    });
+    writeDock(docks, "test", "frontend", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Frontend Agent\n" }],
+      tasks: { doctor: [{ id: "frontend-ready", check: "test -f AGENTS.md" }] },
+    });
+
+    for (const name of ["designer", "frontend"]) {
+      await install({
+        dockRef: DockRef.parse(`test/${name}@1.0.0`),
+        projectDir: project,
+        phase: "install",
+        platform: "macos",
+        runTasks: true,
+        resolve: localResolver(docks),
+      });
+    }
+
+    const store = new OpenDockStateStore(project);
+    const designer = store.findDock("test/designer");
+    const record = designer?.files.find((file) => file.path === "AGENTS.md");
+    expect(record?.markerId).toBeDefined();
+    const agentsPath = join(project, "AGENTS.md");
+    const agents = readFileSync(agentsPath, "utf8");
+    const codec = new ManagedBlockCodec("test/designer", record?.markerId ?? "", "AGENTS.md");
+    const block = codec.extract(agents);
+    expect(block).toBeDefined();
+    writeFileSync(
+      agentsPath,
+      `${agents.slice(0, block?.startIndex).trimEnd()}\n${agents.slice(block?.endIndex).trimStart()}`,
+    );
+    expect(readFileSync(agentsPath, "utf8")).toContain("Frontend Agent");
+
+    const registry = mockRegistry(
+      await Promise.all(
+        ["designer", "frontend"].map(async (name) => ({
+          archive: await createDockArchive(docks, "test", name, "1.0.0"),
+          id: `test/${name}`,
+          platform: "macos" as const,
+          version: "1.0.0",
+        })),
+      ),
+    );
+    try {
+      await expect(
+        withCwd(project, () =>
+          captureConsole(() => runCli(["bun", "opendock", "doctor", "test/designer"])),
+        ),
+      ).rejects.toThrow("doctor found 1 failed check");
+
+      const healthy = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "doctor", "test/frontend"])),
+      );
+      expect(healthy).toContain("✓ test/frontend managed files");
+      expect(healthy).toContain("Status: Ready");
     } finally {
       registry.restore();
     }

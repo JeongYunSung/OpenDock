@@ -3,6 +3,7 @@ import { type InstalledDockUpdateCheck, installedDockListCommandResult } from ".
 import { resolveCliPlatform } from "./cli-options.js";
 import { DockRef } from "./core/domain/manifest.js";
 import { type InstalledDockRecord, OpenDockStateStore } from "./core/domain/state-store.js";
+import { FilePlan } from "./core/files/file-plan.js";
 import { DependencyRunner } from "./core/runtime/dependency-runner.js";
 import { TaskRunner } from "./core/runtime/task-runner.js";
 import { lockedDockVersionSelector } from "./installed-dock-updates.js";
@@ -113,6 +114,7 @@ export async function printDoctor(
       console.log(
         `${formatStepSymbol("✓")} ${formatDockVersion(dock.id, dock.version)} ${formatListPlatform(platform)}`,
       );
+      failedChecks += printManagedFileDoctorCheck(cwd, dock);
       failedChecks += await printDockDoctorChecks(
         cwd,
         DockRef.parse(`${dock.id}@${lockedDockVersionSelector(dock)}`),
@@ -132,6 +134,19 @@ export async function printDoctor(
     if (dockId !== undefined) {
       throw new Error(`dock \`${dockId}\` is not installed in this project`);
     }
+  }
+}
+
+function printManagedFileDoctorCheck(cwd: string, dock: InstalledDockRecord): number {
+  try {
+    new FilePlan(cwd, dock.id, dock.files, false).verifyPriorState();
+    console.log(`${formatStepSymbol("✓")} ${dock.id} managed files`);
+    return 0;
+  } catch (error) {
+    console.log(
+      `${formatStepSymbol("!")} ${terminalStyle.bold(dock.id)} managed files (${(error as Error).message})`,
+    );
+    return 1;
   }
 }
 

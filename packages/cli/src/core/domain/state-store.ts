@@ -13,6 +13,7 @@ export interface AppliedFileRecord {
   mode: ManagedMode;
   checksum: string;
   markerId?: string;
+  prefixNewlines?: number;
   source: "files" | "export";
   executable?: boolean;
 }

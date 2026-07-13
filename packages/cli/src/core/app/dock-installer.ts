@@ -14,7 +14,7 @@ import {
   OpenDockStateStore,
 } from "../domain/state-store.js";
 import { FileCandidateCollector } from "../files/file-candidate.js";
-import { FilePlan } from "../files/file-plan.js";
+import { type FileApplySummary, FilePlan } from "../files/file-plan.js";
 import { pruneEmptyDirectoryChain, safeJoin } from "../files/path-utils.js";
 import { WorkdirSeeder } from "../files/workdir-seeder.js";
 import { createProjectCommandShim, removeProjectCommandShim } from "../runtime/command-shim.js";
@@ -476,7 +476,22 @@ export class DockInstaller {
       total: dock.files.length,
       version: dock.version,
     });
-    const summary = filePlan.apply([]);
+    const fileRollback = new UpdateRollback(options.projectDir, dock, []);
+    let summary: FileApplySummary;
+    try {
+      summary = filePlan.apply([]);
+      fileRollback.commit();
+    } catch (error) {
+      try {
+        fileRollback.rollback([]);
+      } catch (rollbackError) {
+        throw new AggregateError(
+          [error, rollbackError],
+          `uninstall failed and file rollback was incomplete for ${dock.id}`,
+        );
+      }
+      throw error;
+    }
     removeInstalledDependencyOutputs(options.projectDir, dock.dependencies);
     this.progress(options.progress, {
       dockId: dock.id,

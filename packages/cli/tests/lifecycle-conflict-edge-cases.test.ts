@@ -1,4 +1,12 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -59,6 +67,154 @@ describe("lifecycle conflict edge cases", () => {
     expect(forcedUninstall.fileChanges.deleted).toEqual(["AGENTS.md"]);
     expect(existsProjectPath(project, "AGENTS.md")).toBe(false);
     expect(installedDocks(project)).toEqual([]);
+  });
+
+  it("fails closed when a managed block marker pair is duplicated", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "qa", "duplicate-block", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Managed v1\n" }],
+    });
+    writeDock(docks, "qa", "duplicate-block", "1.0.1", {
+      files: [{ path: "AGENTS.md", content: "# Managed v2\n" }],
+    });
+
+    await installDock(docks, project, "qa/duplicate-block@1.0.0");
+    const installed = readProjectFile(project, "AGENTS.md");
+    writeFileSync(join(project, "AGENTS.md"), `${installed.trimEnd()}\n\n${installed}`);
+    const damaged = readProjectFile(project, "AGENTS.md");
+
+    await expect(
+      installDock(docks, project, "qa/duplicate-block@1.0.1", { phase: "update" }),
+    ).rejects.toThrow(
+      "invalid managed block structure for AGENTS.md: expected exactly one matching marker pair",
+    );
+    await expect(
+      installDock(docks, project, "qa/duplicate-block@1.0.1", {
+        force: true,
+        phase: "update",
+      }),
+    ).rejects.toThrow(
+      "invalid managed block structure for AGENTS.md: expected exactly one matching marker pair",
+    );
+    expect(() => uninstallDock(project, "qa/duplicate-block")).toThrow(
+      "invalid managed block structure for AGENTS.md: expected exactly one matching marker pair",
+    );
+
+    expect(readProjectFile(project, "AGENTS.md")).toBe(damaged);
+    expect(installedDocks(project)[0]?.version).toBe("1.0.0");
+  });
+
+  it("fails closed when another OpenDock block is nested inside a managed block", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "qa", "nested-block", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Managed v1\n" }],
+    });
+
+    await installDock(docks, project, "qa/nested-block@1.0.0");
+    const nested = [
+      "<!-- OPENDOCK:START id=foreign dock=qa/foreign path=AGENTS.md -->",
+      "# Foreign block",
+      "<!-- OPENDOCK:END id=foreign dock=qa/foreign path=AGENTS.md -->",
+    ].join("\n");
+    writeFileSync(
+      join(project, "AGENTS.md"),
+      readProjectFile(project, "AGENTS.md").replace("# Managed v1", nested),
+    );
+    const damaged = readProjectFile(project, "AGENTS.md");
+
+    expect(() => uninstallDock(project, "qa/nested-block", { force: true })).toThrow(
+      "managed block content cannot contain OpenDock markers: AGENTS.md",
+    );
+    expect(readProjectFile(project, "AGENTS.md")).toBe(damaged);
+    expect(installedDocks(project).map(({ id }) => id)).toEqual(["qa/nested-block"]);
+  });
+
+  it("does not discard lock state when both managed block markers were renamed", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "qa", "orphaned-block", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Managed v1\n" }],
+    });
+
+    await installDock(docks, project, "qa/orphaned-block@1.0.0");
+    writeFileSync(
+      join(project, "AGENTS.md"),
+      readProjectFile(project, "AGENTS.md")
+        .replace("OPENDOCK:START", "OPENDOCK:BROKEN-START")
+        .replace("OPENDOCK:END", "OPENDOCK:BROKEN-END"),
+    );
+    const damaged = readProjectFile(project, "AGENTS.md");
+
+    expect(() => uninstallDock(project, "qa/orphaned-block", { force: true })).toThrow(
+      "managed block missing: AGENTS.md",
+    );
+    expect(readProjectFile(project, "AGENTS.md")).toBe(damaged);
+    expect(installedDocks(project).map(({ id }) => id)).toEqual(["qa/orphaned-block"]);
+  });
+
+  it("preserves unrelated whitespace when updating and removing a managed block", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const original = "  # User heading\n\n\n\nUser paragraph\n\n";
+    writeFileSync(join(project, "AGENTS.md"), original);
+    writeDock(docks, "qa", "whitespace", "1.0.0", {
+      files: [{ path: "AGENTS.md", content: "# Managed v1\n" }],
+    });
+    writeDock(docks, "qa", "whitespace", "1.0.1", {
+      files: [{ path: "AGENTS.md", content: "# Managed v2\n" }],
+    });
+
+    await installDock(docks, project, "qa/whitespace@1.0.0");
+    await installDock(docks, project, "qa/whitespace@1.0.1", { phase: "update" });
+    uninstallDock(project, "qa/whitespace");
+
+    expect(readProjectFile(project, "AGENTS.md")).toBe(original);
+  });
+
+  it("refuses to follow a replaced parent-directory symlink during uninstall", async () => {
+    if (process.platform === "win32") return;
+    const docks = tempDir();
+    const project = tempDir();
+    const external = tempDir();
+    writeDock(docks, "qa", "parent-symlink", "1.0.0", {
+      files: [{ path: "config/owned.json", content: '{"owned":true}\n' }],
+    });
+
+    await installDock(docks, project, "qa/parent-symlink@1.0.0");
+    rmSync(join(project, "config"), { recursive: true });
+    writeFileSync(join(external, "owned.json"), '{"owned":true}\n');
+    symlinkSync(external, join(project, "config"), "dir");
+
+    for (const force of [false, true]) {
+      expect(() => uninstallDock(project, "qa/parent-symlink", { force })).toThrow(
+        "target parent cannot be a symlink: config/owned.json",
+      );
+      expect(readFileSync(join(external, "owned.json"), "utf8")).toBe('{"owned":true}\n');
+      expect(installedDocks(project).map(({ id }) => id)).toEqual(["qa/parent-symlink"]);
+    }
+  });
+
+  it("preflights every uninstall target before removing any managed file", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "qa", "atomic-uninstall", "1.0.0", {
+      files: [
+        { path: "config/a.json", content: '{"a":true}\n' },
+        { path: "config/z.json", content: '{"z":true}\n' },
+      ],
+    });
+
+    await installDock(docks, project, "qa/atomic-uninstall@1.0.0");
+    rmSync(join(project, "config", "z.json"));
+    mkdirSync(join(project, "config", "z.json"));
+
+    expect(() => uninstallDock(project, "qa/atomic-uninstall", { force: true })).toThrow(
+      "target must be a regular file: config/z.json",
+    );
+    expect(readProjectFile(project, "config/a.json")).toBe('{"a":true}\n');
+    expect(installedDocks(project).map(({ id }) => id)).toEqual(["qa/atomic-uninstall"]);
   });
 
   it("recovers a deleted managed file only when update is forced", async () => {
