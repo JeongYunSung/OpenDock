@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "packages/cli/package.json": {
-    "mtime": 1783907673.1003404,
-    "ast_hash": "876e8cea4582b1f3eb428fbb2f1daa6f",
+    "mtime": 1783914086.3307328,
+    "ast_hash": "7c069c95092b0ac37c346b8faa3e70c8",
     "semantic_hash": ""
   },
   "packages/cli/scripts/build.ts": {
@@ -485,8 +485,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/cli-project-output.ts": {
-    "mtime": 1783148975.1180725,
-    "ast_hash": "810a9ed55ae9775dc7da1aab5ae7b3ac",
+    "mtime": 1783911977.6412466,
+    "ast_hash": "cfc6df67463de50dea19f169f1467b87",
     "semantic_hash": ""
   },
   "packages/cli/src/cli.ts": {
@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/constants.ts": {
-    "mtime": 1783907673.1006875,
-    "ast_hash": "f8be4f24ea55b67aac89b1b77118e602",
+    "mtime": 1783914086.3310444,
+    "ast_hash": "d60abef9f10a2ac7a4f0ec7e33a5e535",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-install-report.ts": {
@@ -505,13 +505,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-installer.ts": {
-    "mtime": 1783246313.4974926,
-    "ast_hash": "7cb65a703cd4c8ecedb25a0772ad7c40",
+    "mtime": 1783918069.0384722,
+    "ast_hash": "ea55f29a17ff3712d6ce4e8dfb7a7076",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/manifest.ts": {
-    "mtime": 1783148975.1185138,
-    "ast_hash": "fe2de1f85cf4d4b97879ccb711c18e49",
+    "mtime": 1783911533.0639317,
+    "ast_hash": "ef0ecd75151032e6b44886c8f5651e65",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/runtime-names.ts": {
@@ -525,8 +525,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/state-store.ts": {
-    "mtime": 1783148975.118625,
-    "ast_hash": "5676461776ebd3acd3c4c8e680859452",
+    "mtime": 1783916266.8975143,
+    "ast_hash": "3e6b12468e24bc9c4cf64e16aaf1cc66",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/checksum.ts": {
@@ -570,8 +570,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/progress.ts": {
-    "mtime": 1781751161.27543,
-    "ast_hash": "abb7dd75aa07ee05bc009abe4787a24b",
+    "mtime": 1783915913.2738297,
+    "ast_hash": "25ba5bb2bfeb71ba7307691ea8e41cd3",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/requirement-runner.ts": {
@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/cli-flow.test.ts": {
-    "mtime": 1782974131.215659,
-    "ast_hash": "bf814d64238d18297f7af801ca087ea5",
+    "mtime": 1783911996.4914408,
+    "ast_hash": "2f582905767835f5e25827e8235382b0",
     "semantic_hash": ""
   },
   "packages/cli/tests/examples-cleanup.test.ts": {
@@ -685,8 +685,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/requirements.test.ts": {
-    "mtime": 1783318628.5567124,
-    "ast_hash": "fa39bd31631befa5c886ccafdb4b6eda",
+    "mtime": 1783911454.1773036,
+    "ast_hash": "701afdf4761d89d25c64ec6e0a49854f",
     "semantic_hash": ""
   },
   "packages/cli/tests/security-regression.test.ts": {
@@ -725,13 +725,13 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1783907673.1010964,
-    "ast_hash": "84975c84254c1ac86675f39a05a36dde",
+    "mtime": 1783915657.5472412,
+    "ast_hash": "8c61d75b1cdf2e09e19302af444256eb",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1783148975.10886,
-    "ast_hash": "0d7a4965cffa6b768dd374a3ed40ca1a",
+    "mtime": 1783911229.504508,
+    "ast_hash": "24adb1e810b7a86db1496b45fbb9dd05",
     "semantic_hash": ""
   },
   "apps/desktop/index.html": {
@@ -765,8 +765,8 @@
     "semantic_hash": ""
   },
   "packages/cli/README.md": {
-    "mtime": 1783342949.3335476,
-    "ast_hash": "2585e6f7bb43c5a65cf95728ca974c87",
+    "mtime": 1783911229.505095,
+    "ast_hash": "c2d116c96c3944c8291766ac08caa37a",
     "semantic_hash": ""
   },
   "packages/cli/README.zh.md": {
@@ -800,8 +800,8 @@
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.md": {
-    "mtime": 1783148975.1176152,
-    "ast_hash": "e5d4f23ba0fce7eb1a9431ab894d044c",
+    "mtime": 1783911229.5055387,
+    "ast_hash": "eede4ec319a4adb9d02ea5050fdd5274",
     "semantic_hash": ""
   },
   "packages/cli/docs/guides/guide.zh.md": {
@@ -2585,8 +2585,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/task-command-validation.ts": {
-    "mtime": 1783148975.1196826,
-    "ast_hash": "6c2080340f910045d7a8bffd27e10f6c",
+    "mtime": 1783911166.8176458,
+    "ast_hash": "1dea749dbab8e830bcb7519a9ecec3a9",
     "semantic_hash": ""
   },
   "scripts/generate-license-notices.mjs": {
@@ -2625,13 +2625,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/tool-runner.ts": {
-    "mtime": 1783906371.0163703,
-    "ast_hash": "b2a2aec97d8549933ced89a5e2cf16db",
+    "mtime": 1783915548.422513,
+    "ast_hash": "3ff35c7b6bfba9ecd3a59baa19764d1f",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-installer.ts": {
-    "mtime": 1783316195.3795269,
-    "ast_hash": "5f39e00e422a5a7d1242c8ca969b3488",
+    "mtime": 1783916155.5674767,
+    "ast_hash": "4cf2dc4d6e6ff0f8fa7d4996d09fb3b0",
     "semantic_hash": ""
   },
   "packages/cli/tests/deploy-manifest-hardening.test.ts": {
@@ -2685,8 +2685,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/command-policy-attack-cases.test.ts": {
-    "mtime": 1783148975.120381,
-    "ast_hash": "aee19b761df57fe612ba4ec9eac9a19f",
+    "mtime": 1783911295.54791,
+    "ast_hash": "e8a0a4b1c66f592e0e9dba75e5538c97",
     "semantic_hash": ""
   },
   "packages/cli/tests/deploy-registry-edge-cases.test.ts": {
@@ -2705,8 +2705,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/runtime-tool-isolation-edge-cases.test.ts": {
-    "mtime": 1783907233.6846445,
-    "ast_hash": "1d86f9fd2d1cac7cb02ea1903bff9292",
+    "mtime": 1783915717.6790686,
+    "ast_hash": "c3b7e6b0da7c0f29c91f9f14d0859095",
     "semantic_hash": ""
   },
   ".serena/memories/memory_maintenance.md": {
@@ -2725,13 +2725,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/dependency-runner.ts": {
-    "mtime": 1783246378.8823318,
-    "ast_hash": "ce6581873ca14d024ac7d58d3ca03fc6",
+    "mtime": 1783915520.9431667,
+    "ast_hash": "28dd543cb2a66f3220b95a032706b597",
     "semantic_hash": ""
   },
   "packages/cli/tests/dependencies.test.ts": {
-    "mtime": 1783248813.2737854,
-    "ast_hash": "f813a412d38037e4ba5557f6a6d3d3ef",
+    "mtime": 1783918027.9606893,
+    "ast_hash": "f3444cbd773e26671b2b012fa3e3eb98",
     "semantic_hash": ""
   },
   "packages/cli/docs/plans/dependencies-qa.md": {
@@ -2777,6 +2777,21 @@
   ".serena/memories/task-board-pip-tools-20260713.md": {
     "mtime": 1783907124.49594,
     "ast_hash": "5ab6c665bbcd972e6404c4a416f6aae4",
+    "semantic_hash": ""
+  },
+  "packages/cli/src/core/app/update-rollback.ts": {
+    "mtime": 1783916698.982755,
+    "ast_hash": "7e8e4f4846cee666aafbde0bc23868be",
+    "semantic_hash": ""
+  },
+  "packages/cli/src/core/app/task-output-rollback.ts": {
+    "mtime": 1783917678.1104631,
+    "ast_hash": "b63c2af64af5a0cb4e7083a0c6599468",
+    "semantic_hash": ""
+  },
+  "packages/cli/src/core/app/workdir-rollback.ts": {
+    "mtime": 1783917661.0542557,
+    "ast_hash": "c93c7623901d1e4562778ccecf43a423",
     "semantic_hash": ""
   }
 }
