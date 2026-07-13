@@ -237,16 +237,21 @@ function runPythonPackageInstall(
     return;
   }
   const pythonCommand = manager === "pip3" ? "python3" : "python";
+  const environmentDir = join(installDir, "python");
   runPackageCommand(
     pythonCommand,
-    ["-m", "ensurepip", "--upgrade"],
+    ["-m", "venv", environmentDir],
     installDir,
     context,
     spec.package,
   );
+  const environmentPython =
+    context.platform === "windows"
+      ? join(environmentDir, "Scripts", "python.exe")
+      : join(environmentDir, "bin", "python");
   runPackageCommand(
-    pythonCommand,
-    ["-m", "pip", "install", "--target", join(installDir, "python"), packageSpec],
+    environmentPython,
+    ["-m", "pip", "install", packageSpec],
     installDir,
     context,
     spec.package,

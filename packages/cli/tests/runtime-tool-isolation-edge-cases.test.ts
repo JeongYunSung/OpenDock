@@ -346,7 +346,7 @@ printf 'host:%s\\n' "$*" >> "${hostLog}"
     });
   });
 
-  it("prefers managed project Python over host pip for pip tool installs", async () => {
+  it("installs pip tools in a dock-local venv without mutating managed Python", async () => {
     const project = tempDir();
     const bin = tempDir();
     const toolLog = join(project, "managed-python-tool.log");
@@ -380,11 +380,20 @@ exit 1
       "require-tool-fake-python-tool:Ready",
       "check-fake-python-tool:Ran",
     ]);
-    expect(readFileSync(toolLog, "utf8")).toContain("ensurepip:--upgrade");
-    expect(readFileSync(toolLog, "utf8")).toContain("pip:-m pip install --target");
-    expect(readFileSync(toolLog, "utf8")).toContain("fake-python-tool:ok");
+    const toolDir = join(
+      project,
+      ".opendock",
+      "tools",
+      safeDockDirectoryName("test/python-tool"),
+      "fake-python-tool",
+    );
+    const log = readFileSync(toolLog, "utf8");
+    expect(log).toContain(`venv:${join(toolDir, "python")}`);
+    expect(log).toContain("pip:-m pip install fake-python-tool==1.0.0");
+    expect(log).not.toContain("ensurepip:");
+    expect(log).toContain("fake-python-tool:ok");
     expect(existsSync(hostPipLog)).toBe(false);
-  });
+  }, 15_000);
 
   it("blocks package-manager installs in task commands", () => {
     for (const command of [
@@ -777,24 +786,29 @@ if [ "$1" = "--version" ]; then
   exit 0
 fi
 if [ "$1" = "-m" ] && [ "$2" = "ensurepip" ]; then
-  printf 'ensurepip:%s\\n' "$3" >> "${log}"
+  printf 'ensurepip:externally-managed-environment\\n' >> "${log}"
+  exit 42
+fi
+if [ "$1" = "-m" ] && [ "$2" = "venv" ]; then
+  target="$3"
+  mkdir -p "$target/bin"
+  /bin/cat > "$target/bin/python" <<'PYTHON'
+#!/bin/sh
+set -eu
+if [ "$1" = "-m" ] && [ "$2" = "pip" ] && [ "$3" = "install" ]; then
+  environment_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+  /bin/cat > "$environment_dir/bin/fake-tool" <<'TOOL'
+#!/bin/sh
+printf 'fake-python-tool:ok\\n' >> "${log}"
+TOOL
+  /bin/chmod +x "$environment_dir/bin/fake-tool"
+  printf 'pip:%s\\n' "$*" >> "${log}"
   exit 0
 fi
-if [ "$1" = "-m" ] && [ "$2" = "pip" ] && [ "$3" = "install" ] && [ "$4" = "--target" ]; then
-  target="$5"
-  mkdir -p "$target/bin" "$target/fake_tool"
-  /bin/cat > "$target/fake_tool/__init__.py" <<'EOF'
-VALUE = "ok"
-EOF
-  /bin/cat > "$target/bin/fake-tool" <<'EOF'
-#!/bin/sh
-python3 - <<'PY'
-import fake_tool
-PY
-printf 'fake-python-tool:ok\\n' >> "${log}"
-EOF
-  /bin/chmod +x "$target/bin/fake-tool"
-  printf 'pip:%s\\n' "$*" >> "${log}"
+exit 1
+PYTHON
+  /bin/chmod +x "$target/bin/python"
+  printf 'venv:%s\\n' "$target" >> "${log}"
   exit 0
 fi
 exit 1
