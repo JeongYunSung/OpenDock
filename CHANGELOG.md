@@ -7,6 +7,13 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.2.10 - 2026-07-13
+
+### CLI
+
+- Install pip-managed tools in dock-local virtual environments without mutating
+  OpenDock-managed Python runtimes.
+
 ## 0.2.9 - 2026-07-06
 
 ### CLI

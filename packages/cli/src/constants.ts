@@ -1,4 +1,4 @@
-export const VERSION = "0.2.9";
+export const VERSION = "0.2.10";
 export const SCHEMA_VERSION = "opendock/v1";
 export const PROJECT_SCHEMA_VERSION = "opendock.project/v1";
 export const LOCK_SCHEMA_VERSION = "opendock.lock/v1";
