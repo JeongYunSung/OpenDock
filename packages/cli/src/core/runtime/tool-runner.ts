@@ -14,6 +14,7 @@ import {
   relativeProjectPath,
   toolInstallDir,
 } from "./project-layout.js";
+import { prepareUvCommand } from "./runtime-installer.js";
 import { type StepReport, stepProgressPercent } from "./step-report.js";
 
 export interface ToolRecord {
@@ -238,9 +239,20 @@ function runPythonPackageInstall(
   }
   const pythonCommand = manager === "pip3" ? "python3" : "python";
   const environmentDir = join(installDir, "python");
+  const uv = prepareUvCommand({
+    platform: context.platform,
+    projectDir: context.projectDir,
+    requested: ">=0.5.0",
+    runtime: "uv",
+  });
+  const pathValue = prependPathEntries(
+    opendockCommandPath(),
+    projectCommandPathEntries(context.projectDir),
+  );
+  const pythonPath = resolveProgramFromPath(pythonCommand, pathValue, context.platform);
   runPackageCommand(
-    pythonCommand,
-    ["-m", "venv", environmentDir],
+    uv,
+    ["venv", "--python", pythonPath, environmentDir],
     installDir,
     context,
     spec.package,
@@ -250,8 +262,8 @@ function runPythonPackageInstall(
       ? join(environmentDir, "Scripts", "python.exe")
       : join(environmentDir, "bin", "python");
   runPackageCommand(
-    environmentPython,
-    ["-m", "pip", "install", packageSpec],
+    uv,
+    ["pip", "install", "--python", environmentPython, packageSpec],
     installDir,
     context,
     spec.package,

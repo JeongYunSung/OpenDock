@@ -26,7 +26,7 @@ import type {
 import { OpenDockRuntimeInstaller } from "../src/core/runtime/runtime-installer.js";
 import { validateManifestTaskCommands } from "../src/core/runtime/task-command-validation.js";
 import { TaskRunner } from "../src/core/runtime/task-runner.js";
-import type { ToolRunner } from "../src/core/runtime/tool-runner.js";
+import { ToolRunner } from "../src/core/runtime/tool-runner.js";
 import { detectPlatform, type OpenDockPlatform } from "../src/platform.js";
 
 const tempRoots: string[] = [];
@@ -351,6 +351,7 @@ printf 'host:%s\\n' "$*" >> "${hostLog}"
     const bin = tempDir();
     const toolLog = join(project, "managed-python-tool.log");
     const hostPipLog = join(project, "host-pip.log");
+    writeFakeUvForPipTool(bin, toolLog, "macos");
     createProjectCommandShim({
       command: "python",
       owner: { dockId: "project", kind: "runtime", name: "python" },
@@ -388,11 +389,74 @@ exit 1
       "fake-python-tool",
     );
     const log = readFileSync(toolLog, "utf8");
-    expect(log).toContain(`venv:${join(toolDir, "python")}`);
-    expect(log).toContain("pip:-m pip install fake-python-tool==1.0.0");
+    expect(log).toContain(
+      `uv-venv:venv --python ${join(project, ".opendock", "bin", "python")} ${join(toolDir, "python")}`,
+    );
+    expect(log).toContain(
+      `uv-pip:pip install --python ${join(toolDir, "python", "bin", "python")} fake-python-tool==1.0.0`,
+    );
+    expect(log).not.toContain("python-venv:");
     expect(log).not.toContain("ensurepip:");
     expect(log).toContain("fake-python-tool:ok");
     expect(existsSync(hostPipLog)).toBe(false);
+  }, 15_000);
+
+  it("installs pip tools with Windows venv paths without mutating managed Python", async () => {
+    const project = tempDir();
+    const bin = tempDir();
+    const toolLog = join(project, "managed-python-tool-windows.log");
+    const hostPipLog = join(project, "host-pip-windows.log");
+    writeFakeUvForPipTool(bin, toolLog, "windows");
+    createProjectCommandShim({
+      command: "python",
+      owner: { dockId: "project", kind: "runtime", name: "python" },
+      platform: "windows",
+      projectDir: project,
+      target: writeManagedPythonForPip(join(tempDir(), "python"), toolLog),
+    });
+    writeExecutable(
+      join(bin, "pip"),
+      `#!/bin/sh
+printf 'host-pip:%s\\n' "$*" >> "${hostPipLog}"
+exit 1
+`,
+    );
+
+    const result = await withEnv({ PATH: `${bin}:${process.env.PATH ?? ""}` }, () =>
+      new ToolRunner().run(pythonToolManifest(), {
+        dockId: "test/python-tool-windows",
+        live: false,
+        phase: "install",
+        platform: "windows",
+        projectDir: project,
+      }),
+    );
+
+    expect(result.reports.map((report) => `${report.id}:${report.status}`)).toEqual([
+      "require-tool-fake-python-tool:Ready",
+    ]);
+    const toolDir = join(
+      project,
+      ".opendock",
+      "tools",
+      safeDockDirectoryName("test/python-tool-windows"),
+      "fake-python-tool",
+    );
+    const log = readFileSync(toolLog, "utf8");
+    expect(log).toContain(`uv-venv:venv --python`);
+    expect(log).toContain(join(toolDir, "python"));
+    expect(log).toContain(
+      `uv-pip:pip install --python ${join(toolDir, "python", "Scripts", "python.exe")} fake-python-tool==1.0.0`,
+    );
+    expect(log).not.toContain("python-venv:");
+    expect(log).not.toContain("ensurepip:");
+    expect(existsSync(hostPipLog)).toBe(false);
+    expect(readFileSync(join(project, ".opendock", "bin", "fake-tool"), "utf8")).toContain(
+      join(toolDir, ".opendock-command-wrappers", "fake-tool.cmd"),
+    );
+    expect(readFileSync(join(project, ".opendock", "bin", "fake-tool.cmd"), "utf8")).toContain(
+      join(toolDir, ".opendock-command-wrappers", "fake-tool.cmd"),
+    );
   }, 15_000);
 
   it("blocks package-manager installs in task commands", () => {
@@ -776,6 +840,46 @@ exit 1
   );
 }
 
+function writeFakeUvForPipTool(bin: string, log: string, platform: "macos" | "windows"): void {
+  const scriptDirectory = platform === "windows" ? "Scripts" : "bin";
+  const pythonName = platform === "windows" ? "python.exe" : "python";
+  const commandName = platform === "windows" ? "fake-tool.exe" : "fake-tool";
+  writeExecutable(
+    join(bin, "uv"),
+    `#!/bin/sh
+set -eu
+if [ "$1" = "--version" ]; then
+  printf 'uv 0.7.21\\n'
+  exit 0
+fi
+if [ "$1" = "venv" ] && [ "$2" = "--python" ]; then
+  target="$4"
+  printf 'uv-venv:%s\\n' "$*" >> "${log}"
+  mkdir -p "$target/${scriptDirectory}"
+  /bin/cat > "$target/${scriptDirectory}/${pythonName}" <<'PYTHON'
+#!/bin/sh
+printf 'venv-python:%s\\n' "$*" >> "${log}"
+exit 0
+PYTHON
+  /bin/chmod +x "$target/${scriptDirectory}/${pythonName}"
+  exit 0
+fi
+if [ "$1" = "pip" ] && [ "$2" = "install" ] && [ "$3" = "--python" ]; then
+  environment_dir=$(CDPATH= cd -- "$(dirname -- "$4")/.." && pwd)
+  printf 'uv-pip:%s\\n' "$*" >> "${log}"
+  /bin/cat > "$environment_dir/${scriptDirectory}/${commandName}" <<'TOOL'
+#!/bin/sh
+printf 'fake-python-tool:ok\\n' >> "${log}"
+exit 0
+TOOL
+  /bin/chmod +x "$environment_dir/${scriptDirectory}/${commandName}"
+  exit 0
+fi
+exit 1
+`,
+  );
+}
+
 function writeManagedPythonForPip(path: string, log: string): string {
   return writeExecutable(
     path,
@@ -790,26 +894,8 @@ if [ "$1" = "-m" ] && [ "$2" = "ensurepip" ]; then
   exit 42
 fi
 if [ "$1" = "-m" ] && [ "$2" = "venv" ]; then
-  target="$3"
-  mkdir -p "$target/bin"
-  /bin/cat > "$target/bin/python" <<'PYTHON'
-#!/bin/sh
-set -eu
-if [ "$1" = "-m" ] && [ "$2" = "pip" ] && [ "$3" = "install" ]; then
-  environment_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-  /bin/cat > "$environment_dir/bin/fake-tool" <<'TOOL'
-#!/bin/sh
-printf 'fake-python-tool:ok\\n' >> "${log}"
-TOOL
-  /bin/chmod +x "$environment_dir/bin/fake-tool"
-  printf 'pip:%s\\n' "$*" >> "${log}"
-  exit 0
-fi
-exit 1
-PYTHON
-  /bin/chmod +x "$target/bin/python"
-  printf 'venv:%s\\n' "$target" >> "${log}"
-  exit 0
+  printf 'python-venv:%s\\n' "$*" >> "${log}"
+  exit 43
 fi
 exit 1
 `,
