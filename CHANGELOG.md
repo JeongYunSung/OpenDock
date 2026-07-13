@@ -7,6 +7,25 @@ version declared in `package.json`; they do not auto-increment versions.
 
 ## Unreleased
 
+## 0.2.12 - 2026-07-13
+
+### CLI
+
+- Fail closed when managed file markers are missing, duplicated, malformed, or
+  nested instead of silently overwriting ambiguous project state.
+- Preserve user-owned whitespace exactly when managed blocks are updated or
+  removed.
+- Preflight every managed target and reject parent-directory symlinks before
+  update or uninstall writes begin.
+- Roll back managed file changes when uninstall fails, preventing partially
+  removed docks.
+- Report missing or modified managed files through `opendock doctor`.
+
+### Desktop App
+
+- Bundle OpenDock CLI 0.2.12 with stricter managed file integrity checks and
+  atomic uninstall behavior.
+
 ## 0.2.11 - 2026-07-13
 
 ### CLI
