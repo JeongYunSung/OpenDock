@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "packages/cli/package.json": {
-    "mtime": 1783322025.5351532,
-    "ast_hash": "7876a2bc4507c5fee25c2dc706ecd438",
+    "mtime": 1783907673.1003404,
+    "ast_hash": "876e8cea4582b1f3eb428fbb2f1daa6f",
     "semantic_hash": ""
   },
   "packages/cli/scripts/build.ts": {
@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/constants.ts": {
-    "mtime": 1783322025.5370328,
-    "ast_hash": "3db33b04060401072573fde3a263e6b9",
+    "mtime": 1783907673.1006875,
+    "ast_hash": "f8be4f24ea55b67aac89b1b77118e602",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-install-report.ts": {
@@ -725,8 +725,8 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1783322025.537355,
-    "ast_hash": "e966a62ef64e13b84d6457ceaa7cae33",
+    "mtime": 1783907673.1010964,
+    "ast_hash": "84975c84254c1ac86675f39a05a36dde",
     "semantic_hash": ""
   },
   "README.md": {
@@ -765,7 +765,7 @@
     "semantic_hash": ""
   },
   "packages/cli/README.md": {
-    "mtime": 1783148975.116695,
+    "mtime": 1783342949.3335476,
     "ast_hash": "2585e6f7bb43c5a65cf95728ca974c87",
     "semantic_hash": ""
   },
@@ -2625,8 +2625,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/tool-runner.ts": {
-    "mtime": 1783321301.0334477,
-    "ast_hash": "15140dafd5a9bfe41dfcb0a1f45baa41",
+    "mtime": 1783906371.0163703,
+    "ast_hash": "b2a2aec97d8549933ced89a5e2cf16db",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/runtime-installer.ts": {
@@ -2705,8 +2705,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/runtime-tool-isolation-edge-cases.test.ts": {
-    "mtime": 1783321340.3353863,
-    "ast_hash": "06e12cb5585cbbd23138bb53f127028e",
+    "mtime": 1783907233.6846445,
+    "ast_hash": "1d86f9fd2d1cac7cb02ea1903bff9292",
     "semantic_hash": ""
   },
   ".serena/memories/memory_maintenance.md": {
@@ -2767,6 +2767,16 @@
   "packages/cli/src/core/runtime/process-spawn.ts": {
     "mtime": 1783248772.423451,
     "ast_hash": "ff9619582ff93aad9c3520e922895d03",
+    "semantic_hash": ""
+  },
+  ".serena/memories/session-ultrawork-pip-tools-20260713.md": {
+    "mtime": 1783907356.1096926,
+    "ast_hash": "cc5f3ec717fd2efb3ab268087c1450ce",
+    "semantic_hash": ""
+  },
+  ".serena/memories/task-board-pip-tools-20260713.md": {
+    "mtime": 1783907124.49594,
+    "ast_hash": "5ab6c665bbcd972e6404c4a416f6aae4",
     "semantic_hash": ""
   }
 }
