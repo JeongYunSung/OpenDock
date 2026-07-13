@@ -1,7 +1,7 @@
 # Graph Report - opendock  (2026-07-13)
 
 ## Corpus Check
-- 469 files · ~242,190 words
+- 469 files · ~242,345 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `98d2f9e2`
+- Built from commit: `7622e9df`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -838,7 +838,7 @@ Nodes (22): fileChangesFromSummary(), installedDockRecordFor(), installReportFor
 
 ### Community 26 - "Community 26"
 Cohesion: 0.06
-Nodes (33): 0.1.0 - 2026-06-07, 0.1.11 - 2026-06-12, 0.1.12 - 2026-06-12, 0.1.13 - 2026-06-12, 0.1.1 - 2026-06-12, 0.1.20 - 2026-06-15, 0.1.2 - 2026-06-12, 0.1.33 - 2026-06-17 (+25 more)
+Nodes (33): 0.1.0 - 2026-06-07, 0.1.11 - 2026-06-12, 0.1.12 - 2026-06-12, 0.1.17 - 2026-06-15, 0.1.1 - 2026-06-12, 0.1.23 - 2026-06-15, 0.1.28 - 2026-06-16, 0.1.2 - 2026-06-12 (+25 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.16
@@ -881,8 +881,8 @@ Cohesion: 0.08
 Nodes (48): cliCommandNames, deployOptionValue(), dockIdFromReference(), inferDeployPlatformFromManifestPath(), parseDeployRef(), parseInstalledDockId(), parseInstallRef(), resolveCliPlatform() (+40 more)
 
 ### Community 37 - "Community 37"
-Cohesion: 0.31
-Nodes (10): Review rails, PR structure, and secret-scan defaults for AI-generated changes., Review rails, PR structure, and secret-scan defaults for AI-generated changes., Repository context packaging, architecture mapping, and change-risk prompts., Repository context packaging, architecture mapping, and change-risk prompts., Tag: context, Tag: git, Tag: quality, Tag: repository (+2 more)
+Cohesion: 0.22
+Nodes (14): Review rails, PR structure, and secret-scan defaults for AI-generated changes., Review rails, PR structure, and secret-scan defaults for AI-generated changes., Security-first MCP inventory, config examples, and review checklists., Security-first MCP inventory, config examples, and review checklists., Repository context packaging, architecture mapping, and change-risk prompts., Repository context packaging, architecture mapping, and change-risk prompts., Tag: config, Tag: context (+6 more)
 
 ### Community 38 - "Community 38"
 Cohesion: 0.12
@@ -1017,8 +1017,8 @@ Cohesion: 0.23
 Nodes (9): AppMenu(), AppMenuGroup, appMenuGroups(), AppMenuItem, WindowControlPlatform, WindowControls(), productUpdateButtonLabel(), productUpdateButtonTitle() (+1 more)
 
 ### Community 72 - "Community 72"
-Cohesion: 0.15
-Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
+Cohesion: 0.14
+Nodes (14): description, required, type, definitions, Capability, Number, PermissionEntry, Target (+6 more)
 
 ### Community 73 - "Community 73"
 Cohesion: 0.13
@@ -1090,7 +1090,7 @@ Nodes (10): type, webviews, windows, items, description, items, type, descriptio
 
 ### Community 90 - "Community 90"
 Cohesion: 0.07
-Nodes (28): 0.1.39 - 2026-06-23, 0.1.43 - 2026-06-26, 0.2.0 - 2026-07-02, 0.2.10 - 2026-07-13, 0.2.11 - 2026-07-13, 0.2.2 - 2026-07-02, 0.2.3 - 2026-07-03, 0.2.4 - 2026-07-04 (+20 more)
+Nodes (28): 0.1.39 - 2026-06-23, 0.1.43 - 2026-06-26, 0.1.46 - 2026-06-30, 0.2.0 - 2026-07-02, 0.2.10 - 2026-07-13, 0.2.11 - 2026-07-13, 0.2.3 - 2026-07-03, 0.2.4 - 2026-07-04 (+20 more)
 
 ### Community 91 - "Community 91"
 Cohesion: 0.22
@@ -1549,8 +1549,8 @@ Cohesion: 0.29
 Nodes (6): Best For, Dev Env, First Run, Outcome, Pair With, What Gets Installed
 
 ### Community 205 - "Community 205"
-Cohesion: 0.27
-Nodes (12): Documentation quality gate for markdown hygiene, links, headings, code fences, quick starts, CLI drift, and multilingual sync., Documentation quality gate for markdown hygiene, links, headings, code fences, quick starts, CLI drift, and multilingual sync., Kotlin/Spring Boot quality gate for Gradle, ktlint, detekt, DTO validation, profiles, transactions, and readiness., Kotlin/Spring Boot quality gate for Gradle, ktlint, detekt, DTO validation, profiles, transactions, and readiness., Tag: docs, Tag: gradle, Tag: i18n, Tag: kotlin (+4 more)
+Cohesion: 0.53
+Nodes (6): Documentation quality gate for markdown hygiene, links, headings, code fences, quick starts, CLI drift, and multilingual sync., Documentation quality gate for markdown hygiene, links, headings, code fences, quick starts, CLI drift, and multilingual sync., Tag: docs, Tag: i18n, Tag: markdown, Tag: readme
 
 ### Community 206 - "Community 206"
 Cohesion: 0.29
@@ -2073,8 +2073,8 @@ Cohesion: 0.39
 Nodes (9): Creative generation loop for image, logo, favicon, video, audio, and asset analysis deliverables., Creative generation loop for image, logo, favicon, video, audio, and asset analysis deliverables., Tag: assets, Tag: audio, Tag: favicon, Tag: generation, Tag: image, Tag: logo (+1 more)
 
 ### Community 350 - "Community 350"
-Cohesion: 0.67
-Nodes (3): 0.1.23 - 2026-06-15, Changed, Desktop App
+Cohesion: 0.26
+Nodes (13): Backend API, database, security, and testing guidance for AI-assisted engineering., Backend API, database, security, and testing guidance for AI-assisted engineering., Backend quality gate for API contracts, validation, authentication, migrations, logging, and service safety., Backend quality gate for API contracts, validation, authentication, migrations, logging, and service safety., Kotlin/Spring Boot quality gate for Gradle, ktlint, detekt, DTO validation, profiles, transactions, and readiness., Kotlin/Spring Boot quality gate for Gradle, ktlint, detekt, DTO validation, profiles, transactions, and readiness., Tag: api, Tag: backend (+5 more)
 
 ### Community 351 - "Community 351"
 Cohesion: 0.10
@@ -2085,8 +2085,8 @@ Cohesion: 0.16
 Nodes (20): A practical workspace for mapping and designing safe internal automations., A practical workspace for mapping and designing safe internal automations., Support playbooks, FAQ structure, ticket triage, escalation, and reusable response prompts., Support playbooks, FAQ structure, ticket triage, escalation, and reusable response prompts., Project-local runtime versions and validation task references for agents., Project-local runtime versions and validation task references for agents., Oh My Agent setup with OpenDock-managed install, update, and uninstall., Oh My Agent setup with OpenDock-managed install, update, and uninstall. (+12 more)
 
 ### Community 353 - "Community 353"
-Cohesion: 0.09
-Nodes (52): satisfiesVersion(), safeRuntimeSegment(), sharedRuntimeBinDir(), sharedRuntimeInstallDir(), sharedRuntimeRoot(), archiveNameForVersion(), assertRuntimeWrapperWritable(), BunPlatformArchive (+44 more)
+Cohesion: 0.11
+Nodes (39): sharedRuntimeInstallDir(), archiveNameForVersion(), assertRuntimeWrapperWritable(), BunPlatformArchive, BunRelease, bunVersionFromTag(), compareVersionStrings(), createExecutableWrapper() (+31 more)
 
 ### Community 354 - "Community 354"
 Cohesion: 0.05
@@ -2097,24 +2097,24 @@ Cohesion: 0.22
 Nodes (10): Ce Que Résout OpenDock, Commands, Dependencies, Development, Dock Format, Example Docks, Install, OpenDock (+2 more)
 
 ### Community 356 - "Community 356"
-Cohesion: 0.19
-Nodes (19): Backend API, database, security, and testing guidance for AI-assisted engineering., Backend API, database, security, and testing guidance for AI-assisted engineering., Security-first MCP inventory, config examples, and review checklists., Security-first MCP inventory, config examples, and review checklists., Test planning, regression, bug report, accessibility, and performance review templates., Test planning, regression, bug report, accessibility, and performance review templates., Backend quality gate for API contracts, validation, authentication, migrations, logging, and service safety., Backend quality gate for API contracts, validation, authentication, migrations, logging, and service safety. (+11 more)
+Cohesion: 0.23
+Nodes (16): Mobile architecture, UI patterns, release readiness, and testing guidance., Mobile architecture, UI patterns, release readiness, and testing guidance., Test planning, regression, bug report, accessibility, and performance review templates., Test planning, regression, bug report, accessibility, and performance review templates., Mobile quality gate for Flutter, React Native, Swift, Android, permissions, accessibility, release readiness, and runtime safety., Mobile quality gate for Flutter, React Native, Swift, Android, permissions, accessibility, release readiness, and runtime safety., QA quality gate for regression coverage, smoke tests, security checks, release confidence, and final handoff discipline., QA quality gate for regression coverage, smoke tests, security checks, release confidence, and final handoff discipline. (+8 more)
 
 ### Community 357 - "Community 357"
-Cohesion: 0.22
-Nodes (16): UI, UX, product design, design system, Figma workflow, and review templates., UI, UX, product design, design system, Figma workflow, and review templates., Portfolio case study templates for problem, process, decision rationale, and impact., Portfolio case study templates for problem, process, decision rationale, and impact., Design implementation quality gate aligned to DESIGN.md plus hard UI checks., Design implementation quality gate aligned to DESIGN.md plus hard UI checks., Figma MCP quality gate aligned to DESIGN.md plus hard UI checks., Figma MCP quality gate aligned to DESIGN.md plus hard UI checks. (+8 more)
+Cohesion: 0.18
+Nodes (24): UI, UX, product design, design system, Figma workflow, and review templates., UI, UX, product design, design system, Figma workflow, and review templates., React, Next.js, TypeScript, component, accessibility, and review guidance., React, Next.js, TypeScript, component, accessibility, and review guidance., Portfolio case study templates for problem, process, decision rationale, and impact., Portfolio case study templates for problem, process, decision rationale, and impact., Design implementation quality gate aligned to DESIGN.md plus hard UI checks., Design implementation quality gate aligned to DESIGN.md plus hard UI checks. (+16 more)
 
 ### Community 358 - "Community 358"
-Cohesion: 0.67
-Nodes (3): 0.1.28 - 2026-06-16, CLI, Tests
+Cohesion: 0.24
+Nodes (13): satisfiesVersion(), safeRuntimeSegment(), sharedRuntimeBinDir(), sharedRuntimeRoot(), commandCandidates(), extractRequiredVersion(), installPythonRuntime(), isRangeLikeVersionRequest() (+5 more)
 
 ### Community 359 - "Community 359"
 Cohesion: 0.50
 Nodes (3): Acceptance Criteria, In Progress, Ultrawork Task Board
 
 ### Community 360 - "Community 360"
-Cohesion: 0.57
-Nodes (8): React, Next.js, TypeScript, component, accessibility, and review guidance., React, Next.js, TypeScript, component, accessibility, and review guidance., Frontend quality gate for React, TypeScript, accessibility, route smoke checks, and build readiness., Frontend quality gate for React, TypeScript, accessibility, route smoke checks, and build readiness., Tag: accessibility, Tag: frontend, Tag: react, Tag: typescript
+Cohesion: 0.67
+Nodes (3): 0.1.13 - 2026-06-12, Changed, Tests
 
 ### Community 361 - "Community 361"
 Cohesion: 0.29
@@ -2126,11 +2126,11 @@ Nodes (18): Baseline instructions and shared rules for AI coding agents., Baseli
 
 ### Community 363 - "Community 363"
 Cohesion: 0.67
-Nodes (3): 0.1.35 - 2026-06-19, CLI, Desktop App
+Nodes (3): 0.1.20 - 2026-06-15, Changed, Desktop App
 
 ### Community 364 - "Community 364"
-Cohesion: 0.50
-Nodes (8): Mobile architecture, UI patterns, release readiness, and testing guidance., Mobile architecture, UI patterns, release readiness, and testing guidance., Mobile quality gate for Flutter, React Native, Swift, Android, permissions, accessibility, release readiness, and runtime safety., Mobile quality gate for Flutter, React Native, Swift, Android, permissions, accessibility, release readiness, and runtime safety., Tag: android, Tag: flutter, Tag: ios, Tag: mobile
+Cohesion: 0.67
+Nodes (3): 0.1.34 - 2026-06-17, CLI, Desktop App
 
 ### Community 365 - "Community 365"
 Cohesion: 0.67
@@ -2146,15 +2146,15 @@ Nodes (4): description, required, type, Capability
 
 ### Community 369 - "Community 369"
 Cohesion: 0.67
-Nodes (3): 0.1.17 - 2026-06-15, Changed, Tests
+Nodes (3): 0.1.36 - 2026-06-22, CLI, Desktop App
 
 ### Community 373 - "Community 373"
 Cohesion: 0.67
 Nodes (3): 0.1.3 - 2026-06-12, Fixed, Tests
 
 ### Community 374 - "Community 374"
-Cohesion: 0.50
-Nodes (4): description, required, type, Capability
+Cohesion: 0.67
+Nodes (3): Value, anyOf, description
 
 ### Community 375 - "Community 375"
 Cohesion: 0.67
@@ -2186,7 +2186,7 @@ Nodes (3): Identifier, description, oneOf
 
 ### Community 427 - "Community 427"
 Cohesion: 0.06
-Nodes (34): 0.1.40 - 2026-06-23, 0.1.44 - 2026-06-30, 0.1.46 - 2026-06-30, 0.1.48 - 2026-07-01, 0.1.49 - 2026-07-01, 0.1.50 - 2026-07-01, 0.1.51 - 2026-07-01, 0.1.53 - 2026-07-01 (+26 more)
+Nodes (34): 0.1.40 - 2026-06-23, 0.1.44 - 2026-06-30, 0.1.48 - 2026-07-01, 0.1.49 - 2026-07-01, 0.1.50 - 2026-07-01, 0.1.51 - 2026-07-01, 0.1.53 - 2026-07-01, 0.1.54 - 2026-07-01 (+26 more)
 
 ### Community 428 - "Community 428"
 Cohesion: 0.50

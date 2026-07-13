@@ -2000,7 +2000,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "schemas_desktop_schema_definitions_capability",
-      "community": 374,
+      "community": 72,
       "norm_label": "capability"
     },
     {
@@ -2010,7 +2010,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "schemas_desktop_schema_capability_description",
-      "community": 374,
+      "community": 72,
       "norm_label": "description"
     },
     {
@@ -2020,7 +2020,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "schemas_desktop_schema_capability_type",
-      "community": 374,
+      "community": 72,
       "norm_label": "type"
     },
     {
@@ -2030,7 +2030,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "schemas_desktop_schema_capability_required",
-      "community": 374,
+      "community": 72,
       "norm_label": "required"
     },
     {
@@ -2520,7 +2520,7 @@
       "source_location": "L2251",
       "_origin": "ast",
       "id": "schemas_desktop_schema_definitions_value",
-      "community": 72,
+      "community": 374,
       "norm_label": "value"
     },
     {
@@ -2530,7 +2530,7 @@
       "source_location": "L2252",
       "_origin": "ast",
       "id": "schemas_desktop_schema_value_description",
-      "community": 72,
+      "community": 374,
       "norm_label": "description"
     },
     {
@@ -2540,7 +2540,7 @@
       "source_location": "L2253",
       "_origin": "ast",
       "id": "schemas_desktop_schema_value_anyof",
-      "community": 72,
+      "community": 374,
       "norm_label": "anyof"
     },
     {
@@ -12157,7 +12157,7 @@
       "label": ".rollback()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
-      "source_location": "L53",
+      "source_location": "L54",
       "_origin": "ast",
       "id": "app_task_output_rollback_taskoutputrollback_rollback",
       "community": 83,
@@ -12167,7 +12167,7 @@
       "label": ".commit()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
-      "source_location": "L68",
+      "source_location": "L70",
       "_origin": "ast",
       "id": "app_task_output_rollback_taskoutputrollback_commit",
       "community": 83,
@@ -12337,7 +12337,7 @@
       "label": ".rollback()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
-      "source_location": "L64",
+      "source_location": "L70",
       "_origin": "ast",
       "id": "app_workdir_rollback_projectdirectoryrollback_rollback",
       "community": 79,
@@ -12347,7 +12347,7 @@
       "label": ".commit()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
-      "source_location": "L76",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "app_workdir_rollback_projectdirectoryrollback_commit",
       "community": 79,
@@ -12357,7 +12357,7 @@
       "label": ".dispose()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
-      "source_location": "L80",
+      "source_location": "L89",
       "_origin": "ast",
       "id": "app_workdir_rollback_projectdirectoryrollback_dispose",
       "community": 79,
@@ -12367,7 +12367,7 @@
       "label": ".assertDirectoryParent()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
-      "source_location": "L94",
+      "source_location": "L103",
       "_origin": "ast",
       "id": "app_workdir_rollback_projectdirectoryrollback_assertdirectoryparent",
       "community": 79,
@@ -12377,7 +12377,7 @@
       "label": "WorkdirRollback",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
-      "source_location": "L103",
+      "source_location": "L112",
       "_origin": "ast",
       "id": "app_workdir_rollback_workdirrollback",
       "community": 79,
@@ -12387,7 +12387,7 @@
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
-      "source_location": "L104",
+      "source_location": "L113",
       "_origin": "ast",
       "id": "app_workdir_rollback_workdirrollback_constructor",
       "community": 79,
@@ -12397,7 +12397,7 @@
       "label": "copyDirectory()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
-      "source_location": "L109",
+      "source_location": "L118",
       "_origin": "ast",
       "id": "app_workdir_rollback_copydirectory",
       "community": 79,
@@ -12407,7 +12407,7 @@
       "label": "lstatIfPresent()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
-      "source_location": "L129",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "app_workdir_rollback_lstatifpresent",
       "community": 79,
@@ -14350,7 +14350,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "runtime_command_runner_satisfiesversion",
-      "community": 353,
+      "community": 358,
       "norm_label": "satisfiesversion()"
     },
     {
@@ -15060,7 +15060,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "runtime_project_layout_sharedruntimeroot",
-      "community": 353,
+      "community": 358,
       "norm_label": "sharedruntimeroot()"
     },
     {
@@ -15070,7 +15070,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "runtime_project_layout_sharedruntimebindir",
-      "community": 353,
+      "community": 358,
       "norm_label": "sharedruntimebindir()"
     },
     {
@@ -15160,7 +15160,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "runtime_project_layout_saferuntimesegment",
-      "community": 353,
+      "community": 358,
       "norm_label": "saferuntimesegment()"
     },
     {
@@ -15640,7 +15640,7 @@
       "source_location": "L277",
       "_origin": "ast",
       "id": "runtime_runtime_installer_installpythonruntime",
-      "community": 353,
+      "community": 358,
       "norm_label": "installpythonruntime()"
     },
     {
@@ -15650,7 +15650,7 @@
       "source_location": "L340",
       "_origin": "ast",
       "id": "runtime_runtime_installer_resolvepythondownloadrequest",
-      "community": 353,
+      "community": 358,
       "norm_label": "resolvepythondownloadrequest()"
     },
     {
@@ -15660,7 +15660,7 @@
       "source_location": "L366",
       "_origin": "ast",
       "id": "runtime_runtime_installer_israngelikeversionrequest",
-      "community": 353,
+      "community": 358,
       "norm_label": "israngelikeversionrequest()"
     },
     {
@@ -15820,7 +15820,7 @@
       "source_location": "L650",
       "_origin": "ast",
       "id": "runtime_runtime_installer_prepareuvcommand",
-      "community": 353,
+      "community": 358,
       "norm_label": "prepareuvcommand()"
     },
     {
@@ -15850,7 +15850,7 @@
       "source_location": "L716",
       "_origin": "ast",
       "id": "runtime_runtime_installer_resolvepowershellcommand",
-      "community": 353,
+      "community": 358,
       "norm_label": "resolvepowershellcommand()"
     },
     {
@@ -15860,7 +15860,7 @@
       "source_location": "L720",
       "_origin": "ast",
       "id": "runtime_runtime_installer_resolvecommandpath",
-      "community": 353,
+      "community": 358,
       "norm_label": "resolvecommandpath()"
     },
     {
@@ -15870,7 +15870,7 @@
       "source_location": "L743",
       "_origin": "ast",
       "id": "runtime_runtime_installer_commandcandidates",
-      "community": 353,
+      "community": 358,
       "norm_label": "commandcandidates()"
     },
     {
@@ -15890,7 +15890,7 @@
       "source_location": "L780",
       "_origin": "ast",
       "id": "runtime_runtime_installer_uvpythonenvironment",
-      "community": 353,
+      "community": 358,
       "norm_label": "uvpythonenvironment()"
     },
     {
@@ -15900,7 +15900,7 @@
       "source_location": "L791",
       "_origin": "ast",
       "id": "runtime_runtime_installer_extractrequiredversion",
-      "community": 353,
+      "community": 358,
       "norm_label": "extractrequiredversion()"
     },
     {
@@ -18547,7 +18547,7 @@
       "label": "tempDir()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1712",
+      "source_location": "L1743",
       "_origin": "ast",
       "id": "tests_dependencies_test_tempdir",
       "community": 111,
@@ -18557,7 +18557,7 @@
       "label": "parseManifestText()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1718",
+      "source_location": "L1749",
       "_origin": "ast",
       "id": "tests_dependencies_test_parsemanifesttext",
       "community": 111,
@@ -18567,7 +18567,7 @@
       "label": "writeDock()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1724",
+      "source_location": "L1755",
       "_origin": "ast",
       "id": "tests_dependencies_test_writedock",
       "community": 111,
@@ -18577,7 +18577,7 @@
       "label": "localResolver()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1769",
+      "source_location": "L1800",
       "_origin": "ast",
       "id": "tests_dependencies_test_localresolver",
       "community": 317,
@@ -18587,7 +18587,7 @@
       "label": "writeFakeToolAndDependencyManager()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1783",
+      "source_location": "L1814",
       "_origin": "ast",
       "id": "tests_dependencies_test_writefaketoolanddependencymanager",
       "community": 111,
@@ -18597,7 +18597,7 @@
       "label": "writeFakeDependencyManager()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1803",
+      "source_location": "L1834",
       "_origin": "ast",
       "id": "tests_dependencies_test_writefakedependencymanager",
       "community": 111,
@@ -18607,7 +18607,7 @@
       "label": "writeFailingDependencyManager()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1824",
+      "source_location": "L1855",
       "_origin": "ast",
       "id": "tests_dependencies_test_writefailingdependencymanager",
       "community": 111,
@@ -18617,7 +18617,7 @@
       "label": "writeFakePip()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1840",
+      "source_location": "L1871",
       "_origin": "ast",
       "id": "tests_dependencies_test_writefakepip",
       "community": 111,
@@ -18627,7 +18627,7 @@
       "label": "writeExecutable()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1863",
+      "source_location": "L1894",
       "_origin": "ast",
       "id": "tests_dependencies_test_writeexecutable",
       "community": 111,
@@ -18637,7 +18637,7 @@
       "label": "withEnv()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1869",
+      "source_location": "L1900",
       "_origin": "ast",
       "id": "tests_dependencies_test_withenv",
       "community": 111,
@@ -18647,7 +18647,7 @@
       "label": "withEnvAsync()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1892",
+      "source_location": "L1923",
       "_origin": "ast",
       "id": "tests_dependencies_test_withenvasync",
       "community": 111,
@@ -21870,7 +21870,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "changelog_0_2_2_2026_07_02",
-      "community": 90,
+      "community": 427,
       "norm_label": "0.2.2 - 2026-07-02"
     },
     {
@@ -21880,7 +21880,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "changelog_cli_96",
-      "community": 90,
+      "community": 427,
       "norm_label": "cli"
     },
     {
@@ -21890,7 +21890,7 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "changelog_desktop_app_101",
-      "community": 90,
+      "community": 427,
       "norm_label": "desktop app"
     },
     {
@@ -22250,7 +22250,7 @@
       "source_location": "L243",
       "_origin": "ast",
       "id": "changelog_0_1_46_2026_06_30",
-      "community": 427,
+      "community": 90,
       "norm_label": "0.1.46 - 2026-06-30"
     },
     {
@@ -22260,7 +22260,7 @@
       "source_location": "L245",
       "_origin": "ast",
       "id": "changelog_cli_245",
-      "community": 427,
+      "community": 90,
       "norm_label": "cli"
     },
     {
@@ -22270,7 +22270,7 @@
       "source_location": "L250",
       "_origin": "ast",
       "id": "changelog_desktop_app_250",
-      "community": 427,
+      "community": 90,
       "norm_label": "desktop app"
     },
     {
@@ -22490,7 +22490,7 @@
       "source_location": "L342",
       "_origin": "ast",
       "id": "changelog_0_1_36_2026_06_22",
-      "community": 26,
+      "community": 369,
       "norm_label": "0.1.36 - 2026-06-22"
     },
     {
@@ -22500,7 +22500,7 @@
       "source_location": "L344",
       "_origin": "ast",
       "id": "changelog_cli_344",
-      "community": 26,
+      "community": 369,
       "norm_label": "cli"
     },
     {
@@ -22510,7 +22510,7 @@
       "source_location": "L349",
       "_origin": "ast",
       "id": "changelog_desktop_app_349",
-      "community": 26,
+      "community": 369,
       "norm_label": "desktop app"
     },
     {
@@ -22520,7 +22520,7 @@
       "source_location": "L356",
       "_origin": "ast",
       "id": "changelog_0_1_35_2026_06_19",
-      "community": 363,
+      "community": 26,
       "norm_label": "0.1.35 - 2026-06-19"
     },
     {
@@ -22530,7 +22530,7 @@
       "source_location": "L358",
       "_origin": "ast",
       "id": "changelog_cli_358",
-      "community": 363,
+      "community": 26,
       "norm_label": "cli"
     },
     {
@@ -22540,7 +22540,7 @@
       "source_location": "L363",
       "_origin": "ast",
       "id": "changelog_desktop_app_363",
-      "community": 363,
+      "community": 26,
       "norm_label": "desktop app"
     },
     {
@@ -22550,7 +22550,7 @@
       "source_location": "L368",
       "_origin": "ast",
       "id": "changelog_0_1_34_2026_06_17",
-      "community": 26,
+      "community": 364,
       "norm_label": "0.1.34 - 2026-06-17"
     },
     {
@@ -22560,7 +22560,7 @@
       "source_location": "L370",
       "_origin": "ast",
       "id": "changelog_cli_370",
-      "community": 26,
+      "community": 364,
       "norm_label": "cli"
     },
     {
@@ -22570,7 +22570,7 @@
       "source_location": "L377",
       "_origin": "ast",
       "id": "changelog_desktop_app_377",
-      "community": 26,
+      "community": 364,
       "norm_label": "desktop app"
     },
     {
@@ -22710,7 +22710,7 @@
       "source_location": "L431",
       "_origin": "ast",
       "id": "changelog_0_1_28_2026_06_16",
-      "community": 358,
+      "community": 26,
       "norm_label": "0.1.28 - 2026-06-16"
     },
     {
@@ -22720,7 +22720,7 @@
       "source_location": "L433",
       "_origin": "ast",
       "id": "changelog_cli_433",
-      "community": 358,
+      "community": 26,
       "norm_label": "cli"
     },
     {
@@ -22730,7 +22730,7 @@
       "source_location": "L440",
       "_origin": "ast",
       "id": "changelog_tests_440",
-      "community": 358,
+      "community": 26,
       "norm_label": "tests"
     },
     {
@@ -22860,7 +22860,7 @@
       "source_location": "L503",
       "_origin": "ast",
       "id": "changelog_0_1_23_2026_06_15",
-      "community": 350,
+      "community": 26,
       "norm_label": "0.1.23 - 2026-06-15"
     },
     {
@@ -22870,7 +22870,7 @@
       "source_location": "L505",
       "_origin": "ast",
       "id": "changelog_changed",
-      "community": 350,
+      "community": 26,
       "norm_label": "changed"
     },
     {
@@ -22880,7 +22880,7 @@
       "source_location": "L511",
       "_origin": "ast",
       "id": "changelog_desktop_app_511",
-      "community": 350,
+      "community": 26,
       "norm_label": "desktop app"
     },
     {
@@ -22970,7 +22970,7 @@
       "source_location": "L554",
       "_origin": "ast",
       "id": "changelog_0_1_20_2026_06_15",
-      "community": 26,
+      "community": 363,
       "norm_label": "0.1.20 - 2026-06-15"
     },
     {
@@ -22980,7 +22980,7 @@
       "source_location": "L556",
       "_origin": "ast",
       "id": "changelog_changed_556",
-      "community": 26,
+      "community": 363,
       "norm_label": "changed"
     },
     {
@@ -22990,7 +22990,7 @@
       "source_location": "L565",
       "_origin": "ast",
       "id": "changelog_desktop_app_565",
-      "community": 26,
+      "community": 363,
       "norm_label": "desktop app"
     },
     {
@@ -23060,7 +23060,7 @@
       "source_location": "L595",
       "_origin": "ast",
       "id": "changelog_0_1_17_2026_06_15",
-      "community": 369,
+      "community": 26,
       "norm_label": "0.1.17 - 2026-06-15"
     },
     {
@@ -23070,7 +23070,7 @@
       "source_location": "L597",
       "_origin": "ast",
       "id": "changelog_changed_597",
-      "community": 369,
+      "community": 26,
       "norm_label": "changed"
     },
     {
@@ -23080,7 +23080,7 @@
       "source_location": "L602",
       "_origin": "ast",
       "id": "changelog_tests_602",
-      "community": 369,
+      "community": 26,
       "norm_label": "tests"
     },
     {
@@ -23210,7 +23210,7 @@
       "source_location": "L655",
       "_origin": "ast",
       "id": "changelog_0_1_13_2026_06_12",
-      "community": 26,
+      "community": 360,
       "norm_label": "0.1.13 - 2026-06-12"
     },
     {
@@ -23220,7 +23220,7 @@
       "source_location": "L657",
       "_origin": "ast",
       "id": "changelog_changed_657",
-      "community": 26,
+      "community": 360,
       "norm_label": "changed"
     },
     {
@@ -23230,7 +23230,7 @@
       "source_location": "L665",
       "_origin": "ast",
       "id": "changelog_tests_665",
-      "community": 26,
+      "community": 360,
       "norm_label": "tests"
     },
     {
@@ -44132,7 +44132,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 356,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "backend api, database, security, and testing guidance for ai-assisted engineering.",
       "id": "opendock__backend_ai_dock_macos_file"
@@ -44146,7 +44146,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 356,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "backend api, database, security, and testing guidance for ai-assisted engineering.",
       "id": "opendock__backend_ai_dock_windows_file"
@@ -44692,7 +44692,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 360,
+      "community": 357,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "react, next.js, typescript, component, accessibility, and review guidance.",
       "id": "opendock__frontend_ai_dock_macos_file"
@@ -44706,7 +44706,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 360,
+      "community": 357,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "react, next.js, typescript, component, accessibility, and review guidance.",
       "id": "opendock__frontend_ai_dock_windows_file"
@@ -44832,7 +44832,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 356,
+      "community": 37,
       "community_name": "Cli / Examples",
       "norm_label": "security-first mcp inventory, config examples, and review checklists.",
       "id": "opendock__mcp_safe_dock_macos_file"
@@ -44846,7 +44846,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 356,
+      "community": 37,
       "community_name": "Cli / Examples",
       "norm_label": "security-first mcp inventory, config examples, and review checklists.",
       "id": "opendock__mcp_safe_dock_windows_file"
@@ -44916,7 +44916,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 364,
+      "community": 356,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile architecture, ui patterns, release readiness, and testing guidance.",
       "id": "opendock__mobile_ai_dock_macos_file"
@@ -44930,7 +44930,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 364,
+      "community": 356,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile architecture, ui patterns, release readiness, and testing guidance.",
       "id": "opendock__mobile_ai_dock_windows_file"
@@ -45882,7 +45882,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 356,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "backend quality gate for api contracts, validation, authentication, migrations, logging, and service safety.",
       "id": "opendock_repo__backend_ultrawork_dock_macos_file"
@@ -45896,7 +45896,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 356,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "backend quality gate for api contracts, validation, authentication, migrations, logging, and service safety.",
       "id": "opendock_repo__backend_ultrawork_dock_windows_file"
@@ -47142,7 +47142,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 360,
+      "community": 357,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "frontend quality gate for react, typescript, accessibility, route smoke checks, and build readiness.",
       "id": "opendock_repo__frontend_ultrawork_dock_macos_file"
@@ -47156,7 +47156,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 360,
+      "community": 357,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "frontend quality gate for react, typescript, accessibility, route smoke checks, and build readiness.",
       "id": "opendock_repo__frontend_ultrawork_dock_windows_file"
@@ -47296,7 +47296,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 205,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "kotlin/spring boot quality gate for gradle, ktlint, detekt, dto validation, profiles, transactions, and readiness.",
       "id": "opendock_repo__kotlin_spring_ultrawork_dock_macos_file"
@@ -47310,7 +47310,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 205,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "kotlin/spring boot quality gate for gradle, ktlint, detekt, dto validation, profiles, transactions, and readiness.",
       "id": "opendock_repo__kotlin_spring_ultrawork_dock_windows_file"
@@ -47450,7 +47450,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 364,
+      "community": 356,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile quality gate for flutter, react native, swift, android, permissions, accessibility, release readiness, and runtime safety.",
       "id": "opendock_repo__mobile_ultrawork_dock_macos_file"
@@ -47464,7 +47464,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 364,
+      "community": 356,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "mobile quality gate for flutter, react native, swift, android, permissions, accessibility, release readiness, and runtime safety.",
       "id": "opendock_repo__mobile_ultrawork_dock_windows_file"
@@ -48584,7 +48584,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 356,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "tag: backend",
       "id": "opendock_tag_backend"
@@ -48598,7 +48598,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 356,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "tag: api",
       "id": "opendock_tag_api"
@@ -48612,7 +48612,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 356,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "tag: database",
       "id": "opendock_tag_database"
@@ -48990,7 +48990,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 360,
+      "community": 357,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: frontend",
       "id": "opendock_tag_frontend"
@@ -49004,7 +49004,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 360,
+      "community": 357,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: react",
       "id": "opendock_tag_react"
@@ -49018,7 +49018,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 360,
+      "community": 357,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: accessibility",
       "id": "opendock_tag_accessibility"
@@ -49032,7 +49032,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 360,
+      "community": 357,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: typescript",
       "id": "opendock_tag_typescript"
@@ -49102,7 +49102,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 356,
+      "community": 37,
       "community_name": "Cli / Examples",
       "norm_label": "tag: security",
       "id": "opendock_tag_security"
@@ -49116,7 +49116,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 356,
+      "community": 37,
       "community_name": "Cli / Examples",
       "norm_label": "tag: config",
       "id": "opendock_tag_config"
@@ -49130,7 +49130,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 364,
+      "community": 356,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: mobile",
       "id": "opendock_tag_mobile"
@@ -49144,7 +49144,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 364,
+      "community": 356,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: ios",
       "id": "opendock_tag_ios"
@@ -49158,7 +49158,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 364,
+      "community": 356,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: android",
       "id": "opendock_tag_android"
@@ -49508,7 +49508,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 205,
+      "community": 357,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: ultrawork",
       "id": "opendock_tag_ultrawork"
@@ -49522,7 +49522,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 357,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "tag: harness",
       "id": "opendock_tag_harness"
@@ -49760,7 +49760,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 205,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "tag: kotlin",
       "id": "opendock_tag_kotlin"
@@ -49774,7 +49774,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 205,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "tag: spring",
       "id": "opendock_tag_spring"
@@ -49788,7 +49788,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 205,
+      "community": 350,
       "community_name": "Dock Catalog / Examples / Cli",
       "norm_label": "tag: gradle",
       "id": "opendock_tag_gradle"
@@ -49802,7 +49802,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 364,
+      "community": 356,
       "community_name": "Cli / Examples / Dock Catalog",
       "norm_label": "tag: flutter",
       "id": "opendock_tag_flutter"
@@ -78590,9 +78590,9 @@
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_dock_installer",
-      "target": "app_task_output_rollback",
-      "confidence_score": 1.0
+      "target": "app_task_output_rollback"
     },
     {
       "relation": "imports",
@@ -78601,9 +78601,9 @@
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_dock_installer",
-      "target": "app_task_output_rollback_taskoutputrollback",
-      "confidence_score": 1.0
+      "target": "app_task_output_rollback_taskoutputrollback"
     },
     {
       "relation": "imports_from",
@@ -78634,9 +78634,9 @@
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_dock_installer",
-      "target": "app_workdir_rollback",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback"
     },
     {
       "relation": "imports",
@@ -78645,9 +78645,9 @@
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_dock_installer",
-      "target": "app_workdir_rollback_workdirrollback",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_workdirrollback"
     },
     {
       "relation": "imports_from",
@@ -79537,9 +79537,9 @@
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L204",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_dock_installer_dockinstaller_install",
-      "target": "app_dock_installer_dockinstaller_removedocktools",
-      "confidence_score": 1.0
+      "target": "app_dock_installer_dockinstaller_removedocktools"
     },
     {
       "relation": "calls",
@@ -79548,9 +79548,9 @@
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L205",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_dock_installer_dockinstaller_install",
-      "target": "app_dock_installer_dockinstaller_removeunusedruntimeshims",
-      "confidence_score": 1.0
+      "target": "app_dock_installer_dockinstaller_removeunusedruntimeshims"
     },
     {
       "relation": "calls",
@@ -79855,9 +79855,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback",
-      "target": "app_task_output_rollback_taskoutputrollback",
-      "confidence_score": 1.0
+      "target": "app_task_output_rollback_taskoutputrollback"
     },
     {
       "relation": "imports_from",
@@ -79866,9 +79866,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback",
-      "target": "app_workdir_rollback",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback"
     },
     {
       "relation": "imports",
@@ -79877,9 +79877,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback"
     },
     {
       "relation": "imports_from",
@@ -79888,9 +79888,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback",
-      "target": "runtime_project_layout",
-      "confidence_score": 1.0
+      "target": "runtime_project_layout"
     },
     {
       "relation": "imports",
@@ -79899,9 +79899,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback",
-      "target": "runtime_project_layout_docktoolsdir",
-      "confidence_score": 1.0
+      "target": "runtime_project_layout_docktoolsdir"
     },
     {
       "relation": "imports",
@@ -79910,9 +79910,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback",
-      "target": "runtime_project_layout_projectbindir",
-      "confidence_score": 1.0
+      "target": "runtime_project_layout_projectbindir"
     },
     {
       "relation": "method",
@@ -79920,9 +79920,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback_taskoutputrollback",
-      "target": "app_task_output_rollback_taskoutputrollback_commit",
-      "confidence_score": 1.0
+      "target": "app_task_output_rollback_taskoutputrollback_commit"
     },
     {
       "relation": "method",
@@ -79930,9 +79930,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback_taskoutputrollback",
-      "target": "app_task_output_rollback_taskoutputrollback_constructor",
-      "confidence_score": 1.0
+      "target": "app_task_output_rollback_taskoutputrollback_constructor"
     },
     {
       "relation": "method",
@@ -79940,9 +79940,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback_taskoutputrollback",
-      "target": "app_task_output_rollback_taskoutputrollback_prepare",
-      "confidence_score": 1.0
+      "target": "app_task_output_rollback_taskoutputrollback_prepare"
     },
     {
       "relation": "method",
@@ -79950,9 +79950,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback_taskoutputrollback",
-      "target": "app_task_output_rollback_taskoutputrollback_rollback",
-      "confidence_score": 1.0
+      "target": "app_task_output_rollback_taskoutputrollback_rollback"
     },
     {
       "relation": "references",
@@ -79961,9 +79961,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback_taskoutputrollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback"
     },
     {
       "relation": "calls",
@@ -79994,9 +79994,9 @@
       "source_file": "packages/cli/src/core/app/task-output-rollback.ts",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_task_output_rollback_taskoutputrollback_prepare",
-      "target": "app_task_output_rollback_taskoutputrollback_rollback",
-      "confidence_score": 1.0
+      "target": "app_task_output_rollback_taskoutputrollback_rollback"
     },
     {
       "relation": "contains",
@@ -80357,9 +80357,9 @@
       "source_file": "packages/cli/src/core/app/update-rollback.ts",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_update_rollback_updaterollback_detachdependencies",
-      "target": "runtime_dependency_runner_dependencyrecord",
-      "confidence_score": 1.0
+      "target": "runtime_dependency_runner_dependencyrecord"
     },
     {
       "relation": "calls",
@@ -80565,9 +80565,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback",
-      "target": "app_workdir_rollback_copydirectory",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_copydirectory"
     },
     {
       "relation": "contains",
@@ -80575,9 +80575,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L129",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback",
-      "target": "app_workdir_rollback_lstatifpresent",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_lstatifpresent"
     },
     {
       "relation": "contains",
@@ -80585,9 +80585,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback"
     },
     {
       "relation": "contains",
@@ -80595,9 +80595,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L103",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback",
-      "target": "app_workdir_rollback_workdirrollback",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_workdirrollback"
     },
     {
       "relation": "imports_from",
@@ -80606,9 +80606,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback",
-      "target": "files_path_utils",
-      "confidence_score": 1.0
+      "target": "files_path_utils"
     },
     {
       "relation": "imports",
@@ -80617,9 +80617,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback",
-      "target": "files_path_utils_assertrealdirectorypath",
-      "confidence_score": 1.0
+      "target": "files_path_utils_assertrealdirectorypath"
     },
     {
       "relation": "imports",
@@ -80628,9 +80628,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback",
-      "target": "files_path_utils_pruneemptydirectorychain",
-      "confidence_score": 1.0
+      "target": "files_path_utils_pruneemptydirectorychain"
     },
     {
       "relation": "method",
@@ -80638,9 +80638,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L94",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback_assertdirectoryparent",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback_assertdirectoryparent"
     },
     {
       "relation": "method",
@@ -80648,9 +80648,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L76",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback_commit",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback_commit"
     },
     {
       "relation": "method",
@@ -80658,9 +80658,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback_constructor",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback_constructor"
     },
     {
       "relation": "method",
@@ -80668,9 +80668,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback_dispose",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback_dispose"
     },
     {
       "relation": "method",
@@ -80678,9 +80678,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback_prepare",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback_prepare"
     },
     {
       "relation": "method",
@@ -80688,9 +80688,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback_rollback",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback_rollback"
     },
     {
       "relation": "inherits",
@@ -80699,9 +80699,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L103",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_workdirrollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback"
     },
     {
       "relation": "calls",
@@ -80710,9 +80710,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback_prepare",
-      "target": "app_workdir_rollback_copydirectory",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_copydirectory"
     },
     {
       "relation": "calls",
@@ -80721,9 +80721,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback_prepare",
-      "target": "app_workdir_rollback_lstatifpresent",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_lstatifpresent"
     },
     {
       "relation": "calls",
@@ -80732,9 +80732,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback_prepare",
-      "target": "app_workdir_rollback_projectdirectoryrollback_assertdirectoryparent",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback_assertdirectoryparent"
     },
     {
       "relation": "calls",
@@ -80743,9 +80743,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback_prepare",
-      "target": "app_workdir_rollback_projectdirectoryrollback_dispose",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback_dispose"
     },
     {
       "relation": "calls",
@@ -80765,9 +80765,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L66",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback_rollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback_assertdirectoryparent",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback_assertdirectoryparent"
     },
     {
       "relation": "calls",
@@ -80776,9 +80776,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback_rollback",
-      "target": "app_workdir_rollback_projectdirectoryrollback_dispose",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback_dispose"
     },
     {
       "relation": "calls",
@@ -80787,9 +80787,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_projectdirectoryrollback_commit",
-      "target": "app_workdir_rollback_projectdirectoryrollback_dispose",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_projectdirectoryrollback_dispose"
     },
     {
       "relation": "calls",
@@ -80830,9 +80830,9 @@
       "source_file": "packages/cli/src/core/app/workdir-rollback.ts",
       "source_location": "L104",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_workdir_rollback_workdirrollback",
-      "target": "app_workdir_rollback_workdirrollback_constructor",
-      "confidence_score": 1.0
+      "target": "app_workdir_rollback_workdirrollback_constructor"
     },
     {
       "relation": "contains",
@@ -86080,9 +86080,9 @@
       "source_file": "packages/cli/tests/dependencies.test.ts",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_dependencies_test",
-      "target": "files_path_utils",
-      "confidence_score": 1.0
+      "target": "files_path_utils"
     },
     {
       "relation": "imports_from",
@@ -87037,9 +87037,9 @@
       "source_file": "packages/cli/tests/dependencies.test.ts",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_dependencies_test",
-      "target": "files_path_utils_safedockdirectoryname",
-      "confidence_score": 1.0
+      "target": "files_path_utils_safedockdirectoryname"
     },
     {
       "relation": "imports",
@@ -100686,9 +100686,9 @@
       "source_file": "packages/cli/tests/dependencies.test.ts",
       "source_location": "L1783",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_dependencies_test",
-      "target": "tests_dependencies_test_writefaketoolanddependencymanager",
-      "confidence_score": 1.0
+      "target": "tests_dependencies_test_writefaketoolanddependencymanager"
     },
     {
       "relation": "calls",
@@ -100708,9 +100708,9 @@
       "source_file": "packages/cli/tests/dependencies.test.ts",
       "source_location": "L1784",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_dependencies_test_writefaketoolanddependencymanager",
-      "target": "tests_dependencies_test_writeexecutable",
-      "confidence_score": 1.0
+      "target": "tests_dependencies_test_writeexecutable"
     },
     {
       "relation": "calls",
@@ -128325,5 +128325,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "98d2f9e28f4c84b29841749d0baf5e654b30284b"
+  "built_at_commit": "7622e9dfdabf08fb78c131de01ab47d900385f4a"
 }

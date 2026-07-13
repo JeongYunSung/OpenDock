@@ -505,8 +505,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-installer.ts": {
-    "mtime": 1783918069.0384722,
-    "ast_hash": "ea55f29a17ff3712d6ce4e8dfb7a7076",
+    "mtime": 1783918258.6067874,
+    "ast_hash": "1a2a7b8781fe22f4665a65b5cd123fd9",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/manifest.ts": {
@@ -2730,8 +2730,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/dependencies.test.ts": {
-    "mtime": 1783918027.9606893,
-    "ast_hash": "f3444cbd773e26671b2b012fa3e3eb98",
+    "mtime": 1783918320.6522825,
+    "ast_hash": "89158f5be62b14767b2a18c8184ab255",
     "semantic_hash": ""
   },
   "packages/cli/docs/plans/dependencies-qa.md": {
@@ -2785,13 +2785,13 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/task-output-rollback.ts": {
-    "mtime": 1783917678.1104631,
-    "ast_hash": "b63c2af64af5a0cb4e7083a0c6599468",
+    "mtime": 1783918307.6224797,
+    "ast_hash": "c80389502cb2ee3bb634546ca814832c",
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/workdir-rollback.ts": {
-    "mtime": 1783917661.0542557,
-    "ast_hash": "c93c7623901d1e4562778ccecf43a423",
+    "mtime": 1783918297.6038473,
+    "ast_hash": "792945e728150f2f7db75663082d02d7",
     "semantic_hash": ""
   }
 }
