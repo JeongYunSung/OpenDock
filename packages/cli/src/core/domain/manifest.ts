@@ -196,12 +196,25 @@ const dependencyModesByManager: Record<z.infer<typeof dependencyManagerSchema>, 
   uv: new Set(["install", "locked"]),
 };
 
+const dependencyIntegritySchema = z
+  .object({
+    path: z.string().trim().min(1).max(240),
+    sha256: z
+      .array(
+        z.string().regex(/^[a-f0-9]{64}$/, "dependency integrity hash must be lowercase SHA-256"),
+      )
+      .min(1)
+      .max(8),
+  })
+  .strict();
+
 const dependencySpecSchema = z
   .object({
     manager: dependencyManagerSchema,
     path: z.string().trim().min(1).max(240),
     mode: z.string().trim().min(1).max(32).optional(),
     timeout_ms: z.number().int().positive().optional(),
+    integrity: z.array(dependencyIntegritySchema).max(32).default([]),
   })
   .strict()
   .transform((spec) => ({

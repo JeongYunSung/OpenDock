@@ -1,11 +1,22 @@
-import { existsSync, lstatSync, rmSync } from "node:fs";
-import { join, relative } from "node:path";
+import { createHash } from "node:crypto";
+import {
+  closeSync,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  openSync,
+  readSync,
+  renameSync,
+  rmSync,
+} from "node:fs";
+import { dirname, join, relative } from "node:path";
 import type { OpenDockPlatform } from "../../platform.js";
 import { formatStepSymbol, terminalStyle } from "../../terminal-style.js";
 import type { DependencySpec, DockManifest, TaskPhase } from "../domain/manifest.js";
 import {
   assertRealDirectoryPath,
   assertSafeDependencyPath,
+  assertSafeRelativePath,
   pruneEmptyDirectoryChain,
   safeJoin,
 } from "../files/path-utils.js";
@@ -40,6 +51,11 @@ interface DependencyContext {
 export interface DependencyRunResult {
   dependencies: DependencyRecord[];
   reports: StepReport[];
+}
+
+export interface DetachedDependencyOutput {
+  backupPath: string;
+  originalPath: string;
 }
 
 interface DependencyCommand {
@@ -110,6 +126,18 @@ export class DependencyRunner {
         },
       };
     }
+    try {
+      verifyDependencyIntegrity(target, spec);
+    } catch (error) {
+      return {
+        report: {
+          id,
+          name,
+          status: "Failed",
+          message: (error as Error).message,
+        },
+      };
+    }
     return { report: { id, name, status: "Ready" } };
   }
 
@@ -138,10 +166,18 @@ export class DependencyRunner {
         [command.program, ...command.args].join(" "),
       )}`,
     );
+    let verifiedTarget = target;
     try {
       runDependencyCommand(target, command, spec, context, name);
+      verifiedTarget = resolveDependencyPath(context.projectDir, spec.path);
+      verifyDependencyIntegrity(verifiedTarget, spec);
     } catch (error) {
-      removeOutputPaths(context.projectDir, target, spec.manager);
+      try {
+        removeDependencyOutputsForSpec(context.projectDir, spec.path, spec);
+      } catch {
+        // A dependency command can replace its root with a symlink. Never follow
+        // the stale pre-install path while rolling back the original failure.
+      }
       throw error;
     }
     console.log(`${formatStepSymbol("✓")} ${terminalStyle.bold(id)}: ready`);
@@ -160,7 +196,7 @@ export class DependencyRunner {
         name,
         manager: spec.manager,
         mode: spec.mode,
-        path: relativeProjectPath(context.projectDir, target),
+        path: relativeProjectPath(context.projectDir, verifiedTarget),
       },
       report: { id, name, status: "Ready" },
     };
@@ -189,6 +225,46 @@ export class DependencyRunner {
   }
 }
 
+function verifyDependencyIntegrity(target: string, spec: DependencySpec): void {
+  for (const integrity of spec.integrity) {
+    const normalized = assertSafeRelativePath(integrity.path, "dependency integrity path");
+    const parent = dirname(normalized).replaceAll("\\", "/");
+    if (parent !== ".") {
+      assertRealDirectoryPath(target, parent, "dependency integrity parent");
+    }
+    const file = safeJoin(target, normalized, "dependency integrity path");
+    if (!existsSync(file)) {
+      throw new Error(`missing dependency integrity file ${normalized}`);
+    }
+    const stat = lstatSync(file);
+    if (stat.isSymbolicLink() || !stat.isFile()) {
+      throw new Error(`dependency integrity file must be a regular file: ${normalized}`);
+    }
+    const digest = fileSha256(file);
+    if (!integrity.sha256.includes(digest)) {
+      throw new Error(`dependency integrity mismatch for ${normalized}: got ${digest}`);
+    }
+  }
+}
+
+function fileSha256(path: string): string {
+  const hash = createHash("sha256");
+  const descriptor = openSync(path, "r");
+  const buffer = Buffer.allocUnsafe(1024 * 1024);
+  try {
+    while (true) {
+      const bytesRead = readSync(descriptor, buffer, 0, buffer.length, null);
+      if (bytesRead === 0) {
+        break;
+      }
+      hash.update(buffer.subarray(0, bytesRead));
+    }
+  } finally {
+    closeSync(descriptor);
+  }
+  return hash.digest("hex");
+}
+
 export function removeInstalledDependencyOutputs(
   projectDir: string,
   dependencies: Array<{
@@ -200,6 +276,57 @@ export function removeInstalledDependencyOutputs(
 ): void {
   for (const dependency of dependencies) {
     removeDependencyOutputsForRecord(projectDir, dependency);
+  }
+}
+
+export function detachInstalledDependencyOutputs(
+  projectDir: string,
+  dependencies: Array<{
+    manager: DependencySpec["manager"] | string;
+    path: string;
+  }>,
+  backupRoot: string,
+): DetachedDependencyOutput[] {
+  const detached: DetachedDependencyOutput[] = [];
+  try {
+    for (const dependency of dependencies) {
+      const normalized = assertSafeDependencyPath(dependency.path, "installed dependency path");
+      const target = resolveDependencyPath(projectDir, normalized);
+      for (const output of outputPathsForManager(target, dependency.manager)) {
+        if (!existsSync(output)) continue;
+        const parent = relativeProjectPath(projectDir, dirname(output));
+        assertRealDirectoryPath(projectDir, parent, "dependency output parent");
+        const stat = lstatSync(output);
+        if (stat.isSymbolicLink() || !stat.isDirectory()) {
+          throw new Error(
+            `dependency output must be a real directory: ${relativeProjectPath(projectDir, output)}`,
+          );
+        }
+        const backupPath = join(backupRoot, String(detached.length));
+        mkdirSync(dirname(backupPath), { recursive: true });
+        renameSync(output, backupPath);
+        detached.push({ backupPath, originalPath: output });
+      }
+    }
+    return detached;
+  } catch (error) {
+    restoreDetachedDependencyOutputs(projectDir, detached);
+    throw error;
+  }
+}
+
+export function restoreDetachedDependencyOutputs(
+  projectDir: string,
+  detached: DetachedDependencyOutput[],
+): void {
+  for (const entry of [...detached].reverse()) {
+    const original = relativeProjectPath(projectDir, entry.originalPath);
+    const parent = relativeProjectPath(projectDir, dirname(entry.originalPath));
+    assertRealDirectoryPath(projectDir, parent, "dependency restore parent");
+    mkdirSync(safeJoin(projectDir, parent, "dependency restore parent"), { recursive: true });
+    const target = safeJoin(projectDir, original, "dependency restore path");
+    rmSync(target, { force: true, recursive: true });
+    renameSync(entry.backupPath, target);
   }
 }
 
@@ -330,11 +457,15 @@ function removeDependencyOutputsForSpec(
 }
 
 function removeOutputPaths(projectDir: string, dependencyPath: string, manager: string): void {
-  for (const output of outputPathsForManager(dependencyPath, manager)) {
+  const dependencyRelative = relativeProjectPath(projectDir, dependencyPath);
+  const verifiedDependencyPath = resolveDependencyPath(projectDir, dependencyRelative);
+  for (const output of outputPathsForManager(verifiedDependencyPath, manager)) {
+    const outputParent = relativeProjectPath(projectDir, dirname(output));
+    assertRealDirectoryPath(projectDir, outputParent, "dependency output parent");
     rmSync(output, { force: true, recursive: true });
     pruneEmptyDirectoryChain(projectDir, relative(projectDir, output));
   }
-  pruneEmptyDirectoryChain(projectDir, relative(projectDir, dependencyPath));
+  pruneEmptyDirectoryChain(projectDir, relative(projectDir, verifiedDependencyPath));
 }
 
 function dependencyOutputPaths(target: string, spec: DependencySpec): string[] {

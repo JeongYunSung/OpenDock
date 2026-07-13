@@ -36,6 +36,9 @@ import {
   type UninstallReport,
   uninstallReportFor,
 } from "./dock-install-report.js";
+import { TaskOutputRollback } from "./task-output-rollback.js";
+import { UpdateRollback } from "./update-rollback.js";
+import { WorkdirRollback } from "./workdir-rollback.js";
 
 type DockResolver = (
   dockRef: DockRef,
@@ -172,119 +175,44 @@ export class DockInstaller {
       total: fileCandidates.length,
       version: resolved.version,
     });
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      message: `Preparing ${resolved.manifest.id} workdir`,
-      percent: 50,
-      phase: "workdir-seed",
-      version: resolved.version,
-    });
-    this.seedWorkdir(options.projectDir, resolved);
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      level: "OK",
-      message: `Prepared ${resolved.manifest.id} workdir`,
-      percent: 54,
-      phase: "workdir-ready",
-      version: resolved.version,
-    });
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      message: `Running ${options.phase ?? "install"} tasks for ${resolved.manifest.id}`,
-      percent: 58,
-      phase: "tasks-start",
-      version: resolved.version,
-    });
-    const taskResult = options.runTasks
-      ? this.taskRunner.run(resolved.manifest, {
-          projectDir: options.projectDir,
-          dockId: resolved.manifest.id,
-          phase: options.phase ?? "install",
-          platform,
-          ...(options.live === undefined ? {} : { live: options.live }),
-          ...(options.progress === undefined
-            ? {}
-            : {
-                progress: this.nestedProgress(
-                  options.progress,
-                  resolved.manifest.id,
-                  resolved.version,
-                  58,
-                  74,
-                ),
-              }),
-        })
-      : { reports: [], exports: [], runtimes: [], tools: [] };
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      level: "OK",
-      message: `Completed ${taskResult.reports.length} task report(s)`,
-      percent: 74,
-      phase: "tasks-complete",
-      total: taskResult.reports.length,
-      version: resolved.version,
-    });
-    const candidates = [...fileCandidates, ...taskResult.exports];
-
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      message: `Preflighting ${candidates.length} managed output(s)`,
-      percent: 78,
-      phase: "file-preflight",
-      total: candidates.length,
-      version: resolved.version,
-    });
-    filePlan.preflight(candidates);
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      level: "OK",
-      message: `Preflight passed for ${candidates.length} managed output(s)`,
-      percent: 82,
-      phase: "file-preflight-complete",
-      total: candidates.length,
-      version: resolved.version,
-    });
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      message: `Applying ${candidates.length} managed output(s)`,
-      percent: 86,
-      phase: "file-apply",
-      total: candidates.length,
-      version: resolved.version,
-    });
-    const fileSummary = filePlan.apply(candidates);
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      level: "OK",
-      message: `${resolved.manifest.id}: ${fileSummary.created} created, ${fileSummary.updated} updated, ${fileSummary.deleted} deleted`,
-      percent: 90,
-      phase: "file-applied",
-      total: candidates.length,
-      version: resolved.version,
-    });
-
-    let dependencyResult: ReturnType<DependencyRunner["run"]>;
+    const workdirRollback = new WorkdirRollback(
+      options.projectDir,
+      this.taskRunner.dockWorkdir(options.projectDir, resolved.manifest.id),
+    );
+    const taskOutputRollback = new TaskOutputRollback(options.projectDir, resolved.manifest.id);
+    workdirRollback.prepare();
+    let stateSaved = false;
     try {
-      if (priorDock) {
-        this.progress(options.progress, {
-          dockId: resolved.manifest.id,
-          message: `Cleaning previous ${resolved.manifest.id} dependencies`,
-          percent: 91,
-          phase: "dependency-clean",
-          version: resolved.version,
-        });
-        removeInstalledDependencyOutputs(options.projectDir, priorDock.dependencies);
-      }
-
       this.progress(options.progress, {
         dockId: resolved.manifest.id,
-        message: `Preparing ${resolved.manifest.id} dependencies`,
-        percent: 92,
-        phase: "dependencies-start",
+        message: `Preparing ${resolved.manifest.id} workdir`,
+        percent: 50,
+        phase: "workdir-seed",
         version: resolved.version,
       });
-      dependencyResult = options.runTasks
-        ? this.dependencyRunner.run(resolved.manifest, {
+      this.seedWorkdir(options.projectDir, resolved);
+      this.progress(options.progress, {
+        dockId: resolved.manifest.id,
+        level: "OK",
+        message: `Prepared ${resolved.manifest.id} workdir`,
+        percent: 54,
+        phase: "workdir-ready",
+        version: resolved.version,
+      });
+    taskOutputRollback.prepare();
+    if (priorDock) {
+      this.removeDockTools(options.projectDir, priorDock);
+      this.removeUnusedRuntimeShims(options.projectDir, priorDock, store, false);
+      }
+      this.progress(options.progress, {
+        dockId: resolved.manifest.id,
+        message: `Running ${options.phase ?? "install"} tasks for ${resolved.manifest.id}`,
+        percent: 58,
+        phase: "tasks-start",
+        version: resolved.version,
+      });
+      const taskResult = options.runTasks
+        ? this.taskRunner.run(resolved.manifest, {
             projectDir: options.projectDir,
             dockId: resolved.manifest.id,
             phase: options.phase ?? "install",
@@ -297,92 +225,223 @@ export class DockInstaller {
                     options.progress,
                     resolved.manifest.id,
                     resolved.version,
-                    92,
-                    96,
+                    58,
+                    74,
                   ),
                 }),
           })
-        : { dependencies: [], reports: [] };
+        : { reports: [], exports: [], runtimes: [], tools: [] };
       this.progress(options.progress, {
         dockId: resolved.manifest.id,
         level: "OK",
-        message: `Prepared ${dependencyResult.dependencies.length} dependency set(s)`,
-        percent: 96,
-        phase: "dependencies-complete",
-        total: dependencyResult.dependencies.length,
+        message: `Completed ${taskResult.reports.length} task report(s)`,
+        percent: 74,
+        phase: "tasks-complete",
+        total: taskResult.reports.length,
         version: resolved.version,
       });
-    } catch (error) {
-      if (!priorDock && (options.phase ?? "install") === "install") {
-        this.rollbackNewInstall(options.projectDir, resolved, fileSummary.createdPaths);
-      }
-      throw error;
-    }
+      const candidates = [...fileCandidates, ...taskResult.exports];
 
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      message: `Recording ${resolved.manifest.id}@${resolved.version}`,
-      percent: 97,
-      phase: "lock-save",
-      version: resolved.version,
-    });
-    store.saveDock(
-      installedDockRecordFor({
-        checksum: resolved.checksum,
-        fileSummary,
-        manifest: resolved.manifest,
-        platform,
-        projectDir: options.projectDir,
-        requested: options.dockRef.requested(),
-        dependencies: dependencyResult.dependencies,
-        runtimes: taskResult.runtimes,
-        signature: resolved.signature,
-        tools: taskResult.tools,
+      this.progress(options.progress, {
+        dockId: resolved.manifest.id,
+        message: `Preflighting ${candidates.length} managed output(s)`,
+        percent: 78,
+        phase: "file-preflight",
+        total: candidates.length,
         version: resolved.version,
-        workdir: this.taskRunner.dockWorkdir(options.projectDir, resolved.manifest.id),
-      }),
-    );
-    this.progress(options.progress, {
-      dockId: resolved.manifest.id,
-      level: "OK",
-      message: `Recorded ${resolved.manifest.id}@${resolved.version}`,
-      percent: 98,
-      phase: "lock-saved",
-      version: resolved.version,
-    });
+      });
+      filePlan.preflight(candidates);
+      this.progress(options.progress, {
+        dockId: resolved.manifest.id,
+        level: "OK",
+        message: `Preflight passed for ${candidates.length} managed output(s)`,
+        percent: 82,
+        phase: "file-preflight-complete",
+        total: candidates.length,
+        version: resolved.version,
+      });
+      const updateRollback = new UpdateRollback(options.projectDir, priorDock, candidates);
+      this.progress(options.progress, {
+        dockId: resolved.manifest.id,
+        message: `Applying ${candidates.length} managed output(s)`,
+        percent: 86,
+        phase: "file-apply",
+        total: candidates.length,
+        version: resolved.version,
+      });
+      let fileSummary: ReturnType<FilePlan["apply"]>;
+      try {
+        fileSummary = filePlan.apply(candidates);
+      } catch (error) {
+        try {
+          updateRollback.rollback([]);
+        } catch (rollbackError) {
+          throw new AggregateError(
+            [error, rollbackError],
+            `file apply failed and rollback was incomplete for ${resolved.manifest.id}: ${(rollbackError as Error).message}`,
+          );
+        }
+        if (!priorDock) this.cleanupFailedNewInstall(options.projectDir, resolved);
+        throw error;
+      }
+      this.progress(options.progress, {
+        dockId: resolved.manifest.id,
+        level: "OK",
+        message: `${resolved.manifest.id}: ${fileSummary.created} created, ${fileSummary.updated} updated, ${fileSummary.deleted} deleted`,
+        percent: 90,
+        phase: "file-applied",
+        total: candidates.length,
+        version: resolved.version,
+      });
 
-    return installReportFor({
-      dockId: resolved.manifest.id,
-      fileSummary,
-      platform,
-      steps: [...taskResult.reports, ...dependencyResult.reports],
-      version: resolved.version,
-    });
-  }
-
-  private rollbackNewInstall(
-    projectDir: string,
-    resolved: ResolvedDock,
-    createdPaths: string[],
-  ): void {
-    try {
-      removeInstalledDependencyOutputs(
-        projectDir,
-        Object.entries(resolved.manifest.dependencies ?? {}).map(([name, spec]) => ({
+      const nextDependencies = Object.entries(resolved.manifest.dependencies ?? {}).map(
+        ([name, spec]) => ({
           manager: spec.manager,
           mode: spec.mode,
           name,
           path: spec.path,
-        })),
+        }),
       );
-    } catch {
-      // Preserve the original install error; rollback is best-effort for partial installs.
+      let dependencyResult: ReturnType<DependencyRunner["run"]>;
+      try {
+        if (priorDock) {
+          this.progress(options.progress, {
+            dockId: resolved.manifest.id,
+            message: `Cleaning previous ${resolved.manifest.id} dependencies`,
+            percent: 91,
+            phase: "dependency-clean",
+            version: resolved.version,
+          });
+        }
+        updateRollback.detachDependencies(nextDependencies);
+
+        this.progress(options.progress, {
+          dockId: resolved.manifest.id,
+          message: `Preparing ${resolved.manifest.id} dependencies`,
+          percent: 92,
+          phase: "dependencies-start",
+          version: resolved.version,
+        });
+        dependencyResult = options.runTasks
+          ? this.dependencyRunner.run(resolved.manifest, {
+              projectDir: options.projectDir,
+              dockId: resolved.manifest.id,
+              phase: options.phase ?? "install",
+              platform,
+              ...(options.live === undefined ? {} : { live: options.live }),
+              ...(options.progress === undefined
+                ? {}
+                : {
+                    progress: this.nestedProgress(
+                      options.progress,
+                      resolved.manifest.id,
+                      resolved.version,
+                      92,
+                      96,
+                    ),
+                  }),
+            })
+          : { dependencies: [], reports: [] };
+        this.progress(options.progress, {
+          dockId: resolved.manifest.id,
+          level: "OK",
+          message: `Prepared ${dependencyResult.dependencies.length} dependency set(s)`,
+          percent: 96,
+          phase: "dependencies-complete",
+          total: dependencyResult.dependencies.length,
+          version: resolved.version,
+        });
+      } catch (error) {
+        try {
+          updateRollback.rollback(nextDependencies);
+        } catch (rollbackError) {
+          throw new AggregateError(
+            [error, rollbackError],
+            `install failed and rollback was incomplete for ${resolved.manifest.id}: ${(rollbackError as Error).message}`,
+          );
+        }
+        if (!priorDock) this.cleanupFailedNewInstall(options.projectDir, resolved);
+        throw error;
+      }
+
+      try {
+        this.progress(options.progress, {
+          dockId: resolved.manifest.id,
+          message: `Recording ${resolved.manifest.id}@${resolved.version}`,
+          percent: 97,
+          phase: "lock-save",
+          version: resolved.version,
+        });
+        store.saveDock(
+          installedDockRecordFor({
+            checksum: resolved.checksum,
+            fileSummary,
+            manifest: resolved.manifest,
+            platform,
+            projectDir: options.projectDir,
+            requested: options.dockRef.requested(),
+            dependencies: dependencyResult.dependencies,
+            runtimes: taskResult.runtimes,
+            signature: resolved.signature,
+            tools: taskResult.tools,
+            version: resolved.version,
+            workdir: this.taskRunner.dockWorkdir(options.projectDir, resolved.manifest.id),
+          }),
+        );
+      } catch (error) {
+        try {
+          updateRollback.rollback(nextDependencies);
+        } catch (rollbackError) {
+          throw new AggregateError(
+            [error, rollbackError],
+            `state save failed and rollback was incomplete for ${resolved.manifest.id}: ${(rollbackError as Error).message}`,
+          );
+        }
+        if (!priorDock) this.cleanupFailedNewInstall(options.projectDir, resolved);
+        throw error;
+      }
+      stateSaved = true;
+      updateRollback.commit();
+      taskOutputRollback.commit();
+      workdirRollback.commit();
+      this.progress(options.progress, {
+        dockId: resolved.manifest.id,
+        level: "OK",
+        message: `Recorded ${resolved.manifest.id}@${resolved.version}`,
+        percent: 98,
+        phase: "lock-saved",
+        version: resolved.version,
+      });
+
+      return installReportFor({
+        dockId: resolved.manifest.id,
+        fileSummary,
+        platform,
+        steps: [...taskResult.reports, ...dependencyResult.reports],
+        version: resolved.version,
+      });
+    } catch (error) {
+      if (!stateSaved) {
+        const rollbackErrors: unknown[] = [];
+        for (const rollback of [taskOutputRollback, workdirRollback]) {
+          try {
+            rollback.rollback();
+          } catch (rollbackError) {
+            rollbackErrors.push(rollbackError);
+          }
+        }
+        if (rollbackErrors.length > 0) {
+          throw new AggregateError(
+            [error, ...rollbackErrors],
+            `install failed and output rollback was incomplete for ${resolved.manifest.id}`,
+          );
+        }
+      }
+      throw error;
     }
-    for (const path of [...createdPaths].reverse()) {
-      const target = safeJoin(projectDir, path, "created managed output");
-      rmSync(target, { force: true });
-      pruneEmptyDirectoryChain(projectDir, relative(projectDir, target));
-    }
+  }
+
+  private cleanupFailedNewInstall(projectDir: string, resolved: ResolvedDock): void {
     const workdir = this.taskRunner.dockWorkdir(projectDir, resolved.manifest.id);
     rmSync(workdir, { force: true, recursive: true });
     pruneEmptyDirectoryChain(projectDir, relative(projectDir, workdir));
@@ -521,6 +580,7 @@ export class DockInstaller {
       runtimes: Array<{ commands: string[]; name: string; path: string }>;
     },
     store: OpenDockStateStore,
+    removeRuntimeFiles = true,
   ): void {
     const otherDocks = store.readLock().docks.filter((candidate) => candidate.id !== dock.id);
     for (const runtime of dock.runtimes) {
@@ -550,7 +610,7 @@ export class DockInstaller {
           projectDir,
         });
       }
-      if (isAbsolute(runtime.path)) {
+      if (!removeRuntimeFiles || isAbsolute(runtime.path)) {
         continue;
       }
       const path = safeJoin(projectDir, runtime.path, "installed runtime path");

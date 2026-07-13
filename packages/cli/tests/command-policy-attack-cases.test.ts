@@ -177,6 +177,7 @@ describe("command policy attack cases", () => {
         manager: "npm",
         mode: "install",
         path: ".codex/skills/image2html",
+        integrity: [],
       },
     };
 

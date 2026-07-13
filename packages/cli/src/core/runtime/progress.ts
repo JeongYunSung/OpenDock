@@ -18,5 +18,9 @@ export function reportProgress(
   reporter: ProgressReporter | undefined,
   event: RuntimeProgressEvent,
 ): void {
-  reporter?.(event);
+  try {
+    reporter?.(event);
+  } catch {
+    // Progress reporting is observational and must not change runtime behavior.
+  }
 }

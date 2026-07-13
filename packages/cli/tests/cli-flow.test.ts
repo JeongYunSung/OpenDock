@@ -1219,6 +1219,67 @@ describe("opendock TypeScript CLI", () => {
     }
   });
 
+  it("fails the doctor command when a dependency integrity check fails", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    const trustedDigest = createHash("sha256").update("trusted\n").digest("hex");
+    writeDock(docks, "test", "verified", "1.0.0", {
+      dependencies: {
+        helper: {
+          manager: "npm",
+          path: "helper",
+          integrity: [
+            {
+              path: "node_modules/native/tool.bin",
+              sha256: [trustedDigest],
+            },
+          ],
+        },
+      },
+      files: [{ path: "helper/package.json", content: "{}\n" }],
+    });
+    await install({
+      dockRef: DockRef.parse("test/verified@1.0.0"),
+      projectDir: project,
+      phase: "install",
+      platform: "macos",
+      runTasks: false,
+      resolve: localResolver(docks),
+    });
+    const binary = join(project, "helper", "node_modules", "native", "tool.bin");
+    mkdirSync(dirname(binary), { recursive: true });
+    writeFileSync(binary, "trusted\n");
+
+    const registry = mockRegistry([
+      {
+        archive: await createDockArchive(docks, "test", "verified", "1.0.0"),
+        id: "test/verified",
+        platform: "macos",
+        version: "1.0.0",
+      },
+    ]);
+    try {
+      const healthy = await withCwd(project, () =>
+        captureConsole(() => runCli(["bun", "opendock", "doctor", "test/verified"])),
+      );
+      expect(healthy).toContain("Status: Ready");
+      expect(healthy).toContain("✓ dependency-helper");
+
+      writeFileSync(binary, "tampered\n");
+      await expect(
+        withCwd(project, () =>
+          captureConsole(() => runCli(["bun", "opendock", "doctor", "test/verified"])),
+        ),
+      ).rejects.toThrow("doctor found 1 failed check");
+      expect(readProjectLogs(project).at(-1)).toMatchObject({
+        command: "doctor",
+        status: "Failure",
+      });
+    } finally {
+      registry.restore();
+    }
+  });
+
   it("rejects doctor for a dock that is not installed", async () => {
     const docks = tempDir();
     const project = tempDir();
@@ -1829,6 +1890,7 @@ function writeDock(
   name: string,
   version: string,
   options: {
+    dependencies?: Record<string, unknown>;
     files?: Array<{ path: string; content: string }>;
     workdirFiles?: Array<{ path: string; to: string; content: string }>;
     permission?: string[];
@@ -1862,6 +1924,7 @@ function writeDock(
     permission: options.permission ?? [],
     requires: options.requires ?? { runtimes: {} },
     tools: options.tools ?? {},
+    dependencies: options.dependencies ?? {},
     files: (options.files ?? []).map((file) => ({
       from: `files/${file.path}`,
       to: file.path,

@@ -300,16 +300,19 @@ describe("requires regression coverage", () => {
       manager: "npm",
       path: ".codex/skills/image2html",
       mode: "locked",
+      integrity: [],
     });
     expect(manifest.dependencies?.pythonChecks).toEqual({
       manager: "pip",
       path: "tools/python-checks",
       mode: "install",
+      integrity: [],
     });
     expect(manifest.dependencies?.uvProject).toEqual({
       manager: "uv",
       path: "tools/uv-project",
       mode: "locked",
+      integrity: [],
     });
   });
 

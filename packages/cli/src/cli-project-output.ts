@@ -98,7 +98,6 @@ export async function printDoctor(
 
   const store = new OpenDockStateStore(cwd);
   if (store.hasState()) {
-    console.log(`Status: ${formatStatus("Ready")}`);
     console.log(`${terminalStyle.bold("Checks")}:`);
     console.log(`${formatStepSymbol("✓")} .opendock/project.yml`);
     console.log(`${formatStepSymbol("✓")} .opendock/dock.lock.yml`);
@@ -108,17 +107,23 @@ export async function printDoctor(
     if (dockId !== undefined && selectedDocks.length === 0) {
       throw new Error(`dock \`${dockId}\` is not installed in this project`);
     }
+    let failedChecks = 0;
     for (const dock of selectedDocks) {
       const platform = resolveCliPlatform(platformOverride ?? dock.platform);
       console.log(
         `${formatStepSymbol("✓")} ${formatDockVersion(dock.id, dock.version)} ${formatListPlatform(platform)}`,
       );
-      await printDockDoctorChecks(
+      failedChecks += await printDockDoctorChecks(
         cwd,
         DockRef.parse(`${dock.id}@${lockedDockVersionSelector(dock)}`),
         platform,
       );
     }
+    if (failedChecks > 0) {
+      console.log(`Status: ${formatStatus("Failed")}`);
+      throw new Error(`doctor found ${failedChecks} failed check${failedChecks === 1 ? "" : "s"}`);
+    }
+    console.log(`Status: ${formatStatus("Ready")}`);
   } else {
     console.log(`Status: ${formatStatus("Not installed")}`);
     console.log(`${terminalStyle.bold("Checks")}:`);
@@ -174,7 +179,7 @@ async function printDockDoctorChecks(
   cwd: string,
   dockRef: DockRef,
   platform: OpenDockPlatform,
-): Promise<void> {
+): Promise<number> {
   try {
     const resolved = await resolveDock(dockRef, platform);
     const taskReports = new TaskRunner().run(resolved.manifest, {
@@ -190,16 +195,22 @@ async function printDockDoctorChecks(
       platform,
     }).reports;
     const reports = [...taskReports, ...dependencyReports];
+    let failedChecks = 0;
     for (const report of reports) {
+      if (report.status === "Failed") {
+        failedChecks += 1;
+      }
       const symbol = report.status === "Failed" ? formatStepSymbol("!") : formatStepSymbol("✓");
       const suffix = report.message ? ` (${report.message})` : "";
       console.log(`${symbol} ${report.id}${suffix}`);
     }
+    return failedChecks;
   } catch (error) {
     console.log(
       `${formatStepSymbol("!")} ${terminalStyle.bold(
         dockRef.id(),
       )} doctor checks unavailable: ${(error as Error).message}`,
     );
+    return 1;
   }
 }

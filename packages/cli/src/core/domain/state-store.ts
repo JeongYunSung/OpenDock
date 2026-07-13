@@ -1,4 +1,5 @@
-import { existsSync, lstatSync, readFileSync, writeFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
+import { existsSync, lstatSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import YAML from "yaml";
 import { LOCK_SCHEMA_VERSION, PROJECT_SCHEMA_VERSION } from "../../constants.js";
@@ -68,6 +69,11 @@ interface ProjectState {
   }>;
 }
 
+interface StateFileSnapshot {
+  content: Buffer;
+  mode: number;
+}
+
 export interface LockState {
   schema: string;
   docks: InstalledDockRecord[];
@@ -126,6 +132,7 @@ export class OpenDockStateStore {
 
   private write(lock: LockState): void {
     ensureRealDirectoryPath(this.projectDir, ".opendock", "OpenDock state directory");
+    this.assertStatePathsSafe();
     const sortedDocks = [...lock.docks].sort((a, b) => a.id.localeCompare(b.id));
     const project: ProjectState = {
       schema: PROJECT_SCHEMA_VERSION,
@@ -138,11 +145,47 @@ export class OpenDockStateStore {
         workdir: dock.workdir,
       })),
     };
-    writeFileSync(this.projectPath(), YAML.stringify(project));
-    writeFileSync(
-      this.lockPath(),
-      YAML.stringify({ schema: LOCK_SCHEMA_VERSION, docks: sortedDocks }),
-    );
+    const writes = [
+      { path: this.projectPath(), content: YAML.stringify(project) },
+      {
+        path: this.lockPath(),
+        content: YAML.stringify({ schema: LOCK_SCHEMA_VERSION, docks: sortedDocks }),
+      },
+    ];
+    const snapshots = new Map(writes.map(({ path }) => [path, snapshotStateFile(path)]));
+    const staged: Array<{ path: string; temporaryPath: string }> = [];
+    const changed: string[] = [];
+    try {
+      for (const write of writes) {
+        staged.push({
+          path: write.path,
+          temporaryPath: stageStateFile(write.path, write.content, snapshots.get(write.path)),
+        });
+      }
+      for (const write of staged) {
+        renameSync(write.temporaryPath, write.path);
+        changed.push(write.path);
+      }
+    } catch (error) {
+      for (const write of staged) {
+        rmSync(write.temporaryPath, { force: true });
+      }
+      const rollbackErrors: unknown[] = [];
+      for (const path of changed.reverse()) {
+        try {
+          restoreStateFile(path, snapshots.get(path));
+        } catch (rollbackError) {
+          rollbackErrors.push(rollbackError);
+        }
+      }
+      if (rollbackErrors.length > 0) {
+        throw new AggregateError(
+          [error, ...rollbackErrors],
+          "OpenDock state write failed and previous state could not be restored",
+        );
+      }
+      throw error;
+    }
   }
 
   private assertStatePathsSafe(): void {
@@ -180,5 +223,37 @@ function lstatIfPresent(path: string): ReturnType<typeof lstatSync> | undefined 
       return undefined;
     }
     throw error;
+  }
+}
+
+function snapshotStateFile(path: string): StateFileSnapshot | undefined {
+  const stat = lstatIfPresent(path);
+  if (!stat) return undefined;
+  return { content: readFileSync(path), mode: Number(stat.mode) & 0o777 };
+}
+
+function stageStateFile(
+  path: string,
+  content: string | Buffer,
+  snapshot: StateFileSnapshot | undefined,
+): string {
+  const temporaryPath = `${path}.tmp-${randomUUID()}`;
+  writeFileSync(temporaryPath, content, {
+    flag: "wx",
+    mode: snapshot?.mode ?? 0o600,
+  });
+  return temporaryPath;
+}
+
+function restoreStateFile(path: string, snapshot: StateFileSnapshot | undefined): void {
+  if (!snapshot) {
+    rmSync(path, { force: true });
+    return;
+  }
+  const temporaryPath = stageStateFile(path, snapshot.content, snapshot);
+  try {
+    renameSync(temporaryPath, path);
+  } finally {
+    rmSync(temporaryPath, { force: true });
   }
 }
