@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import {
   chmodSync,
   existsSync,
+  linkSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -23,6 +24,7 @@ import {
   selectAuthProvider,
 } from "../src/browser-auth.js";
 import { DockInstaller } from "../src/core/app/dock-installer.js";
+import { ProjectOperationLock } from "../src/core/app/project-operation-lock.js";
 import { type DockManifest, DockRef } from "../src/core/domain/manifest.js";
 import { OpenDockStateStore } from "../src/core/domain/state-store.js";
 import type { FileCandidate } from "../src/core/files/file-candidate.js";
@@ -511,6 +513,120 @@ describe("security regression coverage", () => {
     );
   });
 
+  it("rejects hardlinked managed targets and state files", () => {
+    const project = tempDir();
+    const outside = tempDir();
+    const victim = join(outside, "victim.txt");
+    writeFileSync(victim, "preserve\n");
+    linkSync(victim, join(project, "CONFIG.md"));
+    const candidate: FileCandidate = {
+      content: Buffer.from("managed\n"),
+      executable: false,
+      mode: "managed_file",
+      path: "CONFIG.md",
+      source: "files",
+    };
+
+    expect(() => new FilePlan(project, "test/hardlink", [], true).preflight([candidate])).toThrow(
+      "target cannot be a hardlink",
+    );
+    expect(readFileSync(victim, "utf8")).toBe("preserve\n");
+
+    mkdirSync(join(project, ".opendock"));
+    const outsideLock = join(outside, "dock.lock.yml");
+    writeFileSync(outsideLock, "schema: opendock.lock/v1\ndocks: []\n");
+    linkSync(outsideLock, join(project, ".opendock", "dock.lock.yml"));
+    writeFileSync(
+      join(project, ".opendock", "project.yml"),
+      "schema: opendock.project/v1\ndocks: []\n",
+    );
+    expect(() => new OpenDockStateStore(project).readLock()).toThrow(
+      "OpenDock state file cannot be a hardlink",
+    );
+  });
+
+  it("rejects incomplete, unsupported, malformed and divergent state pairs", () => {
+    const project = tempDir();
+    mkdirSync(join(project, ".opendock"));
+    writeFileSync(
+      join(project, ".opendock", "project.yml"),
+      "schema: opendock.project/v1\ndocks: []\n",
+    );
+    expect(() => new OpenDockStateStore(project).readLock()).toThrow(
+      "OpenDock state is incomplete",
+    );
+
+    writeFileSync(
+      join(project, ".opendock", "dock.lock.yml"),
+      "schema: opendock.lock/v999\ndocks: []\n",
+    );
+    expect(() => new OpenDockStateStore(project).readLock()).toThrow(
+      "unsupported OpenDock lock schema",
+    );
+
+    writeFileSync(
+      join(project, ".opendock", "dock.lock.yml"),
+      "schema: opendock.lock/v1\ndocks: {}\n",
+    );
+    expect(() => new OpenDockStateStore(project).readLock()).toThrow(
+      "OpenDock lock docks must be an array",
+    );
+
+    writeFileSync(
+      join(project, ".opendock", "dock.lock.yml"),
+      "schema: opendock.lock/v1\ndocks: []\n",
+    );
+    writeFileSync(
+      join(project, ".opendock", "project.yml"),
+      [
+        "schema: opendock.project/v1",
+        "docks:",
+        "  - id: test/divergent",
+        "    name: divergent",
+        "    requested: 1.0.0",
+        "    version: 1.0.0",
+        "    platform: macos",
+        "    workdir: .opendock/workdirs/test__divergent",
+        "",
+      ].join("\n"),
+    );
+    expect(() => new OpenDockStateStore(project).readLock()).toThrow(
+      "project.yml and dock.lock.yml describe different installed docks",
+    );
+  });
+
+  it("serializes project operations and releases the lock", () => {
+    const project = tempDir();
+    const first = ProjectOperationLock.acquire(project, "install");
+    expect(() => ProjectOperationLock.acquire(project, "update")).toThrow(
+      "another OpenDock operation is in progress",
+    );
+    first.release();
+    const second = ProjectOperationLock.acquire(project, "uninstall");
+    second.release();
+    expect(existsSync(join(project, ".opendock", "operation.lock"))).toBe(false);
+
+    const staleLock = join(project, ".opendock", "operation.lock");
+    mkdirSync(staleLock, { recursive: true });
+    writeFileSync(
+      join(staleLock, "owner.json"),
+      `${JSON.stringify({
+        nonce: "stale-operation",
+        operation: "update",
+        pid: 99_999_999,
+        startedAt: "2026-08-14T00:00:00.000Z",
+      })}\n`,
+    );
+    expect(() => new OpenDockStateStore(project).readLock()).toThrow(
+      "previous OpenDock operation was interrupted",
+    );
+    expect(() => ProjectOperationLock.acquire(project, "install")).toThrow(
+      "rerun the intended install, update, or uninstall with --force",
+    );
+    const recovery = ProjectOperationLock.acquire(project, "install", true);
+    recovery.release();
+  });
+
   it("rejects symlinked dock workdir roots before running task commands", () => {
     const project = tempDir();
     const outside = tempDir();
@@ -633,6 +749,20 @@ describe("security regression coverage", () => {
         "",
       ].join("\n"),
     );
+    writeFileSync(
+      join(project, ".opendock", "project.yml"),
+      [
+        "schema: opendock.project/v1",
+        "docks:",
+        "  - id: test/bad-lock",
+        "    name: bad-lock",
+        "    requested: 1.0.0",
+        "    version: 1.0.0",
+        "    platform: macos",
+        "    workdir: .opendock/workdirs/test__bad-lock",
+        "",
+      ].join("\n"),
+    );
 
     expect(() =>
       new DockInstaller().uninstall({ dockId: "test/bad-lock", projectDir: project }),
@@ -685,6 +815,26 @@ describe("security regression coverage", () => {
         "        path: .opendock/runtimes/node24/bin",
         "        commands:",
         "          - node",
+        "",
+      ].join("\n"),
+    );
+    writeFileSync(
+      join(project, ".opendock", "project.yml"),
+      [
+        "schema: opendock.project/v1",
+        "docks:",
+        "  - id: test/first",
+        "    name: first",
+        "    requested: 1.0.0",
+        "    version: 1.0.0",
+        "    platform: macos",
+        "    workdir: .opendock/workdirs/test__first",
+        "  - id: test/second",
+        "    name: second",
+        "    requested: 1.0.0",
+        "    version: 1.0.0",
+        "    platform: macos",
+        "    workdir: .opendock/workdirs/test__second",
         "",
       ].join("\n"),
     );

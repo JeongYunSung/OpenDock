@@ -153,6 +153,9 @@ export function assertRegularOrMissing(path: string, relativePath: string): void
   if (!stat.isFile()) {
     throw new Error(`target must be a regular file: ${relativePath}`);
   }
+  if (stat.nlink !== 1) {
+    throw new Error(`target cannot be a hardlink: ${relativePath}`);
+  }
 }
 
 export function listRegularFiles(

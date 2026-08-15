@@ -18,10 +18,7 @@ import { type FileApplySummary, FilePlan } from "../files/file-plan.js";
 import { pruneEmptyDirectoryChain, safeJoin } from "../files/path-utils.js";
 import { WorkdirSeeder } from "../files/workdir-seeder.js";
 import { createProjectCommandShim, removeProjectCommandShim } from "../runtime/command-shim.js";
-import {
-  DependencyRunner,
-  removeInstalledDependencyOutputs,
-} from "../runtime/dependency-runner.js";
+import { DependencyRunner } from "../runtime/dependency-runner.js";
 import {
   type ProgressReporter,
   type RuntimeProgressEvent,
@@ -36,6 +33,7 @@ import {
   type UninstallReport,
   uninstallReportFor,
 } from "./dock-install-report.js";
+import { ProjectOperationLock } from "./project-operation-lock.js";
 import { TaskOutputRollback } from "./task-output-rollback.js";
 import { UpdateRollback } from "./update-rollback.js";
 import { WorkdirRollback } from "./workdir-rollback.js";
@@ -109,6 +107,19 @@ export class DockInstaller {
   ) {}
 
   async install(options: InstallOptions): Promise<InstallReport> {
+    const lock = ProjectOperationLock.acquire(
+      options.projectDir,
+      options.phase === "update" ? "update" : "install",
+      options.force === true,
+    );
+    try {
+      return await this.installLocked(options);
+    } finally {
+      lock.release();
+    }
+  }
+
+  private async installLocked(options: InstallOptions): Promise<InstallReport> {
     const platform = options.platform ?? detectPlatform();
     const requestedDockId = options.dockRef.id();
     const requestedVersion = options.dockRef.requested();
@@ -448,6 +459,19 @@ export class DockInstaller {
   }
 
   uninstall(options: UninstallOptions): UninstallReport {
+    const lock = ProjectOperationLock.acquire(
+      options.projectDir,
+      "uninstall",
+      options.force === true,
+    );
+    try {
+      return this.uninstallLocked(options);
+    } finally {
+      lock.release();
+    }
+  }
+
+  private uninstallLocked(options: UninstallOptions): UninstallReport {
     const store = new OpenDockStateStore(options.projectDir);
     this.progress(options.progress, {
       dockId: options.dockId,
@@ -476,55 +500,92 @@ export class DockInstaller {
       total: dock.files.length,
       version: dock.version,
     });
+    const workdir = this.taskRunner.dockWorkdir(options.projectDir, dock.id);
     const fileRollback = new UpdateRollback(options.projectDir, dock, []);
-    let summary: FileApplySummary;
+    const workdirRollback = new WorkdirRollback(options.projectDir, workdir);
+    const taskOutputRollback = new TaskOutputRollback(options.projectDir, dock.id);
+    const preparedRollbacks: Array<{ rollback(): void }> = [];
     try {
-      summary = filePlan.apply([]);
-      fileRollback.commit();
+      workdirRollback.prepare();
+      preparedRollbacks.push(workdirRollback);
+      taskOutputRollback.prepare();
+      preparedRollbacks.push(taskOutputRollback);
+      preparedRollbacks.push({ rollback: () => fileRollback.rollback([]) });
+      fileRollback.detachDependencies([]);
     } catch (error) {
-      try {
-        fileRollback.rollback([]);
-      } catch (rollbackError) {
+      const rollbackErrors: unknown[] = [];
+      for (const rollback of preparedRollbacks.reverse()) {
+        try {
+          rollback.rollback();
+        } catch (rollbackError) {
+          rollbackErrors.push(rollbackError);
+        }
+      }
+      if (rollbackErrors.length > 0) {
         throw new AggregateError(
-          [error, rollbackError],
-          `uninstall failed and file rollback was incomplete for ${dock.id}`,
+          [error, ...rollbackErrors],
+          `uninstall backup failed and rollback was incomplete for ${dock.id}`,
         );
       }
       throw error;
     }
-    removeInstalledDependencyOutputs(options.projectDir, dock.dependencies);
-    this.progress(options.progress, {
-      dockId: dock.id,
-      level: "OK",
-      message: `${dock.id}: ${summary.deleted} deleted, ${summary.updated} updated`,
-      percent: 78,
-      phase: "file-applied",
-      version: dock.version,
-    });
-    const workdir = this.taskRunner.dockWorkdir(options.projectDir, dock.id);
-    this.progress(options.progress, {
-      dockId: dock.id,
-      message: `Removing ${dock.id} workdir`,
-      percent: 86,
-      phase: "workdir-remove",
-      version: dock.version,
-    });
-    rmSync(workdir, {
-      recursive: true,
-      force: true,
-    });
-    pruneEmptyDirectoryChain(options.projectDir, relative(options.projectDir, workdir));
-    this.removeDockTools(options.projectDir, dock);
-    this.removeUnusedRuntimeShims(options.projectDir, dock, store);
-    pruneEmptyDirectoryChain(options.projectDir, ".opendock/bin");
-    this.progress(options.progress, {
-      dockId: dock.id,
-      message: `Removing ${dock.id} from lockfile`,
-      percent: 92,
-      phase: "lock-save",
-      version: dock.version,
-    });
-    store.removeDock(dock.id);
+    let summary: FileApplySummary;
+    let stateRemoved = false;
+    try {
+      summary = filePlan.apply([]);
+      this.progress(options.progress, {
+        dockId: dock.id,
+        level: "OK",
+        message: `${dock.id}: ${summary.deleted} deleted, ${summary.updated} updated`,
+        percent: 78,
+        phase: "file-applied",
+        version: dock.version,
+      });
+      this.progress(options.progress, {
+        dockId: dock.id,
+        message: `Removing ${dock.id} workdir`,
+        percent: 86,
+        phase: "workdir-remove",
+        version: dock.version,
+      });
+      rmSync(workdir, {
+        recursive: true,
+        force: true,
+      });
+      pruneEmptyDirectoryChain(options.projectDir, relative(options.projectDir, workdir));
+      this.removeDockTools(options.projectDir, dock);
+      this.removeUnusedRuntimeShims(options.projectDir, dock, store);
+      pruneEmptyDirectoryChain(options.projectDir, ".opendock/bin");
+      this.progress(options.progress, {
+        dockId: dock.id,
+        message: `Removing ${dock.id} from lockfile`,
+        percent: 92,
+        phase: "lock-save",
+        version: dock.version,
+      });
+      store.removeDock(dock.id);
+      stateRemoved = true;
+    } catch (error) {
+      if (stateRemoved) throw error;
+      const rollbackErrors: unknown[] = [];
+      for (const rollback of [...preparedRollbacks].reverse()) {
+        try {
+          rollback.rollback();
+        } catch (rollbackError) {
+          rollbackErrors.push(rollbackError);
+        }
+      }
+      if (rollbackErrors.length > 0) {
+        throw new AggregateError(
+          [error, ...rollbackErrors],
+          `uninstall failed and rollback was incomplete for ${dock.id}`,
+        );
+      }
+      throw error;
+    }
+    fileRollback.commit();
+    taskOutputRollback.commit();
+    workdirRollback.commit();
     this.progress(options.progress, {
       dockId: dock.id,
       level: "OK",

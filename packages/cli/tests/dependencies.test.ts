@@ -944,6 +944,40 @@ printf 'npm\n' > "${externalModules}/binary/tool.bin"
     ).toBe(false);
   });
 
+  it("restores managed files and installed state when uninstall state persistence fails", async () => {
+    const docks = tempDir();
+    const project = tempDir();
+    writeDock(docks, "test", "uninstall-state-save", "1.0.0", {
+      files: [{ path: "CONFIG.md", content: "managed content\n" }],
+    });
+    await new DockInstaller().install({
+      dockRef: DockRef.parse("test/uninstall-state-save@1.0.0"),
+      projectDir: project,
+      phase: "install",
+      platform: "macos",
+      live: false,
+      runTasks: false,
+      resolve: localResolver(docks),
+    });
+    const original = readFileSync(join(project, "CONFIG.md"));
+    vi.spyOn(OpenDockStateStore.prototype, "removeDock").mockImplementationOnce(() => {
+      throw new Error("simulated uninstall state persistence failure");
+    });
+
+    expect(() =>
+      new DockInstaller().uninstall({
+        dockId: "test/uninstall-state-save",
+        projectDir: project,
+      }),
+    ).toThrow("simulated uninstall state persistence failure");
+
+    expect(readFileSync(join(project, "CONFIG.md"))).toEqual(original);
+    expect(new OpenDockStateStore(project).findDock("test/uninstall-state-save")?.version).toBe(
+      "1.0.0",
+    );
+    expect(existsSync(join(project, ".opendock", "operation.lock"))).toBe(false);
+  });
+
   it("restores pre-existing dependency outputs when first install integrity verification fails", async () => {
     const docks = tempDir();
     const project = tempDir();
