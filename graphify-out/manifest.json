@@ -505,8 +505,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/app/dock-installer.ts": {
-    "mtime": 1783937103.0740666,
-    "ast_hash": "4219162d05ae7aef02a4fc072b59b3dd",
+    "mtime": 1786684144.987254,
+    "ast_hash": "bf8b0de168d48fcd15eb337b680c6b00",
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/manifest.ts": {
@@ -525,8 +525,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/domain/state-store.ts": {
-    "mtime": 1783937267.3079152,
-    "ast_hash": "3eeec04173497bd116fa31bd9d43017e",
+    "mtime": 1786684144.9828026,
+    "ast_hash": "2511a1801133dde4e1e4c2ff4d4dc004",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/checksum.ts": {
@@ -550,8 +550,8 @@
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/path-utils.ts": {
-    "mtime": 1783148975.118865,
-    "ast_hash": "c337ae2b80a350a435ead8ea7b9036d2",
+    "mtime": 1786683156.1599655,
+    "ast_hash": "d65bb62b63e01b7d73b56214cc5863f6",
     "semantic_hash": ""
   },
   "packages/cli/src/core/files/workdir-seeder.ts": {
@@ -690,8 +690,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/security-regression.test.ts": {
-    "mtime": 1782974896.9681754,
-    "ast_hash": "65d10b099af3399e4ac7cfa02a222942",
+    "mtime": 1786684144.9871163,
+    "ast_hash": "603dcf3e28bf86a7e3bffc9b94aba03b",
     "semantic_hash": ""
   },
   "packages/cli/tests/terminal-style.test.ts": {
@@ -2720,8 +2720,8 @@
     "semantic_hash": ""
   },
   ".serena/project.yml": {
-    "mtime": 1783267671.1663477,
-    "ast_hash": "64f5b823a9c5be34634622aecdc03703",
+    "mtime": 1784863048.7267566,
+    "ast_hash": "9b4a9a5d13cd3fa75a1160b9da5fa226",
     "semantic_hash": ""
   },
   "packages/cli/src/core/runtime/dependency-runner.ts": {
@@ -2730,8 +2730,8 @@
     "semantic_hash": ""
   },
   "packages/cli/tests/dependencies.test.ts": {
-    "mtime": 1783918320.6522825,
-    "ast_hash": "89158f5be62b14767b2a18c8184ab255",
+    "mtime": 1786683427.2689817,
+    "ast_hash": "a1a417892b8c43df18364358ee93fbd7",
     "semantic_hash": ""
   },
   "packages/cli/docs/plans/dependencies-qa.md": {
@@ -2812,6 +2812,11 @@
   ".serena/memories/session-ultrawork-docks-20260713.md": {
     "mtime": 1783918635.458196,
     "ast_hash": "ab383d994ba8c706e37eff21a39ad71d",
+    "semantic_hash": ""
+  },
+  "packages/cli/src/core/app/project-operation-lock.ts": {
+    "mtime": 1786684144.9794998,
+    "ast_hash": "160faa8928ba0fb94ce8fb08f1ac95f9",
     "semantic_hash": ""
   }
 }

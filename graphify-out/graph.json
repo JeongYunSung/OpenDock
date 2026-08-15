@@ -2670,7 +2670,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "schemas_macos_schema_definitions_capability",
-      "community": 73,
+      "community": 450,
       "norm_label": "capability"
     },
     {
@@ -2680,7 +2680,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "schemas_macos_schema_capability_description",
-      "community": 73,
+      "community": 450,
       "norm_label": "description"
     },
     {
@@ -2690,7 +2690,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "schemas_macos_schema_capability_type",
-      "community": 73,
+      "community": 450,
       "norm_label": "type"
     },
     {
@@ -2700,7 +2700,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "schemas_macos_schema_capability_required",
-      "community": 73,
+      "community": 450,
       "norm_label": "required"
     },
     {
@@ -3190,7 +3190,7 @@
       "source_location": "L2251",
       "_origin": "ast",
       "id": "schemas_macos_schema_definitions_value",
-      "community": 439,
+      "community": 73,
       "norm_label": "value"
     },
     {
@@ -3200,7 +3200,7 @@
       "source_location": "L2252",
       "_origin": "ast",
       "id": "schemas_macos_schema_value_description",
-      "community": 439,
+      "community": 73,
       "norm_label": "description"
     },
     {
@@ -3210,7 +3210,7 @@
       "source_location": "L2253",
       "_origin": "ast",
       "id": "schemas_macos_schema_value_anyof",
-      "community": 439,
+      "community": 73,
       "norm_label": "anyof"
     },
     {
@@ -5880,7 +5880,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_dialogs",
-      "community": 7,
+      "community": 449,
       "norm_label": "app-dialogs.tsx"
     },
     {
@@ -5890,7 +5890,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_app_dialogs_commandprogressdialog",
-      "community": 7,
+      "community": 449,
       "norm_label": "commandprogressdialog()"
     },
     {
@@ -5910,7 +5910,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "src_app_dialogs_commandpalettedialog",
-      "community": 7,
+      "community": 449,
       "norm_label": "commandpalettedialog()"
     },
     {
@@ -5920,7 +5920,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "src_app_dialogs_projectswitcherdialog",
-      "community": 7,
+      "community": 449,
       "norm_label": "projectswitcherdialog()"
     },
     {
@@ -6060,7 +6060,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_overlays",
-      "community": 7,
+      "community": 449,
       "norm_label": "app-overlays.tsx"
     },
     {
@@ -6070,7 +6070,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_overlays_appoverlays",
-      "community": 7,
+      "community": 449,
       "norm_label": "appoverlays()"
     },
     {
@@ -6270,7 +6270,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_command_log_commandfailuremessage",
-      "community": 2,
+      "community": 9,
       "norm_label": "commandfailuremessage()"
     },
     {
@@ -6620,7 +6620,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_data_sortmode",
-      "community": 19,
+      "community": 5,
       "norm_label": "sortmode"
     },
     {
@@ -6630,7 +6630,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_data_project",
-      "community": 351,
+      "community": 5,
       "norm_label": "project"
     },
     {
@@ -6640,7 +6640,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_data_desktopappstate",
-      "community": 351,
+      "community": 5,
       "norm_label": "desktopappstate"
     },
     {
@@ -6870,7 +6870,7 @@
       "source_location": "L256",
       "_origin": "ast",
       "id": "src_data_opendockcommandresult",
-      "community": 5,
+      "community": 2,
       "norm_label": "opendockcommandresult"
     },
     {
@@ -6950,7 +6950,7 @@
       "source_location": "L334",
       "_origin": "ast",
       "id": "src_data_authsession",
-      "community": 351,
+      "community": 9,
       "norm_label": "authsession"
     },
     {
@@ -6980,7 +6980,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_desktop_text",
-      "community": 8,
+      "community": 449,
       "norm_label": "desktop-text.ts"
     },
     {
@@ -6990,7 +6990,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_desktop_text_text",
-      "community": 8,
+      "community": 449,
       "norm_label": "text"
     },
     {
@@ -7090,7 +7090,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_desktop_ui_starbutton",
-      "community": 5,
+      "community": 8,
       "norm_label": "starbutton()"
     },
     {
@@ -7170,7 +7170,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "src_display_iconbutton",
-      "community": 7,
+      "community": 449,
       "norm_label": "iconbutton()"
     },
     {
@@ -7210,7 +7210,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_dock_data_dockownerfromid",
-      "community": 8,
+      "community": 19,
       "norm_label": "dockownerfromid()"
     },
     {
@@ -7220,7 +7220,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_dock_data_dockpublisherlabel",
-      "community": 8,
+      "community": 19,
       "norm_label": "dockpublisherlabel()"
     },
     {
@@ -7230,7 +7230,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_dock_data_dockpublisherofficial",
-      "community": 8,
+      "community": 19,
       "norm_label": "dockpublisherofficial()"
     },
     {
@@ -7400,7 +7400,7 @@
       "source_location": "L171",
       "_origin": "ast",
       "id": "src_dock_panels_dockcard",
-      "community": 8,
+      "community": 19,
       "norm_label": "dockcard()"
     },
     {
@@ -7430,7 +7430,7 @@
       "source_location": "L307",
       "_origin": "ast",
       "id": "src_dock_panels_detailpanel",
-      "community": 8,
+      "community": 19,
       "norm_label": "detailpanel()"
     },
     {
@@ -7470,7 +7470,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_dock_workspace_model_resolveactiveprojectid",
-      "community": 351,
+      "community": 5,
       "norm_label": "resolveactiveprojectid()"
     },
     {
@@ -7650,7 +7650,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_project_modals",
-      "community": 7,
+      "community": 449,
       "norm_label": "project-modals.tsx"
     },
     {
@@ -7660,7 +7660,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_project_modals_projectaddmodal",
-      "community": 7,
+      "community": 449,
       "norm_label": "projectaddmodal()"
     },
     {
@@ -7670,7 +7670,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_project_modals_projectrenamemodal",
-      "community": 7,
+      "community": 449,
       "norm_label": "projectrenamemodal()"
     },
     {
@@ -7680,7 +7680,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "src_project_modals_projectdeletemodal",
-      "community": 7,
+      "community": 449,
       "norm_label": "projectdeletemodal()"
     },
     {
@@ -7960,7 +7960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_responsive_page_size",
-      "community": 9,
+      "community": 447,
       "norm_label": "responsive-page-size.ts"
     },
     {
@@ -7970,7 +7970,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_responsive_page_size_responsivepagesizes",
-      "community": 9,
+      "community": 447,
       "norm_label": "responsivepagesizes"
     },
     {
@@ -7990,7 +7990,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_responsive_page_size_readresponsivepagesizes",
-      "community": 9,
+      "community": 447,
       "norm_label": "readresponsivepagesizes()"
     },
     {
@@ -8000,7 +8000,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_responsive_page_size_catalogpagelimitforviewport",
-      "community": 9,
+      "community": 447,
       "norm_label": "catalogpagelimitforviewport()"
     },
     {
@@ -8010,7 +8010,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "src_responsive_page_size_catalogcolumnsforviewport",
-      "community": 9,
+      "community": 447,
       "norm_label": "catalogcolumnsforviewport()"
     },
     {
@@ -8020,7 +8020,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "src_responsive_page_size_versionpagelimitforviewport",
-      "community": 9,
+      "community": 447,
       "norm_label": "versionpagelimitforviewport()"
     },
     {
@@ -8080,7 +8080,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_shortcuts_shortcutplatform",
-      "community": 7,
+      "community": 449,
       "norm_label": "shortcutplatform"
     },
     {
@@ -8100,7 +8100,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_shortcuts_shortcutcommandid",
-      "community": 7,
+      "community": 2,
       "norm_label": "shortcutcommandid"
     },
     {
@@ -8110,7 +8110,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_shortcuts_shortcutdefinition",
-      "community": 7,
+      "community": 2,
       "norm_label": "shortcutdefinition"
     },
     {
@@ -8120,7 +8120,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_shortcuts_shortcutbinding",
-      "community": 7,
+      "community": 2,
       "norm_label": "shortcutbinding"
     },
     {
@@ -8310,7 +8310,7 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "src_shortcuts_shortcutcommandlabel",
-      "community": 7,
+      "community": 449,
       "norm_label": "shortcutcommandlabel()"
     },
     {
@@ -8560,7 +8560,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_auth_controller",
-      "community": 8,
+      "community": 9,
       "norm_label": "use-auth-controller.ts"
     },
     {
@@ -8570,7 +8570,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_use_auth_controller_authprovider",
-      "community": 8,
+      "community": 9,
       "norm_label": "authprovider"
     },
     {
@@ -8580,7 +8580,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_use_auth_controller_authcontrolleroptions",
-      "community": 8,
+      "community": 9,
       "norm_label": "authcontrolleroptions"
     },
     {
@@ -8600,7 +8600,7 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "src_use_auth_controller_authcommandid",
-      "community": 8,
+      "community": 9,
       "norm_label": "authcommandid()"
     },
     {
@@ -8610,7 +8610,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "src_use_auth_controller_iscurrentauthrequest",
-      "community": 8,
+      "community": 9,
       "norm_label": "iscurrentauthrequest()"
     },
     {
@@ -8620,7 +8620,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "src_use_auth_controller_finishauthrequest",
-      "community": 8,
+      "community": 9,
       "norm_label": "finishauthrequest()"
     },
     {
@@ -8630,7 +8630,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "src_use_auth_controller_applysuccessfullogin",
-      "community": 8,
+      "community": 9,
       "norm_label": "applysuccessfullogin()"
     },
     {
@@ -8650,7 +8650,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_use_catalog_controller_catalogcontrolleroptions",
-      "community": 19,
+      "community": 5,
       "norm_label": "catalogcontrolleroptions"
     },
     {
@@ -8740,7 +8740,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_desktop_state_sync",
-      "community": 351,
+      "community": 5,
       "norm_label": "use-desktop-state-sync.ts"
     },
     {
@@ -8750,7 +8750,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_use_desktop_state_sync_desktopstatesyncoptions",
-      "community": 351,
+      "community": 5,
       "norm_label": "desktopstatesyncoptions"
     },
     {
@@ -8760,7 +8760,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_use_desktop_state_sync_usedesktopstatesync",
-      "community": 9,
+      "community": 5,
       "norm_label": "usedesktopstatesync()"
     },
     {
@@ -8970,7 +8970,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_installed_dock_metadata",
-      "community": 5,
+      "community": 19,
       "norm_label": "use-installed-dock-metadata.ts"
     },
     {
@@ -8990,7 +8990,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_use_installed_dock_metadata_useinstalleddockmetadata",
-      "community": 5,
+      "community": 9,
       "norm_label": "useinstalleddockmetadata()"
     },
     {
@@ -9060,7 +9060,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_use_navigation_controller_usenavigationcontroller",
-      "community": 351,
+      "community": 9,
       "norm_label": "usenavigationcontroller()"
     },
     {
@@ -9160,7 +9160,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_use_pagination_guards",
-      "community": 19,
+      "community": 9,
       "norm_label": "use-pagination-guards.ts"
     },
     {
@@ -9170,7 +9170,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_use_pagination_guards_paginationguardoptions",
-      "community": 19,
+      "community": 9,
       "norm_label": "paginationguardoptions"
     },
     {
@@ -9180,7 +9180,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_use_pagination_guards_usepaginationguards",
-      "community": 19,
+      "community": 9,
       "norm_label": "usepaginationguards()"
     },
     {
@@ -9480,7 +9480,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_workspace_view_workspace",
-      "community": 9,
+      "community": 8,
       "norm_label": "workspace()"
     },
     {
@@ -11130,7 +11130,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_change_output_installeddockupdatecheck",
-      "community": 363,
+      "community": 22,
       "norm_label": "installeddockupdatecheck"
     },
     {
@@ -11540,7 +11540,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_cli_options",
-      "community": 363,
+      "community": 312,
       "norm_label": "cli-options.ts"
     },
     {
@@ -11550,7 +11550,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_cli_options_clicommandnames",
-      "community": 363,
+      "community": 312,
       "norm_label": "clicommandnames"
     },
     {
@@ -11570,7 +11570,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_cli_options_parsedeployref",
-      "community": 355,
+      "community": 29,
       "norm_label": "parsedeployref()"
     },
     {
@@ -11580,7 +11580,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_cli_options_deployoptionvalue",
-      "community": 363,
+      "community": 312,
       "norm_label": "deployoptionvalue()"
     },
     {
@@ -11590,7 +11590,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_cli_options_parseinstallref",
-      "community": 363,
+      "community": 312,
       "norm_label": "parseinstallref()"
     },
     {
@@ -11600,7 +11600,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "src_cli_options_parseinstalleddockid",
-      "community": 363,
+      "community": 312,
       "norm_label": "parseinstalleddockid()"
     },
     {
@@ -11610,7 +11610,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "src_cli_options_dockidfromreference",
-      "community": 363,
+      "community": 312,
       "norm_label": "dockidfromreference()"
     },
     {
@@ -11620,7 +11620,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "src_cli_options_parseauthprovider",
-      "community": 363,
+      "community": 312,
       "norm_label": "parseauthprovider()"
     },
     {
@@ -11630,7 +11630,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "src_cli_options_resolvecliplatform",
-      "community": 363,
+      "community": 27,
       "norm_label": "resolvecliplatform()"
     },
     {
@@ -11640,7 +11640,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "src_cli_options_resolvedeployplatform",
-      "community": 363,
+      "community": 312,
       "norm_label": "resolvedeployplatform()"
     },
     {
@@ -11650,7 +11650,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "src_cli_options_inferdeployplatformfrommanifestpath",
-      "community": 363,
+      "community": 312,
       "norm_label": "inferdeployplatformfrommanifestpath()"
     },
     {
@@ -11890,7 +11890,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "app_dock_install_report_installreport",
-      "community": 225,
+      "community": 25,
       "norm_label": "installreport"
     },
     {
@@ -11957,7 +11957,7 @@
       "label": "DockResolver",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L43",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "app_dock_installer_dockresolver",
       "community": 25,
@@ -11967,7 +11967,7 @@
       "label": "replacementRuntime()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L48",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "app_dock_installer_replacementruntime",
       "community": 25,
@@ -11977,7 +11977,7 @@
       "label": "runtimeCommandTarget()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L61",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "app_dock_installer_runtimecommandtarget",
       "community": 25,
@@ -11987,7 +11987,7 @@
       "label": "installedRuntimeBinDir()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L72",
+      "source_location": "L70",
       "_origin": "ast",
       "id": "app_dock_installer_installedruntimebindir",
       "community": 25,
@@ -11997,27 +11997,27 @@
       "label": "InstallOptions",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L84",
+      "source_location": "L82",
       "_origin": "ast",
       "id": "app_dock_installer_installoptions",
-      "community": 25,
+      "community": 22,
       "norm_label": "installoptions"
     },
     {
       "label": "UninstallOptions",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L96",
+      "source_location": "L94",
       "_origin": "ast",
       "id": "app_dock_installer_uninstalloptions",
-      "community": 25,
+      "community": 22,
       "norm_label": "uninstalloptions"
     },
     {
       "label": "DockInstaller",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L103",
+      "source_location": "L101",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller",
       "community": 25,
@@ -12027,7 +12027,7 @@
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L104",
+      "source_location": "L102",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_constructor",
       "community": 25,
@@ -12037,17 +12037,27 @@
       "label": ".install()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L111",
+      "source_location": "L109",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_install",
       "community": 25,
       "norm_label": ".install()"
     },
     {
+      "label": ".installLocked()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L122",
+      "_origin": "ast",
+      "id": "app_dock_installer_dockinstaller_installlocked",
+      "community": 25,
+      "norm_label": ".installlocked()"
+    },
+    {
       "label": ".cleanupFailedNewInstall()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L444",
+      "source_location": "L455",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_cleanupfailednewinstall",
       "community": 25,
@@ -12057,17 +12067,27 @@
       "label": ".uninstall()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L450",
+      "source_location": "L461",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_uninstall",
       "community": 25,
       "norm_label": ".uninstall()"
     },
     {
+      "label": ".uninstallLocked()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L474",
+      "_origin": "ast",
+      "id": "app_dock_installer_dockinstaller_uninstalllocked",
+      "community": 25,
+      "norm_label": ".uninstalllocked()"
+    },
+    {
       "label": ".collectManifestFiles()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L544",
+      "source_location": "L605",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_collectmanifestfiles",
       "community": 25,
@@ -12077,7 +12097,7 @@
       "label": ".seedWorkdir()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L556",
+      "source_location": "L617",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_seedworkdir",
       "community": 25,
@@ -12087,7 +12107,7 @@
       "label": ".removeDockTools()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L567",
+      "source_location": "L628",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_removedocktools",
       "community": 25,
@@ -12097,7 +12117,7 @@
       "label": ".removeUnusedRuntimeShims()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L590",
+      "source_location": "L651",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_removeunusedruntimeshims",
       "community": 25,
@@ -12107,7 +12127,7 @@
       "label": ".progress()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L639",
+      "source_location": "L700",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_progress",
       "community": 25,
@@ -12117,11 +12137,91 @@
       "label": ".nestedProgress()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
-      "source_location": "L646",
+      "source_location": "L707",
       "_origin": "ast",
       "id": "app_dock_installer_dockinstaller_nestedprogress",
       "community": 25,
       "norm_label": ".nestedprogress()"
+    },
+    {
+      "label": "project-operation-lock.ts",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_project_operation_lock",
+      "community": 25,
+      "norm_label": "project-operation-lock.ts"
+    },
+    {
+      "label": "LockOwner",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "app_project_operation_lock_lockowner",
+      "community": 25,
+      "norm_label": "lockowner"
+    },
+    {
+      "label": "ProjectOperationLock",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "app_project_operation_lock_projectoperationlock",
+      "community": 25,
+      "norm_label": "projectoperationlock"
+    },
+    {
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "app_project_operation_lock_projectoperationlock_constructor",
+      "community": 25,
+      "norm_label": ".constructor()"
+    },
+    {
+      "label": ".acquire()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "app_project_operation_lock_projectoperationlock_acquire",
+      "community": 25,
+      "norm_label": ".acquire()"
+    },
+    {
+      "label": ".release()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L77",
+      "_origin": "ast",
+      "id": "app_project_operation_lock_projectoperationlock_release",
+      "community": 25,
+      "norm_label": ".release()"
+    },
+    {
+      "label": "readOwner()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L89",
+      "_origin": "ast",
+      "id": "app_project_operation_lock_readowner",
+      "community": 25,
+      "norm_label": "readowner()"
+    },
+    {
+      "label": "processExists()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L136",
+      "_origin": "ast",
+      "id": "app_project_operation_lock_processexists",
+      "community": 25,
+      "norm_label": "processexists()"
     },
     {
       "label": "task-output-rollback.ts",
@@ -12130,7 +12230,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_task_output_rollback",
-      "community": 83,
+      "community": 79,
       "norm_label": "task-output-rollback.ts"
     },
     {
@@ -12140,7 +12240,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "app_task_output_rollback_taskoutputrollback",
-      "community": 83,
+      "community": 79,
       "norm_label": "taskoutputrollback"
     },
     {
@@ -12150,7 +12250,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "app_task_output_rollback_taskoutputrollback_constructor",
-      "community": 83,
+      "community": 79,
       "norm_label": ".constructor()"
     },
     {
@@ -12160,7 +12260,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "app_task_output_rollback_taskoutputrollback_prepare",
-      "community": 83,
+      "community": 79,
       "norm_label": ".prepare()"
     },
     {
@@ -12170,7 +12270,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "app_task_output_rollback_taskoutputrollback_rollback",
-      "community": 83,
+      "community": 79,
       "norm_label": ".rollback()"
     },
     {
@@ -12180,7 +12280,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "app_task_output_rollback_taskoutputrollback_commit",
-      "community": 83,
+      "community": 79,
       "norm_label": ".commit()"
     },
     {
@@ -12220,7 +12320,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "app_update_rollback_updaterollback_constructor",
-      "community": 6,
+      "community": 20,
       "norm_label": ".constructor()"
     },
     {
@@ -12740,7 +12840,7 @@
       "source_location": "L377",
       "_origin": "ast",
       "id": "domain_manifest_toolspec",
-      "community": 22,
+      "community": 93,
       "norm_label": "toolspec"
     },
     {
@@ -12780,7 +12880,7 @@
       "source_location": "L381",
       "_origin": "ast",
       "id": "domain_manifest_taskphase",
-      "community": 25,
+      "community": 22,
       "norm_label": "taskphase"
     },
     {
@@ -12790,7 +12890,7 @@
       "source_location": "L382",
       "_origin": "ast",
       "id": "domain_manifest_taskstep",
-      "community": 93,
+      "community": 22,
       "norm_label": "taskstep"
     },
     {
@@ -12810,7 +12910,7 @@
       "source_location": "L384",
       "_origin": "ast",
       "id": "domain_manifest_dockmanifest",
-      "community": 22,
+      "community": 37,
       "norm_label": "dockmanifest"
     },
     {
@@ -12920,7 +13020,7 @@
       "source_location": "L487",
       "_origin": "ast",
       "id": "domain_manifest_assertversionsatisfiesselector",
-      "community": 80,
+      "community": 25,
       "norm_label": "assertversionsatisfiesselector()"
     },
     {
@@ -12980,7 +13080,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_shell_operators",
-      "community": 37,
+      "community": 363,
       "norm_label": "shell-operators.ts"
     },
     {
@@ -12990,7 +13090,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_shell_operators_blockedshelltokens",
-      "community": 37,
+      "community": 363,
       "norm_label": "blockedshelltokens"
     },
     {
@@ -13000,7 +13100,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "domain_shell_operators_commandseparatortokens",
-      "community": 37,
+      "community": 363,
       "norm_label": "commandseparatortokens"
     },
     {
@@ -13010,7 +13110,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "domain_shell_operators_includesshelloperator",
-      "community": 37,
+      "community": 363,
       "norm_label": "includesshelloperator()"
     },
     {
@@ -13020,7 +13120,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "domain_shell_operators_isshellcommandseparator",
-      "community": 37,
+      "community": 363,
       "norm_label": "isshellcommandseparator()"
     },
     {
@@ -13030,7 +13130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "domain_state_store",
-      "community": 25,
+      "community": 49,
       "norm_label": "state-store.ts"
     },
     {
@@ -13040,7 +13140,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "domain_state_store_managedmode",
-      "community": 25,
+      "community": 0,
       "norm_label": "managedmode"
     },
     {
@@ -13060,7 +13160,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "domain_state_store_installeddockrecord",
-      "community": 25,
+      "community": 22,
       "norm_label": "installeddockrecord"
     },
     {
@@ -13070,7 +13170,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "domain_state_store_installedruntimerecord",
-      "community": 25,
+      "community": 49,
       "norm_label": "installedruntimerecord"
     },
     {
@@ -13080,7 +13180,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "domain_state_store_installedtoolrecord",
-      "community": 25,
+      "community": 49,
       "norm_label": "installedtoolrecord"
     },
     {
@@ -13090,7 +13190,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "domain_state_store_installeddependencyrecord",
-      "community": 25,
+      "community": 49,
       "norm_label": "installeddependencyrecord"
     },
     {
@@ -13100,7 +13200,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "domain_state_store_projectstate",
-      "community": 25,
+      "community": 49,
       "norm_label": "projectstate"
     },
     {
@@ -13110,7 +13210,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "domain_state_store_statefilesnapshot",
-      "community": 25,
+      "community": 49,
       "norm_label": "statefilesnapshot"
     },
     {
@@ -13120,7 +13220,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "domain_state_store_lockstate",
-      "community": 25,
+      "community": 49,
       "norm_label": "lockstate"
     },
     {
@@ -13187,7 +13287,7 @@
       "label": ".hasState()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L110",
+      "source_location": "L117",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_hasstate",
       "community": 49,
@@ -13197,7 +13297,7 @@
       "label": ".findDock()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L115",
+      "source_location": "L127",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_finddock",
       "community": 49,
@@ -13207,7 +13307,7 @@
       "label": ".saveDock()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L119",
+      "source_location": "L131",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_savedock",
       "community": 49,
@@ -13217,7 +13317,7 @@
       "label": ".removeDock()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L126",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_removedock",
       "community": 49,
@@ -13227,7 +13327,7 @@
       "label": ".write()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L134",
+      "source_location": "L146",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_write",
       "community": 49,
@@ -13237,47 +13337,137 @@
       "label": ".assertStatePathsSafe()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L192",
+      "source_location": "L204",
       "_origin": "ast",
       "id": "domain_state_store_opendockstatestore_assertstatepathssafe",
       "community": 49,
       "norm_label": ".assertstatepathssafe()"
     },
     {
+      "label": ".assertOperationLockSafe()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L223",
+      "_origin": "ast",
+      "id": "domain_state_store_opendockstatestore_assertoperationlocksafe",
+      "community": 49,
+      "norm_label": ".assertoperationlocksafe()"
+    },
+    {
+      "label": "parseLockState()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L266",
+      "_origin": "ast",
+      "id": "domain_state_store_parselockstate",
+      "community": 49,
+      "norm_label": "parselockstate()"
+    },
+    {
+      "label": "parseProjectState()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L279",
+      "_origin": "ast",
+      "id": "domain_state_store_parseprojectstate",
+      "community": 49,
+      "norm_label": "parseprojectstate()"
+    },
+    {
+      "label": "parseStateDocument()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L306",
+      "_origin": "ast",
+      "id": "domain_state_store_parsestatedocument",
+      "community": 49,
+      "norm_label": "parsestatedocument()"
+    },
+    {
       "label": "normalizeInstalledDockRecord()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L209",
+      "source_location": "L316",
       "_origin": "ast",
       "id": "domain_state_store_normalizeinstalleddockrecord",
-      "community": 25,
+      "community": 49,
       "norm_label": "normalizeinstalleddockrecord()"
+    },
+    {
+      "label": "assertStateFilesAgree()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L347",
+      "_origin": "ast",
+      "id": "domain_state_store_assertstatefilesagree",
+      "community": 49,
+      "norm_label": "assertstatefilesagree()"
+    },
+    {
+      "label": "assertUniqueDockIds()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L364",
+      "_origin": "ast",
+      "id": "domain_state_store_assertuniquedockids",
+      "community": 49,
+      "norm_label": "assertuniquedockids()"
+    },
+    {
+      "label": "requireRecord()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L373",
+      "_origin": "ast",
+      "id": "domain_state_store_requirerecord",
+      "community": 49,
+      "norm_label": "requirerecord()"
+    },
+    {
+      "label": "requireString()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L380",
+      "_origin": "ast",
+      "id": "domain_state_store_requirestring",
+      "community": 49,
+      "norm_label": "requirestring()"
     },
     {
       "label": "lstatIfPresent()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L219",
+      "source_location": "L387",
       "_origin": "ast",
       "id": "domain_state_store_lstatifpresent",
-      "community": 25,
+      "community": 49,
       "norm_label": "lstatifpresent()"
+    },
+    {
+      "label": "processExists()",
+      "file_type": "code",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L398",
+      "_origin": "ast",
+      "id": "domain_state_store_processexists",
+      "community": 49,
+      "norm_label": "processexists()"
     },
     {
       "label": "snapshotStateFile()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L230",
+      "source_location": "L409",
       "_origin": "ast",
       "id": "domain_state_store_snapshotstatefile",
-      "community": 25,
+      "community": 49,
       "norm_label": "snapshotstatefile()"
     },
     {
       "label": "stageStateFile()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L236",
+      "source_location": "L415",
       "_origin": "ast",
       "id": "domain_state_store_stagestatefile",
       "community": 49,
@@ -13287,7 +13477,7 @@
       "label": "restoreStateFile()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
-      "source_location": "L249",
+      "source_location": "L428",
       "_origin": "ast",
       "id": "domain_state_store_restorestatefile",
       "community": 49,
@@ -13760,7 +13950,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "files_managed_block",
-      "community": 20,
+      "community": 436,
       "norm_label": "managed-block.ts"
     },
     {
@@ -13770,7 +13960,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "files_managed_block_managedblock",
-      "community": 20,
+      "community": 436,
       "norm_label": "managedblock"
     },
     {
@@ -13780,7 +13970,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "files_managed_block_markerindices",
-      "community": 20,
+      "community": 436,
       "norm_label": "markerindices()"
     },
     {
@@ -13790,7 +13980,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec",
-      "community": 20,
+      "community": 436,
       "norm_label": "managedblockcodec"
     },
     {
@@ -13800,7 +13990,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_constructor",
-      "community": 20,
+      "community": 436,
       "norm_label": ".constructor()"
     },
     {
@@ -13810,7 +14000,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_marker",
-      "community": 20,
+      "community": 436,
       "norm_label": ".marker()"
     },
     {
@@ -13820,7 +14010,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_blockfor",
-      "community": 20,
+      "community": 436,
       "norm_label": ".blockfor()"
     },
     {
@@ -13830,7 +14020,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_extract",
-      "community": 20,
+      "community": 436,
       "norm_label": ".extract()"
     },
     {
@@ -13840,7 +14030,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_currentchecksum",
-      "community": 20,
+      "community": 436,
       "norm_label": ".currentchecksum()"
     },
     {
@@ -13850,7 +14040,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_upsert",
-      "community": 20,
+      "community": 436,
       "norm_label": ".upsert()"
     },
     {
@@ -13860,7 +14050,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "files_managed_block_managedblockcodec_remove",
-      "community": 20,
+      "community": 436,
       "norm_label": ".remove()"
     },
     {
@@ -13870,7 +14060,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "files_managed_block_assertnoopendockmarker",
-      "community": 20,
+      "community": 436,
       "norm_label": "assertnoopendockmarker()"
     },
     {
@@ -13960,7 +14150,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "files_path_utils_ensurerealdirectorypath",
-      "community": 22,
+      "community": 83,
       "norm_label": "ensurerealdirectorypath()"
     },
     {
@@ -13997,7 +14187,7 @@
       "label": "listRegularFiles()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/files/path-utils.ts",
-      "source_location": "L158",
+      "source_location": "L161",
       "_origin": "ast",
       "id": "files_path_utils_listregularfiles",
       "community": 0,
@@ -14007,7 +14197,7 @@
       "label": "listRegularFilesInternal()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/files/path-utils.ts",
-      "source_location": "L169",
+      "source_location": "L172",
       "_origin": "ast",
       "id": "files_path_utils_listregularfilesinternal",
       "community": 0,
@@ -14017,27 +14207,27 @@
       "label": "pruneEmptyParentDirectories()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/files/path-utils.ts",
-      "source_location": "L231",
+      "source_location": "L234",
       "_origin": "ast",
       "id": "files_path_utils_pruneemptyparentdirectories",
-      "community": 6,
+      "community": 20,
       "norm_label": "pruneemptyparentdirectories()"
     },
     {
       "label": "pruneEmptyDirectoryChain()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/files/path-utils.ts",
-      "source_location": "L237",
+      "source_location": "L240",
       "_origin": "ast",
       "id": "files_path_utils_pruneemptydirectorychain",
-      "community": 6,
+      "community": 25,
       "norm_label": "pruneemptydirectorychain()"
     },
     {
       "label": "toPosixPath()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/files/path-utils.ts",
-      "source_location": "L268",
+      "source_location": "L271",
       "_origin": "ast",
       "id": "files_path_utils_toposixpath",
       "community": 0,
@@ -14047,17 +14237,17 @@
       "label": "safeDockDirectoryName()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/files/path-utils.ts",
-      "source_location": "L272",
+      "source_location": "L275",
       "_origin": "ast",
       "id": "files_path_utils_safedockdirectoryname",
-      "community": 83,
+      "community": 79,
       "norm_label": "safedockdirectoryname()"
     },
     {
       "label": "lstatIfPresent()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/files/path-utils.ts",
-      "source_location": "L278",
+      "source_location": "L281",
       "_origin": "ast",
       "id": "files_path_utils_lstatifpresent",
       "community": 20,
@@ -14067,7 +14257,7 @@
       "label": "isHomeRelativePath()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/files/path-utils.ts",
-      "source_location": "L289",
+      "source_location": "L292",
       "_origin": "ast",
       "id": "files_path_utils_ishomerelativepath",
       "community": 0,
@@ -14077,7 +14267,7 @@
       "label": "isWindowsDrivePath()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/files/path-utils.ts",
-      "source_location": "L293",
+      "source_location": "L296",
       "_origin": "ast",
       "id": "files_path_utils_iswindowsdrivepath",
       "community": 0,
@@ -14087,7 +14277,7 @@
       "label": "isProtectedManagedFileTarget()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/files/path-utils.ts",
-      "source_location": "L297",
+      "source_location": "L300",
       "_origin": "ast",
       "id": "files_path_utils_isprotectedmanagedfiletarget",
       "community": 0,
@@ -14097,7 +14287,7 @@
       "label": "isProtectedDependencyTarget()",
       "file_type": "code",
       "source_file": "packages/cli/src/core/files/path-utils.ts",
-      "source_location": "L319",
+      "source_location": "L322",
       "_origin": "ast",
       "id": "files_path_utils_isprotecteddependencytarget",
       "community": 0,
@@ -14130,7 +14320,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "files_workdir_seeder_workdirseeder",
-      "community": 6,
+      "community": 0,
       "norm_label": "workdirseeder"
     },
     {
@@ -14140,7 +14330,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "files_workdir_seeder_workdirseeder_seed",
-      "community": 6,
+      "community": 0,
       "norm_label": ".seed()"
     },
     {
@@ -14150,7 +14340,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "files_workdir_seeder_workdirseeder_seedmapping",
-      "community": 6,
+      "community": 0,
       "norm_label": ".seedmapping()"
     },
     {
@@ -14160,7 +14350,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "files_workdir_seeder_workdirseeder_copyfile",
-      "community": 6,
+      "community": 0,
       "norm_label": ".copyfile()"
     },
     {
@@ -14180,7 +14370,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_command_policy",
-      "community": 37,
+      "community": 363,
       "norm_label": "command-policy.ts"
     },
     {
@@ -14190,7 +14380,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "runtime_command_policy_packagemanagermutations",
-      "community": 37,
+      "community": 363,
       "norm_label": "packagemanagermutations"
     },
     {
@@ -14200,7 +14390,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "runtime_command_policy_commonallowedcommands",
-      "community": 37,
+      "community": 363,
       "norm_label": "commonallowedcommands"
     },
     {
@@ -14210,7 +14400,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "runtime_command_policy_platformallowedcommands",
-      "community": 37,
+      "community": 363,
       "norm_label": "platformallowedcommands"
     },
     {
@@ -14260,7 +14450,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "runtime_command_policy_ispermissionallowed",
-      "community": 37,
+      "community": 363,
       "norm_label": "ispermissionallowed()"
     },
     {
@@ -14270,7 +14460,7 @@
       "source_location": "L133",
       "_origin": "ast",
       "id": "runtime_command_policy_isallowedcommandshape",
-      "community": 37,
+      "community": 363,
       "norm_label": "isallowedcommandshape()"
     },
     {
@@ -14280,7 +14470,7 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "runtime_command_policy_issafepackagemanagercommand",
-      "community": 37,
+      "community": 363,
       "norm_label": "issafepackagemanagercommand()"
     },
     {
@@ -14290,7 +14480,7 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "runtime_command_policy_issafepipcommand",
-      "community": 37,
+      "community": 363,
       "norm_label": "issafepipcommand()"
     },
     {
@@ -14300,7 +14490,7 @@
       "source_location": "L179",
       "_origin": "ast",
       "id": "runtime_command_policy_issafepipxcommand",
-      "community": 37,
+      "community": 363,
       "norm_label": "issafepipxcommand()"
     },
     {
@@ -14310,7 +14500,7 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "runtime_command_policy_issafeuvcommand",
-      "community": 37,
+      "community": 363,
       "norm_label": "issafeuvcommand()"
     },
     {
@@ -14320,7 +14510,7 @@
       "source_location": "L193",
       "_origin": "ast",
       "id": "runtime_command_policy_issafepowershellcommand",
-      "community": 37,
+      "community": 363,
       "norm_label": "issafepowershellcommand()"
     },
     {
@@ -14330,7 +14520,7 @@
       "source_location": "L206",
       "_origin": "ast",
       "id": "runtime_command_policy_blockedcommandreason",
-      "community": 37,
+      "community": 363,
       "norm_label": "blockedcommandreason()"
     },
     {
@@ -14340,7 +14530,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "runtime_command_policy_isexact",
-      "community": 37,
+      "community": 363,
       "norm_label": "isexact()"
     },
     {
@@ -14350,7 +14540,7 @@
       "source_location": "L235",
       "_origin": "ast",
       "id": "runtime_command_policy_issaferelativearg",
-      "community": 37,
+      "community": 363,
       "norm_label": "issaferelativearg()"
     },
     {
@@ -14390,7 +14580,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "runtime_command_runner_commandrunner",
-      "community": 22,
+      "community": 373,
       "norm_label": "commandrunner"
     },
     {
@@ -14430,7 +14620,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "runtime_command_runner_extractversion",
-      "community": 93,
+      "community": 22,
       "norm_label": "extractversion()"
     },
     {
@@ -14760,7 +14950,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencycontext",
-      "community": 25,
+      "community": 22,
       "norm_label": "dependencycontext"
     },
     {
@@ -14770,7 +14960,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "runtime_dependency_runner_dependencyrunresult",
-      "community": 22,
+      "community": 93,
       "norm_label": "dependencyrunresult"
     },
     {
@@ -14920,7 +15110,7 @@
       "source_location": "L392",
       "_origin": "ast",
       "id": "runtime_dependency_runner_rundependencycommand",
-      "community": 373,
+      "community": 93,
       "norm_label": "rundependencycommand()"
     },
     {
@@ -14980,7 +15170,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_process_spawn",
-      "community": 454,
+      "community": 93,
       "norm_label": "process-spawn.ts"
     },
     {
@@ -14990,7 +15180,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "runtime_process_spawn_resolveprogramfrompath",
-      "community": 454,
+      "community": 93,
       "norm_label": "resolveprogramfrompath()"
     },
     {
@@ -15000,7 +15190,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "runtime_process_spawn_spawnopendockcommand",
-      "community": 454,
+      "community": 93,
       "norm_label": "spawnopendockcommand()"
     },
     {
@@ -15010,7 +15200,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "runtime_process_spawn_windowsbatchspawnargs",
-      "community": 454,
+      "community": 93,
       "norm_label": "windowsbatchspawnargs()"
     },
     {
@@ -15020,7 +15210,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "runtime_process_spawn_programcandidates",
-      "community": 454,
+      "community": 93,
       "norm_label": "programcandidates()"
     },
     {
@@ -15030,7 +15220,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "runtime_process_spawn_pathdelimiter",
-      "community": 454,
+      "community": 93,
       "norm_label": "pathdelimiter()"
     },
     {
@@ -15040,7 +15230,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "runtime_process_spawn_haspathseparator",
-      "community": 454,
+      "community": 93,
       "norm_label": "haspathseparator()"
     },
     {
@@ -15050,7 +15240,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "runtime_process_spawn_iswindowsbatchfile",
-      "community": 454,
+      "community": 93,
       "norm_label": "iswindowsbatchfile()"
     },
     {
@@ -15060,7 +15250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_progress",
-      "community": 22,
+      "community": 25,
       "norm_label": "progress.ts"
     },
     {
@@ -15070,7 +15260,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_progress_progresslevel",
-      "community": 22,
+      "community": 25,
       "norm_label": "progresslevel"
     },
     {
@@ -15090,7 +15280,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "runtime_progress_progressreporter",
-      "community": 25,
+      "community": 22,
       "norm_label": "progressreporter"
     },
     {
@@ -15100,7 +15290,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "runtime_progress_reportprogress",
-      "community": 22,
+      "community": 25,
       "norm_label": "reportprogress()"
     },
     {
@@ -15110,7 +15300,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_project_layout",
-      "community": 83,
+      "community": 79,
       "norm_label": "project-layout.ts"
     },
     {
@@ -15140,7 +15330,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "runtime_project_layout_sharedruntimebindir",
-      "community": 353,
+      "community": 66,
       "norm_label": "sharedruntimebindir()"
     },
     {
@@ -15150,7 +15340,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "runtime_project_layout_sharedruntimeinstalldir",
-      "community": 445,
+      "community": 66,
       "norm_label": "sharedruntimeinstalldir()"
     },
     {
@@ -15160,7 +15350,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "runtime_project_layout_projecttoolsdir",
-      "community": 83,
+      "community": 79,
       "norm_label": "projecttoolsdir()"
     },
     {
@@ -15170,7 +15360,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "runtime_project_layout_docktoolsdir",
-      "community": 83,
+      "community": 79,
       "norm_label": "docktoolsdir()"
     },
     {
@@ -15180,7 +15370,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "runtime_project_layout_toolinstalldir",
-      "community": 83,
+      "community": 79,
       "norm_label": "toolinstalldir()"
     },
     {
@@ -15190,7 +15380,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "runtime_project_layout_projectcommandpathentries",
-      "community": 373,
+      "community": 93,
       "norm_label": "projectcommandpathentries()"
     },
     {
@@ -15200,7 +15390,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "runtime_project_layout_prependpathentries",
-      "community": 373,
+      "community": 93,
       "norm_label": "prependpathentries()"
     },
     {
@@ -15220,7 +15410,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "runtime_project_layout_uniquepathentries",
-      "community": 373,
+      "community": 79,
       "norm_label": "uniquepathentries()"
     },
     {
@@ -15230,7 +15420,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "runtime_project_layout_saferuntimesegment",
-      "community": 353,
+      "community": 66,
       "norm_label": "saferuntimesegment()"
     },
     {
@@ -15250,7 +15440,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementcontext",
-      "community": 25,
+      "community": 22,
       "norm_label": "requirementcontext"
     },
     {
@@ -15260,7 +15450,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "runtime_requirement_runner_runtimerecord",
-      "community": 22,
+      "community": 93,
       "norm_label": "runtimerecord"
     },
     {
@@ -15270,7 +15460,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunresult",
-      "community": 22,
+      "community": 93,
       "norm_label": "requirementrunresult"
     },
     {
@@ -15290,7 +15480,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "runtime_requirement_runner_requirementrunner_constructor",
-      "community": 22,
+      "community": 70,
       "norm_label": ".constructor()"
     },
     {
@@ -15550,7 +15740,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "runtime_runtime_installer_runtimeinstaller",
-      "community": 44,
+      "community": 70,
       "norm_label": "runtimeinstaller"
     },
     {
@@ -15630,7 +15820,7 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "runtime_runtime_installer_opendockruntimeinstaller",
-      "community": 353,
+      "community": 70,
       "norm_label": "opendockruntimeinstaller"
     },
     {
@@ -15640,7 +15830,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "runtime_runtime_installer_opendockruntimeinstaller_install",
-      "community": 353,
+      "community": 70,
       "norm_label": ".install()"
     },
     {
@@ -16160,7 +16350,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_step_report_stepreport",
-      "community": 22,
+      "community": 93,
       "norm_label": "stepreport"
     },
     {
@@ -16280,7 +16470,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunresult",
-      "community": 22,
+      "community": 93,
       "norm_label": "taskrunresult"
     },
     {
@@ -16290,7 +16480,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "runtime_task_runner_taskcontext",
-      "community": 25,
+      "community": 22,
       "norm_label": "taskcontext"
     },
     {
@@ -16300,7 +16490,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner",
-      "community": 93,
+      "community": 22,
       "norm_label": "taskrunner"
     },
     {
@@ -16310,7 +16500,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_constructor",
-      "community": 93,
+      "community": 22,
       "norm_label": ".constructor()"
     },
     {
@@ -16320,7 +16510,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_run",
-      "community": 93,
+      "community": 22,
       "norm_label": ".run()"
     },
     {
@@ -16330,7 +16520,7 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_dockworkdir",
-      "community": 83,
+      "community": 79,
       "norm_label": ".dockworkdir()"
     },
     {
@@ -16340,7 +16530,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_runsetupsteps",
-      "community": 93,
+      "community": 22,
       "norm_label": ".runsetupsteps()"
     },
     {
@@ -16350,7 +16540,7 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_finishsetupstep",
-      "community": 93,
+      "community": 22,
       "norm_label": ".finishsetupstep()"
     },
     {
@@ -16360,7 +16550,7 @@
       "source_location": "L246",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_progress",
-      "community": 93,
+      "community": 22,
       "norm_label": ".progress()"
     },
     {
@@ -16370,7 +16560,7 @@
       "source_location": "L268",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_rundoctorsteps",
-      "community": 93,
+      "community": 22,
       "norm_label": ".rundoctorsteps()"
     },
     {
@@ -16380,7 +16570,7 @@
       "source_location": "L322",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_resolveworkdir",
-      "community": 93,
+      "community": 22,
       "norm_label": ".resolveworkdir()"
     },
     {
@@ -16390,7 +16580,7 @@
       "source_location": "L335",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_evaluatestepcheck",
-      "community": 93,
+      "community": 22,
       "norm_label": ".evaluatestepcheck()"
     },
     {
@@ -16400,7 +16590,7 @@
       "source_location": "L371",
       "_origin": "ast",
       "id": "runtime_task_runner_taskrunner_collectstepexports",
-      "community": 93,
+      "community": 22,
       "norm_label": ".collectstepexports()"
     },
     {
@@ -16410,7 +16600,7 @@
       "source_location": "L380",
       "_origin": "ast",
       "id": "runtime_task_runner_stepname",
-      "community": 93,
+      "community": 22,
       "norm_label": "stepname()"
     },
     {
@@ -16420,7 +16610,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_task_selection",
-      "community": 93,
+      "community": 22,
       "norm_label": "task-selection.ts"
     },
     {
@@ -16430,7 +16620,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "runtime_task_selection_assertmanifestsupportsplatform",
-      "community": 93,
+      "community": 22,
       "norm_label": "assertmanifestsupportsplatform()"
     },
     {
@@ -16450,7 +16640,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "runtime_task_selection_collectmanifestplatforms",
-      "community": 93,
+      "community": 22,
       "norm_label": "collectmanifestplatforms()"
     },
     {
@@ -16460,7 +16650,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "runtime_tool_runner",
-      "community": 22,
+      "community": 93,
       "norm_label": "tool-runner.ts"
     },
     {
@@ -16470,7 +16660,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrecord",
-      "community": 22,
+      "community": 93,
       "norm_label": "toolrecord"
     },
     {
@@ -16480,7 +16670,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolcontext",
-      "community": 25,
+      "community": 22,
       "norm_label": "toolcontext"
     },
     {
@@ -16490,7 +16680,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunresult",
-      "community": 22,
+      "community": 93,
       "norm_label": "toolrunresult"
     },
     {
@@ -16500,7 +16690,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner",
-      "community": 22,
+      "community": 93,
       "norm_label": "toolrunner"
     },
     {
@@ -16510,7 +16700,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner_constructor",
-      "community": 22,
+      "community": 93,
       "norm_label": ".constructor()"
     },
     {
@@ -16520,7 +16710,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner_run",
-      "community": 22,
+      "community": 93,
       "norm_label": ".run()"
     },
     {
@@ -16530,7 +16720,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner_checktool",
-      "community": 22,
+      "community": 93,
       "norm_label": ".checktool()"
     },
     {
@@ -16540,7 +16730,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner_installtool",
-      "community": 22,
+      "community": 93,
       "norm_label": ".installtool()"
     },
     {
@@ -16550,7 +16740,7 @@
       "source_location": "L141",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolrunner_progress",
-      "community": 22,
+      "community": 93,
       "norm_label": ".progress()"
     },
     {
@@ -16570,7 +16760,7 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "runtime_tool_runner_toolversionpermissions",
-      "community": 22,
+      "community": 93,
       "norm_label": "toolversionpermissions()"
     },
     {
@@ -16580,7 +16770,7 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "runtime_tool_runner_preparetoolpackage",
-      "community": 22,
+      "community": 93,
       "norm_label": "preparetoolpackage()"
     },
     {
@@ -16590,7 +16780,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "runtime_tool_runner_runpackageinstall",
-      "community": 373,
+      "community": 93,
       "norm_label": "runpackageinstall()"
     },
     {
@@ -16600,7 +16790,7 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "runtime_tool_runner_runuvtoolinstall",
-      "community": 373,
+      "community": 93,
       "norm_label": "runuvtoolinstall()"
     },
     {
@@ -16610,7 +16800,7 @@
       "source_location": "L223",
       "_origin": "ast",
       "id": "runtime_tool_runner_runpythonpackageinstall",
-      "community": 373,
+      "community": 93,
       "norm_label": "runpythonpackageinstall()"
     },
     {
@@ -16620,7 +16810,7 @@
       "source_location": "L273",
       "_origin": "ast",
       "id": "runtime_tool_runner_hasmanagedpythoncommand",
-      "community": 83,
+      "community": 93,
       "norm_label": "hasmanagedpythoncommand()"
     },
     {
@@ -16630,7 +16820,7 @@
       "source_location": "L279",
       "_origin": "ast",
       "id": "runtime_tool_runner_runpackagecommand",
-      "community": 373,
+      "community": 93,
       "norm_label": "runpackagecommand()"
     },
     {
@@ -16640,7 +16830,7 @@
       "source_location": "L316",
       "_origin": "ast",
       "id": "runtime_tool_runner_packagespecifier",
-      "community": 373,
+      "community": 93,
       "norm_label": "packagespecifier()"
     },
     {
@@ -16650,7 +16840,7 @@
       "source_location": "L326",
       "_origin": "ast",
       "id": "runtime_tool_runner_resolveinstalledcommand",
-      "community": 22,
+      "community": 93,
       "norm_label": "resolveinstalledcommand()"
     },
     {
@@ -16660,7 +16850,7 @@
       "source_location": "L361",
       "_origin": "ast",
       "id": "runtime_tool_runner_createpythontoolwrapper",
-      "community": 22,
+      "community": 93,
       "norm_label": "createpythontoolwrapper()"
     },
     {
@@ -16670,7 +16860,7 @@
       "source_location": "L391",
       "_origin": "ast",
       "id": "runtime_tool_runner_shquote",
-      "community": 22,
+      "community": 93,
       "norm_label": "shquote()"
     },
     {
@@ -16870,7 +17060,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_installed_dock_updates",
-      "community": 363,
+      "community": 3,
       "norm_label": "installed-dock-updates.ts"
     },
     {
@@ -16880,7 +17070,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_installed_dock_updates_resolvelatestdockversion",
-      "community": 363,
+      "community": 49,
       "norm_label": "resolvelatestdockversion()"
     },
     {
@@ -16900,7 +17090,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_installed_dock_updates_checkinstalleddockupdates",
-      "community": 312,
+      "community": 3,
       "norm_label": "checkinstalleddockupdates()"
     },
     {
@@ -17000,7 +17190,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_paths_cacheroot",
-      "community": 80,
+      "community": 312,
       "norm_label": "cacheroot()"
     },
     {
@@ -17010,7 +17200,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_platform",
-      "community": 363,
+      "community": 22,
       "norm_label": "platform.ts"
     },
     {
@@ -17020,7 +17210,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_platform_supported_platforms",
-      "community": 363,
+      "community": 22,
       "norm_label": "supported_platforms"
     },
     {
@@ -17030,7 +17220,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_platform_opendockplatform",
-      "community": 25,
+      "community": 22,
       "norm_label": "opendockplatform"
     },
     {
@@ -17050,7 +17240,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_platform_parseplatform",
-      "community": 363,
+      "community": 312,
       "norm_label": "parseplatform()"
     },
     {
@@ -17060,7 +17250,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_platform_isopendockplatform",
-      "community": 363,
+      "community": 49,
       "norm_label": "isopendockplatform()"
     },
     {
@@ -17170,7 +17360,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_cli_src_registry_ts_src_registry",
-      "community": 23,
+      "community": 24,
       "norm_label": "registry.ts"
     },
     {
@@ -17180,7 +17370,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_registry_dockversionresponse",
-      "community": 23,
+      "community": 3,
       "norm_label": "dockversionresponse"
     },
     {
@@ -17190,7 +17380,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_registry_releasesignatureresponse",
-      "community": 366,
+      "community": 435,
       "norm_label": "releasesignatureresponse"
     },
     {
@@ -17200,7 +17390,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_registry_cliloginstartresponse",
-      "community": 23,
+      "community": 24,
       "norm_label": "cliloginstartresponse"
     },
     {
@@ -17220,7 +17410,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_registry_clitokenresponse",
-      "community": 23,
+      "community": 24,
       "norm_label": "clitokenresponse"
     },
     {
@@ -17230,7 +17420,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_registry_authuserresponse",
-      "community": 23,
+      "community": 24,
       "norm_label": "authuserresponse"
     },
     {
@@ -17250,7 +17440,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "src_registry_submissionarchiverequest",
-      "community": 23,
+      "community": 24,
       "norm_label": "submissionarchiverequest"
     },
     {
@@ -17260,7 +17450,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "src_registry_submissionlogorequest",
-      "community": 23,
+      "community": 24,
       "norm_label": "submissionlogorequest"
     },
     {
@@ -17280,7 +17470,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "src_registry_submissionlogometadataresponse",
-      "community": 23,
+      "community": 24,
       "norm_label": "submissionlogometadataresponse"
     },
     {
@@ -17420,7 +17610,7 @@
       "source_location": "L196",
       "_origin": "ast",
       "id": "src_registry_registryrequesterror",
-      "community": 23,
+      "community": 24,
       "norm_label": "registryrequesterror"
     },
     {
@@ -17430,7 +17620,7 @@
       "source_location": "L197",
       "_origin": "ast",
       "id": "src_registry_registryrequesterror_constructor",
-      "community": 23,
+      "community": 24,
       "norm_label": ".constructor()"
     },
     {
@@ -17440,7 +17630,7 @@
       "source_location": "L207",
       "_origin": "ast",
       "id": "src_registry_registryrequesterror_fromresponse",
-      "community": 23,
+      "community": 24,
       "norm_label": ".fromresponse()"
     },
     {
@@ -17450,7 +17640,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "src_registry_parsecontentlength",
-      "community": 23,
+      "community": 24,
       "norm_label": "parsecontentlength()"
     },
     {
@@ -17460,7 +17650,7 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "src_registry_readresponsebytes",
-      "community": 23,
+      "community": 24,
       "norm_label": "readresponsebytes()"
     },
     {
@@ -17470,7 +17660,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_release_signature",
-      "community": 366,
+      "community": 435,
       "norm_label": "release-signature.ts"
     },
     {
@@ -17480,7 +17670,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_release_signature_defaulttrustedpublickeys",
-      "community": 366,
+      "community": 435,
       "norm_label": "defaulttrustedpublickeys"
     },
     {
@@ -17490,7 +17680,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_release_signature_releasesignaturesubject",
-      "community": 366,
+      "community": 435,
       "norm_label": "releasesignaturesubject"
     },
     {
@@ -17500,7 +17690,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_release_signature_releasesignatureplatform",
-      "community": 366,
+      "community": 435,
       "norm_label": "releasesignatureplatform"
     },
     {
@@ -17510,7 +17700,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_release_signature_releasesignaturepayload",
-      "community": 366,
+      "community": 435,
       "norm_label": "releasesignaturepayload()"
     },
     {
@@ -17520,7 +17710,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_release_signature_verifyreleasesignature",
-      "community": 80,
+      "community": 435,
       "norm_label": "verifyreleasesignature()"
     },
     {
@@ -17530,7 +17720,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_release_signature_isreleasesignaturevalid",
-      "community": 80,
+      "community": 435,
       "norm_label": "isreleasesignaturevalid()"
     },
     {
@@ -17540,7 +17730,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "src_release_signature_trustedreleasepublickeys",
-      "community": 366,
+      "community": 435,
       "norm_label": "trustedreleasepublickeys()"
     },
     {
@@ -17550,7 +17740,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_release_signature_decodebase64",
-      "community": 366,
+      "community": 435,
       "norm_label": "decodebase64()"
     },
     {
@@ -17590,7 +17780,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_resolver_resolvedock",
-      "community": 80,
+      "community": 27,
       "norm_label": "resolvedock()"
     },
     {
@@ -17630,7 +17820,7 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "src_resolver_verifycompatiblereleasesignature",
-      "community": 80,
+      "community": 435,
       "norm_label": "verifycompatiblereleasesignature()"
     },
     {
@@ -18667,7 +18857,7 @@
       "label": "tempDir()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1743",
+      "source_location": "L1777",
       "_origin": "ast",
       "id": "tests_dependencies_test_tempdir",
       "community": 454,
@@ -18677,7 +18867,7 @@
       "label": "parseManifestText()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1749",
+      "source_location": "L1783",
       "_origin": "ast",
       "id": "tests_dependencies_test_parsemanifesttext",
       "community": 454,
@@ -18687,7 +18877,7 @@
       "label": "writeDock()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1755",
+      "source_location": "L1789",
       "_origin": "ast",
       "id": "tests_dependencies_test_writedock",
       "community": 454,
@@ -18697,7 +18887,7 @@
       "label": "localResolver()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1800",
+      "source_location": "L1834",
       "_origin": "ast",
       "id": "tests_dependencies_test_localresolver",
       "community": 317,
@@ -18707,7 +18897,7 @@
       "label": "writeFakeToolAndDependencyManager()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1814",
+      "source_location": "L1848",
       "_origin": "ast",
       "id": "tests_dependencies_test_writefaketoolanddependencymanager",
       "community": 454,
@@ -18717,7 +18907,7 @@
       "label": "writeFakeDependencyManager()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1834",
+      "source_location": "L1868",
       "_origin": "ast",
       "id": "tests_dependencies_test_writefakedependencymanager",
       "community": 454,
@@ -18727,7 +18917,7 @@
       "label": "writeFailingDependencyManager()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1855",
+      "source_location": "L1889",
       "_origin": "ast",
       "id": "tests_dependencies_test_writefailingdependencymanager",
       "community": 454,
@@ -18737,7 +18927,7 @@
       "label": "writeFakePip()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1871",
+      "source_location": "L1905",
       "_origin": "ast",
       "id": "tests_dependencies_test_writefakepip",
       "community": 454,
@@ -18747,7 +18937,7 @@
       "label": "writeExecutable()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1894",
+      "source_location": "L1928",
       "_origin": "ast",
       "id": "tests_dependencies_test_writeexecutable",
       "community": 454,
@@ -18757,7 +18947,7 @@
       "label": "withEnv()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1900",
+      "source_location": "L1934",
       "_origin": "ast",
       "id": "tests_dependencies_test_withenv",
       "community": 454,
@@ -18767,7 +18957,7 @@
       "label": "withEnvAsync()",
       "file_type": "code",
       "source_file": "packages/cli/tests/dependencies.test.ts",
-      "source_location": "L1923",
+      "source_location": "L1957",
       "_origin": "ast",
       "id": "tests_dependencies_test_withenvasync",
       "community": 454,
@@ -18950,7 +19140,7 @@
       "source_location": "L306",
       "_origin": "ast",
       "id": "tests_deploy_registry_edge_cases_test_boundmanifest",
-      "community": 317,
+      "community": 355,
       "norm_label": "boundmanifest()"
     },
     {
@@ -19300,7 +19490,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_examples_test",
-      "community": 37,
+      "community": 439,
       "norm_label": "examples.test.ts"
     },
     {
@@ -19310,7 +19500,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "tests_examples_test_examplesroot",
-      "community": 37,
+      "community": 439,
       "norm_label": "examplesroot"
     },
     {
@@ -19320,7 +19510,7 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "tests_examples_test_examplenames",
-      "community": 37,
+      "community": 439,
       "norm_label": "examplenames()"
     },
     {
@@ -19330,7 +19520,7 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "tests_examples_test_workspaceexamplenames",
-      "community": 37,
+      "community": 439,
       "norm_label": "workspaceexamplenames()"
     },
     {
@@ -19340,7 +19530,7 @@
       "source_location": "L179",
       "_origin": "ast",
       "id": "tests_examples_test_commandsfor",
-      "community": 37,
+      "community": 439,
       "norm_label": "commandsfor()"
     },
     {
@@ -19350,7 +19540,7 @@
       "source_location": "L187",
       "_origin": "ast",
       "id": "tests_examples_test_commandfor",
-      "community": 37,
+      "community": 439,
       "norm_label": "commandfor()"
     },
     {
@@ -19360,7 +19550,7 @@
       "source_location": "L191",
       "_origin": "ast",
       "id": "tests_examples_test_powershelltestpath",
-      "community": 37,
+      "community": 439,
       "norm_label": "powershelltestpath()"
     },
     {
@@ -19550,7 +19740,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test",
-      "community": 317,
+      "community": 111,
       "norm_label": "lifecycle-conflict-edge-cases.test.ts"
     },
     {
@@ -19560,7 +19750,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test_temproots",
-      "community": 317,
+      "community": 111,
       "norm_label": "temproots"
     },
     {
@@ -19570,7 +19760,7 @@
       "source_location": "L360",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test_dockfile",
-      "community": 317,
+      "community": 111,
       "norm_label": "dockfile"
     },
     {
@@ -19580,7 +19770,7 @@
       "source_location": "L365",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test_tempdir",
-      "community": 317,
+      "community": 111,
       "norm_label": "tempdir()"
     },
     {
@@ -19590,7 +19780,7 @@
       "source_location": "L371",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test_writedock",
-      "community": 317,
+      "community": 111,
       "norm_label": "writedock()"
     },
     {
@@ -19600,7 +19790,7 @@
       "source_location": "L398",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test_installdock",
-      "community": 317,
+      "community": 111,
       "norm_label": "installdock()"
     },
     {
@@ -19610,7 +19800,7 @@
       "source_location": "L415",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test_uninstalldock",
-      "community": 317,
+      "community": 111,
       "norm_label": "uninstalldock()"
     },
     {
@@ -19620,7 +19810,7 @@
       "source_location": "L423",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test_localresolver",
-      "community": 317,
+      "community": 111,
       "norm_label": "localresolver()"
     },
     {
@@ -19630,7 +19820,7 @@
       "source_location": "L437",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test_installeddocks",
-      "community": 317,
+      "community": 111,
       "norm_label": "installeddocks()"
     },
     {
@@ -19640,7 +19830,7 @@
       "source_location": "L441",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test_readprojectfile",
-      "community": 317,
+      "community": 111,
       "norm_label": "readprojectfile()"
     },
     {
@@ -19650,7 +19840,7 @@
       "source_location": "L445",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test_existsprojectpath",
-      "community": 317,
+      "community": 111,
       "norm_label": "existsprojectpath()"
     },
     {
@@ -19660,7 +19850,7 @@
       "source_location": "L449",
       "_origin": "ast",
       "id": "tests_lifecycle_conflict_edge_cases_test_countoccurrences",
-      "community": 317,
+      "community": 111,
       "norm_label": "countoccurrences()"
     },
     {
@@ -19770,7 +19960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_platform_regression_test",
-      "community": 111,
+      "community": 373,
       "norm_label": "platform-regression.test.ts"
     },
     {
@@ -19780,7 +19970,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "tests_platform_regression_test_temproots",
-      "community": 111,
+      "community": 373,
       "norm_label": "temproots"
     },
     {
@@ -19790,7 +19980,7 @@
       "source_location": "L512",
       "_origin": "ast",
       "id": "tests_platform_regression_test_platformmanifest",
-      "community": 111,
+      "community": 373,
       "norm_label": "platformmanifest()"
     },
     {
@@ -19800,7 +19990,7 @@
       "source_location": "L533",
       "_origin": "ast",
       "id": "tests_platform_regression_test_platformruntimestep",
-      "community": 111,
+      "community": 373,
       "norm_label": "platformruntimestep()"
     },
     {
@@ -19810,7 +20000,7 @@
       "source_location": "L548",
       "_origin": "ast",
       "id": "tests_platform_regression_test_tempdir",
-      "community": 111,
+      "community": 373,
       "norm_label": "tempdir()"
     },
     {
@@ -19820,7 +20010,7 @@
       "source_location": "L554",
       "_origin": "ast",
       "id": "tests_platform_regression_test_writefakeplatformcommand",
-      "community": 111,
+      "community": 373,
       "norm_label": "writefakeplatformcommand()"
     },
     {
@@ -19830,7 +20020,7 @@
       "source_location": "L569",
       "_origin": "ast",
       "id": "tests_platform_regression_test_writedock",
-      "community": 111,
+      "community": 373,
       "norm_label": "writedock()"
     },
     {
@@ -19840,7 +20030,7 @@
       "source_location": "L616",
       "_origin": "ast",
       "id": "tests_platform_regression_test_createdockarchive",
-      "community": 111,
+      "community": 373,
       "norm_label": "createdockarchive()"
     },
     {
@@ -19850,7 +20040,7 @@
       "source_location": "L635",
       "_origin": "ast",
       "id": "tests_platform_regression_test_sha256",
-      "community": 111,
+      "community": 373,
       "norm_label": "sha256()"
     },
     {
@@ -19870,7 +20060,7 @@
       "source_location": "L653",
       "_origin": "ast",
       "id": "tests_platform_regression_test_installeddocks",
-      "community": 111,
+      "community": 373,
       "norm_label": "installeddocks()"
     },
     {
@@ -19880,7 +20070,7 @@
       "source_location": "L657",
       "_origin": "ast",
       "id": "tests_platform_regression_test_withenv",
-      "community": 111,
+      "community": 373,
       "norm_label": "withenv()"
     },
     {
@@ -19890,7 +20080,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_quality_contracts_test",
-      "community": 37,
+      "community": 448,
       "norm_label": "quality-contracts.test.ts"
     },
     {
@@ -19900,7 +20090,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "tests_quality_contracts_test_examplesroot",
-      "community": 37,
+      "community": 448,
       "norm_label": "examplesroot"
     },
     {
@@ -19910,7 +20100,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "tests_quality_contracts_test_platformmanifests",
-      "community": 37,
+      "community": 448,
       "norm_label": "platformmanifests"
     },
     {
@@ -19920,7 +20110,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "tests_quality_contracts_test_examplenames",
-      "community": 37,
+      "community": 448,
       "norm_label": "examplenames()"
     },
     {
@@ -19930,7 +20120,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "tests_quality_contracts_test_textfiles",
-      "community": 37,
+      "community": 448,
       "norm_label": "textfiles()"
     },
     {
@@ -19940,7 +20130,7 @@
       "source_location": "L135",
       "_origin": "ast",
       "id": "tests_quality_contracts_test_istextfile",
-      "community": 37,
+      "community": 448,
       "norm_label": "istextfile()"
     },
     {
@@ -20090,7 +20280,7 @@
       "source_location": "L381",
       "_origin": "ast",
       "id": "tests_real_examples_matrix_test_installexample",
-      "community": 14,
+      "community": 317,
       "norm_label": "installexample()"
     },
     {
@@ -20330,7 +20520,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_release_signature_helper",
-      "community": 366,
+      "community": 435,
       "norm_label": "release-signature-helper.ts"
     },
     {
@@ -20340,7 +20530,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "tests_release_signature_helper_testprivatekey",
-      "community": 366,
+      "community": 435,
       "norm_label": "testprivatekey"
     },
     {
@@ -20860,57 +21050,57 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_security_regression_test",
-      "community": 373,
+      "community": 37,
       "norm_label": "security-regression.test.ts"
     },
     {
       "label": "tempRoots",
       "file_type": "code",
       "source_file": "packages/cli/tests/security-regression.test.ts",
-      "source_location": "L39",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "tests_security_regression_test_temproots",
-      "community": 373,
+      "community": 37,
       "norm_label": "temproots"
     },
     {
       "label": "startCliLogin()",
       "file_type": "code",
       "source_file": "packages/cli/tests/security-regression.test.ts",
-      "source_location": "L53",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "tests_security_regression_test_startclilogin",
-      "community": 373,
+      "community": 37,
       "norm_label": "startclilogin()"
     },
     {
       "label": "exchangeCliCode()",
       "file_type": "code",
       "source_file": "packages/cli/tests/security-regression.test.ts",
-      "source_location": "L57",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "tests_security_regression_test_exchangeclicode",
-      "community": 373,
+      "community": 37,
       "norm_label": "exchangeclicode()"
     },
     {
       "label": "tempDir()",
       "file_type": "code",
       "source_file": "packages/cli/tests/security-regression.test.ts",
-      "source_location": "L824",
+      "source_location": "L974",
       "_origin": "ast",
       "id": "tests_security_regression_test_tempdir",
-      "community": 373,
+      "community": 37,
       "norm_label": "tempdir()"
     },
     {
       "label": "createManyDirectoryArchive()",
       "file_type": "code",
       "source_file": "packages/cli/tests/security-regression.test.ts",
-      "source_location": "L830",
+      "source_location": "L980",
       "_origin": "ast",
       "id": "tests_security_regression_test_createmanydirectoryarchive",
-      "community": 373,
+      "community": 37,
       "norm_label": "createmanydirectoryarchive()"
     },
     {
@@ -20920,7 +21110,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test",
-      "community": 22,
+      "community": 83,
       "norm_label": "task-permission-policy.test.ts"
     },
     {
@@ -20930,7 +21120,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_temproots",
-      "community": 22,
+      "community": 83,
       "norm_label": "temproots"
     },
     {
@@ -20940,7 +21130,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_shelloperatorcommands",
-      "community": 22,
+      "community": 83,
       "norm_label": "shelloperatorcommands"
     },
     {
@@ -20950,7 +21140,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_packageinstallcommands",
-      "community": 22,
+      "community": 83,
       "norm_label": "packageinstallcommands"
     },
     {
@@ -20960,7 +21150,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_manifestoverrides",
-      "community": 22,
+      "community": 83,
       "norm_label": "manifestoverrides"
     },
     {
@@ -20970,7 +21160,7 @@
       "source_location": "L343",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_manifest",
-      "community": 22,
+      "community": 83,
       "norm_label": "manifest()"
     },
     {
@@ -20980,7 +21170,7 @@
       "source_location": "L363",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_tool",
-      "community": 22,
+      "community": 83,
       "norm_label": "tool()"
     },
     {
@@ -20990,7 +21180,7 @@
       "source_location": "L372",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_taskrunnerwithouttoolinstall",
-      "community": 22,
+      "community": 83,
       "norm_label": "taskrunnerwithouttoolinstall()"
     },
     {
@@ -21000,7 +21190,7 @@
       "source_location": "L383",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_tempdir",
-      "community": 22,
+      "community": 83,
       "norm_label": "tempdir()"
     },
     {
@@ -21010,7 +21200,7 @@
       "source_location": "L389",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_writeprojectcommand",
-      "community": 22,
+      "community": 83,
       "norm_label": "writeprojectcommand()"
     },
     {
@@ -21020,7 +21210,7 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "tests_task_permission_policy_test_writeexecutable",
-      "community": 22,
+      "community": 83,
       "norm_label": "writeexecutable()"
     },
     {
@@ -21900,7 +22090,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "changelog_0_2_10_2026_07_13",
-      "community": 90,
+      "community": 456,
       "norm_label": "0.2.10 - 2026-07-13"
     },
     {
@@ -21910,7 +22100,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "changelog_cli_48",
-      "community": 90,
+      "community": 456,
       "norm_label": "cli"
     },
     {
@@ -21920,7 +22110,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "changelog_desktop_app_53",
-      "community": 90,
+      "community": 456,
       "norm_label": "desktop app"
     },
     {
@@ -22070,7 +22260,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "changelog_0_2_3_2026_07_03",
-      "community": 427,
+      "community": 90,
       "norm_label": "0.2.3 - 2026-07-03"
     },
     {
@@ -22080,7 +22270,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "changelog_cli_108",
-      "community": 427,
+      "community": 90,
       "norm_label": "cli"
     },
     {
@@ -22090,7 +22280,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "changelog_desktop_app_114",
-      "community": 427,
+      "community": 90,
       "norm_label": "desktop app"
     },
     {
@@ -22100,7 +22290,7 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "changelog_0_2_2_2026_07_02",
-      "community": 90,
+      "community": 457,
       "norm_label": "0.2.2 - 2026-07-02"
     },
     {
@@ -22110,7 +22300,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "changelog_cli_120",
-      "community": 90,
+      "community": 457,
       "norm_label": "cli"
     },
     {
@@ -22120,7 +22310,7 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "changelog_desktop_app_125",
-      "community": 90,
+      "community": 457,
       "norm_label": "desktop app"
     },
     {
@@ -22150,7 +22340,7 @@
       "source_location": "L135",
       "_origin": "ast",
       "id": "changelog_0_2_0_2026_07_02",
-      "community": 90,
+      "community": 427,
       "norm_label": "0.2.0 - 2026-07-02"
     },
     {
@@ -22160,7 +22350,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "changelog_cli_137",
-      "community": 90,
+      "community": 427,
       "norm_label": "cli"
     },
     {
@@ -22170,7 +22360,7 @@
       "source_location": "L143",
       "_origin": "ast",
       "id": "changelog_desktop_app_143",
-      "community": 90,
+      "community": 427,
       "norm_label": "desktop app"
     },
     {
@@ -22530,7 +22720,7 @@
       "source_location": "L288",
       "_origin": "ast",
       "id": "changelog_0_1_44_2026_06_30",
-      "community": 435,
+      "community": 90,
       "norm_label": "0.1.44 - 2026-06-30"
     },
     {
@@ -22540,7 +22730,7 @@
       "source_location": "L290",
       "_origin": "ast",
       "id": "changelog_cli_290",
-      "community": 435,
+      "community": 90,
       "norm_label": "cli"
     },
     {
@@ -22550,7 +22740,7 @@
       "source_location": "L298",
       "_origin": "ast",
       "id": "changelog_desktop_app_298",
-      "community": 435,
+      "community": 90,
       "norm_label": "desktop app"
     },
     {
@@ -22560,7 +22750,7 @@
       "source_location": "L303",
       "_origin": "ast",
       "id": "changelog_0_1_43_2026_06_26",
-      "community": 436,
+      "community": 90,
       "norm_label": "0.1.43 - 2026-06-26"
     },
     {
@@ -22570,7 +22760,7 @@
       "source_location": "L305",
       "_origin": "ast",
       "id": "changelog_cli_305",
-      "community": 436,
+      "community": 90,
       "norm_label": "cli"
     },
     {
@@ -22580,7 +22770,7 @@
       "source_location": "L310",
       "_origin": "ast",
       "id": "changelog_desktop_app_310",
-      "community": 436,
+      "community": 90,
       "norm_label": "desktop app"
     },
     {
@@ -23030,7 +23220,7 @@
       "source_location": "L497",
       "_origin": "ast",
       "id": "changelog_0_1_25_2026_06_15",
-      "community": 26,
+      "community": 455,
       "norm_label": "0.1.25 - 2026-06-15"
     },
     {
@@ -23040,7 +23230,7 @@
       "source_location": "L499",
       "_origin": "ast",
       "id": "changelog_desktop_app_499",
-      "community": 26,
+      "community": 455,
       "norm_label": "desktop app"
     },
     {
@@ -23050,7 +23240,7 @@
       "source_location": "L506",
       "_origin": "ast",
       "id": "changelog_tests_506",
-      "community": 26,
+      "community": 455,
       "norm_label": "tests"
     },
     {
@@ -23230,7 +23420,7 @@
       "source_location": "L594",
       "_origin": "ast",
       "id": "changelog_0_1_19_2026_06_15",
-      "community": 26,
+      "community": 452,
       "norm_label": "0.1.19 - 2026-06-15"
     },
     {
@@ -23240,7 +23430,7 @@
       "source_location": "L596",
       "_origin": "ast",
       "id": "changelog_changed_596",
-      "community": 26,
+      "community": 452,
       "norm_label": "changed"
     },
     {
@@ -23250,7 +23440,7 @@
       "source_location": "L604",
       "_origin": "ast",
       "id": "changelog_tests_604",
-      "community": 26,
+      "community": 452,
       "norm_label": "tests"
     },
     {
@@ -23260,7 +23450,7 @@
       "source_location": "L608",
       "_origin": "ast",
       "id": "changelog_0_1_18_2026_06_15",
-      "community": 451,
+      "community": 26,
       "norm_label": "0.1.18 - 2026-06-15"
     },
     {
@@ -23270,7 +23460,7 @@
       "source_location": "L610",
       "_origin": "ast",
       "id": "changelog_added_610",
-      "community": 451,
+      "community": 26,
       "norm_label": "added"
     },
     {
@@ -23280,7 +23470,7 @@
       "source_location": "L615",
       "_origin": "ast",
       "id": "changelog_tests_615",
-      "community": 451,
+      "community": 26,
       "norm_label": "tests"
     },
     {
@@ -23440,7 +23630,7 @@
       "source_location": "L679",
       "_origin": "ast",
       "id": "changelog_0_1_13_2026_06_12",
-      "community": 26,
+      "community": 451,
       "norm_label": "0.1.13 - 2026-06-12"
     },
     {
@@ -23450,7 +23640,7 @@
       "source_location": "L681",
       "_origin": "ast",
       "id": "changelog_changed_681",
-      "community": 26,
+      "community": 451,
       "norm_label": "changed"
     },
     {
@@ -23460,7 +23650,7 @@
       "source_location": "L689",
       "_origin": "ast",
       "id": "changelog_tests_689",
-      "community": 26,
+      "community": 451,
       "norm_label": "tests"
     },
     {
@@ -23630,7 +23820,7 @@
       "source_location": "L767",
       "_origin": "ast",
       "id": "changelog_0_1_7_2026_06_12",
-      "community": 452,
+      "community": 26,
       "norm_label": "0.1.7 - 2026-06-12"
     },
     {
@@ -23640,7 +23830,7 @@
       "source_location": "L769",
       "_origin": "ast",
       "id": "changelog_changed_769",
-      "community": 452,
+      "community": 26,
       "norm_label": "changed"
     },
     {
@@ -23650,7 +23840,7 @@
       "source_location": "L775",
       "_origin": "ast",
       "id": "changelog_tests_775",
-      "community": 452,
+      "community": 26,
       "norm_label": "tests"
     },
     {
@@ -23720,7 +23910,7 @@
       "source_location": "L813",
       "_origin": "ast",
       "id": "changelog_0_1_4_2026_06_12",
-      "community": 448,
+      "community": 26,
       "norm_label": "0.1.4 - 2026-06-12"
     },
     {
@@ -23730,7 +23920,7 @@
       "source_location": "L815",
       "_origin": "ast",
       "id": "changelog_fixed_815",
-      "community": 448,
+      "community": 26,
       "norm_label": "fixed"
     },
     {
@@ -23740,7 +23930,7 @@
       "source_location": "L820",
       "_origin": "ast",
       "id": "changelog_tests_820",
-      "community": 448,
+      "community": 26,
       "norm_label": "tests"
     },
     {
@@ -78678,6 +78868,17 @@
     },
     {
       "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L122",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
+      "target": "app_dock_install_report_installreport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/app/dock-install-report.ts",
@@ -78710,6 +78911,17 @@
       "target": "app_dock_install_report_uninstallreport"
     },
     {
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L474",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_uninstalllocked",
+      "target": "app_dock_install_report_uninstallreport",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -78729,6 +78941,17 @@
       "source_location": "L227",
       "weight": 1.0,
       "source": "app_dock_installer_dockinstaller_install",
+      "target": "app_dock_install_report_installeddockrecordfor"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L387",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
       "target": "app_dock_install_report_installeddockrecordfor"
     },
     {
@@ -78768,6 +78991,17 @@
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L427",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
+      "target": "app_dock_install_report_installreportfor"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/app/dock-install-report.ts",
       "source_location": "L89",
       "weight": 1.0,
@@ -78795,6 +79029,17 @@
       "source_location": "L324",
       "weight": 1.0,
       "source": "app_dock_installer_dockinstaller_uninstall",
+      "target": "app_dock_install_report_uninstallreportfor"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L597",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_uninstalllocked",
       "target": "app_dock_install_report_uninstallreportfor"
     },
     {
@@ -78866,6 +79111,28 @@
       "confidence_score": 1.0,
       "source": "app_dock_installer",
       "target": "app_dock_installer_uninstalloptions"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "app_dock_installer",
+      "target": "app_project_operation_lock",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "app_dock_installer",
+      "target": "app_project_operation_lock_projectoperationlock",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -79615,6 +79882,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L122",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller",
+      "target": "app_dock_installer_dockinstaller_installlocked",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L362",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -79670,6 +79947,16 @@
       "confidence_score": 1.0,
       "source": "app_dock_installer_dockinstaller",
       "target": "app_dock_installer_dockinstaller_uninstall"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L474",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller",
+      "target": "app_dock_installer_dockinstaller_uninstalllocked",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -79808,6 +80095,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L116",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_install",
+      "target": "app_dock_installer_dockinstaller_installlocked",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L161",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -79895,6 +80193,105 @@
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L295",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
+      "target": "app_dock_installer_dockinstaller_cleanupfailednewinstall",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L179",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
+      "target": "app_dock_installer_dockinstaller_collectmanifestfiles",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L235",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
+      "target": "app_dock_installer_dockinstaller_nestedprogress",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L126",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
+      "target": "app_dock_installer_dockinstaller_progress",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L215",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
+      "target": "app_dock_installer_dockinstaller_removedocktools",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L216",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
+      "target": "app_dock_installer_dockinstaller_removeunusedruntimeshims",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L204",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
+      "target": "app_dock_installer_dockinstaller_seedworkdir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L134",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
+      "target": "domain_manifest_assertversionsatisfiesselector"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L123",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_installlocked",
+      "target": "src_platform_detectplatform"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L410",
@@ -79950,6 +80347,17 @@
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L468",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_uninstall",
+      "target": "app_dock_installer_dockinstaller_uninstalllocked",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "packages/cli/src/core/app/dock-installer.ts",
       "source_location": "L307",
@@ -79967,6 +80375,50 @@
       "weight": 1.0,
       "source": "app_dock_installer_dockinstaller_uninstall",
       "target": "runtime_dependency_runner_removeinstalleddependencyoutputs"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L476",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_uninstalllocked",
+      "target": "app_dock_installer_dockinstaller_progress",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L556",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_uninstalllocked",
+      "target": "app_dock_installer_dockinstaller_removedocktools",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L557",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_uninstalllocked",
+      "target": "app_dock_installer_dockinstaller_removeunusedruntimeshims",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/dock-installer.ts",
+      "source_location": "L555",
+      "weight": 1.0,
+      "source": "app_dock_installer_dockinstaller_uninstalllocked",
+      "target": "files_path_utils_pruneemptydirectorychain"
     },
     {
       "relation": "references",
@@ -80143,6 +80595,208 @@
       "confidence_score": 1.0,
       "source": "app_dock_installer_dockinstaller_nestedprogress",
       "target": "runtime_progress_progressreporter"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "app_project_operation_lock",
+      "target": "app_project_operation_lock_lockowner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L136",
+      "weight": 1.0,
+      "source": "app_project_operation_lock",
+      "target": "app_project_operation_lock_processexists",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "app_project_operation_lock",
+      "target": "app_project_operation_lock_projectoperationlock",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "app_project_operation_lock",
+      "target": "app_project_operation_lock_readowner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "app_project_operation_lock",
+      "target": "files_path_utils",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "app_project_operation_lock",
+      "target": "files_path_utils_assertrealdirectorypath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "app_project_operation_lock",
+      "target": "files_path_utils_ensurerealdirectorypath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "app_project_operation_lock",
+      "target": "files_path_utils_pruneemptydirectorychain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/tests/security-regression.test.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "tests_security_regression_test",
+      "target": "app_project_operation_lock",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "app_project_operation_lock_projectoperationlock",
+      "target": "app_project_operation_lock_projectoperationlock_acquire",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "app_project_operation_lock_projectoperationlock",
+      "target": "app_project_operation_lock_projectoperationlock_constructor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "app_project_operation_lock_projectoperationlock",
+      "target": "app_project_operation_lock_projectoperationlock_release",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/tests/security-regression.test.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "tests_security_regression_test",
+      "target": "app_project_operation_lock_projectoperationlock",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "app_project_operation_lock_projectoperationlock_acquire",
+      "target": "app_project_operation_lock_processexists",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "app_project_operation_lock_projectoperationlock_acquire",
+      "target": "app_project_operation_lock_readowner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "app_project_operation_lock_projectoperationlock_acquire",
+      "target": "files_path_utils_ensurerealdirectorypath"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "app_project_operation_lock_projectoperationlock_release",
+      "target": "app_project_operation_lock_readowner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L85",
+      "weight": 1.0,
+      "source": "app_project_operation_lock_projectoperationlock_release",
+      "target": "files_path_utils_pruneemptydirectorychain"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/app/project-operation-lock.ts",
+      "source_location": "L94",
+      "weight": 1.0,
+      "source": "app_project_operation_lock_readowner",
+      "target": "files_path_utils_assertrealdirectorypath",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -83671,6 +84325,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L347",
+      "weight": 1.0,
+      "source": "domain_state_store",
+      "target": "domain_state_store_assertstatefilesagree",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L364",
+      "weight": 1.0,
+      "source": "domain_state_store",
+      "target": "domain_state_store_assertuniquedockids",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
       "source_location": "L52",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -83761,11 +84435,71 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L266",
+      "weight": 1.0,
+      "source": "domain_state_store",
+      "target": "domain_state_store_parselockstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L279",
+      "weight": 1.0,
+      "source": "domain_state_store",
+      "target": "domain_state_store_parseprojectstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L306",
+      "weight": 1.0,
+      "source": "domain_state_store",
+      "target": "domain_state_store_parsestatedocument",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L398",
+      "weight": 1.0,
+      "source": "domain_state_store",
+      "target": "domain_state_store_processexists",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
       "source_location": "L31",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "domain_state_store",
       "target": "domain_state_store_projectstate"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L373",
+      "weight": 1.0,
+      "source": "domain_state_store",
+      "target": "domain_state_store_requirerecord",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L380",
+      "weight": 1.0,
+      "source": "domain_state_store",
+      "target": "domain_state_store_requirestring",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -83850,6 +84584,17 @@
       "confidence_score": 1.0,
       "source": "domain_state_store",
       "target": "src_platform"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "domain_state_store",
+      "target": "src_platform_isopendockplatform",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -84141,6 +84886,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L223",
+      "weight": 1.0,
+      "source": "domain_state_store_opendockstatestore",
+      "target": "domain_state_store_opendockstatestore_assertoperationlocksafe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
       "source_location": "L120",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -84340,6 +85095,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L224",
+      "weight": 1.0,
+      "source": "domain_state_store_opendockstatestore_assertoperationlocksafe",
+      "target": "domain_state_store_opendockstatestore_opendockdir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
       "source_location": "L60",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -84378,6 +85144,17 @@
       "confidence_score": 1.0,
       "source": "domain_state_store_opendockstatestore_hasstate",
       "target": "domain_state_store_opendockstatestore_projectpath"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "domain_state_store_opendockstatestore_readlock",
+      "target": "domain_state_store_opendockstatestore_projectpath",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -84450,11 +85227,66 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L123",
+      "weight": 1.0,
+      "source": "domain_state_store_opendockstatestore_hasstate",
+      "target": "domain_state_store_opendockstatestore_readlock",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L113",
+      "weight": 1.0,
+      "source": "domain_state_store_opendockstatestore_readlock",
+      "target": "domain_state_store_assertstatefilesagree",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L99",
+      "weight": 1.0,
+      "source": "domain_state_store_opendockstatestore_readlock",
+      "target": "domain_state_store_opendockstatestore_assertoperationlocksafe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
       "source_location": "L64",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "domain_state_store_opendockstatestore_readlock",
       "target": "domain_state_store_opendockstatestore_assertstatepathssafe"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L111",
+      "weight": 1.0,
+      "source": "domain_state_store_opendockstatestore_readlock",
+      "target": "domain_state_store_parselockstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L112",
+      "weight": 1.0,
+      "source": "domain_state_store_opendockstatestore_readlock",
+      "target": "domain_state_store_parseprojectstate",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -84477,6 +85309,17 @@
       "confidence_score": 1.0,
       "source": "domain_state_store_opendockstatestore_savedock",
       "target": "domain_state_store_opendockstatestore_readlock"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L118",
+      "weight": 1.0,
+      "source": "domain_state_store_opendockstatestore_hasstate",
+      "target": "domain_state_store_opendockstatestore_assertoperationlocksafe",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -84576,6 +85419,127 @@
       "weight": 1.0,
       "source": "domain_state_store_opendockstatestore_assertstatepathssafe",
       "target": "files_path_utils_assertrealdirectorypath"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L225",
+      "weight": 1.0,
+      "source": "domain_state_store_opendockstatestore_assertoperationlocksafe",
+      "target": "domain_state_store_lstatifpresent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L255",
+      "weight": 1.0,
+      "source": "domain_state_store_opendockstatestore_assertoperationlocksafe",
+      "target": "domain_state_store_processexists",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L275",
+      "weight": 1.0,
+      "source": "domain_state_store_parselockstate",
+      "target": "domain_state_store_assertuniquedockids",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L267",
+      "weight": 1.0,
+      "source": "domain_state_store_parselockstate",
+      "target": "domain_state_store_parsestatedocument",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L302",
+      "weight": 1.0,
+      "source": "domain_state_store_parseprojectstate",
+      "target": "domain_state_store_assertuniquedockids",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L280",
+      "weight": 1.0,
+      "source": "domain_state_store_parseprojectstate",
+      "target": "domain_state_store_parsestatedocument",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L290",
+      "weight": 1.0,
+      "source": "domain_state_store_parseprojectstate",
+      "target": "src_platform_isopendockplatform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L313",
+      "weight": 1.0,
+      "source": "domain_state_store_parsestatedocument",
+      "target": "domain_state_store_requirerecord",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L321",
+      "weight": 1.0,
+      "source": "domain_state_store_normalizeinstalleddockrecord",
+      "target": "domain_state_store_requirerecord",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L322",
+      "weight": 1.0,
+      "source": "domain_state_store_normalizeinstalleddockrecord",
+      "target": "domain_state_store_requirestring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/cli/src/core/domain/state-store.ts",
+      "source_location": "L323",
+      "weight": 1.0,
+      "source": "domain_state_store_normalizeinstalleddockrecord",
+      "target": "src_platform_isopendockplatform",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -105858,9 +106822,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_changelog",
-      "target": "changelog_0_2_12_2026_07_13",
-      "confidence_score": 1.0
+      "target": "changelog_0_2_12_2026_07_13"
     },
     {
       "relation": "contains",
@@ -105988,9 +106952,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_12_2026_07_13",
-      "target": "changelog_cli",
-      "confidence_score": 1.0
+      "target": "changelog_cli"
     },
     {
       "relation": "contains",
@@ -105998,9 +106962,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_12_2026_07_13",
-      "target": "changelog_desktop_app",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app"
     },
     {
       "relation": "contains",
@@ -106408,9 +107372,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_11_2026_07_13",
-      "target": "changelog_cli_31",
-      "confidence_score": 1.0
+      "target": "changelog_cli_31"
     },
     {
       "relation": "contains",
@@ -106418,9 +107382,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_10_2026_07_13",
-      "target": "changelog_cli_48",
-      "confidence_score": 1.0
+      "target": "changelog_cli_48"
     },
     {
       "relation": "contains",
@@ -106428,9 +107392,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_10_2026_07_13",
-      "target": "changelog_desktop_app_53",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_53"
     },
     {
       "relation": "contains",
@@ -106438,9 +107402,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_9_2026_07_06",
-      "target": "changelog_cli_59",
-      "confidence_score": 1.0
+      "target": "changelog_cli_59"
     },
     {
       "relation": "contains",
@@ -106458,9 +107422,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_8_2026_07_05",
-      "target": "changelog_cli_65",
-      "confidence_score": 1.0
+      "target": "changelog_cli_65"
     },
     {
       "relation": "contains",
@@ -106478,9 +107442,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L75",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_7_2026_07_05",
-      "target": "changelog_cli_75",
-      "confidence_score": 1.0
+      "target": "changelog_cli_75"
     },
     {
       "relation": "contains",
@@ -106498,9 +107462,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_6_2026_07_05",
-      "target": "changelog_cli_81",
-      "confidence_score": 1.0
+      "target": "changelog_cli_81"
     },
     {
       "relation": "contains",
@@ -106508,9 +107472,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_5_2026_07_04",
-      "target": "changelog_desktop_app_87",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_87"
     },
     {
       "relation": "contains",
@@ -106518,9 +107482,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L94",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_4_2026_07_04",
-      "target": "changelog_cli_94",
-      "confidence_score": 1.0
+      "target": "changelog_cli_94"
     },
     {
       "relation": "contains",
@@ -106528,9 +107492,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_4_2026_07_04",
-      "target": "changelog_desktop_app_101",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_101"
     },
     {
       "relation": "contains",
@@ -106538,9 +107502,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L108",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_3_2026_07_03",
-      "target": "changelog_cli_108",
-      "confidence_score": 1.0
+      "target": "changelog_cli_108"
     },
     {
       "relation": "contains",
@@ -106548,9 +107512,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L114",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_3_2026_07_03",
-      "target": "changelog_desktop_app_114",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_114"
     },
     {
       "relation": "contains",
@@ -106558,9 +107522,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L120",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_2_2026_07_02",
-      "target": "changelog_cli_120",
-      "confidence_score": 1.0
+      "target": "changelog_cli_120"
     },
     {
       "relation": "contains",
@@ -106568,9 +107532,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L125",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_2_2026_07_02",
-      "target": "changelog_desktop_app_125",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_125"
     },
     {
       "relation": "contains",
@@ -106578,9 +107542,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L131",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_1_2026_07_02",
-      "target": "changelog_desktop_app_131",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_131"
     },
     {
       "relation": "contains",
@@ -106588,9 +107552,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L137",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_0_2026_07_02",
-      "target": "changelog_cli_137",
-      "confidence_score": 1.0
+      "target": "changelog_cli_137"
     },
     {
       "relation": "contains",
@@ -106598,9 +107562,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L143",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_2_0_2026_07_02",
-      "target": "changelog_desktop_app_143",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_143"
     },
     {
       "relation": "contains",
@@ -106608,9 +107572,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L149",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_60_2026_07_02",
-      "target": "changelog_desktop_app_149",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_149"
     },
     {
       "relation": "contains",
@@ -106618,9 +107582,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L156",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_59_2026_07_02",
-      "target": "changelog_desktop_app_156",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_156"
     },
     {
       "relation": "contains",
@@ -106628,9 +107592,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L163",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_58_2026_07_02",
-      "target": "changelog_desktop_app_163",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_163"
     },
     {
       "relation": "contains",
@@ -106638,9 +107602,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L171",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_57_2026_07_02",
-      "target": "changelog_desktop_app_171",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_171"
     },
     {
       "relation": "contains",
@@ -106648,9 +107612,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L179",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_56_2026_07_01",
-      "target": "changelog_desktop_app_179",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_179"
     },
     {
       "relation": "contains",
@@ -106668,9 +107632,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_55_2026_07_01",
-      "target": "changelog_cli_186",
-      "confidence_score": 1.0
+      "target": "changelog_cli_186"
     },
     {
       "relation": "contains",
@@ -106678,9 +107642,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L191",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_55_2026_07_01",
-      "target": "changelog_desktop_app_191",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_191"
     },
     {
       "relation": "contains",
@@ -106688,9 +107652,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L198",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_54_2026_07_01",
-      "target": "changelog_desktop_app_198",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_198"
     },
     {
       "relation": "contains",
@@ -106698,9 +107662,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L207",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_53_2026_07_01",
-      "target": "changelog_desktop_app_207",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_207"
     },
     {
       "relation": "contains",
@@ -106708,9 +107672,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L218",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_52_2026_07_01",
-      "target": "changelog_desktop_app_218",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_218"
     },
     {
       "relation": "contains",
@@ -106718,9 +107682,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L225",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_51_2026_07_01",
-      "target": "changelog_desktop_app_225",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_225"
     },
     {
       "relation": "contains",
@@ -106728,9 +107692,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L232",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_50_2026_07_01",
-      "target": "changelog_desktop_app_232",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_232"
     },
     {
       "relation": "contains",
@@ -106738,9 +107702,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L239",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_49_2026_07_01",
-      "target": "changelog_desktop_app_239",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_239"
     },
     {
       "relation": "contains",
@@ -106748,9 +107712,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L248",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_48_2026_07_01",
-      "target": "changelog_desktop_app_248",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_248"
     },
     {
       "relation": "contains",
@@ -106758,9 +107722,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L255",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_47_2026_07_01",
-      "target": "changelog_cli_255",
-      "confidence_score": 1.0
+      "target": "changelog_cli_255"
     },
     {
       "relation": "contains",
@@ -106768,9 +107732,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L260",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_47_2026_07_01",
-      "target": "changelog_desktop_app_260",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_260"
     },
     {
       "relation": "contains",
@@ -106778,9 +107742,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L269",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_46_2026_06_30",
-      "target": "changelog_cli_269",
-      "confidence_score": 1.0
+      "target": "changelog_cli_269"
     },
     {
       "relation": "contains",
@@ -106788,9 +107752,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L274",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_46_2026_06_30",
-      "target": "changelog_desktop_app_274",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_274"
     },
     {
       "relation": "contains",
@@ -106798,9 +107762,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L283",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_45_2026_06_30",
-      "target": "changelog_ci_283",
-      "confidence_score": 1.0
+      "target": "changelog_ci_283"
     },
     {
       "relation": "contains",
@@ -106808,9 +107772,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L290",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_44_2026_06_30",
-      "target": "changelog_cli_290",
-      "confidence_score": 1.0
+      "target": "changelog_cli_290"
     },
     {
       "relation": "contains",
@@ -106818,9 +107782,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L298",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_44_2026_06_30",
-      "target": "changelog_desktop_app_298",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_298"
     },
     {
       "relation": "contains",
@@ -106828,9 +107792,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L305",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_43_2026_06_26",
-      "target": "changelog_cli_305",
-      "confidence_score": 1.0
+      "target": "changelog_cli_305"
     },
     {
       "relation": "contains",
@@ -106838,9 +107802,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L310",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_43_2026_06_26",
-      "target": "changelog_desktop_app_310",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_310"
     },
     {
       "relation": "contains",
@@ -106848,9 +107812,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L316",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_42_2026_06_23",
-      "target": "changelog_desktop_app_316",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_316"
     },
     {
       "relation": "contains",
@@ -106858,9 +107822,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L323",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_41_2026_06_23",
-      "target": "changelog_cli_323",
-      "confidence_score": 1.0
+      "target": "changelog_cli_323"
     },
     {
       "relation": "contains",
@@ -106888,9 +107852,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L337",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_40_2026_06_23",
-      "target": "changelog_desktop_app_337",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_337"
     },
     {
       "relation": "contains",
@@ -106898,9 +107862,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L344",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_39_2026_06_23",
-      "target": "changelog_cli_344",
-      "confidence_score": 1.0
+      "target": "changelog_cli_344"
     },
     {
       "relation": "contains",
@@ -106908,9 +107872,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L351",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_38_2026_06_22",
-      "target": "changelog_desktop_app_351",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_351"
     },
     {
       "relation": "contains",
@@ -106918,9 +107882,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L361",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_37_2026_06_22",
-      "target": "changelog_desktop_app_361",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_361"
     },
     {
       "relation": "contains",
@@ -106928,9 +107892,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L368",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_36_2026_06_22",
-      "target": "changelog_cli_368",
-      "confidence_score": 1.0
+      "target": "changelog_cli_368"
     },
     {
       "relation": "contains",
@@ -106938,9 +107902,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L373",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_36_2026_06_22",
-      "target": "changelog_desktop_app_373",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_373"
     },
     {
       "relation": "contains",
@@ -106948,9 +107912,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L382",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_35_2026_06_19",
-      "target": "changelog_cli_382",
-      "confidence_score": 1.0
+      "target": "changelog_cli_382"
     },
     {
       "relation": "contains",
@@ -106958,9 +107922,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L387",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_35_2026_06_19",
-      "target": "changelog_desktop_app_387",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_387"
     },
     {
       "relation": "contains",
@@ -106968,9 +107932,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L394",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_34_2026_06_17",
-      "target": "changelog_cli_394",
-      "confidence_score": 1.0
+      "target": "changelog_cli_394"
     },
     {
       "relation": "contains",
@@ -106978,9 +107942,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L401",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_34_2026_06_17",
-      "target": "changelog_desktop_app_401",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_401"
     },
     {
       "relation": "contains",
@@ -106988,9 +107952,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L407",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_33_2026_06_17",
-      "target": "changelog_cli_407",
-      "confidence_score": 1.0
+      "target": "changelog_cli_407"
     },
     {
       "relation": "contains",
@@ -106998,9 +107962,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L414",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_32_2026_06_17",
-      "target": "changelog_cli_414",
-      "confidence_score": 1.0
+      "target": "changelog_cli_414"
     },
     {
       "relation": "contains",
@@ -107008,9 +107972,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L418",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_32_2026_06_17",
-      "target": "changelog_docs_418",
-      "confidence_score": 1.0
+      "target": "changelog_docs_418"
     },
     {
       "relation": "contains",
@@ -107018,9 +107982,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L424",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_30_2026_06_16",
-      "target": "changelog_cli_424",
-      "confidence_score": 1.0
+      "target": "changelog_cli_424"
     },
     {
       "relation": "contains",
@@ -107028,9 +107992,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L428",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_30_2026_06_16",
-      "target": "changelog_desktop_app_428",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_428"
     },
     {
       "relation": "contains",
@@ -107038,9 +108002,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L433",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_30_2026_06_16",
-      "target": "changelog_docs_433",
-      "confidence_score": 1.0
+      "target": "changelog_docs_433"
     },
     {
       "relation": "contains",
@@ -107068,9 +108032,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L451",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_29_2026_06_16",
-      "target": "changelog_tests_451",
-      "confidence_score": 1.0
+      "target": "changelog_tests_451"
     },
     {
       "relation": "contains",
@@ -107078,9 +108042,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L457",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_28_2026_06_16",
-      "target": "changelog_cli_457",
-      "confidence_score": 1.0
+      "target": "changelog_cli_457"
     },
     {
       "relation": "contains",
@@ -107088,9 +108052,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L464",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_28_2026_06_16",
-      "target": "changelog_tests_464",
-      "confidence_score": 1.0
+      "target": "changelog_tests_464"
     },
     {
       "relation": "contains",
@@ -107098,9 +108062,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L471",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_27_2026_06_16",
-      "target": "changelog_desktop_app_471",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_471"
     },
     {
       "relation": "contains",
@@ -107108,9 +108072,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L477",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_27_2026_06_16",
-      "target": "changelog_tests_477",
-      "confidence_score": 1.0
+      "target": "changelog_tests_477"
     },
     {
       "relation": "contains",
@@ -107118,9 +108082,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L484",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_26_2026_06_16",
-      "target": "changelog_desktop_app_484",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_484"
     },
     {
       "relation": "contains",
@@ -107128,9 +108092,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L492",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_26_2026_06_16",
-      "target": "changelog_tests_492",
-      "confidence_score": 1.0
+      "target": "changelog_tests_492"
     },
     {
       "relation": "contains",
@@ -107138,9 +108102,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L499",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_25_2026_06_15",
-      "target": "changelog_desktop_app_499",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_499"
     },
     {
       "relation": "contains",
@@ -107148,9 +108112,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L506",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_25_2026_06_15",
-      "target": "changelog_tests_506",
-      "confidence_score": 1.0
+      "target": "changelog_tests_506"
     },
     {
       "relation": "contains",
@@ -107158,9 +108122,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L513",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_24_2026_06_15",
-      "target": "changelog_fixed_513",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_513"
     },
     {
       "relation": "contains",
@@ -107168,9 +108132,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L521",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_24_2026_06_15",
-      "target": "changelog_tests_521",
-      "confidence_score": 1.0
+      "target": "changelog_tests_521"
     },
     {
       "relation": "contains",
@@ -107188,9 +108152,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L535",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_23_2026_06_15",
-      "target": "changelog_desktop_app_535",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_535"
     },
     {
       "relation": "contains",
@@ -107198,9 +108162,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L542",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_22_2026_06_15",
-      "target": "changelog_changed_542",
-      "confidence_score": 1.0
+      "target": "changelog_changed_542"
     },
     {
       "relation": "contains",
@@ -107208,9 +108172,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L548",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_22_2026_06_15",
-      "target": "changelog_desktop_app_548",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_548"
     },
     {
       "relation": "contains",
@@ -107218,9 +108182,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L554",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_22_2026_06_15",
-      "target": "changelog_tests_554",
-      "confidence_score": 1.0
+      "target": "changelog_tests_554"
     },
     {
       "relation": "contains",
@@ -107248,9 +108212,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L566",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_21_2026_06_15",
-      "target": "changelog_desktop_app_566",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_566"
     },
     {
       "relation": "contains",
@@ -107258,9 +108222,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L573",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_21_2026_06_15",
-      "target": "changelog_tests_573",
-      "confidence_score": 1.0
+      "target": "changelog_tests_573"
     },
     {
       "relation": "contains",
@@ -107268,9 +108232,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L580",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_20_2026_06_15",
-      "target": "changelog_changed_580",
-      "confidence_score": 1.0
+      "target": "changelog_changed_580"
     },
     {
       "relation": "contains",
@@ -107278,9 +108242,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L589",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_20_2026_06_15",
-      "target": "changelog_desktop_app_589",
-      "confidence_score": 1.0
+      "target": "changelog_desktop_app_589"
     },
     {
       "relation": "contains",
@@ -107288,9 +108252,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L596",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_19_2026_06_15",
-      "target": "changelog_changed_596",
-      "confidence_score": 1.0
+      "target": "changelog_changed_596"
     },
     {
       "relation": "contains",
@@ -107298,9 +108262,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L604",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_19_2026_06_15",
-      "target": "changelog_tests_604",
-      "confidence_score": 1.0
+      "target": "changelog_tests_604"
     },
     {
       "relation": "contains",
@@ -107308,9 +108272,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L610",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_18_2026_06_15",
-      "target": "changelog_added_610",
-      "confidence_score": 1.0
+      "target": "changelog_added_610"
     },
     {
       "relation": "contains",
@@ -107318,9 +108282,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L615",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_18_2026_06_15",
-      "target": "changelog_tests_615",
-      "confidence_score": 1.0
+      "target": "changelog_tests_615"
     },
     {
       "relation": "contains",
@@ -107328,9 +108292,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L621",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_17_2026_06_15",
-      "target": "changelog_changed_621",
-      "confidence_score": 1.0
+      "target": "changelog_changed_621"
     },
     {
       "relation": "contains",
@@ -107338,9 +108302,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L626",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_17_2026_06_15",
-      "target": "changelog_tests_626",
-      "confidence_score": 1.0
+      "target": "changelog_tests_626"
     },
     {
       "relation": "contains",
@@ -107348,9 +108312,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L633",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_16_2026_06_15",
-      "target": "changelog_added_633",
-      "confidence_score": 1.0
+      "target": "changelog_added_633"
     },
     {
       "relation": "contains",
@@ -107358,9 +108322,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L638",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_16_2026_06_15",
-      "target": "changelog_changed_638",
-      "confidence_score": 1.0
+      "target": "changelog_changed_638"
     },
     {
       "relation": "contains",
@@ -107368,9 +108332,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L644",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_16_2026_06_15",
-      "target": "changelog_tests_644",
-      "confidence_score": 1.0
+      "target": "changelog_tests_644"
     },
     {
       "relation": "contains",
@@ -107378,9 +108342,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L651",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_15_2026_06_15",
-      "target": "changelog_added_651",
-      "confidence_score": 1.0
+      "target": "changelog_added_651"
     },
     {
       "relation": "contains",
@@ -107388,9 +108352,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L655",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_15_2026_06_15",
-      "target": "changelog_changed_655",
-      "confidence_score": 1.0
+      "target": "changelog_changed_655"
     },
     {
       "relation": "contains",
@@ -107398,9 +108362,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L659",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_15_2026_06_15",
-      "target": "changelog_tests_659",
-      "confidence_score": 1.0
+      "target": "changelog_tests_659"
     },
     {
       "relation": "contains",
@@ -107408,9 +108372,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L665",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_14_2026_06_12",
-      "target": "changelog_added_665",
-      "confidence_score": 1.0
+      "target": "changelog_added_665"
     },
     {
       "relation": "contains",
@@ -107418,9 +108382,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L670",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_14_2026_06_12",
-      "target": "changelog_changed_670",
-      "confidence_score": 1.0
+      "target": "changelog_changed_670"
     },
     {
       "relation": "contains",
@@ -107428,9 +108392,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L674",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_14_2026_06_12",
-      "target": "changelog_tests_674",
-      "confidence_score": 1.0
+      "target": "changelog_tests_674"
     },
     {
       "relation": "contains",
@@ -107438,9 +108402,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L681",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_13_2026_06_12",
-      "target": "changelog_changed_681",
-      "confidence_score": 1.0
+      "target": "changelog_changed_681"
     },
     {
       "relation": "contains",
@@ -107448,9 +108412,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L689",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_13_2026_06_12",
-      "target": "changelog_tests_689",
-      "confidence_score": 1.0
+      "target": "changelog_tests_689"
     },
     {
       "relation": "contains",
@@ -107458,9 +108422,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L696",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_12_2026_06_12",
-      "target": "changelog_changed_696",
-      "confidence_score": 1.0
+      "target": "changelog_changed_696"
     },
     {
       "relation": "contains",
@@ -107478,9 +108442,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L703",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_11_2026_06_12",
-      "target": "changelog_changed_703",
-      "confidence_score": 1.0
+      "target": "changelog_changed_703"
     },
     {
       "relation": "contains",
@@ -107488,9 +108452,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L710",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_10_2026_06_12",
-      "target": "changelog_added_710",
-      "confidence_score": 1.0
+      "target": "changelog_added_710"
     },
     {
       "relation": "contains",
@@ -107498,9 +108462,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L715",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_10_2026_06_12",
-      "target": "changelog_changed_715",
-      "confidence_score": 1.0
+      "target": "changelog_changed_715"
     },
     {
       "relation": "contains",
@@ -107508,9 +108472,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L720",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_10_2026_06_12",
-      "target": "changelog_tests_720",
-      "confidence_score": 1.0
+      "target": "changelog_tests_720"
     },
     {
       "relation": "contains",
@@ -107528,9 +108492,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L734",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_9_2026_06_12",
-      "target": "changelog_changed_734",
-      "confidence_score": 1.0
+      "target": "changelog_changed_734"
     },
     {
       "relation": "contains",
@@ -107538,9 +108502,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L727",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_9_2026_06_12",
-      "target": "changelog_fixed_727",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_727"
     },
     {
       "relation": "contains",
@@ -107548,9 +108512,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L741",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_9_2026_06_12",
-      "target": "changelog_tests_741",
-      "confidence_score": 1.0
+      "target": "changelog_tests_741"
     },
     {
       "relation": "contains",
@@ -107558,9 +108522,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L748",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_8_2026_06_12",
-      "target": "changelog_added_748",
-      "confidence_score": 1.0
+      "target": "changelog_added_748"
     },
     {
       "relation": "contains",
@@ -107568,9 +108532,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L754",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_8_2026_06_12",
-      "target": "changelog_changed_754",
-      "confidence_score": 1.0
+      "target": "changelog_changed_754"
     },
     {
       "relation": "contains",
@@ -107578,9 +108542,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L761",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_8_2026_06_12",
-      "target": "changelog_tests_761",
-      "confidence_score": 1.0
+      "target": "changelog_tests_761"
     },
     {
       "relation": "contains",
@@ -107588,9 +108552,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L769",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_7_2026_06_12",
-      "target": "changelog_changed_769",
-      "confidence_score": 1.0
+      "target": "changelog_changed_769"
     },
     {
       "relation": "contains",
@@ -107598,9 +108562,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L775",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_7_2026_06_12",
-      "target": "changelog_tests_775",
-      "confidence_score": 1.0
+      "target": "changelog_tests_775"
     },
     {
       "relation": "contains",
@@ -107608,9 +108572,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L782",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_6_2026_06_12",
-      "target": "changelog_fixed_782",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_782"
     },
     {
       "relation": "contains",
@@ -107618,9 +108582,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L789",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_6_2026_06_12",
-      "target": "changelog_tests_789",
-      "confidence_score": 1.0
+      "target": "changelog_tests_789"
     },
     {
       "relation": "contains",
@@ -107628,9 +108592,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L797",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_5_2026_06_12",
-      "target": "changelog_changed_797",
-      "confidence_score": 1.0
+      "target": "changelog_changed_797"
     },
     {
       "relation": "contains",
@@ -107638,9 +108602,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L806",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_5_2026_06_12",
-      "target": "changelog_tests_806",
-      "confidence_score": 1.0
+      "target": "changelog_tests_806"
     },
     {
       "relation": "contains",
@@ -107648,9 +108612,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L815",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_4_2026_06_12",
-      "target": "changelog_fixed_815",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_815"
     },
     {
       "relation": "contains",
@@ -107658,9 +108622,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L820",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_4_2026_06_12",
-      "target": "changelog_tests_820",
-      "confidence_score": 1.0
+      "target": "changelog_tests_820"
     },
     {
       "relation": "contains",
@@ -107668,9 +108632,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L827",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_3_2026_06_12",
-      "target": "changelog_fixed_827",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_827"
     },
     {
       "relation": "contains",
@@ -107678,9 +108642,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L835",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_3_2026_06_12",
-      "target": "changelog_tests_835",
-      "confidence_score": 1.0
+      "target": "changelog_tests_835"
     },
     {
       "relation": "contains",
@@ -107698,9 +108662,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L846",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_2_2026_06_12",
-      "target": "changelog_fixed_846",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_846"
     },
     {
       "relation": "contains",
@@ -107708,9 +108672,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L856",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_1_2026_06_12",
-      "target": "changelog_fixed_856",
-      "confidence_score": 1.0
+      "target": "changelog_fixed_856"
     },
     {
       "relation": "contains",
@@ -107718,9 +108682,9 @@
       "source_file": "CHANGELOG.md",
       "source_location": "L864",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "changelog_0_1_0_2026_06_07",
-      "target": "changelog_added_864",
-      "confidence_score": 1.0
+      "target": "changelog_added_864"
     },
     {
       "relation": "references",
@@ -129354,5 +130318,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "c468765b014dfd1c10e9d4ad0c055856ca856c1e"
+  "built_at_commit": "b4b5b60193ec0227280d7e0a05a096699ce3f0ca"
 }
