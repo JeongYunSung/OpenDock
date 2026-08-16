@@ -23,7 +23,7 @@ excluded unless they are bundled into a distributed artifact.
 | commander@14.0.3 | MIT | git+https://github.com/tj/commander.js.git |
 | minipass@7.1.3 | BlueOak-1.0.0 | https://github.com/isaacs/minipass |
 | minizlib@3.1.0 | MIT | git+https://github.com/isaacs/minizlib.git |
-| tar@7.5.16 | BlueOak-1.0.0 | https://github.com/isaacs/node-tar.git |
+| tar@7.5.22 | BlueOak-1.0.0 | https://github.com/isaacs/node-tar.git |
 | yallist@5.0.0 | BlueOak-1.0.0 | git+https://github.com/isaacs/yallist.git |
 | yaml@2.9.0 | ISC | github:eemeli/yaml |
 | zod@4.4.3 | MIT | git+https://github.com/colinhacks/zod.git |
