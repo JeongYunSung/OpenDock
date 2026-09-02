@@ -20,6 +20,8 @@ to update or remove.
 
 ---
 
+[Privacy policy](https://opendock.app/privacy/) · [Code signing policy](https://opendock.app/code-signing/)
+
 OpenDock helps you add AI setup to a project without rebuilding the same files
 and tool steps by hand.
 

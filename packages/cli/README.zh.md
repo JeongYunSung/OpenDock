@@ -19,6 +19,8 @@
 
 ---
 
+[隐私政策](https://opendock.app/privacy/) · [代码签名政策](https://opendock.app/code-signing/)
+
 OpenDock 帮你把 AI setup 加到项目里，不用每次都手动复制同样的文件和工具步骤。
 
 不必在每个项目里手动复制 prompts、创建配置文件、安装工具并重复同样的步骤。

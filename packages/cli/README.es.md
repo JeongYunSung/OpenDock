@@ -20,6 +20,8 @@ fáciles de actualizar o eliminar.
 
 ---
 
+[Política de privacidad](https://opendock.app/privacy/) · [Política de firma de código](https://opendock.app/code-signing/)
+
 OpenDock te ayuda a agregar setup de IA a un proyecto sin reconstruir los mismos
 archivos y pasos de herramientas a mano.
 

@@ -20,6 +20,8 @@ halte sie leicht aktualisierbar oder entfernbar.
 
 ---
 
+[Datenschutzerklärung](https://opendock.app/privacy/) · [Richtlinie zur Codesignierung](https://opendock.app/code-signing/)
+
 OpenDock hilft dir, KI-Setup in Projekte zu bringen, ohne die gleichen Dateien
 und Tool-Schritte immer wieder von Hand zu bauen.
 
