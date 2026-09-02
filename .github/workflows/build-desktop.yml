@@ -295,7 +295,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_RELEASES_TOKEN || secrets.GH_PACKAGES_TOKEN || github.token }}
           PUBLIC_RELEASE_REPOSITORY: JeongYunSung/OpenDockReleases
-          RELEASE_BODY: ${{ github.event.release.body }}
           RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           RELEASE_TITLE: ${{ github.event.release.name }}
@@ -304,7 +303,14 @@ jobs:
 
           release_title="${RELEASE_TITLE:-$RELEASE_TAG}"
           notes_file="$(mktemp)"
-          printf '%s\n' "$RELEASE_BODY" > "$notes_file"
+          gh release view "$RELEASE_TAG" --repo "${{ github.repository }}" --json body --jq '.body' > "$notes_file"
+          if ! grep -Fq 'https://opendock.app/code-signing/' "$notes_file"; then
+            printf '\n## Code signing policy\n\n[Code signing policy](https://opendock.app/code-signing/)\n' >> "$notes_file"
+          fi
+          if ! grep -Fq 'https://opendock.app/privacy/' "$notes_file"; then
+            printf '\n[Privacy policy](https://opendock.app/privacy/)\n' >> "$notes_file"
+          fi
+          gh release edit "$RELEASE_TAG" --repo "${{ github.repository }}" --notes-file "$notes_file"
 
           release_flags=()
           if [ "$RELEASE_PRERELEASE" = "true" ]; then
