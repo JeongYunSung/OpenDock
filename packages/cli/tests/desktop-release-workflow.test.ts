@@ -35,27 +35,21 @@ function githubExpression(expression: string): string {
 
 describe("Desktop release workflow", () => {
   it.skipIf(process.platform === "win32")(
-    "adds policy links without losing release notes or duplicating links on rerun",
+    "reads source release notes without changing their contents on rerun",
     () => {
       const publish = readWorkflow().jobs?.["publish-updater-manifest"];
       const upload = publish?.steps?.find((step) => step.name === "Upload latest.json");
       const script = upload?.run?.split("release_flags=()")[0];
       expect(script).toContain("gh release view");
       expect(script).not.toContain("$RELEASE_BODY");
-      if (!script) throw new Error("Missing release note update script");
-      const directory = mkdtempSync(join(tmpdir(), "opendock-release-policies-"));
+      if (!script) throw new Error("Missing release note read script");
+      const directory = mkdtempSync(join(tmpdir(), "opendock-release-notes-"));
       try {
         const notes = join(directory, "notes.md");
         writeFileSync(
           join(directory, "gh"),
           `#!/bin/sh
 if [ "$2" = "view" ]; then cat "$TEST_NOTES"; exit 0; fi
-if [ "$2" = "edit" ]; then
-  while [ "$#" -gt 0 ]; do
-    if [ "$1" = "--notes-file" ]; then cp "$2" "$TEST_NOTES"; exit 0; fi
-    shift
-  done
-fi
 exit 1
 `,
           { mode: 0o755 },
@@ -63,7 +57,7 @@ exit 1
         for (const initial of [
           "",
           "Existing release notes\n\n- Fixed a bug.\n",
-          "[Privacy policy](https://opendock.app/privacy/)\n",
+          "Release notes with no trailing newline",
         ]) {
           writeFileSync(notes, initial);
           const run = () =>
@@ -71,12 +65,13 @@ exit 1
               "bash",
               [
                 "-c",
-                script.replaceAll(
+                `${script.replaceAll(
                   githubExpression("{{ github.repository }}"),
                   "JeongYunSung/OpenDock",
-                ),
+                )}\ncat "$notes_file"`,
               ],
               {
+                encoding: "utf8",
                 env: {
                   PATH: `${directory}:${process.env.PATH}`,
                   TMPDIR: directory,
@@ -85,13 +80,9 @@ exit 1
                 },
               },
             );
-          run();
-          const first = readFileSync(notes, "utf8");
-          expect(first.startsWith(initial)).toBe(true);
-          expect(first).toContain("[Code signing policy](https://opendock.app/code-signing/)");
-          expect(first).toContain("[Privacy policy](https://opendock.app/privacy/)");
-          run();
-          expect(readFileSync(notes, "utf8")).toBe(first);
+          expect(run()).toBe(initial);
+          expect(run()).toBe(initial);
+          expect(readFileSync(notes, "utf8")).toBe(initial);
         }
       } finally {
         rmSync(directory, { recursive: true, force: true });
