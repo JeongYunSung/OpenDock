@@ -20,8 +20,6 @@ projet, puis gardez-les faciles à mettre à jour ou supprimer.
 
 ---
 
-[Politique de confidentialité](https://opendock.app/privacy/) · [Politique de signature du code](https://opendock.app/code-signing/)
-
 OpenDock vous aide à ajouter un setup IA à un projet sans reconstruire les mêmes
 fichiers et étapes d'outils à la main.
 

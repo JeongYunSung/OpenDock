@@ -20,8 +20,6 @@
 
 ---
 
-[プライバシーポリシー](https://opendock.app/privacy/) · [コード署名ポリシー](https://opendock.app/code-signing/)
-
 OpenDock は、同じファイルやツール手順を毎回手で作らずに、プロジェクトへ
 AI setup を追加するためのツールです。
 

@@ -20,8 +20,6 @@
 
 ---
 
-[개인정보 처리방침](https://opendock.app/privacy/) · [코드서명 정책](https://opendock.app/code-signing/)
-
 OpenDock은 프로젝트에 필요한 AI 셋업을 반복해서 손으로 만들지 않도록 도와주는
 도구입니다.
 
